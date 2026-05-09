@@ -1,0 +1,9 @@
+company_ticker,fiscal_year,fiscal_period,taxonomy_key,value,unit,currency,source_version_id,source_uri,parser_version,validation_status,confidence,effective_date,reconciled_at,ingested_at
+DHG,2024,FY,revenue.net,,vnd_bn,VND,,,,,,,
+DHG,2024,FY,ebitda.total,,vnd_bn,VND,,,,,,,
+DHG,2024,FY,net_income.parent,,vnd_bn,VND,,,,,,,
+IMP,2024,FY,revenue.net,,vnd_bn,VND,,,,,,,
+IMP,2024,FY,eps.basic,,vnd,VND,,,,,,,
+DMC,2024,FY,total_debt.ending,,vnd_bn,VND,,,,,,,
+TRA,2024,FY,operating_cash_flow.total,,vnd_bn,VND,,,,,,,
+DBD,2024,FY,capex.total,,vnd_bn,VND,,,,,,,

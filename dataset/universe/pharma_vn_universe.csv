@@ -1,0 +1,24 @@
+ticker,company_name,exchange,segment,is_mvp,notes
+DHG,Cong ty Co phan Duoc Hau Giang,HOSE,pharma,true,MVP core
+IMP,Cong ty Co phan Duoc pham Imexpharm,HOSE,pharma,true,MVP core
+DMC,Cong ty Co phan Xuat nhap khau Y te Domesco,HOSE,pharma,true,MVP core
+TRA,Cong ty Co phan Traphaco,HOSE,pharma,true,MVP core
+DBD,Cong ty Co phan Duoc - Trang thiet bi Y te Binh Dinh,HOSE,pharma,true,MVP core
+OPC,Cong ty Co phan Duoc pham OPC,HOSE,pharma,false,
+PME,Cong ty Co phan Pymepharco,HOSE,pharma,false,
+MKP,Cong ty Co phan Hoa - Duoc pham Mekophar,HOSE,pharma,false,
+TNH,Cong ty Co phan Benh vien Quoc te Thai Nguyen,HOSE,healthcare_services,false,
+JVC,Cong ty Co phan Thiet bi Y te Viet Nhat,HOSE,medical_equipment,false,
+DVN,Tong Cong ty Duoc Viet Nam - CTCP,UPCOM,pharma,false,
+DHT,Cong ty Co phan Duoc pham Ha Tay,HNX,pharma,false,
+LDP,Cong ty Co phan Duoc Lam Dong - Ladophar,HNX,pharma,false,
+PPP,Cong ty Co phan Duoc pham Phong Phu,HNX,pharma,false,
+DP3,Cong ty Co phan Duoc pham Trung uong 3,UPCOM,pharma,false,
+DP1,Cong ty Co phan Duoc pham Trung uong CPC1,UPCOM,pharma,false,
+TW3,Cong ty Co phan Duoc - Trang thiet bi Y te Da Nang,UPCOM,pharma,false,
+MED,Cong ty Co phan Duoc Trung uong Mediplantex,UPCOM,pharma,false,
+PMC,Cong ty Co phan Duoc pham Duoc lieu Pharmedic,UPCOM,pharma,false,
+AMV,Cong ty Co phan San xuat Kinh doanh Duoc va Trang thiet bi Y te Viet My,HNX,medical_equipment,false,
+YTC,Cong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh,UPCOM,medical_distribution,false,
+VHE,Cong ty Co phan Duoc lieu Viet Nam,UPCOM,pharma,false,
+VDP,Cong ty Co phan Duoc pham Trung uong Vidipha,UPCOM,pharma,false,

@@ -1,0 +1,93 @@
+version: 1
+currency: VND
+taxonomy:
+  revenue.net:
+    label_vi: Doanh thu thuan
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [doanh_thu_thuan, net_revenue, sales_revenue]
+  cogs.total:
+    label_vi: Gia von hang ban
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [gia_von_hang_ban, cost_of_goods_sold, cogs]
+  gross_profit.total:
+    label_vi: Loi nhuan gop
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [loi_nhuan_gop, gross_profit]
+  sga.total:
+    label_vi: Chi phi ban hang va QLDN
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [chi_phi_ban_hang, chi_phi_qldn, sga]
+  ebit.total:
+    label_vi: Loi nhuan truoc lai vay va thue
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [ebit, operating_profit]
+  ebitda.total:
+    label_vi: EBITDA
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [ebitda]
+  net_income.parent:
+    label_vi: Loi nhuan sau thue co dong cong ty me
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [lnst_co_dong_me, net_income, npat]
+  eps.basic:
+    label_vi: EPS co ban
+    statement: income_statement
+    unit: vnd
+    aliases: [eps, eps_co_ban]
+  cash_and_equivalents.ending:
+    label_vi: Tien va tuong duong tien cuoi ky
+    statement: balance_sheet
+    unit: vnd_bn
+    aliases: [tien_tuong_duong_tien, cash_and_cash_equivalents]
+  inventory.ending:
+    label_vi: Hang ton kho
+    statement: balance_sheet
+    unit: vnd_bn
+    aliases: [hang_ton_kho, inventory]
+  total_debt.ending:
+    label_vi: Tong no vay
+    statement: balance_sheet
+    unit: vnd_bn
+    aliases: [no_vay_ngan_han, no_vay_dai_han, total_debt]
+  equity.parent:
+    label_vi: Von chu so huu cong ty me
+    statement: balance_sheet
+    unit: vnd_bn
+    aliases: [von_chu_so_huu, shareholders_equity]
+  capex.total:
+    label_vi: Chi tieu von
+    statement: cash_flow
+    unit: vnd_bn
+    aliases: [chi_tieu_von, capex, purchase_of_fixed_assets]
+  operating_cash_flow.total:
+    label_vi: Luu chuyen tien thuan tu HDKD
+    statement: cash_flow
+    unit: vnd_bn
+    aliases: [dong_tien_hoat_dong, operating_cash_flow]
+  free_cash_flow.total:
+    label_vi: Dong tien tu do
+    statement: derived
+    unit: vnd_bn
+    formula: operating_cash_flow.total - capex.total
+    aliases: [fcf, free_cash_flow]
+
+derived_ratios:
+  gross_margin:
+    formula: gross_profit.total / revenue.net
+    unit: percent
+  ebitda_margin:
+    formula: ebitda.total / revenue.net
+    unit: percent
+  net_margin:
+    formula: net_income.parent / revenue.net
+    unit: percent
+  debt_to_equity:
+    formula: total_debt.ending / equity.parent
+    unit: ratio

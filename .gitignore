@@ -1,6 +1,20 @@
 # Worktrees
 .worktrees/
 
+# AI tooling / planning docs
+.claude/
+.cursor/
+.codex/
+CLAUDE.md
+COMMIT_PLAYBOOK.MD
+DATA_INGESTION_PHASE_BREAKDOWN.md
+DATA_INGESTION_PLAN_SUPABASE_VNSTOCK.md
+GOAL_OUTPUT.md
+specs/
+docs/
+FinRobot/
+vnstock/
+
 # Python
 __pycache__/
 *.py[cod]

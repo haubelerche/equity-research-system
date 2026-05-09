@@ -1,0 +1,15 @@
+BEGIN;
+
+ALTER TABLE source_versions
+  ADD COLUMN IF NOT EXISTS embedding_version VARCHAR(40);
+
+ALTER TABLE source_versions
+  ADD COLUMN IF NOT EXISTS run_id VARCHAR(64);
+
+ALTER TABLE financial_facts
+  ADD COLUMN IF NOT EXISTS run_id VARCHAR(64);
+
+ALTER TABLE catalyst_events
+  ADD COLUMN IF NOT EXISTS run_id VARCHAR(64);
+
+COMMIT;
