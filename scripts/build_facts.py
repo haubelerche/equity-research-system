@@ -136,7 +136,7 @@ def build_facts(
     strict_completeness: bool = False,
 ) -> dict:
     from scripts.db.fact_store import PostgresFactStore
-    from backend.facts.normalizer import build_fact_table, compute_derived, periods_sorted
+    from backend.facts.normalizer import build_fact_table, build_validation_status_table, compute_derived, periods_sorted
     from backend.facts.completeness import build_fy_validation_report
 
     ticker = ticker.strip().upper()
@@ -181,6 +181,7 @@ def build_facts(
 
     # Build fact table from FY-only data
     base_table = build_fact_table(fy_facts)
+    vstatus_table = build_validation_status_table(fy_facts)
     full_table = compute_derived(base_table)
     periods = periods_sorted(full_table)
 
@@ -204,8 +205,10 @@ def build_facts(
         periods_missing=periods_missing,
         forbidden_periods=forbidden_periods,
         generated_at=generated_at,
+        validation_status_table=vstatus_table,
     )
 
+    print(f"[build_facts] {ticker} annual_reports_collected: {report['annual_reports_collected']}")
     print(f"[build_facts] {ticker} coverage_gate: {report['coverage_gate']}")
     print(f"[build_facts] {ticker} core_keys_gate: {report['core_keys_gate']}")
     print(f"[build_facts] {ticker} source_validation_gate: {report['source_validation_gate']}")
@@ -214,7 +217,7 @@ def build_facts(
     print(f"[build_facts] {ticker} run_status: {report['run_status']}")
     if report.get("blocking_reasons"):
         for reason in report["blocking_reasons"]:
-            print(f"[build_facts] {ticker} blocking_reason: {reason}")
+            print(f"[build_facts] {ticker} BLOCKED: {reason}")
 
     # Print fact table
     print(f"\n[build_facts] Fact table (base facts):")
