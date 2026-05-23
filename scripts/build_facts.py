@@ -251,10 +251,10 @@ def build_facts(
     out_path.write_text(json.dumps(artifact, indent=2, default=str), encoding="utf-8")
     print(f"\n[build_facts] Artifact saved → {out_path}")
 
-    if strict_completeness and report["gate_status"] != "pass":
+    if strict_completeness and report["valuation_gate"] != "pass":
         print(
             f"[build_facts] STRICT COMPLETENESS FAIL — "
-            f"gate_status={report['gate_status']} reason={report.get('gate_reason', '')}"
+            f"valuation_gate={report['valuation_gate']} reasons={report.get('blocking_reasons', [])}"
         )
         sys.exit(2)
 
