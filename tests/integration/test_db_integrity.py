@@ -146,12 +146,7 @@ def test_ref_companies_has_pharma_mvp_tickers(db):
 
 def test_check_schema_version_passes(db):
     """RuntimeStore.check_schema_version() must pass against the live database."""
-    import os as _os
-    with open('c:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\.env') as f:
-        for line in f:
-            line = line.strip()
-            if line.startswith('DATABASE_URL='):
-                _os.environ['DATABASE_URL'] = line.split('=', 1)[1]
+    # DATABASE_URL already in env (pytestmark skips if absent)
     from backend.runtime_store import RuntimeStore
     store = RuntimeStore()
     store.check_schema_version()  # must not raise
