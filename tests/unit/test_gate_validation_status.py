@@ -146,3 +146,63 @@ def test_mixed_status_one_needs_review_blocks():
     reasons = " ".join(report["blocking_reasons"])
     assert "revenue.net" in reasons
     assert "2021FY" in reasons
+
+
+from scripts.build_facts import _filter_facts, _is_allowed_fy
+
+
+def test_is_allowed_fy_accepts_valid_periods():
+    assert _is_allowed_fy("2021FY", 2021, 2025) is True
+    assert _is_allowed_fy("2025FY", 2021, 2025) is True
+    assert _is_allowed_fy("2023FY", 2021, 2025) is True
+
+
+def test_is_allowed_fy_rejects_quarterly():
+    assert _is_allowed_fy("2023Q1", 2021, 2025) is False
+    assert _is_allowed_fy("2024Q4", 2021, 2025) is False
+    assert _is_allowed_fy("2026Q1", 2021, 2025) is False
+
+
+def test_is_allowed_fy_rejects_out_of_range():
+    assert _is_allowed_fy("2020FY", 2021, 2025) is False
+    assert _is_allowed_fy("2026FY", 2021, 2025) is False
+
+
+def _make_raw_fact(taxonomy_key: str, fiscal_year: int, fiscal_period: str) -> dict:
+    return {
+        "taxonomy_key": taxonomy_key,
+        "fiscal_year": fiscal_year,
+        "fiscal_period": fiscal_period,
+        "value": 1000.0,
+        "confidence": 0.9,
+        "validation_status": "accepted",
+        "ingested_at": "2026-01-01T00:00:00+00:00",
+    }
+
+
+def test_filter_facts_keeps_fy_only():
+    raw = [
+        _make_raw_fact("revenue.net", 2022, "FY"),
+        _make_raw_fact("revenue.net", 2022, "Q1"),
+        _make_raw_fact("revenue.net", 2026, "Q1"),
+        _make_raw_fact("revenue.net", 2020, "FY"),  # out of range
+    ]
+    kept, forbidden = _filter_facts(raw, 2021, 2025)
+    assert len(kept) == 1
+    assert kept[0]["fiscal_period"] == "FY"
+    assert "2022Q1" in forbidden
+    assert "2026Q1" in forbidden
+    assert "2020FY" in forbidden
+
+
+def test_filter_facts_2026q1_is_forbidden():
+    raw = [_make_raw_fact("revenue.net", 2026, "Q1")]
+    kept, forbidden = _filter_facts(raw, 2021, 2025)
+    assert kept == []
+    assert "2026Q1" in forbidden
+
+
+def test_filter_facts_empty_input():
+    kept, forbidden = _filter_facts([], 2021, 2025)
+    assert kept == []
+    assert forbidden == []
