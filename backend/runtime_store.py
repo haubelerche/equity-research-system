@@ -51,12 +51,10 @@ class RuntimeStore:
                             f"DB schema out of date: version '{REQUIRED_SCHEMA_VERSION}' not applied. "
                             "Run: python scripts/db/migrate.py"
                         )
-                except Exception as exc:
-                    if "schema_migrations" in str(exc) and "does not exist" in str(exc):
-                        raise RuntimeError(
-                            "schema_migrations table missing — run: python scripts/db/migrate.py"
-                        ) from exc
-                    raise
+                except psycopg2.errors.UndefinedTable as exc:
+                    raise RuntimeError(
+                        "schema_migrations table missing — run: python scripts/db/migrate.py"
+                    ) from exc
 
     def create_run(
         self,
