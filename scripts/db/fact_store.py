@@ -298,6 +298,92 @@ class PostgresFactStore:
             )
         return df
 
+    def list_quarterly_facts(self, ticker: str) -> list[dict[str, Any]]:
+        """Return distinct (fiscal_year, fiscal_period) pairs that are NOT 'FY'."""
+        with self.conn() as connection:
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT DISTINCT fiscal_year, fiscal_period,
+                           COUNT(*) AS fact_count
+                    FROM financial_facts
+                    WHERE company_ticker = %s
+                      AND fiscal_period != 'FY'
+                    GROUP BY fiscal_year, fiscal_period
+                    ORDER BY fiscal_year, fiscal_period
+                    """,
+                    (ticker,),
+                )
+                cols = [d.name for d in cur.description]
+                return [dict(zip(cols, row)) for row in cur.fetchall()]
+
+    def delete_quarterly_facts(self, ticker: str, dry_run: bool = True) -> int:
+        """Delete financial_facts rows with non-FY fiscal_period for the given ticker.
+
+        Always defaults to dry_run=True — pass dry_run=False only for confirmed cleanup.
+        Returns the number of rows that would be (or were) deleted.
+        """
+        with self.conn() as connection:
+            with connection.cursor() as cur:
+                if dry_run:
+                    cur.execute(
+                        """
+                        SELECT COUNT(*) FROM financial_facts
+                        WHERE company_ticker = %s AND fiscal_period != 'FY'
+                        """,
+                        (ticker,),
+                    )
+                    count: int = cur.fetchone()[0]
+                else:
+                    cur.execute(
+                        """
+                        DELETE FROM financial_facts
+                        WHERE company_ticker = %s AND fiscal_period != 'FY'
+                        """,
+                        (ticker,),
+                    )
+                    count = cur.rowcount
+        return count
+
+    def get_financial_facts_for_ticker(self, ticker: str) -> list[dict[str, Any]]:
+        """Return all financial facts for a ticker as a list of dicts."""
+        with self.conn() as connection:
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT taxonomy_key, fiscal_year, fiscal_period, value, unit, currency,
+                           source_version_id, parser_version, validation_status, confidence, ingested_at
+                    FROM financial_facts
+                    WHERE company_ticker = %s
+                    ORDER BY fiscal_year ASC, fiscal_period ASC, taxonomy_key ASC
+                    """,
+                    (ticker,),
+                )
+                cols = [d.name for d in cur.description]
+                return [dict(zip(cols, row)) for row in cur.fetchall()]
+
+    def get_accepted_financial_facts(self, ticker: str) -> list[dict[str, Any]]:
+        """Return only accepted, FY-period facts for a ticker (valuation-safe).
+
+        Reads from the accepted_financial_facts view, which filters
+        validation_status='accepted' AND fiscal_period='FY'.
+        Run migration 006_accepted_facts_view before calling this method.
+        """
+        with self.conn() as connection:
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT taxonomy_key, fiscal_year, fiscal_period, value, unit, currency,
+                           source_version_id, parser_version, confidence, ingested_at
+                    FROM public.accepted_financial_facts
+                    WHERE company_ticker = %s
+                    ORDER BY fiscal_year ASC, taxonomy_key ASC
+                    """,
+                    (ticker,),
+                )
+                cols = [d.name for d in cur.description]
+                return [dict(zip(cols, row)) for row in cur.fetchall()]
+
     def get_company_news(self, ticker: str, days_back: int = 30) -> list[dict[str, Any]]:
         with self.conn() as connection:
             with connection.cursor() as cur:
