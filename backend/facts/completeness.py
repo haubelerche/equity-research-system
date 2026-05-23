@@ -1,8 +1,8 @@
 """FY-aware completeness and freshness scoring for the canonical fact set.
 
-For MVP, the required fiscal periods are exactly 2021FY–2025FY.
-Gate passes only when all five FY periods are present AND all core keys
-exist for each required period.
+Gate passes when >= 3 FY periods are present (coverage_gate), all CORE_FY_KEYS exist for
+every collected period (core_keys_gate), and all collected facts have validation_status='accepted'
+(source_validation_gate). valuation_ready=True only when all three tiers pass.
 
 Produces a structured report consumed by build_facts.py and downstream
 evaluation gates.
@@ -47,6 +47,7 @@ RECOMMENDED_KEYS: list[str] = [
 ]
 
 FRESHNESS_THRESHOLD_DAYS = 400
+MIN_FY_PERIODS = 3
 
 
 def _year_from_period(period: str) -> int | None:
@@ -77,7 +78,6 @@ def build_fy_validation_report(
     valuation_ready=True ONLY when all three tiers pass.
     """
     blocking_reasons: list[str] = []
-    MIN_FY_PERIODS = 3
 
     # --- Per-core-key coverage status (checked against periods_available only) ---
     core_keys: dict[str, Any] = {}
@@ -113,13 +113,15 @@ def build_fy_validation_report(
         core_keys_gate = "pass"
 
     # --- Tier 3: source_validation_gate ---
-    non_accepted: list[dict[str, str]] = []
+    non_accepted: list[dict[str, str]] | None = None
     if validation_status_table is None:
         source_validation_gate = "fail"
+        non_accepted = None  # not checked — no validation_status_table provided
         blocking_reasons.append(
             "no validation_status_table provided — cannot verify source acceptance"
         )
     else:
+        non_accepted = []
         for key in CORE_FY_KEYS:
             for period in periods_available:
                 status = validation_status_table.get(key, {}).get(period, "unknown")

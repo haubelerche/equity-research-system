@@ -284,7 +284,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--strict-completeness",
         action="store_true",
-        help="Exit code 2 if gate_status != pass (any required FY period or core key missing).",
+        help="Exit code 2 if valuation_gate != pass (coverage < 3 FY periods, missing core keys, or unaccepted facts).",
     )
     # Legacy alias kept for backward compat
     parser.add_argument(

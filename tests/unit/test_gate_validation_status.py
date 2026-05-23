@@ -1,16 +1,13 @@
 """Phase 3 gate invariant tests."""
 import pytest
-from backend.facts.normalizer import build_validation_status_table
+from datetime import UTC, datetime
+from backend.facts.normalizer import build_validation_status_table, FactTable
+from backend.facts.completeness import build_fy_validation_report
 
 
 def test_build_validation_status_table_import():
     """Smoke: function exists and is importable."""
     assert callable(build_validation_status_table)
-
-
-from datetime import UTC, datetime
-from backend.facts.completeness import build_fy_validation_report
-from backend.facts.normalizer import FactTable
 
 
 REQUIRED_PERIODS = ["2021FY", "2022FY", "2023FY", "2024FY", "2025FY"]
