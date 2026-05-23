@@ -11,6 +11,9 @@ import psycopg2
 from psycopg2.extras import Json
 
 
+REQUIRED_SCHEMA_VERSION = "006_accepted_facts_view"
+
+
 class RuntimeStore:
     """Persistence layer for orchestration/runtime metadata."""
 
@@ -29,13 +32,31 @@ class RuntimeStore:
         finally:
             connection.close()
 
-    def ensure_schema(self) -> None:
+    def check_schema_version(self) -> None:
+        """Verify the database schema is at the required version.
+
+        Raises RuntimeError if schema_migrations does not contain
+        REQUIRED_SCHEMA_VERSION. Does NOT apply migrations — run
+        scripts/db/migrate.py first.
+        """
         with self.conn() as connection:
             with connection.cursor() as cur:
-                migrations_dir = Path(__file__).resolve().parents[1] / "scripts" / "db" / "migrations"
-                for name in ("001_initial_schema.sql", "002_backend_runtime.sql", "003_lineage_enhancements.sql"):
-                    sql = (migrations_dir / name).read_text(encoding="utf-8")
-                    cur.execute(sql)
+                try:
+                    cur.execute(
+                        "SELECT 1 FROM schema_migrations WHERE version = %s",
+                        (REQUIRED_SCHEMA_VERSION,),
+                    )
+                    if cur.fetchone() is None:
+                        raise RuntimeError(
+                            f"DB schema out of date: version '{REQUIRED_SCHEMA_VERSION}' not applied. "
+                            "Run: python scripts/db/migrate.py"
+                        )
+                except Exception as exc:
+                    if "schema_migrations" in str(exc) and "does not exist" in str(exc):
+                        raise RuntimeError(
+                            "schema_migrations table missing — run: python scripts/db/migrate.py"
+                        ) from exc
+                    raise
 
     def create_run(
         self,
