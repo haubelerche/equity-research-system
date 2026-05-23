@@ -33,18 +33,19 @@ def _version_from_filename(filename: str) -> str:
 
 
 def _apply_migration(conn, path: Path, version: str) -> None:
-    """Apply one migration file and record it in schema_migrations.
+    """Apply one migration file and record it in schema_migrations atomically.
 
-    The migration SQL may contain its own BEGIN/COMMIT. We use autocommit=True
-    on the connection before calling this so psycopg2 does not open an implicit
-    transaction that conflicts with the file's own transaction block.
-    After recording the version we commit the version-insert separately.
+    The caller must NOT set autocommit=True. This function executes the SQL
+    and the version-insert in a single psycopg2 transaction; conn.commit() is
+    called by the caller's context manager.
     """
+    import re
     sql = path.read_text(encoding="utf-8")
+    # Strip file-level BEGIN/COMMIT so psycopg2 owns the transaction.
+    sql = re.sub(r"(?i)^\s*BEGIN\s*;", "", sql)
+    sql = re.sub(r"(?i)\bCOMMIT\s*;\s*$", "", sql)
     with conn.cursor() as cur:
         cur.execute(sql)
-    # Record the version in a separate autocommit statement
-    with conn.cursor() as cur:
         cur.execute(
             "INSERT INTO schema_migrations (version) VALUES (%s) ON CONFLICT DO NOTHING",
             (version,),
@@ -52,25 +53,29 @@ def _apply_migration(conn, path: Path, version: str) -> None:
 
 
 @contextmanager
-def _connect_autocommit(dsn: str):
-    """Open a connection with autocommit=True to avoid nested transaction issues."""
+def _connect(dsn: str):
+    """Open a connection with default autocommit=False."""
     conn = psycopg2.connect(dsn)
-    conn.autocommit = True
+    conn.autocommit = False
     try:
         yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         conn.close()
 
 
 def get_applied_versions(dsn: str) -> set[str]:
-    with _connect_autocommit(dsn) as conn:
+    with _connect(dsn) as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT version FROM schema_migrations")
             return {row[0] for row in cur.fetchall()}
 
 
 def run_migrations(dsn: str, dry_run: bool = False) -> list[str]:
-    """Apply all pending migrations. Returns list of versions applied."""
+    """Apply all pending migrations. Returns list of versions actually applied."""
     all_files = sorted(f.name for f in MIGRATIONS_DIR.glob("*.sql"))
     applied = get_applied_versions(dsn)
     pending = _pending_migrations(all_files, applied)
@@ -87,10 +92,10 @@ def run_migrations(dsn: str, dry_run: bool = False) -> list[str]:
             print(f"  [dry-run] would apply: {version}")
         else:
             print(f"  Applying: {version} ... ", end="", flush=True)
-            with _connect_autocommit(dsn) as conn:
+            with _connect(dsn) as conn:
                 _apply_migration(conn, path, version)
             print("done")
-        applied_list.append(version)
+            applied_list.append(version)  # only append when actually applied
     return applied_list
 
 
