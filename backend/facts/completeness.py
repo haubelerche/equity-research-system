@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from backend.facts.normalizer import FactTable, periods_sorted
+from backend.facts.reconciliation import run_reconciliation, ReconciliationReport
 
 
 # Keys that MUST be present in every required FY period to pass the gate.
@@ -136,11 +137,22 @@ def build_fy_validation_report(
         else:
             source_validation_gate = "pass"
 
+    # --- Tier 4: accounting reconciliation gate ---
+    recon = run_reconciliation(ticker, table, periods_available)
+    reconciliation_gate = "fail" if recon.valuation_blocked else (
+        "warn" if recon.warnings else "pass"
+    )
+    if recon.valuation_blocked:
+        blocking_reasons.append(
+            f"reconciliation_failures: {', '.join(c.name for c in recon.critical_failures)}"
+        )
+
     # --- Overall valuation_gate ---
     all_pass = (
         coverage_gate == "pass"
         and core_keys_gate == "pass"
         and source_validation_gate == "pass"
+        and not recon.valuation_blocked
     )
     valuation_gate = "pass" if all_pass else "fail"
     valuation_ready = all_pass
@@ -192,6 +204,16 @@ def build_fy_validation_report(
         "core_keys_gate": core_keys_gate,
         "source_validation_gate": source_validation_gate,
         "non_accepted_facts": non_accepted,
+        # Tier 4: reconciliation gate
+        "reconciliation_gate": reconciliation_gate,
+        "reconciliation_critical_failures": [
+            {"name": c.name, "period": c.period, "message": c.message}
+            for c in recon.critical_failures
+        ],
+        "reconciliation_warnings": [
+            {"name": c.name, "period": c.period, "message": c.message}
+            for c in recon.warnings
+        ],
         "valuation_gate": valuation_gate,
         # Top-level summary
         "valuation_ready": valuation_ready,
@@ -204,6 +226,53 @@ def build_fy_validation_report(
         "most_recent_ingested_at": (
             most_recent_ingested.isoformat() if most_recent_ingested else None
         ),
+    }
+
+
+def valuation_readiness_gate(
+    ticker: str,
+    fact_table: FactTable,
+    fy_validation_report: dict,
+    periods_available: list[str],
+) -> dict:
+    """Run the Valuation Readiness Gate (Plan §16).
+
+    Combines three-tier DQ gate results with accounting reconciliation.
+    Returns a gate report with overall pass/fail and blocked status.
+    """
+    dq_gate_status = fy_validation_report.get("valuation_gate")
+    dq_blocked = dq_gate_status == "fail"
+
+    reconciliation_report = run_reconciliation(ticker, fact_table, periods_available)
+
+    if dq_blocked or reconciliation_report.valuation_blocked:
+        overall_status = "fail"
+    elif (
+        fy_validation_report.get("reconciliation_gate") == "warn"
+        or reconciliation_report.warnings
+    ):
+        overall_status = "warn"
+    else:
+        overall_status = "pass"
+
+    return {
+        "ticker": ticker,
+        "dq_gate_status": dq_gate_status,
+        "dq_gate_blocking_reasons": fy_validation_report.get("blocking_reasons", []),
+        "reconciliation_status": reconciliation_report.overall_status,
+        "reconciliation_blocked": reconciliation_report.valuation_blocked,
+        "reconciliation_critical_failures": [
+            {"name": c.name, "period": c.period, "message": c.message}
+            for c in reconciliation_report.critical_failures
+        ],
+        "reconciliation_warnings": [
+            {"name": c.name, "period": c.period, "message": c.message}
+            for c in reconciliation_report.warnings
+        ],
+        "overall_status": overall_status,
+        "valuation_allowed": overall_status != "fail",
+        "blocked_by_dq": dq_blocked,
+        "blocked_by_reconciliation": reconciliation_report.valuation_blocked,
     }
 
 
