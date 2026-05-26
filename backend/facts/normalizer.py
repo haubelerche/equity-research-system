@@ -4,7 +4,7 @@ Takes a list of raw FinancialFact dicts from the DB and returns a structured
 FactTable: a dict keyed by taxonomy_key → period_key → value.
 
 Derived metrics computed here (not stored in DB — sourced from the spec):
-  free_cash_flow.total  = operating_cash_flow.total - capex.total
+  free_cash_flow.total  = operating_cash_flow.total + capex.total  # capex is negative (CFS outflow)
   gross_margin          = gross_profit.total / revenue.net
   ebitda_margin         = ebitda.total / revenue.net
   net_margin            = net_income.parent / revenue.net
@@ -104,11 +104,11 @@ def compute_derived(table: FactTable) -> FactTable:
         def get(key: str) -> float | None:
             return table.get(key, {}).get(period)
 
-        # free_cash_flow.total = operating_cash_flow.total - capex.total
+        # free_cash_flow.total = operating_cash_flow.total + capex.total  # capex stored as negative CFS outflow
         ocf = get("operating_cash_flow.total")
         capex = get("capex.total")
         if ocf is not None and capex is not None:
-            derived.setdefault("free_cash_flow.total", {})[period] = ocf - capex
+            derived.setdefault("free_cash_flow.total", {})[period] = ocf + capex
 
         # gross_margin = gross_profit.total / revenue.net
         gp = get("gross_profit.total")
