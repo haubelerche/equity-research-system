@@ -44,7 +44,7 @@ def submit_universe_runs(limit: int | None = None) -> list[str]:
                 run_type="full_report",
                 objective=f"Batch full report for {ticker}",
                 flags=flags,
-                policy=policy,
+                config_snapshot_json=policy,
                 requested_by="batch_runner",
             )
         except Exception:

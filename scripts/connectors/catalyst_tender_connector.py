@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from scripts.dataset.config_io import ROOT
 from scripts.dataset.dqf import infer_materiality, validate_catalyst_event
 from scripts.db.fact_store import PostgresFactStore
-from scripts.db.source_registry import SourceRegistry, SourceVersionInput
+from scripts.db.source_registry import SourceInput, SourceRegistry
 
 
 CONNECTOR_VERSION = "catalyst_tender_connector_v1"
@@ -38,7 +38,7 @@ def _parse_tender_page(base_url: str, html: str) -> list[dict]:
                 "title": text,
                 "source_url": urljoin(base_url, href),
                 "occurred_at": datetime.now(UTC).isoformat(),
-                "event_type": "tender_award" if "trung thau" in lowered else "tender_notice",
+                "event_type": "tender" if "trung thau" in lowered else "bidding",
             }
         )
     return events
@@ -56,11 +56,11 @@ def sync_tender_connector() -> int:
 
     raw_path = ROOT / "dataset" / "raw" / "catalyst" / "tender" / now.date().isoformat() / "tender_feed.html"
     checksum = registry.save_raw_snapshot(html.encode("utf-8"), raw_path)
-    source_version_id = registry.register_version(
-        SourceVersionInput(
-            source_id="tender_results",
+    source_version_id = registry.register_source(
+        SourceInput(
+            logical_id="tender_results",
             source_uri=TENDER_FEED,
-            source_type="catalyst_tender",
+            source_type="tender",
             checksum=checksum,
             connector_version=CONNECTOR_VERSION,
             raw_path=str(raw_path),
@@ -77,10 +77,10 @@ def sync_tender_connector() -> int:
             "summary": None,
             "occurred_at": row["occurred_at"],
             "effective_date": None,
-            "company_ticker": None,
+            "ticker": None,
             "materiality_hint": infer_materiality(row["event_type"], row["title"]),
             "source_url": row["source_url"],
-            "source_version_id": source_version_id,
+            "source_id": source_version_id,
             "confidence": 0.75,
             "validation_status": "accepted",
             "ingested_at": now.isoformat(),
@@ -93,6 +93,12 @@ def sync_tender_connector() -> int:
     upserted = store.upsert_catalyst_events(events)
     print(f"[tender] upserted {upserted} events")
     return upserted
+
+
+def sync_tender_for_ticker(ticker: str, **_kwargs) -> dict:
+    """Per-ticker entry point for ingest_ticker.py; tender data is industry-wide so runs the full sync."""
+    count = sync_tender_connector()
+    return {"events": count}
 
 
 def main() -> None:

@@ -34,7 +34,7 @@ def _to_status_response(run: dict[str, Any]) -> RunStatusResponse:
         ticker=run["ticker"],
         run_type=run["run_type"],
         status=RunStatus(run["status"]),
-        current_state=run["current_state"],
+        current_stage=run["current_stage"],
         flags=run.get("flags_json", {}),
         created_at=run["created_at"],
         updated_at=run["updated_at"],
@@ -75,7 +75,7 @@ def start_research(request: StartRunRequest) -> StartRunResponse:
             run_type=request.run_type.value,
             objective=request.objective,
             flags=initial_flags,
-            policy=policy,
+            config_snapshot_json=policy,
             org_id=request.org_id,
             requested_by=request.requested_by,
         )

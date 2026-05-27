@@ -2,19 +2,24 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Iterable
 
+# Ensure pip-installed vnstock is found before the local vnstock/ namespace folder.
+if "" in sys.path:
+    sys.path = [p for p in sys.path if p != ""] + [""]
+
 import pandas as pd
-from vnstock import Vnstock
+from vnstock.api.quote import Quote
 
 from scripts.dataset.config_io import ROOT, load_universe_tickers
 from scripts.db.fact_store import PostgresFactStore, PriceRow
-from scripts.db.source_registry import SourceRegistry, SourceVersionInput
+from scripts.db.source_registry import SourceInput, SourceRegistry
 
 
-CONNECTOR_VERSION = "vnstock_price_connector_v1"
+CONNECTOR_VERSION = "vn_price_v1"
 
 
 def _to_float(value: object) -> float | None:
@@ -55,14 +60,16 @@ def _normalize_history(df: pd.DataFrame, ticker: str, source_version_id: str | N
         rows.append(
             PriceRow(
                 ticker=ticker,
-                date=dt,
+                trade_date=dt,
                 open=_to_float(row.get("open")),
                 high=_to_float(row.get("high")),
                 low=_to_float(row.get("low")),
                 close=_to_float(row.get("close")),
+                adjusted_close=_to_float(row.get("adjusted_close") or row.get("adj_close")),
                 volume=_to_int(row.get("volume")),
-                value=_to_float(row.get("value")),
-                source_version_id=source_version_id,
+                traded_value=_to_float(row.get("value")),
+                market_cap=_to_float(row.get("market_cap")),
+                source_id=source_version_id,
                 ingested_at=now,
             )
         )
@@ -70,8 +77,8 @@ def _normalize_history(df: pd.DataFrame, ticker: str, source_version_id: str | N
 
 
 def _fetch_history(ticker: str, start: date, end: date, source: str) -> pd.DataFrame:
-    client = Vnstock(symbol=ticker, source=source)
-    return client.quote.history(start=start.isoformat(), end=end.isoformat(), interval="1D")
+    client = Quote(source=source, symbol=ticker)
+    return client.history(start=start.isoformat(), end=end.isoformat(), interval="1D")
 
 
 def sync_ticker_price(
@@ -101,23 +108,24 @@ def sync_ticker_price(
     raw_path = ROOT / "dataset" / "raw" / "market" / end.isoformat() / f"{ticker}_quote_history.json"
     checksum = registry.save_raw_snapshot(payload=payload, out_path=raw_path)
 
-    latest = registry.get_latest_by_uri(source_id="price_history", source_uri=source_uri)
+    latest = registry.get_latest_by_uri("price_history", source_uri)
     if latest and latest[1] == checksum:
         return 0
 
-    source_version_id = registry.register_version(
-        SourceVersionInput(
-            source_id="price_history",
+    source_id = registry.register_source(
+        SourceInput(
+            logical_id="price_history",
+            ticker=ticker,
             source_uri=source_uri,
-            source_type="market_reference",
+            source_type="vnstock_price",
             checksum=checksum,
             connector_version=CONNECTOR_VERSION,
             raw_path=str(raw_path),
-            effective_date=end.isoformat(),
             published_at=datetime.now(UTC).isoformat(),
+            metadata_json={"start": str(start), "end": str(end)},
         )
     )
-    rows = _normalize_history(df=frame, ticker=ticker, source_version_id=source_version_id)
+    rows = _normalize_history(df=frame, ticker=ticker, source_version_id=source_id)
     return store.upsert_price_rows(rows)
 
 

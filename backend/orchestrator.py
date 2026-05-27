@@ -52,7 +52,7 @@ class Supervisor:
             self.store.update_run_state(
                 run_id=run_id,
                 status="NEEDS_REVIEW",
-                state="NEEDS_REVIEW",
+                stage="NEEDS_REVIEW",
             )
             self.store.add_audit_event(
                 run_id=run_id,
@@ -93,7 +93,7 @@ class Supervisor:
             return result
         except Exception as exc:  # noqa: BLE001
             self.store.close_step(step_id, "FAILED", metadata={"error": str(exc)})
-            self.store.update_run_state(run_id=run_id, status="FAILED", state=status, finished=True)
+            self.store.update_run_state(run_id=run_id, status="FAILED", stage=status, finished=True)
             self.store.add_audit_event(
                 run_id=run_id,
                 actor="Supervisor",
@@ -108,7 +108,7 @@ class Supervisor:
         run_id = context.run_id
         ticker = context.ticker
 
-        self.store.update_run_state(run_id=run_id, status="INGESTING", state="INGESTING", flags=context.flags)
+        self.store.update_run_state(run_id=run_id, status="INGESTING", stage="INGESTING", flags=context.flags)
         if not self._charge_or_stop(run_id=run_id, step_name="INGESTING", budget_policy=budget_policy):
             return
         data_result = self._run_agent_step(
@@ -130,7 +130,7 @@ class Supervisor:
         )
 
         # Phase-3 grounding foundation: build/refresh retrieval index.
-        self.store.update_run_state(run_id=run_id, status="ANALYZING", state="INDEXING")
+        self.store.update_run_state(run_id=run_id, status="ANALYZING", stage="INDEXING")
         index_step_id = self.store.add_step(
             run_id=run_id,
             step_name="INDEXING",
@@ -148,7 +148,7 @@ class Supervisor:
             created_by_agent="DataAgent",
         )
 
-        self.store.update_run_state(run_id=run_id, status="VALUATING", state="VALUATING", flags=context.flags)
+        self.store.update_run_state(run_id=run_id, status="VALUATING", stage="VALUATING", flags=context.flags)
         if not self._charge_or_stop(run_id=run_id, step_name="VALUATING", budget_policy=budget_policy):
             return
         quant_result = self._run_agent_step(
@@ -169,10 +169,10 @@ class Supervisor:
             created_by_agent="QuantAgent",
         )
         if quant_result.needs_human:
-            self.store.update_run_state(run_id=run_id, status="NEEDS_REVIEW", state="NEEDS_REVIEW")
+            self.store.update_run_state(run_id=run_id, status="NEEDS_REVIEW", stage="NEEDS_REVIEW")
             return
 
-        self.store.update_run_state(run_id=run_id, status="SYNTHESIZING", state="SYNTHESIZING")
+        self.store.update_run_state(run_id=run_id, status="SYNTHESIZING", stage="SYNTHESIZING")
         if not self._charge_or_stop(run_id=run_id, step_name="SYNTHESIZING", budget_policy=budget_policy):
             return
         researcher_result = self._run_agent_step(
@@ -193,7 +193,7 @@ class Supervisor:
             created_by_agent="ResearcherAgent",
         )
 
-        self.store.update_run_state(run_id=run_id, status="ANALYZING", state="DEBATING")
+        self.store.update_run_state(run_id=run_id, status="ANALYZING", stage="DEBATING")
         if not self._charge_or_stop(run_id=run_id, step_name="DEBATING", budget_policy=budget_policy):
             return
         debate_result = self._run_agent_step(
@@ -219,7 +219,7 @@ class Supervisor:
         )
 
         if debate_result.needs_human:
-            self.store.update_run_state(run_id=run_id, status="NEEDS_REVIEW", state="NEEDS_REVIEW")
+            self.store.update_run_state(run_id=run_id, status="NEEDS_REVIEW", stage="NEEDS_REVIEW")
             return
 
         retrieved_refs = self.retrieval.evidence_for_claims(
@@ -228,7 +228,7 @@ class Supervisor:
         )
         combined_refs = list(quant_result.evidence_refs) + retrieved_refs
 
-        self.store.update_run_state(run_id=run_id, status="AUDITING", state="AUDITING")
+        self.store.update_run_state(run_id=run_id, status="AUDITING", stage="AUDITING")
         if not self._charge_or_stop(run_id=run_id, step_name="AUDITING", budget_policy=budget_policy):
             return
         auditor_result = self._run_agent_step(
@@ -254,13 +254,13 @@ class Supervisor:
         )
 
         if not auditor_result.payload.get("passed", False):
-            self.store.update_run_state(run_id=run_id, status="NEEDS_REVIEW", state="NEEDS_REVIEW")
+            self.store.update_run_state(run_id=run_id, status="NEEDS_REVIEW", stage="NEEDS_REVIEW")
             return
 
         self.store.update_run_state(
             run_id=run_id,
             status="WAITING_ASSUMPTIONS_APPROVAL",
-            state="WAITING_ASSUMPTIONS_APPROVAL",
+            stage="WAITING_ASSUMPTIONS_APPROVAL",
         )
         self.store.add_audit_event(
             run_id=run_id,
@@ -274,7 +274,7 @@ class Supervisor:
         self.store.add_approval(run_id=run_id, stage=stage, decision=decision, reviewer=reviewer, feedback_patch=feedback_patch)
 
         if decision == "reject":
-            self.store.update_run_state(run_id=run_id, status="NEEDS_REVIEW", state="NEEDS_REVIEW")
+            self.store.update_run_state(run_id=run_id, status="NEEDS_REVIEW", stage="NEEDS_REVIEW")
             self.store.save_artifact(
                 artifact_id=deterministic_id(run_id, "review_feedback", stage),
                 run_id=run_id,
@@ -285,10 +285,10 @@ class Supervisor:
             return
 
         if stage == "assumptions":
-            self.store.update_run_state(run_id=run_id, status="WAITING_FINAL_APPROVAL", state="WAITING_FINAL_APPROVAL")
+            self.store.update_run_state(run_id=run_id, status="WAITING_FINAL_APPROVAL", stage="WAITING_FINAL_APPROVAL")
             return
         if stage == "final":
-            self.store.update_run_state(run_id=run_id, status="PUBLISHED", state="PUBLISHED", finished=True)
+            self.store.update_run_state(run_id=run_id, status="PUBLISHED", stage="PUBLISHED", finished=True)
             self.store.save_artifact(
                 artifact_id=deterministic_id(run_id, "published_report"),
                 run_id=run_id,
@@ -305,7 +305,7 @@ class Supervisor:
         self.store.update_run_state(
             run_id=run_id,
             status="NEEDS_REVIEW",
-            state="NEEDS_REVIEW",
+            stage="NEEDS_REVIEW",
             flags=merged_flags,
         )
         self.store.save_artifact(

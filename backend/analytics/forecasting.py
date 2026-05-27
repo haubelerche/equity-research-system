@@ -1,329 +1,362 @@
-"""Deterministic 5-year income statement forecasting engine.
+"""Deterministic financial forecast engine.
 
-Builds a forward projection using historical drivers derived from the FactTable.
-All arithmetic is deterministic Python — no LLM involvement.
+Generates 5-year income statement and balance sheet projections
+from historical canonical facts using driver-based methods.
 
-Conventions (matching the rest of the analytics layer):
-  - Values are in tỷ VND (bn VND) unless stated otherwise.
-  - sga.total          → stored NEGATIVE (expense)
-  - interest_expense.total → stored NEGATIVE (cost)
-  - profit_before_tax.total → stored POSITIVE
-  - gross_profit.total      → stored POSITIVE
+Methods:
+  - revenue_growth: historical CAGR (capped ±25%), overridable
+  - cost items: ratio-to-revenue (historical median margin)
+  - balance sheet: simplified equity waterfall
 
-The PBT gap fix:
-  EBIT_model = gross_profit + sga          (sga negative → subtracts correctly)
-  naive_pbt  = EBIT_model + interest_expense
-  Historical data consistently shows actual PBT < naive_pbt.
-  The residual  other_items = PBT − (EBIT_model + interest_expense)
-  captures provisions, net finance income/loss, subsidiary results, etc.
-  The median historical ratio (other_items / revenue) is applied to each
-  forecast year so the model does not spuriously inflate forward PBT.
+No LLM involvement — all arithmetic is explicit Python.
+
+Output artifact: ForecastArtifact (to_dict() → JSON-serializable)
 """
 from __future__ import annotations
 
 import statistics
-import warnings as _warnings_module
 from dataclasses import dataclass, field
 from typing import Any
 
-from backend.facts.normalizer import FactTable
+FactTable = dict[str, dict[str, float]]
 
+_FORECAST_YEARS = [2026, 2027, 2028, 2029, 2030]
+_MAX_REVENUE_GROWTH = 0.25
+_MIN_REVENUE_GROWTH = -0.10
 
-# ---------------------------------------------------------------------------
-# Data structures
-# ---------------------------------------------------------------------------
-
-@dataclass
-class ForecastYear:
-    year: int
-    period_key: str          # e.g. "2026F"
-    revenue: float | None
-    gross_profit: float | None
-    gross_margin: float | None
-    sga: float | None        # negative value (expense)
-    ebit: float | None
-    interest_expense: float | None  # negative value (cost)
-    other_items: float | None       # residual non-SGA gap (typically negative)
-    profit_before_tax: float | None
-    tax_expense: float | None       # negative value
-    net_income: float | None
-    net_margin: float | None
-
-
-@dataclass
-class ForecastArtifact:
-    ticker: str
-    base_period: str                 # last historical period used
-    forecast_years: list[ForecastYear] = field(default_factory=list)
-    drivers: dict[str, Any] = field(default_factory=dict)
-    warnings: list[str] = field(default_factory=list)
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "ticker": self.ticker,
-            "base_period": self.base_period,
-            "drivers": self.drivers,
-            "warnings": self.warnings,
-            "forecast": [
-                {
-                    "year": fy.year,
-                    "period_key": fy.period_key,
-                    "revenue": round(fy.revenue, 1) if fy.revenue is not None else None,
-                    "gross_profit": round(fy.gross_profit, 1) if fy.gross_profit is not None else None,
-                    "gross_margin": round(fy.gross_margin, 4) if fy.gross_margin is not None else None,
-                    "sga": round(fy.sga, 1) if fy.sga is not None else None,
-                    "ebit": round(fy.ebit, 1) if fy.ebit is not None else None,
-                    "interest_expense": round(fy.interest_expense, 1) if fy.interest_expense is not None else None,
-                    "other_items": round(fy.other_items, 1) if fy.other_items is not None else None,
-                    "profit_before_tax": round(fy.profit_before_tax, 1) if fy.profit_before_tax is not None else None,
-                    "tax_expense": round(fy.tax_expense, 1) if fy.tax_expense is not None else None,
-                    "net_income": round(fy.net_income, 1) if fy.net_income is not None else None,
-                    "net_margin": round(fy.net_margin, 4) if fy.net_margin is not None else None,
-                }
-                for fy in self.forecast_years
-            ],
-        }
-
-
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
 
 def _get(table: FactTable, key: str, period: str) -> float | None:
     return table.get(key, {}).get(period)
 
 
-def _fy_periods(fact_table: FactTable) -> list[str]:
-    """Return sorted FY period keys present in the fact table."""
-    periods = {p for periods in fact_table.values() for p in periods if p.endswith("FY")}
-    return sorted(periods)
+def _cagr(start: float, end: float, years: int) -> float | None:
+    if years <= 0 or start is None or end is None or start <= 0:
+        return None
+    return (end / start) ** (1.0 / years) - 1.0
 
 
-# ---------------------------------------------------------------------------
-# Core forecasting function
-# ---------------------------------------------------------------------------
+def _median_ratio(
+    numerator_key: str,
+    denominator_key: str,
+    table: FactTable,
+    periods: list[str],
+) -> float | None:
+    """Compute median of numerator/denominator across available FY periods."""
+    ratios = []
+    for p in periods:
+        num = _get(table, numerator_key, p)
+        den = _get(table, denominator_key, p)
+        if num is not None and den is not None and den != 0:
+            ratios.append(num / den)
+    if not ratios:
+        return None
+    return statistics.median(ratios)
+
+
+@dataclass
+class ForecastAssumptions:
+    revenue_growth_override: float | None = None  # None → use historical CAGR
+    gross_margin_override: float | None = None     # None → use historical median
+    net_margin_override: float | None = None       # None → derive from other lines
+    sga_to_revenue_override: float | None = None
+    tax_rate_override: float | None = None
+    capex_to_revenue_override: float | None = None
+    depreciation_to_revenue_override: float | None = None
+    assumption_status: str = "default_unapproved"  # or "analyst_approved"
+
+
+@dataclass
+class ForecastYear:
+    year: int
+    label: str          # e.g. "2026F"
+    revenue: float | None
+    cogs: float | None
+    gross_profit: float | None
+    gross_margin: float | None
+    sga: float | None
+    ebit: float | None
+    ebit_margin: float | None
+    depreciation: float | None
+    ebitda: float | None
+    interest_expense: float | None
+    profit_before_tax: float | None
+    tax_expense: float | None
+    net_income: float | None
+    net_margin: float | None
+    capex: float | None
+    # Balance sheet highlights
+    total_assets: float | None
+    equity: float | None
+    total_debt: float | None
+    other_liabilities: float | None  # non-debt liabilities carried forward
+    # Per-share
+    eps: float | None
+    bvps: float | None
+
+
+@dataclass
+class ForecastArtifact:
+    ticker: str
+    historical_periods: list[str]
+    forecast_periods: list[str]
+    assumptions: ForecastAssumptions
+    revenue_cagr: float | None
+    drivers: dict[str, Any]
+    forecast_years: list[ForecastYear]
+    warnings: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "ticker": self.ticker,
+            "historical_periods": self.historical_periods,
+            "forecast_periods": self.forecast_periods,
+            "revenue_cagr_historical": round(self.revenue_cagr, 4) if self.revenue_cagr else None,
+            "drivers": self.drivers,
+            "assumption_status": self.assumptions.assumption_status,
+            "forecast_years": [
+                {
+                    "year": fy.year,
+                    "label": fy.label,
+                    "revenue": round(fy.revenue, 1) if fy.revenue is not None else None,
+                    "cogs": round(fy.cogs, 1) if fy.cogs is not None else None,
+                    "gross_profit": round(fy.gross_profit, 1) if fy.gross_profit is not None else None,
+                    "gross_margin": round(fy.gross_margin, 4) if fy.gross_margin is not None else None,
+                    "sga": round(fy.sga, 1) if fy.sga is not None else None,
+                    "ebit": round(fy.ebit, 1) if fy.ebit is not None else None,
+                    "ebit_margin": round(fy.ebit_margin, 4) if fy.ebit_margin is not None else None,
+                    "depreciation": round(fy.depreciation, 1) if fy.depreciation is not None else None,
+                    "ebitda": round(fy.ebitda, 1) if fy.ebitda is not None else None,
+                    "interest_expense": round(fy.interest_expense, 1) if fy.interest_expense is not None else None,
+                    "profit_before_tax": round(fy.profit_before_tax, 1) if fy.profit_before_tax is not None else None,
+                    "tax_expense": round(fy.tax_expense, 1) if fy.tax_expense is not None else None,
+                    "net_income": round(fy.net_income, 1) if fy.net_income is not None else None,
+                    "net_margin": round(fy.net_margin, 4) if fy.net_margin is not None else None,
+                    "capex": round(fy.capex, 1) if fy.capex is not None else None,
+                    "total_assets": round(fy.total_assets, 1) if fy.total_assets is not None else None,
+                    "equity": round(fy.equity, 1) if fy.equity is not None else None,
+                    "total_debt": round(fy.total_debt, 1) if fy.total_debt is not None else None,
+                    "other_liabilities": round(fy.other_liabilities, 1) if fy.other_liabilities is not None else None,
+                    "eps": round(fy.eps, 0) if fy.eps is not None else None,
+                    "bvps": round(fy.bvps, 0) if fy.bvps is not None else None,
+                }
+                for fy in self.forecast_years
+            ],
+            "warnings": self.warnings,
+        }
+
 
 def run_forecast(
     ticker: str,
     fact_table: FactTable,
-    n_years: int = 5,
-    revenue_growth_override: float | None = None,
+    forecast_years: list[int] | None = None,
+    assumptions: ForecastAssumptions | None = None,
+    shares_mn: float | None = None,
 ) -> ForecastArtifact:
-    """Build a deterministic n-year income statement forecast.
+    """Run deterministic 5-year income statement and balance sheet forecast.
 
-    Parameters
-    ----------
-    ticker:
-        Stock ticker (e.g. "DHG").
-    fact_table:
-        Normalised FactTable from build_fact_table / compute_derived.
-    n_years:
-        Number of forward years to project (default 5).
-    revenue_growth_override:
-        If provided, overrides the historical median revenue growth rate.
-
-    Returns
-    -------
-    ForecastArtifact with per-year projections and driver metadata.
+    Uses historical CAGR for revenue growth, historical median margins for
+    cost lines. All assumptions are explicit and stored in the artifact.
     """
-    artifact_warnings: list[str] = []
+    if assumptions is None:
+        assumptions = ForecastAssumptions()
+    if forecast_years is None:
+        forecast_years = _FORECAST_YEARS
 
-    fy_periods = _fy_periods(fact_table)
+    warnings: list[str] = []
+
+    fy_periods = sorted(
+        p for p in {p for vals in fact_table.values() for p in vals} if p.endswith("FY")
+    )
     if not fy_periods:
-        artifact_warnings.append("No FY periods found in fact table — forecast is empty.")
         return ForecastArtifact(
-            ticker=ticker,
-            base_period="",
-            warnings=artifact_warnings,
+            ticker=ticker, historical_periods=[], forecast_periods=[],
+            assumptions=assumptions, revenue_cagr=None, drivers={},
+            forecast_years=[], warnings=["No FY periods available for forecast"],
         )
 
-    base_period = fy_periods[-1]
-    base_year = int(base_period.replace("FY", ""))
+    # ── Historical revenue CAGR ────────────────────────────────────────────
+    rev_vals = [_get(fact_table, "revenue.net", p) for p in fy_periods]
+    rev_vals = [v for v in rev_vals if v is not None]
 
-    # ------------------------------------------------------------------
-    # Driver 1: Revenue growth (historical median YoY)
-    # ------------------------------------------------------------------
-    rev_growth_rates: list[float] = []
-    for i in range(1, len(fy_periods)):
-        prev_p = fy_periods[i - 1]
-        curr_p = fy_periods[i]
-        rev_prev = _get(fact_table, "revenue.net", prev_p)
-        rev_curr = _get(fact_table, "revenue.net", curr_p)
-        if rev_prev and rev_curr and rev_prev > 0:
-            rev_growth_rates.append((rev_curr - rev_prev) / rev_prev)
-
-    if revenue_growth_override is not None:
-        rev_growth = revenue_growth_override
-        artifact_warnings.append(
-            f"Revenue growth overridden to {rev_growth:.1%} (historical median ignored)."
-        )
-    elif rev_growth_rates:
-        rev_growth = statistics.median(rev_growth_rates)
+    if assumptions.revenue_growth_override is not None:
+        rev_growth = assumptions.revenue_growth_override
+        revenue_cagr = None
+    elif len(rev_vals) >= 2:
+        revenue_cagr = _cagr(rev_vals[0], rev_vals[-1], len(rev_vals) - 1)
+        # Cap for projection
+        rev_growth = max(_MIN_REVENUE_GROWTH, min(_MAX_REVENUE_GROWTH, revenue_cagr or 0.05))
+        if revenue_cagr is not None and revenue_cagr != rev_growth:
+            warnings.append(
+                f"Revenue CAGR {revenue_cagr:.1%} capped to {rev_growth:.1%} for forecast"
+            )
     else:
-        rev_growth = 0.04  # default 4% if no history
-        artifact_warnings.append("No revenue history to compute growth — defaulting to 4%.")
+        rev_growth = 0.05
+        revenue_cagr = None
+        warnings.append("Insufficient revenue history — assuming 5% growth")
 
-    # ------------------------------------------------------------------
-    # Driver 2: Gross margin (historical median)
-    # ------------------------------------------------------------------
-    gm_ratios: list[float] = []
-    for p in fy_periods:
-        gp = _get(fact_table, "gross_profit.total", p)
-        rev = _get(fact_table, "revenue.net", p)
-        if gp is not None and rev and rev > 0:
-            gm_ratios.append(gp / rev)
+    # ── Historical margin drivers ──────────────────────────────────────────
+    gross_margin = (
+        assumptions.gross_margin_override
+        or _median_ratio("gross_profit.total", "revenue.net", fact_table, fy_periods)
+    )
+    if gross_margin is None:
+        gross_margin = 0.40
+        warnings.append("No gross margin history — using default 40%")
 
-    gross_margin_fwd = statistics.median(gm_ratios) if gm_ratios else 0.35
-
-    # ------------------------------------------------------------------
-    # Driver 3: SGA as % of revenue (historical median; sga is negative)
-    # ------------------------------------------------------------------
-    sga_ratios: list[float] = []
+    # SGA as % of revenue (sga is stored negative)
+    sga_ratios = []
     for p in fy_periods:
         sga = _get(fact_table, "sga.total", p)
         rev = _get(fact_table, "revenue.net", p)
         if sga is not None and rev and rev > 0:
-            sga_ratios.append(sga / rev)  # negative ratio
+            sga_ratios.append(abs(sga) / rev)
+    sga_to_rev = (
+        assumptions.sga_to_revenue_override
+        or (statistics.median(sga_ratios) if sga_ratios else 0.20)
+    )
 
-    sga_to_rev = statistics.median(sga_ratios) if sga_ratios else -0.20
+    # Depreciation as % of revenue
+    dep_to_rev = (
+        assumptions.depreciation_to_revenue_override
+        or _median_ratio("depreciation.total", "revenue.net", fact_table, fy_periods)
+        or 0.04
+    )
 
-    # ------------------------------------------------------------------
-    # Driver 4: Interest expense as % of revenue (historical median)
-    # ------------------------------------------------------------------
-    interest_ratios: list[float] = []
+    # CAPEX as % of revenue (capex stored negative → use abs)
+    capex_ratios = []
+    for p in fy_periods:
+        capex = _get(fact_table, "capex.total", p)
+        rev = _get(fact_table, "revenue.net", p)
+        if capex is not None and rev and rev > 0:
+            capex_ratios.append(abs(capex) / rev)
+    capex_to_rev = (
+        assumptions.capex_to_revenue_override
+        or (statistics.median(capex_ratios) if capex_ratios else 0.03)
+    )
+
+    # Effective tax rate
+    tax_rates = []
+    for p in fy_periods:
+        pbt = _get(fact_table, "profit_before_tax.total", p)
+        ni = _get(fact_table, "net_income.parent", p)
+        if pbt and pbt > 0 and ni is not None:
+            tax_rates.append(max(0, (pbt - ni) / pbt))
+    tax_rate = (
+        assumptions.tax_rate_override
+        or (statistics.median(tax_rates) if tax_rates else 0.20)
+    )
+
+    # Interest expense as % of revenue
+    interest_ratios = []
     for p in fy_periods:
         ie = _get(fact_table, "interest_expense.total", p)
         rev = _get(fact_table, "revenue.net", p)
         if ie is not None and rev and rev > 0:
-            interest_ratios.append(ie / rev)  # negative ratio
+            interest_ratios.append(abs(ie) / rev)
+    interest_to_rev = statistics.median(interest_ratios) if interest_ratios else 0.01
 
-    interest_to_rev = statistics.median(interest_ratios) if interest_ratios else 0.0
+    # ── Starting balance sheet values ────────────────────────────────────
+    latest_fy = fy_periods[-1]
+    start_assets = _get(fact_table, "total_assets.ending", latest_fy) or 0
+    start_equity = _get(fact_table, "equity.parent", latest_fy) or 0
+    start_debt = _get(fact_table, "total_debt.ending", latest_fy) or 0
+    # Non-debt liabilities: carry forward as constant (trade payables, accruals, etc.)
+    # Satisfies identity: total_assets = equity + total_debt + other_liabilities
+    other_liabilities = max(0.0, start_assets - start_equity - start_debt)
 
-    # ------------------------------------------------------------------
-    # Driver 5: Other items (PBT gap) as % of revenue (historical median)
-    # ------------------------------------------------------------------
-    # For each historical period: other_items = PBT − (EBIT_model + interest_expense)
-    # where EBIT_model = gross_profit + sga  (sga negative)
-    # and interest_expense is stored negative.
-    # A negative other_items_to_rev reduces forecast PBT (the correct direction for DHG).
-    other_items_ratios: list[float] = []
-    for p in fy_periods:
-        gp_h = _get(fact_table, "gross_profit.total", p)
-        sga_h = _get(fact_table, "sga.total", p)
-        ie_h = _get(fact_table, "interest_expense.total", p)
-        pbt_h = _get(fact_table, "profit_before_tax.total", p)
-        rev_h = _get(fact_table, "revenue.net", p)
-        if all(v is not None for v in [gp_h, sga_h, ie_h, pbt_h, rev_h]) and rev_h > 0:
-            ebit_model = gp_h + sga_h          # sga_h negative → correct subtraction
-            other_items = pbt_h - (ebit_model + ie_h)   # ie_h negative → correct
-            other_items_ratios.append(other_items / rev_h)
+    # Shares outstanding
+    if shares_mn is None:
+        ni_latest = _get(fact_table, "net_income.parent", latest_fy)
+        eps_latest = _get(fact_table, "eps.basic", latest_fy)
+        if ni_latest and eps_latest and eps_latest > 0:
+            shares_mn = (ni_latest * 1_000) / eps_latest
+        else:
+            shares_mn = None
 
-    other_items_to_rev = statistics.median(other_items_ratios) if other_items_ratios else 0.0
-    if other_items_ratios and other_items_to_rev != 0.0:
-        artifact_warnings.append(
-            f"Non-operating items (provisions, finance income, etc.) = "
-            f"{other_items_to_rev:.1%} of revenue (historical median). "
-            f"Applied to forecast. Individual years ranged from "
-            f"{min(other_items_ratios):.1%} to {max(other_items_ratios):.1%}."
-        )
-
-    # ------------------------------------------------------------------
-    # Driver 6: Effective tax rate (historical median)
-    # ------------------------------------------------------------------
-    tax_rates: list[float] = []
-    for p in fy_periods:
-        pbt = _get(fact_table, "profit_before_tax.total", p)
-        tax = _get(fact_table, "tax_expense.total", p)
-        if pbt and pbt > 0 and tax is not None:
-            tax_rates.append(abs(tax) / pbt)
-
-    eff_tax_rate = statistics.median(tax_rates) if tax_rates else 0.20
-
-    # ------------------------------------------------------------------
-    # Assemble drivers dict
-    # ------------------------------------------------------------------
-    drivers: dict[str, Any] = {
-        "revenue_growth": {
-            "method": "historical_median" if revenue_growth_override is None else "override",
-            "value": round(rev_growth, 4),
-        },
-        "gross_margin": {
-            "method": "historical_median",
-            "value": round(gross_margin_fwd, 4),
-        },
-        "sga_to_revenue": {
-            "method": "historical_median",
-            "value": round(sga_to_rev, 4),
-        },
-        "interest_to_revenue": {
-            "method": "historical_median",
-            "value": round(interest_to_rev, 4),
-        },
-        "other_items_to_revenue": {
-            "method": "historical_median",
-            "value": round(other_items_to_rev, 4),
-        },
-        "effective_tax_rate": {
-            "method": "historical_median",
-            "value": round(eff_tax_rate, 4),
-        },
+    # ── Store drivers ──────────────────────────────────────────────────────
+    drivers = {
+        "revenue_growth": {y: round(rev_growth, 4) for y in forecast_years},
+        "gross_margin": {"method": "historical_median", "value": round(gross_margin, 4)},
+        "sga_to_revenue": {"method": "historical_median", "value": round(sga_to_rev, 4)},
+        "depreciation_to_revenue": {"method": "historical_median", "value": round(dep_to_rev, 4)},
+        "capex_to_revenue": {"method": "historical_median", "value": round(capex_to_rev, 4)},
+        "effective_tax_rate": {"method": "historical_median", "value": round(tax_rate, 4)},
+        "interest_to_revenue": {"method": "historical_median", "value": round(interest_to_rev, 4)},
     }
 
-    # ------------------------------------------------------------------
-    # Per-year projection loop
-    # ------------------------------------------------------------------
-    base_revenue = _get(fact_table, "revenue.net", base_period)
-    if base_revenue is None:
-        artifact_warnings.append(
-            f"No revenue found for base period {base_period} — cannot project forward."
-        )
-        return ForecastArtifact(
-            ticker=ticker,
-            base_period=base_period,
-            drivers=drivers,
-            warnings=artifact_warnings,
-        )
+    # ── Project each year ──────────────────────────────────────────────────
+    latest_rev = _get(fact_table, "revenue.net", latest_fy) or 0
+    current_rev = latest_rev
+    current_equity = start_equity
+    current_debt = start_debt
 
-    forecast_years_list: list[ForecastYear] = []
-    prev_revenue = base_revenue
-
-    forecast_years = [base_year + i for i in range(1, n_years + 1)]
+    forecast_year_objects: list[ForecastYear] = []
+    forecast_period_labels: list[str] = []
 
     for year in forecast_years:
-        revenue = prev_revenue * (1 + rev_growth)
-        gross_profit = revenue * gross_margin_fwd
-        sga = revenue * sga_to_rev                   # negative
-        ebit = gross_profit + sga
-        interest_expense = revenue * interest_to_rev  # negative
-        other_items = revenue * other_items_to_rev    # typically negative
-        pbt = ebit + interest_expense + other_items
-        tax_expense = -abs(pbt) * eff_tax_rate if pbt is not None else None
-        net_income = pbt + tax_expense if (pbt is not None and tax_expense is not None) else None
-        net_margin = (net_income / revenue) if (net_income is not None and revenue > 0) else None
+        label = f"{year}F"
+        forecast_period_labels.append(label)
 
-        forecast_years_list.append(
-            ForecastYear(
-                year=year,
-                period_key=f"{year}F",
-                revenue=revenue,
-                gross_profit=gross_profit,
-                gross_margin=gross_margin_fwd,
-                sga=sga,
-                ebit=ebit,
-                interest_expense=interest_expense,
-                other_items=other_items,
-                profit_before_tax=pbt,
-                tax_expense=tax_expense,
-                net_income=net_income,
-                net_margin=net_margin,
-            )
-        )
-        prev_revenue = revenue
+        revenue = current_rev * (1 + rev_growth)
+        cogs = -revenue * (1 - gross_margin)  # negative convention
+        gross_profit = revenue + cogs
+        sga = -revenue * sga_to_rev       # negative
+        depreciation = revenue * dep_to_rev
+        ebit = gross_profit + sga          # sga is negative, so this subtracts
+        ebitda = ebit + depreciation
+        ebit_margin = ebit / revenue if revenue else None
+
+        interest_expense = -revenue * interest_to_rev  # negative
+        pbt = ebit + interest_expense
+        tax_expense = -max(0, pbt) * tax_rate
+        net_income = pbt + tax_expense
+        net_margin = net_income / revenue if revenue else None
+
+        capex = -revenue * capex_to_rev   # negative
+
+        # Equity grows by net income (no dividends in MVP)
+        current_equity = current_equity + net_income
+        # Identity: total_assets = equity + total_debt + other_liabilities
+        total_assets = current_equity + current_debt + other_liabilities
+
+        eps = (net_income * 1_000) / shares_mn if shares_mn else None
+        bvps = (current_equity / shares_mn) * 1_000 if shares_mn else None
+
+        forecast_year_objects.append(ForecastYear(
+            year=year,
+            label=label,
+            revenue=revenue,
+            cogs=cogs,
+            gross_profit=gross_profit,
+            gross_margin=gross_margin,
+            sga=sga,
+            ebit=ebit,
+            ebit_margin=ebit_margin,
+            depreciation=depreciation,
+            ebitda=ebitda,
+            interest_expense=interest_expense,
+            profit_before_tax=pbt,
+            tax_expense=tax_expense,
+            net_income=net_income,
+            net_margin=net_margin,
+            capex=capex,
+            total_assets=total_assets,
+            equity=current_equity,
+            total_debt=current_debt,
+            other_liabilities=other_liabilities,
+            eps=eps,
+            bvps=bvps,
+        ))
+
+        current_rev = revenue
 
     return ForecastArtifact(
         ticker=ticker,
-        base_period=base_period,
-        forecast_years=forecast_years_list,
+        historical_periods=fy_periods,
+        forecast_periods=forecast_period_labels,
+        assumptions=assumptions,
+        revenue_cagr=revenue_cagr,
         drivers=drivers,
-        warnings=artifact_warnings,
+        forecast_years=forecast_year_objects,
+        warnings=warnings,
     )

@@ -17,9 +17,9 @@ def _facts_for_ticker(ticker: str) -> pd.DataFrame:
     with STORE.conn() as connection:
         frame = pd.read_sql_query(
             """
-            SELECT company_ticker, fiscal_year, fiscal_period, taxonomy_key, value
-            FROM financial_facts
-            WHERE company_ticker = %s
+            SELECT ticker, fiscal_year, fiscal_period, line_item_code, value
+            FROM fact.financial_facts
+            WHERE ticker = %s
             ORDER BY fiscal_year DESC, fiscal_period DESC
             """,
             connection,
@@ -33,9 +33,9 @@ def _latest_price(ticker: str) -> float | None:
         df = pd.read_sql_query(
             """
             SELECT close
-            FROM price_history
+            FROM fact.price_history
             WHERE ticker = %s
-            ORDER BY date DESC
+            ORDER BY trade_date DESC
             LIMIT 1
             """,
             connection,
@@ -49,7 +49,7 @@ def _latest_price(ticker: str) -> float | None:
 def _yearly_facts(frame: pd.DataFrame) -> pd.DataFrame:
     if frame.empty:
         return pd.DataFrame()
-    annual = frame.groupby(["fiscal_year", "taxonomy_key"], as_index=False)["value"].last()
+    annual = frame.groupby(["fiscal_year", "line_item_code"], as_index=False)["value"].last()
     return annual
 
 
@@ -99,7 +99,7 @@ def _financial_statement_like(frame: pd.DataFrame, statement: str) -> pd.DataFra
 
 
 def _val(frame: pd.DataFrame, key: str) -> float | None:
-    rows = frame[frame["taxonomy_key"] == key]
+    rows = frame[frame["line_item_code"] == key]
     if rows.empty:
         return None
     return float(rows.iloc[-1]["value"])

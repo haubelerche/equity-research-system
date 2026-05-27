@@ -46,7 +46,7 @@ class RunStatusResponse(BaseModel):
     ticker: str
     run_type: RunType
     status: RunStatus
-    current_state: str
+    current_stage: str
     flags: dict[str, Any]
     created_at: str
     updated_at: str

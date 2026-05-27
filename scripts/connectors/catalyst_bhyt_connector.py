@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from scripts.dataset.config_io import ROOT
 from scripts.dataset.dqf import infer_materiality, validate_catalyst_event
 from scripts.db.fact_store import PostgresFactStore
-from scripts.db.source_registry import SourceRegistry, SourceVersionInput
+from scripts.db.source_registry import SourceInput, SourceRegistry
 
 
 CONNECTOR_VERSION = "catalyst_bhyt_connector_v1"
@@ -25,12 +25,12 @@ def _event_id(source_url: str, title: str, occurred_at: str) -> str:
 def _classify_bhyt_event(title: str) -> str:
     lowered = title.lower()
     if any(k in lowered for k in ("bo sung", "them moi", "addition")):
-        return "bhyt_reimbursement_addition"
+        return "drug_registration"
     if any(k in lowered for k in ("loai bo", "cat giam", "removal")):
-        return "bhyt_reimbursement_removal"
+        return "regulatory"
     if any(k in lowered for k in ("ty le", "muc huong", "rate")):
-        return "bhyt_reimbursement_rate_change"
-    return "bhyt_guideline_update"
+        return "regulatory"
+    return "regulatory"
 
 
 def _parse_bhyt_page(base_url: str, html: str) -> list[dict]:
@@ -66,11 +66,11 @@ def sync_bhyt_connector() -> int:
 
     raw_path = ROOT / "dataset" / "raw" / "catalyst" / "bhyt_policy" / now.date().isoformat() / "bhyt_feed.html"
     checksum = registry.save_raw_snapshot(html.encode("utf-8"), raw_path)
-    source_version_id = registry.register_version(
-        SourceVersionInput(
-            source_id="bhyt_policy",
+    source_version_id = registry.register_source(
+        SourceInput(
+            logical_id="bhyt_policy",
             source_uri=BHYT_FEED,
-            source_type="catalyst_policy",
+            source_type="regulatory",
             checksum=checksum,
             connector_version=CONNECTOR_VERSION,
             raw_path=str(raw_path),
@@ -88,10 +88,10 @@ def sync_bhyt_connector() -> int:
             "summary": None,
             "occurred_at": row["occurred_at"],
             "effective_date": None,
-            "company_ticker": None,
+            "ticker": None,
             "materiality_hint": infer_materiality(event_type=event_type, title=row["title"]),
             "source_url": row["source_url"],
-            "source_version_id": source_version_id,
+            "source_id": source_version_id,
             "confidence": 0.75,
             "validation_status": "accepted",
             "ingested_at": now.isoformat(),
@@ -104,6 +104,12 @@ def sync_bhyt_connector() -> int:
     upserted = store.upsert_catalyst_events(events)
     print(f"[bhyt] upserted {upserted} events")
     return upserted
+
+
+def sync_bhyt_for_ticker(ticker: str, **_kwargs) -> dict:
+    """Per-ticker entry point for ingest_ticker.py; BHYT is industry-wide so runs the full sync."""
+    count = sync_bhyt_connector()
+    return {"events": count}
 
 
 def main() -> None:

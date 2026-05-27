@@ -38,7 +38,7 @@ if _env_file.exists():
         _line = _line.strip()
         if _line and not _line.startswith("#") and "=" in _line:
             _k, _v = _line.split("=", 1)
-            os.environ.setdefault(_k.strip(), _v.strip())
+            os.environ.setdefault(_k.strip(), _v.strip().strip(chr(34)).strip(chr(39)))
 
 ROOT = _Path(__file__).resolve().parents[1]
 FACTS_DIR = ROOT / "artifacts" / "facts"
@@ -114,14 +114,14 @@ def _load_golden_fallback(
             except (ValueError, KeyError):
                 continue
             facts.append({
-                "taxonomy_key": row["canonical_key"].strip(),
+                "line_item_code": row["canonical_key"].strip(),
                 "fiscal_year": fy,
                 "fiscal_period": "FY",
                 "value": value,
                 "unit": row.get("unit", "vnd_bn").strip(),
                 "currency": row.get("currency", "VND").strip(),
-                "source_version_id": f"golden_csv_{ticker}_{fy}FY",
-                "parser_version": "golden_csv_v1",
+                "source_id": f"golden_csv_{ticker}_{fy}FY",
+                "connector_version": "golden_csv_v1",
                 "validation_status": row.get("validation_status", "needs_review").strip(),
                 "confidence": float(row.get("confidence") or 0.75),
                 "ingested_at": now,
@@ -252,7 +252,25 @@ def build_facts(
     ts = generated_at.strftime("%Y%m%dT%H%M%S")
     out_path = FACTS_DIR / f"{ticker}_{ts}_fact_report.json"
     out_path.write_text(json.dumps(artifact, indent=2, default=str), encoding="utf-8")
-    print(f"\n[build_facts] Artifact saved → {out_path}")
+    print(f"\n[build_facts] Artifact saved: {out_path}")
+
+    # Persist DQ gate summary to DB
+    try:
+        from backend.dataops.quality_report import persist_dq_report
+        dq_id = persist_dq_report(ticker=ticker, report=report, from_year=from_year, to_year=to_year)
+        print(f"[build_facts] DQ report persisted: id={dq_id}")
+    except Exception as _exc:  # noqa: BLE001
+        print(f"[build_facts] WARNING: DQ report persistence skipped: {_exc}")
+
+    # Create research snapshot if valuation gate passed
+    if report.get("valuation_gate") == "pass":
+        try:
+            from backend.dataops.snapshot import create_snapshot
+            snap = create_snapshot(ticker=ticker, from_year=from_year, to_year=to_year, created_by="build_facts")
+            artifact["snapshot_id"] = snap["snapshot_id"]
+            print(f"[build_facts] Snapshot created: {snap['snapshot_id']} ({snap['facts_count']} facts, periods={snap['periods']})")
+        except Exception as _exc:  # noqa: BLE001
+            print(f"[build_facts] WARNING: snapshot creation skipped: {_exc}")
 
     if strict_completeness and report["valuation_gate"] != "pass":
         print(

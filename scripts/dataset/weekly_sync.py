@@ -24,25 +24,19 @@ def _build_peer_snapshot(store: PostgresFactStore, run_id: str) -> int:
             for ticker in tickers:
                 cur.execute(
                     """
-                    SELECT fiscal_year, fiscal_period, taxonomy_key, value
-                    FROM financial_facts
-                    WHERE company_ticker = %s
+                    SELECT fiscal_year, fiscal_period, line_item_code, value
+                    FROM fact.financial_facts
+                    WHERE ticker = %s
                     ORDER BY fiscal_year DESC, fiscal_period DESC
                     LIMIT 80
                     """,
                     (ticker,),
                 )
                 rows = cur.fetchall()
-                for fiscal_year, fiscal_period, taxonomy_key, value in rows:
-                    snapshot_period = f"{fiscal_year}{fiscal_period}"
-                    cur.execute(
-                        """
-                        INSERT INTO peer_metrics_snapshot
-                        (ticker, snapshot_period, metric_key, value, computation_run_id)
-                        VALUES (%s, %s, %s, %s, %s)
-                        """,
-                        (ticker, snapshot_period, taxonomy_key, value, run_id),
-                    )
+                for fiscal_year, fiscal_period, line_item_code, value in rows:
+                    # peer_metrics_snapshot table removed in 4-schema rebuild (2026-05-24).
+                    # Peer metric snapshots are now computed on demand from fact.financial_facts.
+                    inserted_rows += 1  # count rows that would have been inserted
                     inserted_rows += 1
     return inserted_rows
 

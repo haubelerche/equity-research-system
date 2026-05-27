@@ -1,7 +1,7 @@
 """Deterministic fact normalization and derived metric computation.
 
 Takes a list of raw FinancialFact dicts from the DB and returns a structured
-FactTable: a dict keyed by taxonomy_key → period_key → value.
+FactTable: a dict keyed by line_item_code → period_key → value.
 
 Derived metrics computed here (not stored in DB — sourced from the spec):
   free_cash_flow.total  = operating_cash_flow.total + capex.total  # capex is negative (CFS outflow)
@@ -32,7 +32,8 @@ def build_fact_table(raw_facts: list[dict[str, Any]]) -> FactTable:
     # Collect best row per (taxonomy_key, period)
     best: dict[tuple[str, str], dict[str, Any]] = {}
     for row in raw_facts:
-        key = (row["taxonomy_key"], _period_key(row["fiscal_year"], row["fiscal_period"]))
+        code = row.get("line_item_code") or row.get("taxonomy_key", "")
+        key = (code, _period_key(row["fiscal_year"], row["fiscal_period"]))
         existing = best.get(key)
         if existing is None:
             best[key] = row
@@ -46,10 +47,10 @@ def build_fact_table(raw_facts: list[dict[str, Any]]) -> FactTable:
                     best[key] = row
 
     table: FactTable = {}
-    for (taxonomy_key, period), row in best.items():
-        if taxonomy_key not in table:
-            table[taxonomy_key] = {}
-        table[taxonomy_key][period] = float(row["value"])
+    for (line_item_code, period), row in best.items():
+        if line_item_code not in table:
+            table[line_item_code] = {}
+        table[line_item_code][period] = float(row["value"])
 
     return table
 
@@ -62,7 +63,8 @@ def build_validation_status_table(raw_facts: list[dict[str, Any]]) -> dict[str, 
     """
     best: dict[tuple[str, str], dict[str, Any]] = {}
     for row in raw_facts:
-        key = (row["taxonomy_key"], _period_key(row["fiscal_year"], row["fiscal_period"]))
+        code = row.get("line_item_code") or row.get("taxonomy_key", "")
+        key = (code, _period_key(row["fiscal_year"], row["fiscal_period"]))
         existing = best.get(key)
         if existing is None:
             best[key] = row
@@ -76,10 +78,10 @@ def build_validation_status_table(raw_facts: list[dict[str, Any]]) -> dict[str, 
                     best[key] = row
 
     status_table: dict[str, dict[str, str]] = {}
-    for (taxonomy_key, period), row in best.items():
-        if taxonomy_key not in status_table:
-            status_table[taxonomy_key] = {}
-        status_table[taxonomy_key][period] = str(row.get("validation_status") or "unknown")
+    for (line_item_code, period), row in best.items():
+        if line_item_code not in status_table:
+            status_table[line_item_code] = {}
+        status_table[line_item_code][period] = str(row.get("validation_status") or "unknown")
     return status_table
 
 
@@ -117,8 +119,16 @@ def compute_derived(table: FactTable) -> FactTable:
         if gm is not None:
             derived.setdefault("gross_margin", {})[period] = round(gm, 6)
 
-        # ebitda_margin = ebitda.total / revenue.net
+        # ebitda.total = gross_profit - sga + depreciation (when not directly ingested)
         ebitda = get("ebitda.total")
+        if ebitda is None:
+            dep = get("depreciation.total")
+            sga = get("sga.total")
+            if gp is not None and sga is not None and dep is not None:
+                ebitda = gp + sga + dep  # sga is stored as negative
+                derived.setdefault("ebitda.total", {})[period] = round(ebitda, 4)
+
+        # ebitda_margin = ebitda.total / revenue.net
         em = _safe_div(ebitda, rev)
         if em is not None:
             derived.setdefault("ebitda_margin", {})[period] = round(em, 6)

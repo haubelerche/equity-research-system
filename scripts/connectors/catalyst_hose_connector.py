@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 from scripts.dataset.config_io import ROOT, load_universe_tickers
 from scripts.dataset.dqf import infer_materiality, validate_catalyst_event
 from scripts.db.fact_store import PostgresFactStore
-from scripts.db.source_registry import SourceRegistry, SourceVersionInput
+from scripts.db.source_registry import SourceInput, SourceRegistry
 
 
 CONNECTOR_VERSION = "catalyst_hose_connector_v1"
@@ -64,11 +64,11 @@ def sync_hose_hnx_connector(tickers: list[str] | None = None) -> int:
         entries = _parse_anchors(base_url=url, html=html, tracked_tickers=tracked)
         raw_path = ROOT / "dataset" / "raw" / "catalyst" / "company_news" / now.date().isoformat() / f"{'hose' if 'hsx' in url else 'hnx'}_announcements.html"
         checksum = registry.save_raw_snapshot(html.encode("utf-8"), raw_path)
-        source_version_id = registry.register_version(
-            SourceVersionInput(
-                source_id="company_news",
+        source_version_id = registry.register_source(
+            SourceInput(
+                logical_id="company_news",
                 source_uri=url,
-                source_type="catalyst_company_news",
+                source_type="news",
                 checksum=checksum,
                 connector_version=CONNECTOR_VERSION,
                 raw_path=str(raw_path),
@@ -78,7 +78,7 @@ def sync_hose_hnx_connector(tickers: list[str] | None = None) -> int:
 
         for row in entries:
             title = row["title"]
-            event_type = "company_guidance_update" if "ke hoach" in title.lower() or "guidance" in title.lower() else "company_announcement"
+            event_type = "disclosure" if "ke hoach" in title.lower() or "guidance" in title.lower() else "news"
             event = {
                 "event_id": _event_id(row["source_url"], title, row["occurred_at"]),
                 "event_type": event_type,
@@ -86,10 +86,10 @@ def sync_hose_hnx_connector(tickers: list[str] | None = None) -> int:
                 "summary": None,
                 "occurred_at": row["occurred_at"],
                 "effective_date": None,
-                "company_ticker": row["ticker"],
+                "ticker": row["ticker"],
                 "materiality_hint": infer_materiality(event_type=event_type, title=title),
                 "source_url": row["source_url"],
-                "source_version_id": source_version_id,
+                "source_id": source_version_id,
                 "confidence": 0.8,
                 "validation_status": "accepted",
                 "ingested_at": now.isoformat(),
@@ -102,6 +102,12 @@ def sync_hose_hnx_connector(tickers: list[str] | None = None) -> int:
     upserted = store.upsert_catalyst_events(all_events)
     print(f"[hose_hnx] upserted {upserted} events")
     return upserted
+
+
+def sync_hose_for_ticker(ticker: str, **_kwargs) -> dict:
+    """Per-ticker entry point for ingest_ticker.py; filters the HOSE/HNX scrape to one ticker."""
+    count = sync_hose_hnx_connector(tickers=[ticker])
+    return {"events": count}
 
 
 def parse_args() -> argparse.Namespace:

@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 from scripts.dataset.config_io import ROOT, load_universe_tickers
 from scripts.dataset.dqf import infer_materiality, validate_catalyst_event
 from scripts.db.fact_store import PostgresFactStore
-from scripts.db.source_registry import SourceRegistry, SourceVersionInput
+from scripts.db.source_registry import SourceInput, SourceRegistry
 
 
 CONNECTOR_VERSION = "catalyst_dav_connector_v1"
@@ -70,11 +70,11 @@ def sync_dav_connector(tickers: list[str] | None = None) -> int:
         raw_payload = json.dumps(entries, ensure_ascii=False).encode("utf-8")
         raw_path = ROOT / "dataset" / "raw" / "catalyst" / "regulatory" / now.date().isoformat() / "dav_feed.json"
         checksum = registry.save_raw_snapshot(raw_payload, raw_path)
-        source_version_id = registry.register_version(
-            SourceVersionInput(
-                source_id="dav_regulatory",
+        source_version_id = registry.register_source(
+            SourceInput(
+                logical_id="dav_regulatory",
                 source_uri=feed,
-                source_type="catalyst_regulatory",
+                source_type="regulatory",
                 checksum=checksum,
                 connector_version=CONNECTOR_VERSION,
                 raw_path=str(raw_path),
@@ -84,7 +84,7 @@ def sync_dav_connector(tickers: list[str] | None = None) -> int:
 
         for item in entries:
             title = item["title"]
-            event_type = "regulatory_recall" if "thu hoi" in title.lower() else "regulatory_approval"
+            event_type = "regulatory"
             ticker = _guess_ticker(title, tracked)
             event = {
                 "event_id": _event_id(item["source_url"], title, item["occurred_at"]),
@@ -93,10 +93,10 @@ def sync_dav_connector(tickers: list[str] | None = None) -> int:
                 "summary": None,
                 "occurred_at": item["occurred_at"],
                 "effective_date": None,
-                "company_ticker": ticker,
+                "ticker": ticker,
                 "materiality_hint": infer_materiality(event_type=event_type, title=title),
                 "source_url": item["source_url"],
-                "source_version_id": source_version_id,
+                "source_id": source_version_id,
                 "confidence": 0.8,
                 "validation_status": "accepted",
                 "ingested_at": now.isoformat(),
@@ -109,6 +109,12 @@ def sync_dav_connector(tickers: list[str] | None = None) -> int:
     upserted = store.upsert_catalyst_events(all_events)
     print(f"[dav] upserted {upserted} events")
     return upserted
+
+
+def sync_dav_for_ticker(ticker: str, **_kwargs) -> dict:
+    """Per-ticker entry point for ingest_ticker.py; filters DAV scrape to one ticker."""
+    count = sync_dav_connector(tickers=[ticker])
+    return {"events": count}
 
 
 def parse_args() -> argparse.Namespace:
