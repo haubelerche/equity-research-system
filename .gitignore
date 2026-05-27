@@ -1,20 +1,21 @@
 # Worktrees
 .worktrees/
 
-# AI tooling / planning docs
-
-
+# Private / generated — never commit
+.claude/
+dataset/
+reports/
 specs/
+docs/superpowers/
 
+# Large reference repos
 FinRobot/
 vnstock/
-docs/
-dataset/
 
-
+# Tests (local only)
 tests/
-reports/
 
+# Markdown docs (generated reports, plans)
 *.md
 
 # Python
