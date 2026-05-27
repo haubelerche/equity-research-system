@@ -13,7 +13,7 @@ from backend.utils import deterministic_id
 
 def submit_universe_runs(limit: int | None = None) -> list[str]:
     store = RuntimeStore(dsn=settings.database_url)
-    store.ensure_schema()
+    store.check_schema_version()
     supervisor = Supervisor(store=store)
     executor = RunExecutor(store=store, supervisor=supervisor)
 
