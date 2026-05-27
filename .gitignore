@@ -6,8 +6,16 @@
 
 specs/
 
-
+FinRobot/
 vnstock/
+docs/
+dataset/
+
+
+tests/
+reports/
+
+*.md
 
 # Python
 __pycache__/
@@ -28,6 +36,7 @@ build/
 
 # IDE
 .vscode/
+.claude/
 .cursor/
 .idea/
 *.swp
