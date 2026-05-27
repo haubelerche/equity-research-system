@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import os
 from datetime import UTC, datetime
-from typing import Any
 
 from backend.facts.normalizer import FactTable
 
@@ -124,14 +123,16 @@ def generate_data_validation_report(
         blocking_reasons_str = "None — valuation may proceed"
 
     # --- Section 6: Valuation Readiness Decision ---
-    if valuation_ready:
-        valuation_status = "VALUATION_ALLOWED"
-        analyst_review = "No"
-        readiness_message = "All gates pass. Proceed to valuation."
-    else:
+    # Block valuation if EITHER valuation_ready is False OR reconciliation_report.valuation_blocked is True
+    should_block = (not valuation_ready) or (reconciliation_report is not None and reconciliation_report.valuation_blocked)
+    if should_block:
         valuation_status = "VALUATION_BLOCKED"
         analyst_review = "Yes"
         readiness_message = "Fix blocking reasons above before valuation can run."
+    else:
+        valuation_status = "VALUATION_ALLOWED"
+        analyst_review = "No"
+        readiness_message = "All gates pass. Proceed to valuation."
 
     # --- Assemble markdown report ---
     report_md = f"""# Data Validation Report — {ticker}

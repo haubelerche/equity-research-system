@@ -171,6 +171,24 @@ def test_report_shows_valuation_blocked_when_failed():
     assert "Status: VALUATION_BLOCKED" in report_md
 
 
+def test_report_shows_valuation_blocked_when_reconciliation_fails():
+    """When reconciliation_report.valuation_blocked=True, section 6 should contain VALUATION_BLOCKED even if valuation_ready=True."""
+    table = _minimal_fact_table()
+    fy_report = _minimal_fy_report_pass()  # valuation_ready=True
+    recon_report = _minimal_reconciliation_report_fail()  # valuation_blocked=True
+
+    report_md = generate_data_validation_report(
+        ticker="DHG",
+        snapshot_id="snap-001",
+        fact_table=table,
+        fy_report=fy_report,
+        reconciliation_report=recon_report,
+    )
+
+    # Despite valuation_ready=True, reconciliation.valuation_blocked=True should block
+    assert "Status: VALUATION_BLOCKED" in report_md
+
+
 # ---------------------------------------------------------------------------
 # Test 4: Report shows VALUATION_ALLOWED when passed
 # ---------------------------------------------------------------------------
