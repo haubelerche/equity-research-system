@@ -42,6 +42,8 @@ if _env_file.exists():
 import psycopg2
 import psycopg2.extras
 
+from backend.analytics.approval_gate import build_gate_from_artifacts
+
 ROOT = Path(__file__).resolve().parents[1]
 REPORTS_DIR = ROOT / "reports"
 VALUATION_DIR = ROOT / "artifacts" / "valuation"
@@ -235,22 +237,7 @@ def _footnotes(cmap: dict, claims: list[tuple]) -> str:
     return "\n\n".join(lines)
 
 
-# ── Draft rating ───────────────────────────────────────────────────────────────
-
-def _draft_rating(upside_pct: float | None, assumption_status: str = "default_unapproved") -> str:
-    """Compute draft BUY/HOLD/SELL based on valuation upside."""
-    if upside_pct is None:
-        rating = "NEEDS_REVIEW"
-    elif upside_pct >= 0.20:
-        rating = "MUA (BUY)"
-    elif upside_pct >= -0.10:
-        rating = "GIU (HOLD)"
-    else:
-        rating = "BAN (SELL)"
-
-    if assumption_status != "analyst_approved":
-        return f"**Draft: {rating}** — _Chưa được chuyên gia phê duyệt_"
-    return f"**{rating}**"
+# (draft_rating removed — use AssumptionGate.recommendation_label() instead)
 
 
 # ── Catalyst dedup ─────────────────────────────────────────────────────────────
@@ -437,7 +424,8 @@ def _build_fcff_section(
         shares_mn=shares_mn,
     )
 
-    wacc_assumptions = WACCAssumptions()
+    # Pass TaxPolicy from forecast so FCFF and forecast tax rates are consistent.
+    wacc_assumptions = WACCAssumptions(tax_policy=forecast.tax_policy)
     fcff_result = compute_fcff(
         ticker=ticker,
         forecast=forecast,
@@ -774,8 +762,22 @@ def generate_report(
 
     wacc_val = assumptions.get("wacc", 0.10)
     tg_val   = assumptions.get("terminal_growth", 0.03)
-    target_pe_val = assumptions.get("target_pe", 15.0)
-    target_ev_val = assumptions.get("target_ev_ebitda", 10.0)
+    _rel_val_status = multiples.get("relative_valuation_status", "pending_peer_dataset")
+    _peer_source = multiples.get("peer_data_source")
+    # Only show target multiples when a real peer dataset is present
+    target_pe_val: float | None = assumptions.get("target_pe") if _peer_source else None
+    target_ev_val: float | None = assumptions.get("target_ev_ebitda") if _peer_source else None
+
+    _blend_artifact = val.get("blend_dcf", {})
+    _blend_is_draft = _blend_artifact.get("is_draft_only", True)  # default True = safe
+    _valuation_label = (
+        "Draft valuation range — awaiting analyst approval"
+        if _blend_is_draft else
+        "PRIMARY target price (60% FCFF + 40% FCFE)"
+    )
+
+    _target_pe_str = f"{target_pe_val:.1f}x" if target_pe_val is not None else "Pending — chưa có dữ liệu peer"
+    _target_ev_str = f"{target_ev_val:.1f}x" if target_ev_val is not None else "Pending — chưa có dữ liệu peer"
 
     price_str    = f"{current_price:,.0f} VND" if current_price else "Chưa có"
     intrinsic_str = f"{dcf_intrinsic:,.0f} VND/CP" if dcf_intrinsic else "N/A"
@@ -924,13 +926,36 @@ def generate_report(
         json.dumps(blend_artifact, indent=2, default=str), encoding="utf-8"
     )
 
-    # Best upside for draft rating: prefer blend, fall back to FCFF then DCF
+    # Best upside for recommendation label: prefer blend, fall back to FCFF then DCF
     fcff_upside = fcff_artifact.get("upside_pct")
     blend_upside = blend_artifact.get("upside_pct")
     best_upside = next(
         (v for v in [blend_upside, fcff_upside, upside_dcf] if v is not None), None
     )
-    draft_rating = _draft_rating(best_upside, "default_unapproved")
+
+    # Build AssumptionGate — blocks BUY/HOLD/SELL until all critical assumptions
+    # are analyst-approved. "assumption_status" is the key in each artifact dict.
+    _wacc_status = fcff_artifact.get("assumption_status", "default_unapproved")
+    _coe_status = fcfe_artifact.get("assumption_status", "default_unapproved")
+    _forecast_status = forecast_artifact.get("assumption_status", "default_unapproved")
+    _tax_approved = bool((forecast_artifact.get("tax_policy") or {}).get("approved", False))
+
+    assumption_gate = build_gate_from_artifacts(
+        data_quality_passed=False,  # conservative: DQ gate runs separately
+        wacc_assumption_status=_wacc_status,
+        cost_of_equity_status=_coe_status,
+        forecast_assumption_status=_forecast_status,
+        debt_schedule_method="missing",  # not yet tracked per-artifact
+        tax_policy_approved=_tax_approved,
+    )
+    draft_rating = assumption_gate.recommendation_label(model_upside_pct=best_upside)
+
+    # Save gate artifact so the quality gate script can find it
+    VALUATION_DIR.mkdir(parents=True, exist_ok=True)
+    gate_artifact = {**assumption_gate.to_dict(), "ticker": ticker, "generated_at": ts_str}
+    (VALUATION_DIR / f"{ticker}_{ts_str}_gate.json").write_text(
+        json.dumps(gate_artifact, indent=2), encoding="utf-8"
+    )
 
     # ── Sensitivity table ─────────────────────────────────────────────────────
     g_range = sensitivity.get("g_range", [])
@@ -1016,11 +1041,11 @@ Dự phóng: {FORECAST_YEARS[0]}F – {FORECAST_YEARS[-1]}F
 
 | Phương pháp | Giá trị nội tại | Giá thị trường | Upside | Độ tin cậy |
 |---|---|---|---|---|
-| **DCF Blend (60% FCFF + 40% FCFE)** | **{blend_target_str}** | {price_str} | **{blend_upside_str}** | **PRIMARY** |
+| **DCF Blend (60% FCFF + 40% FCFE)** | **{blend_target_str}** | {price_str} | **{blend_upside_str}** | **{_valuation_label}** |
 | FCFF DCF (WACC mặc định) | {fcff_target_str} | {price_str} | {fcff_upside_str} | Thành phần blend |
 | FCFE DCF (Re mặc định) | {fcfe_target_str} | {price_str} | {fcfe_upside_str} | Thành phần blend |
-| P/E mục tiêu ({target_pe_val}x) | {f"{implied_pe:,.0f} VND/CP" if implied_pe else "N/A"} | {price_str} | — | Cross-check |
-| EV/EBITDA mục tiêu ({target_ev_val}x) | {f"{implied_ev:,.0f} VND/CP" if implied_ev else "N/A"} | {price_str} | — | Cross-check |
+| P/E mục tiêu ({_target_pe_str}) | {f"{implied_pe:,.0f} VND/CP" if implied_pe else "N/A"} | {price_str} | — | Cross-check |
+| EV/EBITDA mục tiêu ({_target_ev_str}) | {f"{implied_ev:,.0f} VND/CP" if implied_ev else "N/A"} | {price_str} | — | Cross-check |
 | ~~DCF OCF-CAPEX (base)~~ | ~~{intrinsic_str}~~ | ~~{price_str}~~ | ~~{upside_str}~~ | **Tham khảo — không dùng làm target** |
 
 > ⚠ DCF OCF-CAPEX truyền thống dùng CAGR từ lịch sử OCF biến động — kết quả nhạy cảm với năm CAPEX bất thường
@@ -1107,8 +1132,8 @@ Giả định: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, kỳ dự báo = {assump
 | Phương pháp | Giá trị | Giá thị trường | Ghi chú |
 |---|---|---|---|
 | P/E quan sát | {_fmt_x(pe_obs)} | {price_str} | EPS = {f"{eps_vnd:,.0f} VND/CP" if eps_vnd else "N/A"} |
-| Implied @ P/E {target_pe_val}x | {f"{implied_pe:,.0f} VND/CP" if implied_pe else "N/A"} | {price_str} | Bội số mục tiêu ngành |
-| Implied @ EV/EBITDA {target_ev_val}x | {f"{implied_ev:,.0f} VND/CP" if implied_ev else "N/A"} | {price_str} | Bội số mục tiêu ngành |
+| Implied @ P/E {_target_pe_str} | {f"{implied_pe:,.0f} VND/CP" if implied_pe else "N/A"} | {price_str} | Bội số mục tiêu ngành |
+| Implied @ EV/EBITDA {_target_ev_str} | {f"{implied_ev:,.0f} VND/CP" if implied_ev else "N/A"} | {price_str} | Bội số mục tiêu ngành |
 
 > Bội số mục tiêu theo ước tính ngành — cần cập nhật bằng dữ liệu peer group thực tế trước publish.
 
