@@ -76,11 +76,12 @@ def compute_ratios(fact_table: FactTable) -> RatioTable:
         _set("roe", period, _safe_div(ni, equity))
         _set("roa", period, _safe_div(ni, assets))
         roa = _safe_div(ni, assets)
-        roce_base = (equity or 0) + (total_debt or total_liab or 0)
-        _set("roce", period, _safe_div(ni, roce_base if roce_base else None))
+        # ROCE: use interest-bearing debt only; fall back to equity-only if debt missing
+        roce_base = (equity or 0) + (total_debt or 0)
+        _set("roce", period, _safe_div(ni, roce_base if roce_base > 0 else None))
 
-        # Leverage
-        _set("debt_to_equity", period, _safe_div(total_debt or total_liab, equity))
+        # Leverage: ONLY use interest-bearing debt — do NOT proxy with total_liabilities
+        _set("debt_to_equity", period, _safe_div(total_debt, equity))
         _set("net_debt_to_equity", period,
              _safe_div(
                  ((total_debt or 0) - (cash or 0)) if total_debt is not None else None,
