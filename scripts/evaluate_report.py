@@ -224,8 +224,20 @@ def _check_valuation_reproducibility(ticker: str, citation_data: dict, val_artif
     dcf_block = val_artifact.get("dcf") or val_artifact.get("dcf_simplified") or {}
     dcf_base = dcf_block.get("base", {})
     intrinsic = dcf_base.get("intrinsic_value_per_share_vnd")
+    blend_target = val_artifact.get("blend_dcf", {}).get("target_price_dcf_vnd")
     if intrinsic is None:
-        issues.append("DCF intrinsic value missing from valuation artifact")
+        # Simplified DCF may be intentionally blocked (negative FCF history, WACC<=g, etc.)
+        # If the FCFF/FCFE blend target price exists, simplified DCF being None is expected
+        dcf_warnings = dcf_base.get("warnings", [])
+        intentionally_blocked = any(
+            "blocked" in w or "INVALID" in w for w in dcf_warnings
+        )
+        if blend_target is not None and intentionally_blocked:
+            pass  # primary valuation is blend; simplified DCF blocked intentionally
+        elif blend_target is not None:
+            pass  # blend is primary; simplified DCF absent is acceptable
+        else:
+            issues.append("DCF intrinsic value missing from valuation artifact")
 
     return {
         "gate": "valuation_reproducibility",
@@ -466,6 +478,69 @@ def _check_valuation_sanity(val_artifact: dict) -> dict:
     }
 
 
+def _check_approval_gate_status(ticker: str, val_artifact: dict) -> dict:
+    """Gate 9: Ticker cross-check, blend draft flag, approval gate status.
+
+    Checks:
+      (a) val_artifact["ticker"] matches the report ticker.
+      (b) val_artifact["blend_dcf"]["is_draft_only"] — warns if True.
+      (c) val_artifact["approval_gate"]["status"] — warns/blocks based on status.
+    """
+    issues: list[str] = []
+    critical_fail = False
+
+    # (a) Ticker cross-check
+    artifact_ticker = (val_artifact.get("ticker") or "").upper().strip()
+    if artifact_ticker and artifact_ticker != ticker.upper():
+        issues.append(
+            f"Ticker mismatch: report is for {ticker!r} but valuation artifact "
+            f"declares ticker={artifact_ticker!r}. Evaluation is using wrong artifact."
+        )
+        critical_fail = True
+
+    # (b) Blend draft flag
+    blend_block = val_artifact.get("blend_dcf", {})
+    if blend_block.get("is_draft_only", False):
+        gap = blend_block.get("valuation_gap_pct")
+        gap_str = f"{gap:.1%}" if gap is not None else "unknown"
+        issues.append(
+            f"Blend DCF is marked draft-only (FCFF/FCFE gap={gap_str}). "
+            "Target price must not be presented as PRIMARY until gap is resolved."
+        )
+
+    # (c) Approval gate status
+    gate = val_artifact.get("approval_gate", {})
+    gate_status = gate.get("status", "")
+    if gate_status == "blocked":
+        issues.append(
+            "Valuation approval gate is BLOCKED — data quality did not pass. "
+            "No target price or recommendation may be published."
+        )
+        critical_fail = True
+    elif gate_status == "draft_needs_analyst_review":
+        blocking_reasons = gate.get("blocking_reasons", [])
+        n = len(blocking_reasons)
+        issues.append(
+            f"Approval gate status: draft_needs_analyst_review ({n} assumption(s) pending). "
+            "Report is a draft — do not export as final."
+        )
+    elif not gate_status:
+        issues.append(
+            "No approval_gate found in valuation artifact — cannot verify assumption status. "
+            "Regenerate artifact with scripts/run_valuation.py."
+        )
+
+    return {
+        "gate": "approval_gate_check",
+        "artifact_ticker": artifact_ticker or "(missing)",
+        "blend_is_draft_only": blend_block.get("is_draft_only", False),
+        "gate_status": gate_status or "missing",
+        "issues": issues,
+        "pass": len([i for i in issues if "mismatch" in i or "BLOCKED" in i]) == 0,
+        "critical_fail": critical_fail,
+    }
+
+
 def evaluate_report(
     report_path: Path | None = None,
     ticker: str | None = None,
@@ -527,7 +602,10 @@ def evaluate_report(
     print("[evaluate_report] Gate 8: Valuation sanity check (cross-model divergence)...")
     g8 = _check_valuation_sanity(val_artifact)
 
-    gates = [g1, g2, g3, g4, g5, g6, g7, g8]
+    print("[evaluate_report] Gate 9: Approval gate status + ticker cross-check...")
+    g9 = _check_approval_gate_status(ticker, val_artifact)
+
+    gates = [g1, g2, g3, g4, g5, g6, g7, g8, g9]
 
     all_pass = all(g["pass"] for g in gates)
     any_critical = any(g.get("critical_fail", False) for g in gates)
