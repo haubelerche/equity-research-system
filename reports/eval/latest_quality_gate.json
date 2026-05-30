@@ -1,0 +1,66 @@
+{
+  "ticker": "DBD",
+  "generated_at": "2026-05-28T08:40:01.999239+00:00",
+  "overall_status": "WARN_NEEDS_REVIEW",
+  "n_fail": 0,
+  "n_warn": 3,
+  "n_pass": 5,
+  "checks": [
+    {
+      "check_id": "TAX_01",
+      "description": "Tax consistency (forecast vs FCFF NOPAT)",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "Forecast rate=15.8%, FCFF rate=15.8%, diff=0.0%"
+    },
+    {
+      "check_id": "CAPEX_01",
+      "description": "CAPEX displayed as positive outflow",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": ""
+    },
+    {
+      "check_id": "DEBT_01",
+      "description": "No silent N/A in debt forecast",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": ""
+    },
+    {
+      "check_id": "FCFE_01",
+      "description": "FCFE includes net_borrowing",
+      "status": "PASS",
+      "severity": "WARNING",
+      "detail": ""
+    },
+    {
+      "check_id": "DIV_01",
+      "description": "Dividend schedule modeled or warned",
+      "status": "PASS",
+      "severity": "WARNING",
+      "detail": ""
+    },
+    {
+      "check_id": "GATE_01",
+      "description": "No BUY/HOLD/SELL when gate not approved",
+      "status": "WARN_NEEDS_REVIEW",
+      "severity": "WARNING",
+      "detail": "No report markdown to check — gate check only."
+    },
+    {
+      "check_id": "REL_01",
+      "description": "Relative valuation peer data required",
+      "status": "WARN_NEEDS_REVIEW",
+      "severity": "WARNING",
+      "detail": "No multiples artifact provided."
+    },
+    {
+      "check_id": "CONF_01",
+      "description": "Module-level confidence score present",
+      "status": "WARN_NEEDS_REVIEW",
+      "severity": "WARNING",
+      "detail": "No confidence artifact provided."
+    }
+  ]
+}

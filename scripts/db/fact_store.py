@@ -267,16 +267,25 @@ class PostgresFactStore:
         return len(payload)
 
     def get_financial_facts_for_ticker(self, ticker: str) -> list[dict[str, Any]]:
-        """Return all financial facts for a ticker as a list of dicts."""
+        """Return all financial facts for a ticker with source provenance.
+
+        Joins ingest.sources to include source_tier, source_uri, and source_title
+        so that build_fact_table() can produce FactEntry objects with full lineage.
+        """
         with self.conn() as connection:
             with connection.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT line_item_code, fiscal_year, fiscal_period, value, unit, currency,
-                           source_id, connector_version, validation_status, confidence, ingested_at
-                    FROM fact.financial_facts
-                    WHERE ticker = %s
-                    ORDER BY fiscal_year ASC, fiscal_period ASC, line_item_code ASC
+                    SELECT f.id, f.line_item_code, f.fiscal_year, f.fiscal_period,
+                           f.value, f.unit, f.currency,
+                           f.source_id, f.connector_version, f.validation_status,
+                           f.confidence, f.ingested_at,
+                           s.source_tier, s.source_uri, s.source_title,
+                           s.reliability_tier AS src_reliability_tier
+                    FROM fact.financial_facts f
+                    LEFT JOIN ingest.sources s ON f.source_id = s.source_id
+                    WHERE f.ticker = %s
+                    ORDER BY f.fiscal_year ASC, f.fiscal_period ASC, f.line_item_code ASC
                     """,
                     (ticker,),
                 )
@@ -284,21 +293,64 @@ class PostgresFactStore:
                 return [dict(zip(cols, row)) for row in cur.fetchall()]
 
     def get_accepted_financial_facts(self, ticker: str) -> list[dict[str, Any]]:
-        """Return accepted FY facts for a ticker from the valuation-safe view."""
+        """Return accepted FY facts with source provenance for FactEntry construction."""
         with self.conn() as connection:
             with connection.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT id, line_item_code, fiscal_year, fiscal_period, value, unit, currency,
-                           source_id, connector_version, confidence, effective_date, ingested_at
-                    FROM fact.accepted_financial_facts
-                    WHERE ticker = %s
-                    ORDER BY fiscal_year ASC, line_item_code ASC
+                    SELECT f.id, f.line_item_code, f.fiscal_year, f.fiscal_period,
+                           f.value, f.unit, f.currency,
+                           f.source_id, f.connector_version, f.confidence,
+                           f.effective_date, f.ingested_at,
+                           s.source_tier, s.source_uri, s.source_title,
+                           s.reliability_tier AS src_reliability_tier
+                    FROM fact.accepted_financial_facts f
+                    LEFT JOIN ingest.sources s ON f.source_id = s.source_id
+                    WHERE f.ticker = %s
+                    ORDER BY f.fiscal_year ASC, f.line_item_code ASC
                     """,
                     (ticker,),
                 )
                 cols = [d.name for d in cur.description]
                 return [dict(zip(cols, row)) for row in cur.fetchall()]
+
+    def get_accepted_canonical_facts(self, ticker: str, canonical_version: str = "v_legacy") -> list[dict[str, Any]]:
+        """Return canonical facts from fact.canonical_facts for FactEntry construction.
+
+        Falls back to get_accepted_financial_facts if canonical_facts is not yet
+        populated for this ticker/version (Phase 2 migration in progress).
+        """
+        with self.conn() as connection:
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT cf.fact_id, cf.metric AS line_item_code,
+                           CAST(SPLIT_PART(cf.period, 'FY', 1) AS SMALLINT) AS fiscal_year,
+                           'FY' AS fiscal_period,
+                           cf.value, cf.unit, cf.currency,
+                           cf.source_tier,
+                           cf.confidence, cf.quality_status AS validation_status,
+                           cf.created_at AS ingested_at,
+                           s.source_id, s.source_uri, s.source_title,
+                           s.reliability_tier AS src_reliability_tier,
+                           s.connector_version
+                    FROM fact.canonical_facts cf
+                    LEFT JOIN fact.fact_observations obs
+                        ON cf.selected_observation_id = obs.observation_id
+                    LEFT JOIN ingest.sources s
+                        ON obs.source_id = s.source_id
+                    WHERE cf.ticker = %s
+                      AND cf.canonical_version = %s
+                      AND cf.period_type = 'FY'
+                    ORDER BY cf.period ASC, cf.metric ASC
+                    """,
+                    (ticker, canonical_version),
+                )
+                cols = [d.name for d in cur.description]
+                rows = [dict(zip(cols, row)) for row in cur.fetchall()]
+        if not rows:
+            return self.get_accepted_financial_facts(ticker)
+        return rows
 
     def get_price_history(self, ticker: str, start: str, end: str) -> pd.DataFrame:
         with self.conn() as connection:

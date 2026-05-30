@@ -84,7 +84,11 @@ class OfflineEvaluator:
                 "storytelling": 0.0,
             }
 
-        citation_artifacts = [a for a in artifacts if a["artifact_type"] == "audit_report"]
+        citation_artifacts = [
+            a for a in artifacts
+            if a["artifact_type"] == "eval_result_json"
+            or a.get("section_key") in {"audit_review", "quality", "citation_gate"}
+        ]
         coverage = 1.0 if citation_artifacts else 0.5
         return {
             "grounding": coverage,

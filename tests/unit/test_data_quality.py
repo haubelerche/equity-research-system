@@ -20,11 +20,14 @@ from backend.facts.completeness import (
 
 def _make_complete_table(periods: list[str]) -> dict:
     """Create a fact table with all CORE_FY_KEYS present for all given periods."""
+    from backend.facts.normalizer import FactEntry
+    def e(v):
+        return FactEntry(value=v, source_id="test_src", source_tier=1)
     table: dict = {}
     for key in CORE_FY_KEYS:
-        table[key] = {p: 1000.0 for p in periods}
+        table[key] = {p: e(1000.0) for p in periods}
     # Also add some extra keys
-    table["gross_profit.total"] = {p: 500.0 for p in periods}
+    table["gross_profit.total"] = {p: e(500.0) for p in periods}
     return table
 
 
@@ -37,7 +40,9 @@ def _make_raw_facts(periods: list[str], days_ago: int = 5) -> list[dict]:
     ingested = datetime.now(UTC) - timedelta(days=days_ago)
     return [
         {"line_item_code": "revenue.net", "fiscal_year": int(p[:4]),
-         "fiscal_period": "FY", "value": 1000.0, "ingested_at": ingested}
+         "fiscal_period": "FY", "value": 1000.0,
+         "source_tier": 1,   # Tier 1 so tier coverage gate passes in these baseline tests
+         "ingested_at": ingested}
         for p in periods
     ]
 

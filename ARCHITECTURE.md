@@ -1,1277 +1,915 @@
-# AI Agent Định Giá Cổ Phiếu Doanh Nghiệp Ngành Y Dược Việt Nam
+# Vietnam Pharma Equity Research Agent — Architecture
 
-> **Vietnam Pharma Equity Research Agent** — hệ thống **Multi-Agent AI 5 tác tử** hỗ trợ phân tích và định giá cổ phiếu doanh nghiệp ngành y dược tại Việt Nam.  
-> Dự án lấy cảm hứng từ FinRobot nhưng được tái thiết kế cho **thị trường chứng khoán Việt Nam**, **dữ liệu tiếng Việt**, **cổ phiếu y dược Việt Nam** và **pipeline định giá có kiểm chứng nguồn**.
+> Hệ thống **AI-assisted equity research pipeline** cho cổ phiếu ngành y dược Việt Nam.
+> Build-state hiện tại: **Level 9 — Scale-ready (5/5 MVP tickers complete)**.
 
 ---
 
 ## Table of Contents
 
 1. [Executive Summary](#1-executive-summary)
-2. [Problem Statement](#2-problem-statement)
-3. [Design Principles](#3-design-principles)
-4. [Reference Sources](#4-reference-sources)
-5. [Business Scope](#5-business-scope)
-6. [Target Outputs](#6-target-outputs)
-7. [5-Agent Architecture](#7-5-agent-architecture)
-8. [End-to-End Workflow](#8-end-to-end-workflow)
-9. [Data Contract](#9-data-contract)
+2. [Design Principles](#2-design-principles)
+3. [MVP Scope](#3-mvp-scope)
+4. [Technology Stack](#4-technology-stack)
+5. [Project Structure](#5-project-structure)
+6. [Database Schema](#6-database-schema)
+7. [Pipeline Workflow](#7-pipeline-workflow)
+8. [Data Contracts](#8-data-contracts)
+9. [Analytics Engine](#9-analytics-engine)
 10. [Valuation Methodology](#10-valuation-methodology)
 11. [Evaluation Framework](#11-evaluation-framework)
-12. [Technology Stack](#12-technology-stack)
-13. [Project Structure](#13-project-structure)
-14. [API Design](#14-api-design)
-15. [6-Week Delivery Roadmap](#15-6-week-delivery-roadmap)
-16. [Developer Workflow with Claude Code, Cursor, and Codex](#16-developer-workflow-with-claude-code-cursor-and-codex)
-17. [Quality Gates and Done Criteria](#17-quality-gates-and-done-criteria)
-18. [Limitations](#18-limitations)
-19. [Disclaimer](#19-disclaimer)
+12. [Agent and Orchestration Layer](#12-agent-and-orchestration-layer)
+13. [Human Review and Approval](#13-human-review-and-approval)
+14. [Artifacts and Outputs](#14-artifacts-and-outputs)
+15. [Testing](#15-testing)
+16. [Deployment and Operations](#16-deployment-and-operations)
+17. [Known Limitations](#17-known-limitations)
+18. [Disclaimer](#18-disclaimer)
 
 ---
 
 ## 1. Executive Summary
 
-Dự án xây dựng một hệ thống AI Agent hỗ trợ quy trình **equity research và định giá cổ phiếu ngành y dược Việt Nam**. Hệ thống không phải là chatbot tài chính tự do, không phải công cụ khuyến nghị mua/bán tự động, và không để LLM tự tạo số liệu định giá.
+Hệ thống hỗ trợ analyst sinh **bản nháp báo cáo phân tích và định giá cổ phiếu ngành y dược Việt Nam**. Mọi số liệu định lượng được tính bằng code Python xác định, mọi claim quan trọng được truy vết về nguồn, và báo cáo cuối phải được analyst phê duyệt trước khi xuất bản.
 
-Mục tiêu cốt lõi là tạo ra một **financial-document intelligence engine** có khả năng:
+Hệ thống **không phải**:
+- Bot giao dịch tự động.
+- Chatbot tài chính tự do.
+- Công cụ sinh số liệu bằng LLM.
 
-1. Thu thập, chuẩn hóa và kiểm tra dữ liệu tài chính của doanh nghiệp y dược Việt Nam.
-2. Phân tích báo cáo tài chính, dữ liệu giá, báo cáo thường niên, công bố thông tin và tin tức doanh nghiệp.
-3. Tính toán chỉ tiêu tài chính, peer comparison, DCF, multiples và sensitivity analysis bằng **Python deterministic code**.
-4. Sinh báo cáo phân tích bằng tiếng Việt với **claim-level citation**, **source manifest**, **valuation assumptions**, **audit trail** và **evaluation result**.
-5. Cho phép human analyst kiểm tra giả định, đánh giá chất lượng và duyệt báo cáo cuối.
-
-Dự án được thiết kế theo hướng:
+Pipeline cốt lõi:
 
 ```text
-FinRobot-inspired, not FinRobot-copied.
-Pipeline-first multi-agent, not autonomous-agent chaos.
-Deterministic financial calculation first, LLM narrative second.
-Evaluation-first report generation, not AI writing without verification.
+Ingest → Canonical Facts → Data Quality Gates
+→ Code-First Valuation → Evidence Retrieval
+→ Report Generation → Evaluation Gate
+→ Human Approval → Export
 ```
 
----
+**Build state (2026-05-30):**
 
-## 2. Problem Statement
-
-Các báo cáo phân tích cổ phiếu truyền thống thường tốn nhiều thời gian do analyst phải thu thập dữ liệu, đọc báo cáo tài chính, chuẩn hóa số liệu, tính toán chỉ tiêu, so sánh peer, xây mô hình định giá và viết báo cáo. Với nhóm cổ phiếu y dược Việt Nam, khó khăn tăng thêm do dữ liệu phân tán, chất lượng công bố không đồng nhất, thuật ngữ tiếng Việt không chuẩn hóa và nguồn tin định tính khó kiểm chứng.
-
-Bài toán của dự án:
-
-> Xây dựng hệ thống AI Agent có khả năng sinh bản nháp báo cáo phân tích và định giá cổ phiếu ngành y dược Việt Nam, trong đó mọi số liệu định lượng được tính bằng các hàm công thức tài chính, mọi nhận định quan trọng có nguồn, mọi giả định định giá được lưu vết, và báo cáo cuối được đánh giá bằng bộ kiểm thử chống hallucination.
-
-### Success Criteria
-
-| Tiêu chí | Mục tiêu MVP |
-|---|---:|
-| Universe cổ phiếu | 53 mã y dược Việt Nam được khai báo bằng config |
-| Golden dataset | 3 mã được kiểm toán thủ công dữ liệu 3–5 năm |
-| Số lượng agent | 5 logical agents |
-| Công thức định giá | Có nguồn học thuật/nghề nghiệp rõ ràng |
-| Tính toán tài chính | 100% bằng Python deterministic code |
-| Citation coverage | 100% claim định lượng có `source_id` |
-| Numeric consistency | >= 99% số trong report khớp structured state |
-| Report language | Tiếng Việt |
-| Report artifacts | Markdown/HTML, claim ledger, source manifest, valuation result, eval result |
-| Human review | Bắt buộc ở assumptions và final report |
+| Level | Name | Status |
+|---|---|---|
+| 1 | Spec-ready | `completed` |
+| 2 | Data-ready | `completed` |
+| 3 | Fact-ready | `completed` |
+| 4 | Calculation-ready | `completed` |
+| 5 | Grounding-ready | `completed` |
+| 6 | Report-ready | `completed` |
+| 7 | Eval-ready | `completed` |
+| 8 | Demo-ready | `completed` |
+| 9 | Scale-ready | `completed` — 5/5 MVP tickers |
 
 ---
 
-## 3. Design Principles
+## 2. Design Principles
 
-### 3.1. Code-first quantitative analysis
+### 2.1 Code-first quantitative analysis
 
-LLM không được tính toán kết quả tài chính cuối cùng. Các thành phần sau bắt buộc chạy bằng code:
+LLM không được tính toán kết quả tài chính cuối cùng. Các thành phần sau chạy bằng code Python xác định:
 
-- Financial ratios.
-- Growth metrics.
-- Margin analysis.
+- Financial ratios, growth metrics, margin analysis.
 - Peer comparison.
-- DCF.
-- Relative valuation.
-- Sensitivity analysis.
+- FCFF DCF, FCFE DCF, Blend DCF (60% FCFF + 40% FCFE).
+- Relative valuation (P/E, EV/EBITDA).
+- Sensitivity analysis (WACC × terminal growth grid).
+- TaxPolicy, DebtSchedule, DividendSchedule.
 - Numeric consistency checking.
 
-LLM chỉ được dùng cho:
+LLM chỉ được dùng cho: tóm tắt tài liệu, trích xuất có schema, sinh narrative tiếng Việt có grounding, phát hiện mâu thuẫn.
 
-- Tóm tắt tài liệu.
-- Trích xuất có schema.
-- Diễn giải kết quả đã tính.
-- Sinh narrative tiếng Việt có grounding.
-- Phát hiện mâu thuẫn giữa các nguồn.
-- Audit report theo rubric.
+### 2.2 Every number must be traceable
 
-### 3.2. Every number must be traceable
+Mọi số liệu trong báo cáo phải truy vết về canonical fact record hoặc source document chunk. Nếu không truy vết được, số liệu không được xuất hiện trong report final.
 
-Mọi số liệu trong báo cáo phải truy vết được về:
+### 2.3 Evaluation before scaling
 
-```text
-source_id
-source_type
-source_name
-period
-statement_type
-line_item
-unit
-currency
-retrieval_timestamp
-transformation_method
-```
+Không mở rộng scope trước khi evaluation gates tồn tại. Minimum gates:
 
-Nếu không truy vết được, số liệu không được xuất hiện trong report final.
+- Numeric consistency.
+- Citation coverage.
+- Stale data detection.
+- Valuation reproducibility.
+- Unsupported recommendation detection.
+- Tax/CAPEX/Debt consistency (deterministic checks).
 
-### 3.3. Five agents only
+### 2.4 Human-in-the-loop
 
-Dự án sử dụng đúng **5 logical agents** để giảm độ phức tạp, phù hợp nguồn lực 1 người và thời gian 6 tuần:
+Hệ thống phải yêu cầu human approval trước khi xuất final report. `ApprovalGate` block BUY/HOLD/SELL cho đến khi analyst phê duyệt.
 
-1. `orchestrator_agent`
-2. `data_foundation_agent`
-3. `core_analyst_agent`
-4. `valuation_reasoning_agent`
-5. `synthesis_auditor_agent`
-
-Các evaluator, quality gates, deterministic calculators, retrievers và renderers **không được tính là agent**. Chúng là tools/services được agent gọi.
-
-### 3.4. Dynamic by configuration, not uncontrolled autonomy
-
-Hệ thống phải mở rộng bằng config, không để agent tự do quyết định quá nhiều:
-
-- Thêm ticker mới bằng `data/universe/pharma_vn_53.yaml`.
-- Thay peer group bằng YAML.
-- Bật/tắt phương pháp định giá bằng config.
-- Thay model bằng `configs/model_config.yaml`.
-- Thay ngưỡng evaluation bằng `configs/evaluation_thresholds.yaml`.
-
-### 3.5. Evaluation is a first-class subsystem
-
-Evaluation không phải phần phụ sau khi viết report. Hệ thống phải sinh kèm:
+### 2.5 Do not over-agentize
 
 ```text
-valuation_result.json
-claim_ledger.json
-source_manifest.json
-eval_result.json
-report.md hoặc report.html
-run_log.json
+service/module = deterministic technical capability
+workflow node  = one step in the run lifecycle
+agent role     = LLM-assisted reasoning role
 ```
+
+Ingestion, normalization, valuation, citation validation là services — không phải LLM agents.
 
 ---
 
-## 4. Reference Sources
+## 3. MVP Scope
 
-Dự án chỉ sử dụng phương pháp tài chính, kiến trúc agent và quy trình dữ liệu có nguồn tham chiếu rõ ràng.
+### 3.1 Ticker Universe (5 tickers)
 
-| Nhóm nguồn | Vai trò trong dự án | Nguồn tham chiếu |
+```text
+DHG — Dược Hậu Giang (HOSE)
+IMP — Imexpharm (HOSE)
+DMC — Domesco (HOSE)
+TRA — Traphaco (HNX)
+DBD — Dược Bình Định (HOSE)
+```
+
+Cấu hình trong `dataset/universe/` và `dataset/mvp/mvp5_scope.yaml`.
+
+### 3.2 Fiscal year coverage
+
+| Ticker | FY periods | Coverage gate |
 |---|---|---|
-| Kiến trúc AI Agent tài chính | Tham khảo mô hình agent, financial chain-of-thought, LLMOps/DataOps và financial foundation models | FinRobot paper: https://arxiv.org/html/2405.14767v2 |
-| Equity research automation | Tham khảo pipeline sinh equity research report, phân tích tài chính, valuation, peer comparison | FinRobot GitHub: https://github.com/AI4Finance-Foundation/FinRobot |
-| Financial NLP/DataOps | Tham khảo cách tổ chức dữ liệu news, filings, earnings calls, financial NLP | FinNLP GitHub: https://github.com/AI4Finance-Foundation/FinNLP |
-| Stock-specific news modeling | Tham khảo hướng khai thác tin tức gắn với từng mã cổ phiếu | Astock GitHub: https://github.com/JinanZou/Astock |
-| Text-price benchmark | Tham khảo cấu trúc dữ liệu kết hợp văn bản và giá lịch sử | StockNet dataset: https://github.com/yumoxu/stocknet-dataset |
-| Free Cash Flow Valuation | Cơ sở cho FCFF, FCFE, WACC, terminal value, sensitivity analysis | CFA Institute Free Cash Flow Valuation: https://www.cfainstitute.org/insights/professional-learning/refresher-readings/2026/free-cash-flow-valuation |
-| Market-Based Valuation | Cơ sở cho P/E, P/B, EV/EBITDA, EV/Sales, peer comparison | CFA Institute Market-Based Valuation: https://www.cfainstitute.org/insights/professional-learning/refresher-readings/2026/market-based-valuation-price-enterprise-value-multiples |
-| Công bố thông tin Việt Nam | Cơ sở sử dụng báo cáo tài chính, báo cáo thường niên, báo cáo quản trị và công bố thông tin | Thông tư 96/2020/TT-BTC: https://vanban.chinhphu.vn/default.aspx?docid=201902&pageid=27160 |
-| OpenAI API | LLM provider mặc định cho hệ thống | OpenAI API docs: https://platform.openai.com/docs |
+| DHG | 5 FY (2021–2025) | pass |
+| IMP | 4 FY (2022–2025) | pass |
+| DMC | 4 FY (2022–2025) | pass |
+| TRA | 4 FY (2022–2025) | pass |
+| DBD | 4 FY (2022–2025) | pass |
+
+Gate passes at ≥ 3 FY periods (per memory: `project_mvp_scope.md`).
+
+### 3.3 Out of scope for MVP
+
+- SEC XBRL / OpenFDA / ClinicalTrials.gov.
+- Fully autonomous multi-agent planning.
+- Real-time trading signals.
+- Expansion to full 53-ticker pharma universe.
 
 ---
 
-## 5. Business Scope
+## 4. Technology Stack
 
-### 5.1. Universe cổ phiếu
+| Layer | Technology | Role |
+|---|---|---|
+| Backend API | FastAPI | REST endpoints cho pipeline orchestration |
+| Database | Supabase / PostgreSQL | 4-schema DB: `ref`, `ingest`, `fact`, `research` |
+| Schema | Pydantic v2 | Data contracts, structured output |
+| LLM provider | OpenAI API | Report synthesis, evidence extraction |
+| Primary model | gpt-4o | Reasoning, report generation |
+| Fast model | gpt-4o-mini | Routing, simple extraction, JSON validation |
+| Data processing | pandas, numpy | Financial calculations |
+| Valuation | Custom deterministic Python modules | DCF, multiples, sensitivity, blend |
+| Data source | vnstock (via connector abstraction) | VN stock market data |
+| Vector store | Milvus (local) | Document chunk indexing for evidence retrieval |
+| Scheduler | APScheduler | 3 cron jobs: weekly_sync, daily_prices, monthly_valuation |
+| Config | YAML + Pydantic Settings | Universe, models, thresholds |
+| Reporting | Python f-strings / Markdown templates | Report rendering |
+| Testing | pytest | 25 test files, 200+ tests |
+| Storage | Local files + Supabase/PostgreSQL | Artifacts, run logs, facts |
 
-Dự án tập trung vào khoảng **53 mã cổ phiếu ngành y dược Việt Nam**. Danh sách chính thức được cấu hình trong:
+### 4.1 Environment variables
 
 ```text
-data/universe/pharma_vn_53.yaml
+DATABASE_URL          — Supabase PostgreSQL connection string
+OPENAI_API_KEY        — OpenAI API key
+SUPABASE_URL          — Supabase project URL (optional if DATABASE_URL set)
+SUPABASE_SERVICE_KEY  — Supabase service role key (optional)
 ```
 
-Ví dụ:
+---
+
+## 5. Project Structure
+
+```text
+vietnam-pharma-equity-agent/
+├── ARCHITECTURE.md           — This file (source-of-truth architecture doc)
+├── CLAUDE.md                 — Engineering principles, phase plan, coding standards
+├── CHANGELOG.md
+├── README.md
+├── GOAL_OUTPUT.md
+├── AUDIT_SUMMARY.md
+│
+├── specs/                    — Canonical specs (all 7 + progress tracker)
+│   ├── 00_REPO_AUDIT.md
+│   ├── 01_IMPLEMENTATION_ROADMAP.md
+│   ├── 02_ARCHITECTURE_DECISIONS.md
+│   ├── 03_DATA_CONTRACTS.md
+│   ├── 04_CANONICAL_FACT_SCHEMA.md
+│   ├── 05_SOURCE_METADATA_SCHEMA.md
+│   ├── 06_REPORT_TEMPLATE.md
+│   ├── 07_EVALUATION_RUBRIC.md
+│   └── LEVEL_PROGRESS.md     — 9-level build tracker (source-of-truth for build state)
+│
+├── docs/                     — Product and architecture documentation
+│   ├── PRD.md
+│   ├── PROBLEM-BRIEF.md
+│   ├── AI_PRODUCT_SPEC.md
+│   ├── DATA_ARCHITECTURE.md
+│   └── SEQUENCE.md
+│
+├── backend/                  — Core backend modules
+│   ├── main.py               — FastAPI app entry point
+│   ├── api.py                — API route definitions
+│   ├── orchestrator.py       — Pipeline orchestration logic
+│   ├── schemas.py            — Pydantic data models
+│   ├── settings.py           — Config via environment variables
+│   ├── services.py           — High-level service layer
+│   ├── retrieval.py          — Evidence retrieval stub (Level 5)
+│   ├── utils.py
+│   ├── batch.py              — Batch ticker processing
+│   ├── executor.py
+│   ├── runtime_store.py
+│   │
+│   ├── facts/                — Canonical fact layer
+│   │   ├── normalizer.py     — build_fact_table(), compute_derived()
+│   │   ├── completeness.py   — 3-tier DQ gate: coverage, core_keys, source_validation
+│   │   ├── reconciliation.py — IS/BS/CF cross-check (with minority interest handling)
+│   │   └── validation_report.py
+│   │
+│   ├── analytics/            — Deterministic valuation engine (NO LLM calls)
+│   │   ├── ratios.py         — compute_ratios(), ratio_table_for_display()
+│   │   ├── dcf.py            — run_dcf(), run_three_scenarios() (bear/base/bull)
+│   │   ├── fcff.py           — FCFF DCF with WACC; CAPEX positive-outflow convention
+│   │   ├── fcfe.py           — FCFE DCF with cost-of-equity; DebtSchedule integration
+│   │   ├── blend.py          — Blend DCF (60% FCFF + 40% FCFE); is_draft_only flag
+│   │   ├── forecasting.py    — 5-year driver-based P&L + balance sheet forecast
+│   │   ├── multiples.py      — P/E, EV/EBITDA, P/B relative valuation
+│   │   ├── sensitivity.py    — WACC × terminal growth sensitivity grid
+│   │   ├── tax_policy.py     — Effective tax rate (historical median, fallback 20%)
+│   │   ├── debt_schedule.py  — net_borrowing hierarchy (5-tier fallback)
+│   │   ├── dividend_schedule.py — retained_earnings = NI × (1 − payout_ratio)
+│   │   ├── approval_gate.py  — AssumptionGate: blocks BUY/HOLD/SELL until approved
+│   │   └── valuation_confidence.py — per-component confidence (high/medium/low/unavailable)
+│   │
+│   ├── dataops/              — Data operations layer
+│   │   ├── snapshot.py       — Research snapshots: frozen accepted facts
+│   │   └── quality_report.py — Data quality reporting
+│   │
+│   ├── validation/           — Report validation layer
+│   │   ├── confidence.py     — Confidence scoring
+│   │   ├── market_alignment.py — Market data consistency checks
+│   │   └── report_builder.py — Validation report assembly
+│   │
+│   ├── agents/               — LLM agent layer (partial implementation)
+│   │   └── data_foundation_agent.py — assess/prepare/readiness for all 5 tickers
+│   │
+│   └── jobs/                 — Scheduled tasks
+│       └── scheduler.py      — APScheduler: weekly_sync, daily_prices, monthly_valuation
+│
+├── scripts/                  — Runnable pipeline scripts
+│   ├── ingest_ticker.py      — Phase 2: ingest raw data from vnstock
+│   ├── build_facts.py        — Phase 3: normalize to canonical facts, DQ gate
+│   ├── run_valuation.py      — Phase 4: DCF, multiples, sensitivity, blend
+│   ├── build_index.py        — Phase 5: chunk docs, build Milvus index
+│   ├── test_retrieval.py     — Phase 5b: test evidence retrieval
+│   ├── generate_report.py    — Phase 6: generate Markdown report + citations
+│   ├── evaluate_report.py    — Phase 7: legacy 5-gate evaluation
+│   ├── evaluate_report_quality.py — Phase 7: 8-check quality gate (current)
+│   ├── run_research.py       — Phase 8: full pipeline orchestration
+│   ├── approve_report.py     — Phase 9: human approval + export
+│   ├── validate_data.py      — Data validation across all 5 tickers
+│   ├── cleanup_financial_facts.py
+│   ├── debug_vnstock_financial_coverage.py
+│   ├── _vnstock_path.py      — vnstock path bootstrap
+│   │
+│   ├── connectors/           — Data source adapters
+│   │   ├── vnstock_finance_connector.py   — Financial statements via vnstock
+│   │   ├── vnstock_price_connector.py     — Price/market data via vnstock
+│   │   ├── vnstock_company_connector.py   — Company profile via vnstock
+│   │   ├── vn_market_data_adapter.py      — Unified market data adapter
+│   │   ├── catalyst_bhyt_connector.py     — BHYT tender data (stub)
+│   │   ├── catalyst_dav_connector.py      — DAV regulatory data (stub)
+│   │   ├── catalyst_hose_connector.py     — HOSE disclosures (stub)
+│   │   └── catalyst_tender_connector.py   — Drug tender data (stub)
+│   │
+│   ├── db/                   — Database layer
+│   │   ├── migrate.py        — Migration runner
+│   │   ├── fact_store.py     — Fact CRUD operations
+│   │   ├── source_registry.py — Source catalog management (upsert on conflict)
+│   │   ├── milvus_store.py   — Milvus vector store operations
+│   │   └── migrations/       — 9 SQL migrations (001–009)
+│   │       ├── 001_ref_schema.sql
+│   │       ├── 002_ingest_schema.sql
+│   │       ├── 003_fact_schema.sql
+│   │       ├── 004_research_schema.sql
+│   │       ├── 005_seed_reference_data.sql
+│   │       ├── 006_grants_and_privileges.sql
+│   │       ├── 007_expand_line_items.sql
+│   │       ├── 008_research_snapshots.sql
+│   │       └── 009_cleanup_source_duplicates.sql
+│   │
+│   └── dataset/              — Dataset management utilities
+│       ├── bootstrap_mvp_facts.py
+│       ├── check_golden_facts.py
+│       ├── chunk_pipeline.py
+│       ├── config_io.py
+│       ├── dqf.py
+│       ├── manual_refresh.py
+│       ├── offline_eval.py
+│       ├── validate_contracts.py
+│       ├── validate_universe.py
+│       └── weekly_sync.py
+│
+├── dataset/                  — Dataset definitions and contracts
+│   ├── contracts/            — JSON schemas for all data contracts
+│   │   ├── financial_fact.schema.json
+│   │   ├── source_version.schema.json
+│   │   ├── document_chunk.schema.json
+│   │   ├── citation.schema.json
+│   │   ├── catalyst_event.schema.json
+│   │   ├── agent_message.schema.json
+│   │   └── tool_call.schema.json
+│   ├── mvp/
+│   │   ├── mvp5_scope.yaml   — 5-ticker MVP configuration
+│   │   └── golden_facts_spec.yaml
+│   ├── taxonomy/
+│   │   ├── financial_taxonomy_vn_pharma.yaml
+│   │   └── catalyst_taxonomy_vn_pharma.yaml
+│   ├── sources/
+│   │   └── source_catalog.yaml
+│   ├── universe/             — Ticker universe definitions
+│   ├── golden/               — Golden reference data per ticker
+│   └── raw/                  — Raw ingested data (vnstock CSV)
+│
+├── artifacts/                — Generated run artifacts
+│   ├── facts/                — {TICKER}_{ts}_fact_report.json
+│   ├── valuation/            — {TICKER}_{ts}_valuation.json + gate.json
+│   ├── forecast/             — {TICKER}_{ts}_forecast/fcff/fcfe/blend.json
+│   ├── reports/              — {TICKER}_{ts}_full_report_citation.json
+│   ├── evaluation/           — {TICKER}_{ts}_evaluation.json
+│   ├── runs/                 — {TICKER}_{ts}_inventory.json + run_log.json
+│   └── index/                — {TICKER}_{ts}_index_summary.json
+│
+├── reports/                  — Generated Markdown reports
+│   ├── {TICKER}_{ts}_full_report.md
+│   ├── approved/             — Analyst-approved final reports
+│   │   ├── {ts}_APPROVED_{run_id}.md
+│   │   └── {ts}_approval.json
+│   ├── eval/                 — Quality gate results
+│   │   ├── latest_quality_gate.json
+│   │   └── latest_quality_gate.md
+│   └── DATA_VALIDATION_REPORT_{TICKER}_*.md
+│
+├── tests/
+│   ├── unit/                 — 25 test files, 200+ tests
+│   │   ├── test_normalizer.py       — 17 tests
+│   │   ├── test_ratios.py           — 19 tests
+│   │   ├── test_dcf.py              — 19 tests
+│   │   ├── test_data_quality.py     — 18 tests
+│   │   ├── test_tax_policy.py       — 14 tests
+│   │   ├── test_debt_schedule.py    — 16 tests
+│   │   ├── test_approval_gate.py    — 14 tests
+│   │   ├── test_dividend_schedule.py — 11 tests
+│   │   ├── test_relative_valuation.py — 9 tests
+│   │   ├── test_capex_sign_convention.py — 7 tests
+│   │   ├── test_blend_draft_flag.py
+│   │   ├── test_reconciliation.py
+│   │   ├── test_validation_report.py
+│   │   └── ... (others)
+│   └── integration/
+│       └── test_db_integrity.py
+│
+├── FinRobot/                 — Reference project (do not modify, do not import directly)
+├── vnstock/                  — Local vnstock library (access via connectors only)
+└── frontend/                 — Placeholder (deferred)
+```
+
+---
+
+## 6. Database Schema
+
+Supabase / PostgreSQL. Schema version: `009_cleanup_source_duplicates` (latest applied).
+
+### 6.1 Schema overview
+
+| Schema | Purpose |
+|---|---|
+| `ref` | Reference data: ticker universe, taxonomy, source catalog |
+| `ingest` | Raw ingestion: source_versions, raw_payloads, financial_raw |
+| `fact` | Canonical facts: financial_facts, accepted_financial_facts (view) |
+| `research` | Research runs: snapshots, snapshot_items, runs, run_steps, run_approvals |
+
+### 6.2 Key tables
+
+```sql
+-- ref schema
+ref.tickers             -- Ticker universe (5 MVP tickers)
+ref.taxonomy            -- Financial line item taxonomy
+ref.source_catalog      -- Source type registry
+
+-- ingest schema
+ingest.sources          -- Source metadata (deduplicated via migration 009)
+ingest.source_versions  -- Source version tracking (checksum, ingested_at)
+ingest.financial_raw    -- Raw financial data rows from vnstock
+
+-- fact schema
+fact.financial_facts    -- Canonical facts (96 accepted facts per ticker)
+fact.accepted_financial_facts  -- View: latest accepted facts per ticker/metric/FY
+
+-- research schema
+research.snapshots      -- Frozen accepted-fact snapshots for reproducible valuation
+research.snapshot_items -- Snapshot line items
+research.runs           -- Pipeline run metadata
+research.run_steps      -- Individual step logs
+research.run_approvals  -- Human approval records
+```
+
+### 6.3 Canonical financial fact
+
+```sql
+CREATE TABLE fact.financial_facts (
+    fact_id         UUID PRIMARY KEY,
+    ticker          TEXT NOT NULL,
+    fiscal_year     INTEGER,
+    quarter         INTEGER,        -- NULL for annual
+    metric_name     TEXT NOT NULL,  -- e.g. "revenue.net"
+    value           NUMERIC,
+    unit            TEXT,           -- e.g. "VND_millions"
+    currency        TEXT DEFAULT 'VND',
+    source_id       UUID REFERENCES ingest.sources(source_id),
+    confidence      NUMERIC,        -- 0.0–1.0
+    created_at      TIMESTAMPTZ DEFAULT now()
+);
+```
+
+---
+
+## 7. Pipeline Workflow
+
+### 7.1 Step-by-step commands
+
+```bash
+# Full pipeline for one ticker:
+python scripts/ingest_ticker.py --ticker DHG --years 5
+python scripts/build_facts.py --ticker DHG
+python scripts/run_valuation.py --ticker DHG
+python scripts/build_index.py --ticker DHG
+python scripts/generate_report.py --ticker DHG --report-type full_report
+python scripts/evaluate_report_quality.py --ticker DHG
+python scripts/approve_report.py --ticker DHG --decision approve
+
+# One-command wrapper:
+python scripts/run_research.py --ticker DHG
+
+# Data validation across all tickers:
+python scripts/validate_data.py --ticker DHG
+python -m backend.agents.data_foundation_agent --all
+```
+
+### 7.2 Stage dependencies
+
+```text
+ingest_ticker        → raw data in DB (ingest schema)
+    ↓
+build_facts          → canonical facts (fact schema) + DQ gate
+    ↓
+run_valuation        → valuation artifact + gate artifact + forecast artifact
+    ↓
+build_index          → Milvus chunk index (Level 5)
+    ↓
+generate_report      → Markdown report + citation map + ApprovalGate status
+    ↓
+evaluate_report_quality  → 8-check quality gate (PASS/WARN/FAIL)
+    ↓
+[HITL] approve_report    → approval record + final export
+```
+
+### 7.3 Run artifacts per stage
+
+| Stage | Artifact |
+|---|---|
+| ingest | `artifacts/runs/{TICKER}_{ts}_inventory.json` |
+| build_facts | `artifacts/facts/{TICKER}_{ts}_fact_report.json` |
+| run_valuation | `artifacts/valuation/{TICKER}_{ts}_valuation.json` + `gate.json` |
+| run_valuation | `artifacts/forecast/{TICKER}_{ts}_forecast/fcff/fcfe/blend.json` |
+| generate_report | `reports/{TICKER}_{ts}_full_report.md` |
+| generate_report | `artifacts/reports/{TICKER}_{ts}_full_report_citation.json` |
+| evaluate | `artifacts/evaluation/{TICKER}_{ts}_evaluation.json` |
+| approve | `reports/approved/{ts}_APPROVED_{run_id}.md` + `approval.json` |
+
+---
+
+## 8. Data Contracts
+
+Data contracts are defined in `dataset/contracts/*.schema.json` and `specs/03–05_*.md`.
+
+### 8.1 Source metadata (ingest.sources)
 
 ```yaml
-universe_name: vietnam_pharma_53
-market: vietnam
-language: vi
-currency: VND
-
-sector_scope:
-  - duoc_pham
-  - y_te
-  - thiet_bi_y_te
-  - benh_vien
-  - phan_phoi_duoc
-
-tickers:
-  - ticker: DHG
-    exchange: HOSE
-    company_name: "Công ty Cổ phần Dược Hậu Giang"
-    subsector: "duoc_pham"
-    peer_group: ["TRA", "IMP", "DBD"]
-    enabled_valuation_methods: ["dcf", "pe", "pb"]
-
-  - ticker: DBD
-    exchange: HOSE
-    company_name: "Công ty Cổ phần Dược - Trang thiết bị Y tế Bình Định"
-    subsector: "duoc_pham_thiet_bi_y_te"
-    peer_group: ["DHG", "IMP", "TRA"]
-    enabled_valuation_methods: ["dcf", "pe", "pb", "ev_ebitda"]
+source_id:       UUID
+ticker:          str
+source_type:     ["vnstock_finance", "vnstock_price", "vnstock_company", "golden_csv", "manual"]
+source_title:    str
+provider:        str          # "VCI", "KBS", etc.
+fiscal_year:     int | null
+quarter:         int | null
+reliability_tier: int         # 1 = high, 2 = medium, 3 = low
+checksum:        str
+ingested_at:     datetime
 ```
 
-### 5.2. MVP golden dataset
+### 8.2 Canonical financial fact
 
-Không triển khai sâu cả 53 mã ngay từ đầu. MVP tập trung vào **3 mã golden dataset** để kiểm chứng end-to-end:
-
-```text
-DHG
-TRA
-IMP hoặc DBD
+```yaml
+fact_id:         UUID
+ticker:          str
+fiscal_year:     int
+quarter:         int | null
+metric_name:     str          # namespaced: "revenue.net", "equity.parent"
+value:           float
+unit:            str          # "VND_millions", "ratio", "percent"
+currency:        str          # default "VND"
+source_id:       UUID
+confidence:      float        # 0.0–1.0
+created_at:      datetime
 ```
 
-Mỗi mã golden nên có:
+### 8.3 Research snapshot
 
-```text
-company_profile.yaml
-financial_statements_3y.csv hoặc financial_statements_5y.csv
-market_prices.csv
-peer_group.yaml
-audited_ratios.csv
-valuation_assumptions.yaml
-source_manifest.yaml
-expected_report_quality_rubric.md
+Snapshot = frozen copy of accepted facts at a point in time. Used for reproducible valuation.
+
+```yaml
+snapshot_id:     str
+ticker:          str
+created_at:      datetime
+fiscal_years:    list[int]
+items:           list[snapshot_item]
 ```
 
-### 5.3. Data types
+### 8.4 Valuation artifact
 
-| Loại dữ liệu | Ví dụ | Vai trò |
+```yaml
+valuation_id:    str
+ticker:          str
+method:          str          # "fcff_dcf", "fcfe_dcf", "blend_dcf", "pe", "ev_ebitda"
+assumptions:     dict         # WACC, g, tax_rate, etc.
+input_snapshot:  str          # snapshot_id
+output_values:   dict         # intrinsic_value, equity_value_per_share, etc.
+sensitivity_table: dict       # WACC × g grid
+created_at:      datetime
+```
+
+### 8.5 Report approval record
+
+```yaml
+report_id:       str
+ticker:          str
+run_id:          str
+decision:        str          # "approve" | "reject"
+analyst_notes:   str | null
+approved_at:     datetime
+export_path:     str
+```
+
+---
+
+## 9. Analytics Engine
+
+Tất cả module trong `backend/analytics/` là **deterministic Python, không có LLM calls**.
+
+### 9.1 Module summary
+
+| Module | Function | Notes |
 |---|---|---|
-| Dữ liệu giá | OHLCV, vốn hóa, thanh khoản | Market context, multiples, biểu đồ |
-| Báo cáo tài chính | Income statement, balance sheet, cash flow | FCFF/FCFE, margin, ROE, ROA, leverage |
-| Báo cáo thường niên | Chiến lược, ngành nghề, rủi ro, ban lãnh đạo | Qualitative analysis, risk narrative |
-| Công bố thông tin | Nghị quyết, giải trình biến động, cổ tức, phát hành | Event extraction, assumption validation |
-| Tin tức | Tin doanh nghiệp, chính sách ngành, đấu thầu thuốc | Catalyst và rủi ro |
-| Peer data | Doanh nghiệp cùng ngành | Relative valuation và benchmarking |
+| `ratios.py` | `compute_ratios()`, `ratio_table_for_display()` | ROE, ROA, margins, leverage, liquidity, PE/PB/BVPS/CCC |
+| `dcf.py` | `run_dcf()`, `run_three_scenarios()` | Two-stage DCF, bear/base/bull |
+| `fcff.py` | `run_fcff_dcf()` | FCFF = EBIT(1-t) + Dep − ΔWC − CapEx; CAPEX positive-outflow |
+| `fcfe.py` | `run_fcfe_dcf()` | FCFE = NI − ΔWC − CapEx + Net_borrowing |
+| `blend.py` | `run_blend_dcf()` | 60% FCFF + 40% FCFE; `is_draft_only` flag khi gap > 25% |
+| `forecasting.py` | `run_forecast()` | 5-year driver-based P&L + BS forecast (all line items) |
+| `multiples.py` | `run_multiples()` | P/E, EV/EBITDA; requires peer_data_source |
+| `sensitivity.py` | `run_sensitivity()` | WACC × g grid, 5×5 default |
+| `tax_policy.py` | `TaxPolicy` | Historical effective rate (median), fallback 20% statutory |
+| `debt_schedule.py` | `DebtSchedule` | net_borrowing: 5-tier hierarchy (CFO → BS delta → target ratio → zero → missing) |
+| `dividend_schedule.py` | `DividendSchedule` | retained_earnings = NI × (1 − payout_ratio) |
+| `approval_gate.py` | `AssumptionGate` | Blocks BUY/HOLD/SELL; emits `Draft / Needs Analyst Review` label |
+| `valuation_confidence.py` | `ValuationConfidence` | Per-component confidence: high/medium/low/unavailable |
 
-### 5.4. Out of Scope for MVP
+### 9.2 CAPEX convention
 
-Các thành phần sau **không triển khai trong MVP 6 tuần** trừ khi có thời gian dư:
-
-| Thành phần | Lý do loại khỏi MVP |
-|---|---|
-| SEC XBRL | Không phù hợp trực tiếp với thị trường Việt Nam |
-| ClinicalTrials.gov | Không có coverage trực tiếp cho phần lớn doanh nghiệp dược niêm yết Việt Nam |
-| OpenFDA | Không phải nguồn chính cho định giá cổ phiếu dược Việt Nam |
-| LayoutLMv3/Nougat | Tốn thời gian triển khai, không cần cho MVP nếu có CSV/API/golden data |
-| Vanna.ai Text-to-SQL | Không cần thiết khi schema nhỏ và query có thể viết deterministic |
-| Celery/Redis | Chỉ cần khi batch workload lớn; MVP có thể chạy sync/background đơn giản |
-| MinIO/S3 | Chưa cần nếu lưu local artifacts |
-| Fully autonomous agent planning | Rủi ro cao, khó kiểm thử, không cần cho đồ án 6 tuần |
-
----
-
-## 6. Target Outputs
-
-Mỗi lần chạy phân tích phải tạo một **Report Package** gồm:
-
-```text
-artifacts/
-├── reports/
-│   └── {run_id}_{ticker}_report.md
-├── reports_html/
-│   └── {run_id}_{ticker}_report.html
-├── valuation_results/
-│   └── {run_id}_{ticker}_valuation_result.json
-├── claim_ledgers/
-│   └── {run_id}_{ticker}_claim_ledger.json
-├── source_manifests/
-│   └── {run_id}_{ticker}_source_manifest.json
-├── eval_results/
-│   └── {run_id}_{ticker}_eval_result.json
-└── run_logs/
-    └── {run_id}_{ticker}_run_log.json
-```
-
-### 6.1. Report sections
-
-Báo cáo tiếng Việt phải có cấu trúc cố định:
-
-1. Tóm tắt đầu tư.
-2. Hồ sơ doanh nghiệp.
-3. Tổng quan ngành y dược và vị thế doanh nghiệp.
-4. Phân tích tài chính lịch sử.
-5. Phân tích dòng tiền và chất lượng lợi nhuận.
-6. Định giá DCF.
-7. Định giá tương đối theo peer multiples.
-8. Sensitivity analysis.
-9. Catalyst tăng trưởng.
-10. Rủi ro ngành, rủi ro doanh nghiệp và rủi ro dữ liệu.
-11. Kịch bản bear/base/bull.
-12. Kết luận định giá với khoảng giá hợp lý.
-13. Phụ lục nguồn dữ liệu, giả định và công thức.
-
-### 6.2. Report constraints
-
-Báo cáo không được:
-
-- Đưa lệnh mua/bán tự động.
-- Tự tạo số liệu không có trong structured state.
-- Tự tạo nguồn hoặc citation giả.
-- Khẳng định vị thế ngành, năng lực ban lãnh đạo, lợi thế pháp lý hoặc pipeline sản phẩm nếu không có evidence.
-- Cá nhân hóa khuyến nghị đầu tư cho người dùng.
-
----
-
-## 7. 5-Agent Architecture
-
-### 7.1. Architecture Overview
-
-```text
-┌──────────────────────────────────────────────────────────┐
-│                    Orchestrator Agent                    │
-│     Validate request · Build plan · Route · HITL          │
-└────────────────────────────┬─────────────────────────────┘
-                             │
-                             v
-┌──────────────────────────────────────────────────────────┐
-│                  Data Foundation Agent                   │
-│   Ingest · Normalize · Source manifest · Data quality     │
-└────────────────────────────┬─────────────────────────────┘
-                             │
-                             v
-┌──────────────────────────────────────────────────────────┐
-│                    Core Analyst Agent                    │
-│    Financial ratios · Peer comparison · Business analysis │
-└────────────────────────────┬─────────────────────────────┘
-                             │
-                             v
-┌──────────────────────────────────────────────────────────┐
-│              Valuation & Reasoning Agent                 │
-│   DCF · Multiples · Sensitivity · Believer/Skeptic pass   │
-└────────────────────────────┬─────────────────────────────┘
-                             │
-                             v
-┌──────────────────────────────────────────────────────────┐
-│                Synthesis & Auditor Agent                 │
-│   Vietnamese report · Claim ledger · Citation · Audit     │
-└──────────────────────────────────────────────────────────┘
-```
-
-### 7.2. Agent responsibilities
-
-| Agent | Trách nhiệm | Output chính | Không được làm |
-|---|---|---|---|
-| `orchestrator_agent` | Validate ticker, tạo research plan, route workflow, quản lý HITL và run state | `ResearchPlan` | Không tự phân tích tài chính, không tự kết luận đầu tư |
-| `data_foundation_agent` | Lấy dữ liệu, chuẩn hóa, kiểm tra missing/stale/conflict, tạo source manifest | `DataSnapshot` | Không tự sửa số liệu thiếu nguồn, không tự forecast |
-| `core_analyst_agent` | Gọi analytics engine, phân tích tài chính, peer comparison, business/risk context | `FundamentalAnalysis` | Không tính target price cuối, không tạo công thức mới |
-| `valuation_reasoning_agent` | Gọi DCF/multiples/sensitivity engine, chạy internal believer-skeptic reasoning | `ValuationResult` | Không để LLM tính DCF, không dùng assumption thiếu kiểm chứng |
-| `synthesis_auditor_agent` | Viết báo cáo tiếng Việt, tạo claim ledger, kiểm citation, audit numeric consistency | `FinalReportPackage` | Không thay đổi kết quả tính toán, không tạo nguồn giả |
-
-### 7.3. Internal modes are not additional agents
-
-Để giữ đúng 5 agent, một số năng lực được triển khai như **internal mode** hoặc **tool**, không tách thành agent mới:
-
-| Năng lực | Cách triển khai |
-|---|---|
-| Risk analysis | Một phần của `core_analyst_agent` và report sections |
-| Regulation analysis | Tool/retriever được Core Analyst hoặc Synthesis gọi |
-| Believer/Skeptic debate | Hai pass nội bộ trong `valuation_reasoning_agent` |
-| Citation checker | Deterministic evaluator/tool trong `evaluation/` |
-| Numeric consistency checker | Deterministic evaluator/tool trong `evaluation/` |
-| Report quality judge | Rubric evaluator, không phải core agent |
-
----
-
-## 8. End-to-End Workflow
-
-### 8.1. Business workflow
-
-```text
-1. User chọn ticker, kỳ phân tích, loại báo cáo.
-2. Orchestrator kiểm tra ticker thuộc universe và tạo ResearchPlan.
-3. Data Foundation lấy dữ liệu từ Vnstock/API/CSV/documents/news.
-4. Data Foundation chuẩn hóa dữ liệu và tạo DataSnapshot.
-5. Data Quality Gate kiểm tra completeness, stale data, conflict và source manifest.
-6. Core Analyst tính ratios, growth, margins, leverage, liquidity, cash flow và peer metrics.
-7. Calculation Gate kiểm tra công thức và consistency.
-8. Valuation & Reasoning tính DCF, multiples, sensitivity và scenario.
-9. HITL Assumption Gate cho người dùng/analyst duyệt assumption quan trọng.
-10. Synthesis & Auditor viết báo cáo tiếng Việt từ structured outputs.
-11. Final Audit Gate kiểm citation, numeric consistency, hallucination risk và report quality.
-12. Hệ thống xuất report package.
-```
-
-### 8.2. LangGraph state flow
-
-```text
-START
-  |
-  v
-orchestrator_agent
-  |
-  v
-data_foundation_agent
-  |
-  v
-data_quality_gate
-  |--- fail ---> human_review_or_stop
-  |
-  v
-core_analyst_agent
-  |
-  v
-calculation_consistency_gate
-  |--- fail ---> human_review_or_stop
-  |
-  v
-valuation_reasoning_agent
-  |
-  v
-assumption_review_gate
-  |--- needs_review ---> human_approval
-  |
-  v
-synthesis_auditor_agent
-  |
-  v
-final_evaluation_gate
-  |--- fail ---> revision_required
-  |
-  v
-END
-```
-
-### 8.3. Core state object
-
-```python
-class EquityResearchState(BaseModel):
-    run_id: str
-    ticker: str
-    research_plan: ResearchPlan | None = None
-    data_snapshot: DataSnapshot | None = None
-    fundamental_analysis: FundamentalAnalysis | None = None
-    valuation_result: ValuationResult | None = None
-    final_report_package: FinalReportPackage | None = None
-    source_manifest: list[SourceRecord] = []
-    claim_ledger: list[ReportClaim] = []
-    eval_result: EvaluationResult | None = None
-    warnings: list[str] = []
-    errors: list[str] = []
-    status: Literal[
-        "initialized",
-        "data_ready",
-        "analysis_ready",
-        "valuation_ready",
-        "needs_human_review",
-        "report_ready",
-        "failed"
-    ] = "initialized"
-```
-
----
-
-## 9. Data Contract
-
-### 9.1. SourceRecord
-
-```python
-class SourceRecord(BaseModel):
-    source_id: str
-    source_type: Literal[
-        "market_data",
-        "financial_statement",
-        "annual_report",
-        "disclosure",
-        "news",
-        "manual_golden_dataset"
-    ]
-    source_name: str
-    source_url: str | None
-    document_path: str | None
-    retrieval_timestamp: datetime
-    period: str | None
-    reliability: Literal["high", "medium", "low"]
-```
-
-### 9.2. DataSnapshot
-
-```python
-class DataSnapshot(BaseModel):
-    ticker: str
-    as_of_date: date
-    company_profile: CompanyProfile
-    financial_statements: list[FinancialStatement]
-    market_data: MarketData
-    peer_data: list[PeerSnapshot]
-    news_events: list[NewsEvent]
-    source_manifest: list[SourceRecord]
-    data_quality: DataQualityReport
-```
-
-### 9.3. DataQualityReport
-
-```python
-class DataQualityReport(BaseModel):
-    completeness_score: float
-    missing_fields: list[str]
-    stale_sources: list[str]
-    conflicting_values: list[str]
-    warnings: list[str]
-    pass_gate: bool
-```
-
-### 9.4. GroundedClaim
-
-```python
-class GroundedClaim(BaseModel):
-    claim_id: str
-    claim: str
-    claim_type: Literal["quantitative", "qualitative", "inference"]
-    supporting_metrics: list[str]
-    source_ids: list[str]
-    confidence: float
-```
-
-### 9.5. Claim ledger
-
-Mỗi report final phải sinh `claim_ledger.json`.
-
-```json
-{
-  "claim_id": "CLAIM_001",
-  "section": "financial_analysis",
-  "claim_text": "Doanh thu của DHG tăng trưởng ổn định trong giai đoạn phân tích.",
-  "claim_type": "quantitative",
-  "numbers_used": ["revenue_2021", "revenue_2022", "revenue_2023", "revenue_cagr_3y"],
-  "source_ids": ["SRC_FINANCIALS_DHG_2023", "SRC_GOLDEN_DHG"],
-  "confidence": 0.92,
-  "verdict": "pass"
-}
-```
+CAPEX được lưu và dùng theo **positive-outflow** convention: CapEx = 50 nghĩa là chi 50 tỷ. Cả FCFF và FCFE đều dùng quy ước này nhất quán.
 
 ---
 
 ## 10. Valuation Methodology
 
-Dự án áp dụng nguyên tắc:
-
-> Không tự tạo công thức định giá. Không dùng LLM để tính intrinsic value. Không kết luận định giá nếu assumption không được ghi rõ.
-
-### 10.1. FCFF-based DCF
+### 10.1 Blend DCF (primary method)
 
 ```text
-Firm Value = Σ FCFF_t / (1 + WACC)^t + Terminal Value / (1 + WACC)^n
-Equity Value = Firm Value - Market Value of Debt + Cash and Equivalents
-Equity Value per Share = Equity Value / Shares Outstanding
+Blend = 0.60 × FCFF_intrinsic + 0.40 × FCFE_intrinsic
 ```
 
-Các công thức FCFF được phép dùng:
+Dùng Blend khi cả FCFF và FCFE đều có dữ liệu đầy đủ. `is_draft_only = True` khi:
+- Chênh lệch FCFF vs FCFE > 25%, hoặc
+- Một trong hai phương pháp thiếu dữ liệu.
+
+### 10.2 FCFF DCF
 
 ```text
-FCFF = NI + NCC + Int(1 - Tax rate) - FCInv - WCInv
-FCFF = CFO + Int(1 - Tax rate) - FCInv
-FCFF = EBIT(1 - Tax rate) + Dep - FCInv - WCInv
+FCFF = EBIT × (1 − tax_rate) + Depreciation − ΔWorking_Capital − CapEx
+FCFF = CFO + Interest × (1 − tax_rate) − CapEx
+
+Firm Value = Σ FCFF_t / (1 + WACC)^t + TV / (1 + WACC)^n
+Equity Value = Firm Value − Net Debt
+Equity Value/Share = Equity Value / Shares Outstanding
+
+Terminal Value = FCFF_{n+1} / (WACC − g)
 ```
 
-### 10.2. FCFE-based DCF
+### 10.3 FCFE DCF
 
 ```text
-Equity Value = Σ FCFE_t / (1 + r)^t + Terminal Value / (1 + r)^n
-FCFE = NI + NCC - FCInv - WCInv + Net Borrowing
-FCFE = CFO - FCInv + Net Borrowing
+FCFE = NI − ΔWorking_Capital − CapEx + Net_Borrowing
+FCFE = CFO − CapEx + Net_Borrowing
+
+Equity Value = Σ FCFE_t / (1 + Ke)^t + TV / (1 + Ke)^n
 ```
 
-### 10.3. Terminal value
+### 10.4 Terminal value controls
 
 ```text
-Terminal Value = FCFF_{n+1} / (WACC - g)
+g < WACC (enforced)
+g ≤ long-term Vietnam GDP growth (checked by ApprovalGate)
+WACC, g, margin, growth assumptions must appear in valuation artifact
 ```
 
-Control rules:
+### 10.5 Relative valuation
 
-```text
-g < WACC
-terminal_growth_rate phải hợp lý với ngành và nền kinh tế dài hạn
-WACC, g, margin, growth assumptions phải xuất hiện trong valuation_result.json
-```
-
-### 10.4. Relative valuation
-
-| Multiple | Điều kiện dùng | Ghi chú |
-|---|---|---|
-| P/E | EPS dương, lợi nhuận không quá bất thường | Ưu tiên cho doanh nghiệp có lợi nhuận ổn định |
-| P/B | Book value đáng tin, vốn chủ sở hữu dương | Hữu ích với doanh nghiệp tài sản hữu hình lớn |
-| EV/EBITDA | Có dữ liệu EV và EBITDA đáng tin | Dùng bổ trợ nếu cấu trúc nợ khác biệt |
-| EV/Sales | Biên lợi nhuận biến động hoặc EBITDA âm | Chỉ dùng làm tham khảo, không làm kết luận chính |
-
-### 10.5. Sensitivity analysis
-
-Bắt buộc có sensitivity theo tối thiểu:
-
-```text
-WACC
-terminal_growth_rate
-revenue_growth
-operating_margin
-```
-
-### 10.6. Scenario analysis
-
-Hệ thống phải tạo 3 kịch bản:
-
-| Scenario | Ý nghĩa |
+| Multiple | Điều kiện dùng |
 |---|---|
-| Bear | Giả định thận trọng, tăng trưởng thấp, margin suy giảm hoặc WACC cao hơn |
-| Base | Giả định trung tâm, dựa trên dữ liệu lịch sử và industry context |
-| Bull | Giả định tích cực nhưng phải có catalyst/evidence hỗ trợ |
+| P/E | EPS dương, lợi nhuận không bất thường |
+| P/B | Book value đáng tin, equity dương |
+| EV/EBITDA | Có dữ liệu EV và EBITDA |
+
+Peer multiples yêu cầu `peer_data_source` (hiện tại: `pending_peer_dataset` — REL_01 WARN).
+
+### 10.6 Sensitivity analysis
+
+Minimum sensitivity grid:
+
+```text
+WACC × terminal_growth_rate (5×5 grid default)
+```
+
+Optional: revenue_growth × operating_margin.
+
+### 10.7 Scenario analysis
+
+| Scenario | Giả định |
+|---|---|
+| Bear | WACC +1%, g −0.5%, margin −2pp |
+| Base | Historical median drivers |
+| Bull | WACC −1%, g +0.5%, revenue growth +2pp (requires catalyst evidence) |
 
 ---
 
 ## 11. Evaluation Framework
 
-Evaluation là phần trọng tâm của đồ án. Hệ thống phải chứng minh report đáng tin bằng cả deterministic tests và rubric-based evaluation.
+### 11.1 Current evaluation script: `evaluate_report_quality.py`
 
-### 11.1. Evaluation layers
+8 deterministic checks (no LLM). Exit code: `0` for WARN, `1` for FAIL_BLOCK_EXPORT.
 
-| Lớp evaluation | Mục tiêu | Cách đo | Threshold MVP |
-|---|---|---|---:|
-| Data Extraction Eval | Kiểm tra số liệu lấy đúng | So với golden dataset/manual audited data | >= 98% field accuracy |
-| Data Quality Eval | Kiểm tra thiếu dữ liệu, stale source, conflict | `DataQualityReport` | completeness >= 0.85 |
-| Calculation Eval | Kiểm tra công thức tài chính và valuation | Unit tests với expected values | 100% pass |
-| Source Grounding Eval | Kiểm tra claim có nguồn | Claim ledger kiểm `source_ids` | 100% quantitative claims |
-| Numeric Consistency Eval | Kiểm số trong report khớp structured state | Regex/table parser + tolerance | >= 99% |
-| Hallucination Risk Eval | Phát hiện claim ngoài evidence | Rule-based + optional LLM judge | risk <= threshold |
-| Reasoning Quality Eval | Kiểm thesis, logic, risk balance | Rubric LLM judge + human review | >= 4/5 |
-| End-to-End Eval | Kiểm report package chạy hoàn chỉnh | E2E test trên golden dataset | 3/3 golden tickers pass |
+| Check ID | Description | Severity | DHG status |
+|---|---|---|---|
+| TAX_01 | Tax rate forecast = FCFF tax rate | CRITICAL | PASS |
+| CAPEX_01 | CAPEX positive outflow in FCFF + FCFE | CRITICAL | PASS |
+| DEBT_01 | No silent N/A in debt forecast rows | CRITICAL | PASS |
+| FCFE_01 | FCFE includes non-None net_borrowing | WARNING | PASS |
+| DIV_01 | Dividend schedule modeled or warned | WARNING | PASS |
+| GATE_01 | No BUY/HOLD/SELL when gate not approved | WARNING | WARN |
+| REL_01 | Relative valuation has peer dataset | WARNING | WARN |
+| CONF_01 | Confidence artifact persisted per-run | INFO | WARN |
 
-### 11.2. Numeric tolerance
+**All 5 MVP tickers: WARN_NEEDS_REVIEW (0 FAIL for all).**
 
-| Loại số | Tolerance |
+### 11.2 Legacy evaluation: `evaluate_report.py`
+
+5-gate evaluation (numeric/citation/staleness/reproducibility/recommendation_safety). Still used in `run_research.py` pipeline.
+
+### 11.3 Data quality gates (build_facts.py)
+
+Three-tier gate in `backend/facts/completeness.py`:
+
+| Gate | Condition | Default threshold |
+|---|---|---|
+| `coverage_gate` | `periods_available ≥ 3 FY` | PASS if ≥ 3 |
+| `core_keys_gate` | revenue.net, net_income.parent, equity.parent, total_assets.ending present | All required |
+| `source_validation_gate` | Source tier ≤ 2 (medium or high) | Required |
+| `valuation_gate` | All 4 gates above pass | Composite |
+
+### 11.4 Report quality rubric
+
+| Tiêu chí | Weight |
 |---|---:|
-| Doanh thu, lợi nhuận, tài sản | 0.1% hoặc rounding tolerance |
-| Ratio phần trăm | ±0.1 điểm phần trăm |
-| P/E, P/B | ±0.05x |
-| Target price | ±1% do rounding |
-| CAGR | ±0.1 điểm phần trăm |
+| Factual accuracy | 25% |
+| Citation completeness | 20% |
+| Valuation discipline | 20% |
+| Investment reasoning | 15% |
+| Risk balance | 10% |
+| Vietnamese financial writing | 10% |
 
-### 11.3. Report quality rubric
-
-| Tiêu chí | Mô tả | Weight |
-|---|---|---:|
-| Factual accuracy | Số liệu khớp nguồn và structured state | 25% |
-| Citation completeness | Claim định lượng có nguồn | 20% |
-| Valuation discipline | Assumption rõ, không tùy tiện | 20% |
-| Investment reasoning | Thesis có logic nhân-quả | 15% |
-| Risk balance | Có phản biện, không một chiều | 10% |
-| Vietnamese financial writing | Văn phong analyst, không marketing | 10% |
-
-Score interpretation:
-
-```text
->= 4.5/5: Excellent
-4.0–4.5: Strong student project
-3.5–4.0: Acceptable but needs revision
-< 3.5: Fail quality gate
-```
-
-### 11.4. Final confidence score
-
-```python
-final_confidence = (
-    0.35 * data_quality_score
-    + 0.25 * numeric_consistency_score
-    + 0.20 * citation_coverage
-    + 0.10 * valuation_assumption_quality
-    + 0.10 * report_quality_score
-)
-```
-
-Gate:
-
-```text
-final_confidence >= 0.85: pass
-0.70 <= final_confidence < 0.85: needs_human_review
-final_confidence < 0.70: fail
-```
-
-### 11.5. Hallucination policy
+### 11.5 Hallucination controls
 
 Các claim sau bị cấm nếu không có evidence:
 
-| Claim bị kiểm soát | Ví dụ |
-|---|---|
-| Market leadership | “Doanh nghiệp dẫn đầu ngành...” |
-| Management quality | “Ban lãnh đạo có năng lực vượt trội...” |
-| Regulatory advantage | “Doanh nghiệp hưởng lợi rõ rệt từ chính sách...” |
-| Product pipeline | “Pipeline sản phẩm mạnh...” |
-| Foreign investor interest | “Khối ngoại quan tâm mạnh...” |
-| Valuation certainty | “Cổ phiếu chắc chắn đang rẻ...” |
+- Market leadership ("Doanh nghiệp dẫn đầu ngành...")
+- Management quality
+- Regulatory advantage
+- Product pipeline
+- Foreign investor interest
+- Valuation certainty ("cổ phiếu chắc chắn đang rẻ...")
 
-Khi thiếu dữ liệu, report phải viết:
-
-```text
-Dữ liệu hiện tại chưa đủ để kết luận chắc chắn về ...
-```
+Khi thiếu dữ liệu: `"Dữ liệu hiện tại chưa đủ để kết luận về ..."`
 
 ---
 
-## 12. Technology Stack
+## 12. Agent and Orchestration Layer
 
-### 12.1. MVP stack
+### 12.1 Implemented agents
 
-| Layer | Công nghệ | Vai trò |
+| Agent | File | Status | Responsibilities |
+|---|---|---|---|
+| `DataFoundationAgent` | `backend/agents/data_foundation_agent.py` | Implemented | assess/prepare/readiness for all 5 tickers; `--all` mode |
+
+### 12.2 Pipeline orchestration (non-agent)
+
+Phần lớn orchestration là **script-based pipeline**, không phải LLM agents:
+
+- `backend/orchestrator.py` — run lifecycle management
+- `scripts/run_research.py` — full pipeline CLI wrapper
+- `backend/jobs/scheduler.py` — APScheduler cron jobs
+
+### 12.3 Planned agent expansion (post-MVP)
+
+LangGraph-based multi-agent workflow (supervisor, research_agent, auditor_agent) là post-MVP. Current implementation dùng script pipeline thay vì LangGraph.
+
+### 12.4 Scheduler (APScheduler)
+
+3 registered cron jobs trong `backend/jobs/scheduler.py`:
+
+| Job | Schedule | Action |
 |---|---|---|
-| Backend API | FastAPI | REST API cho analysis/report |
-| Workflow | LangGraph | Stateful 5-agent workflow |
-| Schema | Pydantic v2 | Data contract, structured output |
-| LLM provider | OpenAI API | Report synthesis, extraction, audit |
-| Primary model | gpt-4o | Reasoning, report writing, complex qualitative analysis |
-| Fast model | gpt-4o-mini | Routing, classification, simple extraction, JSON validation |
-| Data processing | pandas, numpy | Financial calculations |
-| Valuation | Custom deterministic Python modules | DCF, multiples, sensitivity |
-| Config | YAML + Pydantic Settings | Universe, models, thresholds |
-| Reporting | Jinja2 Markdown/HTML | Report rendering |
-| Testing | pytest | Unit/integration/evaluation tests |
-| Storage MVP | Local files + optional SQLite | Artifacts, run logs, golden dataset |
-| Frontend MVP | Empty or minimal placeholder | Deferred until backend is stable |
-
-### 12.2. Optional post-MVP stack
-
-| Component | Khi nào thêm |
-|---|---|
-| PostgreSQL | Khi cần persistent multi-run database |
-| pgvector | Khi RAG tài liệu lớn và cần semantic search bền vững |
-| Redis/Celery | Khi batch 53 mã hoặc long-running jobs cần queue |
-| MinIO/S3 | Khi lưu nhiều PDF, annual reports, artifacts |
-| Streamlit dashboard | Khi cần HITL UI nhanh |
-| Next.js frontend | Khi muốn production-like web app |
-| WeasyPrint/python-docx | Khi cần export PDF/Word đẹp |
-| LangSmith/Langfuse | Khi cần tracing chi tiết LLM/agent runs |
-
-### 12.3. Model config
-
-```yaml
-llm:
-  provider: openai
-  primary_reasoning_model: gpt-4o
-  fast_model: gpt-4o-mini
-  structured_outputs: true
-  max_retries: 2
-
-temperature:
-  extraction: 0.0
-  financial_analysis: 0.1
-  valuation_reasoning: 0.1
-  report_generation: 0.2
-  audit: 0.0
-```
-
-Model phải được cấu hình qua file config, không hardcode trong code.
+| `weekly_sync` | Weekly | Sync raw data from vnstock for all tickers |
+| `daily_prices` | Daily | Update market price data |
+| `monthly_valuation` | Monthly | Rebuild valuation artifacts |
 
 ---
 
-## 13. Project Structure
+## 13. Human Review and Approval
 
-```text
-vietnam-pharma-equity-agent/
-├── README.md
-├── CHANGELOG.md
-├── pyproject.toml
-├── .env.example
-├── .gitignore
-├── CLAUDE.md
-├── DONE_CRITERIA.md
-│
-├── specs/
-│   ├── PRD.md
-│   ├── PROBLEM_BRIEF.md
-│   ├── BACKEND_PLAN.md
-│   ├── DATA_CONTRACT.md
-│   ├── AGENT_SPECS.md
-│   ├── VALUATION_METHODOLOGY.md
-│   ├── EVALUATION_PLAN.md
-│   ├── REPORT_TEMPLATE.md
-│   └── SEQUENCE.md
-│
-├── backend/
-│   ├── app/
-│   │   ├── main.py
-│   │   │
-│   │   ├── api/
-│   │   │   ├── routes_research.py
-│   │   │   ├── routes_reports.py
-│   │   │   └── routes_health.py
-│   │   │
-│   │   ├── core/
-│   │   │   ├── config.py
-│   │   │   ├── logging.py
-│   │   │   ├── errors.py
-│   │   │   └── constants.py
-│   │   │
-│   │   ├── domain/
-│   │   │   ├── universe.py
-│   │   │   ├── financials.py
-│   │   │   ├── valuation.py
-│   │   │   ├── claims.py
-│   │   │   └── reports.py
-│   │   │
-│   │   ├── agents/
-│   │   │   ├── orchestrator.py
-│   │   │   ├── data_foundation.py
-│   │   │   ├── core_analyst.py
-│   │   │   ├── valuation_reasoning.py
-│   │   │   └── synthesis_auditor.py
-│   │   │
-│   │   ├── workflows/
-│   │   │   ├── graph.py
-│   │   │   ├── state.py
-│   │   │   ├── edges.py
-│   │   │   └── gates.py
-│   │   │
-│   │   ├── connectors/
-│   │   │   ├── vnstock_client.py
-│   │   │   ├── market_data_client.py
-│   │   │   ├── financial_statement_client.py
-│   │   │   ├── disclosure_client.py
-│   │   │   ├── news_client.py
-│   │   │   └── llm_client.py
-│   │   │
-│   │   ├── dataops/
-│   │   │   ├── ingestion.py
-│   │   │   ├── normalization.py
-│   │   │   ├── quality_checks.py
-│   │   │   ├── source_manifest.py
-│   │   │   └── cache.py
-│   │   │
-│   │   ├── analytics/
-│   │   │   ├── ratios.py
-│   │   │   ├── peer_analysis.py
-│   │   │   ├── forecasting.py
-│   │   │   ├── dcf.py
-│   │   │   ├── multiples.py
-│   │   │   └── sensitivity.py
-│   │   │
-│   │   ├── evaluation/
-│   │   │   ├── data_eval.py
-│   │   │   ├── calculation_eval.py
-│   │   │   ├── citation_eval.py
-│   │   │   ├── numeric_consistency_eval.py
-│   │   │   ├── hallucination_eval.py
-│   │   │   ├── report_quality_eval.py
-│   │   │   └── eval_runner.py
-│   │   │
-│   │   ├── reporting/
-│   │   │   ├── templates/
-│   │   │   │   └── equity_report_vi.md.jinja2
-│   │   │   ├── renderer.py
-│   │   │   └── exporter.py
-│   │   │
-│   │   └── schemas/
-│   │       ├── requests.py
-│   │       ├── responses.py
-│   │       ├── financials.py
-│   │       ├── valuation.py
-│   │       ├── agent_outputs.py
-│   │       └── evaluation.py
-│   │
-│   ├── tests/
-│   │   ├── unit/
-│   │   ├── integration/
-│   │   ├── golden/
-│   │   └── e2e/
-│   │
-│   └── scripts/
-│       ├── ingest_universe.py
-│       ├── backfill_golden_dataset.py
-│       ├── generate_report.py
-│       └── run_eval.py
-│
-├── data/
-│   ├── universe/
-│   │   └── pharma_vn_53.yaml
-│   ├── golden/
-│   │   ├── DHG/
-│   │   ├── TRA/
-│   │   └── IMP/
-│   ├── raw/
-│   ├── curated/
-│   └── cache/
-│
-├── artifacts/
-│   ├── reports/
-│   ├── reports_html/
-│   ├── valuation_results/
-│   ├── claim_ledgers/
-│   ├── source_manifests/
-│   ├── eval_results/
-│   └── run_logs/
-│
-├── frontend/
-│   └── README.md
-│
-├── notebooks/
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_dcf_prototype.ipynb
-│   └── 03_report_eval.ipynb
-│
-├── research/
-│   ├── finrobot_architecture_notes.md
-│   ├── vietnam_pharma_domain_notes.md
-│   └── third_party/
-│       └── README.md
-│
-└── .claude/
-    ├── EXECUTION_STATE.md
-    ├── rules/
-    │   ├── architecture.md
-    │   ├── backend.md
-    │   ├── finance_domain.md
-    │   ├── agent_contracts.md
-    │   ├── valuation.md
-    │   ├── evaluation.md
-    │   ├── testing.md
-    │   └── documentation.md
-    └── plan/
-        ├── 00_MASTER_CONTEXT.md
-        ├── 01_DATA_CONTRACT.md
-        ├── 02_GOLDEN_DATASET.md
-        ├── 03_ANALYTICS_ENGINE.md
-        ├── 04_VALUATION_ENGINE.md
-        ├── 05_LANGGRAPH_5_AGENTS.md
-        ├── 06_SYNTHESIS_AUDITOR.md
-        ├── 07_EVALUATION_HARNESS.md
-        └── 08_API_AND_REPORTING.md
+`ApprovalGate` (`backend/analytics/approval_gate.py`) là **hard gate** trước khi xuất recommendation.
+
+### 13.1 Gate logic
+
+- Khi tất cả critical flags (`dividend_schedule`, `peer_multiples`, etc.) được analyst phê duyệt → gate APPROVED.
+- Khi gate chưa approved → `recommendation_label = "Draft / Needs Analyst Review"`.
+- BUY / HOLD / SELL bị block cho đến khi gate APPROVED.
+
+### 13.2 Approval workflow
+
+```bash
+# Analyst reviews report, then:
+python scripts/approve_report.py --ticker DHG --decision approve --notes "Reviewed assumptions"
+
+# Output:
+# reports/approved/{ts}_APPROVED_{run_id}.md
+# reports/approved/{ts}_approval.json (stored in research.run_approvals)
 ```
 
-### 13.1. Repository hygiene
-
-Không đặt nguyên source code của FinRobot hoặc vnstock trong production path. Nếu cần tham khảo, đặt vào:
-
-```text
-research/third_party/
-```
-
-Production backend chỉ import qua adapter chính thức:
-
-```text
-backend/app/connectors/vnstock_client.py
-```
-
----
-
-## 14. API Design
-
-| Endpoint | Method | Vai trò |
-|---|---|---|
-| `/api/health` | GET | Health check |
-| `/api/tickers` | GET | Lấy danh sách mã cổ phiếu trong universe |
-| `/api/research/start` | POST | Tạo analysis run |
-| `/api/research/{run_id}/status` | GET | Kiểm tra trạng thái run |
-| `/api/research/{run_id}/approve-assumptions` | POST | HITL duyệt assumption định giá |
-| `/api/reports/{run_id}` | GET | Lấy report package |
-| `/api/reports/{run_id}/markdown` | GET | Lấy Markdown report |
-| `/api/reports/{run_id}/html` | GET | Lấy HTML report |
-| `/api/evaluation/{run_id}` | GET | Lấy kết quả evaluation |
-| `/api/sources/{run_id}` | GET | Lấy source manifest |
-
-### Example request
+### 13.3 Gate artifact
 
 ```json
 {
   "ticker": "DHG",
-  "report_type": "full_equity_research",
-  "language": "vi",
-  "fiscal_years": [2021, 2022, 2023, 2024],
-  "valuation_methods": ["dcf", "pe", "pb"],
-  "require_human_review": true
-}
-```
-
-### Example response
-
-```json
-{
-  "run_id": "RUN_DHG_20260504_001",
-  "ticker": "DHG",
-  "status": "initialized",
-  "message": "Research run created successfully."
+  "status": "draft_needs_analyst_review",
+  "flags": {
+    "dividend_schedule": false,
+    "peer_multiples": false
+  },
+  "recommendation_label": "Draft / Needs Analyst Review (model-implied upside: +45.1%)",
+  "created_at": "..."
 }
 ```
 
 ---
 
-## 15. 6-Week Delivery Roadmap
+## 14. Artifacts and Outputs
 
-### Week 1 — Contract-first foundation
+### 14.1 Report structure (generated)
 
-Deliverables:
+Báo cáo tiếng Việt gồm:
 
-- `DATA_CONTRACT.md`
-- `AGENT_SPECS.md`
-- `EVALUATION_PLAN.md`
-- `VALUATION_METHODOLOGY.md`
-- `pharma_vn_53.yaml`
-- Backend skeleton: FastAPI, Pydantic, config, logging.
-- Golden dataset folder structure.
+1. Tóm tắt đầu tư và giá mục tiêu (Blend DCF + cross-checks).
+2. Hồ sơ doanh nghiệp.
+3. Phân tích tài chính lịch sử (ratio table: PE/PB/BVPS/ROE/ROA/Margins/Leverage/Liquidity/CCC).
+4. Dự báo KQKD và BCĐKT 5 năm (tất cả line items).
+5. Định giá DCF: FCFF / FCFE / Blend.
+6. Sensitivity analysis (WACC × g grid).
+7. Bear/Base/Bull scenarios.
+8. Bộ phát hiện biến động bất thường.
+9. Bảng rủi ro cấu trúc.
+10. Key takeaways.
+11. Phụ lục: WACC breakdown, assumptions, citation map, quality gate summary.
+12. Disclaimer.
 
-Done criteria:
+### 14.2 Report constraints
 
-```text
-pytest runs successfully
-schema validation passes
-no LLM call in financial calculation modules
-5-agent contract is documented
-```
-
-### Week 2 — Data Foundation + Golden Dataset
-
-Deliverables:
-
-- `vnstock_client.py` or market data adapter.
-- CSV/YAML ingestion.
-- `normalization.py`.
-- `source_manifest.py`.
-- `quality_checks.py`.
-- Golden data for 3 tickers.
-
-Done criteria:
-
-```text
-DataSnapshot can be generated for 3 golden tickers
-data_quality.completeness_score >= 0.85
-source_manifest is non-empty
-normalization unit tests pass
-```
-
-### Week 3 — Core Analytics Engine
-
-Deliverables:
-
-- `ratios.py`.
-- `peer_analysis.py`.
-- `forecasting.py`.
-- `calculation_eval.py`.
-- `core_analyst_agent.py`.
-
-Done criteria:
-
-```text
-100% financial calculation unit tests pass
-metrics_table is complete
-no metric is generated by LLM
-peer comparison works for golden tickers
-```
-
-### Week 4 — Valuation Engine + Reasoning
-
-Deliverables:
-
-- `dcf.py`.
-- `multiples.py`.
-- `sensitivity.py`.
-- `valuation_reasoning.py`.
-- `VALUATION_METHODOLOGY.md`.
-
-Done criteria:
-
-```text
-valuation result is reproducible
-target price traces back to assumptions
-bear/base/bull scenarios are meaningfully different
-DCF and multiples unit tests pass
-```
-
-### Week 5 — Synthesis + Auditor + Report
-
-Deliverables:
-
-- `equity_report_vi.md.jinja2`.
-- `synthesis_auditor.py`.
-- `citation_eval.py`.
-- `numeric_consistency_eval.py`.
-- `hallucination_eval.py`.
-- `claim_ledger.json` generation.
-
-Done criteria:
-
-```text
-100% quantitative claims have source_id
-numeric_consistency_score >= 0.99
-hallucination_risk_score <= configured threshold
-Markdown report generated for 3 golden tickers
-```
-
-### Week 6 — End-to-End Hardening + Demo
-
-Deliverables:
-
-- End-to-end reports for 3 golden tickers.
-- `eval_results/*.json`.
-- API endpoints for research/report/evaluation.
-- Demo script.
-- Final README and documentation.
-
-Done criteria:
-
-```text
-one command can generate a complete report package
-3/3 golden tickers pass final evaluation gate
-all critical tests pass
-academic disclaimer included in every report
-```
+Báo cáo không được:
+- Đưa lệnh mua/bán khi gate chưa approved.
+- Tự tạo số liệu không trong canonical facts hoặc valuation artifact.
+- Tạo citation giả.
+- Khẳng định vị thế/quản lý/lợi thế pháp lý nếu không có evidence.
 
 ---
 
-## 16. Developer Workflow with Claude Code, Cursor, and Codex
+## 15. Testing
 
-Dự án được triển khai bởi 1 người với 3 coding agents. Mỗi tool phải có vai trò rõ để tránh trùng việc và context rot.
+### 15.1 Test suite
 
-| Tool | Vai trò chính | Không nên dùng cho |
+```text
+tests/unit/     — 25 test files
+tests/integration/ — DB integrity tests
+
+pytest tests/   — run all
+pytest tests/unit/test_dcf.py -v
+```
+
+### 15.2 Key test files
+
+| File | Tests | Coverage |
 |---|---|---|
-| Claude Code | Implement module lớn theo plan, wiring LangGraph, refactor có kiểm soát | Tự quyết định architecture khi specs chưa khóa |
-| Cursor | Review interactive, sửa bug nhỏ, kiểm tra flow, inspect diff | Giao refactor lớn nhiều file không có acceptance criteria |
-| Codex | Viết unit tests, fixtures, deterministic utility, evaluation scripts | Viết agent prompt phức tạp hoặc sửa architecture tổng thể |
+| `test_normalizer.py` | 17 | build_fact_table, compute_derived, periods_sorted |
+| `test_ratios.py` | 19 | compute_ratios, ratio_table_for_display |
+| `test_dcf.py` | 19 | run_dcf, run_three_scenarios |
+| `test_data_quality.py` | 18 | build_fy_validation_report, completeness/freshness |
+| `test_tax_policy.py` | 14 | TaxPolicy effective rate, fallback |
+| `test_debt_schedule.py` | 16 | DebtSchedule 5-tier hierarchy |
+| `test_approval_gate.py` | 14 | ApprovalGate block logic |
+| `test_dividend_schedule.py` | 11 | DividendSchedule payout |
+| `test_relative_valuation.py` | 9 | P/E, EV/EBITDA multiples |
+| `test_capex_sign_convention.py` | 7 | CAPEX positive-outflow |
+| `test_blend_draft_flag.py` | — | is_draft_only flag logic |
+| `test_reconciliation.py` | — | IS/BS/CF reconciliation + minority interest |
 
-### Required task format for coding agents
+### 15.3 Known test failures
 
-```text
-Task:
-Scope:
-Files allowed:
-Files forbidden:
-Expected outputs:
-Tests to run:
-Acceptance criteria:
-Do not:
+`tests/unit/test_forecasting_gap.py` — 14 pre-existing failures (run_forecast() missing `n_years` param and `other_items` field). Pre-date current work. Not blocking.
+
+---
+
+## 16. Deployment and Operations
+
+### 16.1 Prerequisites
+
+```bash
+pip install -r requirements.txt
+# Required: DATABASE_URL, OPENAI_API_KEY
+# Optional: apscheduler (for scheduler), pymilvus (for vector store)
 ```
 
-Example:
+### 16.2 DB setup
 
-```text
-Task: Implement financial ratio engine.
+```bash
+python scripts/db/migrate.py  # Apply all 9 migrations
+```
 
-Scope:
-- Implement backend/app/analytics/ratios.py
-- Implement backend/tests/unit/test_ratios.py
+### 16.3 First run
 
-Files allowed:
-- backend/app/analytics/ratios.py
-- backend/tests/unit/test_ratios.py
-- backend/app/schemas/financials.py only if schema is missing
+```bash
+python scripts/ingest_ticker.py --ticker DHG --years 5
+python scripts/build_facts.py --ticker DHG
+python scripts/run_valuation.py --ticker DHG
+python scripts/generate_report.py --ticker DHG --report-type full_report
+python scripts/evaluate_report_quality.py --ticker DHG
+python scripts/approve_report.py --ticker DHG --decision approve
+```
 
-Files forbidden:
-- backend/app/agents/*
-- backend/app/workflows/*
-- specs/*
+### 16.4 Batch mode (all 5 tickers)
 
-Expected outputs:
-- calculate_profitability_ratios()
-- calculate_growth_metrics()
-- calculate_leverage_metrics()
-- calculate_liquidity_metrics()
-
-Tests to run:
-- pytest backend/tests/unit/test_ratios.py -q
-
-Acceptance criteria:
-- 100% tests pass
-- No LLM calls
-- No network calls
-- Handles zero denominator safely
-
-Do not:
-- Do not add new dependencies
-- Do not modify architecture
-- Do not create agent logic
+```bash
+for ticker in DHG IMP DMC TRA DBD; do
+    python scripts/run_research.py --ticker $ticker
+done
+# Or via DataFoundationAgent:
+python -m backend.agents.data_foundation_agent --all
 ```
 
 ---
 
-## 17. Quality Gates and Done Criteria
+## 17. Known Limitations
 
-### 17.1. Data quality gate
-
-Fail if:
-
-```text
-revenue missing
-net_income missing
-equity missing
-total_assets missing
-market_price missing
-fiscal_years < 3
-source_manifest empty
-data_quality.completeness_score < 0.85
-```
-
-### 17.2. Calculation gate
-
-Fail if:
-
-```text
-unit tests fail
-division-by-zero is not handled
-negative/invalid financial values are not flagged
-valuation output cannot be reproduced
-```
-
-### 17.3. Assumption gate
-
-Fail or require human review if:
-
-```text
-WACC <= terminal_growth_rate
-terminal_growth_rate unrealistic
-forecast growth materially exceeds historical growth without evidence
-peer group has fewer than 3 valid companies
-DCF target price deviates too much from relative valuation without explanation
-```
-
-### 17.4. Citation gate
-
-Fail if:
-
-```text
-quantitative claim has no source_id
-source_id not found in source_manifest
-citation refers to a non-existent document
-claim ledger missing
-```
-
-### 17.5. Numeric consistency gate
-
-Fail if:
-
-```text
-number in report is not found in DataSnapshot, FundamentalAnalysis, or ValuationResult
-rounded number exceeds tolerance
-valuation conclusion uses target price not present in ValuationResult
-```
-
-### 17.6. Final report gate
-
-Fail if:
-
-```text
-final_confidence < 0.70
-report lacks disclaimer
-report contains buy/sell command
-report contains unsupported market leadership claim
-report contains unsupported management quality claim
-```
+| Issue | Impact | Status |
+|---|---|---|
+| REL_01: Peer multiples | P/E / EV/EBITDA cross-check uses default targets, không có real peer data | WARN — `pending_peer_dataset` |
+| CONF_01: Confidence artifact | ValuationConfidence không được persist per-run | WARN — INFO severity |
+| GATE_01: Gate check in eval | evaluate_report_quality không tự đọc report file để check BUY/SELL text | WARN — resolved với `--report-file` flag |
+| IMP/DMC/TRA/DBD 2021 FY | vnstock VCI provider không trả 2021 data | Fallback KBS provider nếu có |
+| Milvus optional | `build_index.py` requires running Milvus server | Graceful skip if unavailable |
+| APScheduler optional | Scheduler silently disabled if not installed | `pip install apscheduler` |
+| test_forecasting_gap.py | 14 pre-existing failures | Non-blocking, documented |
+| Supabase statement_timeout | Large snapshot INSERTs cần `page_size=50` | Fixed in snapshot.py |
 
 ---
 
-## 18. Limitations
-
-1. Kết quả định giá phụ thuộc mạnh vào dữ liệu đầu vào và giả định dự phóng.
-2. Dự án không cam kết độ chính xác đầu tư thực tế.
-3. Dự án không thực hiện giao dịch tự động.
-4. Dự án không thay thế tư vấn tài chính cá nhân hoặc báo cáo phân tích của tổ chức được cấp phép.
-5. LLM có thể sai khi tóm tắt hoặc diễn giải; vì vậy các claim quan trọng phải có citation và các phép tính phải chạy bằng code deterministic.
-6. Một số nguồn dữ liệu thương mại như FiinPro, Vietstock, SSI hoặc FiinGroup API chỉ được sử dụng nếu có quyền truy cập hợp lệ.
-7. MVP ưu tiên 3 mã golden dataset có kiểm chứng, sau đó mới mở rộng lên toàn bộ 53 mã.
-8. Báo cáo sinh ra là bản nháp nghiên cứu học thuật, cần human analyst duyệt trước khi sử dụng ngoài phạm vi học tập.
-
----
-
-## 19. Disclaimer
+## 18. Disclaimer
 
 Dự án này phục vụ mục đích học thuật và nghiên cứu. Kết quả phân tích không phải khuyến nghị đầu tư, không phải tư vấn tài chính cá nhân, không phải lời mời mua/bán chứng khoán và không đảm bảo lợi nhuận. Người dùng cần tự kiểm chứng dữ liệu, giả định, phương pháp định giá và rủi ro trước khi sử dụng bất kỳ kết quả nào trong thực tế.
+
+Mọi báo cáo được đánh dấu `Draft / Needs Analyst Review` cho đến khi có phê duyệt rõ ràng từ analyst. Hệ thống không tự xuất báo cáo cuối.

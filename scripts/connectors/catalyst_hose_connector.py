@@ -63,17 +63,30 @@ def sync_hose_hnx_connector(tickers: list[str] | None = None) -> int:
     for url, html in responses:
         entries = _parse_anchors(base_url=url, html=html, tracked_tickers=tracked)
         raw_path = ROOT / "dataset" / "raw" / "catalyst" / "company_news" / now.date().isoformat() / f"{'hose' if 'hsx' in url else 'hnx'}_announcements.html"
+        exchange_label = "hose" if "hsx" in url else "hnx"
         checksum = registry.save_raw_snapshot(html.encode("utf-8"), raw_path)
         source_version_id = registry.register_source(
             SourceInput(
                 logical_id="company_news",
                 source_uri=url,
-                source_type="news",
+                # Exchange disclosure pages are Tier 0 — official exchange publications.
+                source_type="disclosure",
+                source_tier=0,
+                source_title=f"{'HOSE' if exchange_label == 'hose' else 'HNX'} Công bố thông tin",
                 checksum=checksum,
                 connector_version=CONNECTOR_VERSION,
                 raw_path=str(raw_path),
                 published_at=now.isoformat(),
             )
+        )
+        registry.register_raw_payload(
+            source_id=source_version_id,
+            content_type="text/html",
+            checksum=checksum,
+            storage_path=str(raw_path),
+            connector_name="catalyst_hose_connector",
+            connector_version=CONNECTOR_VERSION,
+            request_uri=url,
         )
 
         for row in entries:

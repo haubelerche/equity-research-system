@@ -9,12 +9,15 @@ from __future__ import annotations
 
 from typing import Any
 
-FactTable = dict[str, dict[str, float]]
+from backend.facts.normalizer import FactTable
 RatioTable = dict[str, dict[str, float | None]]
 
 
 def _get(table: FactTable, key: str, period: str) -> float | None:
-    return table.get(key, {}).get(period)
+    entry = table.get(key, {}).get(period)
+    if entry is None:
+        return None
+    return entry.value if hasattr(entry, "value") else float(entry)
 
 
 def _safe_div(num: float | None, den: float | None) -> float | None:

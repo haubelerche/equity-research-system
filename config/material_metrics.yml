@@ -1,0 +1,62 @@
+# Material Metrics — Data Trust Layer
+# Defines which canonical metrics require Tier 0/1 corroboration for material claims.
+# Any quantitative report claim using only a Tier 3 source for these metrics:
+#   - In draft reports: WARNING + mark claim as needs_review
+#   - In approved/exported reports: FAIL — blocks export
+#
+# Metrics not listed here are considered non-material and may use Tier 3 sources.
+
+income_statement:
+  - revenue.net
+  - gross_profit.total
+  - operating_profit.total
+  - net_income.parent
+  - eps.basic
+  - eps.diluted
+  - ebitda.total
+
+balance_sheet:
+  - total_assets.ending
+  - equity.parent
+  - total_debt.ending
+  - cash_and_equivalents.ending
+  - total_liabilities.ending
+
+cash_flow:
+  - operating_cash_flow.total
+  - capex.total
+  - free_cash_flow.total
+  - investing_cash_flow.total
+  - financing_cash_flow.total
+
+valuation_outputs:
+  - target_price
+  - fair_value_per_share
+  - wacc
+  - terminal_growth_rate
+  - terminal_value
+  - intrinsic_value_per_share
+  - ev_ebitda_implied_price
+  - pe_implied_price
+
+market:
+  - shares_outstanding
+  - market_cap
+  - enterprise_value
+  - current_price
+
+derived_ratios:
+  - gross_margin
+  - net_margin
+  - ebitda_margin
+  - roe
+  - roa
+  - debt_to_equity
+
+# Non-material metrics (informational only; Tier 3 accepted without warning):
+non_material:
+  - depreciation.total
+  - sga.total
+  - interest_expense.total
+  - tax_expense.total
+  - minority_interest.total

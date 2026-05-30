@@ -194,6 +194,8 @@ def run_valuation(
         compute_tv_weight,
         compute_valuation_gap,
     )
+    from backend.analytics.approval_gate import build_gate_from_artifacts
+    from backend.analytics.valuation_confidence import build_valuation_confidence
 
     ticker = ticker.strip().upper()
     generated_at = datetime.now(UTC)
@@ -321,9 +323,24 @@ def run_valuation(
     _eps = full_table.get("eps.basic", {}).get(_latest_fy) if _latest_fy else None
     _shares_mn = (_ni * 1_000 / _eps) if (_ni and _eps and _eps > 0) else None
 
+    # Net borrowing schedule — sourced from forecast.debt_schedule (driver-based NB per year)
+    _net_borrowing_sched = (
+        forecast.debt_schedule.net_borrowing_schedule()
+        if forecast.debt_schedule is not None else None
+    )
+    if _net_borrowing_sched:
+        print(f"[run_valuation] {ticker} — net_borrowing_schedule connected: {_net_borrowing_sched}")
+    else:
+        print(f"[run_valuation] {ticker} — net_borrowing_schedule unavailable; FCFE will assume NB=0")
+
     # ── FCFF valuation (proper: EBIT(1-T)+D&A-CAPEX-DeltaNWC) ───────────────────
     print(f"\n[run_valuation] {ticker} — FCFF valuation (EBIT(1-T)+D&A-CAPEX-DeltaNWC, discounted at WACC)")
-    wacc_assumptions = WACCAssumptions(assumption_status="default_unapproved")
+    # Wire forecast.tax_policy → WACCAssumptions so FCFF EBIT(1-T) uses the same
+    # effective tax rate as the forecast P&L (avoids silent rate mismatch).
+    wacc_assumptions = WACCAssumptions(
+        assumption_status="default_unapproved",
+        tax_policy=forecast.tax_policy,
+    )
     fcff_result = compute_fcff(
         ticker=ticker,
         forecast=forecast,
@@ -350,6 +367,7 @@ def run_valuation(
         terminal_growth=terminal_growth,
         cost_of_equity_assumptions=coe_assumptions,
         shares_mn=_shares_mn,
+        net_borrowing_schedule=_net_borrowing_sched,
     )
     fe = fcfe_result.to_dict()
     tv_check_fcfe = compute_tv_weight(fe.get("pv_terminal_value"), fe.get("equity_value"))
@@ -432,6 +450,7 @@ def run_valuation(
         base_coe_assumptions=coe_assumptions,
         shares_mn=_shares_mn,
         current_price_vnd=current_price,
+        net_borrowing_schedule=_net_borrowing_sched,
     )
     _print_wacc_g_matrix(sens_fcfe["matrix"], sens_fcfe["g_range"], "Price_FCFE (VND/share)", row_label="Re")
 
@@ -494,6 +513,54 @@ def run_valuation(
     else:
         print(f"\n[run_valuation] {ticker} — EV/EBITDA sensitivity skipped (EBITDA or shares unavailable)")
 
+    # ── Assumption gate ───────────────────────────────────────────────────────
+    _debt_method = (
+        forecast.debt_schedule.forecast_method if forecast.debt_schedule else "missing"
+    )
+    _div_method = (
+        forecast.dividend_schedule.method if forecast.dividend_schedule else "missing"
+    )
+    _mult_status = multiples.to_dict().get("relative_valuation_status", "pending_peer_dataset")
+    _tax_approved = (
+        forecast.tax_policy.approved if forecast.tax_policy else False
+    )
+    gate = build_gate_from_artifacts(
+        data_quality_passed=True,          # snapshot guarantees accepted facts
+        wacc_assumption_status=wacc_assumptions.assumption_status,
+        cost_of_equity_status=coe_assumptions.assumption_status,
+        forecast_assumption_status=forecast.assumptions.assumption_status,
+        debt_schedule_method=_debt_method,
+        tax_policy_approved=_tax_approved,
+        dividend_schedule_approved=(_div_method != "missing"),
+        peer_multiples_approved=(_mult_status not in ("pending_peer_dataset", "no_peer_data")),
+        terminal_growth_approved=False,    # always requires analyst sign-off
+        final_recommendation_approved=False,
+    )
+    print(f"\n[run_valuation] {ticker} — Assumption gate: {gate.status}")
+    if gate.blocking_reasons:
+        for r in gate.blocking_reasons:
+            print(f"  GATE: {r}")
+
+    # ── Valuation confidence ──────────────────────────────────────────────────
+    _fcfe_nb_method = _debt_method if _net_borrowing_sched else "missing"
+    confidence = build_valuation_confidence(
+        historical_facts_validated=True,
+        forecast_assumption_status=forecast.assumptions.assumption_status,
+        tax_policy_source=(forecast.tax_policy.source if forecast.tax_policy else "statutory_default"),
+        tax_policy_approved=_tax_approved,
+        debt_schedule_method=_debt_method,
+        debt_schedule_approved=(_debt_method in ("zero_debt_policy", "manual_override")),
+        dividend_method=_div_method,
+        fcff_has_warnings=bool(fcff_result.warnings),
+        fcfe_net_borrowing_method=_fcfe_nb_method,
+        relative_pe_status=_mult_status,
+        relative_ev_ebitda_status=_mult_status,
+        gate_status=gate.status,
+    )
+    print(f"[run_valuation] {ticker} — Valuation confidence: final_rating={confidence.final_rating}")
+    for r in confidence.reasons:
+        print(f"  CONFIDENCE: {r}")
+
     # ── Build artifact ────────────────────────────────────────────────────────
     assumptions_record = {
         "wacc": wacc,
@@ -528,6 +595,8 @@ def run_valuation(
         },
         "multiples": multiples.to_dict(),
         "current_price_vnd": current_price,
+        "assumption_gate": gate.to_dict(),
+        "valuation_confidence": confidence.to_dict(),
     }
 
     VALUATION_DIR.mkdir(parents=True, exist_ok=True)

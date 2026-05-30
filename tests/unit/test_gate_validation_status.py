@@ -22,9 +22,24 @@ CORE_KEYS = [
 
 def _make_full_table(status: str = "accepted") -> tuple[FactTable, dict]:
     """Return (fact_table, validation_status_table) fully populated for 2021-2025FY."""
-    table: FactTable = {key: {p: 1000.0 for p in REQUIRED_PERIODS} for key in CORE_KEYS}
+    from backend.facts.normalizer import FactEntry
+    def e(v):
+        return FactEntry(value=v, source_id="test", source_tier=1)
+    table: FactTable = {key: {p: e(1000.0) for p in REQUIRED_PERIODS} for key in CORE_KEYS}
     vstatus = {key: {p: status for p in REQUIRED_PERIODS} for key in CORE_KEYS}
     return table, vstatus
+
+
+def _make_raw_facts_tier1(periods=REQUIRED_PERIODS):
+    """Raw facts with source_tier=1 so the tier coverage gate passes in baseline tests."""
+    from datetime import timedelta
+    ingested = datetime.now(UTC) - timedelta(days=5)
+    return [
+        {"line_item_code": "revenue.net", "fiscal_year": int(p[:4]),
+         "fiscal_period": "FY", "value": 1000.0,
+         "source_tier": 1, "ingested_at": ingested}
+        for p in periods
+    ]
 
 
 def _call_report(table: FactTable, vstatus: dict, periods_available=None, periods_missing=None):
@@ -35,7 +50,7 @@ def _call_report(table: FactTable, vstatus: dict, periods_available=None, period
     return build_fy_validation_report(
         ticker="DHG",
         table=table,
-        raw_facts=[],
+        raw_facts=_make_raw_facts_tier1(periods_available),
         required_periods=REQUIRED_PERIODS,
         periods_available=periods_available,
         periods_missing=periods_missing,

@@ -1,0 +1,737 @@
+# Báo cáo Phân tích Cổ phiếu — DHG
+
+> **CẢNH BÁO QUAN TRỌNG:** Báo cáo này được tạo bởi hệ thống nghiên cứu tự động.
+> Số liệu trích xuất từ dữ liệu canonical kiểm toán. Dự phóng và định giá dùng giả định mặc định **chưa được chuyên gia phê duyệt**.
+> KHÔNG dùng để ra quyết định đầu tư độc lập.
+
+---
+
+## 1. Tóm tắt điều hành và khuyến nghị Draft
+
+**Công ty Cổ phần Dược Hậu Giang** (DHG — HOSE) — Ngành Dược phẩm
+
+Ngày tạo: 2026-05-30 09:57 UTC | Snapshot: `snap_5eeffd8eee27997808d2`
+Giai đoạn phân tích lịch sử: 2022FY – 2025FY
+Dự phóng: 2026F – 2030F
+
+### Định giá tóm tắt
+
+> **Phương pháp định giá chính: Blend 60% FCFF + 40% FCFE** (driver-based, đã kiểm soát sign convention).
+> DCF OCF-CAPEX truyền thống chỉ để tham khảo lịch sử dòng tiền — không dùng làm target price.
+
+| Phương pháp | Giá trị nội tại | Giá thị trường | Upside | Độ tin cậy |
+|---|---|---|---|---|
+| **DCF Blend (60% FCFF + 40% FCFE)** | **82,244 VND/CP** | 94,400 VND | **-12.9%** | **Draft valuation range — awaiting analyst approval** |
+| FCFF DCF (WACC mặc định) | 89,687 VND/CP | 94,400 VND | -5.0% | Thành phần blend |
+| FCFE DCF (Re mặc định) | 71,080 VND/CP | 94,400 VND | -24.7% | Thành phần blend |
+| P/E mục tiêu (Pending — chưa có dữ liệu peer) | N/A | 94,400 VND | — | Cross-check |
+| EV/EBITDA mục tiêu (Pending — chưa có dữ liệu peer) | N/A | 94,400 VND | — | Cross-check |
+| ~~DCF OCF-CAPEX (base)~~ | ~~N/A~~ | ~~94,400 VND~~ | ~~—~~ | **Tham khảo — không dùng làm target** |
+
+> ⚠ DCF OCF-CAPEX truyền thống dùng CAGR từ lịch sử OCF biến động — kết quả nhạy cảm với năm CAPEX bất thường
+> (ví dụ: năm đầu tư nhà máy làm FCF âm sẽ méo CAGR và thổi phồng target price đáng kể).
+> Xem §4.1 để biết cảnh báo chi tiết.
+
+### Draft Rating
+
+Draft / Needs Analyst Review (model-implied downside: -12.9%)
+
+> Căn cứ: upside Blend DCF = -12.9% | Ngưỡng BUY ≥ 20%, HOLD −10% đến +20%, SELL < −10%
+> Giả định chưa được analyst phê duyệt — chỉ dùng làm tham khảo nội bộ.
+
+---
+
+## 2. Giới thiệu doanh nghiệp
+
+**Công ty Cổ phần Dược Hậu Giang** niêm yết tại sàn HOSE với mã cổ phiếu **DHG**.
+Hoạt động trong ngành Dược phẩm Việt Nam.
+
+- Số cổ phiếu lưu hành ước tính: **135.1 triệu CP**
+- Giá thị trường: **94,400 VND**
+- EPS (FY2025): **6,308 VND/CP** [^eps_basic_2025]
+- P/E quan sát: **15.0x**
+
+---
+
+## 3. Kết quả tài chính lịch sử
+
+### 3.1 Bảng tổng hợp (2022FY–2025FY)
+
+| Chỉ tiêu | 2022FY | 2023FY | 2024FY | 2025FY |
+|---|--- | --- | --- | ---|
+| Doanh thu thuần (tỷ VND) | 4,676.0 | 5,015.4 | 4,884.9 | 5,267.0 |
+| Lợi nhuận gộp (tỷ VND) | 2,257.5 | 2,343.5 | 2,137.8 | 2,506.4 |
+| Lợi nhuận sau thuế (tỷ VND) | 988.5 | 1,050.7 | 776.0 | 852.4 |
+| EPS cơ bản (VND/CP) | 7,318 | 7,780 | 5,763 | 6,308 |
+| Dòng tiền hoạt động (tỷ VND) | 901.3 | 240.2 | 1,317.6 | 1,213.0 |
+| Tổng tài sản (tỷ VND) | 5,168.2 | 6,110.5 | 5,959.2 | 5,173.9 |
+| Vốn chủ sở hữu (tỷ VND) | 4,291.5 | 4,852.9 | 4,094.8 | 4,137.3 |
+
+_Đơn vị: tỷ VND trừ EPS. Nguồn: dữ liệu canonical đã kiểm định._
+
+### 3.2 Bảng chỉ số tài chính
+
+| Tỷ lệ | 2022FY | 2023FY | 2024FY | 2025FY |
+|---|--- | --- | --- | ---|
+| Biên lợi nhuận gộp | 48.3% | 46.7% | 43.8% | 47.6% |
+| Biên lợi nhuận ròng | 21.1% | 20.9% | 15.9% | 16.2% |
+| Biên EBITDA | 30.5% | 29.0% | 28.7% | 27.9% |
+| Biên OCF | 19.3% | 4.8% | 27.0% | 23.0% |
+| ROE | 23.0% | 21.6% | 19.0% | 20.6% |
+| ROA | 19.1% | 17.2% | 13.0% | 16.5% |
+| Tăng trưởng doanh thu | N/A | 7.3% | -2.6% | 7.8% |
+| Tăng trưởng lợi nhuận ròng | N/A | 6.3% | -26.1% | 9.8% |
+| Nợ/VCSH | 0.2x | 0.3x | 0.5x | 0.3x |
+| Vốn hóa thị trường (tỷ VND) | 12,755.3 | 12,755.3 | 12,755.3 | 12,755.3 |
+| EPS cơ bản (VND/CP) | 7,318 | 7,780 | 5,763 | 6,308 |
+| BVPS (VND/CP) | 31,761 | 35,916 | 30,305 | 30,619 |
+| P/E | 12.9x | 12.1x | 16.4x | 15.0x |
+| P/B | 3.0x | 2.6x | 3.1x | 3.1x |
+| P/S | 2.7x | 2.5x | 2.6x | 2.4x |
+| EV/EBITDA | — | — | — | — |
+| Chu kỳ tiền (ngày — CCC) | 159.0 ngày | 221.5 ngày | 167.9 ngày | 127.2 ngày |
+
+_EPS, BVPS tính theo đơn vị VND/CP. Vốn hóa, CCC từ giá thị trường hiện tại 94,400 VND._
+
+### 3.3 Cảnh báo biến động bất thường
+
+| Chỉ số | Kỳ | Giá trị | Lý do cảnh báo |
+|---|---|---|---|
+| debt_to_equity | 2022FY→2023FY | 0.204 → 0.259 | Thay đổi +26.9% > 25% |
+| fcf_margin | 2022FY→2023FY | 0.143 → -0.0491 | Đổi dấu âm |
+| fcf_absolute_bn | 2022FY→2023FY | 667 → -246 | Đổi dấu âm |
+| net_margin | 2023FY→2024FY | 0.209 → 0.159 | Thay đổi -5.1pp > 5.0pp |
+| debt_to_equity | 2023FY→2024FY | 0.259 → 0.455 | Thay đổi +75.7% > 25% |
+| current_ratio | 2023FY→2024FY | 3.9 → 2.57 | Thay đổi -34.1% > 25% |
+| fcf_margin | 2023FY→2024FY | -0.0491 → 0.252 | Đổi dấu dương |
+| fcf_absolute_bn | 2023FY→2024FY | -246 → 1.23e+03 | Đổi dấu dương |
+| revenue_growth | 2023FY→2024FY | 0.0726 → -0.026 | Thay đổi -135.9% > 25% | Đổi dấu âm |
+| net_income_growth | 2023FY→2024FY | 0.0629 → -0.261 | Thay đổi -515.4% > 25% | Đổi dấu âm |
+| eps_growth | 2023FY→2024FY | 0.0631 → -0.259 | Thay đổi -510.7% > 25% | Đổi dấu âm |
+| gross_profit_growth | 2023FY→2024FY | 0.0381 → -0.0878 | Đổi dấu âm |
+| pe | 2023FY→2024FY | 12.1 → 16.4 | Thay đổi +35.0% > 25% |
+| debt_to_equity | 2024FY→2025FY | 0.455 → 0.251 | Thay đổi -45.0% > 25% |
+| current_ratio | 2024FY→2025FY | 2.57 → 4.03 | Thay đổi +56.5% > 25% |
+| revenue_growth | 2024FY→2025FY | -0.026 → 0.0782 | Thay đổi +400.6% > 25% | Đổi dấu dương |
+| net_income_growth | 2024FY→2025FY | -0.261 → 0.0984 | Thay đổi +137.6% > 25% | Đổi dấu dương |
+| eps_growth | 2024FY→2025FY | -0.259 → 0.0946 | Thay đổi +136.5% > 25% | Đổi dấu dương |
+| gross_profit_growth | 2024FY→2025FY | -0.0878 → 0.172 | Đổi dấu dương |
+
+> _Các biến động trên vượt ngưỡng cảnh báo (>25% tương đối hoặc >5pp biên lợi nhuận) — cần giải thích thêm._
+
+
+### 3.4 Dự phóng KQKD 2026F–2030F
+
+| Chỉ tiêu (tỷ VND) | 2022FY | 2023FY | 2024FY | 2025FY | 2026F | 2027F | 2028F | 2029F | 2030F |
+|---|---|---|---|---|---|---|---|---|---|
+| Doanh thu thuần | 4,676.0 | 5,015.4 | 4,884.9 | 5,267.0 | **5,480.1** | **5,701.9** | **5,932.6** | **6,172.7** | **6,422.4** |
+| Giá vốn hàng bán (COGS) | -2,418.5 | -2,671.8 | -2,747.1 | -2,760.6 | **-2,895.9** | **-3,013.0** | **-3,135.0** | **-3,261.8** | **-3,393.8** |
+| Lợi nhuận gộp | 2,257.5 | 2,343.5 | 2,137.8 | 2,506.4 | **2,584.2** | **2,688.8** | **2,797.6** | **2,910.8** | **3,028.6** |
+| Biên lợi nhuận gộp (%) | 48.3% | 46.7% | 43.8% | 47.6% | **47.2%** | **47.2%** | **47.2%** | **47.2%** | **47.2%** |
+| Chi phí SGA (bán hàng + QLDN) | -913.2 | -978.4 | -904.7 | -1,157.3 | **-1,069.7** | **-1,112.9** | **-1,158.0** | **-1,204.8** | **-1,253.6** |
+| EBIT | N/A | N/A | N/A | N/A | **1,514.6** | **1,575.9** | **1,639.6** | **1,706.0** | **1,775.0** |
+| EBITDA | N/A | N/A | N/A | N/A | **1,625.0** | **1,690.7** | **1,759.1** | **1,830.3** | **1,904.4** |
+| Chi phí lãi vay | -12.6 | -29.5 | -24.8 | -25.6 | **-7.4** | **-14.9** | **-14.9** | **-14.9** | **-14.9** |
+| Lợi nhuận trước thuế (PBT) | 1,099.6 | 1,159.2 | 904.5 | 986.6 | **1,200.8** | **1,242.2** | **1,293.1** | **1,346.0** | **1,401.1** |
+| Chi phí thuế TNDN | -111.2 | -108.5 | -128.5 | -134.2 | **-142.4** | **-147.3** | **-153.3** | **-159.6** | **-166.1** |
+| Lợi nhuận sau thuế (CĐ mẹ) | 988.5 | 1,050.7 | 776.0 | 852.4 | **1,058.4** | **1,094.9** | **1,139.8** | **1,186.4** | **1,235.0** |
+| EPS (VND/CP) | 7,318 | 7,780 | 5,763 | 6,308 | **7,833** | **8,103** | **8,435** | **8,781** | **9,140** |
+
+_Lịch sử: 2022FY, 2023FY, 2024FY, 2025FY | Dự phóng (in đậm): 2026F, 2027F, 2028F, 2029F, 2030F_
+
+**Giả định dự phóng (chưa được chuyên gia phê duyệt):**
+
+| Giả định | Giá trị | Cơ sở |
+|---|---|---|
+| Tốc độ tăng trưởng doanh thu | 4.0%/năm | CAGR lịch sử = 4.0% (giới hạn ±25%) |
+| Biên lợi nhuận gộp | 47.2% | Trung vị lịch sử |
+| Chi phí SGA/doanh thu | 19.5% | Trung vị lịch sử |
+| Khấu hao/doanh thu | 2.0% | Trung vị lịch sử |
+| CAPEX/doanh thu | 3.4% | Trung vị lịch sử |
+| Thuế suất thực tế | 11.9% | Trung vị lịch sử |
+| Chi phí nợ (cost of debt) | 4.34% | historical_implied_cod |
+| Lãi vay = nợ bình quân × cost_of_debt | — | Driver-based (không phải % doanh thu) |
+| ΔNWC | 2% thay đổi doanh thu | Ước tính đơn giản |
+| Tỷ lệ chi trả cổ tức (payout) | 0% (không có dữ liệu) | missing |
+
+> _Cảnh báo dự phóng: Non-operating items (PBT gap) detected: ranged from -6.4% to -3.5% of revenue; median -5.6% applied to forecast.; [DebtSchedule] Debt forecast uses target_debt_ratio: median historical debt = 343.4 VND bn. Low confidence — recommend analyst review._
+
+
+### 3.5 Dự phóng bảng cân đối kế toán (Chỉ tiêu chính)
+
+| Chỉ tiêu (tỷ VND) | 2022FY | 2023FY | 2024FY | 2025FY | 2026F | 2027F | 2028F | 2029F | 2030F |
+|---|---|---|---|---|---|---|---|---|---|
+| Tổng tài sản | 5,168.2 | 6,110.5 | 5,959.2 | 5,173.9 | **6,575.7** | **7,670.7** | **8,810.5** | **9,996.9** | **11,231.9** |
+| Vốn chủ sở hữu | 4,291.5 | 4,852.9 | 4,094.8 | 4,137.3 | **5,195.7** | **6,290.6** | **7,430.4** | **8,616.8** | **9,851.8** |
+| Tổng nợ vay | N/A | N/A | N/A | N/A | **343.4** | **343.4** | **343.4** | **343.4** | **343.4** |
+| Vay ròng (Net Borrowing) | N/A | N/A | N/A | N/A | **343.4** | **0.0** | **0.0** | **0.0** | **0.0** |
+| Cổ tức tiền mặt chi trả | N/A | N/A | N/A | N/A | **N/A** | **N/A** | **N/A** | **N/A** | **N/A** |
+| Lợi nhuận giữ lại | N/A | N/A | N/A | N/A | **1,058.4** | **1,094.9** | **1,139.8** | **1,186.4** | **1,235.0** |
+
+_Lưu ý: Mô hình driver-based — lãi vay = nợ bình quân × cost_of_debt (4.34%); nợ vay theo phương pháp target_debt_ratio; vốn chủ cập nhật qua retained earnings sau khi trừ cổ tức (payout 0% (không có dữ liệu))._
+
+
+
+#### Tài liệu bằng chứng đã sử dụng
+
+**Financial Data 2025FY (2025):**
+
+#### Tóm tắt tài chính DHG năm 2025 (FY)
+
+- accounts_payable.ending (Bảng cân đối kế toán): 391.6 tỷ VND (VND)
+- Phải thu khách hàng (Bảng cân đối kế toán): 615.2 tỷ VND (VND)
+- Chi đầu tư TSCĐ (CAPEX) (Báo cáo lưu chuyển tiền tệ): -31.1 tỷ VND (VND)
+- Tiền và tương đương tiền (Bảng cân đối kế toán): 129.9 tỷ VND (VND)
+- Giá vốn hàng bán (Báo cáo kết quả kinh doanh): -2,760.6 tỷ VND (VND)
+- current_assets.ending (Bảng cân đối kế toán): 3,888.8 tỷ VND (VND)
+- current_liabilities.ending (Bảng cân đối kế toán): 965.9 tỷ VND (VND)
+- Khấu hao (Báo cáo lưu chuyển tiền tệ): 119.0 tỷ VND (VND)
+- EPS cơ bản (Báo cáo kết quả kinh doanh): 6,308 VND (VND)
+- Vốn chủ sở hữu (cổ đông công ty mẹ) (Bảng cân đối kế toán): 4,137.3 tỷ VND (VND)
+- Lợi nhuận gộp (Báo cáo kết quả kinh doanh): 2,506.4 tỷ VND (VND)
+- Chi phí lãi vay (Báo cáo kết quả kinh doanh): -25.6 tỷ VND (VND)
+- Hàng tồn kho (Bảng cân đối kế toán): 1,031.2 tỷ VND (VND)
+- Lợi nhuận sau thuế (cổ đông công ty mẹ) (Báo cáo kết quả kinh doanh): 852.4 tỷ VND (VND)
+- Dòng tiền từ hoạt động kinh doanh (Báo cáo lưu chuyển tiền tệ): 1,213.0 tỷ VND (VND)
+- ppe.net (Bảng cân đối kế toán): 968.4 tỷ VND (VND)
+- Lợi nhuận trước thuế (Báo cáo kết quả kinh doanh): 986.6 tỷ VND (VND)
+- Doanh thu thuần (Báo cáo kết quả kinh doanh): 5,267.0 tỷ VND (VND)
+- Chi phí bán hàng và quản lý (Báo cáo kết quả kinh doanh): -1,157.3 tỷ VND (VND)
+- Vay ngắn hạn (Bảng cân đối kế toán): 0.0 tỷ VND (VND)
+- short_term_investments.ending (Bảng cân đối kế toán): 0.0 tỷ VND (VND)
+- tax_expense.total (Báo cáo kết quả kinh doanh): -134.2 tỷ VND (VND)
+- Tổng tài sản (Bảng cân đối kế toán): 5,173.9 tỷ VND (VND)
+- Tổng nợ phải trả (Bảng cân đối kế toán): 1,036.6 tỷ VND (VND)
+
+Dữ liệu từ báo cáo tài chính kiểm toán năm 2025.
+
+**Financial Data 2024FY (2024):**
+
+#### Tóm tắt tài chính DHG năm 2024 (FY)
+
+- accounts_payable.ending (Bảng cân đối kế toán): 167.3 tỷ VND (VND)
+- Phải thu khách hàng (Bảng cân đối kế toán): 556.9 tỷ VND (VND)
+- Chi đầu tư TSCĐ (CAPEX) (Báo cáo lưu chuyển tiền tệ): -88.7 tỷ VND (VND)
+- Tiền và tương đương tiền (Bảng cân đối kế toán): 62.9 tỷ VND (VND)
+- Giá vốn hàng bán (Báo cáo kết quả kinh doanh): -2,747.1 tỷ VND (VND)
+- current_assets.ending (Bảng cân đối kế toán): 4,604.0 tỷ VND (VND)
+- current_liabilities.ending (Bảng cân đối kế toán): 1,790.3 tỷ VND (VND)
+- Khấu hao (Báo cáo lưu chuyển tiền tệ): 169.7 tỷ VND (VND)
+- EPS cơ bản (Báo cáo kết quả kinh doanh): 5,763 VND (VND)
+- Vốn chủ sở hữu (cổ đông công ty mẹ) (Bảng cân đối kế toán): 4,094.8 tỷ VND (VND)
+- Lợi nhuận gộp (Báo cáo kết quả kinh doanh): 2,137.8 tỷ VND (VND)
+- Chi phí lãi vay (Báo cáo kết quả kinh doanh): -24.8 tỷ VND (VND)
+- Hàng tồn kho (Bảng cân đối kế toán): 1,117.8 tỷ VND (VND)
+- Lợi nhuận sau thuế (cổ đông công ty mẹ) (Báo cáo kết quả kinh doanh): 776.0 tỷ VND (VND)
+- Dòng tiền từ hoạt động kinh doanh (Báo cáo lưu chuyển tiền tệ): 1,317.6 tỷ VND (VND)
+- ppe.net (Bảng cân đối kế toán): 1,017.8 tỷ VND (VND)
+- Lợi nhuận trước thuế (Báo cáo kết quả kinh doanh): 904.5 tỷ VND (VND)
+- Doanh thu thuần (Báo cáo kết quả kinh doanh): 4,884.9 tỷ VND (VND)
+- Chi phí bán hàng và quản lý (Báo cáo kết quả kinh doanh): -904.7 tỷ VND (VND)
+- Vay ngắn hạn (Bảng cân đối kế toán): 649.9 tỷ VND (VND)
+- short_term_investments.ending (Bảng cân đối kế toán): 0.0 tỷ VND (VND)
+- tax_expense.total (Báo cáo kết quả kinh doanh): -128.5 tỷ VND (VND)
+- Tổng tài sản (Bảng cân đối kế toán): 5,959.2 tỷ VND (VND)
+- Tổng nợ phải trả (Bảng cân đối kế toán): 1,864.5 tỷ VND (VND)
+
+Dữ liệu từ báo cáo tài chính kiểm toán năm 2024.
+
+**Financial Data 2023FY (2023):**
+
+#### Tóm tắt tài chính DHG năm 2023 (FY)
+
+- accounts_payable.ending (Bảng cân đối kế toán): 218.0 tỷ VND (VND)
+- Phải thu khách hàng (Bảng cân đối kế toán): 564.3 tỷ VND (VND)
+- Chi đầu tư TSCĐ (CAPEX) (Báo cáo lưu chuyển tiền tệ): -486.3 tỷ VND (VND)
+- Tiền và tương đương tiền (Bảng cân đối kế toán): 94.1 tỷ VND (VND)
+- Giá vốn hàng bán (Báo cáo kết quả kinh doanh): -2,671.8 tỷ VND (VND)
+- current_assets.ending (Bảng cân đối kế toán): 4,642.2 tỷ VND (VND)
+- current_liabilities.ending (Bảng cân đối kế toán): 1,189.2 tỷ VND (VND)
+- Khấu hao (Báo cáo lưu chuyển tiền tệ): 88.7 tỷ VND (VND)
+- EPS cơ bản (Báo cáo kết quả kinh doanh): 7,780 VND (VND)
+- Vốn chủ sở hữu (cổ đông công ty mẹ) (Bảng cân đối kế toán): 4,852.9 tỷ VND (VND)
+- Lợi nhuận gộp (Báo cáo kết quả kinh doanh): 2,343.5 tỷ VND (VND)
+- Chi phí lãi vay (Báo cáo kết quả kinh doanh): -29.5 tỷ VND (VND)
+- Hàng tồn kho (Bảng cân đối kế toán): 1,538.8 tỷ VND (VND)
+- Lợi nhuận sau thuế (cổ đông công ty mẹ) (Báo cáo kết quả kinh doanh): 1,050.7 tỷ VND (VND)
+- Dòng tiền từ hoạt động kinh doanh (Báo cáo lưu chuyển tiền tệ): 240.2 tỷ VND (VND)
+- ppe.net (Bảng cân đối kế toán): 634.3 tỷ VND (VND)
+- Lợi nhuận trước thuế (Báo cáo kết quả kinh doanh): 1,159.2 tỷ VND (VND)
+- Doanh thu thuần (Báo cáo kết quả kinh doanh): 5,015.4 tỷ VND (VND)
+- Chi phí bán hàng và quản lý (Báo cáo kết quả kinh doanh): -978.4 tỷ VND (VND)
+- Vay ngắn hạn (Bảng cân đối kế toán): 572.2 tỷ VND (VND)
+- short_term_investments.ending (Bảng cân đối kế toán): 0.0 tỷ VND (VND)
+- tax_expense.total (Báo cáo kết quả kinh doanh): -108.5 tỷ VND (VND)
+- Tổng tài sản (Bảng cân đối kế toán): 6,110.5 tỷ VND (VND)
+- Tổng nợ phải trả (Bảng cân đối kế toán): 1,257.5 tỷ VND (VND)
+
+Dữ liệu từ báo cáo tài chính kiểm toán năm 2023.
+
+**Financial Data 2022FY (2022):**
+
+#### Tóm tắt tài chính DHG năm 2022 (FY)
+
+- accounts_payable.ending (Bảng cân đối kế toán): 364.4 tỷ VND (VND)
+- Phải thu khách hàng (Bảng cân đối kế toán): 320.5 tỷ VND (VND)
+- Chi đầu tư TSCĐ (CAPEX) (Báo cáo lưu chuyển tiền tệ): -234.0 tỷ VND (VND)
+- Tiền và tương đương tiền (Bảng cân đối kế toán): 34.0 tỷ VND (VND)
+- Giá vốn hàng bán (Báo cáo kết quả kinh doanh): -2,418.5 tỷ VND (VND)
+- current_assets.ending (Bảng cân đối kế toán): 4,218.8 tỷ VND (VND)
+- current_liabilities.ending (Bảng cân đối kế toán): 811.5 tỷ VND (VND)
+- Khấu hao (Báo cáo lưu chuyển tiền tệ): 81.0 tỷ VND (VND)
+- EPS cơ bản (Báo cáo kết quả kinh doanh): 7,318 VND (VND)
+- Vốn chủ sở hữu (cổ đông công ty mẹ) (Bảng cân đối kế toán): 4,291.5 tỷ VND (VND)
+- Lợi nhuận gộp (Báo cáo kết quả kinh doanh): 2,257.5 tỷ VND (VND)
+- Chi phí lãi vay (Báo cáo kết quả kinh doanh): -12.6 tỷ VND (VND)
+- Hàng tồn kho (Bảng cân đối kế toán): 1,251.9 tỷ VND (VND)
+- Lợi nhuận sau thuế (cổ đông công ty mẹ) (Báo cáo kết quả kinh doanh): 988.5 tỷ VND (VND)
+- Dòng tiền từ hoạt động kinh doanh (Báo cáo lưu chuyển tiền tệ): 901.3 tỷ VND (VND)
+- ppe.net (Bảng cân đối kế toán): 585.6 tỷ VND (VND)
+- Lợi nhuận trước thuế (Báo cáo kết quả kinh doanh): 1,099.6 tỷ VND (VND)
+- Doanh thu thuần (Báo cáo kết quả kinh doanh): 4,676.0 tỷ VND (VND)
+- Chi phí bán hàng và quản lý (Báo cáo kết quả kinh doanh): -913.2 tỷ VND (VND)
+- Vay ngắn hạn (Bảng cân đối kế toán): 114.7 tỷ VND (VND)
+- short_term_investments.ending (Bảng cân đối kế toán): 0.0 tỷ VND (VND)
+- tax_expense.total (Báo cáo kết quả kinh doanh): -111.2 tỷ VND (VND)
+- Tổng tài sản (Bảng cân đối kế toán): 5,168.2 tỷ VND (VND)
+- Tổng nợ phải trả (Bảng cân đối kế toán): 876.6 tỷ VND (VND)
+
+Dữ liệu từ báo cáo tài chính kiểm toán năm 2022.
+
+**Catalyst Events:**
+
+#### Sự kiện doanh nghiệp và môi trường kinh doanh
+
+- [2026-05-25] (news) DHG: Thông báo đường dẫn báo cáo thường niên năm 2025: 
+
+
+
+---
+
+## 4. Định giá (Valuation)
+
+### 4.1 DCF OCF-CAPEX — Tham khảo lịch sử dòng tiền _(không dùng làm target price)_
+
+> **Giới hạn:** Phương pháp này dùng CAGR từ OCF lịch sử biến động (không phải driver-based).
+> Năm CAPEX đầu tư lớn (ví dụ xây nhà máy) làm FCF lịch sử âm → CAGR méo → target price không đáng tin.
+> **Chỉ xem để hiểu vùng biến động rộng. Định giá chính là §4.5 Blend 60/40.**
+
+Giả định: WACC = 10.0%, g = 3.0%, kỳ dự báo = 5 năm
+
+| Kịch bản | Giá trị nội tại (VND/CP) | WACC | g | Cảnh báo |
+|---|---|---|---|---|
+| Bear case | N/A | 12.0% | 2.0% | Chỉ tham khảo |
+| Base case | N/A | 10.0% | 3.0% | Chỉ tham khảo |
+| Bull case | N/A | 8.0% | 4.0% | Chỉ tham khảo |
+
+### 4.2 Sensitivity — Giá trị nội tại DCF (VND/CP)
+
+| WACC \ g | 2.0% | 2.5% | 3.0% | 3.5% | 4.0% |
+|---|---|---|---|---|---|
+| 8.0% | — | — | — | — | — |
+| 9.0% | — | — | — | — | — |
+| 10.0% | — | — | — | — | — |
+| 11.0% | — | — | — | — | — |
+| 12.0% | — | — | — | — | — |
+
+### 4.3 Mô hình FCFF (trọng số 60%)
+
+**Công thức:** FCFF = EBIT × (1 − T) + Khấu hao − CAPEX − ΔVLĐ
+
+| Năm | EBIT | EBIT(1-T) | Khấu hao | CAPEX | ΔVLĐ | FCFF | PV(FCFF) |
+|---|---|---|---|---|---|---|---|
+| 2026F | 1,514.6 | 1,335.0 | 110.4 | 186.9 | 4.3 | 1,254.2 | 1,102.1 |
+| 2027F | 1,575.9 | 1,389.0 | 114.8 | 194.4 | 4.4 | 1,305.0 | 1,007.7 |
+| 2028F | 1,639.6 | 1,445.2 | 119.5 | 202.3 | 4.6 | 1,357.8 | 921.3 |
+| 2029F | 1,706.0 | 1,503.7 | 124.3 | 210.5 | 4.8 | 1,412.7 | 842.3 |
+| 2030F | 1,775.0 | 1,564.5 | 129.4 | 219.0 | 5.0 | 1,469.9 | 770.2 |
+
+| | Tỷ VND |
+|---|---|
+| Tổng PV(FCFF) | 4,643.6 |
+| Giá trị cuối kỳ (Terminal Value) | 14,018.5 |
+| PV(Terminal Value) | 7,345.0 |
+| Giá trị doanh nghiệp (EV) | 11,988.6 |
+| Nợ ròng (Net Debt) | -129.9 |
+| Giá trị vốn chủ (Equity Value) | 12,118.4 |
+| Số cổ phiếu (triệu CP) | 135.1 |
+
+**Giá mục tiêu FCFF: 89,687 VND/CP**
+Upside so với giá thị trường: **-5.0%**
+
+**Thông số WACC (chưa được chuyên gia phê duyệt):**
+
+| Thông số | Giá trị |
+|---|---|
+| Lãi suất phi rủi ro (rf) | 4.0% |
+| Beta | 0.85 |
+| TSSL kỳ vọng thị trường (Rm) | 12.0% |
+| Chi phí vốn chủ (Ke) | 13.80% |
+| Chi phí nợ (Kd) | 8.0% |
+| Thuế suất thực tế | 12% |
+| WACC | **13.80%** |
+| Tốc độ tăng trưởng cuối kỳ (g) | 3.0% |
+
+> **Lưu ý:** Tất cả giả định WACC và dự phóng là _default_unapproved_ — phải được chuyên gia xem xét trước khi sử dụng cho quyết định đầu tư.
+
+> _Cảnh báo: Non-operating items (PBT gap) detected: ranged from -6.4% to -3.5% of revenue; median -5.6% applied to forecast.; [DebtSchedule] Debt forecast uses target_debt_ratio: median historical debt = 343.4 VND bn. Low confidence — recommend analyst review.; [DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout — equity may be overstated. Recommend analyst review and explicit payout assumption._
+
+
+
+### 4.4 Mô hình FCFE (trọng số 40%)
+
+**Công thức:** FCFE = LNST + Khấu hao − CAPEX − ΔVLĐ + Vay ròng
+
+> FCFE chiết khấu bằng Re (chi phí vốn chủ), **không dùng WACC**.
+> FCFE cho trực tiếp Equity Value — **không trừ nợ ròng lần nữa**.
+> Vay ròng lấy từ debt_schedule (phương pháp: target_debt_ratio).
+
+| Năm | LNST | Khấu hao | CAPEX | ΔVLĐ | Vay ròng | FCFE | PV(FCFE) |
+|---|---|---|---|---|---|---|---|
+| 2026F | 1,058.4 | 110.4 | 186.9 | 4.3 | 343.4 | 1,321.1 | 1,160.9 |
+| 2027F | 1,094.9 | 114.8 | 194.4 | 4.4 | 0.0 | 1,010.9 | 780.6 |
+| 2028F | 1,139.8 | 119.5 | 202.3 | 4.6 | 0.0 | 1,052.4 | 714.1 |
+| 2029F | 1,186.4 | 124.3 | 210.5 | 4.8 | 0.0 | 1,095.5 | 653.2 |
+| 2030F | 1,235.0 | 129.4 | 219.0 | 5.0 | 0.0 | 1,140.3 | 597.5 |
+
+| | Tỷ VND |
+|---|---|
+| Tổng PV(FCFE) | 3,906.2 |
+| Giá trị cuối kỳ (Terminal Value FCFE) | 10,875.3 |
+| PV(Terminal Value) | 5,698.1 |
+| Giá trị vốn chủ (Equity Value) | 9,604.3 |
+| Số cổ phiếu (triệu CP) | 135.1 |
+
+**Giá mục tiêu FCFE: 71,080 VND/CP**
+Upside so với giá thị trường: **-24.7%**
+
+**Thông số Re — Extended CAPM (chưa phê duyệt):**
+
+| Thông số | Giá trị |
+|---|---|
+| Lãi suất phi rủi ro (Rf) | 4.0% |
+| Beta | 0.85 |
+| Phần bù rủi ro thị trường (ERP) | 8.0% |
+| Phần bù quy mô (Size Premium) | 2.0% |
+| Phần bù rủi ro riêng (Specific Risk) | 1.0% |
+| Chi phí vốn chủ (Re) | **13.80%** |
+| Tốc độ tăng trưởng cuối kỳ (g) | 3.0% |
+
+> _Cảnh báo: Non-operating items (PBT gap) detected: ranged from -6.4% to -3.5% of revenue; median -5.6% applied to forecast.; [DebtSchedule] Debt forecast uses target_debt_ratio: median historical debt = 343.4 VND bn. Low confidence — recommend analyst review.; [DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout — equity may be overstated. Recommend analyst review and explicit payout assumption._
+
+
+
+### 4.5 Blend DCF — Giá mục tiêu kết hợp 60% FCFF + 40% FCFE
+
+**Công thức:** Target Price_DCF = 0.60 × Price_FCFF + 0.40 × Price_FCFE
+
+| Phương pháp | Giá mục tiêu (VND/CP) | Trọng số | Đóng góp (VND/CP) |
+|---|---|---|---|
+| FCFF DCF | 89,687 | 60% | 53,812 |
+| FCFE DCF | 71,080 | 40% | 28,432 |
+| **Target Price DCF** | **82,244 VND/CP** | 100% | **82,244 VND/CP** |
+
+| Chỉ tiêu | Giá trị |
+|---|---|
+| Giá thị trường hiện tại | 94,400 VND/CP |
+| Target Price (60/40 blend) | 82,244 VND/CP |
+| Upside / Downside | -12.9% |
+| Margin of Safety | -14.8% |
+| FCFF vs FCFE Gap | 26.2% [high] |
+| TV Weight (FCFF/EV) | 61.3% [ok] |
+
+### Bảng sensitivity Blend (Price_FCFF × Price_FCFE → Target Price_DCF, VND/CP)
+
+| FCFF \ FCFE | 61,080 | 66,080 | 71,080 | 76,080 | 81,080 |
+|---|---|---|---|---|---|
+| 79,687 | 72,244 | 74,244 | 76,244 | 78,244 | 80,244 |
+| 84,687 | 75,244 | 77,244 | 79,244 | 81,244 | 83,244 |
+| 89,687 | 78,244 | 80,244 | 82,244 | 84,244 | 86,244 |
+| 94,687 | 81,244 | 83,244 | 85,244 | 87,244 | 89,244 |
+| 99,687 | 84,244 | 86,244 | 88,244 | 90,244 | 92,244 |
+
+_Vùng upside: [-23.5%, -2.3%] so với giá thị trường 94,400 VND/CP_
+
+> ⚠ FCFF vs FCFE gap = 26.2% > 25% — cần kiểm tra Net Borrowing, CAPEX, NWC trước khi kết luận target price
+> **Lưu ý:** Trọng số 60% FCFF / 40% FCFE là quy ước chuẩn cho cổ phiếu dược với nợ vay vừa phải và dòng tiền ổn định.
+> Nếu gap FCFF/FCFE > 25%, phải kiểm tra Net Borrowing, CAPEX và NWC trước khi dùng target price.
+
+
+### 4.6 Bội số thị trường (Cross-check)
+
+| Phương pháp | Giá trị | Giá thị trường | Ghi chú |
+|---|---|---|---|
+| P/E quan sát | 15.0x | 94,400 VND | EPS = 6,308 VND/CP |
+| Implied @ P/E Pending — chưa có dữ liệu peer | N/A | 94,400 VND | Bội số mục tiêu ngành |
+| Implied @ EV/EBITDA Pending — chưa có dữ liệu peer | N/A | 94,400 VND | Bội số mục tiêu ngành |
+
+> Bội số mục tiêu theo ước tính ngành — cần cập nhật bằng dữ liệu peer group thực tế trước publish.
+
+---
+
+## 5. Rủi ro đầu tư
+
+| Loại rủi ro | Driver tài chính | Mô tả | Mức độ | Khả năng | Cơ sở / Giám sát |
+|---|---|---|---|---|---|
+| Chính sách BHYT/đấu thầu | Biên lợi nhuận gộp, Doanh thu | Thay đổi quy định đấu thầu, giá trần thuốc ảnh hưởng biên lợi nhuận gộp (47.6%) | Cao | Trung bình | Generic — cần kiểm chứng; Theo dõi kết quả đấu thầu hàng năm |
+| Tỷ giá / Nguyên liệu | COGS, Biên gộp | Lạm phát và biến động tỷ giá làm tăng giá vốn nguyên liệu nhập khẩu | Trung bình | Trung bình | Generic — theo dõi tỷ lệ COGS/doanh thu |
+| Cạnh tranh generic/nhập khẩu | Doanh thu, thị phần | Thuốc generic và nhập khẩu giá rẻ tạo áp lực giá bán và thị phần | Trung bình | Cao | Generic sector risk |
+| Tập trung nhà cung cấp | COGS, hoạt động | Phụ thuộc vào số ít nhà cung cấp nguyên liệu chính | Trung bình | Thấp | Generic — xem báo cáo thường niên |
+| Giả định mô hình | Target price, Rating | Giả định WACC/g chưa được analyst duyệt — target price nhạy cảm với WACC | Thấp – Trung bình | Cao | Cần phê duyệt assumptions trước publish |
+
+> _Rủi ro đánh dấu "Generic" là rủi ro ngành chung chưa có evidence trực tiếp từ nguồn doanh nghiệp — cần kiểm chứng bằng công bố thông tin hoặc nguồn ngành trước khi xuất bản báo cáo final._
+
+---
+
+## 6. Kết luận và Kiểm toán chất lượng
+
+### 6.1 Điểm kết luận chính
+
+- **Tài chính:** DHG ghi nhận doanh thu 5,267.0 tỷ VND (2025FY), biên lợi nhuận gộp 47.6%, ROE 20.6% — nền tảng lợi nhuận tốt.
+- **Dự phóng:** CAGR doanh thu 4.0% lịch sử; dự phóng 2026F–2030F dựa trên tỷ lệ median lịch sử chưa được analyst phê duyệt.
+- **Định giá FCFF:** 89,687 VND/CP (upside -5.0%) | **FCFE:** 71,080 VND/CP (upside -24.7%) | **Blend 60/40:** 82,244 VND/CP (upside -12.9%) — chưa được phê duyệt.
+- **Rating Draft:** Draft / Needs Analyst Review (model-implied downside: -12.9%) — chỉ có hiệu lực sau khi assumptions được analyst phê duyệt.
+- **Rủi ro chính:** Thay đổi chính sách BHYT và áp lực cạnh tranh generic là rủi ro trọng yếu nhất với biên lợi nhuận.
+
+### 6.2 Tóm tắt định giá
+
+| Chỉ tiêu | Giá trị |
+|---|---|
+| Doanh thu thuần (FY2025) | 5,267.0 tỷ VND |
+| Lợi nhuận sau thuế (FY2025) | 852.4 tỷ VND |
+| Biên lợi nhuận gộp | 47.6% |
+| Biên lợi nhuận ròng | 16.2% |
+| ROE | 20.6% |
+| Nợ/Vốn chủ | 0.3x |
+| Giá Blend DCF (60% FCFF + 40% FCFE) | 82,244 VND/CP |
+| Giá FCFF mục tiêu | 89,687 VND/CP |
+| Giá FCFE mục tiêu | 71,080 VND/CP |
+| Giá DCF base | N/A |
+| Draft Rating | Draft / Needs Analyst Review (model-implied downside: -12.9%) |
+
+### 6.3 Kiểm toán chất lượng
+
+| Gate | Trạng thái | Ghi chú |
+|---|---|---|
+| Nguồn dữ liệu | PASS | 96 facts từ snapshot canonical |
+| Nhất quán số liệu | Xem evaluate_report.py | Chạy scripts/evaluate_report.py --ticker DHG |
+| Tái lập valuation | PASS | FCFF recomputable từ artifact |
+| Citation coverage | PASS | 116 citations được tạo |
+| Độ tươi dữ liệu | PASS | Dữ liệu đến FY2025 |
+| Phê duyệt giả định | PENDING | Assumptions chưa được analyst phê duyệt |
+| Phê duyệt final | PENDING | Chưa qua HITL approval |
+
+### 6.4 Disclaimer
+
+> **Tuyên bố quan trọng:** Báo cáo này chỉ nhằm mục đích nghiên cứu và tham khảo học thuật/sản phẩm. Nội dung không phải là khuyến nghị đầu tư cá nhân hóa, không phải lời mời mua/bán chứng khoán, và không thay thế tư vấn từ chuyên gia được cấp phép. Kết quả định giá phụ thuộc vào dữ liệu đầu vào, giả định mô hình và điều kiện thị trường tại thời điểm lập báo cáo. Rating trong báo cáo là kết luận mô hình dựa trên dữ liệu và giả định hiện tại — không phải khuyến nghị đầu tư cá nhân hóa. Hiệu suất quá khứ không đảm bảo kết quả tương lai.
+
+---
+
+## 7. Phụ lục
+
+### A. Giả định định giá (chưa phê duyệt)
+
+```json
+{
+  "wacc": 0.1,
+  "terminal_growth": 0.03,
+  "forecast_years": 5,
+  "target_pe": 15.0,
+  "target_pb": 2.5,
+  "target_ev_ebitda": 10.0,
+  "note": "Assumptions are defaults \u2014 must be reviewed and approved before use in final reports."
+}
+```
+
+### B. Giả định FCFF/WACC
+
+```json
+{
+  "risk_free_rate": 0.04,
+  "beta": 0.85,
+  "expected_market_return": 0.12,
+  "size_premium": 0.02,
+  "specific_risk_premium": 0.01,
+  "cost_of_equity": 0.138,
+  "cost_of_debt": 0.08,
+  "tax_rate": 0.11857899999999999,
+  "wacc_override": null
+}
+```
+
+### C. Bảng bằng chứng (Citation Map)
+
+| Chỉ tiêu | Kỳ | Giá trị | Nguồn |
+|---|---|---|---|
+| accounts_payable.ending | 2022FY | 364.4 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| accounts_payable.ending | 2023FY | 218.0 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| accounts_payable.ending | 2024FY | 167.3 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| accounts_payable.ending | 2025FY | 391.6 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| accounts_receivable.ending | 2022FY | 320.5 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| accounts_receivable.ending | 2023FY | 564.3 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| accounts_receivable.ending | 2024FY | 556.9 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| accounts_receivable.ending | 2025FY | 615.2 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| CAPEX | 2022FY | -234.0 tỷ VND | Cash Flow (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| CAPEX | 2023FY | -486.3 tỷ VND | Cash Flow (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| CAPEX | 2024FY | -88.7 tỷ VND | Cash Flow (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| CAPEX | 2025FY | -31.1 tỷ VND | Cash Flow (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| Tiền & tương đương tiền | 2022FY | 34.0 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| Tiền & tương đương tiền | 2023FY | 94.1 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| Tiền & tương đương tiền | 2024FY | 62.9 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| Tiền & tương đương tiền | 2025FY | 129.9 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| cogs.total | 2022FY | -2,418.5 tỷ VND | Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| cogs.total | 2023FY | -2,671.8 tỷ VND | Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| cogs.total | 2024FY | -2,747.1 tỷ VND | Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| cogs.total | 2025FY | -2,760.6 tỷ VND | Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| current_assets.ending | 2022FY | 4,218.8 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| current_assets.ending | 2023FY | 4,642.2 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| current_assets.ending | 2024FY | 4,604.0 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| current_assets.ending | 2025FY | 3,888.8 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| current_liabilities.ending | 2022FY | 811.5 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| current_liabilities.ending | 2023FY | 1,189.2 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| current_liabilities.ending | 2024FY | 1,790.3 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| current_liabilities.ending | 2025FY | 965.9 tỷ VND | Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| Khấu hao | 2022FY | 81.0 tỷ VND | Cash Flow (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+| Khấu hao | 2023FY | 88.7 tỷ VND | Cash Flow (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)] |
+
+### D. Footnotes (Trích dẫn chi tiết)
+
+[^revenue_net_2022]: **Doanh thu thuần** — 4,676.0 tỷ VND, kỳ 2022FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=4)_
+
+[^revenue_net_2023]: **Doanh thu thuần** — 5,015.4 tỷ VND, kỳ 2023FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=3)_
+
+[^revenue_net_2024]: **Doanh thu thuần** — 4,884.9 tỷ VND, kỳ 2024FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=2)_
+
+[^revenue_net_2025]: **Doanh thu thuần** — 5,267.0 tỷ VND, kỳ 2025FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=1)_
+
+[^gross_profit_total_2022]: **Lợi nhuận gộp** — 2,257.5 tỷ VND, kỳ 2022FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=12)_
+
+[^gross_profit_total_2023]: **Lợi nhuận gộp** — 2,343.5 tỷ VND, kỳ 2023FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=11)_
+
+[^gross_profit_total_2024]: **Lợi nhuận gộp** — 2,137.8 tỷ VND, kỳ 2024FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=10)_
+
+[^gross_profit_total_2025]: **Lợi nhuận gộp** — 2,506.4 tỷ VND, kỳ 2025FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=9)_
+
+[^net_income_parent_2022]: **Lợi nhuận sau thuế (cty mẹ)** — 988.5 tỷ VND, kỳ 2022FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=20)_
+
+[^net_income_parent_2023]: **Lợi nhuận sau thuế (cty mẹ)** — 1,050.7 tỷ VND, kỳ 2023FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=19)_
+
+[^net_income_parent_2024]: **Lợi nhuận sau thuế (cty mẹ)** — 776.0 tỷ VND, kỳ 2024FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=18)_
+
+[^net_income_parent_2025]: **Lợi nhuận sau thuế (cty mẹ)** — 852.4 tỷ VND, kỳ 2025FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=17)_
+
+[^eps_basic_2022]: **EPS cơ bản (VND/CP)** — 7,318.0 tỷ VND, kỳ 2022FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=24)_
+
+[^eps_basic_2023]: **EPS cơ bản (VND/CP)** — 7,780.0 tỷ VND, kỳ 2023FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=23)_
+
+[^eps_basic_2024]: **EPS cơ bản (VND/CP)** — 5,763.0 tỷ VND, kỳ 2024FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=22)_
+
+[^eps_basic_2025]: **EPS cơ bản (VND/CP)** — 6,308.0 tỷ VND, kỳ 2025FY.
+Nguồn: _Income Statement (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/income_statement/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=21)_
+
+[^operating_cash_flow_total_2022]: **Dòng tiền hoạt động** — 901.3 tỷ VND, kỳ 2022FY.
+Nguồn: _Cash Flow (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/cash_flow/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=44)_
+
+[^operating_cash_flow_total_2023]: **Dòng tiền hoạt động** — 240.2 tỷ VND, kỳ 2023FY.
+Nguồn: _Cash Flow (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/cash_flow/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=43)_
+
+[^operating_cash_flow_total_2024]: **Dòng tiền hoạt động** — 1,317.6 tỷ VND, kỳ 2024FY.
+Nguồn: _Cash Flow (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/cash_flow/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=42)_
+
+[^operating_cash_flow_total_2025]: **Dòng tiền hoạt động** — 1,213.0 tỷ VND, kỳ 2025FY.
+Nguồn: _Cash Flow (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/cash_flow/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=41)_
+
+[^total_assets_ending_2022]: **Tổng tài sản** — 5,168.2 tỷ VND, kỳ 2022FY.
+Nguồn: _Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/balance_sheet/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=36)_
+
+[^total_assets_ending_2023]: **Tổng tài sản** — 6,110.5 tỷ VND, kỳ 2023FY.
+Nguồn: _Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/balance_sheet/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=35)_
+
+[^total_assets_ending_2024]: **Tổng tài sản** — 5,959.2 tỷ VND, kỳ 2024FY.
+Nguồn: _Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/balance_sheet/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=34)_
+
+[^total_assets_ending_2025]: **Tổng tài sản** — 5,173.9 tỷ VND, kỳ 2025FY.
+Nguồn: _Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/balance_sheet/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=33)_
+
+[^equity_parent_2022]: **Vốn chủ sở hữu (cty mẹ)** — 4,291.5 tỷ VND, kỳ 2022FY.
+Nguồn: _Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/balance_sheet/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=40)_
+
+[^equity_parent_2023]: **Vốn chủ sở hữu (cty mẹ)** — 4,852.9 tỷ VND, kỳ 2023FY.
+Nguồn: _Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/balance_sheet/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=39)_
+
+[^equity_parent_2024]: **Vốn chủ sở hữu (cty mẹ)** — 4,094.8 tỷ VND, kỳ 2024FY.
+Nguồn: _Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/balance_sheet/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=38)_
+
+[^equity_parent_2025]: **Vốn chủ sở hữu (cty mẹ)** — 4,137.3 tỷ VND, kỳ 2025FY.
+Nguồn: _Balance Sheet (VCI) [Tier 3 — API tổng hợp (cần kiểm chứng)]_ | Chỉ số phái sinh | URI: `vnstock://vci/finance/balance_sheet/DHG?period=year`
+⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp.
+_(Internal: fact_id=37)_

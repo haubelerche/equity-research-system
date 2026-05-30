@@ -318,11 +318,60 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--report-type", default="full_report", dest="run_type")
     parser.add_argument("--skip-ingest", action="store_true", dest="skip_ingest",
                         help="Skip build_facts step and reuse existing snapshot.")
+    parser.add_argument("--legacy-pipeline", action="store_true", dest="legacy_pipeline",
+                        help="Use the pre-harness script pipeline instead of the LangGraph harness.")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    if not args.legacy_pipeline:
+        from backend.harness.runner import ResearchGraphRunner
+        from backend.orchestrator import RunContext
+        from backend.runtime_store import RuntimeStore
+        from backend.settings import settings
+
+        ticker = args.ticker.strip().upper()
+        run_id = _run_id(ticker)
+        flags = {
+            "factsChanged": False,
+            "catalystChanged": False,
+            "valuationChanged": False,
+            "thesisNeedsRefresh": False,
+            "citationsNeedRefresh": False,
+        }
+        policy = {
+            "budget_policy": settings.default_budget_policy,
+            "soft_budget_usd": settings.soft_budget_usd,
+            "hard_budget_usd": settings.hard_budget_usd,
+            "fallback_model": settings.fallback_model,
+        }
+        store = RuntimeStore(dsn=settings.database_url)
+        store.check_schema_version()
+        store.create_run(
+            run_id=run_id,
+            ticker=ticker,
+            run_type=args.run_type,
+            objective=f"full_pipeline_{args.run_type}_{ticker}",
+            flags=flags,
+            config_snapshot_json=policy,
+            requested_by="run_research_cli",
+        )
+        runner = ResearchGraphRunner(store=store)
+        runner.execute(
+            RunContext(
+                run_id=run_id,
+                ticker=ticker,
+                run_type=args.run_type,
+                objective=f"full_pipeline_{args.run_type}_{ticker}",
+                policy=policy,
+                flags=flags,
+            )
+        )
+        print(f"[run_research] harness submitted run_id={run_id}")
+        print("[run_research] graph pauses for HITL approvals when required")
+        return
+
     runner = ResearchRunner(
         ticker=args.ticker,
         run_type=args.run_type,

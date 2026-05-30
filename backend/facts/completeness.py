@@ -12,7 +12,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 
-from backend.facts.normalizer import FactTable, periods_sorted
+from backend.facts.normalizer import (
+    FactTable, periods_sorted, build_source_tier_coverage,
+)
 from backend.facts.reconciliation import run_reconciliation, ReconciliationReport
 
 
@@ -58,6 +60,76 @@ def _year_from_period(period: str) -> int | None:
         return None
 
 
+def check_source_tier_coverage(
+    ticker: str,
+    periods_available: list[str],
+    source_tiers_by_period: dict[str, list[int]] | None = None,
+) -> dict[str, Any]:
+    """Check Plan §11.2: each material historical FY must have ≥1 Tier 0/1 source.
+
+    Args:
+        ticker: Ticker symbol.
+        periods_available: FY period strings checked (e.g. ["2021FY","2022FY"]).
+        source_tiers_by_period: mapping period → list of source tiers present.
+            Pass None to treat all periods as having no Tier 0/1 source (no silent pass).
+
+    Returns a dict with:
+        status: "pass" | "warn" | "fail"
+        tier3_only_periods: list of periods that only have Tier 3 sources
+        missing_tier1_periods: list of periods with no Tier 0/1 source
+        blocking_reasons: list of human-readable strings
+    """
+    # Treat None as an empty mapping — all periods lack a known tier.
+    # The silent pass (previously: return pass when None) has been removed.
+    if source_tiers_by_period is None:
+        source_tiers_by_period = {}
+
+    tier3_only: list[str] = []
+    missing_tier1: list[str] = []
+    blocking_reasons: list[str] = []
+
+    for period in periods_available:
+        tiers = source_tiers_by_period.get(period, [])
+        # Tier 0 = audited BCTC/exchange filing, Tier 1 = company IR/manual verified
+        # Tier 2 = reputable media (acceptable as corroboration), Tier 3 = API aggregator
+        has_tier01 = any(t <= 1 for t in tiers)
+        has_tier3_only = tiers and all(t >= 3 for t in tiers)
+        no_source = not tiers
+
+        if not has_tier01:
+            missing_tier1.append(period)
+            if has_tier3_only:
+                tier3_only.append(period)
+                blocking_reasons.append(
+                    f"tier3_only_source: {period} has only Tier-3 API data "
+                    f"— no Tier-0/1 audited/verified source available"
+                )
+            elif no_source:
+                blocking_reasons.append(
+                    f"no_source_data: {period} has no source tier information"
+                )
+
+    if not missing_tier1:
+        status = "pass"
+    elif len(missing_tier1) <= 1:
+        # One period without Tier 1/2 → warn only (allow valuation with warning)
+        status = "warn"
+    else:
+        # Two or more periods without Tier 1/2 → block trend analysis
+        status = "fail"
+        blocking_reasons.append(
+            f"consecutive_tier3_periods: {len(missing_tier1)} periods lack Tier-1/2 source "
+            f"— trend analysis blocked"
+        )
+
+    return {
+        "status": status,
+        "tier3_only_periods": tier3_only,
+        "missing_tier1_periods": missing_tier1,
+        "blocking_reasons": blocking_reasons,
+    }
+
+
 def build_fy_validation_report(
     ticker: str,
     table: FactTable,
@@ -68,6 +140,7 @@ def build_fy_validation_report(
     forbidden_periods: list[str],
     generated_at: datetime,
     validation_status_table: dict[str, dict[str, str]] | None = None,
+    source_tiers_by_period: dict[str, list[int]] | None = None,
 ) -> dict[str, Any]:
     """Build the three-tier FY gate report for a ticker.
 
@@ -147,21 +220,45 @@ def build_fy_validation_report(
             f"reconciliation_failures: {', '.join(c.name for c in recon.critical_failures)}"
         )
 
+    # --- Tier source coverage check (Plan §11.2) — always runs ---
+    # Auto-compute source_tiers_by_period from raw_facts if not provided by caller.
+    # This removes the silent pass: the gate now always has real data to evaluate.
+    if source_tiers_by_period is None:
+        raw_tier_coverage = build_source_tier_coverage(
+            raw_facts=raw_facts,
+            required_periods=required_periods,
+        )
+        source_tiers_by_period = {
+            period: cov["tiers_present"]
+            for period, cov in raw_tier_coverage.items()
+        }
+
+    tier_coverage = check_source_tier_coverage(
+        ticker, periods_available, source_tiers_by_period
+    )
+    if tier_coverage["status"] == "fail":
+        blocking_reasons.extend(tier_coverage["blocking_reasons"])
+
     # --- Overall valuation_gate ---
     all_pass = (
         coverage_gate == "pass"
         and core_keys_gate == "pass"
         and source_validation_gate == "pass"
         and not recon.valuation_blocked
+        and tier_coverage["status"] != "fail"
     )
     valuation_gate = "pass" if all_pass else "fail"
     valuation_ready = all_pass
 
-    # run_status
+    # run_status — ordered by severity
     if coverage_gate == "fail" or core_keys_gate == "fail":
         run_status = "needs_fallback"
     elif source_validation_gate == "fail":
         run_status = "needs_human_verification"
+    elif tier_coverage["status"] == "fail":
+        run_status = "tier3_only_warning"   # data present but no Tier 0/1 verified source
+    elif tier_coverage["status"] == "warn":
+        run_status = "tier3_only_warning"
     else:
         run_status = "ok"
 
@@ -204,6 +301,10 @@ def build_fy_validation_report(
         "core_keys_gate": core_keys_gate,
         "source_validation_gate": source_validation_gate,
         "non_accepted_facts": non_accepted,
+        # Tier source coverage (Plan §11.2)
+        "source_tier_coverage_status": tier_coverage["status"],
+        "tier3_only_periods": tier_coverage["tier3_only_periods"],
+        "missing_tier1_periods": tier_coverage["missing_tier1_periods"],
         # Tier 4: reconciliation gate
         "reconciliation_gate": reconciliation_gate,
         "reconciliation_critical_failures": [
