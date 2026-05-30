@@ -77,6 +77,10 @@ def main() -> None:
     parser.add_argument("--tolerance-pct", type=float, default=0.5, dest="tolerance_pct")
     parser.add_argument("--no-promote", action="store_true",
                         help="Compute reconciliation without promoting facts")
+    parser.add_argument("--promote-official-only", action="store_true",
+                        dest="promote_official_only",
+                        help="Insert new canonical facts (v_official) for official-doc metrics "
+                             "that have no API/Tier-3 counterpart (e.g. years vnstock omits)")
     parser.add_argument("--canonical-version", default="v_legacy", dest="canonical_version")
     args = parser.parse_args()
     ticker = args.ticker.strip().upper()
@@ -88,6 +92,7 @@ def main() -> None:
         tolerance_pct=args.tolerance_pct,
         canonical_version=args.canonical_version,
         promote=not args.no_promote,
+        promote_official_only=args.promote_official_only,
     )
     artifact = write_artifact(summary, args.from_year, args.to_year)
     print(f"[reconcile_financial_facts] {ticker}: {summary.to_dict()}")

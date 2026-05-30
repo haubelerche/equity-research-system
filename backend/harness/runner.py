@@ -3,7 +3,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from backend.agents import AuditAgent, ResearchAgent
+from backend.agents.audit_agent import AuditAgent
+from backend.agents.research_agent import ResearchAgent
 from backend.harness.gates import citation_gate, data_quality_gate, export_gate, valuation_gate
 from backend.harness.graph import GRAPH_STAGES, build_langgraph
 from backend.harness.state import ResearchGraphState, stable_hash

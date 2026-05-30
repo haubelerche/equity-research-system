@@ -12,8 +12,6 @@ docs/superpowers/
 FinRobot/
 vnstock/
 
-# Tests (local only)
-tests/
 
 # Markdown docs (generated reports, plans)
 #*.md

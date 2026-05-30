@@ -159,6 +159,7 @@ def reconcile_ticker(
     tolerance_pct: float = DEFAULT_TOLERANCE_PCT,
     canonical_version: str = "v_legacy",
     promote: bool = True,
+    promote_official_only: bool = False,
     store=None,
 ) -> ReconciliationSummary:
     """DB-driven reconciliation for a ticker over a fiscal-year range.
@@ -166,6 +167,11 @@ def reconcile_ticker(
     Loads Tier-3 API canonical facts and official-document observations, compares them
     per (year, metric), persists results to fact.fact_reconciliation, and promotes
     matched facts by linking canonical_facts to the official document.
+
+    promote_official_only: when True, official-only facts (status=missing_api —
+      i.e. official doc exists but no Tier-3 API counterpart) are inserted as new
+      canonical facts with canonical_version='v_official' and status='manual_reviewed'.
+      Use when the source year has no API data (e.g. 2021FY vnstock gap).
     """
     import psycopg2.extras as _extras
 
@@ -245,7 +251,7 @@ def reconcile_ticker(
                     ),
                 )
 
-            # Promote only matched facts by linking the canonical fact to its official doc.
+            # Promote matched facts (API + official agree) → mark existing canonical fact.
             if promote and r.promotable and api_row and r.official_document_id:
                 reg.mark_fact_verified(
                     fact_id=api_row["fact_id"],
@@ -253,6 +259,33 @@ def reconcile_ticker(
                     reconciliation_status=r.status,
                     verified_by="reconcile_financial_facts",
                 )
+                summary.promoted += 1
+
+            # Official-only facts (no API counterpart) → insert new canonical fact.
+            elif (promote and promote_official_only
+                    and r.status == "missing_api"
+                    and off_row and r.official_document_id):
+                off_value = float(off_row["value"])
+                reg.insert_official_canonical_fact(
+                    ticker=ticker,
+                    period=period,
+                    metric=metric,
+                    value=off_value,
+                    official_document_id=r.official_document_id,
+                    unit="vnd_bn",
+                    source_tier=0,
+                    verified_by="reconcile_financial_facts_official_only",
+                )
+                # Update reconciliation row to reflect manual_reviewed
+                with conn.cursor() as wcur:
+                    wcur.execute(
+                        """
+                        UPDATE fact.fact_reconciliation
+                        SET reconciliation_status='manual_reviewed', requires_review=FALSE
+                        WHERE ticker=%s AND period=%s AND metric=%s
+                        """,
+                        (ticker, period, metric),
+                    )
                 summary.promoted += 1
 
     return summary

@@ -1,4 +1,2 @@
-from backend.harness.runner import ResearchGraphRunner
-from backend.harness.state import ResearchGraphState
-
-__all__ = ["ResearchGraphRunner", "ResearchGraphState"]
+# Harness package — import submodules directly to avoid circular imports.
+# e.g.: from backend.harness.runner import ResearchGraphRunner

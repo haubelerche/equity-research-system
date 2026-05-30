@@ -203,6 +203,59 @@ class OfficialDocumentRegistry:
                     (official_document_id, reconciliation_status, verified_by, fact_id),
                 )
 
+    def insert_official_canonical_fact(
+        self,
+        ticker: str,
+        period: str,
+        metric: str,
+        value: float,
+        official_document_id: int,
+        unit: str = "vnd_bn",
+        currency: str = "V",
+        source_tier: int = 0,
+        verified_by: str = "official_doc_only",
+    ) -> str:
+        """Insert a canonical fact sourced entirely from an official document.
+
+        Used for official-only years where no API/Tier-3 counterpart exists.
+        The fact is immediately marked manual_reviewed and linked to the document.
+        Returns the generated fact_id.
+        """
+        import hashlib
+        fact_id = hashlib.sha256(
+            f"{ticker}_{period}_{metric}_official_{official_document_id}".encode()
+        ).hexdigest()[:32]
+        period_type = period[4:] if len(period) > 4 else "FY"
+
+        with self.store.conn() as connection:
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO fact.canonical_facts
+                    (fact_id, ticker, period, period_type, canonical_version, metric,
+                     value, unit, currency, selected_observation_id, selection_policy,
+                     confidence, quality_status, source_tier, official_document_id,
+                     reconciliation_status, verified_by, verified_at)
+                    VALUES (%s, %s, %s, %s, %s, %s,
+                            %s, %s, %s, NULL, %s,
+                            %s, %s, %s, %s,
+                            %s, %s, NOW())
+                    ON CONFLICT (fact_id) DO UPDATE SET
+                        official_document_id  = EXCLUDED.official_document_id,
+                        reconciliation_status = EXCLUDED.reconciliation_status,
+                        verified_by           = EXCLUDED.verified_by,
+                        verified_at           = NOW(),
+                        updated_at            = NOW()
+                    """,
+                    (
+                        fact_id, ticker, period, period_type, "v_official", metric,
+                        value, unit, currency, "official_doc_only",
+                        0.95, "accepted", source_tier, official_document_id,
+                        "manual_reviewed", verified_by,
+                    ),
+                )
+        return fact_id
+
     def get_verified_facts(self, ticker: str, canonical_version: str | None = None) -> list[dict]:
         """Return final-report-safe facts from fact.verified_financial_facts."""
         import psycopg2.extras as _extras
