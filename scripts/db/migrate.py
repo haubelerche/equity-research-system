@@ -17,7 +17,7 @@ from pathlib import Path
 import psycopg2
 
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
-CURRENT_SCHEMA_VERSION = "008_research_snapshots"
+CURRENT_SCHEMA_VERSION = "014_fact_reconciliation_official"
 
 
 def _bootstrap_migrations_table(conn) -> None:
