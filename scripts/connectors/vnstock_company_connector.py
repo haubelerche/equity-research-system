@@ -46,18 +46,30 @@ def _register_payload(
     source_uri = f"vnstock://kbs/company/{endpoint}/{ticker}"
     raw_path = ROOT / "dataset" / "raw" / "market" / datetime.now(UTC).date().isoformat() / f"{ticker}_{endpoint}.json"
     checksum = registry.save_raw_snapshot(payload=payload, out_path=raw_path)
-    return registry.register_source(
+    source_id = registry.register_source(
         SourceInput(
             logical_id="company_news" if endpoint in {"news", "events"} else "listing_metadata",
             ticker=ticker,
             source_uri=source_uri,
             source_type="news" if endpoint in {"news", "events"} else "vnstock_company",
+            source_tier=3,
+            source_title=f"vnstock KBS — {endpoint} — {ticker}",
             checksum=checksum,
             connector_version=CONNECTOR_VERSION,
             raw_path=str(raw_path),
             published_at=datetime.now(UTC).isoformat(),
         )
     )
+    registry.register_raw_payload(
+        source_id=source_id,
+        content_type="application/json",
+        checksum=checksum,
+        storage_path=str(raw_path),
+        connector_name="vnstock_company_connector",
+        connector_version=CONNECTOR_VERSION,
+        request_uri=source_uri,
+    )
+    return source_id
 
 
 def _event_id(ticker: str, title: str, occurred_at: str, source_url: str) -> str:

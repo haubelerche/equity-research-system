@@ -1,0 +1,89 @@
+# Catalyst Source Registry — Source-Provenance Rebuild, Phase 5.
+#
+# A CONTROLLED list of sources for catalyst/event evidence. This is NOT a broad web
+# crawler — only registered, enabled sources are fetched, and every catalyst event must
+# trace to a concrete source document from one of these sources.
+#
+# Each source:
+#   name:                 unique identifier
+#   source_type:          group (exchange_disclosure, company_ir, regulatory_notice,
+#                          official_tender, bhyt_policy, financial_media, broker_report)
+#   source_tier:          0 (official) | 1 (IR/verified) | 2 (reputable media/broker)
+#   base_url:             root URL
+#   allowed_event_types:  controlled taxonomy subset this source may produce
+#   fetch_method:         http | manual | connector:<name>
+#   enabled:              true|false (disabled sources are skipped)
+#   notes:
+
+sources:
+  - name: hose_disclosure
+    source_type: exchange_disclosure
+    source_tier: 0
+    base_url: https://www.hsx.vn
+    allowed_event_types: [financial_disclosure, annual_report, dividend_resolution, management_change]
+    fetch_method: connector:catalyst_hose_connector
+    enabled: true
+    notes: "HOSE listed-company disclosures — Tier 0 exchange filings."
+
+  - name: hnx_disclosure
+    source_type: exchange_disclosure
+    source_tier: 0
+    base_url: https://www.hnx.vn
+    allowed_event_types: [financial_disclosure, annual_report, dividend_resolution]
+    fetch_method: http
+    enabled: true
+    notes: "HNX/UPCoM company disclosures."
+
+  - name: company_ir_dhg
+    source_type: company_ir
+    source_tier: 1
+    base_url: https://www.dhgpharma.com.vn
+    allowed_event_types: [earnings_explanation, capacity_expansion, factory_gmp, dividend_resolution]
+    fetch_method: http
+    enabled: true
+    notes: "DHG investor-relations site — Tier 1."
+
+  - name: dav_regulatory
+    source_type: regulatory_notice
+    source_tier: 0
+    base_url: https://dav.gov.vn
+    allowed_event_types: [drug_recall, drug_registration, regulatory_notice, factory_gmp]
+    fetch_method: connector:catalyst_dav_connector
+    enabled: true
+    notes: "Cục Quản lý Dược (DAV) — government drug authority, Tier 0."
+
+  - name: bhxh_policy
+    source_type: bhyt_policy
+    source_tier: 0
+    base_url: https://baohiemxahoi.gov.vn
+    allowed_event_types: [bhyt_policy, regulatory_notice]
+    fetch_method: connector:catalyst_bhyt_connector
+    enabled: true
+    notes: "BHXH Việt Nam — BHYT policy, Tier 0."
+
+  - name: national_tender
+    source_type: official_tender
+    source_tier: 0
+    base_url: https://muasamcong.mpi.gov.vn
+    allowed_event_types: [bidding_result, hospital_tender]
+    fetch_method: connector:catalyst_tender_connector
+    enabled: true
+    notes: "Hệ thống mạng đấu thầu quốc gia — tender/bidding results."
+
+  - name: vietstock_media
+    source_type: financial_media
+    source_tier: 2
+    base_url: https://vietstock.vn
+    allowed_event_types: [media_article, earnings_explanation]
+    fetch_method: http
+    enabled: false
+    notes: "Reputable financial media — Tier 2 secondary context. Disabled by default."
+
+  - name: broker_research
+    source_type: broker_report
+    source_tier: 2
+    base_url: https://example-broker.vn
+    allowed_event_types: [broker_report]
+    fetch_method: manual
+    enabled: false
+    notes: "Broker reports — Tier 2. Manual placement only; disabled by default."

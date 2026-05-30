@@ -1,0 +1,2 @@
+ticker,fiscal_year,period_type,statement_type,metric_id,value,unit,document_title,page_number,table_name,extracted_text,extraction_method,verified_by,verified_at
+DHG,<YEAR>,FY,income_statement,revenue_net,<VALUE_FROM_BCTC>,vnd_bn,Báo cáo tài chính kiểm toán DHG <YEAR>,<PAGE>,Báo cáo kết quả hoạt động kinh doanh,<trích nguyên văn dòng doanh thu thuần>,manual,<analyst>,<YYYY-MM-DD>

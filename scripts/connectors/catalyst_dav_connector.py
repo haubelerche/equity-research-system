@@ -74,12 +74,24 @@ def sync_dav_connector(tickers: list[str] | None = None) -> int:
             SourceInput(
                 logical_id="dav_regulatory",
                 source_uri=feed,
-                source_type="regulatory",
+                # Cục Quản lý Dược — Vietnamese government drug authority (Tier 0).
+                source_type="regulatory_filing",
+                source_tier=0,
+                source_title="Cục Quản lý Dược (DAV) — Thông báo thu hồi / phê duyệt",
                 checksum=checksum,
                 connector_version=CONNECTOR_VERSION,
                 raw_path=str(raw_path),
                 published_at=now.isoformat(),
             )
+        )
+        registry.register_raw_payload(
+            source_id=source_version_id,
+            content_type="application/json",
+            checksum=checksum,
+            storage_path=str(raw_path),
+            connector_name="catalyst_dav_connector",
+            connector_version=CONNECTOR_VERSION,
+            request_uri=feed,
         )
 
         for item in entries:

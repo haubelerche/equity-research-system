@@ -9,7 +9,56 @@ import psycopg2
 from psycopg2.extras import Json
 
 
-REQUIRED_SCHEMA_VERSION = "008_research_snapshots"
+REQUIRED_SCHEMA_VERSION = "014_fact_reconciliation_official"
+
+DB_TO_PUBLIC_STATUS = {
+    "initialized": "INIT",
+    "running": "ANALYZING",
+    "data_ready": "ANALYZING",
+    "analysis_ready": "ANALYZING",
+    "valuation_ready": "VALUATING",
+    "report_ready": "SYNTHESIZING",
+    "needs_human_review": "NEEDS_REVIEW",
+    "approved": "PUBLISHED",
+    "failed": "FAILED",
+    "cancelled": "FAILED",
+}
+
+PUBLIC_TO_DB_STATUS = {
+    "INIT": "initialized",
+    "INGESTING": "running",
+    "ANALYZING": "analysis_ready",
+    "VALUATING": "valuation_ready",
+    "SYNTHESIZING": "report_ready",
+    "AUDITING": "analysis_ready",
+    "WAITING_ASSUMPTIONS_APPROVAL": "needs_human_review",
+    "WAITING_FINAL_APPROVAL": "needs_human_review",
+    "PUBLISHED": "approved",
+    "NEEDS_REVIEW": "needs_human_review",
+    "FAILED": "failed",
+}
+
+
+def to_db_status(status: str) -> str:
+    return PUBLIC_TO_DB_STATUS.get(status, status)
+
+
+def to_public_status(status: str) -> str:
+    return DB_TO_PUBLIC_STATUS.get(status, status)
+
+
+STEP_STATUS_ALIASES = {
+    "STARTED": "running",
+    "RUNNING": "running",
+    "COMPLETED": "completed",
+    "FAILED": "failed",
+    "SKIPPED": "skipped",
+    "PENDING": "pending",
+}
+
+
+def to_db_step_status(status: str) -> str:
+    return STEP_STATUS_ALIASES.get(status, status).lower()
 
 
 class RuntimeStore:
@@ -112,7 +161,7 @@ class RuntimeStore:
                         finished_at   = CASE WHEN %s THEN NOW() ELSE finished_at END
                     WHERE run_id = %s
                     """,
-                    (status, stage, Json(flags) if flags is not None else None, finished, run_id),
+                    (to_db_status(status), stage, Json(flags) if flags is not None else None, finished, run_id),
                 )
 
     def get_run(self, run_id: str) -> dict[str, Any] | None:
@@ -164,7 +213,7 @@ class RuntimeStore:
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                     RETURNING id
                     """,
-                    (run_id, step_name, agent_name, status, policy_reason, input_hash, Json(metadata or {})),
+                    (run_id, step_name, agent_name, to_db_step_status(status), policy_reason, input_hash, Json(metadata or {})),
                 )
                 step_id = cur.fetchone()[0]
         return int(step_id)
@@ -190,7 +239,7 @@ class RuntimeStore:
                         metadata_json = COALESCE(metadata_json, '{}'::jsonb) || %s
                     WHERE id = %s
                     """,
-                    (status, output_hash, error_message, Json(metadata or {}), step_id),
+                    (to_db_step_status(status), output_hash, error_message, Json(metadata or {}), step_id),
                 )
 
     def increment_step_retry(self, step_id: int) -> None:
@@ -278,6 +327,24 @@ class RuntimeStore:
             }
             for row in rows
         ]
+
+    def latest_graph_state(self, run_id: str) -> dict[str, Any] | None:
+        with self.conn() as connection:
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT payload_json
+                    FROM research.run_artifacts
+                    WHERE run_id = %s
+                      AND artifact_type = 'run_log_json'
+                      AND section_key = 'graph_state_snapshot'
+                    ORDER BY version DESC, created_at DESC
+                    LIMIT 1
+                    """,
+                    (run_id,),
+                )
+                row = cur.fetchone()
+        return row[0] if row else None
 
     def add_approval(
         self,

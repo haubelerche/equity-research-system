@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-FactTable = dict[str, dict[str, float]]
+from backend.facts.normalizer import FactTable
 
 
 @dataclass
@@ -40,6 +40,10 @@ class MultiplesResult:
     implied_price_pb: float | None
     implied_price_ev_ebitda: float | None
 
+    # Peer data status
+    peer_data_source: str | None = None
+    relative_valuation_status: str = "pending_peer_dataset"
+
     warnings: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -63,29 +67,42 @@ class MultiplesResult:
             "implied_price_pe": _r(self.implied_price_pe, 0),
             "implied_price_pb": _r(self.implied_price_pb, 0),
             "implied_price_ev_ebitda": _r(self.implied_price_ev_ebitda, 0),
+            "peer_data_source": self.peer_data_source,
+            "relative_valuation_status": self.relative_valuation_status,
             "warnings": self.warnings,
         }
 
 
 def _get(table: FactTable, key: str, period: str) -> float | None:
-    return table.get(key, {}).get(period)
+    entry = table.get(key, {}).get(period)
+    if entry is None:
+        return None
+    return entry.value if hasattr(entry, "value") else float(entry)
 
 
 def compute_multiples(
     ticker: str,
     fact_table: FactTable,
     current_price_vnd: float | None = None,
-    target_pe: float | None = 15.0,
-    target_pb: float | None = 2.5,
-    target_ev_ebitda: float | None = 10.0,
+    target_pe: float | None = None,
+    target_pb: float | None = None,
+    target_ev_ebitda: float | None = None,
+    peer_data_source: str | None = None,
 ) -> MultiplesResult:
     """Compute market multiples and implied target prices.
 
     Args:
         current_price_vnd: Latest market close price in VND.
-        target_pe: Sector-justified forward P/E (default 15x for VN pharma).
-        target_pb: Sector-justified P/B (default 2.5x).
-        target_ev_ebitda: Sector EV/EBITDA (default 10x for VN pharma).
+        target_pe: Peer-derived forward P/E. Must have peer_data_source to be used.
+        target_pb: Peer-derived P/B. Must have peer_data_source to be used.
+        target_ev_ebitda: Peer-derived EV/EBITDA. Must have peer_data_source to be used.
+        peer_data_source: Description of peer group source (e.g. "VN pharma peers: IMP, DMC, TRA").
+            If None, target multiples are blocked — implied prices will be None.
+
+    Peer guard rule:
+        If peer_data_source is None, implied prices from target multiples are set to None.
+        The relative_valuation_status is set to "pending_peer_dataset".
+        No default P/E or EV/EBITDA targets are applied without peer_data_source.
     """
     warnings: list[str] = []
 
@@ -139,7 +156,41 @@ def compute_multiples(
     else:
         warnings.append("No current price provided — observed P/E and P/B omitted")
 
-    # Implied prices at target multiples
+    # ── Peer guard: no default multiples without peer data source ─────────
+    rv_status: str
+    if peer_data_source is None:
+        warnings.append(
+            "Relative valuation is PENDING — no peer_data_source provided. "
+            "Target P/E, P/B, and EV/EBITDA require a real peer group dataset. "
+            "Implied prices blocked until peer data is available."
+        )
+        rv_status = "pending_peer_dataset"
+        # Block all implied prices
+        return MultiplesResult(
+            ticker=ticker,
+            latest_fy=latest_fy,
+            current_price_vnd=current_price_vnd,
+            eps_vnd=eps,
+            book_value_per_share_vnd=bvps,
+            ebitda_vnd_bn=ebitda,
+            net_debt_vnd_bn=net_debt,
+            shares_mn=shares_mn,
+            pe_ratio=pe_ratio,
+            pb_ratio=pb_ratio,
+            target_pe=target_pe,
+            target_pb=target_pb,
+            target_ev_ebitda=target_ev_ebitda,
+            implied_price_pe=None,
+            implied_price_pb=None,
+            implied_price_ev_ebitda=None,
+            peer_data_source=None,
+            relative_valuation_status=rv_status,
+            warnings=warnings,
+        )
+
+    rv_status = "peer_data_available"
+
+    # ── Implied prices at target multiples ────────────────────────────────
     implied_pe: float | None = None
     implied_pb: float | None = None
     implied_ev_ebitda: float | None = None
@@ -148,16 +199,22 @@ def compute_multiples(
         implied_pe = target_pe * eps
     if target_pb is not None and bvps and bvps > 0:
         implied_pb = target_pb * bvps
-    if target_ev_ebitda is not None and ebitda and shares_mn and shares_mn > 0:
-        # EV = EBITDA * multiple; equity_val = EV - net_debt
-        ev_impl = ebitda * target_ev_ebitda  # VND bn
-        equity_impl = ev_impl - net_debt
-        if equity_impl > 0:
-            implied_ev_ebitda = (equity_impl / shares_mn) * 1_000
+
+    # EV/EBITDA: requires full bridge (EBITDA + net_debt + shares)
+    if target_ev_ebitda is not None:
+        if ebitda is None:
+            warnings.append("EV/EBITDA blocked: EBITDA unavailable for EV bridge.")
+        elif net_debt is None:
+            warnings.append("EV/EBITDA blocked: net_debt unavailable — cannot compute EV-to-equity bridge.")
+        elif not shares_mn or shares_mn <= 0:
+            warnings.append("EV/EBITDA blocked: shares outstanding unavailable.")
         else:
-            warnings.append("Implied EV/EBITDA equity value is negative — omitted")
-    elif ebitda is None:
-        warnings.append("EBITDA unavailable — EV/EBITDA implied price omitted")
+            ev_impl = ebitda * target_ev_ebitda
+            equity_impl = ev_impl - net_debt
+            if equity_impl > 0:
+                implied_ev_ebitda = (equity_impl / shares_mn) * 1_000
+            else:
+                warnings.append("EV/EBITDA: implied equity value is negative — omitted")
 
     return MultiplesResult(
         ticker=ticker,
@@ -176,5 +233,7 @@ def compute_multiples(
         implied_price_pe=implied_pe,
         implied_price_pb=implied_pb,
         implied_price_ev_ebitda=implied_ev_ebitda,
+        peer_data_source=peer_data_source,
+        relative_valuation_status=rv_status,
         warnings=warnings,
     )

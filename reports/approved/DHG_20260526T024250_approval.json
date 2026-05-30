@@ -1,0 +1,10 @@
+{
+  "run_id": "run_dhg_20260526T023637_edd0c579e6",
+  "ticker": "DHG",
+  "decision": "approve",
+  "reviewer": "analyst_test",
+  "comment": "Pipeline smoke test",
+  "approved_at": "2026-05-26T02:42:49.164386+00:00",
+  "report_file": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\reports\\DHG_20260526T023652_full_report.md",
+  "exported_to": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\reports\\approved\\DHG_20260526T024250_APPROVED_run_dhg_20260526T023.md"
+}

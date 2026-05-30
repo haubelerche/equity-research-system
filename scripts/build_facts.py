@@ -79,12 +79,32 @@ def _filter_facts(
     return fy_facts, sorted(forbidden_set)
 
 
+def _load_golden_provenance(ticker: str) -> dict | None:
+    """Load and validate the golden provenance JSON for a ticker.
+
+    Returns the provenance dict if the file exists and is valid JSON.
+    Returns None if the file is missing — golden CSV is then treated as Tier 3.
+    """
+    prov_path = GOLDEN_DIR / f"{ticker.upper()}_golden_provenance.json"
+    if not prov_path.exists():
+        return None
+    try:
+        return json.loads(prov_path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        print(f"[build_facts] WARNING: Could not parse golden provenance for {ticker}: {exc}")
+        return None
+
+
 def _load_golden_fallback(
     ticker: str,
     from_year: int,
     to_year: int,
 ) -> list[dict]:
     """Load annual FY facts from dataset/golden/financials/{ticker}.csv.
+
+    Source tier assignment:
+      - Tier 1: companion *_golden_provenance.json exists and is valid
+      - Tier 3: no provenance file (unverified; treated as API-equivalent)
 
     Only rows with period matching YYYYFY and fiscal_year in [from_year, to_year]
     are included.  Quarterly rows are silently skipped.
@@ -96,6 +116,22 @@ def _load_golden_fallback(
     golden_path = GOLDEN_DIR / f"{ticker.upper()}.csv"
     if not golden_path.exists():
         return []
+
+    # Determine source tier from provenance file
+    provenance = _load_golden_provenance(ticker)
+    if provenance is not None:
+        resolved_tier = int(provenance.get("source_tier", 1))
+        publisher = provenance.get("publisher", "")
+        print(
+            f"[build_facts] {ticker} golden provenance found — "
+            f"source_tier={resolved_tier}, publisher={publisher!r}"
+        )
+    else:
+        resolved_tier = 3
+        print(
+            f"[build_facts] WARNING: {ticker} golden CSV has no provenance file "
+            f"({ticker.upper()}_golden_provenance.json). Treating as Tier 3 (unverified)."
+        )
 
     facts: list[dict] = []
     now = datetime.now(UTC)
@@ -113,6 +149,15 @@ def _load_golden_fallback(
                 value = float(row["value"])
             except (ValueError, KeyError):
                 continue
+
+            # Read source metadata from CSV columns if present
+            source_uri = row.get("source_uri", "").strip() or (
+                provenance.get("source_urls", [""])[0] if provenance else ""
+            )
+            source_title = row.get("source_title", "").strip() or (
+                f"{provenance.get('publisher', 'Golden CSV')} — {fy}FY" if provenance else f"Golden CSV {fy}FY"
+            )
+
             facts.append({
                 "line_item_code": row["canonical_key"].strip(),
                 "fiscal_year": fy,
@@ -121,6 +166,9 @@ def _load_golden_fallback(
                 "unit": row.get("unit", "vnd_bn").strip(),
                 "currency": row.get("currency", "VND").strip(),
                 "source_id": f"golden_csv_{ticker}_{fy}FY",
+                "source_uri": source_uri,
+                "source_title": source_title,
+                "source_tier": resolved_tier,
                 "connector_version": "golden_csv_v1",
                 "validation_status": row.get("validation_status", "needs_review").strip(),
                 "confidence": float(row.get("confidence") or 0.75),
@@ -136,7 +184,10 @@ def build_facts(
     strict_completeness: bool = False,
 ) -> dict:
     from scripts.db.fact_store import PostgresFactStore
-    from backend.facts.normalizer import build_fact_table, build_validation_status_table, compute_derived, periods_sorted
+    from backend.facts.normalizer import (
+        build_fact_table, build_validation_status_table, compute_derived,
+        periods_sorted, build_source_conflict_report, build_source_tier_coverage,
+    )
     from backend.facts.completeness import build_fy_validation_report
 
     ticker = ticker.strip().upper()
@@ -179,11 +230,24 @@ def build_facts(
         )
         sys.exit(1)
 
-    # Build fact table from FY-only data
+    # Build fact table — now returns FactEntry objects with source provenance
     base_table = build_fact_table(fy_facts)
     vstatus_table = build_validation_status_table(fy_facts)
     full_table = compute_derived(base_table)
     periods = periods_sorted(full_table)
+
+    # Source conflict report: flag when 2+ sources disagree on the same metric/period
+    source_conflicts = build_source_conflict_report(ticker=ticker, raw_facts=fy_facts)
+    source_tier_coverage = build_source_tier_coverage(
+        raw_facts=fy_facts, required_periods=required_periods
+    )
+    if source_conflicts:
+        print(f"[build_facts] {ticker} source conflicts detected: {len(source_conflicts)}")
+        for c in source_conflicts[:5]:
+            flag = " [REQUIRES REVIEW]" if c.requires_review else ""
+            print(f"  {c.metric} {c.period}: variance={c.variance_pct:.1f}%{flag}")
+    else:
+        print(f"[build_facts] {ticker} no source conflicts detected")
 
     periods_available = [p for p in required_periods if p in periods]
     periods_missing = [p for p in required_periods if p not in periods]
@@ -195,7 +259,19 @@ def build_facts(
     latest_fy = max((int(p[:4]) for p in periods_available), default=None)
     print(f"[build_facts] {ticker} latest fiscal year: {latest_fy}")
 
-    # Build FY-aware validation report
+    # Convert source_tier_coverage to the format expected by check_source_tier_coverage
+    source_tiers_by_period = {
+        period: cov["tiers_present"]
+        for period, cov in source_tier_coverage.items()
+    }
+
+    # Print tier coverage summary
+    for period, cov in sorted(source_tier_coverage.items()):
+        tier_label = "Tier 0/1 ✓" if cov["has_tier01"] else f"Tier 3-only (tiers={cov['tiers_present']})"
+        print(f"[build_facts] {ticker} {period}: {tier_label}")
+
+    # Build FY-aware validation report — source_tiers_by_period is always passed
+    # so check_source_tier_coverage() always runs with real data (no silent pass)
     report = build_fy_validation_report(
         ticker=ticker,
         table=full_table,
@@ -206,11 +282,13 @@ def build_facts(
         forbidden_periods=forbidden_periods,
         generated_at=generated_at,
         validation_status_table=vstatus_table,
+        source_tiers_by_period=source_tiers_by_period,
     )
 
     print(f"[build_facts] {ticker} annual_reports_collected: {report['annual_reports_collected']}")
     print(f"[build_facts] {ticker} coverage_gate: {report['coverage_gate']}")
     print(f"[build_facts] {ticker} core_keys_gate: {report['core_keys_gate']}")
+    print(f"[build_facts] {ticker} source_tier_coverage_status: {report['source_tier_coverage_status']}")
     print(f"[build_facts] {ticker} source_validation_gate: {report['source_validation_gate']}")
     print(f"[build_facts] {ticker} valuation_gate: {report['valuation_gate']}")
     print(f"[build_facts] {ticker} valuation_ready: {report['valuation_ready']}")
@@ -219,19 +297,34 @@ def build_facts(
         for reason in report["blocking_reasons"]:
             print(f"[build_facts] {ticker} BLOCKED: {reason}")
 
-    # Print fact table
+    # Print fact table (FactEntry objects — show value + source_tier)
     print(f"\n[build_facts] Fact table (base facts):")
     for key in sorted(base_table.keys()):
         values = base_table[key]
-        row_str = "  ".join(f"{p}={v:,.1f}" for p, v in sorted(values.items()))
+        row_str = "  ".join(
+            f"{p}={e.value:,.1f}[T{e.source_tier if e.source_tier is not None else '?'}]"
+            for p, e in sorted(values.items())
+        )
         print(f"  {key:<35} {row_str}")
 
     print(f"\n[build_facts] Derived metrics:")
     derived_keys = [k for k in full_table if k not in base_table]
     for key in sorted(derived_keys):
         values = full_table[key]
-        row_str = "  ".join(f"{p}={v:.4f}" for p, v in sorted(values.items()))
+        row_str = "  ".join(f"{p}={e.value:.4f}" for p, e in sorted(values.items()))
         print(f"  {key:<35} {row_str}")
+
+    # Serialize fact table: include value + source provenance per entry
+    def _entry_to_dict(entry) -> dict:
+        return {
+            "value": entry.value,
+            "fact_id": entry.fact_id or "",
+            "source_id": entry.source_id or "",
+            "source_uri": entry.source_uri or "",
+            "source_title": entry.source_title or "",
+            "source_tier": entry.source_tier,
+            "confidence": entry.confidence,
+        }
 
     artifact = {
         "ticker": ticker,
@@ -244,7 +337,24 @@ def build_facts(
         "periods_available": periods_available,
         "periods_missing": periods_missing,
         "forbidden_periods_ignored": forbidden_periods,
-        "facts": {k: dict(sorted(v.items())) for k, v in sorted(full_table.items())},
+        "facts": {
+            k: {p: _entry_to_dict(e) for p, e in sorted(v.items())}
+            for k, v in sorted(full_table.items())
+        },
+        "source_conflicts": [
+            {
+                "ticker": c.ticker,
+                "period": c.period,
+                "metric": c.metric,
+                "candidate_values": c.candidate_values,
+                "selected_source_id": c.selected_source_id,
+                "variance_pct": c.variance_pct,
+                "requires_review": c.requires_review,
+                "decision_reason": c.decision_reason,
+            }
+            for c in source_conflicts
+        ],
+        "source_tier_coverage": source_tier_coverage,
         "validation": report,
     }
 

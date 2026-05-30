@@ -24,7 +24,7 @@ from typing import Any
 
 from backend.analytics.forecasting import ForecastArtifact, ForecastYear  # noqa: F401
 
-FactTable = dict[str, dict[str, float]]
+from backend.facts.normalizer import FactTable
 
 
 @dataclass
@@ -102,6 +102,8 @@ class FCFEResult:
                 "specific_risk_premium": self.cost_of_equity_assumptions.specific_risk_premium,
                 "re_override": self.cost_of_equity_assumptions.re_override,
             },
+            "capex_convention": "positive_outflow",
+            "capex_formula_note": "CAPEX displayed as positive outflow; formula: FCFE = NI + D&A - CAPEX - ΔNWC + Net Borrowing",
             "fcfe_table": [
                 {
                     "year": fy.year,
@@ -122,7 +124,7 @@ class FCFEResult:
             "pv_terminal_value": _r(self.pv_terminal_value),
             "equity_value": _r(self.equity_value),
             "shares_mn": _r(self.shares_mn),
-            "target_price_vnd": round(self.target_price_vnd, 0) if self.target_price_vnd else None,
+            "target_price_vnd": round(self.target_price_vnd, 0) if self.target_price_vnd is not None else None,
             "current_price_vnd": _r(self.current_price_vnd, 0),
             "upside_pct": round(self.upside_pct, 4) if self.upside_pct is not None else None,
             "warnings": self.warnings,
@@ -160,18 +162,26 @@ def compute_fcfe(
     warnings: list[str] = list(forecast.warnings)
     re = cost_of_equity_assumptions.cost_of_equity
 
+    # INVALID guard: Re (cost of equity) must exceed terminal growth for Gordon Growth to be finite.
+    re_invalid = False
     if re <= terminal_growth:
         warnings.append(
-            f"Re ({re:.1%}) ≤ terminal growth ({terminal_growth:.1%}) — "
-            "terminal value undefined, capping g = Re - 1%"
+            f"INVALID: Re ({re:.1%}) ≤ terminal growth ({terminal_growth:.1%}) — "
+            "terminal value undefined; target price blocked"
         )
-        terminal_growth = re - 0.01
+        re_invalid = True
+        terminal_growth = re - 0.01  # prevent ZeroDivisionError; result will not yield target price
 
     fy_periods = forecast.historical_periods
     latest_fy = fy_periods[-1] if fy_periods else None
 
     def _get(key: str, period: str | None) -> float | None:
-        return fact_table.get(key, {}).get(period) if period else None
+        if not period:
+            return None
+        entry = fact_table.get(key, {}).get(period)
+        if entry is None:
+            return None
+        return entry.value if hasattr(entry, "value") else float(entry)
 
     # Derive shares from latest historical EPS + net income
     if shares_mn is None:
@@ -226,7 +236,7 @@ def compute_fcfe(
             label=fy.label,
             net_income=ni,
             depreciation=dep,
-            capex=(-capex_pos) if capex_pos is not None else None,  # store negative per convention
+            capex=capex_pos,  # stored as positive outflow; formula: FCFE = NI + D&A - CAPEX - ΔNWC + NB
             delta_nwc=delta_nwc,
             net_borrowing=net_borrowing,
             fcfe=fcfe,
@@ -253,10 +263,11 @@ def compute_fcfe(
     equity_val = sum_pv + pv_tv
 
     target_price: float | None = None
-    if shares_mn and shares_mn > 0 and equity_val > 0:
-        target_price = (equity_val / shares_mn) * 1_000  # VND bn / mn shares * 1000 = VND/share
-    elif equity_val <= 0:
-        warnings.append("FCFE equity value is non-positive — target price not computed")
+    if not re_invalid:
+        if shares_mn and shares_mn > 0 and equity_val > 0:
+            target_price = (equity_val / shares_mn) * 1_000  # VND bn / mn shares * 1000 = VND/share
+        elif equity_val <= 0:
+            warnings.append("FCFE: equity value is non-positive — target price not computed")
 
     upside_pct: float | None = None
     if target_price and current_price_vnd and current_price_vnd > 0:

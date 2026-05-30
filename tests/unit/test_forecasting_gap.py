@@ -192,7 +192,7 @@ class TestForecastPBTIncludesOtherItems:
         artifact = run_forecast("DHG", table, n_years=2)
         d = artifact.to_dict()
 
-        for year_dict in d["forecast"]:
+        for year_dict in d["forecast_years"]:
             assert "other_items" in year_dict, (
                 f"to_dict() missing 'other_items' key for year {year_dict.get('year')}"
             )

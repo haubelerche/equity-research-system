@@ -1,0 +1,80 @@
+# Source Tier Policy
+# Maps connector names and source_types to source_tier (0-4).
+# Used by source_registry.py as the default when source_tier is not explicitly passed.
+#
+# Tier 0: Audited BCTC, exchange filings, government regulatory documents
+# Tier 1: Company IR, investor presentations, manually verified documents
+# Tier 2: Reputable media, industry research, reliable news outlets
+# Tier 3: API aggregators, scrapers, third-party financial data providers
+# Tier 4: LLM output — NEVER a valid fact source
+#
+# Rule: No material quantitative claim may rely solely on a Tier 3 source in an
+# approved/exported report. Draft reports may warn; exported reports must FAIL.
+
+connectors:
+  vnstock_finance_connector:
+    source_tier: 3
+    note: "vnstock API — financial aggregator; requires Tier 0/1 corroboration for material claims"
+  vnstock_price_connector:
+    source_tier: 3
+    note: "vnstock API — market price data"
+  vnstock_company_connector:
+    source_tier: 3
+    note: "vnstock API — company profile data"
+  vn_market_data_adapter:
+    source_tier: 3
+    note: "vnstock-derived peer metrics adapter"
+  catalyst_hose_connector:
+    source_tier: 0
+    note: "HOSE/HNX exchange disclosures — Tier 0 exchange filings"
+  catalyst_bhyt_connector:
+    source_tier: 0
+    note: "BHXH Vietnam government website — official regulatory documents"
+  catalyst_dav_connector:
+    source_tier: 0
+    note: "Cục Quản lý Dược (DAV) — government drug authority"
+  catalyst_tender_connector:
+    source_tier: 3
+    note: "muasamcong.mpi.gov.vn — procurement portal; Tier 3 until parsed into structured tender records"
+  manual_upload_connector:
+    source_tier: 1
+    note: "Analyst manual upload — requires provenance JSON to be treated as Tier 1"
+
+source_types:
+  financial_statement:
+    source_tier: 3
+    note: "Currently fetched via vnstock API. Phase 1B will introduce bctc_audited source_type at Tier 0."
+  annual_report:
+    source_tier: 0
+  disclosure:
+    source_tier: 0
+  regulatory_filing:
+    source_tier: 0
+  news:
+    source_tier: 2
+  industry_report:
+    source_tier: 2
+  market_reference:
+    source_tier: 3
+  vnstock_financial:
+    source_tier: 3
+  vnstock_price:
+    source_tier: 3
+  vnstock_company:
+    source_tier: 3
+  tender:
+    source_tier: 3
+  bidding:
+    source_tier: 3
+  regulatory:
+    source_tier: 3
+  manual:
+    source_tier: 1
+
+# Phase 1B: Source types planned but not yet implemented.
+# When introduced, these will carry Tier 0 and override the financial_statement mapping.
+planned_tier0_source_types:
+  - bctc_audited        # Audited BCTC PDF ingested via annual_report_connector.py
+  - hose_filing         # HOSE filing PDF downloaded by hose_filing_connector.py
+  - hnx_filing          # HNX filing PDF
+  - dav_regulatory_doc  # DAV regulatory document PDF

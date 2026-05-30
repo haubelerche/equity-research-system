@@ -15,7 +15,7 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
-FactTable = dict[str, dict[str, float]]
+from backend.facts.normalizer import FactTable
 
 NAStatus = Literal[
     "available",
@@ -118,6 +118,13 @@ class DebtSchedule:
         }
 
 
+def _get(table: FactTable, key: str, period: str) -> float | None:
+    entry = table.get(key, {}).get(period)
+    if entry is None:
+        return None
+    return entry.value if hasattr(entry, "value") else float(entry)
+
+
 def interest_bearing_debt(fact_table: FactTable, period: str) -> float | None:
     """Normalize interest-bearing debt from available fact_table fields.
 
@@ -126,19 +133,19 @@ def interest_bearing_debt(fact_table: FactTable, period: str) -> float | None:
     2. short_term_borrowings.ending + long_term_borrowings.ending
     3. short_term_debt.ending + long_term_debt.ending  (vnstock alias group)
     """
-    total_debt = fact_table.get("total_debt.ending", {}).get(period)
+    total_debt = _get(fact_table, "total_debt.ending", period)
     if total_debt is not None:
         return total_debt
 
     # Primary component keys
-    st = fact_table.get("short_term_borrowings.ending", {}).get(period)
-    lt = fact_table.get("long_term_borrowings.ending", {}).get(period)
+    st = _get(fact_table, "short_term_borrowings.ending", period)
+    lt = _get(fact_table, "long_term_borrowings.ending", period)
     if st is not None or lt is not None:
         return (st or 0.0) + (lt or 0.0)
 
     # Alias component keys (vnstock normalizer variant)
-    st_alias = fact_table.get("short_term_debt.ending", {}).get(period)
-    lt_alias = fact_table.get("long_term_debt.ending", {}).get(period)
+    st_alias = _get(fact_table, "short_term_debt.ending", period)
+    lt_alias = _get(fact_table, "long_term_debt.ending", period)
     if st_alias is not None or lt_alias is not None:
         return (st_alias or 0.0) + (lt_alias or 0.0)
 
@@ -171,9 +178,9 @@ def build_historical_debt_schedule(
         )
 
         # Try direct CFS data first
-        new_borrow = fact_table.get("proceeds_from_borrowings.total", {}).get(period)
-        repayment = fact_table.get("repayment_of_borrowings.total", {}).get(period)
-        ie = fact_table.get("interest_expense.total", {}).get(period)
+        new_borrow = _get(fact_table, "proceeds_from_borrowings.total", period)
+        repayment = _get(fact_table, "repayment_of_borrowings.total", period)
+        ie = _get(fact_table, "interest_expense.total", period)
 
         if new_borrow is not None and repayment is not None:
             net_borrow = new_borrow - abs(repayment)

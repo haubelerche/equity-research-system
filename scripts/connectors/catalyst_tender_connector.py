@@ -61,11 +61,22 @@ def sync_tender_connector() -> int:
             logical_id="tender_results",
             source_uri=TENDER_FEED,
             source_type="tender",
+            source_tier=3,
+            source_title="Hệ thống mua sắm công — muasamcong.mpi.gov.vn",
             checksum=checksum,
             connector_version=CONNECTOR_VERSION,
             raw_path=str(raw_path),
             published_at=now.isoformat(),
         )
+    )
+    registry.register_raw_payload(
+        source_id=source_version_id,
+        content_type="text/html",
+        checksum=checksum,
+        storage_path=str(raw_path),
+        connector_name="catalyst_tender_connector",
+        connector_version=CONNECTOR_VERSION,
+        request_uri=TENDER_FEED,
     )
 
     events = []

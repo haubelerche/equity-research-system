@@ -70,12 +70,24 @@ def sync_bhyt_connector() -> int:
         SourceInput(
             logical_id="bhyt_policy",
             source_uri=BHYT_FEED,
-            source_type="regulatory",
+            # BHXH Vietnam government website — official regulatory documents (Tier 0).
+            source_type="regulatory_filing",
+            source_tier=0,
+            source_title="BHXH Việt Nam — Danh mục thuốc BHYT",
             checksum=checksum,
             connector_version=CONNECTOR_VERSION,
             raw_path=str(raw_path),
             published_at=now.isoformat(),
         )
+    )
+    registry.register_raw_payload(
+        source_id=source_version_id,
+        content_type="text/html",
+        checksum=checksum,
+        storage_path=str(raw_path),
+        connector_name="catalyst_bhyt_connector",
+        connector_version=CONNECTOR_VERSION,
+        request_uri=BHYT_FEED,
     )
 
     events = []

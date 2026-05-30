@@ -118,12 +118,24 @@ def sync_ticker_price(
             ticker=ticker,
             source_uri=source_uri,
             source_type="vnstock_price",
+            source_tier=3,
+            source_title=f"Dữ liệu giá {ticker} — vnstock ({provider_used})",
             checksum=checksum,
             connector_version=CONNECTOR_VERSION,
             raw_path=str(raw_path),
             published_at=datetime.now(UTC).isoformat(),
-            metadata_json={"start": str(start), "end": str(end)},
+            metadata_json={"start": str(start), "end": str(end), "provider": provider_used},
         )
+    )
+    registry.register_raw_payload(
+        source_id=source_id,
+        content_type="application/json",
+        checksum=checksum,
+        storage_path=str(raw_path),
+        connector_name="vnstock_price_connector",
+        connector_version=CONNECTOR_VERSION,
+        request_uri=source_uri,
+        request_params={"ticker": ticker, "start": str(start), "end": str(end)},
     )
     rows = _normalize_history(df=frame, ticker=ticker, source_version_id=source_id)
     return store.upsert_price_rows(rows)

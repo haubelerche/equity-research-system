@@ -13,8 +13,9 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from backend.analytics.forecasting import ForecastArtifact, ForecastYear
+from backend.analytics.tax_policy import TaxPolicy
 
-FactTable = dict[str, dict[str, float]]
+from backend.facts.normalizer import FactTable
 
 
 @dataclass
@@ -30,6 +31,7 @@ class WACCAssumptions:
     equity_weight: float | None = None
     wacc_override: float | None = None     # if set, bypass component calculation
     assumption_status: str = "default_unapproved"
+    tax_policy: TaxPolicy | None = None   # if set, overrides tax_rate for EBIT(1-T)
 
     @property
     def cost_of_equity(self) -> float:
@@ -95,9 +97,16 @@ class FCFFResult:
                 "specific_risk_premium": self.wacc_assumptions.specific_risk_premium,
                 "cost_of_equity": round(self.wacc_assumptions.cost_of_equity, 4),
                 "cost_of_debt": self.wacc_assumptions.cost_of_debt,
-                "tax_rate": self.wacc_assumptions.tax_rate,
+                # Reflect the actual rate used: TaxPolicy.effective_tax_rate when provided
+                "tax_rate": (
+                    self.wacc_assumptions.tax_policy.effective_tax_rate
+                    if self.wacc_assumptions.tax_policy is not None
+                    else self.wacc_assumptions.tax_rate
+                ),
                 "wacc_override": self.wacc_assumptions.wacc_override,
             },
+            "capex_convention": "positive_outflow",
+            "capex_formula_note": "CAPEX displayed as positive outflow; formula: FCFF = NOPAT + D&A - CAPEX - ΔNWC",
             "fcff_table": [
                 {
                     "year": fy.year,
@@ -120,7 +129,7 @@ class FCFFResult:
             "net_debt": _r(self.net_debt),
             "equity_value": _r(self.equity_value),
             "shares_mn": _r(self.shares_mn),
-            "target_price_vnd": round(self.target_price_vnd, 0) if self.target_price_vnd else None,
+            "target_price_vnd": round(self.target_price_vnd, 0) if self.target_price_vnd is not None else None,
             "current_price_vnd": _r(self.current_price_vnd, 0),
             "upside_pct": round(self.upside_pct, 4) if self.upside_pct is not None else None,
             "warnings": self.warnings,
@@ -153,11 +162,25 @@ def compute_fcff(
     latest_fy = fy_periods[-1] if fy_periods else None
 
     def _get(key: str, period: str) -> float | None:
-        return fact_table.get(key, {}).get(period) if period else None
+        if not period:
+            return None
+        entry = fact_table.get(key, {}).get(period)
+        if entry is None:
+            return None
+        return entry.value if hasattr(entry, "value") else float(entry)
 
-    total_debt = _get("total_debt.ending", latest_fy) or 0.0
-    cash = _get("cash_and_equivalents.ending", latest_fy) or 0.0
-    net_debt = total_debt - cash
+    total_debt = _get("total_debt.ending", latest_fy)
+    cash = _get("cash_and_equivalents.ending", latest_fy)
+    short_inv = _get("short_term_investments.ending", latest_fy) or 0.0
+
+    if total_debt is None:
+        warnings.append("FCFF: total_debt missing — net_debt may be understated; using 0")
+        total_debt = 0.0
+    if cash is None:
+        warnings.append("FCFF: cash_and_equivalents missing — net_debt may be overstated; using 0")
+        cash = 0.0
+
+    net_debt = total_debt - cash - short_inv
 
     equity_book = _get("equity.parent", latest_fy) or 0.0
     total_capital = equity_book + total_debt
@@ -168,11 +191,33 @@ def compute_fcff(
     e_weight = wacc_assumptions.equity_weight or (1.0 - d_weight)
 
     wacc = wacc_assumptions.wacc(d_weight, e_weight)
-    tax_rate = wacc_assumptions.tax_rate
 
+    if wacc_assumptions.tax_policy is not None:
+        tax_rate = wacc_assumptions.tax_policy.effective_tax_rate
+        # Warn if the caller's WACCAssumptions.tax_rate differs materially (>2pp)
+        diff = abs(wacc_assumptions.tax_rate - tax_rate)
+        if diff > 0.02:
+            warnings.append(
+                f"FCFF: WACCAssumptions.tax_rate={wacc_assumptions.tax_rate:.1%} differs "
+                f"from TaxPolicy.effective_tax_rate={tax_rate:.1%} by {diff:.1%}; "
+                "using TaxPolicy rate for EBIT(1-T)"
+            )
+    else:
+        tax_rate = wacc_assumptions.tax_rate
+        warnings.append(
+            f"FCFF: using WACCAssumptions.tax_rate={tax_rate:.1%} — "
+            "no TaxPolicy object provided; may differ from forecast P&L effective tax rate"
+        )
+
+    # INVALID guard: WACC must exceed terminal growth for Gordon Growth to be meaningful.
+    wacc_invalid = False
     if wacc <= terminal_growth:
-        warnings.append(f"WACC ({wacc:.1%}) ≤ terminal growth ({terminal_growth:.1%}) — capping g")
-        terminal_growth = wacc - 0.01
+        warnings.append(
+            f"INVALID: WACC ({wacc:.1%}) ≤ terminal growth ({terminal_growth:.1%}) — "
+            "terminal value undefined; target price blocked"
+        )
+        wacc_invalid = True
+        terminal_growth = wacc - 0.01  # prevent ZeroDivisionError; result will not yield target price
 
     # Shares outstanding
     if shares_mn is None:
@@ -214,7 +259,7 @@ def compute_fcff(
             ebit=ebit,
             ebit_after_tax=ebit_after_tax,
             depreciation=dep,
-            capex=(-capex) if capex is not None else None,  # store as negative per convention
+            capex=capex,  # stored as positive outflow; formula: FCFF = NOPAT + D&A - CAPEX - ΔNWC
             delta_nwc=delta_nwc,
             fcff=fcff,
             discount_factor=discount_factor,
@@ -239,10 +284,11 @@ def compute_fcff(
     equity_val = ev - net_debt
 
     target_price: float | None = None
-    if shares_mn and shares_mn > 0 and equity_val > 0:
-        target_price = (equity_val / shares_mn) * 1_000  # VND bn / mn shares * 1000 = VND/share
-    elif equity_val <= 0:
-        warnings.append("Equity value is negative — target price not computed")
+    if not wacc_invalid:
+        if shares_mn and shares_mn > 0 and equity_val > 0:
+            target_price = (equity_val / shares_mn) * 1_000  # VND bn / mn shares * 1000 = VND/share
+        elif equity_val <= 0:
+            warnings.append("FCFF: equity value is negative — target price not computed")
 
     upside_pct: float | None = None
     if target_price and current_price_vnd and current_price_vnd > 0:
@@ -271,8 +317,10 @@ def compute_fcff(
 def _derive_shares(fact_table: FactTable, latest_fy: str | None) -> float | None:
     if not latest_fy:
         return None
-    ni = fact_table.get("net_income.parent", {}).get(latest_fy)
-    eps = fact_table.get("eps.basic", {}).get(latest_fy)
+    ni_e = fact_table.get("net_income.parent", {}).get(latest_fy)
+    eps_e = fact_table.get("eps.basic", {}).get(latest_fy)
+    ni = (ni_e.value if hasattr(ni_e, "value") else float(ni_e)) if ni_e is not None else None
+    eps = (eps_e.value if hasattr(eps_e, "value") else float(eps_e)) if eps_e is not None else None
     if ni and eps and eps > 0:
         return (ni * 1_000) / eps
     return None

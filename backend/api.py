@@ -18,6 +18,7 @@ from backend.schemas import (
 )
 from backend.settings import settings
 from backend.utils import deterministic_id
+from backend.runtime_store import to_public_status
 
 
 store = RuntimeStore(dsn=settings.database_url)
@@ -33,7 +34,7 @@ def _to_status_response(run: dict[str, Any]) -> RunStatusResponse:
         run_id=run["run_id"],
         ticker=run["ticker"],
         run_type=run["run_type"],
-        status=RunStatus(run["status"]),
+        status=RunStatus(to_public_status(run["status"])),
         current_stage=run["current_stage"],
         flags=run.get("flags_json", {}),
         created_at=run["created_at"],
@@ -82,7 +83,7 @@ def start_research(request: StartRunRequest) -> StartRunResponse:
     except Exception:
         existing = store.get_run(run_id)
         if existing:
-            return StartRunResponse(run_id=run_id, status=RunStatus(existing["status"]))
+            return StartRunResponse(run_id=run_id, status=RunStatus(to_public_status(existing["status"])))
         raise
 
     executor.submit(
@@ -119,7 +120,10 @@ def get_report(run_id: str) -> ArtifactsResponse:
     run = store.get_run(run_id)
     if run is None:
         raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
-    artifacts = [a for a in store.list_artifacts(run_id) if a["artifact_type"] in {"research_draft", "audit_report", "published_report"}]
+    artifacts = [
+        a for a in store.list_artifacts(run_id)
+        if a["artifact_type"] in {"report_md", "eval_result_json", "run_log_json"}
+    ]
     return ArtifactsResponse(run_id=run_id, artifacts=artifacts)
 
 

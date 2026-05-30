@@ -174,10 +174,16 @@ def build_fcfe_sensitivity_table(
     g_range: list[float] | None = None,
     shares_mn: float | None = None,
     current_price_vnd: float | None = None,
+    net_borrowing_schedule: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     """Re × terminal_growth sensitivity for FCFE.
 
     Each cell = Price_FCFE (VND/share) or None if Re ≤ g.
+
+    Args:
+        net_borrowing_schedule: {label: net_borrowing} from debt_schedule.net_borrowing_schedule().
+            Passed through to every compute_fcfe call so the grid uses driver-based NB,
+            not the stable-leverage (NB=0) default.
 
     Returns:
         {
@@ -218,6 +224,7 @@ def build_fcfe_sensitivity_table(
                 terminal_growth=g_val,
                 cost_of_equity_assumptions=assumptions,
                 shares_mn=shares_mn,
+                net_borrowing_schedule=net_borrowing_schedule,
             )
             all_warnings.extend(result.warnings)
             val = result.target_price_vnd

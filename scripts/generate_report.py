@@ -138,25 +138,34 @@ def _fmt_x(val: float | None) -> str:
     return f"{val:.1f}x" if val is not None else "N/A"
 
 
-# ── Citation helpers ───────────────────────────────────────────────────────────
+# ── Citation helpers (Phase 4: backed by backend.citations) ───────────────────
 
-def _resolve_source_title(f: dict) -> str:
-    """Return human-readable source title from fact dict.
+def _build_citation_map_from_fact_table(
+    ticker: str,
+    fact_table: "Any",
+    context_events: "dict | None" = None,
+) -> "dict[str, dict]":
+    """Build citation map from a FactTable (Phase 4 path).
 
-    Priority: src_title from DB JOIN → src_type label → fallback.
+    Uses backend.citations.citation_map.build_citation_map() which produces
+    CitationRecord objects with real source provenance from FactEntry.
+    Returns a plain dict compatible with the legacy _footnotes() format.
     """
-    title = f.get("src_title") or ""
-    if title:
-        return title
-    src_type = (f.get("src_type") or "").lower()
-    for key, label in _SOURCE_TYPE_LABEL.items():
-        if key in src_type:
-            return label
-    return "Báo cáo tài chính (nguồn không xác định)"
+    from backend.citations.citation_map import build_citation_map, citation_map_to_legacy_dict
+    cmap_obj = build_citation_map(
+        ticker=ticker,
+        fact_table=fact_table,
+        context_events=context_events,
+    )
+    return citation_map_to_legacy_dict(cmap_obj)
 
 
 def _build_citation_map(facts: list[dict]) -> dict[str, dict]:
-    """Build lookup: '{ticker}/{year}FY/{metric}' → rich citation record."""
+    """Legacy path: build citation map from raw fact rows (pre-Phase-4 fallback).
+
+    Used when a FactTable is not available. Kept for backward compat with
+    snapshot-based loading paths that return flat fact dicts.
+    """
     cmap: dict[str, dict] = {}
     for f in facts:
         key = f"{f['ticker']}/{f['fiscal_year']}FY/{f['line_item_code']}"
@@ -170,6 +179,21 @@ def _build_citation_map(facts: list[dict]) -> dict[str, dict]:
         published = f.get("src_published_at") or ""
         if hasattr(published, "isoformat"):
             published = published.isoformat()
+
+        # Phase 4: use source_tier if available (from JOIN on ingest.sources)
+        source_tier = f.get("source_tier")
+        tier_suffix = f" [Tier {source_tier}]" if source_tier is not None else ""
+        raw_title = f.get("src_title") or f.get("source_title") or ""
+        if not raw_title:
+            src_type = (f.get("src_type") or "").lower()
+            for type_key, label_val in _SOURCE_TYPE_LABEL.items():
+                if type_key in src_type:
+                    raw_title = label_val
+                    break
+        if not raw_title:
+            raw_title = "Dữ liệu tài chính"
+        source_title = f"{raw_title}{tier_suffix}"
+
         cmap[key] = {
             "fact_id": str(f.get("id", "")),
             "ticker": f["ticker"],
@@ -181,9 +205,10 @@ def _build_citation_map(facts: list[dict]) -> dict[str, dict]:
             "value_display": val_str,
             "unit": unit,
             "source_id": f.get("source_id", ""),
-            "source_title": _resolve_source_title(f),
-            "source_uri": f.get("src_uri") or "",
+            "source_title": source_title,
+            "source_uri": f.get("src_uri") or f.get("source_uri") or "",
             "source_type": f.get("src_type") or "",
+            "source_tier": source_tier,
             "published_at": str(published)[:10] if published else "",
             "reliability_tier": f.get("src_reliability_tier"),
         }
@@ -201,8 +226,15 @@ def _cite(cmap: dict, ticker: str, year: int, metric: str) -> str:
     return _cite_tag(metric, year)
 
 
-def _footnotes(cmap: dict, claims: list[tuple]) -> str:
-    """Generate user-readable footnote block for quantitative claims."""
+def _footnotes(cmap: dict, claims: list[tuple], mode: str = "draft") -> str:
+    """Generate user-readable footnote block.
+
+    Phase 6: footnotes are verification-aware.
+      - Verified claim (has official_document_id): cite the OFFICIAL document, noting the
+        provider cross-check ("đã đối soát với ... qua vnstock").
+      - Unverified Tier-3 claim: render the provider source but clearly label it
+        "⚠️ chưa kiểm chứng bằng nguồn chính thức" (allowed in draft; blocks final export).
+    """
     lines: list[str] = []
     seen: set[str] = set()
     for ticker, year, metric in claims:
@@ -212,26 +244,44 @@ def _footnotes(cmap: dict, claims: list[tuple]) -> str:
             continue
         seen.add(key)
         tag = _cite_tag(metric, year)
-        label = rec["line_item_label"]
-        val_str = rec["value_display"]
-        src_title = rec["source_title"]
-        src_type = rec.get("source_type") or ""
+        label = rec.get("metric_label") or rec.get("line_item_label") or rec.get("line_item_code", metric)
+        val_str = rec.get("value_display") or str(rec.get("value", ""))
+        period = rec.get("period") or f"{year}FY"
+        fact_id = rec.get("fact_id") or ""
+        tier = rec.get("source_tier")
+        official_id = rec.get("official_document_id")
+        is_derived = rec.get("is_derived", False)
+
+        if official_id is not None:
+            # Verified against an official document → official-source footnote format.
+            doc_title = rec.get("official_document_title") or "tài liệu chính thức"
+            issuer = rec.get("official_issuer") or ""
+            provider = (rec.get("source_uri") or "").removeprefix("vnstock://").split("/")[0].upper()
+            issuer_part = f", {issuer}" if issuer else ""
+            cross = f" Dữ liệu đã được đối soát với {provider} qua vnstock tại thời điểm ingest." if provider else ""
+            lines.append(
+                f"{tag}: **{label}** năm {year} — {val_str}, được trích từ "
+                f"_{doc_title}_{issuer_part}, kỳ {period}.{cross}\n"
+                f"_(Verified · official_document_id={official_id} · fact_id={fact_id})_"
+            )
+            continue
+
+        # No official linkage.
+        src_title = rec.get("source_title") or "Nguồn không xác định"
         src_uri = rec.get("source_uri") or ""
-        published = rec.get("published_at") or ""
-        period = rec["period"]
-        fact_id = rec["fact_id"]
-        # Build readable source line — only show fields that have real values
+        tier_label = rec.get("tier_label") or (f"[Tier {tier}]" if tier is not None else "")
         src_parts = [f"_{src_title}_"]
-        if src_type:
-            src_parts.append(f"Loại: {src_type}")
-        if published:
-            src_parts.append(f"Ngày: {published}")
+        if tier_label:
+            src_parts.append(tier_label)
         if src_uri:
             src_parts.append(f"URI: `{src_uri}`")
         src_line = " | ".join(src_parts)
+        unverified_note = ""
+        if not is_derived and (tier is None or tier >= 3):
+            unverified_note = "\n⚠️ **Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp."
         lines.append(
             f"{tag}: **{label}** — {val_str}, kỳ {period}.\n"
-            f"Nguồn: {src_line}\n"
+            f"Nguồn: {src_line}{unverified_note}\n"
             f"_(Internal: fact_id={fact_id})_"
         )
     return "\n\n".join(lines)
@@ -263,17 +313,22 @@ def _dedup_catalyst_lines(text: str) -> str:
 
 # ── Forecast table ─────────────────────────────────────────────────────────────
 
-def _build_forecast_section(ticker: str, fact_table: dict, shares_mn: float | None) -> tuple[str, dict]:
+def _build_forecast_section(
+    ticker: str,
+    fact_table: dict,
+    shares_mn: float | None,
+    forecast=None,   # ForecastArtifact — pass pre-built to avoid triple computation
+) -> tuple[str, dict]:
     """Run forecast engine and return (markdown_section, forecast_artifact_dict)."""
-    from backend.analytics.forecasting import ForecastAssumptions, run_forecast
-
-    forecast = run_forecast(
-        ticker=ticker,
-        fact_table=fact_table,
-        forecast_years=FORECAST_YEARS,
-        assumptions=ForecastAssumptions(),
-        shares_mn=shares_mn,
-    )
+    if forecast is None:
+        from backend.analytics.forecasting import ForecastAssumptions, run_forecast
+        forecast = run_forecast(
+            ticker=ticker,
+            fact_table=fact_table,
+            forecast_years=FORECAST_YEARS,
+            assumptions=ForecastAssumptions(),
+            shares_mn=shares_mn,
+        )
     artifact = forecast.to_dict()
 
     if not forecast.forecast_years:
@@ -371,10 +426,37 @@ def _build_forecast_section(ticker: str, fact_table: dict, shares_mn: float | No
     dep_val = drivers.get("depreciation_to_revenue", {}).get("value", 0)
     capex_val = drivers.get("capex_to_revenue", {}).get("value", 0)
     tax_val = drivers.get("effective_tax_rate", {}).get("value", 0)
+    cod_val = drivers.get("cost_of_debt", {}).get("value", 0)
+    cod_method = drivers.get("cost_of_debt", {}).get("method", "unknown")
+
+    # Debt/dividend schedule metadata for BS note
+    _debt_method = forecast.debt_schedule.forecast_method if forecast.debt_schedule else "unknown"
+    _div_method = forecast.dividend_schedule.method if forecast.dividend_schedule else "unknown"
+    _hist_payout = (
+        forecast.dividend_schedule.historical_payout_ratio
+        if forecast.dividend_schedule else None
+    )
+    _payout_str = f"{_hist_payout:.1%}" if _hist_payout is not None else "0% (không có dữ liệu)"
+
+    # Extended BS table: add net_borrowing and dividend rows
+    fcast_nb  = [fy.net_borrowing for fy in forecast.forecast_years]
+    fcast_div = [fy.cash_dividend for fy in forecast.forecast_years]
+    fcast_re  = [fy.retained_earnings_addition for fy in forecast.forecast_years]
+    hist_nb   = [None] * len(hist)
+    hist_div  = [None] * len(hist)
+    hist_re   = [None] * len(hist)
+
+    bs_table.extend([
+        row("Vay ròng (Net Borrowing)", hist_nb, fcast_nb),
+        row("Cổ tức tiền mặt chi trả", hist_div, fcast_div),
+        row("Lợi nhuận giữ lại", hist_re, fcast_re),
+    ])
 
     warn_lines = ""
     if forecast.warnings:
-        warn_lines = "\n> _Cảnh báo dự phóng: " + "; ".join(forecast.warnings) + "_\n"
+        # Show only non-verbose warnings (cap at 5)
+        shown = [w for w in forecast.warnings if len(w) < 200][:5]
+        warn_lines = "\n> _Cảnh báo dự phóng: " + "; ".join(shown) + "_\n"
 
     section = f"""### 3.4 Dự phóng KQKD 2026F–2030F
 
@@ -392,14 +474,17 @@ _Lịch sử: {', '.join(hist)} | Dự phóng (in đậm): {', '.join(fcast)}_
 | Khấu hao/doanh thu | {dep_val:.1%} | Trung vị lịch sử |
 | CAPEX/doanh thu | {capex_val:.1%} | Trung vị lịch sử |
 | Thuế suất thực tế | {tax_val:.1%} | Trung vị lịch sử |
+| Chi phí nợ (cost of debt) | {cod_val:.2%} | {cod_method} |
+| Lãi vay = nợ bình quân × cost_of_debt | — | Driver-based (không phải % doanh thu) |
 | ΔNWC | 2% thay đổi doanh thu | Ước tính đơn giản |
+| Tỷ lệ chi trả cổ tức (payout) | {_payout_str} | {_div_method} |
 {warn_lines}
 
 ### 3.5 Dự phóng bảng cân đối kế toán (Chỉ tiêu chính)
 
 {chr(10).join(bs_table)}
 
-_Lưu ý: Mô hình bảng cân đối đơn giản — vốn chủ tăng theo lợi nhuận giữ lại, không mô phỏng chia cổ tức._
+_Lưu ý: Mô hình driver-based — lãi vay = nợ bình quân × cost_of_debt ({cod_val:.2%}); nợ vay theo phương pháp {_debt_method}; vốn chủ cập nhật qua retained earnings sau khi trừ cổ tức (payout {_payout_str})._
 """
     return section, artifact
 
@@ -412,17 +497,18 @@ def _build_fcff_section(
     forecast_artifact_dict: dict,
     current_price: float | None,
     shares_mn: float | None,
+    forecast=None,   # ForecastArtifact — pass pre-built to avoid recomputation
 ) -> tuple[str, dict]:
     """Run FCFF valuation and return (markdown_section, fcff_artifact_dict)."""
-    from backend.analytics.forecasting import ForecastAssumptions, run_forecast
+    if forecast is None:
+        from backend.analytics.forecasting import ForecastAssumptions, run_forecast
+        forecast = run_forecast(
+            ticker=ticker, fact_table=fact_table,
+            forecast_years=FORECAST_YEARS,
+            assumptions=ForecastAssumptions(),
+            shares_mn=shares_mn,
+        )
     from backend.analytics.fcff import FCFFResult, WACCAssumptions, compute_fcff
-
-    forecast = run_forecast(
-        ticker=ticker, fact_table=fact_table,
-        forecast_years=FORECAST_YEARS,
-        assumptions=ForecastAssumptions(),
-        shares_mn=shares_mn,
-    )
 
     # Pass TaxPolicy from forecast so FCFF and forecast tax rates are consistent.
     wacc_assumptions = WACCAssumptions(tax_policy=forecast.tax_policy)
@@ -505,16 +591,23 @@ def _build_fcfe_section(
     fact_table: dict,
     current_price: float | None,
     shares_mn: float | None,
+    forecast=None,   # ForecastArtifact — pass pre-built to avoid recomputation
 ) -> tuple[str, dict]:
     """Run FCFE valuation and return (markdown_section, fcfe_artifact_dict)."""
-    from backend.analytics.forecasting import ForecastAssumptions, run_forecast
+    if forecast is None:
+        from backend.analytics.forecasting import ForecastAssumptions, run_forecast
+        forecast = run_forecast(
+            ticker=ticker, fact_table=fact_table,
+            forecast_years=FORECAST_YEARS,
+            assumptions=ForecastAssumptions(),
+            shares_mn=shares_mn,
+        )
     from backend.analytics.fcfe import CostOfEquityAssumptions, compute_fcfe
 
-    forecast = run_forecast(
-        ticker=ticker, fact_table=fact_table,
-        forecast_years=FORECAST_YEARS,
-        assumptions=ForecastAssumptions(),
-        shares_mn=shares_mn,
+    # Use driver-based net borrowing from debt_schedule (not stable-leverage NB=0)
+    _nb_sched = (
+        forecast.debt_schedule.net_borrowing_schedule()
+        if forecast.debt_schedule is not None else None
     )
     coe = CostOfEquityAssumptions()
     fcfe_result = compute_fcfe(
@@ -525,6 +618,7 @@ def _build_fcfe_section(
         terminal_growth=0.03,
         cost_of_equity_assumptions=coe,
         shares_mn=shares_mn,
+        net_borrowing_schedule=_nb_sched,
     )
     artifact = fcfe_result.to_dict()
 
@@ -551,11 +645,20 @@ def _build_fcfe_section(
         if shown:
             warn_lines = "\n> _Cảnh báo: " + "; ".join(shown) + "_\n"
 
+    _debt_method_fcfe = (
+        forecast.debt_schedule.forecast_method if forecast.debt_schedule else "missing"
+    )
+    _nb_note = (
+        f"Vay ròng lấy từ debt_schedule (phương pháp: {_debt_method_fcfe})."
+        if _nb_sched else
+        "Vay ròng = 0 (không có dữ liệu debt_schedule — giả định cấu trúc vốn ổn định)."
+    )
+
     section = f"""**Công thức:** FCFE = LNST + Khấu hao − CAPEX − ΔVLĐ + Vay ròng
 
 > FCFE chiết khấu bằng Re (chi phí vốn chủ), **không dùng WACC**.
 > FCFE cho trực tiếp Equity Value — **không trừ nợ ròng lần nữa**.
-> Giả định Vay ròng (Net Borrowing) = 0 các năm dự phóng (cấu trúc vốn ổn định).
+> {_nb_note}
 
 | Năm | LNST | Khấu hao | CAPEX | ΔVLĐ | Vay ròng | FCFE | PV(FCFE) |
 |---|---|---|---|---|---|---|---|
@@ -680,14 +783,75 @@ def _build_blend_section(
 
 # ── Main report generator ──────────────────────────────────────────────────────
 
+def _enrich_citations_with_verification(cmap: "dict[str, dict]", ticker: str) -> None:
+    """Phase 6: attach official_document_id, reconciliation_status and a grounded
+    source_tier to each citation entry by looking up the canonical facts.
+
+    Mutates cmap in place. Safe to call even if the DB is unavailable (best-effort).
+    """
+    try:
+        conn = psycopg2.connect(_dsn())
+    except Exception as exc:  # noqa: BLE001
+        print(f"[generate_report] WARNING: verification enrichment skipped ({exc})")
+        return
+    try:
+        import psycopg2.extras as _extras
+        with conn.cursor(cursor_factory=_extras.DictCursor) as cur:
+            cur.execute(
+                """
+                SELECT cf.period, cf.metric, cf.source_tier,
+                       cf.official_document_id, cf.reconciliation_status,
+                       od.title AS official_title, od.issuer AS official_issuer,
+                       od.source_type AS official_source_type
+                FROM fact.canonical_facts cf
+                LEFT JOIN ingest.official_documents od
+                       ON od.official_document_id = cf.official_document_id
+                WHERE cf.ticker = %s
+                """,
+                (ticker,),
+            )
+            by_key = {
+                f"{ticker}/{r['period']}/{r['metric']}": r for r in cur.fetchall()
+            }
+    finally:
+        conn.close()
+
+    for key, rec in cmap.items():
+        info = by_key.get(key)
+        if info is None:
+            rec.setdefault("official_document_id", None)
+            rec.setdefault("reconciliation_status", "missing_official")
+            continue
+        rec["official_document_id"] = info["official_document_id"]
+        rec["reconciliation_status"] = info["reconciliation_status"]
+        if rec.get("source_tier") is None and info["source_tier"] is not None:
+            rec["source_tier"] = info["source_tier"]
+        if info["official_document_id"] is not None:
+            rec["official_document_title"] = info["official_title"]
+            rec["official_issuer"] = info["official_issuer"]
+            rec["official_source_type"] = info["official_source_type"]
+
+
+def _run_source_tier_gate(cmap: "dict[str, dict]", mode: str) -> dict:
+    """Run the Phase 2 source-tier export gate on the (enriched) citation map."""
+    from backend.citations.citation_map import legacy_dict_to_citation_map
+    from backend.citations.source_tier_policy import evaluate_source_tier_gate
+    typed = legacy_dict_to_citation_map(cmap)
+    return evaluate_source_tier_gate(typed, mode=mode).to_dict()
+
+
 def generate_report(
     ticker: str,
     from_year: int = MVP_FROM_YEAR,
     to_year: int = MVP_TO_YEAR,
     report_type: str = "full_report",
     snapshot_id: str | None = None,
+    mode: str = "draft",
 ) -> dict:
     ticker = ticker.strip().upper()
+    mode = (mode or "draft").strip().lower()
+    if mode not in ("draft", "final"):
+        raise ValueError(f"mode must be 'draft' or 'final', got {mode!r}")
     generated_at = datetime.now(UTC)
     info = _COMPANY_INFO.get(ticker, {"name": ticker, "exchange": "N/A", "sector": "Dược phẩm"})
 
@@ -702,8 +866,45 @@ def generate_report(
 
     print(f"[generate_report] {ticker} — loading snapshot facts")
     facts = _load_snapshot_facts(used_snapshot_id)
-    cmap = _build_citation_map(facts)
     print(f"[generate_report] {ticker} — {len(facts)} facts loaded")
+
+    # Phase 4: build FactTable from snapshot facts, then build citation map
+    # with full source provenance (source_tier, source_uri, source_title).
+    _context_events: dict = {}  # hoisted so Phase 5 catalyst section can read it
+    try:
+        from backend.facts.normalizer import build_fact_table, compute_derived
+        from backend.citations.event_linker import link_events_to_periods
+        _fact_table = compute_derived(build_fact_table(facts))
+        _fy_periods_for_events = list({
+            f"{f['fiscal_year']}FY"
+            for f in facts
+            if str(f.get("fiscal_period", "")).upper() == "FY"
+        })
+        _context_events = link_events_to_periods(
+            ticker=ticker,
+            periods=_fy_periods_for_events,
+        )
+        cmap = _build_citation_map_from_fact_table(
+            ticker=ticker,
+            fact_table=_fact_table,
+            context_events=_context_events,
+        )
+        print(f"[generate_report] {ticker} — citation map built (Phase 4): "
+              f"{len(cmap)} entries, {len(_context_events)} periods with events")
+    except Exception as _cmap_exc:  # noqa: BLE001
+        print(f"[generate_report] WARNING: Phase 4 citation map failed ({_cmap_exc}), "
+              f"falling back to legacy path")
+        cmap = _build_citation_map(facts)
+
+    # Phase 6: enrich citations with verification provenance (official_document_id,
+    # reconciliation_status, grounded source_tier) from the canonical/verified facts,
+    # then run the mode-aware source-tier export gate.
+    _enrich_citations_with_verification(cmap, ticker)
+    source_tier_gate = _run_source_tier_gate(cmap, mode)
+    print(f"[generate_report] {ticker} — source-tier gate ({mode}): "
+          f"{source_tier_gate['export_decision']} "
+          f"({len(source_tier_gate['blocking_reasons'])} blocking, "
+          f"{len(source_tier_gate['warnings'])} warnings)")
 
     conn = psycopg2.connect(_dsn())
     try:
@@ -890,9 +1091,21 @@ def generate_report(
     else:
         abnormal_section = "### 3.3 Biến động chỉ số\n\nKhông có chỉ số nào biến động bất thường vượt ngưỡng cảnh báo.\n"
 
+    # ── Forecast — run ONCE; pass to all section builders for consistency ────
+    print(f"[generate_report] {ticker} — running forecast engine (single pass)")
+    from backend.analytics.forecasting import ForecastAssumptions, run_forecast
+    _shared_forecast = run_forecast(
+        ticker=ticker,
+        fact_table=fact_table,
+        forecast_years=FORECAST_YEARS,
+        assumptions=ForecastAssumptions(),
+        shares_mn=shares_mn,
+    )
+
     # ── Forecast section ──────────────────────────────────────────────────────
-    print(f"[generate_report] {ticker} — running forecast engine")
-    forecast_section, forecast_artifact = _build_forecast_section(ticker, fact_table, shares_mn)
+    forecast_section, forecast_artifact = _build_forecast_section(
+        ticker, fact_table, shares_mn, forecast=_shared_forecast
+    )
     FORECAST_DIR.mkdir(parents=True, exist_ok=True)
     ts_str = generated_at.strftime("%Y%m%dT%H%M%S")
     (FORECAST_DIR / f"{ticker}_{ts_str}_forecast.json").write_text(
@@ -902,7 +1115,8 @@ def generate_report(
     # ── FCFF section ─────────────────────────────────────────────────────────
     print(f"[generate_report] {ticker} — running FCFF valuation engine")
     fcff_section, fcff_artifact = _build_fcff_section(
-        ticker, fact_table, forecast_artifact, current_price, shares_mn
+        ticker, fact_table, forecast_artifact, current_price, shares_mn,
+        forecast=_shared_forecast,
     )
     (FORECAST_DIR / f"{ticker}_{ts_str}_fcff.json").write_text(
         json.dumps(fcff_artifact, indent=2, default=str), encoding="utf-8"
@@ -911,7 +1125,8 @@ def generate_report(
     # ── FCFE section ─────────────────────────────────────────────────────────
     print(f"[generate_report] {ticker} — running FCFE valuation engine")
     fcfe_section, fcfe_artifact = _build_fcfe_section(
-        ticker, fact_table, current_price, shares_mn
+        ticker, fact_table, current_price, shares_mn,
+        forecast=_shared_forecast,
     )
     (FORECAST_DIR / f"{ticker}_{ts_str}_fcfe.json").write_text(
         json.dumps(fcfe_artifact, indent=2, default=str), encoding="utf-8"
@@ -1007,6 +1222,17 @@ def generate_report(
                 seen_fiscal.add(fy)
                 evidence_section_md += f"**{title} ({fy}):**\n\n{text}\n\n"
 
+    # ── Phase 5: Key Catalysts section ────────────────────────────────────────
+    try:
+        from backend.citations.driver_evidence import render_catalyst_section
+        catalyst_section_md = render_catalyst_section(ticker, _context_events)
+        print(f"[generate_report] {ticker} — catalyst section built "
+              f"({sum(len(v) for v in _context_events.values())} events across "
+              f"{len(_context_events)} periods)")
+    except Exception as _cat_exc:  # noqa: BLE001
+        catalyst_section_md = ""
+        print(f"[generate_report] WARNING: catalyst section failed ({_cat_exc})")
+
     # ── Assemble full report ───────────────────────────────────────────────────
     fcff_target = fcff_artifact.get("target_price_vnd")
     fcff_target_str = f"{fcff_target:,.0f} VND/CP" if fcff_target else "N/A"
@@ -1092,6 +1318,8 @@ _EPS, BVPS tính theo đơn vị VND/CP. Vốn hóa, CCC từ giá thị trườ
 {forecast_section}
 
 {evidence_section_md}
+
+{catalyst_section_md}
 
 ---
 
@@ -1222,11 +1450,27 @@ Giả định: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, kỳ dự báo = {assump
 
 ### D. Footnotes (Trích dẫn chi tiết)
 
-""" + _footnotes(cmap, claims_used)
+""" + _footnotes(cmap, claims_used, mode)
+
+    # ── Phase 6: final-export gate banner ──────────────────────────────────────
+    export_blocked = (mode == "final") and (source_tier_gate["export_decision"] == "BLOCKED")
+    if mode == "final":
+        n_block = source_tier_gate.get("blocking_count", len(source_tier_gate["blocking_reasons"]))
+        if export_blocked:
+            banner = (
+                "> 🚫 **BÁO CÁO KHÔNG ĐỦ ĐIỀU KIỆN XUẤT BẢN (FINAL EXPORT BLOCKED)**\n"
+                f"> {n_block} quantitative claim chỉ có nguồn Tier 3 (API/provider) hoặc thiếu "
+                "nguồn chính thức. Cần ingest tài liệu chính thức (BCTC/BCTN) và đối soát "
+                "(Phase 3 + Phase 4) trước khi xuất bản final.\n"
+            )
+        else:
+            banner = "> ✅ **Source-tier gate: PASS** — mọi quantitative claim có nguồn chính thức.\n"
+        report_md = banner + "\n" + report_md
 
     # ── Save report ────────────────────────────────────────────────────────────
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    report_path = REPORTS_DIR / f"{ticker}_{ts_str}_{report_type}.md"
+    _suffix = "_BLOCKED" if export_blocked else ""
+    report_path = REPORTS_DIR / f"{ticker}_{ts_str}_{report_type}_{mode}{_suffix}.md"
     report_path.write_text(report_md, encoding="utf-8")
     print(f"[generate_report] Report saved: {report_path}")
 
@@ -1237,6 +1481,9 @@ Giả định: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, kỳ dự báo = {assump
         "generated_at": generated_at.isoformat(),
         "report_path": str(report_path),
         "report_type": report_type,
+        "mode": mode,
+        "export_blocked": export_blocked,
+        "source_tier_gate": source_tier_gate,
         "citation_map": cmap,
         "claims": [{"ticker": t, "year": y, "metric": m} for t, y, m in claims_used],
         "evidence_chunks_used": len(evidence_chunks),
@@ -1247,11 +1494,49 @@ Giả định: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, kỳ dự báo = {assump
     }
     out_dir = ROOT / "artifacts" / "reports"
     out_dir.mkdir(parents=True, exist_ok=True)
-    citation_path = out_dir / f"{ticker}_{ts_str}_{report_type}_citation.json"
+    citation_path = out_dir / f"{ticker}_{ts_str}_{report_type}_{mode}_citation.json"
     citation_path.write_text(json.dumps(citation_artifact, indent=2, default=str), encoding="utf-8")
     print(f"[generate_report] Citation map saved: {citation_path}")
 
+    # Phase 6: stable-named final-mode citation artifacts for the evaluator.
+    if mode == "final":
+        _write_final_citation_artifacts(ticker, citation_artifact, claims_used, cmap)
+
     return citation_artifact
+
+
+def _write_final_citation_artifacts(ticker, citation_artifact, claims_used, cmap) -> None:
+    """Write artifacts/reports/<TICKER>_final_citation_map.json + _final_citation_audit.md."""
+    out_dir = ROOT / "artifacts" / "reports"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / f"{ticker}_final_citation_map.json").write_text(
+        json.dumps(citation_artifact, indent=2, default=str), encoding="utf-8")
+
+    quant_keys = [k for k, r in cmap.items() if not r.get("is_derived", False)]
+    with_official = [k for k in quant_keys if cmap[k].get("official_document_id") is not None]
+    tier3_only = [
+        k for k in quant_keys
+        if cmap[k].get("official_document_id") is None
+        and (cmap[k].get("source_tier") is None or cmap[k].get("source_tier") >= 3)
+    ]
+    gate = citation_artifact["source_tier_gate"]
+    audit = [
+        f"# {ticker} Final Citation Audit (Phase 6)",
+        "",
+        f"- Generated: {citation_artifact['generated_at']}",
+        f"- Mode: final",
+        f"- Total quantitative claims: {len(quant_keys)}",
+        f"- Quantitative claims with official source: {len(with_official)}",
+        f"- Quantitative claims with Tier 3 only: {len(tier3_only)}",
+        f"- Catalyst claims: (see catalyst section) ",
+        f"- **Final export decision: {gate['export_decision']}**",
+        "",
+        "## Blocking reasons (first 25)",
+        "",
+    ]
+    audit += [f"- {r}" for r in gate["blocking_reasons"][:25]] or ["- (none)"]
+    (out_dir / f"{ticker}_final_citation_audit.md").write_text("\n".join(audit), encoding="utf-8")
+    print(f"[generate_report] Final citation artifacts written to {out_dir}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -1264,18 +1549,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--to-year", type=int, default=MVP_TO_YEAR, dest="to_year")
     parser.add_argument("--report-type", default="full_report", dest="report_type")
     parser.add_argument("--snapshot-id", default=None, dest="snapshot_id")
+    parser.add_argument("--mode", default="draft", choices=["draft", "final"],
+                        help="draft warns on Tier-3; final blocks export without official sources")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    generate_report(
+    result = generate_report(
         ticker=args.ticker,
         from_year=args.from_year,
         to_year=args.to_year,
         report_type=args.report_type,
         snapshot_id=args.snapshot_id,
+        mode=args.mode,
     )
+    if result.get("export_blocked"):
+        print("[generate_report] FINAL EXPORT BLOCKED — report is non-exportable "
+              "until official sources are ingested + reconciled.")
+        sys.exit(3)
     print("[generate_report] done")
 
 

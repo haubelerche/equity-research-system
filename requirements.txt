@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic>=2
+psycopg2-binary
+pandas
+numpy
+pyyaml
+langgraph
+pytest

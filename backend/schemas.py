@@ -54,8 +54,8 @@ class RunStatusResponse(BaseModel):
 
 
 class ApprovalRequest(BaseModel):
-    stage: str = Field(pattern="^(assumptions|final)$")
-    decision: str = Field(pattern="^(approve|reject)$")
+    stage: str = Field(pattern="^(assumptions|valuation_assumptions|report_draft|final|final_report)$")
+    decision: str = Field(pattern="^(approve|approved|reject|rejected|needs_revision)$")
     reviewer: str
     feedback_patch: dict[str, Any] = Field(default_factory=dict)
 

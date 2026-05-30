@@ -277,18 +277,34 @@ def _register_source_version(
     source_uri = f"vnstock://{source.lower()}/finance/{statement}/{ticker}?period={period}"
     raw_path = ROOT / "dataset" / "raw" / "bctc" / ticker / f"{statement}_{period}.json"
     checksum = registry.save_raw_snapshot(payload=payload, out_path=raw_path)
-    return registry.register_source(
+    # financial_statement via vnstock API = Tier 3. When Phase 1B introduces
+    # bctc_audited source_type backed by actual PDFs, those rows will be Tier 0.
+    source_id = registry.register_source(
         SourceInput(
             logical_id="bctc_disclosure",
             source_uri=source_uri,
             source_type="financial_statement",
+            source_tier=3,
+            source_title=f"Báo cáo tài chính {ticker} — {statement.upper()} ({source})",
             checksum=checksum,
             connector_version=CONNECTOR_VERSION,
+            ticker=ticker,
             raw_path=str(raw_path),
             published_at=datetime.now(UTC).isoformat(),
-            metadata_json={"provider": source, "period": period},
+            metadata_json={"provider": source, "period": period, "statement": statement},
         )
     )
+    registry.register_raw_payload(
+        source_id=source_id,
+        content_type="application/json",
+        checksum=checksum,
+        storage_path=str(raw_path),
+        connector_name="vnstock_finance_connector",
+        connector_version=CONNECTOR_VERSION,
+        request_uri=source_uri,
+        request_params={"ticker": ticker, "source": source, "period": period, "statement": statement},
+    )
+    return source_id
 
 
 def sync_financial_for_ticker(

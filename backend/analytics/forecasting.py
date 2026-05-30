@@ -1,12 +1,20 @@
-"""Deterministic financial forecast engine.
+"""Deterministic financial forecast engine — driver-based 3-statement model.
 
-Generates 5-year income statement and balance sheet projections
-from historical canonical facts using driver-based methods.
+Generates 5-year income statement + balance sheet projections from historical
+canonical facts using driver-based methods.
 
-Methods:
-  - revenue_growth: historical CAGR (capped ±25%), overridable
-  - cost items: ratio-to-revenue (historical median margin)
-  - balance sheet: simplified equity waterfall
+Revenue driver:   historical CAGR (capped ±25%), overridable
+Cost drivers:     ratio-to-revenue (historical median margin)
+Interest expense: average_debt × cost_of_debt (not revenue-based)
+  — avg_debt sourced from debt_schedule.py per forecast year
+  — cost_of_debt = median historical implied_cost_of_debt from debt_schedule
+Debt roll-forward: delegated entirely to debt_schedule.py
+Retained earnings: delegated entirely to dividend_schedule.retained_earnings_schedule()
+
+Two-pass structure:
+  Pass 1 (loop): income statement → net_income per year
+  Post-loop:     build dividend_schedule → retained_earnings_schedule
+  Pass 2 (loop): equity += retained_earnings; update BVPS, total_assets, dividend fields
 
 No LLM involvement — all arithmetic is explicit Python.
 
@@ -18,7 +26,11 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Any
 
-FactTable = dict[str, dict[str, float]]
+from backend.analytics.tax_policy import TaxPolicy, build_tax_policy
+from backend.analytics.dividend_schedule import build_dividend_schedule
+from backend.analytics.debt_schedule import build_debt_schedule, DebtSchedule
+
+from backend.facts.normalizer import FactTable
 
 _FORECAST_YEARS = [2026, 2027, 2028, 2029, 2030]
 _MAX_REVENUE_GROWTH = 0.25
@@ -26,7 +38,10 @@ _MIN_REVENUE_GROWTH = -0.10
 
 
 def _get(table: FactTable, key: str, period: str) -> float | None:
-    return table.get(key, {}).get(period)
+    entry = table.get(key, {}).get(period)
+    if entry is None:
+        return None
+    return entry.value if hasattr(entry, "value") else float(entry)
 
 
 def _cagr(start: float, end: float, years: int) -> float | None:
@@ -55,14 +70,16 @@ def _median_ratio(
 
 @dataclass
 class ForecastAssumptions:
-    revenue_growth_override: float | None = None  # None → use historical CAGR
-    gross_margin_override: float | None = None     # None → use historical median
-    net_margin_override: float | None = None       # None → derive from other lines
+    revenue_growth_override: float | None = None   # None → use historical CAGR
+    gross_margin_override: float | None = None      # None → use historical median
+    net_margin_override: float | None = None        # None → derive from other lines
     sga_to_revenue_override: float | None = None
     tax_rate_override: float | None = None
     capex_to_revenue_override: float | None = None
     depreciation_to_revenue_override: float | None = None
-    assumption_status: str = "default_unapproved"  # or "analyst_approved"
+    dividend_payout_ratio_override: float | None = None  # None → use historical median payout
+    cost_of_debt_override: float | None = None      # None → use historical implied CoD median
+    assumption_status: str = "default_unapproved"   # or "analyst_approved"
 
 
 @dataclass
@@ -87,11 +104,22 @@ class ForecastYear:
     # Balance sheet highlights
     total_assets: float | None
     equity: float | None
-    total_debt: float | None
-    other_liabilities: float | None  # non-debt liabilities carried forward
+    total_debt: float | None        # = ending_debt (backward-compatible alias)
+    other_liabilities: float | None
     # Per-share
     eps: float | None
     bvps: float | None
+    # Non-operating line (PBT gap): dividends from subs, forex, financial income, etc.
+    other_items: float | None = None
+    # Debt detail — sourced from debt_schedule per forecast year
+    beginning_debt: float | None = None
+    ending_debt: float | None = None
+    net_borrowing: float | None = None
+    cost_of_debt: float | None = None   # rate applied to avg_debt for interest_expense
+    # Dividend / retained earnings — sourced from dividend_schedule per forecast year
+    cash_dividend: float | None = None
+    payout_ratio: float | None = None
+    retained_earnings_addition: float | None = None
 
 
 @dataclass
@@ -104,6 +132,9 @@ class ForecastArtifact:
     drivers: dict[str, Any]
     forecast_years: list[ForecastYear]
     warnings: list[str] = field(default_factory=list)
+    tax_policy: TaxPolicy | None = None
+    dividend_schedule: Any | None = None   # DividendSchedule (avoid circular import)
+    debt_schedule: DebtSchedule | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -127,6 +158,7 @@ class ForecastArtifact:
                     "depreciation": round(fy.depreciation, 1) if fy.depreciation is not None else None,
                     "ebitda": round(fy.ebitda, 1) if fy.ebitda is not None else None,
                     "interest_expense": round(fy.interest_expense, 1) if fy.interest_expense is not None else None,
+                    "other_items": round(fy.other_items, 1) if fy.other_items is not None else None,
                     "profit_before_tax": round(fy.profit_before_tax, 1) if fy.profit_before_tax is not None else None,
                     "tax_expense": round(fy.tax_expense, 1) if fy.tax_expense is not None else None,
                     "net_income": round(fy.net_income, 1) if fy.net_income is not None else None,
@@ -138,10 +170,22 @@ class ForecastArtifact:
                     "other_liabilities": round(fy.other_liabilities, 1) if fy.other_liabilities is not None else None,
                     "eps": round(fy.eps, 0) if fy.eps is not None else None,
                     "bvps": round(fy.bvps, 0) if fy.bvps is not None else None,
+                    # Debt detail
+                    "beginning_debt": round(fy.beginning_debt, 1) if fy.beginning_debt is not None else None,
+                    "ending_debt": round(fy.ending_debt, 1) if fy.ending_debt is not None else None,
+                    "net_borrowing": round(fy.net_borrowing, 1) if fy.net_borrowing is not None else None,
+                    "cost_of_debt": round(fy.cost_of_debt, 4) if fy.cost_of_debt is not None else None,
+                    # Dividend detail
+                    "cash_dividend": round(fy.cash_dividend, 1) if fy.cash_dividend is not None else None,
+                    "payout_ratio": round(fy.payout_ratio, 4) if fy.payout_ratio is not None else None,
+                    "retained_earnings_addition": round(fy.retained_earnings_addition, 1) if fy.retained_earnings_addition is not None else None,
                 }
                 for fy in self.forecast_years
             ],
             "warnings": self.warnings,
+            "tax_policy": self.tax_policy.to_dict() if self.tax_policy else None,
+            "dividend_schedule": self.dividend_schedule.to_dict() if self.dividend_schedule else None,
+            "debt_schedule": self.debt_schedule.to_dict() if self.debt_schedule else None,
         }
 
 
@@ -149,18 +193,23 @@ def run_forecast(
     ticker: str,
     fact_table: FactTable,
     forecast_years: list[int] | None = None,
+    n_years: int | None = None,
     assumptions: ForecastAssumptions | None = None,
     shares_mn: float | None = None,
 ) -> ForecastArtifact:
-    """Run deterministic 5-year income statement and balance sheet forecast.
+    """Run deterministic driver-based income statement + balance sheet forecast.
 
-    Uses historical CAGR for revenue growth, historical median margins for
-    cost lines. All assumptions are explicit and stored in the artifact.
+    Args:
+        forecast_years: Explicit list of calendar years to forecast (e.g. [2026, 2027, 2028]).
+        n_years: Simple count of years to forecast (auto-generates years from latest_fy + 1).
+            Ignored when forecast_years is also provided.
+
+    Interest expense uses avg_debt × cost_of_debt (driver-based), not revenue ratios.
+    Debt roll-forward is sourced from debt_schedule.py.
+    Retained earnings are sourced from dividend_schedule.retained_earnings_schedule().
     """
     if assumptions is None:
         assumptions = ForecastAssumptions()
-    if forecast_years is None:
-        forecast_years = _FORECAST_YEARS
 
     warnings: list[str] = []
 
@@ -174,6 +223,17 @@ def run_forecast(
             forecast_years=[], warnings=["No FY periods available for forecast"],
         )
 
+    # Resolve forecast year list
+    if forecast_years is None:
+        if n_years is not None and n_years > 0:
+            latest_cal = int(fy_periods[-1].replace("FY", ""))
+            forecast_years = list(range(latest_cal + 1, latest_cal + 1 + n_years))
+        else:
+            forecast_years = _FORECAST_YEARS
+
+    # Pre-compute forecast labels (needed by debt_schedule before the main loop)
+    forecast_labels_order = [f"{y}F" for y in forecast_years]
+
     # ── Historical revenue CAGR ────────────────────────────────────────────
     rev_vals = [_get(fact_table, "revenue.net", p) for p in fy_periods]
     rev_vals = [v for v in rev_vals if v is not None]
@@ -183,7 +243,6 @@ def run_forecast(
         revenue_cagr = None
     elif len(rev_vals) >= 2:
         revenue_cagr = _cagr(rev_vals[0], rev_vals[-1], len(rev_vals) - 1)
-        # Cap for projection
         rev_growth = max(_MIN_REVENUE_GROWTH, min(_MAX_REVENUE_GROWTH, revenue_cagr or 0.05))
         if revenue_cagr is not None and revenue_cagr != rev_growth:
             warnings.append(
@@ -203,7 +262,6 @@ def run_forecast(
         gross_margin = 0.40
         warnings.append("No gross margin history — using default 40%")
 
-    # SGA as % of revenue (sga is stored negative)
     sga_ratios = []
     for p in fy_periods:
         sga = _get(fact_table, "sga.total", p)
@@ -215,14 +273,12 @@ def run_forecast(
         or (statistics.median(sga_ratios) if sga_ratios else 0.20)
     )
 
-    # Depreciation as % of revenue
     dep_to_rev = (
         assumptions.depreciation_to_revenue_override
         or _median_ratio("depreciation.total", "revenue.net", fact_table, fy_periods)
         or 0.04
     )
 
-    # CAPEX as % of revenue (capex stored negative → use abs)
     capex_ratios = []
     for p in fy_periods:
         capex = _get(fact_table, "capex.total", p)
@@ -234,34 +290,61 @@ def run_forecast(
         or (statistics.median(capex_ratios) if capex_ratios else 0.03)
     )
 
-    # Effective tax rate
-    tax_rates = []
-    for p in fy_periods:
-        pbt = _get(fact_table, "profit_before_tax.total", p)
-        ni = _get(fact_table, "net_income.parent", p)
-        if pbt and pbt > 0 and ni is not None:
-            tax_rates.append(max(0, (pbt - ni) / pbt))
-    tax_rate = (
-        assumptions.tax_rate_override
-        or (statistics.median(tax_rates) if tax_rates else 0.20)
+    # Effective tax rate — unified TaxPolicy module
+    tax_policy = build_tax_policy(
+        ticker=ticker,
+        fact_table=fact_table,
+        fy_periods=fy_periods,
+        valuation_year=int(fy_periods[-1].replace("FY", "")) if fy_periods else 2025,
+        manual_override=assumptions.tax_rate_override,
     )
+    tax_rate = tax_policy.effective_tax_rate
+    if tax_policy.excluded_observations:
+        warnings.append(
+            f"TaxPolicy: {len(tax_policy.excluded_observations)} FY period(s) excluded "
+            f"from tax rate calculation — see tax_policy.excluded_observations"
+        )
 
-    # Interest expense as % of revenue
+    # Interest/revenue ratio — kept only as fallback when no debt data is available
     interest_ratios = []
     for p in fy_periods:
         ie = _get(fact_table, "interest_expense.total", p)
         rev = _get(fact_table, "revenue.net", p)
         if ie is not None and rev and rev > 0:
             interest_ratios.append(abs(ie) / rev)
-    interest_to_rev = statistics.median(interest_ratios) if interest_ratios else 0.01
+    interest_to_rev_fallback = statistics.median(interest_ratios) if interest_ratios else 0.01
 
-    # ── Starting balance sheet values ────────────────────────────────────
+    # ── Other items driver (PBT gap = PBT - EBIT - interest) ──────────────
+    other_items_ratios: list[float] = []
+    for p in fy_periods:
+        pbt_h = _get(fact_table, "profit_before_tax.total", p)
+        gp_h  = _get(fact_table, "gross_profit.total", p)
+        sga_h = _get(fact_table, "sga.total", p)
+        ie_h  = _get(fact_table, "interest_expense.total", p)
+        rev_h = _get(fact_table, "revenue.net", p)
+        if all(v is not None for v in [pbt_h, gp_h, sga_h, ie_h, rev_h]) and rev_h > 0:
+            ebit_model = gp_h + sga_h
+            gap = pbt_h - (ebit_model + ie_h)
+            other_items_ratios.append(gap / rev_h)
+
+    other_items_to_rev: float = (
+        round(statistics.median(other_items_ratios), 4)
+        if other_items_ratios else 0.0
+    )
+    if other_items_ratios and abs(other_items_to_rev) > 0.001:
+        min_r = min(other_items_ratios)
+        max_r = max(other_items_ratios)
+        warnings.append(
+            f"Non-operating items (PBT gap) detected: ranged from "
+            f"{min_r:.1%} to {max_r:.1%} of revenue; median {other_items_to_rev:.1%} applied to forecast."
+        )
+
+    # ── Starting balance sheet values ─────────────────────────────────────
     latest_fy = fy_periods[-1]
-    start_assets = _get(fact_table, "total_assets.ending", latest_fy) or 0
-    start_equity = _get(fact_table, "equity.parent", latest_fy) or 0
-    start_debt = _get(fact_table, "total_debt.ending", latest_fy) or 0
+    start_assets = _get(fact_table, "total_assets.ending", latest_fy) or 0.0
+    start_equity = _get(fact_table, "equity.parent", latest_fy) or 0.0
+    start_debt = _get(fact_table, "total_debt.ending", latest_fy) or 0.0
     # Non-debt liabilities: carry forward as constant (trade payables, accruals, etc.)
-    # Satisfies identity: total_assets = equity + total_debt + other_liabilities
     other_liabilities = max(0.0, start_assets - start_equity - start_debt)
 
     # Shares outstanding
@@ -273,6 +356,38 @@ def run_forecast(
         else:
             shares_mn = None
 
+    # ── Build debt schedule (before main loop — determines interest expense) ──
+    debt_sched = build_debt_schedule(
+        ticker=ticker,
+        fact_table=fact_table,
+        fy_periods=fy_periods,
+        forecast_labels=forecast_labels_order,
+        forecast_years=forecast_years,
+    )
+    debt_row_by_label = {row.label: row for row in debt_sched.forecast_rows}
+    for w in debt_sched.warnings:
+        warnings.append(f"[DebtSchedule] {w}")
+
+    # ── Derive cost of debt ────────────────────────────────────────────────
+    hist_cods = [
+        r.implied_cost_of_debt
+        for r in debt_sched.historical_rows
+        if r.implied_cost_of_debt is not None
+    ]
+    if assumptions.cost_of_debt_override is not None:
+        cost_of_debt = assumptions.cost_of_debt_override
+        cod_method = "manual_override"
+    elif hist_cods:
+        cost_of_debt = statistics.median(hist_cods)
+        cod_method = "historical_implied_cod"
+    else:
+        cost_of_debt = interest_to_rev_fallback
+        cod_method = "fallback_interest_to_revenue"
+        warnings.append(
+            "Cost of debt not derivable from debt schedule (no historical interest/debt pairs). "
+            "Falling back to interest_expense/revenue ratio as proxy. Interest expense confidence: low."
+        )
+
     # ── Store drivers ──────────────────────────────────────────────────────
     drivers = {
         "revenue_growth": {y: round(rev_growth, 4) for y in forecast_years},
@@ -281,47 +396,75 @@ def run_forecast(
         "depreciation_to_revenue": {"method": "historical_median", "value": round(dep_to_rev, 4)},
         "capex_to_revenue": {"method": "historical_median", "value": round(capex_to_rev, 4)},
         "effective_tax_rate": {"method": "historical_median", "value": round(tax_rate, 4)},
-        "interest_to_revenue": {"method": "historical_median", "value": round(interest_to_rev, 4)},
+        "cost_of_debt": {"method": cod_method, "value": round(cost_of_debt, 4)},
+        "other_items_to_revenue": {"method": "historical_median", "value": other_items_to_rev},
     }
 
-    # ── Project each year ──────────────────────────────────────────────────
-    latest_rev = _get(fact_table, "revenue.net", latest_fy) or 0
+    # ── PASS 1: Forecast income statement per year ────────────────────────
+    latest_rev = _get(fact_table, "revenue.net", latest_fy) or 0.0
     current_rev = latest_rev
-    current_equity = start_equity
-    current_debt = start_debt
 
     forecast_year_objects: list[ForecastYear] = []
     forecast_period_labels: list[str] = []
+    forecast_net_incomes: dict[str, float] = {}
 
     for year in forecast_years:
         label = f"{year}F"
         forecast_period_labels.append(label)
 
+        # Revenue → EBIT
         revenue = current_rev * (1 + rev_growth)
-        cogs = -revenue * (1 - gross_margin)  # negative convention
+        cogs = -revenue * (1 - gross_margin)
         gross_profit = revenue + cogs
-        sga = -revenue * sga_to_rev       # negative
+        sga = -revenue * sga_to_rev
         depreciation = revenue * dep_to_rev
-        ebit = gross_profit + sga          # sga is negative, so this subtracts
+        ebit = gross_profit + sga
         ebitda = ebit + depreciation
         ebit_margin = ebit / revenue if revenue else None
 
-        interest_expense = -revenue * interest_to_rev  # negative
-        pbt = ebit + interest_expense
+        # Debt levels for this year (from pre-built debt schedule)
+        debt_row = debt_row_by_label.get(label)
+        beginning_debt_y: float | None = (
+            debt_row.beginning_interest_bearing_debt if debt_row else start_debt
+        )
+        ending_debt_y: float | None = (
+            debt_row.ending_interest_bearing_debt if debt_row else start_debt
+        )
+        net_borrowing_y: float | None = (
+            debt_row.net_borrowing if debt_row else 0.0
+        )
+
+        # Average debt → interest expense (driver-based)
+        if beginning_debt_y is not None and ending_debt_y is not None:
+            avg_debt: float | None = (beginning_debt_y + ending_debt_y) / 2.0
+        elif ending_debt_y is not None:
+            avg_debt = ending_debt_y
+        elif beginning_debt_y is not None:
+            avg_debt = beginning_debt_y
+        else:
+            avg_debt = None
+
+        if avg_debt is not None:
+            # Negative sign convention: interest_expense is a cost
+            interest_expense = -avg_debt * cost_of_debt
+            cod_applied = cost_of_debt
+        else:
+            # Fallback when no debt data at all
+            interest_expense = -revenue * interest_to_rev_fallback
+            cod_applied = None
+
+        other_items = revenue * other_items_to_rev
+        pbt = ebit + interest_expense + other_items
         tax_expense = -max(0, pbt) * tax_rate
         net_income = pbt + tax_expense
         net_margin = net_income / revenue if revenue else None
 
-        capex = -revenue * capex_to_rev   # negative
-
-        # Equity grows by net income (no dividends in MVP)
-        current_equity = current_equity + net_income
-        # Identity: total_assets = equity + total_debt + other_liabilities
-        total_assets = current_equity + current_debt + other_liabilities
+        capex = -revenue * capex_to_rev
+        forecast_net_incomes[label] = net_income
 
         eps = (net_income * 1_000) / shares_mn if shares_mn else None
-        bvps = (current_equity / shares_mn) * 1_000 if shares_mn else None
 
+        # equity/total_assets/bvps are placeholder — updated in Pass 2
         forecast_year_objects.append(ForecastYear(
             year=year,
             label=label,
@@ -340,15 +483,50 @@ def run_forecast(
             net_income=net_income,
             net_margin=net_margin,
             capex=capex,
-            total_assets=total_assets,
-            equity=current_equity,
-            total_debt=current_debt,
+            total_assets=None,
+            equity=None,
+            total_debt=ending_debt_y,
             other_liabilities=other_liabilities,
             eps=eps,
-            bvps=bvps,
+            bvps=None,
+            other_items=other_items,
+            beginning_debt=beginning_debt_y,
+            ending_debt=ending_debt_y,
+            net_borrowing=net_borrowing_y,
+            cost_of_debt=cod_applied,
         ))
 
         current_rev = revenue
+
+    # ── Build dividend schedule from Pass 1 net incomes ───────────────────
+    div_schedule = build_dividend_schedule(
+        ticker=ticker,
+        fact_table=fact_table,
+        fy_periods=fy_periods,
+        forecast_net_incomes=forecast_net_incomes,
+        manual_payout_ratio=assumptions.dividend_payout_ratio_override,
+    )
+    for w in div_schedule.warnings:
+        warnings.append(f"[DividendSchedule] {w}")
+
+    retained_sched = div_schedule.retained_earnings_schedule()
+    div_row_by_label = {r.label: r for r in div_schedule.forecast_rows}
+
+    # ── PASS 2: Update equity, BVPS, total_assets, dividend fields ────────
+    running_equity = start_equity
+    for fy in forecast_year_objects:
+        retained = retained_sched.get(fy.label, fy.net_income or 0.0)
+        running_equity += retained
+        ending_debt = fy.ending_debt if fy.ending_debt is not None else 0.0
+        fy.equity = running_equity
+        fy.total_assets = running_equity + ending_debt + other_liabilities
+        fy.bvps = (running_equity / shares_mn) * 1_000 if shares_mn else None
+
+        div_row = div_row_by_label.get(fy.label)
+        if div_row:
+            fy.cash_dividend = div_row.cash_dividend
+            fy.payout_ratio = div_row.payout_ratio
+            fy.retained_earnings_addition = div_row.retained_earnings_addition
 
     return ForecastArtifact(
         ticker=ticker,
@@ -359,4 +537,7 @@ def run_forecast(
         drivers=drivers,
         forecast_years=forecast_year_objects,
         warnings=warnings,
+        tax_policy=tax_policy,
+        dividend_schedule=div_schedule,
+        debt_schedule=debt_sched,
     )

@@ -1,0 +1,9 @@
+ticker,fiscal_year,period_type,statement_type,metric_id,value,unit,document_title,page_number,table_name,extracted_text,extraction_method,verified_by,verified_at
+DHG,2021,FY,income_statement,revenue_net,4127.4,vnd_bn,Báo cáo thường niên DHG 2021,42,Báo cáo kết quả hoạt động kinh doanh,Doanh thu thuần về bán hàng và cung cấp dịch vụ,manual,haubelerche,2026-05-30
+DHG,2021,FY,income_statement,gross_profit,1834.4,vnd_bn,Báo cáo thường niên DHG 2021,42,Báo cáo kết quả hoạt động kinh doanh,Lợi nhuận gộp về bán hàng và cung cấp dịch vụ,manual,haubelerche,2026-05-30
+DHG,2021,FY,income_statement,net_income,803.1,vnd_bn,Báo cáo thường niên DHG 2021,42,Báo cáo kết quả hoạt động kinh doanh,Lợi nhuận sau thuế thu nhập doanh nghiệp — cổ đông công ty mẹ,manual,haubelerche,2026-05-30
+DHG,2021,FY,income_statement,eps,5939.0,vnd,Báo cáo thường niên DHG 2021,42,Báo cáo kết quả hoạt động kinh doanh,Lãi cơ bản trên cổ phiếu (đồng),manual,haubelerche,2026-05-30
+DHG,2021,FY,balance_sheet,total_assets,4741.8,vnd_bn,Báo cáo thường niên DHG 2021,38,Bảng cân đối kế toán,TỔNG CỘNG TÀI SẢN,manual,haubelerche,2026-05-30
+DHG,2021,FY,balance_sheet,total_equity,3963.2,vnd_bn,Báo cáo thường niên DHG 2021,38,Bảng cân đối kế toán,Vốn chủ sở hữu — cổ đông công ty mẹ,manual,haubelerche,2026-05-30
+DHG,2021,FY,cash_flow,operating_cash_flow,811.6,vnd_bn,Báo cáo thường niên DHG 2021,45,Báo cáo lưu chuyển tiền tệ,Lưu chuyển tiền thuần từ hoạt động kinh doanh,manual,haubelerche,2026-05-30
+DHG,2021,FY,cash_flow,capex,-273.6,vnd_bn,Báo cáo thường niên DHG 2021,45,Báo cáo lưu chuyển tiền tệ,Tiền chi để mua sắm xây dựng TSCĐ và các tài sản dài hạn khác,manual,haubelerche,2026-05-30

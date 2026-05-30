@@ -2,10 +2,10 @@
 .worktrees/
 
 # Private / generated — never commit
-.claude/
+#.claude/
 dataset/
-reports/
-specs/
+
+
 docs/superpowers/
 
 # Large reference repos
@@ -16,7 +16,7 @@ vnstock/
 tests/
 
 # Markdown docs (generated reports, plans)
-*.md
+#*.md
 
 # Python
 __pycache__/
@@ -37,7 +37,7 @@ build/
 
 # IDE
 .vscode/
-.claude/
+
 .cursor/
 .idea/
 *.swp
