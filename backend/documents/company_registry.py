@@ -20,6 +20,7 @@ class CompanyRecord:
     aliases: list[str] = field(default_factory=list)
     tax_code: str | None = None
     issuer_code: str | None = None   # exchange ticker used on HOSE/HNX/SSC portals
+    cafef_id: str | None = None      # CafeF symbol (Tier 2 structured data)
 
 
 # MVP pharma universe. DHG is fully populated (the one-ticker E2E target); the others
@@ -36,33 +37,35 @@ _COMPANIES: dict[str, CompanyRecord] = {
             "https://dhgpharma.com.vn/vi/bao-cao-thuong-nien",
         ],
         aliases=["Dược Hậu Giang", "DHG Pharma", "Hau Giang Pharmaceutical"],
-        issuer_code="DHG",
+        issuer_code="DHG", cafef_id="DHG",
     ),
     "IMP": CompanyRecord(
         ticker="IMP", company_name_vi="Công ty Cổ phần Dược phẩm Imexpharm",
         company_name_en="Imexpharm Corporation", exchange="HOSE",
         official_website="https://www.imexpharm.com",
         ir_urls=["https://www.imexpharm.com/quan-he-co-dong"],
-        aliases=["Imexpharm"], issuer_code="IMP",
+        aliases=["Imexpharm"], issuer_code="IMP", cafef_id="IMP",
     ),
     "DMC": CompanyRecord(
         ticker="DMC", company_name_vi="Công ty Cổ phần Xuất nhập khẩu Y tế Domesco",
         company_name_en="Domesco Medical Import Export JSC", exchange="HOSE",
         official_website="https://www.domesco.com",
         ir_urls=["https://www.domesco.com/co-dong"], aliases=["Domesco"], issuer_code="DMC",
+        cafef_id="DMC",
     ),
     "TRA": CompanyRecord(
         ticker="TRA", company_name_vi="Công ty Cổ phần Traphaco",
         company_name_en="Traphaco JSC", exchange="HOSE",
         official_website="https://www.traphaco.com.vn",
         ir_urls=["https://www.traphaco.com.vn/vi/quan-he-co-dong.html"],
-        aliases=["Traphaco"], issuer_code="TRA",
+        aliases=["Traphaco"], issuer_code="TRA", cafef_id="TRA",
     ),
     "DBD": CompanyRecord(
         ticker="DBD", company_name_vi="Công ty Cổ phần Dược - Trang thiết bị Y tế Bình Định",
         company_name_en="Binh Dinh Pharmaceutical and Medical Equipment JSC", exchange="HOSE",
         official_website="https://www.bidiphar.com",
-        ir_urls=["https://www.bidiphar.com/quan-he-co-dong"], aliases=["Bidiphar"], issuer_code="DBD",
+        ir_urls=["https://www.bidiphar.com/quan-he-co-dong"], aliases=["Bidiphar"],
+        issuer_code="DBD", cafef_id="DBD",
     ),
 }
 

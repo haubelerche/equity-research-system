@@ -138,3 +138,38 @@ class BaseDiscoveryConnector:
     def discover(self, company, from_year: int, to_year: int,
                  http_get: HttpGet | None = None) -> list[DocumentCandidate]:
         raise NotImplementedError
+
+
+# ---------------------------------------------------------------------------
+# Structured financial data (Tier 2) — not PDFs, machine-readable JSON APIs
+# ---------------------------------------------------------------------------
+
+@dataclass
+class StructuredFinancialRow:
+    """One metric from a structured (non-PDF) data source."""
+    ticker: str
+    fiscal_year: int
+    metric_id: str
+    value: float
+    unit: str             # "vnd_bn" | "vnd" | "ratio"
+    source_name: str
+    source_tier: int      # 2 for CafeF
+    raw_label: str        # original JSON field name from API
+    api_url: str          # exact endpoint URL used
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+class StructuredDataConnector:
+    """Interface for connectors returning structured financial data (not PDFs)."""
+    source_name: str = "structured_base"
+    source_tier: int = 2
+
+    def fetch(
+        self,
+        ticker: str,
+        fiscal_year: int,
+        http_get=None,
+    ) -> list[StructuredFinancialRow]:
+        raise NotImplementedError
