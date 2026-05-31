@@ -4,6 +4,8 @@ pydantic>=2
 psycopg2-binary
 pandas
 numpy
+pdfplumber
 pyyaml
 langgraph
+openai
 pytest
