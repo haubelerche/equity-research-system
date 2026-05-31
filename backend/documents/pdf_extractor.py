@@ -49,6 +49,19 @@ def _slug_label(text: str) -> str:
 _NULL_VALUES = {"", "—", "-", "n/a"}
 
 
+def _parse_eps_raw(raw: str) -> Optional[float]:
+    """Parse EPS value (VND/share) — no scaling, just clean and convert."""
+    if not raw or raw.strip() in ("—", "-", "", "n/a", "N/A"):
+        return None
+    negative = raw.strip().startswith("(") and raw.strip().endswith(")")
+    cleaned = re.sub(r"[(),\s]", "", raw.strip())
+    try:
+        value = float(cleaned)
+    except ValueError:
+        return None
+    return -value if negative else value
+
+
 def _parse_vnd_bn(raw: str) -> Optional[float]:
     """Parse a raw Vietnamese financial string to tỷ VND (billions VND).
 
@@ -108,16 +121,18 @@ _METRIC_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"loi nhuan sau thue.*co dong.*cong ty me"), "net_income.parent"),
     (re.compile(r"loi nhuan sau thue.*co dong cty me"), "net_income.parent"),
     (re.compile(r"loi nhuan sau thue cong ty me"), "net_income.parent"),
-    # EPS
+    # EPS — keep only unambiguous patterns; removed broad `lai.*co.*phieu`
     (re.compile(r"lai co ban tren co phieu"), "eps.basic"),
     (re.compile(r"eps co ban"), "eps.basic"),
-    (re.compile(r"lai.*co.*phieu"), "eps.basic"),
     # Balance sheet
-    (re.compile(r"tong tai san"), "total_assets.ending"),
+    (re.compile(r"tong tai san(?! ngan| dai)"), "total_assets.ending"),
     (re.compile(r"tong cong tai san"), "total_assets.ending"),
     (re.compile(r"von chu so huu.*cong ty me"), "equity.parent"),
     (re.compile(r"vcsh.*cong ty me"), "equity.parent"),
     (re.compile(r"co dong cong ty me"), "equity.parent"),
+    # IFRS-style debt labels (must come before the shorter vay ngan/dai han patterns)
+    (re.compile(r"vay.*no thue tai chinh ngan han"), "short_term_debt.ending"),
+    (re.compile(r"vay.*no thue tai chinh dai han"), "long_term_debt.ending"),
     (re.compile(r"vay ngan han"), "short_term_debt.ending"),
     (re.compile(r"no ngan han.*vay"), "short_term_debt.ending"),
     (re.compile(r"vay dai han"), "long_term_debt.ending"),
@@ -285,7 +300,10 @@ class VietnameseBCTCExtractor:
                 if value_col >= len(row):
                     continue
                 raw_value = row[value_col]
-                parsed = _parse_vnd_bn(raw_value)
+                if metric_id == "eps.basic":
+                    parsed = _parse_eps_raw(raw_value)
+                else:
+                    parsed = _parse_vnd_bn(raw_value)
                 if parsed is None:
                     continue
 

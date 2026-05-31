@@ -3,6 +3,7 @@
 import pytest
 from backend.documents.pdf_extractor import (
     _slug_label,
+    _parse_eps_raw,
     _parse_vnd_bn,
     _map_label_to_metric,
     ExtractedRow,
@@ -334,3 +335,84 @@ class TestVietnameseBCTCExtractor:
             fiscal_years=[2023],
         )
         assert extracted[0].ticker == "DHG"
+
+
+# ---------------------------------------------------------------------------
+# Bug 1 regression: EPS must NOT be scaled by /1000
+# ---------------------------------------------------------------------------
+
+class TestEPSParsing:
+    def test_eps_value_not_divided(self):
+        """EPS '7,500' must produce 7500.0, not 7.5."""
+        ext = VietnameseBCTCExtractor("DHG", 2023, "BCTN DHG 2023")
+        rows = [["Lãi cơ bản trên cổ phiếu", "7,500", ""]]
+        extracted = ext.extract_from_table_rows(
+            rows, statement_type="income_statement", fiscal_years=[2023]
+        )
+        assert len(extracted) == 1
+        assert extracted[0].metric_id == "eps.basic"
+        assert extracted[0].value == pytest.approx(7500.0, abs=1.0)
+        assert extracted[0].unit == "vnd"
+
+    def test_negative_eps_value_correct(self):
+        ext = VietnameseBCTCExtractor("DHG", 2023, "BCTN DHG 2023")
+        rows = [["Lãi cơ bản trên cổ phiếu", "(2,000)", ""]]
+        extracted = ext.extract_from_table_rows(
+            rows, statement_type="income_statement", fiscal_years=[2023]
+        )
+        assert len(extracted) == 1
+        assert extracted[0].value == pytest.approx(-2000.0, abs=1.0)
+
+    def test_parse_eps_raw_plain(self):
+        assert _parse_eps_raw("7,500") == pytest.approx(7500.0)
+
+    def test_parse_eps_raw_negative(self):
+        assert _parse_eps_raw("(2,000)") == pytest.approx(-2000.0)
+
+    def test_parse_eps_raw_null(self):
+        assert _parse_eps_raw("—") is None
+        assert _parse_eps_raw("") is None
+
+
+# ---------------------------------------------------------------------------
+# Bug 2 regression: total_assets anchor — subtotals must not match
+# ---------------------------------------------------------------------------
+
+class TestTotalAssetsAnchor:
+    def test_subtotal_ngan_han_not_mapped_to_total_assets(self):
+        """'tong tai san ngan han' must NOT map to total_assets.ending."""
+        assert _map_label_to_metric("tong tai san ngan han") is None
+
+    def test_subtotal_dai_han_not_mapped_to_total_assets(self):
+        """'tong tai san dai han' must NOT map to total_assets.ending."""
+        assert _map_label_to_metric("tong tai san dai han") is None
+
+    def test_total_assets_still_mapped(self):
+        assert _map_label_to_metric("tong tai san") == "total_assets.ending"
+
+    def test_tong_cong_tai_san_mapped(self):
+        assert _map_label_to_metric("tong cong tai san") == "total_assets.ending"
+
+
+# ---------------------------------------------------------------------------
+# Bug 3 regression: lai co phieu thuong must NOT map to eps.basic
+# ---------------------------------------------------------------------------
+
+class TestFalsePositiveEPS:
+    def test_lai_co_phieu_thuong_not_eps(self):
+        """Common stock label must NOT map to eps.basic."""
+        assert _map_label_to_metric("lai co phieu thuong") is None
+
+
+# ---------------------------------------------------------------------------
+# Bug 4 regression: IFRS-style debt labels must match
+# ---------------------------------------------------------------------------
+
+class TestModernDebtLabels:
+    def test_ifrs_short_term_debt_mapped(self):
+        m = _map_label_to_metric("vay va no thue tai chinh ngan han")
+        assert m == "short_term_debt.ending"
+
+    def test_ifrs_long_term_debt_mapped(self):
+        m = _map_label_to_metric("vay va no thue tai chinh dai han")
+        assert m == "long_term_debt.ending"
