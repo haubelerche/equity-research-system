@@ -78,6 +78,31 @@ psql $DATABASE_URL -f scripts/db/migrations/007_expand_line_items.sql
 psql $DATABASE_URL -f scripts/db/migrations/008_research_snapshots.sql
 ```
 
+### OCR Runtime Requirements
+
+For processing scanned Vietnamese BCTC PDFs, the following dependencies are required:
+
+#### System Dependencies
+
+```bash
+sudo apt-get update
+sudo apt-get install -y tesseract-ocr tesseract-ocr-vie poppler-utils
+```
+
+#### Python Packages
+
+```bash
+pip install pytesseract pdf2image Pillow
+```
+
+These are included in `requirements.txt` and the `Dockerfile`. For local development without Docker, ensure the system packages are installed before running OCR-dependent scripts.
+
+#### Verify Runtime
+
+```bash
+python scripts/check_ocr_runtime.py
+```
+
 ### Biến môi trường
 
 Tạo file `.env` ở root:
