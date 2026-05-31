@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import json
 from typing import Any
 
-from backend.agents.audit_agent import AuditAgent
-from backend.agents.research_agent import ResearchAgent
-from backend.harness.gates import citation_gate, data_quality_gate, export_gate, valuation_gate
+from backend.harness.agent_registry import AgentRegistry
+from backend.harness.gates import citation_gate, data_quality_gate, export_gate, financial_analyst_gate, valuation_gate
 from backend.harness.graph import GRAPH_STAGES, build_langgraph
+from backend.harness.model_adapter import OpenAIModelAdapter
 from backend.harness.state import ResearchGraphState, stable_hash
 from backend.harness.tools import (
     build_facts_tool,
@@ -42,8 +41,8 @@ class ResearchGraphRunner:
         self.store = store
         self.settings = app_settings or settings
         self.budget = BudgetGuard(store, self.settings)
-        self.research_agent = ResearchAgent()
-        self.audit_agent = AuditAgent()
+        self.agent_registry = AgentRegistry()
+        self.model_adapter = OpenAIModelAdapter()
         self._compiled_graph = build_langgraph(self._node_map())
 
     def execute(self, context) -> None:
@@ -93,6 +92,7 @@ class ResearchGraphRunner:
             raise ValueError(f"Run not found: {run_id}")
 
         if db_decision != "approved":
+            self._invalidate_after_rejection(run_id, db_stage, reviewer, feedback_patch)
             self.store.update_run_state(run_id=run_id, status="needs_human_review", stage="NEEDS_REVIEW")
             self.store.add_audit_event(
                 run_id=run_id,
@@ -114,14 +114,54 @@ class ResearchGraphRunner:
         state.requires_human = False
         state.blocking_reason = None
         state.approvals[db_stage] = "approved"
+        state.human_review_decisions[db_stage] = {
+            "decision": "approved",
+            "reviewer": reviewer,
+            "feedback_patch": feedback_patch,
+        }
 
         if db_stage == "valuation_assumptions":
+            self.store.lock_artifacts(run_id, ["valuation_draft"])
             self.run_until_pause(state, start_stage="VALUATION_LOCKED")
         elif db_stage == "final_report":
             self.run_until_pause(state, start_stage="PUBLISHED")
 
     def _node_map(self):
         return {stage: (lambda state, s=stage: self._run_stage(ResearchGraphState(**state), s).model_dump(mode="json")) for stage in GRAPH_STAGES}
+
+    def _invalidate_after_rejection(
+        self,
+        run_id: str,
+        db_stage: str,
+        reviewer: str,
+        feedback_patch: dict[str, Any],
+    ) -> None:
+        invalidation_map = {
+            "valuation_assumptions": ["valuation_draft", "full_report_draft", "quality", "citation_gate"],
+            "report_draft": ["full_report_draft", "quality", "citation_gate"],
+            "final_report": ["full_report_draft", "quality", "citation_gate"],
+        }
+        section_keys = invalidation_map.get(db_stage, [])
+        stale_count = self.store.mark_artifacts_stale(
+            run_id=run_id,
+            section_keys=section_keys,
+            reason=f"{db_stage}_rejected",
+        )
+        latest = self.store.latest_graph_state(run_id)
+        if latest:
+            state = ResearchGraphState(**latest)
+            state.status = "needs_human_review"
+            state.requires_human = True
+            state.current_stage = "NEEDS_REVIEW"
+            state.blocking_reason = f"{db_stage}_rejected"
+            state.human_review_decisions[db_stage] = {
+                "decision": "rejected",
+                "reviewer": reviewer,
+                "feedback_patch": feedback_patch,
+                "invalidated_sections": section_keys,
+                "stale_artifacts_count": stale_count,
+            }
+            self._checkpoint(state)
 
     def _run_stage(self, state: ResearchGraphState, stage: str) -> ResearchGraphState:
         input_hash = state.stable_hash()
@@ -158,25 +198,48 @@ class ResearchGraphRunner:
 
         if stage == "PREFLIGHT":
             self._preflight(state)
-        elif stage == "BUILD_FACTS":
+        elif stage == "SUPERVISOR_PLAN":
+            result = self._run_agent(state, "supervisor", "Create execution plan and HITL routing policy.")
+            state.plan = result.payload
+            self._merge_agent_result(state, result)
+        elif stage == "DATA_RETRIEVAL_RUN":
             result = build_facts_tool(state.ticker, state.from_year, state.to_year)
             state.artifacts["build_facts"] = result.summary
+            state.data_inventory = result.summary
             state.snapshot_id = result.summary.get("snapshot_id")
             self._merge_result(state, result)
+
+            index_result = build_index_tool(state.ticker, state.from_year, state.to_year)
+            state.artifacts["index"] = index_result.summary
+            state.retrieval_results = index_result.summary
+            self._merge_result(state, index_result)
+
+            agent_result = self._run_agent(state, "data_retrieval", "Review data inventory, source coverage, and retrieval readiness.")
+            state.artifacts["data_retrieval_review"] = agent_result.payload
+            self._merge_agent_result(state, agent_result)
         elif stage == "DATA_QUALITY_GATE":
-            gate = data_quality_gate(state.artifacts.get("build_facts", {}))
+            gate = data_quality_gate(state.data_inventory or state.artifacts.get("build_facts", {}))
             self._record_gate(state, gate)
-        elif stage == "BUILD_INDEX":
-            result = build_index_tool(state.ticker, state.from_year, state.to_year)
-            state.artifacts["index"] = result.summary
-            self._merge_result(state, result)
-        elif stage == "VALUATION_DRAFT":
+        elif stage == "FINANCIAL_ANALYST_RUN":
+            result = self._run_agent(state, "financial_analyst", "Interpret deterministic financial tables and identify traceable diagnostics.")
+            state.financial_tables = result.model_dump(mode="json")
+            state.artifacts["financial_analyst_review"] = result.payload
+            self._merge_agent_result(state, result)
+        elif stage == "FINANCIAL_ANALYST_GATE":
+            gate = financial_analyst_gate(state.financial_tables)
+            self._record_gate(state, gate)
+        elif stage == "VALUATION_RUN":
             result = run_valuation_tool(state.ticker, state.from_year, state.to_year)
+            state.valuation_outputs = result.summary
             state.artifacts["valuation"] = result.summary
             state.snapshot_id = result.summary.get("snapshot_id") or state.snapshot_id
             self._merge_result(state, result)
+
+            agent_result = self._run_agent(state, "valuation", "Review deterministic valuation outputs, assumptions, and model limitations.")
+            state.artifacts["valuation_review"] = agent_result.payload
+            self._merge_agent_result(state, agent_result)
         elif stage == "VALUATION_GATE":
-            gate = valuation_gate(state.artifacts.get("valuation", {}))
+            gate = valuation_gate(state.valuation_outputs or state.artifacts.get("valuation", {}))
             self._record_gate(state, gate)
         elif stage == "WAITING_ASSUMPTIONS_APPROVAL":
             state.status = "needs_human_review"
@@ -186,30 +249,26 @@ class ResearchGraphRunner:
         elif stage == "VALUATION_LOCKED":
             state.artifacts.setdefault("valuation_lock", {"locked": True, "approval": state.approvals.get("valuation_assumptions")})
             state.status = "running"
-        elif stage == "REPORT_GENERATION":
+        elif stage == "REPORT_WRITER_CRITIC_RUN":
             result = generate_report_tool(state.ticker, state.snapshot_id, state.from_year, state.to_year, mode="draft")
             state.artifacts["report"] = result.summary
+            state.draft_report = result.summary
             self._merge_result(state, result)
+
+            agent_result = self._run_agent(state, "report_writer_critic", "Review draft report for grounded narrative, citations, numeric consistency, and final readiness.")
+            state.artifacts["report_writer_critic_review"] = agent_result.payload
+            self._merge_agent_result(state, agent_result)
         elif stage == "QUALITY_EVALUATION":
-            report_path = (state.artifacts.get("report") or {}).get("report_path")
+            report_path = (state.draft_report or state.artifacts.get("report") or {}).get("report_path")
             result = evaluate_quality_tool(state.ticker, report_path)
             state.artifacts["quality"] = result.summary
+            state.evaluation_results = result.summary
             self._merge_result(state, result)
             if result.blocking_reason:
                 state.blocking_reason = result.blocking_reason
         elif stage == "CITATION_GATE":
-            gate = citation_gate(state.artifacts.get("report", {}))
+            gate = citation_gate(state.draft_report or state.artifacts.get("report", {}))
             self._record_gate(state, gate)
-        elif stage == "RESEARCH_REVIEW":
-            self._charge_agent_step(state, stage)
-            result = self.research_agent.run(state.model_dump(mode="json"))
-            state.artifacts["research_review"] = result.payload
-            self._merge_agent_result(state, result)
-        elif stage == "AUDIT_REVIEW":
-            self._charge_agent_step(state, stage)
-            result = self.audit_agent.run(state.model_dump(mode="json"))
-            state.artifacts["audit_review"] = result.payload
-            self._merge_agent_result(state, result)
         elif stage == "EXPORT_GATE":
             gate = export_gate(state.model_dump(mode="json"), final_approval_required=False)
             self._record_gate(state, gate)
@@ -237,6 +296,8 @@ class ResearchGraphRunner:
         if not state.ticker or len(state.ticker) > 10:
             raise ValueError(f"Invalid ticker: {state.ticker!r}")
         self.store.check_schema_version()
+        self.agent_registry.validate()
+        self.model_adapter.validate_environment()
 
     def _record_gate(self, state: ResearchGraphState, gate: dict[str, Any]) -> None:
         state.gate_results[gate["gate"]] = gate
@@ -249,6 +310,7 @@ class ResearchGraphRunner:
     def _merge_result(self, state: ResearchGraphState, result) -> None:
         state.artifact_refs.extend([ref.model_dump(mode="json") for ref in result.artifact_refs])
         state.evidence_refs.extend([ref.model_dump(mode="json") for ref in result.evidence_refs])
+        self._record_tool_trace(state, result.node_name, result.summary, result.output_hash)
 
     def _merge_agent_result(self, state: ResearchGraphState, result) -> None:
         state.artifact_refs.extend([ref if isinstance(ref, dict) else dict(ref) for ref in result.artifact_refs])
@@ -258,12 +320,23 @@ class ResearchGraphRunner:
             state.requires_human = True
             state.blocking_reason = result.review_reason or result.blocking_reason
             self.store.update_run_state(state.run_id, "needs_human_review", state.current_stage)
+        self._record_agent_trace(state, result)
 
-    def _charge_agent_step(self, state: ResearchGraphState, stage: str) -> None:
+    def _run_agent(self, state: ResearchGraphState, agent_id: str, task: str):
+        config = self.agent_registry.get_agent_config(agent_id)
+        self._charge_agent_step(state, config.agent_id, config.model)
+        return self.model_adapter.run_agent(
+            agent_config=config,
+            state=state.model_dump(mode="json"),
+            task=task,
+            input_refs=[ref.get("artifact_id", "") for ref in state.artifact_refs if isinstance(ref, dict)],
+        )
+
+    def _charge_agent_step(self, state: ResearchGraphState, step_name: str, model_name: str) -> None:
         decision = self.budget.charge(
             run_id=state.run_id,
-            step_name=stage,
-            model_name=self.settings.default_model_name,
+            step_name=step_name,
+            model_name=model_name,
             prompt_tokens=1200,
             completion_tokens=400,
             budget_policy=state.policy.get("budget_policy", self.settings.default_budget_policy),
@@ -273,6 +346,55 @@ class ResearchGraphRunner:
             state.requires_human = True
             state.blocking_reason = decision.stop_reason or "budget_stop"
             raise RuntimeError(state.blocking_reason)
+
+    def _record_agent_trace(self, state: ResearchGraphState, result) -> None:
+        payload = {
+            "kind": "agent_message",
+            "run_id": state.run_id,
+            "agent_id": result.agent_id,
+            "agent_role": result.agent_id,
+            "action": result.action,
+            "input_summary": result.input_summary,
+            "output_summary": result.output_summary,
+            "confidence": result.confidence,
+            "confidence_breakdown": result.confidence_breakdown,
+            "status": result.status,
+            "latency_ms": result.latency_ms,
+            "cost_estimate": result.cost_estimate,
+            "sources_used": result.sources_used,
+            "fallback_triggered": result.fallback_triggered,
+            "requires_human": result.requires_human,
+            "next_action": result.next_action,
+            "warnings": result.warnings,
+        }
+        state.trace.append(payload)
+        self.store.add_audit_event(
+            run_id=state.run_id,
+            actor=result.agent_id or "agent",
+            action="agent_message",
+            payload=payload,
+        )
+
+    def _record_tool_trace(self, state: ResearchGraphState, tool_name: str, summary: dict[str, Any], output_hash: str | None) -> None:
+        payload = {
+            "kind": "tool_call",
+            "run_id": state.run_id,
+            "agent_role": self._agent_name(state.current_stage),
+            "tool_name": tool_name,
+            "arguments_json": {"ticker": state.ticker, "from_year": state.from_year, "to_year": state.to_year},
+            "expected_output_schema": "ServiceNodeResult",
+            "timeout_policy": "default",
+            "retry_policy": "no_retry",
+            "output_hash": output_hash,
+            "output_summary": summary,
+        }
+        state.trace.append(payload)
+        self.store.add_audit_event(
+            run_id=state.run_id,
+            actor=self._agent_name(state.current_stage),
+            action="tool_call",
+            payload=payload,
+        )
 
     def _checkpoint(self, state: ResearchGraphState) -> None:
         state.checkpoint_version += 1
@@ -298,10 +420,16 @@ class ResearchGraphRunner:
 
     @staticmethod
     def _agent_name(stage: str) -> str:
-        if stage in {"RESEARCH_REVIEW"}:
-            return "ResearchAgent"
-        if stage in {"AUDIT_REVIEW"}:
-            return "AuditAgent"
+        if stage == "SUPERVISOR_PLAN":
+            return "SupervisorAgent"
+        if stage in {"DATA_RETRIEVAL_RUN", "DATA_QUALITY_GATE"}:
+            return "DataRetrievalAgent"
+        if stage in {"FINANCIAL_ANALYST_RUN", "FINANCIAL_ANALYST_GATE"}:
+            return "FinancialAnalystAgent"
+        if stage in {"VALUATION_RUN", "VALUATION_GATE", "WAITING_ASSUMPTIONS_APPROVAL", "VALUATION_LOCKED"}:
+            return "ValuationAgent"
+        if stage in {"REPORT_WRITER_CRITIC_RUN", "QUALITY_EVALUATION", "CITATION_GATE", "EXPORT_GATE", "WAITING_FINAL_APPROVAL", "PUBLISHED"}:
+            return "ReportWriterCriticAgent"
         return "ServiceNode"
 
     @staticmethod
@@ -310,13 +438,13 @@ class ResearchGraphRunner:
 
     @staticmethod
     def _db_status_for_stage(stage: str) -> str:
-        if stage in {"BUILD_FACTS", "DATA_QUALITY_GATE"}:
+        if stage in {"DATA_RETRIEVAL_RUN", "DATA_QUALITY_GATE"}:
             return "running"
-        if stage in {"BUILD_INDEX", "RESEARCH_REVIEW", "DEBATE_REVIEW", "AUDIT_REVIEW"}:
+        if stage in {"SUPERVISOR_PLAN", "FINANCIAL_ANALYST_RUN", "FINANCIAL_ANALYST_GATE"}:
             return "analysis_ready"
-        if stage in {"VALUATION_DRAFT", "VALUATION_GATE", "VALUATION_LOCKED"}:
+        if stage in {"VALUATION_RUN", "VALUATION_GATE", "VALUATION_LOCKED"}:
             return "valuation_ready"
-        if stage in {"REPORT_GENERATION", "QUALITY_EVALUATION", "CITATION_GATE", "EXPORT_GATE"}:
+        if stage in {"REPORT_WRITER_CRITIC_RUN", "QUALITY_EVALUATION", "CITATION_GATE", "EXPORT_GATE"}:
             return "report_ready"
         if stage in {"WAITING_ASSUMPTIONS_APPROVAL", "WAITING_FINAL_APPROVAL"}:
             return "needs_human_review"

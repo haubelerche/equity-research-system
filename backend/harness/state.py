@@ -57,15 +57,24 @@ class ServiceNodeResult(BaseModel):
 
 class AgentResult(BaseModel):
     status: NodeStatus
+    agent_id: str | None = None
+    action: str | None = None
+    input_summary: dict[str, Any] = Field(default_factory=dict)
+    output_summary: dict[str, Any] = Field(default_factory=dict)
     payload: dict[str, Any] = Field(default_factory=dict)
     artifact_refs: list[Any] = Field(default_factory=list)
     evidence_refs: list[Any] = Field(default_factory=list)
     confidence: float = Field(ge=0, le=1)
     confidence_breakdown: dict[str, float] = Field(default_factory=dict)
+    next_action: str | None = None
     requires_human: bool = False
     review_reason: str | None = None
     blocking_reason: str | None = None
     warnings: list[str] = Field(default_factory=list)
+    sources_used: list[str] = Field(default_factory=list)
+    latency_ms: int | None = None
+    cost_estimate: float | None = None
+    fallback_triggered: bool = False
 
 
 class ResearchGraphState(BaseModel):
@@ -85,6 +94,15 @@ class ResearchGraphState(BaseModel):
     evidence_refs: list[dict[str, Any]] = Field(default_factory=list)
     gate_results: dict[str, dict[str, Any]] = Field(default_factory=dict)
     approvals: dict[str, str] = Field(default_factory=dict)
+    plan: dict[str, Any] = Field(default_factory=dict)
+    data_inventory: dict[str, Any] = Field(default_factory=dict)
+    retrieval_results: dict[str, Any] = Field(default_factory=dict)
+    financial_tables: dict[str, Any] = Field(default_factory=dict)
+    valuation_outputs: dict[str, Any] = Field(default_factory=dict)
+    draft_report: dict[str, Any] = Field(default_factory=dict)
+    evaluation_results: dict[str, Any] = Field(default_factory=dict)
+    human_review_decisions: dict[str, Any] = Field(default_factory=dict)
+    trace: list[dict[str, Any]] = Field(default_factory=list)
     requires_human: bool = False
     blocking_reason: str | None = None
     errors: list[str] = Field(default_factory=list)

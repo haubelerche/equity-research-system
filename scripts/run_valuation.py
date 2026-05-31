@@ -575,6 +575,12 @@ def run_valuation(
     artifact = {
         "ticker": ticker,
         "generated_at": generated_at.isoformat(),
+        "formula_version": "valuation_v1_code_first_fcff_fcfe_blend",
+        "assumption_version": "default_assumptions_v1",
+        "unit_policy": "VND per share; financial statement values follow canonical fact units",
+        "currency": "VND",
+        "period_scope": {"from_year": from_year, "to_year": to_year, "period_type": "FY"},
+        "valuation_methods": ["fcff", "fcfe", "blend_dcf", "multiples", "sensitivity"],
         "snapshot_id": snapshot_id,
         "snapshot_as_of": snap["as_of_date"],
         "fy_periods": fy_periods,

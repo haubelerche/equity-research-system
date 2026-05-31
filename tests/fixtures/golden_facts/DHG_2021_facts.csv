@@ -1,0 +1,9 @@
+metric_id,canonical_label_vi,fiscal_year,value,unit,statement_type,tolerance_pct
+revenue.net,Doanh thu thuần về bán hàng và cung cấp dịch vụ,2021,4127.4,vnd_bn,income_statement,0.5
+gross_profit.total,Lợi nhuận gộp về bán hàng và cung cấp dịch vụ,2021,1834.4,vnd_bn,income_statement,0.5
+net_income.parent,Lợi nhuận sau thuế thu nhập doanh nghiệp — cổ đông công ty mẹ,2021,803.1,vnd_bn,income_statement,0.5
+eps.basic,Lãi cơ bản trên cổ phiếu,2021,5939.0,vnd,income_statement,1.0
+total_assets.ending,TỔNG CỘNG TÀI SẢN,2021,4741.8,vnd_bn,balance_sheet,0.5
+equity.parent,Vốn chủ sở hữu — cổ đông công ty mẹ,2021,3963.2,vnd_bn,balance_sheet,0.5
+operating_cash_flow.total,Lưu chuyển tiền thuần từ hoạt động kinh doanh,2021,811.6,vnd_bn,cash_flow,0.5
+capex.total,Tiền chi để mua sắm xây dựng TSCĐ và các tài sản dài hạn khác,2021,-273.6,vnd_bn,cash_flow,0.5

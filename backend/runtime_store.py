@@ -346,6 +346,43 @@ class RuntimeStore:
                 row = cur.fetchone()
         return row[0] if row else None
 
+    def mark_artifacts_stale(self, run_id: str, section_keys: list[str], reason: str) -> int:
+        if not section_keys:
+            return 0
+        with self.conn() as connection:
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE research.run_artifacts
+                    SET payload_json = COALESCE(payload_json, '{}'::jsonb) || %s::jsonb,
+                        is_locked    = FALSE
+                    WHERE run_id = %s
+                      AND section_key = ANY(%s)
+                    """,
+                    (
+                        Json({"stale": True, "stale_reason": reason, "stale_at": datetime.now(UTC).isoformat()}),
+                        run_id,
+                        section_keys,
+                    ),
+                )
+                return int(cur.rowcount)
+
+    def lock_artifacts(self, run_id: str, section_keys: list[str]) -> int:
+        if not section_keys:
+            return 0
+        with self.conn() as connection:
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE research.run_artifacts
+                    SET is_locked = TRUE
+                    WHERE run_id = %s
+                      AND section_key = ANY(%s)
+                    """,
+                    (run_id, section_keys),
+                )
+                return int(cur.rowcount)
+
     def add_approval(
         self,
         run_id: str,

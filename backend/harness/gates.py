@@ -12,22 +12,42 @@ def fail_gate(name: str, reason: str, summary: dict[str, Any] | None = None) -> 
 
 
 def data_quality_gate(build_facts_summary: dict[str, Any]) -> dict[str, Any]:
+    blocking_reasons: list[str] = []
     if build_facts_summary.get("valuation_gate") != "pass":
-        reasons = build_facts_summary.get("blocking_reasons") or ["valuation_gate_not_passed"]
+        blocking_reasons.extend(build_facts_summary.get("blocking_reasons") or ["valuation_gate_not_passed"])
+    if not build_facts_summary.get("snapshot_id"):
+        blocking_reasons.append("snapshot_id_missing")
+    periods = build_facts_summary.get("periods_available") or []
+    if periods and any(not str(period).endswith("FY") for period in periods):
+        blocking_reasons.append("invalid_period_scope")
+    for gate_key in ("coverage_gate", "core_keys_gate", "source_validation_gate"):
+        if build_facts_summary.get(gate_key) == "fail":
+            blocking_reasons.append(f"{gate_key}_failed")
+    if build_facts_summary.get("source_tier_coverage_status") == "fail":
+        blocking_reasons.append("source_tier_coverage_failed")
+    if build_facts_summary.get("reconciliation_status") in {"fail", "manual_review"}:
+        blocking_reasons.append("reconciliation_requires_review")
+    if blocking_reasons:
         return {
             "gate": "DATA_QUALITY_GATE",
             "passed": False,
-            "blocking_reasons": reasons,
+            "blocking_reasons": sorted(set(blocking_reasons)),
             "summary": build_facts_summary,
         }
-    if not build_facts_summary.get("snapshot_id"):
-        return fail_gate("DATA_QUALITY_GATE", "snapshot_id_missing", build_facts_summary)
     return pass_gate("DATA_QUALITY_GATE", build_facts_summary)
 
 
 def valuation_gate(valuation_summary: dict[str, Any]) -> dict[str, Any]:
     required = ["has_fcff", "has_fcfe", "has_blend", "has_sensitivity"]
+    required_metadata = ["formula_version", "assumption_version", "unit_policy", "currency", "period_scope"]
     missing = [key for key in required if not valuation_summary.get(key)]
+    missing.extend([key for key in required_metadata if not valuation_summary.get(key)])
+    if not valuation_summary.get("assumptions"):
+        missing.append("assumptions")
+    if not valuation_summary.get("sensitivity_summary"):
+        missing.append("sensitivity_summary")
+    if not valuation_summary.get("valuation_methods"):
+        missing.append("valuation_methods")
     if missing:
         return fail_gate("VALUATION_GATE", f"missing_valuation_components:{','.join(missing)}", valuation_summary)
     if not valuation_summary.get("snapshot_id"):
@@ -38,10 +58,22 @@ def valuation_gate(valuation_summary: dict[str, Any]) -> dict[str, Any]:
     return pass_gate("VALUATION_GATE", valuation_summary)
 
 
+def financial_analyst_gate(financial_summary: dict[str, Any]) -> dict[str, Any]:
+    if financial_summary.get("requires_human"):
+        return fail_gate("FINANCIAL_ANALYST_GATE", financial_summary.get("review_reason") or "financial_analyst_requires_review", financial_summary)
+    if financial_summary.get("status") in {"failed", "needs_review"}:
+        return fail_gate("FINANCIAL_ANALYST_GATE", "financial_analyst_failed", financial_summary)
+    return pass_gate("FINANCIAL_ANALYST_GATE", financial_summary)
+
+
 def citation_gate(report_summary: dict[str, Any]) -> dict[str, Any]:
     source_gate = report_summary.get("source_tier_gate") or {}
-    if source_gate.get("export_decision") == "BLOCKED":
+    if source_gate.get("export_decision") == "BLOCKED" or source_gate.get("blocking_count", 0) > 0:
         return fail_gate("CITATION_GATE", "source_tier_gate_blocked", report_summary)
+    if report_summary.get("tier3_only_material_count", 0) > 0:
+        return fail_gate("CITATION_GATE", "tier3_only_material_claims", report_summary)
+    if report_summary.get("unsupported_numeric_claims_count", 0) > 0:
+        return fail_gate("CITATION_GATE", "unsupported_numeric_claims", report_summary)
     if report_summary.get("claims_count", 0) > 0 and report_summary.get("citation_count", 0) <= 0:
         return fail_gate("CITATION_GATE", "claims_without_citations", report_summary)
     return pass_gate("CITATION_GATE", report_summary)
@@ -54,6 +86,15 @@ def export_gate(state: dict[str, Any], final_approval_required: bool = True) -> 
         return fail_gate("EXPORT_GATE", f"upstream_gate_failed:{','.join(failed)}", {"failed": failed})
     if final_approval_required and (state.get("approvals") or {}).get("final_report") != "approved":
         return fail_gate("EXPORT_GATE", "final_human_approval_missing", {})
+    evaluation = state.get("evaluation_results") or (state.get("artifacts") or {}).get("quality") or {}
+    if evaluation.get("overall_status") in {"FAIL", "failed", "fail"}:
+        return fail_gate("EXPORT_GATE", "quality_evaluation_failed", evaluation)
+    valuation = state.get("valuation_outputs") or (state.get("artifacts") or {}).get("valuation") or {}
+    report = state.get("draft_report") or (state.get("artifacts") or {}).get("report") or {}
+    if valuation and report and valuation.get("snapshot_id") != report.get("snapshot_id"):
+        return fail_gate("EXPORT_GATE", "report_not_linked_to_valuation_snapshot", {"valuation": valuation, "report": report})
+    if final_approval_required and valuation and not (state.get("artifacts") or {}).get("valuation_lock"):
+        return fail_gate("EXPORT_GATE", "approved_valuation_lock_missing", {})
     audit = (state.get("artifacts") or {}).get("audit_review", {})
     if audit and audit.get("passed") is False:
         return fail_gate("EXPORT_GATE", "audit_review_failed", audit)

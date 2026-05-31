@@ -1,0 +1,412 @@
+# Financial Metric Dictionary — Vietnam BCTC (Báo cáo tài chính)
+#
+# Schema per entry:
+#   metric_id:            canonical identifier (dot-namespaced)
+#   statement_type:       income_statement | balance_sheet | cash_flow
+#   canonical_vi:         most common Vietnamese label (for display)
+#   synonyms_vi:          alternate Vietnamese label strings (already diacritic-stripped
+#                         for direct comparison after _slug_label())
+#   patterns:             regex patterns applied to slugged text (first match wins)
+#   unit_policy:          vnd_bn | vnd_per_share | ratio | percent
+#   expected_sign:        positive | negative | any
+#   required_for_valuation: true if missing this metric blocks valuation
+#   cafef_fields:         CafeF JSON field names that map to this metric
+#
+# Version: 1.0  (2026-05-31)
+# Source: derived from BCTC format per Vietnamese Accounting Standards (VAS/IFRS)
+#
+# NOTE: patterns use slugged labels (diacritics removed, lowercase).
+# The pdf_extractor._slug_label() function normalises before matching.
+
+# =============================================================================
+# INCOME STATEMENT (Báo cáo kết quả hoạt động kinh doanh)
+# =============================================================================
+
+- metric_id: revenue.net
+  statement_type: income_statement
+  canonical_vi: "Doanh thu thuần"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: true
+  cafef_fields: [DoanhThuThuanBanHangVaCungCapDichVu]
+  patterns:
+    - "doanh thu thuan"
+    - "doanh thu thuan ban hang"
+    - "doanh thu ban hang va cung cap dich vu"
+
+- metric_id: cogs.total
+  statement_type: income_statement
+  canonical_vi: "Giá vốn hàng bán"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [GiaVonHangBan]
+  patterns:
+    - "gia von hang ban"
+    - "gia von ban hang"
+    - "chi phi gia von"
+
+- metric_id: gross_profit.total
+  statement_type: income_statement
+  canonical_vi: "Lợi nhuận gộp"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: true
+  cafef_fields: [LoiNhuanGop]
+  patterns:
+    - "loi nhuan gop"
+    - "loi nhuan gop ve ban hang"
+
+- metric_id: financial_income.total
+  statement_type: income_statement
+  canonical_vi: "Doanh thu hoạt động tài chính"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [DoanhThuHoatDongTaiChinh]
+  patterns:
+    - "doanh thu hoat dong tai chinh"
+    - "thu nhap tai chinh"
+
+- metric_id: financial_expense.total
+  statement_type: income_statement
+  canonical_vi: "Chi phí tài chính"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [ChiPhiTaiChinh]
+  patterns:
+    - "chi phi tai chinh"
+
+- metric_id: interest_expense.total
+  statement_type: income_statement
+  canonical_vi: "Chi phí lãi vay"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: true
+  cafef_fields: [ChiPhiLaiVay]
+  patterns:
+    - "chi phi lai vay"
+    - "lai vay phai tra"
+
+- metric_id: selling_expense.total
+  statement_type: income_statement
+  canonical_vi: "Chi phí bán hàng"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [ChiPhiBanHang]
+  patterns:
+    - "chi phi ban hang"
+
+- metric_id: admin_expense.total
+  statement_type: income_statement
+  canonical_vi: "Chi phí quản lý doanh nghiệp"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [ChiPhiQuanLyDoanhNghiep]
+  patterns:
+    - "chi phi quan ly doanh nghiep"
+    - "chi phi quan ly"
+
+- metric_id: operating_profit.total
+  statement_type: income_statement
+  canonical_vi: "Lợi nhuận thuần từ hoạt động kinh doanh"
+  unit_policy: vnd_bn
+  expected_sign: any
+  required_for_valuation: false
+  cafef_fields: [LoiNhuanThuanTuHoatDongKinhDoanh]
+  patterns:
+    - "loi nhuan thuan tu hoat dong kinh doanh"
+    - "loi nhuan.*hoat dong kinh doanh"
+
+- metric_id: profit_before_tax.total
+  statement_type: income_statement
+  canonical_vi: "Lợi nhuận trước thuế"
+  unit_policy: vnd_bn
+  expected_sign: any
+  required_for_valuation: false
+  cafef_fields: [LoiNhuanTruocThue]
+  patterns:
+    - "loi nhuan truoc thue"
+    - "loi nhuan.*truoc.*thue"
+
+- metric_id: tax_expense.total
+  statement_type: income_statement
+  canonical_vi: "Chi phí thuế thu nhập doanh nghiệp"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [ChiPhiThue]
+  patterns:
+    - "chi phi thue thu nhap doanh nghiep"
+    - "^thue thu nhap doanh nghiep$"
+
+- metric_id: net_income.total
+  statement_type: income_statement
+  canonical_vi: "Lợi nhuận sau thuế"
+  unit_policy: vnd_bn
+  expected_sign: any
+  required_for_valuation: false
+  cafef_fields: [LoiNhuanSauThue]
+  patterns:
+    - "loi nhuan sau thue thu nhap doanh nghiep$"
+    - "^loi nhuan sau thue$"
+
+- metric_id: net_income.parent
+  statement_type: income_statement
+  canonical_vi: "Lợi nhuận sau thuế — cổ đông công ty mẹ"
+  unit_policy: vnd_bn
+  expected_sign: any
+  required_for_valuation: true
+  cafef_fields: [LoiNhuanSauThueCoTucCongTyMe, LoiNhuanSauThue]
+  patterns:
+    - "lnst.*cong ty me"
+    - "loi nhuan sau thue.*co dong.*cong ty me"
+    - "loi nhuan sau thue.*co dong cty me"
+    - "loi nhuan sau thue cong ty me"
+    - "loi ich cua co dong cong ty me"
+
+- metric_id: eps.basic
+  statement_type: income_statement
+  canonical_vi: "Lãi cơ bản trên cổ phiếu"
+  unit_policy: vnd_per_share
+  expected_sign: any
+  required_for_valuation: true
+  cafef_fields: [LaiCoSoBanToanBo, LaiBinhQuanTrenCoPhieu]
+  patterns:
+    - "lai co ban tren co phieu"
+    - "eps co ban"
+    - "lai co ban moi co phieu"
+    - "lai suy giam tren co phieu"
+
+- metric_id: depreciation.total
+  statement_type: income_statement
+  canonical_vi: "Khấu hao"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [KhauHao]
+  patterns:
+    - "khau hao tai san co dinh"
+    - "chi phi khau hao"
+    - "^khau hao$"
+
+# =============================================================================
+# BALANCE SHEET (Bảng cân đối kế toán)
+# =============================================================================
+
+- metric_id: total_assets.ending
+  statement_type: balance_sheet
+  canonical_vi: "Tổng tài sản"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: true
+  cafef_fields: [TongTaiSan]
+  patterns:
+    # Negative lookahead prevents matching subtotals (ngắn hạn / dài hạn)
+    - "tong tai san(?! ngan| dai)"
+    - "tong cong tai san"
+
+- metric_id: current_assets.ending
+  statement_type: balance_sheet
+  canonical_vi: "Tài sản ngắn hạn"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [TaiSanNganHan]
+  patterns:
+    - "tai san ngan han"
+    - "tong tai san ngan han"
+
+- metric_id: cash_and_equivalents.ending
+  statement_type: balance_sheet
+  canonical_vi: "Tiền và tương đương tiền"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [TienVaTuongDuongTien]
+  patterns:
+    - "tien va tuong duong tien"
+    - "tien va cac khoan tuong duong tien"
+
+- metric_id: accounts_receivable.ending
+  statement_type: balance_sheet
+  canonical_vi: "Phải thu khách hàng"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [PhaiThuKhachHang]
+  patterns:
+    - "phai thu khach hang"
+    - "cac khoan phai thu ngan han"
+
+- metric_id: inventory.ending
+  statement_type: balance_sheet
+  canonical_vi: "Hàng tồn kho"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [HangTonKho]
+  patterns:
+    - "hang ton kho"
+    - "^ton kho$"
+
+- metric_id: fixed_assets.ending
+  statement_type: balance_sheet
+  canonical_vi: "Tài sản cố định"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [TaiSanCoDinh]
+  patterns:
+    # Must NOT match "mua sam tai san co dinh" (capex) — use anchors/context
+    - "(?<!mua sam )(?<!nguyen gia )tai san co dinh$"
+    - "nguyen gia tai san co dinh$"
+
+- metric_id: total_liabilities.ending
+  statement_type: balance_sheet
+  canonical_vi: "Nợ phải trả"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [TongNoPhaitra]
+  patterns:
+    - "tong no phai tra"
+    - "no phai tra"
+
+- metric_id: short_term_debt.ending
+  statement_type: balance_sheet
+  canonical_vi: "Vay ngắn hạn"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: true
+  cafef_fields: [VayNganHan, VayVaNoThueNganHan]
+  patterns:
+    # IFRS-style patterns first (more specific)
+    - "vay.*no thue tai chinh ngan han"
+    - "vay va no thue tai chinh ngan han"
+    - "vay ngan han"
+    - "no ngan han.*vay"
+
+- metric_id: long_term_debt.ending
+  statement_type: balance_sheet
+  canonical_vi: "Vay dài hạn"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: true
+  cafef_fields: [VayDaiHan, VayVaNoThueDaiHan]
+  patterns:
+    # IFRS-style patterns first
+    - "vay.*no thue tai chinh dai han"
+    - "vay va no thue tai chinh dai han"
+    - "vay dai han"
+    - "no dai han.*vay"
+
+- metric_id: equity.parent
+  statement_type: balance_sheet
+  canonical_vi: "Vốn chủ sở hữu — công ty mẹ"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: true
+  cafef_fields: [VonChuSoHuu]
+  patterns:
+    - "von chu so huu.*cong ty me"
+    - "vcsh.*cong ty me"
+    - "co dong cong ty me"
+    - "von chu so huu cua co dong cong ty me"
+
+- metric_id: charter_capital.ending
+  statement_type: balance_sheet
+  canonical_vi: "Vốn điều lệ"
+  unit_policy: vnd_bn
+  expected_sign: positive
+  required_for_valuation: false
+  cafef_fields: [VonDieuLe]
+  patterns:
+    - "von dieu le"
+    - "von co phan"
+
+- metric_id: retained_earnings.ending
+  statement_type: balance_sheet
+  canonical_vi: "Lợi nhuận chưa phân phối"
+  unit_policy: vnd_bn
+  expected_sign: any
+  required_for_valuation: false
+  cafef_fields: [LoiNhuanChuaPhanPhoi]
+  patterns:
+    - "loi nhuan chua phan phoi"
+    - "loi nhuan giu lai"
+
+# =============================================================================
+# CASH FLOW (Báo cáo lưu chuyển tiền tệ)
+# =============================================================================
+
+- metric_id: operating_cash_flow.total
+  statement_type: cash_flow
+  canonical_vi: "Lưu chuyển tiền thuần từ hoạt động kinh doanh"
+  unit_policy: vnd_bn
+  expected_sign: any
+  required_for_valuation: true
+  cafef_fields: [LuuChuyenTienThuanTuHoatDongKinhDoanh]
+  patterns:
+    - "luu chuyen tien thuan tu hoat dong kinh doanh"
+    - "dong tien hoat dong kinh doanh thuan"
+
+- metric_id: capex.total
+  statement_type: cash_flow
+  canonical_vi: "Mua sắm tài sản cố định"
+  unit_policy: vnd_bn
+  expected_sign: negative
+  required_for_valuation: true
+  cafef_fields: [MuaSamTaiSanCoDinh]
+  patterns:
+    - "mua sam.*tai san co dinh"
+    - "mua sam xay dung tsc[dđ]"
+    - "chi.*mua.*tsc[dđ]"
+    - "chi mua sam.*tsc[dđ]"
+    - "tien chi de mua sam xay dung tscđ"
+
+- metric_id: investing_cash_flow.total
+  statement_type: cash_flow
+  canonical_vi: "Lưu chuyển tiền thuần từ hoạt động đầu tư"
+  unit_policy: vnd_bn
+  expected_sign: any
+  required_for_valuation: false
+  cafef_fields: [LuuChuyenTienThuanTuHoatDongDauTu]
+  patterns:
+    - "luu chuyen tien thuan tu hoat dong dau tu"
+
+- metric_id: financing_cash_flow.total
+  statement_type: cash_flow
+  canonical_vi: "Lưu chuyển tiền thuần từ hoạt động tài chính"
+  unit_policy: vnd_bn
+  expected_sign: any
+  required_for_valuation: false
+  cafef_fields: [LuuChuyenTienThuanTuHoatDongTaiChinh]
+  patterns:
+    - "luu chuyen tien thuan tu hoat dong tai chinh"
+
+- metric_id: dividends_paid.total
+  statement_type: cash_flow
+  canonical_vi: "Cổ tức đã trả"
+  unit_policy: vnd_bn
+  expected_sign: negative
+  required_for_valuation: false
+  cafef_fields: [CoTucDaTra]
+  patterns:
+    - "co tuc da tra"
+    - "tien chi tra co tuc"
+    - "tra co tuc"
+
+- metric_id: net_cash_flow.total
+  statement_type: cash_flow
+  canonical_vi: "Lưu chuyển tiền thuần trong kỳ"
+  unit_policy: vnd_bn
+  expected_sign: any
+  required_for_valuation: false
+  cafef_fields: [LuuChuyenTienThuanTrongKy]
+  patterns:
+    - "luu chuyen tien thuan trong ky"
+    - "tang giam tien thuan trong ky"

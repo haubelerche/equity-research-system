@@ -255,7 +255,8 @@ Draft rating: BAN (SELL) — chưa được analyst phê duyệt
 │   │   ├── ratios.py       # Financial ratios
 │   │   └── multiples.py    # P/E, EV/EBITDA cross-check
 │   ├── facts/              # Fact normalization, taxonomy
-│   └── agents/             # LLM agent wrappers (supervisor, research, auditor)
+│   ├── harness/            # LangGraph 5-agent harness, gates, checkpoints
+│   └── agents/             # Compatibility wrappers; production flow uses config/agents
 │
 ├── scripts/
 │   ├── ingest_ticker.py    # Phase 2: Data ingestion
@@ -283,6 +284,9 @@ Draft rating: BAN (SELL) — chưa được analyst phê duyệt
 ├── dataset/
 │   ├── taxonomy/           # Financial fact taxonomy (VN pharma)
 │   └── universe/           # Ticker universe config
+│
+├── config/
+│   └── agents/             # 5 product-agent YAML config and prompt library
 │
 ├── specs/                  # Architecture & data contract docs
 ├── tests/                  # Unit + integration tests

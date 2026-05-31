@@ -1,0 +1,51 @@
+agents:
+  supervisor:
+    role: SupervisorAgent
+    model: gpt-4o
+    temperature: 0.1
+    prompt_path: prompts/supervisor.md
+    allowed_tools: []
+    output_schema: AgentResult
+    budget_class: reasoning
+    timeout_seconds: 60
+    retry_policy: no_retry
+  data_retrieval:
+    role: DataRetrievalAgent
+    model: gpt-4o-mini
+    temperature: 0.0
+    prompt_path: prompts/data_retrieval.md
+    allowed_tools: [build_facts, build_index]
+    output_schema: AgentResult
+    budget_class: light_review
+    timeout_seconds: 60
+    retry_policy: no_retry
+  financial_analyst:
+    role: FinancialAnalystAgent
+    model: gpt-4o
+    temperature: 0.1
+    prompt_path: prompts/financial_analyst.md
+    allowed_tools: [read_snapshot, read_ratio_artifact]
+    output_schema: AgentResult
+    budget_class: reasoning
+    timeout_seconds: 60
+    retry_policy: no_retry
+  valuation:
+    role: ValuationAgent
+    model: gpt-4o
+    temperature: 0.1
+    prompt_path: prompts/valuation.md
+    allowed_tools: [run_valuation, read_valuation_artifact]
+    output_schema: AgentResult
+    budget_class: reasoning
+    timeout_seconds: 60
+    retry_policy: no_retry
+  report_writer_critic:
+    role: ReportWriterCriticAgent
+    model: gpt-4o
+    temperature: 0.2
+    prompt_path: prompts/report_writer_critic.md
+    allowed_tools: [generate_report, evaluate_report_quality]
+    output_schema: AgentResult
+    budget_class: synthesis
+    timeout_seconds: 90
+    retry_policy: no_retry

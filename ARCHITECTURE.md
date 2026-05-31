@@ -247,11 +247,13 @@ vietnam-pharma-equity-agent/
 │   │   ├── market_alignment.py — Market data consistency checks
 │   │   └── report_builder.py — Validation report assembly
 │   │
-│   ├── agents/               — LLM agent layer (partial implementation)
-│   │   └── data_foundation_agent.py — assess/prepare/readiness for all 5 tickers
+│   ├── harness/              — LangGraph 5-agent harness, gates, checkpoints, model adapter
+│   ├── agents/               — compatibility wrappers; production agent policy is config-driven
 │   │
 │   └── jobs/                 — Scheduled tasks
 │       └── scheduler.py      — APScheduler: weekly_sync, daily_prices, monthly_valuation
+│
+├── config/agents/            — 5 product-agent YAML config and Markdown prompt library
 │
 ├── scripts/                  — Runnable pipeline scripts
 │   ├── ingest_ticker.py      — Phase 2: ingest raw data from vnstock
@@ -450,7 +452,6 @@ python scripts/run_research.py --ticker DHG
 
 # Data validation across all tickers:
 python scripts/validate_data.py --ticker DHG
-python -m backend.agents.data_foundation_agent --all
 ```
 
 ### 7.2 Stage dependencies
@@ -722,24 +723,49 @@ Khi thiếu dữ liệu: `"Dữ liệu hiện tại chưa đủ để kết lu�
 
 ## 12. Agent and Orchestration Layer
 
-### 12.1 Implemented agents
+### 12.1 Product agents
 
-| Agent | File | Status | Responsibilities |
-|---|---|---|---|
-| `DataFoundationAgent` | `backend/agents/data_foundation_agent.py` | Implemented | assess/prepare/readiness for all 5 tickers; `--all` mode |
+Production orchestration uses a LangGraph harness with exactly five product agents. Their runtime policy is declared in `config/agents/agents.yml`; prompts live in `config/agents/prompts/`; deterministic services remain the source of truth for facts, valuation numbers, report files, quality gates, and citation checks.
 
-### 12.2 Pipeline orchestration (non-agent)
+| Agent | Runtime stage | Responsibilities |
+|---|---|---|
+| `SupervisorAgent` | `SUPERVISOR_PLAN` | execution plan, routing rationale, HITL/fallback policy |
+| `DataRetrievalAgent` | `DATA_RETRIEVAL_RUN` | data inventory review, source coverage summary, missing evidence notes |
+| `FinancialAnalystAgent` | `FINANCIAL_ANALYST_RUN` | qualitative interpretation of deterministic financial tables and anomaly notes |
+| `ValuationAgent` | `VALUATION_RUN` | critique deterministic valuation artifacts, assumptions, sensitivity readiness, model limitations |
+| `ReportWriterCriticAgent` | `REPORT_WRITER_CRITIC_RUN` | grounded narrative synthesis, factuality critique, final-readiness review |
 
-Phần lớn orchestration là **script-based pipeline**, không phải LLM agents:
+### 12.2 LangGraph harness
 
-- `backend/orchestrator.py` — run lifecycle management
-- `scripts/run_research.py` — full pipeline CLI wrapper
-- `backend/jobs/scheduler.py` — APScheduler cron jobs
+The full-report workflow is:
 
-### 12.3 Planned agent expansion (post-MVP)
+```text
+INIT
+-> PREFLIGHT
+-> SUPERVISOR_PLAN
+-> DATA_RETRIEVAL_RUN
+-> DATA_QUALITY_GATE
+-> FINANCIAL_ANALYST_RUN
+-> FINANCIAL_ANALYST_GATE
+-> VALUATION_RUN
+-> VALUATION_GATE
+-> WAITING_ASSUMPTIONS_APPROVAL
+-> VALUATION_LOCKED
+-> REPORT_WRITER_CRITIC_RUN
+-> QUALITY_EVALUATION
+-> CITATION_GATE
+-> EXPORT_GATE
+-> WAITING_FINAL_APPROVAL
+-> PUBLISHED
+```
 
-LangGraph-based multi-agent workflow (supervisor, research_agent, auditor_agent) là post-MVP. Current implementation dùng script pipeline thay vì LangGraph.
+Approval is an external API transition, not an agent tool. Missing `OPENAI_API_KEY` fails in `PREFLIGHT` for v1 agent execution.
 
+### 12.3 Pipeline orchestration
+
+- `backend/orchestrator.py` delegates run lifecycle to `backend/harness/runner.py`.
+- `scripts/run_research.py` calls the harness by default and keeps `--legacy-pipeline` for compatibility.
+- `backend/jobs/scheduler.py` remains the APScheduler cron layer.
 ### 12.4 Scheduler (APScheduler)
 
 3 registered cron jobs trong `backend/jobs/scheduler.py`:
@@ -887,8 +913,6 @@ python scripts/approve_report.py --ticker DHG --decision approve
 for ticker in DHG IMP DMC TRA DBD; do
     python scripts/run_research.py --ticker $ticker
 done
-# Or via DataFoundationAgent:
-python -m backend.agents.data_foundation_agent --all
 ```
 
 ---

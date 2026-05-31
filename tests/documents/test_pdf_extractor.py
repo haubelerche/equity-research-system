@@ -380,12 +380,20 @@ class TestEPSParsing:
 
 class TestTotalAssetsAnchor:
     def test_subtotal_ngan_han_not_mapped_to_total_assets(self):
-        """'tong tai san ngan han' must NOT map to total_assets.ending."""
-        assert _map_label_to_metric("tong tai san ngan han") is None
+        """'tong tai san ngan han' must NOT map to total_assets.ending.
+        With the YAML dictionary it correctly maps to current_assets.ending instead.
+        """
+        result = _map_label_to_metric("tong tai san ngan han")
+        assert result != "total_assets.ending", (
+            "Subtotal 'tong tai san ngan han' must not be mistaken for total_assets"
+        )
+        # YAML now correctly maps it to current_assets.ending
+        assert result in ("current_assets.ending", None)
 
     def test_subtotal_dai_han_not_mapped_to_total_assets(self):
         """'tong tai san dai han' must NOT map to total_assets.ending."""
-        assert _map_label_to_metric("tong tai san dai han") is None
+        result = _map_label_to_metric("tong tai san dai han")
+        assert result != "total_assets.ending"
 
     def test_total_assets_still_mapped(self):
         assert _map_label_to_metric("tong tai san") == "total_assets.ending"

@@ -11,6 +11,7 @@ import csv
 import re
 import unicodedata
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Optional
 
@@ -106,53 +107,46 @@ def _parse_vnd_bn(raw: str) -> Optional[float]:
 
 
 # ---------------------------------------------------------------------------
-# Label → metric mapping
+# Label → metric mapping (loaded from config/financial_metric_dictionary.yaml)
 # ---------------------------------------------------------------------------
 
-# Each entry: (compiled regex pattern, metric_id)
-# First match wins.
-_METRIC_PATTERNS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"doanh thu thuan"), "revenue.net"),
-    (re.compile(r"loi nhuan gop"), "gross_profit.total"),
-    (re.compile(r"loi nhuan.*hoat dong kinh doanh"), "operating_profit.total"),
-    (re.compile(r"loi nhuan.*truoc.*thue"), "profit_before_tax.total"),
-    # net_income.parent — several forms
-    (re.compile(r"lnst.*cong ty me"), "net_income.parent"),
-    (re.compile(r"loi nhuan sau thue.*co dong.*cong ty me"), "net_income.parent"),
-    (re.compile(r"loi nhuan sau thue.*co dong cty me"), "net_income.parent"),
-    (re.compile(r"loi nhuan sau thue cong ty me"), "net_income.parent"),
-    # EPS — keep only unambiguous patterns; removed broad `lai.*co.*phieu`
-    (re.compile(r"lai co ban tren co phieu"), "eps.basic"),
-    (re.compile(r"eps co ban"), "eps.basic"),
-    # Balance sheet
-    (re.compile(r"tong tai san(?! ngan| dai)"), "total_assets.ending"),
-    (re.compile(r"tong cong tai san"), "total_assets.ending"),
-    (re.compile(r"von chu so huu.*cong ty me"), "equity.parent"),
-    (re.compile(r"vcsh.*cong ty me"), "equity.parent"),
-    (re.compile(r"co dong cong ty me"), "equity.parent"),
-    # IFRS-style debt labels (must come before the shorter vay ngan/dai han patterns)
-    (re.compile(r"vay.*no thue tai chinh ngan han"), "short_term_debt.ending"),
-    (re.compile(r"vay.*no thue tai chinh dai han"), "long_term_debt.ending"),
-    (re.compile(r"vay ngan han"), "short_term_debt.ending"),
-    (re.compile(r"no ngan han.*vay"), "short_term_debt.ending"),
-    (re.compile(r"vay dai han"), "long_term_debt.ending"),
-    (re.compile(r"no dai han.*vay"), "long_term_debt.ending"),
-    (re.compile(r"tong no phai tra"), "total_liabilities.ending"),
-    (re.compile(r"tien va tuong duong tien"), "cash_and_equivalents.ending"),
-    # Cash flow
-    (re.compile(r"luu chuyen tien thuan tu hoat dong kinh doanh"), "operating_cash_flow.total"),
-    (re.compile(r"mua sam.*tai san co dinh"), "capex.total"),
-    (re.compile(r"chi.*mua.*tsc[dđ]"), "capex.total"),
-    (re.compile(r"chi mua sam.*tsc[dđ]"), "capex.total"),
-    (re.compile(r"mua sam xay dung tsc[dđ]"), "capex.total"),
-    (re.compile(r"luu chuyen tien thuan tu hoat dong dau tu"), "investing_cash_flow.total"),
-    (re.compile(r"luu chuyen tien thuan tu hoat dong tai chinh"), "financing_cash_flow.total"),
-]
+def _load_metric_patterns() -> tuple[list[tuple[re.Pattern, str]], frozenset[str]]:
+    """Load compiled patterns and per-share metrics from the YAML dictionary.
+
+    Returns (patterns, vnd_per_share_metric_ids).
+    Falls back gracefully if YAML is absent or unparseable.
+    """
+    _FALLBACK_PER_SHARE = frozenset({"eps.basic"})
+    try:
+        import yaml  # type: ignore[import-untyped]
+        yaml_path = Path(__file__).resolve().parents[2] / "config" / "financial_metric_dictionary.yaml"
+        if not yaml_path.exists():
+            return [], _FALLBACK_PER_SHARE
+        entries = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or []
+        patterns: list[tuple[re.Pattern, str]] = []
+        per_share: set[str] = set()
+        for entry in entries:
+            metric_id = entry.get("metric_id", "")
+            if entry.get("unit_policy") == "vnd_per_share":
+                per_share.add(metric_id)
+            for pat_str in entry.get("patterns", []):
+                try:
+                    patterns.append((re.compile(pat_str), metric_id))
+                except re.error:
+                    pass  # skip malformed patterns silently
+        return patterns, frozenset(per_share) or _FALLBACK_PER_SHARE
+    except Exception:  # noqa: BLE001
+        return [], _FALLBACK_PER_SHARE
+
+
+# Compiled at module import. Reload module to pick up YAML changes.
+_METRIC_PATTERNS, _VND_PER_SHARE_METRICS = _load_metric_patterns()
 
 
 def _map_label_to_metric(slug: str) -> Optional[str]:
     """Map a slugged Vietnamese label to a canonical metric_id.
 
+    Uses patterns loaded from config/financial_metric_dictionary.yaml.
     Returns None if no pattern matches.
     """
     for pattern, metric_id in _METRIC_PATTERNS:
@@ -291,8 +285,9 @@ class VietnameseBCTCExtractor:
             if metric_id is None:
                 continue
 
-            # Determine unit: EPS is in VND/share, everything else in VND billions
-            unit = "vnd" if metric_id == "eps.basic" else "vnd_bn"
+            # Determine unit from YAML dictionary (fallback: per-share if in _VND_PER_SHARE_METRICS)
+            is_per_share = metric_id in _VND_PER_SHARE_METRICS
+            unit = "vnd" if is_per_share else "vnd_bn"
 
             # Process each value column
             for col_idx, fy in enumerate(fiscal_years):
@@ -300,7 +295,7 @@ class VietnameseBCTCExtractor:
                 if value_col >= len(row):
                     continue
                 raw_value = row[value_col]
-                if metric_id == "eps.basic":
+                if is_per_share:
                     parsed = _parse_eps_raw(raw_value)
                 else:
                     parsed = _parse_vnd_bn(raw_value)
@@ -414,6 +409,148 @@ class VietnameseBCTCExtractor:
             return []
 
         return results
+
+
+# ---------------------------------------------------------------------------
+# PDF type detection
+# ---------------------------------------------------------------------------
+
+class PdfType(str, Enum):
+    TEXT_BASED = "text_based"
+    """PDF has a text layer — pdfplumber can extract tables directly."""
+    SCANNED = "scanned"
+    """PDF is a scanned image — needs OCR before table extraction."""
+    UNKNOWN = "unknown"
+    """Could not determine (file error, empty PDF, etc.)."""
+
+
+def detect_pdf_type(pdf_path: Path, sample_pages: int = 5) -> PdfType:
+    """Classify a PDF as text-based or scanned by measuring text density.
+
+    Checks the first *sample_pages* pages. A PDF is considered scanned if
+    the sampled pages yield zero extractable characters.
+
+    Args:
+        pdf_path: Path to the PDF file.
+        sample_pages: Number of pages to sample (default 5).
+
+    Returns:
+        PdfType enum value.
+    """
+    try:
+        import pdfplumber  # type: ignore
+        with pdfplumber.open(str(pdf_path)) as pdf:
+            pages = pdf.pages[:sample_pages]
+            if not pages:
+                return PdfType.UNKNOWN
+            total_chars = sum(len(p.extract_text() or "") for p in pages)
+            return PdfType.TEXT_BASED if total_chars > 0 else PdfType.SCANNED
+    except Exception:  # noqa: BLE001
+        return PdfType.UNKNOWN
+
+
+# ---------------------------------------------------------------------------
+# OCR fallback (requires pytesseract + pdf2image + tesseract binary)
+# ---------------------------------------------------------------------------
+
+def extract_from_pdf_ocr(
+    pdf_path: Path,
+    ticker: str,
+    fiscal_year: int,
+    document_title: str,
+    lang: str = "vie+eng",
+) -> list[ExtractedRow]:
+    """Attempt OCR-based extraction on a scanned PDF.
+
+    Requires:
+        pip install pytesseract pdf2image
+        System: tesseract-ocr (https://github.com/UB-Mannheim/tesseract/wiki)
+                poppler (for pdf2image)
+
+    Args:
+        pdf_path: Path to the scanned PDF.
+        ticker: Stock ticker symbol.
+        fiscal_year: Primary fiscal year.
+        document_title: Human-readable document title.
+        lang: Tesseract language string (default: Vietnamese + English).
+
+    Returns:
+        List of ExtractedRow (may be empty if OCR unavailable or no tables matched).
+    """
+    try:
+        import pytesseract  # type: ignore
+        from pdf2image import convert_from_path  # type: ignore
+    except ImportError as exc:
+        missing = str(exc).split("'")[-2] if "'" in str(exc) else str(exc)
+        print(
+            f"[pdf_extractor] OCR unavailable — install {missing}: "
+            "pip install pytesseract pdf2image  (also need tesseract binary + poppler)"
+        )
+        return []
+
+    try:
+        images = convert_from_path(str(pdf_path), dpi=200)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[pdf_extractor] pdf2image conversion failed: {exc}")
+        return []
+
+    extractor = VietnameseBCTCExtractor(
+        ticker=ticker,
+        fiscal_year=fiscal_year,
+        document_title=document_title,
+        extraction_method="ocr_tesseract",
+    )
+    results: list[ExtractedRow] = []
+
+    for page_num, image in enumerate(images, start=1):
+        try:
+            ocr_text = pytesseract.image_to_string(image, lang=lang)
+            slug_text = _slug_label(ocr_text)
+            statement_type = _detect_statement_type(slug_text)
+            if statement_type is None:
+                continue
+
+            # Parse lines as pseudo-table rows (label | value | value ...)
+            rows = _parse_ocr_text_to_rows(ocr_text)
+            if not rows:
+                continue
+
+            extractor.page_number = page_num
+            extracted = extractor.extract_from_table_rows(
+                rows=rows,
+                statement_type=statement_type,
+                fiscal_years=[fiscal_year],
+                table_name="ocr_page",
+            )
+            results.extend(extracted)
+        except Exception:  # noqa: BLE001
+            continue
+
+    return results
+
+
+def _parse_ocr_text_to_rows(ocr_text: str) -> list[list[str]]:
+    """Convert raw OCR text into pseudo table rows [label, value, ...].
+
+    Heuristic: lines with a numeric value at the end are candidate rows.
+    Pattern: '<label text>  <number>' where number may have commas/parens.
+    """
+    rows: list[list[str]] = []
+    # Match: label (non-digit text) followed by a numeric value at end of line
+    _row_re = re.compile(
+        r"^(.{5,80}?)\s{2,}([\d,.()\-—]+)\s*$"
+    )
+    for line in ocr_text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        m = _row_re.match(line)
+        if m:
+            label = m.group(1).strip()
+            value = m.group(2).strip()
+            if label and value:
+                rows.append([label, value])
+    return rows
 
 
 # ---------------------------------------------------------------------------

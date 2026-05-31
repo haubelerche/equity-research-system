@@ -1,6 +1,7 @@
-from backend.agents.audit_agent import AuditAgent
-from backend.agents.debate_agent import DebateAgent
-from backend.agents.research_agent import ResearchAgent
-from backend.agents.supervisor_policy import SupervisorPolicy
+"""Legacy package retained for import compatibility.
 
-__all__ = ["AuditAgent", "DebateAgent", "ResearchAgent", "SupervisorPolicy"]
+Production agent execution is config-driven through `backend.harness` and
+`config/agents`; no product agent is implemented as an ad-hoc Python class here.
+"""
+
+__all__: list[str] = []
