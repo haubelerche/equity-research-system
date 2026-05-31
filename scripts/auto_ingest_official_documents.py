@@ -17,6 +17,7 @@ import os
 import sys
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from enum import Enum
 from pathlib import Path
 
 _PROJECT_ROOT = str(Path(__file__).resolve().parents[1])
@@ -40,6 +41,50 @@ _CSV_FIELDNAMES = [
     "value", "unit", "document_title", "page_number", "table_name",
     "extracted_text", "extraction_method", "verified_by", "verified_at",
 ]
+
+
+# ---------------------------------------------------------------------------
+# Explicit pipeline status (never silently continue without knowing why)
+# ---------------------------------------------------------------------------
+
+class IngestStatus(str, Enum):
+    """Explicit data-readiness states for one fiscal year.
+
+    These states replace the previous silent-continue behaviour where
+    `ingested=0 errors=0` looked like success but actually meant no data.
+    """
+    OFFICIAL_FACTS_READY = "OFFICIAL_FACTS_READY"
+    """PDF or official structured source parsed, reconciled, promoted. Safe for final report."""
+
+    TIER2_ONLY = "TIER2_ONLY"
+    """Only Tier-2 source (CafeF/structured aggregator) — block final export, allow draft."""
+
+    EXTRACTION_FAILED_SCANNED_PDF = "EXTRACTION_FAILED_SCANNED_PDF"
+    """PDF downloaded but is scanned (no text layer) — OCR required for extraction."""
+
+    EXTRACTION_FAILED_NO_TABLES = "EXTRACTION_FAILED_NO_TABLES"
+    """PDF has text layer but no recognisable BCTC tables — narrative/governance PDF."""
+
+    SOURCE_MISSING = "SOURCE_MISSING"
+    """No official document or structured source found for this year."""
+
+    CAFEF_EMPTY = "CAFEF_EMPTY"
+    """CafeF API returned no rows (undocumented endpoint, may be rate-limited or absent)."""
+
+    LOW_CONFIDENCE = "LOW_CONFIDENCE"
+    """Extraction returned data but confidence is below threshold — needs review."""
+
+    CONFLICT_REVIEW = "CONFLICT_REVIEW"
+    """CafeF and PDF values diverge beyond tolerance — needs analyst reconciliation."""
+
+    DRY_RUN = "dry_run"
+    """Dry-run mode — no DB writes, no actual fetch."""
+
+    DONE = "done"
+    """At least some facts ingested and promoted successfully."""
+
+    DONE_WITH_ERRORS = "done_with_errors"
+    """Facts partially ingested; some errors encountered."""
 
 
 # ---------------------------------------------------------------------------
@@ -74,6 +119,21 @@ class YearResult:
     promoted: int = 0
     errors: list[str] = field(default_factory=list)
     status: str = "pending"
+    ingest_status: IngestStatus = IngestStatus.SOURCE_MISSING
+
+    def status_summary(self) -> str:
+        """Human-readable summary line for this year's ingest result."""
+        parts = [
+            f"FY{self.fiscal_year}",
+            f"status={self.ingest_status.value}",
+            f"cafef={self.cafef_rows}",
+            f"pdf={self.pdf_rows}",
+            f"ingested={self.ingested}",
+            f"promoted={self.promoted}",
+        ]
+        if self.errors:
+            parts.append(f"errors={len(self.errors)}")
+        return " | ".join(parts)
 
 
 # ---------------------------------------------------------------------------
@@ -175,13 +235,32 @@ def _fetch_cafef(
 # Channel 2: PDF discovery + extraction
 # ---------------------------------------------------------------------------
 
+def _is_scanned_pdf(pdf_path: Path, sample_pages: int = 5) -> bool:
+    """Return True if the PDF has no extractable text (likely a scanned image)."""
+    try:
+        import pdfplumber
+        with pdfplumber.open(str(pdf_path)) as pdf:
+            pages_to_check = pdf.pages[:sample_pages]
+            total_chars = sum(len(p.extract_text() or "") for p in pages_to_check)
+            return total_chars == 0
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def _fetch_pdf(
     ticker: str,
     fiscal_year: int,
     doc_dir: Path,
     cfg: AutoIngestConfig,
-) -> list[dict]:
-    """Discover, download, and extract a PDF annual report for the given year."""
+) -> tuple[list[dict], IngestStatus]:
+    """Discover, download, and extract a PDF annual report for the given year.
+
+    Returns (csv_rows, IngestStatus):
+      - EXTRACTION_FAILED_SCANNED_PDF: PDF downloaded but pdfplumber reads 0 text
+      - EXTRACTION_FAILED_NO_TABLES: text readable but no BCTC metrics mapped
+      - SOURCE_MISSING: no high-confidence PDF found by the discovery connectors
+      - OFFICIAL_FACTS_READY: extraction succeeded with ≥1 facts
+    """
     try:
         from backend.documents.official_document_discovery import discover_documents, fetch_candidate
         from backend.documents.pdf_extractor import extract_to_csv
@@ -191,70 +270,75 @@ def _fetch_pdf(
             min_confidence=cfg.min_pdf_confidence,
         )
 
-        # Filter to annual_report or audited_financial_statement only
+        # Filter to financial documents (not governance/sustainability)
         annual_cands = [
             c for c in result.ranking.selected
-            if c.document_type in ("annual_report", "audited_financial_statement")
+            if c.document_type in ("annual_report", "audited_financial_statement",
+                                   "financial_statement")
         ]
         if not annual_cands:
-            return []
+            return [], IngestStatus.SOURCE_MISSING
 
         best = annual_cands[0]
 
         if cfg.dry_run:
-            return [{"note": f"dry_run: would fetch {best.source_url}"}]
+            return [{"note": f"dry_run: would fetch {best.source_url}"}], IngestStatus.DRY_RUN
 
         rec = fetch_candidate(best)
         pdf_path = Path(rec.local_path)
+
+        # Detect scanned PDF before attempting extraction
+        if _is_scanned_pdf(pdf_path):
+            print(f"[auto_ingest] {ticker} {fiscal_year}: PDF is scanned image "
+                  f"({best.title[:40]}) — OCR required")
+            return [], IngestStatus.EXTRACTION_FAILED_SCANNED_PDF
 
         pdf_csv_path = doc_dir / "extracted_facts_pdf.csv"
         extracted_rows = extract_to_csv(pdf_path, ticker, fiscal_year, best.title, pdf_csv_path)
         csv_rows = [r.to_csv_dict() for r in extracted_rows]
 
-        if csv_rows:
-            # PDF is Tier 0 (official document); CafeF is Tier 2. PDF rows take precedence
-            # for overlapping metrics. Non-overlapping CafeF rows are preserved.
-            existing_csv_path = doc_dir / "extracted_facts.csv"
-            if existing_csv_path.exists():
-                with existing_csv_path.open(encoding="utf-8-sig", newline="") as fh:
-                    existing_rows = list(csv.DictReader(fh))
-                pdf_metric_ids = {r.get("metric_id", "") for r in csv_rows}
-                # Keep existing (CafeF) rows only for metrics NOT in PDF
-                cafef_only_rows = [r for r in existing_rows if r.get("metric_id", "") not in pdf_metric_ids]
-                merged = cafef_only_rows + csv_rows  # PDF rows override CafeF for overlapping metrics
-                _write_extracted_csv(merged, existing_csv_path)
-            else:
-                _write_extracted_csv(csv_rows, existing_csv_path)
+        if not csv_rows:
+            return [], IngestStatus.EXTRACTION_FAILED_NO_TABLES
 
-            # Write metadata.json if not already present
-            meta_path = doc_dir / "metadata.json"
-            if not meta_path.exists():
-                try:
-                    from backend.documents.company_registry import get_company, has_company
-                    _company_name = get_company(ticker).company_name_vi if has_company(ticker) else ticker
-                except Exception:
-                    _company_name = ticker
-                meta = {
-                    "ticker": ticker,
-                    "company_name": _company_name,
-                    "source_type": "audited_financial_statement",
-                    "issuer": best.publisher or best.source_name,
-                    "title": best.title,
-                    "url": best.source_url,
-                    "local_path": rec.local_path,
-                    "published_date": f"{fiscal_year}-12-31",
-                    "fiscal_year": fiscal_year,
-                    "language": "vi",
-                    "file_hash": rec.file_hash,
-                }
-                meta_path.write_text(
-                    json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8"
-                )
+        # PDF is Tier 0; CafeF is Tier 2. PDF rows take precedence for overlapping metrics.
+        existing_csv_path = doc_dir / "extracted_facts.csv"
+        if existing_csv_path.exists():
+            with existing_csv_path.open(encoding="utf-8-sig", newline="") as fh:
+                existing_rows = list(csv.DictReader(fh))
+            pdf_metric_ids = {r.get("metric_id", "") for r in csv_rows}
+            cafef_only_rows = [r for r in existing_rows if r.get("metric_id", "") not in pdf_metric_ids]
+            merged = cafef_only_rows + csv_rows
+            _write_extracted_csv(merged, existing_csv_path)
+        else:
+            _write_extracted_csv(csv_rows, existing_csv_path)
 
-        return csv_rows if isinstance(csv_rows, list) else []
+        # Write metadata.json if not already present
+        meta_path = doc_dir / "metadata.json"
+        if not meta_path.exists():
+            try:
+                from backend.documents.company_registry import get_company, has_company
+                _company_name = get_company(ticker).company_name_vi if has_company(ticker) else ticker
+            except Exception:  # noqa: BLE001
+                _company_name = ticker
+            meta = {
+                "ticker": ticker,
+                "company_name": _company_name,
+                "source_type": "audited_financial_statement",
+                "issuer": best.publisher or best.source_name,
+                "title": best.title,
+                "url": best.source_url,
+                "local_path": rec.local_path,
+                "published_date": f"{fiscal_year}-12-31",
+                "fiscal_year": fiscal_year,
+                "language": "vi",
+                "file_hash": rec.file_hash,
+            }
+            meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        return csv_rows, IngestStatus.OFFICIAL_FACTS_READY
 
     except Exception as exc:  # noqa: BLE001
-        return [{"error": str(exc)}]
+        return [{"error": str(exc)}], IngestStatus.SOURCE_MISSING
 
 
 # ---------------------------------------------------------------------------
@@ -262,36 +346,64 @@ def _fetch_pdf(
 # ---------------------------------------------------------------------------
 
 def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
-    """Run the full auto-ingest pipeline for each year in the config range."""
+    """Run the full auto-ingest pipeline for each year in the config range.
+
+    Each YearResult.ingest_status carries an explicit IngestStatus so callers
+    know *why* a year has no promoted facts (SOURCE_MISSING vs SCANNED_PDF vs
+    CAFEF_EMPTY), rather than seeing a silent ``ingested=0``.
+    """
     plan = build_pipeline_plan(cfg)
     results: list[YearResult] = []
 
     for year in plan.years:
-        yr = YearResult(fiscal_year=year)
+        yr = YearResult(fiscal_year=year, ingest_status=IngestStatus.SOURCE_MISSING)
         doc_dir = OFFICIAL_DOCS_DIR / cfg.ticker / str(year)
         doc_dir.mkdir(parents=True, exist_ok=True)
 
-        # Channel 1: CafeF
+        # ── Channel 1: CafeF (Tier 2) ──────────────────────────────────────
         if "cafef" in cfg.channels:
             cafef_rows = _fetch_cafef(cfg.ticker, year, doc_dir, cfg.dry_run)
-            yr.cafef_rows = len([r for r in cafef_rows if "error" not in r and "note" not in r])
+            good_cafef = [r for r in cafef_rows if "error" not in r and "note" not in r]
+            yr.cafef_rows = len(good_cafef)
+            if yr.cafef_rows > 0:
+                yr.ingest_status = IngestStatus.TIER2_ONLY
+            elif not cafef_rows:
+                yr.errors.append(f"FY{year}: CafeF API returned no rows (CAFEF_EMPTY)")
             if any("error" in r for r in cafef_rows):
-                yr.errors.append(f"cafef: {cafef_rows}")
+                yr.errors.append(f"cafef: {[r['error'] for r in cafef_rows if 'error' in r]}")
 
-        # Channel 2: PDF
+        # ── Channel 2: PDF (Tier 0) ─────────────────────────────────────────
         if "pdf" in cfg.channels:
-            pdf_rows = _fetch_pdf(cfg.ticker, year, doc_dir, cfg)
-            yr.pdf_rows = len([r for r in pdf_rows if "error" not in r and "note" not in r])
-            if any("error" in r for r in pdf_rows):
-                yr.errors.append(f"pdf: {pdf_rows}")
+            pdf_rows, pdf_status = _fetch_pdf(cfg.ticker, year, doc_dir, cfg)
+            good_pdf = [r for r in pdf_rows if "error" not in r and "note" not in r]
+            yr.pdf_rows = len(good_pdf)
+            # PDF status overrides CafeF when it gives a definitive verdict
+            if pdf_status not in (IngestStatus.SOURCE_MISSING,):
+                yr.ingest_status = pdf_status
+            elif yr.cafef_rows > 0:
+                yr.ingest_status = IngestStatus.TIER2_ONLY
+            if pdf_status == IngestStatus.EXTRACTION_FAILED_SCANNED_PDF:
+                yr.errors.append(
+                    f"FY{year}: PDF is scanned image (0 text) — OCR required. "
+                    f"Manually enter facts into "
+                    f"data/official_documents/{cfg.ticker}/{year}/extracted_facts.csv"
+                )
+            elif pdf_status == IngestStatus.EXTRACTION_FAILED_NO_TABLES:
+                yr.errors.append(
+                    f"FY{year}: PDF has text but no recognisable BCTC tables "
+                    "(likely narrative/governance document)."
+                )
 
         if cfg.dry_run:
+            yr.ingest_status = IngestStatus.DRY_RUN
             yr.status = "dry_run"
             results.append(yr)
+            print(f"[auto_ingest] (dry-run) {yr.status_summary()}")
             continue
 
-        # Ingest
-        if (doc_dir / "extracted_facts.csv").exists():
+        # ── Ingest into DB ──────────────────────────────────────────────────
+        extracted_csv = doc_dir / "extracted_facts.csv"
+        if extracted_csv.exists():
             try:
                 from scripts.ingest_official_documents import ingest_year
                 summary = ingest_year(cfg.ticker, year, dry_run=False)
@@ -300,7 +412,7 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
             except Exception as exc:  # noqa: BLE001
                 yr.errors.append(f"ingest: {exc}")
 
-        # Reconcile
+        # ── Reconcile and promote ───────────────────────────────────────────
         if yr.ingested > 0:
             try:
                 from backend.reconciliation.financial_fact_reconciler import reconcile_ticker
@@ -315,11 +427,7 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
 
         yr.status = "done" if not yr.errors else "done_with_errors"
         results.append(yr)
-        print(
-            f"[auto_ingest] {cfg.ticker} {year}: "
-            f"cafef={yr.cafef_rows} pdf={yr.pdf_rows} "
-            f"ingested={yr.ingested} promoted={yr.promoted} errors={len(yr.errors)}"
-        )
+        print(f"[auto_ingest] {yr.status_summary()}")
 
     return results
 
@@ -343,13 +451,14 @@ def _write_artifact(ticker: str, cfg: AutoIngestConfig, results: list[YearResult
         f"- Channels: {', '.join(cfg.channels) or '(none)'}",
         f"- Dry run: {cfg.dry_run}",
         "",
-        "| Year | CafeF rows | PDF rows | Ingested | Promoted | Status |",
-        "|------|-----------|---------|----------|----------|--------|",
+        "| Year | IngestStatus | CafeF | PDF | Ingested | Promoted |",
+        "|------|-------------|-------|-----|----------|----------|",
     ]
     for r in results:
+        status_val = r.ingest_status.value if isinstance(r.ingest_status, IngestStatus) else r.ingest_status
         lines.append(
-            f"| {r.fiscal_year} | {r.cafef_rows} | {r.pdf_rows} "
-            f"| {r.ingested} | {r.promoted} | {r.status} |"
+            f"| {r.fiscal_year} | `{status_val}` | {r.cafef_rows} | {r.pdf_rows} "
+            f"| {r.ingested} | {r.promoted} |"
         )
     lines += [
         "",
