@@ -9,3 +9,6 @@ pyyaml
 langgraph
 openai
 pytest
+pytesseract
+pdf2image
+Pillow

@@ -99,3 +99,110 @@ def export_gate(state: dict[str, Any], final_approval_required: bool = True) -> 
     if audit and audit.get("passed") is False:
         return fail_gate("EXPORT_GATE", "audit_review_failed", audit)
     return pass_gate("EXPORT_GATE", {})
+
+
+def ocr_export_gate(
+    candidate_facts: list[Any],  # list[CandidateFact] — use Any to avoid circular import
+    report_mode: str = "final",  # "draft" | "final"
+) -> dict[str, Any]:
+    """Gate that blocks final report export if any quantitative OCR facts are unresolved.
+
+    In "draft" mode: always passes (warnings may be present in summary).
+    In "final" mode: fails if any CandidateFact has promotion_status == "blocked".
+
+    Args:
+        candidate_facts: List of CandidateFact objects (use Any to avoid circular import).
+        report_mode: "draft" or "final". Only "final" mode can fail this gate.
+
+    Returns:
+        Gate result dict with structure:
+            {
+                "gate": "OCR_EXPORT_GATE",
+                "passed": bool,
+                "blocking_reasons": list[str],
+                "summary": {
+                    "total_candidates": int,
+                    "promoted": int,
+                    "blocked": int,
+                    "blocking_facts": list[dict],
+                    "action": str,
+                }
+            }
+    """
+    total = len(candidate_facts) if candidate_facts else 0
+    promoted = sum(1 for f in candidate_facts if getattr(f, "promotion_status", None) == "promoted")
+    blocked = sum(1 for f in candidate_facts if getattr(f, "promotion_status", None) == "blocked")
+
+    # Build blocking_facts with detailed reasons
+    blocking_facts = []
+    blocking_reasons = []
+
+    if report_mode == "draft":
+        # Draft mode always passes, even if facts are blocked
+        return pass_gate(
+            "OCR_EXPORT_GATE",
+            {
+                "total_candidates": total,
+                "promoted": promoted,
+                "blocked": blocked,
+                "blocking_facts": [],
+                "action": "draft mode — unresolved candidate facts allowed",
+                "report_mode": "draft",
+            },
+        )
+
+    # Final mode: check for blocked facts
+    for fact in candidate_facts:
+        if getattr(fact, "promotion_status", None) == "blocked":
+            metric_id = getattr(fact, "metric_id", "unknown")
+            reconciliation_status = getattr(fact, "reconciliation_status", "not_checked")
+            validation_status = getattr(fact, "validation_status", "pending")
+            warnings = getattr(fact, "warnings", [])
+
+            # Determine the blocking reason
+            if reconciliation_status == "conflicted":
+                reason = "OCR candidate conflicted with secondary source"
+            elif validation_status == "failed":
+                # Use first warning if available, otherwise generic message
+                first_warning = warnings[0] if warnings else "validation failed"
+                reason = f"validation_failed: {first_warning}"
+            elif reconciliation_status == "not_checked":
+                reason = "reconciliation_not_run"
+            else:
+                reason = "promotion_blocked"
+
+            blocking_fact_entry = {
+                "metric_id": metric_id,
+                "reason": reason,
+            }
+            blocking_facts.append(blocking_fact_entry)
+            blocking_reasons.append(f"{metric_id}:{reason}")
+
+    # If any facts are blocked in final mode, fail the gate
+    if blocking_reasons:
+        return {
+            "gate": "OCR_EXPORT_GATE",
+            "passed": False,
+            "blocking_reasons": blocking_reasons,
+            "summary": {
+                "total_candidates": total,
+                "promoted": promoted,
+                "blocked": blocked,
+                "blocking_facts": blocking_facts,
+                "action": "inspect reconciliation report, manually approve or correct candidate facts, rerun promotion",
+                "report_mode": "final",
+            },
+        }
+
+    # Final mode with no blocked facts: pass
+    return pass_gate(
+        "OCR_EXPORT_GATE",
+        {
+            "total_candidates": total,
+            "promoted": promoted,
+            "blocked": blocked,
+            "blocking_facts": [],
+            "action": "all candidate facts resolved",
+            "report_mode": "final",
+        },
+    )
