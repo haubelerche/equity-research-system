@@ -227,6 +227,26 @@ class ResearchRunner:
 
             index_summary = self._step("build_index", _build_index)
 
+            # ── Step 3.5: Auto-ingest official documents ────────────────────────
+            def _auto_ingest_official():
+                from scripts.auto_ingest_official_documents import AutoIngestConfig, run_pipeline as _run_auto_ingest
+                _auto_cfg = AutoIngestConfig(
+                    ticker=self.ticker,
+                    from_year=self.from_year,
+                    to_year=self.to_year,
+                    dry_run=False,
+                    channels=["cafef", "pdf"],
+                )
+                _auto_results = _run_auto_ingest(_auto_cfg)
+                _total_promoted = sum(r.promoted for r in _auto_results)
+                return {"promoted": _total_promoted, "results": len(_auto_results)}
+
+            try:
+                auto_ingest_result = self._step("auto_ingest_official_documents", _auto_ingest_official)
+                print(f"[run_research] Auto-ingest complete: {auto_ingest_result.get('promoted')} fact(s) promoted to verified")
+            except StepFailed:
+                print("[run_research] WARNING: auto-ingest failed — report will use Tier 3 facts")
+
             # ── Step 4: Generate report ────────────────────────────────────────
             def _generate_report():
                 from scripts.generate_report import generate_report
