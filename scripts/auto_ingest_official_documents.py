@@ -148,9 +148,14 @@ def _fetch_cafef(
         meta_path = doc_dir / "metadata.json"
         if not meta_path.exists():
             ticker_lower = ticker.lower()
+            try:
+                from backend.documents.company_registry import get_company, has_company
+                _company_name = get_company(ticker).company_name_vi if has_company(ticker) else ticker
+            except Exception:
+                _company_name = ticker
             meta = {
                 "ticker": ticker,
-                "company_name": ticker,
+                "company_name": _company_name,
                 "source_type": "annual_report",
                 "issuer": "CafeF / HOSE / HNX",
                 "title": f"CafeF {ticker} {fiscal_year} — Dữ liệu BCTC từ HOSE/HNX",
@@ -203,31 +208,35 @@ def _fetch_pdf(
         pdf_path = Path(rec.local_path)
 
         pdf_csv_path = doc_dir / "extracted_facts_pdf.csv"
-        csv_rows = extract_to_csv(pdf_path, ticker, fiscal_year, best.title, pdf_csv_path)
+        extracted_rows = extract_to_csv(pdf_path, ticker, fiscal_year, best.title, pdf_csv_path)
+        csv_rows = [r.to_csv_dict() for r in extracted_rows]
 
         if csv_rows:
-            # Load existing extracted_facts.csv if present
+            # PDF is Tier 0 (official document); CafeF is Tier 2. PDF rows take precedence
+            # for overlapping metrics. Non-overlapping CafeF rows are preserved.
             existing_csv_path = doc_dir / "extracted_facts.csv"
-            existing_rows: list[dict] = []
-            existing_metric_ids: set[str] = set()
             if existing_csv_path.exists():
                 with existing_csv_path.open(encoding="utf-8-sig", newline="") as fh:
-                    reader = csv.DictReader(fh)
-                    for row in reader:
-                        existing_rows.append(dict(row))
-                        existing_metric_ids.add(row.get("metric_id", ""))
-
-            # PDF rows override CafeF for the same metric_id (add only new metric_ids)
-            new_pdf_rows = [r for r in csv_rows if r.get("metric_id", "") not in existing_metric_ids]
-            merged = existing_rows + new_pdf_rows
-            _write_extracted_csv(merged, existing_csv_path)
+                    existing_rows = list(csv.DictReader(fh))
+                pdf_metric_ids = {r.get("metric_id", "") for r in csv_rows}
+                # Keep existing (CafeF) rows only for metrics NOT in PDF
+                cafef_only_rows = [r for r in existing_rows if r.get("metric_id", "") not in pdf_metric_ids]
+                merged = cafef_only_rows + csv_rows  # PDF rows override CafeF for overlapping metrics
+                _write_extracted_csv(merged, existing_csv_path)
+            else:
+                _write_extracted_csv(csv_rows, existing_csv_path)
 
             # Write metadata.json if not already present
             meta_path = doc_dir / "metadata.json"
             if not meta_path.exists():
+                try:
+                    from backend.documents.company_registry import get_company, has_company
+                    _company_name = get_company(ticker).company_name_vi if has_company(ticker) else ticker
+                except Exception:
+                    _company_name = ticker
                 meta = {
                     "ticker": ticker,
-                    "company_name": ticker,
+                    "company_name": _company_name,
                     "source_type": "audited_financial_statement",
                     "issuer": best.publisher or best.source_name,
                     "title": best.title,

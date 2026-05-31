@@ -311,7 +311,7 @@ class VietnameseBCTCExtractor:
                     ExtractedRow(
                         ticker=self.ticker,
                         fiscal_year=fy,
-                        period_type="annual",
+                        period_type="FY",
                         statement_type=statement_type,
                         metric_id=metric_id,
                         value=parsed,

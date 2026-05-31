@@ -198,36 +198,9 @@ class ResearchRunner:
             if self.conn and snap_id:
                 _db_update_run(self.conn, self.run_id, "running", snapshot_id=snap_id)
 
-            # ── Step 2: Run valuation ──────────────────────────────────────────
-            def _run_valuation():
-                from scripts.run_valuation import run_valuation
-                artifact = run_valuation(
-                    ticker=self.ticker,
-                    from_year=self.from_year,
-                    to_year=self.to_year,
-                )
-                dcf_base = artifact.get("dcf", {}).get("base", {})
-                return {
-                    "snapshot_id": artifact.get("snapshot_id"),
-                    "facts_count": artifact.get("multiples", {}).get("shares_mn"),
-                    "dcf_intrinsic": dcf_base.get("intrinsic_value_per_share_vnd"),
-                }
-
-            val_result = self._step("run_valuation", _run_valuation)
-            # Always use the snapshot from the latest valuation run
-            snap_id = val_result.get("snapshot_id") or snap_id
-
-            # ── Step 3: Build evidence index ───────────────────────────────────
-            def _build_index():
-                from scripts.build_index import build_index
-                return build_index(
-                    ticker=self.ticker,
-                    years=list(range(self.from_year, self.to_year + 1)),
-                )
-
-            index_summary = self._step("build_index", _build_index)
-
-            # ── Step 3.5: Auto-ingest official documents ────────────────────────
+            # ── Step 2: Auto-ingest official documents BEFORE valuation ────────
+            # Auto-ingest official documents BEFORE valuation so promoted verified facts
+            # are available to the valuation engine during this run.
             def _auto_ingest_official():
                 from scripts.auto_ingest_official_documents import AutoIngestConfig, run_pipeline as _run_auto_ingest
                 _auto_cfg = AutoIngestConfig(
@@ -247,7 +220,36 @@ class ResearchRunner:
             except StepFailed:
                 print("[run_research] WARNING: auto-ingest failed — report will use Tier 3 facts")
 
-            # ── Step 4: Generate report ────────────────────────────────────────
+            # ── Step 3: Run valuation ──────────────────────────────────────────
+            def _run_valuation():
+                from scripts.run_valuation import run_valuation
+                artifact = run_valuation(
+                    ticker=self.ticker,
+                    from_year=self.from_year,
+                    to_year=self.to_year,
+                )
+                dcf_base = artifact.get("dcf", {}).get("base", {})
+                return {
+                    "snapshot_id": artifact.get("snapshot_id"),
+                    "facts_count": artifact.get("multiples", {}).get("shares_mn"),
+                    "dcf_intrinsic": dcf_base.get("intrinsic_value_per_share_vnd"),
+                }
+
+            val_result = self._step("run_valuation", _run_valuation)
+            # Always use the snapshot from the latest valuation run
+            snap_id = val_result.get("snapshot_id") or snap_id
+
+            # ── Step 4: Build evidence index ───────────────────────────────────
+            def _build_index():
+                from scripts.build_index import build_index
+                return build_index(
+                    ticker=self.ticker,
+                    years=list(range(self.from_year, self.to_year + 1)),
+                )
+
+            index_summary = self._step("build_index", _build_index)
+
+            # ── Step 5: Generate report ────────────────────────────────────────
             def _generate_report():
                 from scripts.generate_report import generate_report
                 return generate_report(
@@ -260,7 +262,7 @@ class ResearchRunner:
 
             citation_data = self._step("generate_report", _generate_report)
 
-            # ── Step 5: Evaluate report ────────────────────────────────────────
+            # ── Step 6: Evaluate report ────────────────────────────────────────
             def _evaluate_report():
                 from scripts.evaluate_report import evaluate_report
                 return evaluate_report(ticker=self.ticker)
