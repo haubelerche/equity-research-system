@@ -54,15 +54,18 @@ data/cache/
 
 dataset/raw/
 
-# Browser automation profile — not source data
-artifacts/chrome-profile/
-artifacts/.chrome-profile/
+# Generated artifacts — all subdirs ignored (large files, reproducible)
+artifacts/
 
-# Generated report outputs — reproducible, not for git
-artifacts/reports_html/
-artifacts/reports_pdf/
-artifacts/charts/
-artifacts/manifests/
+# Browser automation profile — not source data (explicit reference)
+# artifacts/chrome-profile/
+# artifacts/.chrome-profile/
+
+# Generated report outputs — reproducible, not for git (explicit reference)
+# artifacts/reports_html/
+# artifacts/reports_pdf/
+# artifacts/charts/
+# artifacts/manifests/
 
 # Analyst reference reports (large PDFs, not source-tier)
 data/reference_reports/
