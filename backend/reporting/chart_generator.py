@@ -1,0 +1,447 @@
+"""Chart generator — deterministic matplotlib charts per GOAL_OUTPUT.md registry.
+
+Chart IDs
+---------
+C1 — Stock vs VNINDEX (line, base-100 normalised)         — if data available
+C2 — Revenue & EBITDA/EBIT Trend (bar + line, dual Y)     — required
+C3 — EPS & P/E Trend (bar + line, dual Y)                 — required
+C4 — Margin & ROE Trend (multi-line)                       — required
+C5 — Forecast Revenue/Profit (bar + line, dual Y)          — required
+C6 — DCF Value Bridge (waterfall bar)                      — recommended
+C7 — Sensitivity Heatmap (seaborn)                         — required
+"""
+
+from __future__ import annotations
+
+import matplotlib
+matplotlib.use("Agg")  # non-interactive backend — must be before pyplot import
+
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import numpy as np
+import seaborn as sns
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Optional
+
+# ---------------------------------------------------------------------------
+# Palette — muted, professional
+# ---------------------------------------------------------------------------
+_BLUE = "#2563EB"
+_TEAL = "#0D9488"
+_AMBER = "#D97706"
+_RED = "#DC2626"
+_GREY = "#6B7280"
+_LIGHT_BLUE = "#93C5FD"
+
+_DPI = 150
+_FIG_W = 10
+_FIG_H = 5.5
+
+
+# ---------------------------------------------------------------------------
+# ChartSpec dataclass
+# ---------------------------------------------------------------------------
+@dataclass
+class ChartSpec:
+    """All data needed to render any single chart."""
+
+    chart_id: str
+    ticker: str
+    run_id: str = ""
+
+    # Historical periods (x-axis labels for C2–C4)
+    periods: list[str] = field(default_factory=list)
+
+    # C2 — Revenue & EBITDA/EBIT
+    revenue_bn: list[float] = field(default_factory=list)
+    ebitda_margin_pct: list[float] = field(default_factory=list)
+    ebit_margin_pct: list[float] = field(default_factory=list)
+
+    # C3 — EPS & P/E
+    eps_vnd: list[float] = field(default_factory=list)
+    pe_x: list[float] = field(default_factory=list)
+
+    # C4 — Margins & ROE
+    gross_margin_pct: list[float] = field(default_factory=list)
+    net_margin_pct: list[float] = field(default_factory=list)
+    roe_pct: list[float] = field(default_factory=list)
+
+    # C5 — Forecast
+    forecast_revenue_bn: list[float] = field(default_factory=list)
+    forecast_profit_bn: list[float] = field(default_factory=list)
+    forecast_periods: list[str] = field(default_factory=list)
+
+    # C1 — Price vs VNINDEX
+    price_series: list[float] = field(default_factory=list)
+    benchmark_series: list[float] = field(default_factory=list)
+    date_labels: list[str] = field(default_factory=list)
+
+    # C6 — DCF Bridge: list of (label, value_billion_vnd) tuples
+    bridge_items: list[tuple[str, float]] = field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# ChartGenerator
+# ---------------------------------------------------------------------------
+class ChartGenerator:
+    """Generates deterministic PNG charts from ChartSpec instances."""
+
+    def __init__(self, output_dir: "Path | str"):
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _out_path(self, spec: ChartSpec) -> Path:
+        """Return output file path based on run_id presence."""
+        if spec.run_id:
+            name = f"{spec.run_id}_{spec.ticker}_{spec.chart_id}.png"
+        else:
+            name = f"{spec.ticker}_{spec.chart_id}.png"
+        return self.output_dir / name
+
+    @staticmethod
+    def _safe(lst: list[float], n: int = 1) -> list[float]:
+        """Return lst padded / truncated to n elements; replace None/NaN with 0."""
+        out = [v if (v is not None and not (isinstance(v, float) and np.isnan(v))) else 0.0
+               for v in lst]
+        while len(out) < n:
+            out.append(0.0)
+        return out
+
+    @staticmethod
+    def _source_caption(ax: plt.Axes, ticker: str) -> None:
+        ax.annotate(
+            f"Source: canonical facts — {ticker}",
+            xy=(0, 0), xycoords="axes fraction",
+            xytext=(0, -0.10), textcoords="axes fraction",
+            fontsize=7, color=_GREY,
+        )
+
+    @staticmethod
+    def _style_ax(ax: plt.Axes, title: str = "", xlabel: str = "", ylabel: str = "") -> None:
+        ax.set_title(title, fontsize=11, fontweight="bold", pad=10)
+        if xlabel:
+            ax.set_xlabel(xlabel, fontsize=9)
+        if ylabel:
+            ax.set_ylabel(ylabel, fontsize=9)
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.tick_params(axis="both", labelsize=8)
+
+    @staticmethod
+    def _save_close(fig: plt.Figure, path: Path) -> Path:
+        fig.savefig(path, dpi=_DPI, bbox_inches="tight")
+        plt.close(fig)
+        return path
+
+    # ------------------------------------------------------------------
+    # C1 — Stock vs VNINDEX
+    # ------------------------------------------------------------------
+
+    def render_c1_price_vs_vnindex(self, spec: ChartSpec) -> Path:
+        """Line chart, base-100 normalised."""
+        spec.chart_id = "C1"
+        path = self._out_path(spec)
+
+        n = max(len(spec.price_series), len(spec.benchmark_series), 1)
+        prices = self._safe(spec.price_series, n)
+        bench = self._safe(spec.benchmark_series, n)
+        labels = spec.date_labels if spec.date_labels else [str(i) for i in range(n)]
+
+        # Normalise to 100
+        def _base100(series: list[float]) -> list[float]:
+            base = series[0] if series[0] != 0 else 1.0
+            return [v / base * 100 for v in series]
+
+        prices_norm = _base100(prices)
+        bench_norm = _base100(bench)
+
+        fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
+        ax.plot(labels, prices_norm, color=_BLUE, linewidth=2, marker="o", markersize=3,
+                label=spec.ticker)
+        ax.plot(labels, bench_norm, color=_GREY, linewidth=1.5, linestyle="--",
+                marker="s", markersize=3, label="VNINDEX")
+        ax.axhline(100, color=_GREY, linewidth=0.8, linestyle=":")
+        ax.legend(fontsize=9)
+        self._style_ax(ax,
+                       title=f"{spec.ticker} — Stock Price vs VNINDEX (base 100)",
+                       ylabel="Indexed (base = 100)")
+        plt.xticks(rotation=45, ha="right")
+        self._source_caption(ax, spec.ticker)
+        return self._save_close(fig, path)
+
+    # ------------------------------------------------------------------
+    # C2 — Revenue & EBITDA/EBIT Trend
+    # ------------------------------------------------------------------
+
+    def render_c2_revenue_ebitda(self, spec: ChartSpec) -> Path:
+        """Bar (revenue) + line (EBITDA margin) on dual Y-axis."""
+        spec.chart_id = "C2"
+        path = self._out_path(spec)
+
+        periods = spec.periods or ["—"]
+        n = len(periods)
+        rev = self._safe(spec.revenue_bn, n)
+        ebitda_m = self._safe(spec.ebitda_margin_pct, n)
+        ebit_m = self._safe(spec.ebit_margin_pct, n)
+        x = np.arange(n)
+
+        fig, ax1 = plt.subplots(figsize=(_FIG_W, _FIG_H))
+        ax2 = ax1.twinx()
+
+        bars = ax1.bar(x, rev, color=_BLUE, alpha=0.75, label="Revenue (bn VND)", width=0.5)
+        ax2.plot(x, ebitda_m, color=_TEAL, linewidth=2, marker="o", markersize=5,
+                 label="EBITDA Margin %")
+        ax2.plot(x, ebit_m, color=_AMBER, linewidth=2, marker="s", markersize=5,
+                 linestyle="--", label="EBIT Margin %")
+
+        ax1.set_xticks(x)
+        ax1.set_xticklabels(periods, rotation=45, ha="right", fontsize=8)
+        self._style_ax(ax1,
+                       title=f"{spec.ticker} — Revenue & EBITDA/EBIT Trend",
+                       ylabel="Revenue (bn VND)")
+        ax2.set_ylabel("Margin (%)", fontsize=9)
+        ax2.spines[["top"]].set_visible(False)
+        ax2.tick_params(axis="y", labelsize=8)
+
+        # Combined legend
+        h1, l1 = ax1.get_legend_handles_labels()
+        h2, l2 = ax2.get_legend_handles_labels()
+        ax1.legend(h1 + h2, l1 + l2, fontsize=8, loc="upper left")
+
+        self._source_caption(ax1, spec.ticker)
+        return self._save_close(fig, path)
+
+    # ------------------------------------------------------------------
+    # C3 — EPS & P/E Trend
+    # ------------------------------------------------------------------
+
+    def render_c3_eps_pe(self, spec: ChartSpec) -> Path:
+        """Bar (EPS in VND) + line (P/E) on dual Y-axis."""
+        spec.chart_id = "C3"
+        path = self._out_path(spec)
+
+        periods = spec.periods or ["—"]
+        n = len(periods)
+        eps = self._safe(spec.eps_vnd, n)
+        pe = self._safe(spec.pe_x, n)
+        x = np.arange(n)
+
+        fig, ax1 = plt.subplots(figsize=(_FIG_W, _FIG_H))
+        ax2 = ax1.twinx()
+
+        ax1.bar(x, eps, color=_TEAL, alpha=0.75, label="EPS (VND)", width=0.5)
+        ax2.plot(x, pe, color=_RED, linewidth=2, marker="D", markersize=5, label="P/E (x)")
+
+        ax1.set_xticks(x)
+        ax1.set_xticklabels(periods, rotation=45, ha="right", fontsize=8)
+        self._style_ax(ax1,
+                       title=f"{spec.ticker} — EPS & P/E Trend",
+                       ylabel="EPS (VND)")
+        ax2.set_ylabel("P/E (x)", fontsize=9)
+        ax2.spines[["top"]].set_visible(False)
+        ax2.tick_params(axis="y", labelsize=8)
+
+        h1, l1 = ax1.get_legend_handles_labels()
+        h2, l2 = ax2.get_legend_handles_labels()
+        ax1.legend(h1 + h2, l1 + l2, fontsize=8, loc="upper left")
+
+        self._source_caption(ax1, spec.ticker)
+        return self._save_close(fig, path)
+
+    # ------------------------------------------------------------------
+    # C4 — Margin & ROE Trend
+    # ------------------------------------------------------------------
+
+    def render_c4_margin_roe(self, spec: ChartSpec) -> Path:
+        """Multi-line: gross margin, net margin, ROE."""
+        spec.chart_id = "C4"
+        path = self._out_path(spec)
+
+        periods = spec.periods or ["—"]
+        n = len(periods)
+        gm = self._safe(spec.gross_margin_pct, n)
+        nm = self._safe(spec.net_margin_pct, n)
+        roe = self._safe(spec.roe_pct, n)
+        x = np.arange(n)
+
+        fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
+        ax.plot(x, gm, color=_BLUE, linewidth=2, marker="o", markersize=5, label="Gross Margin %")
+        ax.plot(x, nm, color=_TEAL, linewidth=2, marker="s", markersize=5, label="Net Margin %")
+        ax.plot(x, roe, color=_AMBER, linewidth=2, marker="D", markersize=5, label="ROE %")
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(periods, rotation=45, ha="right", fontsize=8)
+        ax.set_ylabel("%", fontsize=9)
+        self._style_ax(ax, title=f"{spec.ticker} — Margin & ROE Trend")
+        ax.legend(fontsize=9)
+        self._source_caption(ax, spec.ticker)
+        return self._save_close(fig, path)
+
+    # ------------------------------------------------------------------
+    # C5 — Forecast Revenue / Profit
+    # ------------------------------------------------------------------
+
+    def render_c5_forecast(self, spec: ChartSpec) -> Path:
+        """Bar (forecast revenue) + line (forecast profit) dual-axis."""
+        spec.chart_id = "C5"
+        path = self._out_path(spec)
+
+        periods = spec.forecast_periods or ["—"]
+        n = len(periods)
+        rev = self._safe(spec.forecast_revenue_bn, n)
+        profit = self._safe(spec.forecast_profit_bn, n)
+        x = np.arange(n)
+
+        fig, ax1 = plt.subplots(figsize=(_FIG_W, _FIG_H))
+        ax2 = ax1.twinx()
+
+        ax1.bar(x, rev, color=_LIGHT_BLUE, alpha=0.85, label="Forecast Revenue (bn VND)",
+                width=0.5, edgecolor=_BLUE, linewidth=0.8)
+        ax2.plot(x, profit, color=_AMBER, linewidth=2.5, marker="o", markersize=6,
+                 label="Forecast Net Profit (bn VND)")
+
+        ax1.set_xticks(x)
+        ax1.set_xticklabels(periods, rotation=45, ha="right", fontsize=8)
+        self._style_ax(ax1,
+                       title=f"{spec.ticker} — Revenue & Profit Forecast",
+                       ylabel="Revenue (bn VND)")
+        ax2.set_ylabel("Net Profit (bn VND)", fontsize=9)
+        ax2.spines[["top"]].set_visible(False)
+        ax2.tick_params(axis="y", labelsize=8)
+
+        h1, l1 = ax1.get_legend_handles_labels()
+        h2, l2 = ax2.get_legend_handles_labels()
+        ax1.legend(h1 + h2, l1 + l2, fontsize=8, loc="upper left")
+
+        self._source_caption(ax1, spec.ticker)
+        return self._save_close(fig, path)
+
+    # ------------------------------------------------------------------
+    # C6 — DCF Value Bridge (waterfall)
+    # ------------------------------------------------------------------
+
+    def render_c6_dcf_bridge(self, spec: ChartSpec) -> Path:
+        """Waterfall bar chart from bridge_items list."""
+        spec.chart_id = "C6"
+        path = self._out_path(spec)
+
+        items = spec.bridge_items
+        if not items:
+            # Render placeholder
+            fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
+            ax.text(0.5, 0.5, "No DCF bridge data available",
+                    ha="center", va="center", fontsize=12, color=_GREY,
+                    transform=ax.transAxes)
+            self._style_ax(ax, title=f"{spec.ticker} — DCF Value Bridge")
+            self._source_caption(ax, spec.ticker)
+            return self._save_close(fig, path)
+
+        labels = [item[0] for item in items]
+        values = [item[1] for item in items]
+        n = len(labels)
+
+        # Build waterfall: running total is the base for each bar
+        running = 0.0
+        bottoms: list[float] = []
+        bar_values: list[float] = []
+        colors: list[str] = []
+
+        for i, val in enumerate(values):
+            if i == 0:
+                # First bar starts at 0 and goes up (positive)
+                bottoms.append(0.0)
+                bar_values.append(abs(val))
+                colors.append(_BLUE)
+                running = val
+            elif i == n - 1:
+                # Last bar: final total — draw from 0 to running
+                bottoms.append(0.0)
+                bar_values.append(running)
+                colors.append(_TEAL)
+            else:
+                if val >= 0:
+                    bottoms.append(running)
+                    bar_values.append(val)
+                    colors.append(_BLUE)
+                else:
+                    bottoms.append(running + val)
+                    bar_values.append(-val)
+                    colors.append(_RED)
+                running += val
+
+        x = np.arange(n)
+        fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
+        ax.bar(x, bar_values, bottom=bottoms, color=colors, alpha=0.82, width=0.5)
+
+        # Value labels above bars
+        for i, (bot, val) in enumerate(zip(bottoms, bar_values)):
+            ax.text(i, bot + val + max(bar_values) * 0.01,
+                    f"{bot + val:,.0f}",
+                    ha="center", va="bottom", fontsize=7.5)
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=8)
+        self._style_ax(ax,
+                       title=f"{spec.ticker} — DCF Equity Value Bridge",
+                       ylabel="Value (bn VND)")
+        self._source_caption(ax, spec.ticker)
+        return self._save_close(fig, path)
+
+    # ------------------------------------------------------------------
+    # C7 — Sensitivity Heatmap
+    # ------------------------------------------------------------------
+
+    def render_c7_sensitivity_heatmap(
+        self,
+        spec: ChartSpec,
+        wacc_range: list[float],
+        tg_range: list[float],
+        matrix: list[list[float]],
+    ) -> Path:
+        """Seaborn heatmap: rows = terminal growth, cols = WACC."""
+        spec.chart_id = "C7"
+        path = self._out_path(spec)
+
+        if not matrix or not wacc_range or not tg_range:
+            # Placeholder
+            fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
+            ax.text(0.5, 0.5, "No sensitivity data available",
+                    ha="center", va="center", fontsize=12, color=_GREY,
+                    transform=ax.transAxes)
+            self._style_ax(ax, title=f"{spec.ticker} — DCF Sensitivity")
+            self._source_caption(ax, spec.ticker)
+            return self._save_close(fig, path)
+
+        import pandas as pd
+        df = pd.DataFrame(
+            matrix,
+            index=[f"{g:.1f}%" for g in tg_range],
+            columns=[f"{w:.1f}%" for w in wacc_range],
+        )
+
+        fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
+        sns.heatmap(
+            df,
+            annot=True,
+            fmt=",.0f",
+            cmap="RdYlGn",
+            ax=ax,
+            linewidths=0.4,
+            linecolor="white",
+            annot_kws={"size": 8},
+        )
+        ax.set_title(
+            f"{spec.ticker} — DCF Target Price Sensitivity\n"
+            "Rows: Terminal Growth (%), Cols: WACC (%)",
+            fontsize=10, fontweight="bold", pad=12,
+        )
+        ax.set_xlabel("WACC (%)", fontsize=9)
+        ax.set_ylabel("Terminal Growth (%)", fontsize=9)
+        ax.tick_params(axis="both", labelsize=8)
+        self._source_caption(ax, spec.ticker)
+
+        return self._save_close(fig, path)

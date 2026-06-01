@@ -12,3 +12,5 @@ pytest
 pytesseract
 pdf2image
 Pillow
+matplotlib>=3.8
+seaborn>=0.13
