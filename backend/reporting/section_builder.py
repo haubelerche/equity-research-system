@@ -1,0 +1,463 @@
+"""8-section report builder per GOAL_OUTPUT.md page spec.
+
+Produces structured output with \\pagebreak markers between pages.
+All content comes from ReportContext fields — never invented.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any
+
+
+DISCLAIMER_TEXT = (
+    "Báo cáo này chỉ nhằm mục đích nghiên cứu và tham khảo học thuật/sản phẩm. "
+    "Nội dung không phải là khuyến nghị đầu tư cá nhân hóa, không phải lời mời "
+    "mua/bán chứng khoán, và không thay thế tư vấn từ chuyên gia được cấp phép. "
+    "Rating trong báo cáo là kết luận mô hình dựa trên dữ liệu, giả định và mức "
+    "sinh lời kỳ vọng tại thời điểm lập báo cáo; không phải khuyến nghị đầu tư "
+    "cá nhân hóa."
+)
+
+_PLACEHOLDER = "_[Nội dung chưa có]_"
+
+
+def _fmt_price(price: float) -> str:
+    """Format a price as integer with thousands commas, e.g. 94400 → '94,400'."""
+    return f"{int(round(price)):,}"
+
+
+def _or_placeholder(text: str) -> str:
+    """Return text or Vietnamese placeholder if empty."""
+    return text.strip() if text.strip() else _PLACEHOLDER
+
+
+@dataclass
+class ReportContext:
+    # Required
+    ticker: str
+    company_name: str
+    exchange: str
+    report_date: str        # "2026-06-01"
+    data_cutoff: str        # "2025-12-31"
+    rating: str             # "BUY" | "HOLD" | "SELL" | "UNDER_REVIEW"
+    current_price: float
+    target_price: float
+    upside_pct: float       # e.g. 45.1 (not 0.451)
+    risk_level: str
+    data_confidence: str
+    status: str             # "DRAFT" | "NEEDS_REVIEW" | "PENDING_APPROVAL" | "APPROVED" | "BLOCKED" | "FINAL_EXPORTABLE"
+
+    # Optional — default empty string or 0
+    market_cap_bn: float = 0.0
+    revenue_latest_bn: float = 0.0
+    revenue_growth_pct: float = 0.0
+    gross_margin_pct: float = 0.0
+    net_margin_pct: float = 0.0
+    roe_pct: float = 0.0
+    roa_pct: float = 0.0
+    eps_vnd: float = 0.0
+    pe_x: float = 0.0
+    pb_x: float = 0.0
+    fiscal_year: str = "2024"
+    horizon: str = "12 tháng"
+    wacc_pct: float = 0.0
+    terminal_growth_pct: float = 0.0
+    source_coverage_pct: float = 0.0
+    numeric_consistency: str = "PENDING"
+    valuation_reproducibility: str = "PENDING"
+    human_review: str = "PENDING"
+
+    # Prebuilt markdown content (populated by generate_report.py)
+    investment_thesis: str = ""
+    company_overview: str = ""
+    business_driver_table: str = ""
+    financial_summary_table: str = ""
+    financial_narrative: str = ""
+    forecast_table: str = ""
+    driver_table: str = ""
+    assumptions_table: str = ""
+    forecast_narrative: str = ""
+    dcf_table: str = ""
+    valuation_summary_table: str = ""
+    valuation_assumptions_table: str = ""
+    valuation_narrative: str = ""
+    sensitivity_matrix: str = ""
+    scenario_table: str = ""
+    peer_table: str = ""
+    sensitivity_narrative: str = ""
+    catalysts_table: str = ""
+    risks_table: str = ""
+    risk_narrative: str = ""
+    key_takeaways: str = ""
+    quality_summary_table: str = ""
+    key_sources_table: str = ""
+
+    # Chart paths: chart_id → relative file path
+    chart_paths: dict = field(default_factory=dict)
+
+
+# ---------------------------------------------------------------------------
+# Helper
+# ---------------------------------------------------------------------------
+
+def _chart_ref(ctx: ReportContext, chart_id: str, fallback_note: str = "") -> str:
+    """Return an image reference or a blockquote placeholder.
+
+    Returns ``![{chart_id}]({path})`` if chart_id is in ctx.chart_paths,
+    otherwise returns a blockquote note.
+    """
+    path = ctx.chart_paths.get(chart_id)
+    if path:
+        return f"![{chart_id}]({path})"
+    note = fallback_note if fallback_note else f"Biểu đồ {chart_id} chưa được tạo."
+    return f"> _{note}_"
+
+
+# ---------------------------------------------------------------------------
+# Section builders (internal)
+# ---------------------------------------------------------------------------
+
+def _build_cover_snapshot(ctx: ReportContext) -> dict:
+    """Page 1 — Cover / Snapshot."""
+    upside_sign = "+" if ctx.upside_pct >= 0 else ""
+    thesis = _or_placeholder(ctx.investment_thesis)
+
+    md = f"""\
+# {ctx.ticker} — {ctx.company_name}
+**Sàn:** {ctx.exchange} | **Ngày báo cáo:** {ctx.report_date} | **Trạng thái:** {ctx.status}
+
+---
+
+## Snapshot
+
+| Chỉ số | Giá trị |
+|---|---|
+| **Giá hiện tại (VNĐ)** | {_fmt_price(ctx.current_price)} |
+| **Giá mục tiêu (VNĐ)** | {_fmt_price(ctx.target_price)} |
+| **Tiềm năng tăng/giảm** | {upside_sign}{ctx.upside_pct:.1f}% |
+| **Rating** | **{ctx.rating}** |
+| **Khung thời gian** | {ctx.horizon} |
+| **Mức rủi ro** | {ctx.risk_level} |
+| **Dữ liệu đến** | {ctx.data_cutoff} |
+| **Độ tin cậy dữ liệu** | {ctx.data_confidence} |
+
+---
+
+## Luận điểm đầu tư
+
+{thesis}
+"""
+    return {
+        "page": "cover_snapshot",
+        "page_number": 1,
+        "title": f"{ctx.ticker} — Cover & Snapshot",
+        "markdown": md,
+        "chart_ids": [],
+        "word_count": len(md.split()),
+    }
+
+
+def _build_company_overview(ctx: ReportContext) -> dict:
+    """Page 2 — Company Overview."""
+    overview = _or_placeholder(ctx.company_overview)
+    driver_table = _or_placeholder(ctx.business_driver_table)
+    chart = _chart_ref(ctx, "C1", "Cơ cấu doanh thu theo phân khúc")
+
+    md = f"""\
+# Tổng quan công ty — {ctx.ticker}
+
+{overview}
+
+## Động lực kinh doanh
+
+{driver_table}
+
+## Biểu đồ cơ cấu doanh thu (C1)
+
+{chart}
+"""
+    return {
+        "page": "company_overview",
+        "page_number": 2,
+        "title": "Tổng quan công ty",
+        "markdown": md,
+        "chart_ids": ["C1"],
+        "word_count": len(md.split()),
+    }
+
+
+def _build_financial_performance(ctx: ReportContext) -> dict:
+    """Page 3 — Financial Performance."""
+    fin_table = _or_placeholder(ctx.financial_summary_table)
+    narrative = _or_placeholder(ctx.financial_narrative)
+    chart_rev = _chart_ref(ctx, "C2", "Doanh thu & Lợi nhuận lịch sử")
+    chart_margin = _chart_ref(ctx, "C3", "Biên lợi nhuận gộp & ròng")
+
+    md = f"""\
+# Kết quả tài chính lịch sử — {ctx.ticker}
+
+## Bảng tóm tắt tài chính (FY {ctx.fiscal_year})
+
+{fin_table}
+
+## Biểu đồ doanh thu & lợi nhuận (C2)
+
+{chart_rev}
+
+## Biểu đồ biên lợi nhuận (C3)
+
+{chart_margin}
+
+## Phân tích
+
+{narrative}
+"""
+    return {
+        "page": "financial_performance",
+        "page_number": 3,
+        "title": "Kết quả tài chính lịch sử",
+        "markdown": md,
+        "chart_ids": ["C2", "C3"],
+        "word_count": len(md.split()),
+    }
+
+
+def _build_forecast_assumptions(ctx: ReportContext) -> dict:
+    """Page 4 — Forecast & Assumptions."""
+    forecast_table = _or_placeholder(ctx.forecast_table)
+    driver_table = _or_placeholder(ctx.driver_table)
+    assumptions_table = _or_placeholder(ctx.assumptions_table)
+    narrative = _or_placeholder(ctx.forecast_narrative)
+    chart = _chart_ref(ctx, "C4", "Dự phóng doanh thu & lợi nhuận")
+
+    md = f"""\
+# Dự phóng & Giả định — {ctx.ticker}
+
+## Bảng dự phóng tài chính
+
+{forecast_table}
+
+## Driver kinh doanh → Giả định
+
+{driver_table}
+
+## Bảng giả định chi tiết
+
+{assumptions_table}
+
+## Biểu đồ dự phóng (C4)
+
+{chart}
+
+## Phân tích dự phóng
+
+{narrative}
+"""
+    return {
+        "page": "forecast_assumptions",
+        "page_number": 4,
+        "title": "Dự phóng & Giả định",
+        "markdown": md,
+        "chart_ids": ["C4"],
+        "word_count": len(md.split()),
+    }
+
+
+def _build_valuation(ctx: ReportContext) -> dict:
+    """Page 5 — Valuation."""
+    dcf_table = _or_placeholder(ctx.dcf_table)
+    val_summary = _or_placeholder(ctx.valuation_summary_table)
+    val_assumptions = _or_placeholder(ctx.valuation_assumptions_table)
+    narrative = _or_placeholder(ctx.valuation_narrative)
+    chart = _chart_ref(ctx, "C5", "DCF Waterfall / Football Field")
+
+    md = f"""\
+# Định giá — {ctx.ticker}
+
+## DCF FCFF
+
+**WACC:** {ctx.wacc_pct:.1f}% | **Tăng trưởng dài hạn:** {ctx.terminal_growth_pct:.1f}%
+
+{dcf_table}
+
+## Tổng hợp định giá
+
+{val_summary}
+
+## Giả định định giá
+
+{val_assumptions}
+
+## Biểu đồ định giá (C5)
+
+{chart}
+
+## Nhận xét định giá
+
+{narrative}
+"""
+    return {
+        "page": "valuation",
+        "page_number": 5,
+        "title": "Định giá",
+        "markdown": md,
+        "chart_ids": ["C5"],
+        "word_count": len(md.split()),
+    }
+
+
+def _build_sensitivity_peer(ctx: ReportContext) -> dict:
+    """Page 6 — Sensitivity & Peer Comparison."""
+    sensitivity_matrix = _or_placeholder(ctx.sensitivity_matrix)
+    scenario_table = _or_placeholder(ctx.scenario_table)
+    peer_table = _or_placeholder(ctx.peer_table)
+    narrative = _or_placeholder(ctx.sensitivity_narrative)
+    chart = _chart_ref(ctx, "C6", "Peer Comparison Bubble Chart")
+
+    md = f"""\
+# Phân tích độ nhạy & So sánh đồng ngành — {ctx.ticker}
+
+## Ma trận độ nhạy (WACC × Tăng trưởng dài hạn)
+
+{sensitivity_matrix}
+
+## Kịch bản (Bull / Base / Bear)
+
+{scenario_table}
+
+## So sánh đồng ngành
+
+{peer_table}
+
+## Biểu đồ peer (C6)
+
+{chart}
+
+## Nhận xét
+
+{narrative}
+"""
+    return {
+        "page": "sensitivity_peer",
+        "page_number": 6,
+        "title": "Phân tích độ nhạy & So sánh đồng ngành",
+        "markdown": md,
+        "chart_ids": ["C6"],
+        "word_count": len(md.split()),
+    }
+
+
+def _build_catalysts_risks(ctx: ReportContext) -> dict:
+    """Page 7 — Catalysts & Risks."""
+    catalysts_table = _or_placeholder(ctx.catalysts_table)
+    risks_table = _or_placeholder(ctx.risks_table)
+    narrative = _or_placeholder(ctx.risk_narrative)
+
+    md = f"""\
+# Catalyst & Rủi ro — {ctx.ticker}
+
+## Catalyst tích cực
+
+{catalysts_table}
+
+## Rủi ro chính
+
+{risks_table}
+
+## Đánh giá rủi ro tổng thể
+
+**Mức rủi ro:** {ctx.risk_level}
+
+{narrative}
+"""
+    return {
+        "page": "catalysts_risks",
+        "page_number": 7,
+        "title": "Catalyst & Rủi ro",
+        "markdown": md,
+        "chart_ids": [],
+        "word_count": len(md.split()),
+    }
+
+
+def _build_conclusion(ctx: ReportContext) -> dict:
+    """Page 8 — Conclusion, Audit Summary, Disclaimer."""
+    key_takeaways = _or_placeholder(ctx.key_takeaways)
+    quality_table = _or_placeholder(ctx.quality_summary_table)
+    sources_table = _or_placeholder(ctx.key_sources_table)
+    upside_sign = "+" if ctx.upside_pct >= 0 else ""
+
+    md = f"""\
+# Kết luận & Phụ lục kiểm định — {ctx.ticker}
+
+## Kết luận đầu tư
+
+**Rating:** {ctx.rating} | **Giá mục tiêu:** {_fmt_price(ctx.target_price)} VNĐ | **Tiềm năng:** {upside_sign}{ctx.upside_pct:.1f}%
+
+{key_takeaways}
+
+## Kiểm định chất lượng báo cáo
+
+| Gate | Kết quả |
+|---|---|
+| Numeric Consistency | {ctx.numeric_consistency} |
+| Valuation Reproducibility | {ctx.valuation_reproducibility} |
+| Human Review | {ctx.human_review} |
+| Source Coverage | {ctx.source_coverage_pct:.0f}% |
+
+{quality_table}
+
+## Nguồn dữ liệu chính
+
+{sources_table}
+
+---
+
+## Tuyên bố miễn trách nhiệm
+
+> {DISCLAIMER_TEXT}
+
+---
+
+_Báo cáo sinh ngày {ctx.report_date} | Dữ liệu đến {ctx.data_cutoff} | Trạng thái: {ctx.status}_
+"""
+    return {
+        "page": "conclusion",
+        "page_number": 8,
+        "title": "Kết luận & Phụ lục kiểm định",
+        "markdown": md,
+        "chart_ids": [],
+        "word_count": len(md.split()),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+def build_report_sections(ctx: ReportContext) -> list[dict]:
+    """Build exactly 8 page sections from ReportContext.
+
+    Returns a list of dicts, one per page, with keys:
+        page, page_number, title, markdown, chart_ids, word_count
+    """
+    builders = [
+        _build_cover_snapshot,
+        _build_company_overview,
+        _build_financial_performance,
+        _build_forecast_assumptions,
+        _build_valuation,
+        _build_sensitivity_peer,
+        _build_catalysts_risks,
+        _build_conclusion,
+    ]
+    return [fn(ctx) for fn in builders]
+
+
+def assemble_markdown(sections: list[dict]) -> str:
+    """Join all section markdowns with \\pagebreak markers between them.
+
+    Returns a string containing exactly 7 \\pagebreak occurrences (one between
+    each of the 8 sections).
+    """
+    return "\n\\pagebreak\n".join(s["markdown"] for s in sections)
