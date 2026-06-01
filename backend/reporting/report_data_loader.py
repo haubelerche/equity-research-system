@@ -1,7 +1,9 @@
 """Load real financial data from valuation artifacts and return a populated ReportContext.
 
-This module abstracts the data-extraction logic from demo_render_dhg.py into a
-reusable, ticker-agnostic loader.
+Supports two artifact formats:
+  - New format (DHG+): has blend_dcf, fcff.fcff_table, sensitivity.fcff_wacc_g.matrix
+  - Old format (DBD): has dcf.base.intrinsic_value_per_share_vnd, current_price_vnd at root,
+    sensitivity.wacc_range/g_range/matrix directly, multiples.eps_vnd
 
 Usage::
 
@@ -12,8 +14,11 @@ from __future__ import annotations
 
 import glob
 import json
+import logging as _logging
 import os
+import warnings as _warnings
 from pathlib import Path
+from typing import Optional
 
 # Optional DB support
 try:
@@ -26,6 +31,30 @@ from backend.reporting.section_builder import ReportContext
 
 ROOT = Path(__file__).resolve().parents[2]
 
+_loader_logger = _logging.getLogger(__name__)
+
+
+def _resolve_artifact(key: str, glob_pattern: str, manifest=None) -> dict:
+    """Resolve JSON artifact: manifest-first, then glob fallback with DeprecationWarning.
+
+    If manifest is provided, only the manifest path is used — glob is never called.
+    If manifest is None, glob is used and a DeprecationWarning is emitted.
+    """
+    if manifest is not None:
+        return manifest.load_json(key)  # load_json already logs on failure, returns {}
+
+    _warnings.warn(
+        f"load_report_context called without run_id — resolving '{key}' via glob. "
+        "This is non-deterministic. Pass run_id= for reproducible rendering.",
+        DeprecationWarning,
+        stacklevel=4,
+    )
+    files = sorted(glob.glob(str(ROOT / glob_pattern)))
+    if files:
+        with open(files[-1], encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
 # ── Company master data ────────────────────────────────────────────────────────
 _COMPANIES: dict[str, tuple[str, str]] = {
     "DHG": ("Công ty CP Dược Hậu Giang", "HOSE"),
@@ -37,31 +66,39 @@ _COMPANIES: dict[str, tuple[str, str]] = {
 
 _SECTOR_BLURB: dict[str, str] = {
     "DHG": (
-        "Công ty CP Dược Hậu Giang (mã DHG) là công ty dược phẩm lớn nhất Việt Nam tính theo "
-        "doanh thu nội địa, thành lập 1974, niêm yết HOSE từ 2006. Sản xuất và phân phối 300+ "
-        "sản phẩm, tập trung kênh OTC (nhà thuốc) và ETC (đấu thầu bệnh viện). Năng lực sản xuất "
-        "đạt chuẩn GMP-WHO và PIC/S. Cổ đông lớn nhất: Taisho Pharmaceutical Nhật Bản (~51%)."
+        "Công ty CP Dược Hậu Giang (DHG) là công ty dược phẩm lớn nhất Việt Nam tính theo "
+        "doanh thu nội địa, thành lập 1974, niêm yết HOSE từ 2006. Công ty sản xuất và phân phối "
+        "trên 300 sản phẩm, tập trung vào hai kênh chính: OTC (nhà thuốc) và ETC (đấu thầu bệnh "
+        "viện). Năng lực sản xuất đạt chuẩn GMP-WHO và PIC/S. Cổ đông chiến lược lớn nhất là "
+        "Taisho Pharmaceutical Nhật Bản (~51%). Vị thế thị trường và hệ thống phân phối rộng "
+        "khắp tạo lợi thế cạnh tranh bền vững trong ngành dược generic Việt Nam."
     ),
     "IMP": (
-        "Công ty CP Dược phẩm Imexpharm (mã IMP) là nhà sản xuất dược phẩm generic hàng đầu, "
-        "niêm yết HOSE. Tập trung vào sản phẩm generic chất lượng cao đạt chuẩn EU-GMP, "
-        "cung cấp cho kênh bệnh viện và chuỗi nhà thuốc."
+        "Công ty CP Dược phẩm Imexpharm (IMP) là nhà sản xuất dược phẩm generic chất lượng cao, "
+        "niêm yết HOSE. Công ty tập trung vào sản phẩm đạt chuẩn EU-GMP, cung cấp cho kênh bệnh "
+        "viện và chuỗi nhà thuốc. Định vị ở phân khúc generic chất lượng cao, IMP hưởng lợi từ "
+        "xu hướng nâng cấp tiêu dùng dược phẩm tại Việt Nam."
     ),
     "DMC": (
-        "Công ty CP XNK Y tế Domesco (mã DMC) chuyên sản xuất và phân phối dược phẩm, "
-        "thiết bị y tế tại Việt Nam, niêm yết HOSE."
+        "Công ty CP XNK Y tế Domesco (DMC) chuyên sản xuất và phân phối dược phẩm, thiết bị y tế "
+        "tại Việt Nam, niêm yết HOSE. Công ty có mạng lưới phân phối rộng và danh mục sản phẩm đa "
+        "dạng phục vụ cả kênh OTC và ETC."
     ),
     "TRA": (
-        "Công ty CP Traphaco (mã TRA) là công ty dược phẩm và thảo dược hàng đầu, "
-        "niêm yết HOSE. Nổi tiếng với các sản phẩm thảo dược và dược phẩm từ thiên nhiên."
+        "Công ty CP Traphaco (TRA) là công ty dược phẩm và thảo dược hàng đầu Việt Nam, niêm yết "
+        "HOSE. Nổi tiếng với các sản phẩm thảo dược và dược phẩm từ thiên nhiên, Traphaco sở hữu "
+        "thương hiệu mạnh trong phân khúc đông dược và sản phẩm chăm sóc sức khỏe."
     ),
     "DBD": (
-        "Công ty CP Dược Bình Định (mã DBD) là nhà sản xuất dược phẩm khu vực miền Trung, "
-        "niêm yết HNX."
+        "Công ty CP Dược Bình Định (DBD) là nhà sản xuất dược phẩm khu vực miền Trung Việt Nam, "
+        "niêm yết HNX. Công ty cung cấp đa dạng sản phẩm dược generic cho cả kênh ETC (đấu thầu "
+        "bệnh viện) và OTC, phục vụ thị trường miền Trung và Tây Nguyên. Biên gộp ổn định trong "
+        "vùng 47-49% phản ánh cơ cấu sản phẩm cân bằng."
     ),
 }
 
 _PLACEHOLDER = "Chưa có dữ liệu — cần bổ sung trước khi export final."
+_NA = "N/A"
 
 
 # ── Internal helpers ───────────────────────────────────────────────────────────
@@ -69,6 +106,21 @@ _PLACEHOLDER = "Chưa có dữ liệu — cần bổ sung trước khi export fi
 def _latest_valuation(ticker: str) -> dict:
     """Return the most recent valuation JSON for *ticker*, or empty dict."""
     pattern = str(ROOT / f"artifacts/valuation/{ticker}_*_valuation.json")
+    files = sorted(glob.glob(pattern))
+    if files:
+        with open(files[-1], encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
+def _latest_valuation_result(ticker: str) -> dict:
+    """Return the newest public valuation-result artifact for *ticker*, if any.
+
+    These artifacts represent the report-facing governance output. When present,
+    they override older exploratory valuation JSONs for recommendation, target
+    price, upside, and publishability.
+    """
+    pattern = str(ROOT / f"artifacts/valuation_results/*_{ticker}_valuation_result.json")
     files = sorted(glob.glob(pattern))
     if files:
         with open(files[-1], encoding="utf-8") as f:
@@ -100,25 +152,31 @@ def _load_db_facts(ticker: str) -> dict[tuple[str, str], float]:
         return {}
 
 
-def _pct(v: float | None) -> float:
-    """Convert decimal ratio to percentage, rounded to 1 dp."""
-    return round((v or 0.0) * 100, 1)
+def _pct(v: float | None) -> Optional[float]:
+    """Convert decimal ratio to percentage, rounded to 1 dp. Returns None if missing."""
+    if v is None:
+        return None
+    return round(v * 100, 1)
 
 
-def _latest_val(d: dict, fy_periods: list[str]) -> float:
-    """Return value for the last available FY period in *d*."""
+def _latest_val_or_none(d: dict, fy_periods: list[str]) -> Optional[float]:
+    """Return value for the last available FY period in *d*, or None if missing."""
     if not d or not fy_periods:
-        return 0.0
-    return d.get(fy_periods[-1], 0.0) or 0.0
+        return None
+    for p in reversed(fy_periods):
+        v = d.get(p)
+        if v is not None:
+            return v
+    return None
 
 
 def _rating_from_upside(upside_pct: float) -> str:
     """Compute analyst rating from upside percentage.
 
-    Bands (per project spec):
-      BUY   : upside > +15%
-      HOLD  : -20% <= upside <= +15%
-      SELL  : upside < -20%
+    Bands:
+      BUY  : upside > +15%
+      HOLD : -20% <= upside <= +15%
+      SELL : upside < -20%
     """
     if upside_pct > 15.0:
         return "BUY"
@@ -139,6 +197,226 @@ def _load_chart_paths(ticker: str) -> dict[str, str]:
     return result
 
 
+def _has_valid_data(lst: list, min_nonzero: int = 1) -> bool:
+    """Return True if list has at least min_nonzero non-zero, non-None values."""
+    count = sum(1 for v in lst if v is not None and v != 0.0 and not (isinstance(v, float) and not v == v))
+    return count >= min_nonzero
+
+
+def _positive_number(v: object) -> Optional[float]:
+    """Return a positive finite float, otherwise None."""
+    try:
+        n = float(v)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+    if n > 0 and n == n and n not in (float("inf"), float("-inf")):
+        return n
+    return None
+
+
+def _status_token(v: object) -> str:
+    """Normalize artifact/gate status strings for deterministic checks."""
+    return str(v or "").strip().upper().replace("-", "_")
+
+
+def _status_pass(v: object) -> bool:
+    return _status_token(v) in {"PASS", "PASSED", "APPROVED", "ANALYST_APPROVED"}
+
+
+def _status_pending_or_unapproved(v: object) -> bool:
+    return _status_token(v) in {
+        "",
+        "MISSING",
+        "N_A",
+        "NA",
+        "PENDING",
+        "PENDING_REVIEW",
+        "DEFAULT_UNAPPROVED",
+        "DRAFT_NEEDS_ANALYST_REVIEW",
+        "UNDER_REVIEW",
+    }
+
+
+def _artifact_status(artifact: dict) -> str:
+    """Best-effort status lookup across legacy and current artifact formats."""
+    for key in ("validation_status", "status", "artifact_status", "valuation_status"):
+        if artifact.get(key) is not None:
+            return str(artifact.get(key))
+    if artifact.get("rating_model_output") == "UNDER_REVIEW":
+        return "UNDER_REVIEW"
+    return "MISSING"
+
+
+def _assumptions_approved(val: dict, fcff_v: dict, valuation_result: dict) -> bool:
+    """Return True only when assumptions are explicitly approved."""
+    candidates = [
+        fcff_v.get("assumption_status"),
+        val.get("assumption_status"),
+        val.get("assumptions_status"),
+        valuation_result.get("assumption_status"),
+        valuation_result.get("forecast_assumption_status"),
+    ]
+    assumptions = valuation_result.get("assumptions")
+    if isinstance(assumptions, list) and assumptions:
+        candidates.extend(a.get("status") for a in assumptions if isinstance(a, dict))
+    return any(_status_pass(c) for c in candidates)
+
+
+def _valuation_publishable(
+    val: dict,
+    fcff_v: dict,
+    valuation_result: dict,
+    current_price: Optional[float],
+    target_price: Optional[float],
+) -> bool:
+    """Centralized valuation gate for target price, upside, and rating display."""
+    artifact = valuation_result or val
+    status = _artifact_status(artifact)
+    explicit_publishable = artifact.get("is_publishable")
+    if explicit_publishable is False:
+        return False
+    return (
+        current_price is not None
+        and target_price is not None
+        and _status_pass(status)
+        and _assumptions_approved(val, fcff_v, valuation_result)
+    )
+
+
+def _forecast_publishable(fcff_v: dict, valuation_result: dict) -> bool:
+    """Forecast charts/tables require actual rows and approved assumptions."""
+    if not fcff_v.get("fcff_table"):
+        return False
+    status = fcff_v.get("validation_status") or fcff_v.get("status")
+    if status is not None and not _status_pass(status):
+        return False
+    return _assumptions_approved({}, fcff_v, valuation_result)
+
+
+def _sensitivity_publishable(
+    sens_norm: dict,
+    valuation_passed: bool,
+    valuation_result: dict,
+) -> bool:
+    """Sensitivity requires a valid valuation plus non-empty sensitivity data."""
+    if not valuation_passed or not sens_norm:
+        return False
+    sens_status = valuation_result.get("sensitivity_status")
+    if sens_status is None and isinstance(valuation_result.get("sensitivity"), dict):
+        sens_status = valuation_result["sensitivity"].get("validation_status")
+    return sens_status is None or _status_pass(sens_status)
+
+
+# ── Artifact format adapters ─────────────────────────────────────────────────
+# Two formats exist:
+# - "new" (DHG+): blend_dcf + fcff.fcff_table + sensitivity.fcff_wacc_g
+# - "old" (DBD):  dcf.base + multiples + sensitivity.{wacc_range, g_range, matrix}
+
+def _extract_prices(val: dict) -> tuple[Optional[float], Optional[float], Optional[float]]:
+    """Return (current_price, target_price, upside_pct) from valuation artifact.
+
+    Returns None for any value that is genuinely unavailable.
+    upside_pct is in percentage points (e.g. 15.3 not 0.153).
+    """
+    if not val:
+        return None, None, None
+
+    # Public valuation-result artifact: zeros mean unavailable, not actual zero.
+    if {"current_price", "target_price", "upside_downside"} & set(val.keys()):
+        cp = _positive_number(val.get("current_price"))
+        tp = _positive_number(val.get("target_price"))
+        raw_upside = val.get("upside_downside")
+        upside = None
+        try:
+            if raw_upside is not None and cp is not None and tp is not None:
+                up = float(raw_upside)
+                if up == up:
+                    upside = round(up * 100, 1)
+        except (TypeError, ValueError):
+            upside = None
+        return cp, tp, upside
+
+    # New format: blend_dcf
+    blend = val.get("blend_dcf", {})
+    if blend:
+        cp = _positive_number(blend.get("current_price_vnd"))
+        tp = _positive_number(blend.get("target_price_dcf_vnd"))
+        raw_upside = blend.get("upside_pct")
+        upside = round(raw_upside * 100, 1) if raw_upside is not None else None
+        return cp, tp, upside
+
+    # Old format (DBD): current_price at root + dcf.base target
+    cp = _positive_number(val.get("current_price_vnd")) or _positive_number(val.get("multiples", {}).get("current_price_vnd"))
+    dcf = val.get("dcf", {})
+    base = dcf.get("base", {})
+    tp = _positive_number(base.get("intrinsic_value_per_share_vnd"))
+
+    if cp and tp:
+        upside = round((tp - cp) / cp * 100, 1)
+    else:
+        upside = None
+
+    return cp, tp, upside
+
+
+def _extract_fcff(val: dict) -> dict:
+    """Return FCFF section regardless of format.
+
+    New format: val['fcff'] directly has fcff_table, wacc, terminal_growth.
+    Old format: no fcff key; adapt from dcf.base.
+    """
+    fcff = val.get("fcff", {})
+    if fcff:
+        return fcff
+
+    # Old format: derive from dcf.base
+    dcf_base = val.get("dcf", {}).get("base", {})
+    if dcf_base:
+        assumptions = dcf_base.get("assumptions", {})
+        return {
+            "wacc": assumptions.get("wacc", 0.10),
+            "terminal_growth": assumptions.get("terminal_growth", 0.03),
+            "fcff_table": [],  # Old format has no row-level FCFF table
+            "assumption_status": "default_unapproved",
+        }
+    return {}
+
+
+def _extract_multiples(val: dict) -> dict:
+    """Return multiples dict regardless of format."""
+    return val.get("multiples", {})
+
+
+def _extract_sensitivity(val: dict) -> dict:
+    """Return sensitivity data in normalised form {wacc_range, g_range, matrix}.
+
+    New format: val['sensitivity']['fcff_wacc_g']['matrix']
+    Old format: val['sensitivity']['matrix'] directly
+    """
+    sens = val.get("sensitivity", {})
+    if not sens:
+        return {}
+
+    # New format
+    sg = sens.get("fcff_wacc_g", {})
+    if sg and sg.get("matrix"):
+        return {
+            "wacc_range": sg.get("wacc_range", []),
+            "g_range": sg.get("g_range", []),
+            "matrix": sg.get("matrix", {}),
+        }
+
+    # Old format: matrix is directly under sensitivity
+    if sens.get("matrix"):
+        return {
+            "wacc_range": sens.get("wacc_range", []),
+            "g_range": sens.get("g_range", []),
+            "matrix": sens.get("matrix", {}),
+        }
+
+    return {}
+
+
 # ── Table builders ─────────────────────────────────────────────────────────────
 
 def _build_fin_table(ratios: dict, fy_periods: list[str]) -> str:
@@ -157,7 +435,7 @@ def _build_fin_table(ratios: dict, fy_periods: list[str]) -> str:
         if p == "—":
             return "—"
         v = d.get(p)
-        return f"{_pct(v):.1f}%" if v is not None else "—"
+        return f"{round(v * 100, 1):.1f}%" if v is not None else "—"
 
     header = "| Chỉ tiêu | " + " | ".join(periods) + " |\n"
     sep = "|---|" + "---:|" * len(periods) + "\n"
@@ -176,7 +454,7 @@ def _build_fin_table(ratios: dict, fy_periods: list[str]) -> str:
 def _build_dcf_table(fcff_v: dict) -> str:
     fcff_tbl = fcff_v.get("fcff_table", [])
     if not fcff_tbl:
-        return "_Dữ liệu DCF chưa có._"
+        return "> _Bảng DCF FCFF chi tiết chưa có — cần chạy lại valuation engine với FCFF module._"
     forecast_rows = {r["year"]: r for r in fcff_tbl}
     years = ["2026F", "2027F", "2028F", "2029F", "2030F"]
     cols = [
@@ -195,62 +473,98 @@ def _build_dcf_table(fcff_v: dict) -> str:
     for label, col in cols:
         vals = []
         for yr in years:
-            v = forecast_rows.get(yr, {}).get(col, 0)
-            if col == "discount_factor":
-                vals.append(f"{v:.4f}" if v else "—")
+            v = forecast_rows.get(yr, {}).get(col)
+            if v is None:
+                vals.append("—")
+            elif col == "discount_factor":
+                vals.append(f"{v:.4f}")
             else:
-                vals.append(f"{(v or 0)/1e9:,.0f}" if v else "—")
+                vals.append(f"{v / 1e9:,.0f}" if abs(v) > 1e6 else f"{v:,.2f}")
         body += f"| {label} | " + " | ".join(vals) + " |\n"
     return header + sep + body
 
 
-def _build_val_summary(blend: dict, target_price: float) -> str:
-    return (
+def _build_val_summary(val: dict, target_price: Optional[float], current_price: Optional[float]) -> str:
+    blend = val.get("blend_dcf", {})
+    mult = _extract_multiples(val)
+
+    if blend:
+        p_fcff = blend.get("price_fcff_vnd", 0)
+        p_fcfe = blend.get("price_fcfe_vnd", 0)
+        rows = (
+            f"| DCF - FCFF | {p_fcff:,.0f} | 60% | {p_fcff * 0.6:,.0f} | PASS |\n"
+            f"| DCF - FCFE | {p_fcfe:,.0f} | 40% | {p_fcfe * 0.4:,.0f} | PASS |\n"
+        )
+    else:
+        # Old format: DCF base
+        dcf_base = val.get("dcf", {}).get("base", {})
+        p_dcf = dcf_base.get("intrinsic_value_per_share_vnd", 0)
+        p_pe = mult.get("implied_price_pe", 0)
+        rows = (
+            f"| DCF (FCF-based) | {p_dcf:,.0f} | 60% | {p_dcf * 0.6:,.0f} | default_unapproved |\n"
+            f"| P/E múltiple | {p_pe:,.0f} | 40% | {p_pe * 0.4:,.0f} | default_unapproved |\n"
+        )
+
+    tp_str = f"{target_price:,.0f}" if target_price else _NA
+    table = (
         "| Phương pháp | Giá hàm ý (VND/CP) | Trọng số | Giá có trọng số | Trạng thái |\n"
         "|---|---:|---:|---:|---|\n"
-        f"| DCF - FCFF | {blend.get('price_fcff_vnd', 0):,.0f} | 60% | "
-        f"{blend.get('price_fcff_vnd', 0) * 0.6:,.0f} | valid |\n"
-        f"| DCF - FCFE | {blend.get('price_fcfe_vnd', 0):,.0f} | 40% | "
-        f"{blend.get('price_fcfe_vnd', 0) * 0.4:,.0f} | valid |\n"
-        f"| **Target Price (DCF Blend)** | **{target_price:,.0f}** | 100% | **{target_price:,.0f}** | |\n"
+        + rows
+        + f"| **Target Price** | **{tp_str}** | 100% | **{tp_str}** | pending_review |\n"
     )
+    return table
 
 
-def _build_val_assumptions(fcff_v: dict, mult: dict, current_price: float) -> str:
+def _build_val_assumptions(fcff_v: dict, mult: dict, current_price: Optional[float]) -> str:
+    wacc = fcff_v.get("wacc", 0.10)
+    tg = fcff_v.get("terminal_growth", 0.03)
+    shares = mult.get("shares_mn", 0)
+    net_debt = mult.get("net_debt_vnd_bn", 0)
+    cp_str = f"{current_price:,.0f}" if current_price else _NA
     return (
         "| Parameter | Giá trị | Nguồn |\n"
         "|---|---:|---|\n"
-        f"| WACC | {fcff_v.get('wacc', 0.10) * 100:.1f}% | valuation_result |\n"
-        f"| Terminal growth | {fcff_v.get('terminal_growth', 0.03) * 100:.1f}% | valuation_result |\n"
-        f"| Shares outstanding | {mult.get('shares_mn', 0):.2f} triệu CP | canonical_fact |\n"
-        f"| Net debt | {mult.get('net_debt_vnd_bn', 0):,.1f} tỷ VND | canonical_fact |\n"
-        f"| Current price | {current_price:,.0f} VND/CP | market data |\n"
+        f"| WACC | {wacc * 100:.1f}% | valuation_result |\n"
+        f"| Terminal growth | {tg * 100:.1f}% | valuation_result |\n"
+        f"| Shares outstanding | {shares:.2f} triệu CP | canonical_fact |\n"
+        f"| Net debt | {net_debt:,.1f} tỷ VND | canonical_fact |\n"
+        f"| Current price | {cp_str} VND/CP | market data |\n"
+        f"| Assumption status | default_unapproved | **Cần analyst review** |\n"
     )
 
 
-def _build_sensitivity_matrix(sens: dict) -> str:
-    sg = sens.get("fcff_wacc_g", {})
-    wrange = sg.get("wacc_range", [])
-    grange = sg.get("g_range", [])
-    matrix_d = sg.get("matrix", {})
+def _build_sensitivity_matrix(sens_norm: dict) -> str:
+    """Build sensitivity matrix table from normalised sensitivity dict."""
+    wrange = sens_norm.get("wacc_range", [])
+    grange = sens_norm.get("g_range", [])
+    matrix_d = sens_norm.get("matrix", {})
     if not matrix_d or not wrange or not grange:
-        return "_Dữ liệu sensitivity chưa có._"
+        return "> _Dữ liệu sensitivity chưa có._"
+
     w_keys = [f"{w:.3f}" for w in wrange]
-    g_keys = [f"{g:.2f}" if g >= 0.01 else f"{g:.3f}" for g in grange]
+    g_keys_for_lookup = [f"{g:.3f}" if g < 0.01 else (f"{g:.2f}" if g < 0.1 else f"{g:.3f}") for g in grange]
+
     header = "| Target Price (VND/CP) | " + " | ".join([f"WACC {w * 100:.1f}%" for w in wrange]) + " |\n"
     sep = "|---|" + "---:|" * len(wrange) + "\n"
     body = ""
-    for g, g_key in zip(grange, g_keys):
+    for g, g_key_lookup in zip(grange, g_keys_for_lookup):
         row_vals = []
         for w_key in w_keys:
             row_d = matrix_d.get(w_key, {})
-            v = row_d.get(str(g), row_d.get(g_key, None))
+            # Try multiple key formats for g
+            v = row_d.get(g_key_lookup)
+            if v is None:
+                # Try 2-decimal, 3-decimal, and string representations
+                for alt in [f"{g:.2f}", f"{g:.3f}", str(g)]:
+                    v = row_d.get(alt)
+                    if v is not None:
+                        break
             row_vals.append(f"{float(v):,.0f}" if v is not None else "—")
         body += f"| g={g * 100:.1f}% | " + " | ".join(row_vals) + " |\n"
     return header + sep + body
 
 
-def _build_forecast_assumptions(fc: dict) -> str:
+def _build_forecast_assumptions_table(fc: dict) -> str:
     fc_drivers = fc.get("drivers", {})
     labels = {
         "revenue_growth": "Revenue growth",
@@ -259,6 +573,11 @@ def _build_forecast_assumptions(fc: dict) -> str:
         "depreciation_to_revenue": "Depr/Revenue",
         "capex_to_revenue": "CAPEX/Revenue",
     }
+    if not fc_drivers:
+        return (
+            "> _Assumptions chưa được lập — cần analyst review và phê duyệt trước khi "
+            "dùng cho forecast chart và valuation._"
+        )
     table = "| Assumption | Base Case | Approval Status |\n|---|---:|---|\n"
     for k, v in fc_drivers.items():
         if isinstance(v, dict):
@@ -271,148 +590,384 @@ def _build_forecast_assumptions(fc: dict) -> str:
         else:
             base = str(v)
         table += f"| {labels.get(k, k)} | {base} | pending_review |\n"
-    return table if fc_drivers else _PLACEHOLDER
+    return table
 
 
 def _build_forecast_table(fcff_v: dict) -> str:
     fcff_tbl = fcff_v.get("fcff_table", [])
     if not fcff_tbl:
-        return _PLACEHOLDER
-    forecast_rows = {r["year"]: r for r in fcff_tbl}
+        return (
+            "> _Bảng dự phóng chưa có. Forecast chart (C5) và bảng này bị chặn "
+            "do assumptions chưa được phê duyệt._"
+        )
+    forecast_rows = {r["label"]: r for r in fcff_tbl}
     years = ["2026F", "2027F", "2028F", "2029F", "2030F"]
     cols = [("EBIT (tỷ VND)", "ebit"), ("FCFF (tỷ VND)", "fcff"), ("PV FCFF (tỷ VND)", "pv_fcff")]
     header = "| Chi tiêu | " + " | ".join(years) + " |\n"
     sep = "|---|" + "---:|" * len(years) + "\n"
     body = ""
     for label, col in cols:
-        vals = [f"{(forecast_rows.get(yr, {}).get(col, 0) or 0)/1e9:,.0f}" for yr in years]
-        body += f"| {label} | " + " | ".join(vals) + " |\n"
+        def _fmtv(yr: str) -> str:
+            v = forecast_rows.get(yr, {}).get(col)
+            if v is None:
+                return "—"
+            return f"{v / 1e9:,.0f}" if abs(v) > 1e6 else f"{v:,.2f}"
+        body += f"| {label} | " + " | ".join(_fmtv(yr) for yr in years) + " |\n"
     return header + sep + body
+
+
+def _build_analyst_financial_narrative(
+    ratios: dict,
+    fy_periods: list[str],
+    gross_margin_pct: Optional[float],
+    net_margin_pct: Optional[float],
+    roe_pct: Optional[float],
+    roa_pct: Optional[float],
+    fiscal_year: str,
+    ticker: str,
+) -> str:
+    """Build analyst-style financial narrative (not just a metric restatement).
+
+    Answers: what changed, why it matters, implication, what to monitor.
+    """
+    gm = ratios.get("gross_margin", {})
+    nm = ratios.get("net_margin", {})
+    roe_r = ratios.get("roe", {})
+    rev_g = ratios.get("revenue_growth", {})
+
+    periods = fy_periods[-4:] if len(fy_periods) >= 4 else fy_periods
+    if len(periods) < 2:
+        return _PLACEHOLDER
+
+    first_fy = periods[0]
+    last_fy = periods[-1]
+
+    # Gross margin trend
+    gm_first = gm.get(first_fy)
+    gm_last = gm.get(last_fy)
+    gm_trend = ""
+    if gm_first is not None and gm_last is not None:
+        gm_chg = round((gm_last - gm_first) * 100, 1)
+        direction = "giảm" if gm_chg < 0 else "cải thiện"
+        gm_trend = (
+            f"Biên gộp {direction} từ {gm_first * 100:.1f}% ({first_fy.replace('FY', '')}) "
+            f"xuống {gm_last * 100:.1f}% ({last_fy.replace('FY', '')}), thay đổi {gm_chg:+.1f} điểm %. "
+        )
+        if gm_chg < -1.0:
+            gm_trend += (
+                "Xu hướng này phản ánh áp lực giá bán (đặc biệt kênh ETC/đấu thầu) hoặc chi phí "
+                "nguyên liệu đầu vào tăng. Nếu tiếp tục, FCFF và biên EBIT sẽ chịu áp lực. "
+                "Cần theo dõi kết quả đấu thầu thuốc ETC và biến động giá API nhập khẩu. "
+            )
+        elif gm_chg > 1.0:
+            gm_trend += (
+                "Xu hướng tích cực có thể phản ánh cải thiện cơ cấu sản phẩm (tăng tỷ trọng "
+                "branded generic) hoặc kiểm soát chi phí đầu vào tốt hơn. "
+            )
+
+    # ROE trend
+    roe_first = roe_r.get(first_fy)
+    roe_last = roe_r.get(last_fy)
+    roe_trend = ""
+    if roe_first is not None and roe_last is not None:
+        roe_chg = round((roe_last - roe_first) * 100, 1)
+        if abs(roe_chg) >= 1.0:
+            direction = "giảm" if roe_chg < 0 else "tăng"
+            roe_trend = (
+                f"ROE {direction} từ {roe_first * 100:.1f}% xuống {roe_last * 100:.1f}% "
+                f"trong giai đoạn {first_fy.replace('FY', '')}–{last_fy.replace('FY', '')}. "
+            )
+            if roe_chg < -2.0:
+                roe_trend += (
+                    "Suy giảm ROE đáng kể — có thể phản ánh mở rộng tài sản (CAPEX, hàng tồn kho) "
+                    "chưa tạo ra tăng trưởng lợi nhuận tương xứng. "
+                )
+
+    # Revenue growth
+    rev_latest = rev_g.get(last_fy)
+    rev_trend = ""
+    if rev_latest is not None:
+        rev_trend = (
+            f"Tăng trưởng doanh thu gần nhất ({last_fy.replace('FY', '')}): "
+            f"{rev_latest * 100:+.1f}%. "
+        )
+
+    # Monitoring items (pharma-specific)
+    monitor = (
+        "Các chỉ tiêu cần theo dõi: kết quả đấu thầu ETC, tỷ giá USD/VND và giá API nhập khẩu, "
+        "ngày tồn kho và phải thu, tỷ lệ thắng thầu so sánh với cùng kỳ năm trước."
+    )
+
+    parts = [p for p in [gm_trend, roe_trend, rev_trend, monitor] if p]
+    if not parts:
+        return _PLACEHOLDER
+
+    return "\n\n".join(parts)
+
+
+def _build_valuation_narrative(
+    fcff_v: dict,
+    target_price: Optional[float],
+    current_price: Optional[float],
+    upside_pct: Optional[float],
+    val: dict,
+) -> str:
+    """Analyst-style valuation commentary."""
+    if not target_price:
+        return (
+            "> _Định giá bị chặn: không có target price hợp lệ. "
+            "Cần (1) phê duyệt assumptions WACC và terminal growth, "
+            "(2) xác nhận giá thị trường hiện tại, "
+            "(3) chạy lại valuation engine._"
+        )
+
+    wacc_pct = round(fcff_v.get("wacc", 0.10) * 100, 1)
+    tg_pct = round(fcff_v.get("terminal_growth", 0.03) * 100, 1)
+    assumption_status = fcff_v.get("assumption_status", "default_unapproved")
+
+    upside_str = f"{upside_pct:+.1f}%" if upside_pct is not None else _NA
+    cp_str = f"{current_price:,.0f}" if current_price else _NA
+
+    narrative = (
+        f"**Phương pháp:** DCF dựa trên FCF lịch sử với kịch bản Base (WACC={wacc_pct:.1f}%, "
+        f"tăng trưởng dài hạn={tg_pct:.1f}%). "
+        f"Target price: {target_price:,.0f} VND/CP — giá thị trường: {cp_str} VND/CP "
+        f"(tiềm năng: {upside_str}).\n\n"
+    )
+
+    if assumption_status == "default_unapproved":
+        narrative += (
+            "**Lưu ý:** Assumptions hiện tại là mặc định (chưa được analyst review). "
+            "Target price trên chỉ là ước tính sơ bộ. "
+            "Rating và upside sẽ không được hiển thị chính thức cho đến khi assumptions được phê duyệt.\n\n"
+        )
+
+    # Warnings from artifact
+    dcf_warnings = val.get("dcf", {}).get("base", {}).get("warnings", [])
+    fcff_warnings = fcff_v.get("warnings", [])
+    all_warnings = dcf_warnings + fcff_warnings
+    if all_warnings:
+        narrative += "**Cảnh báo kỹ thuật:**\n"
+        for w in all_warnings[:3]:
+            narrative += f"- {w}\n"
+
+    return narrative
 
 
 # ── Main public function ───────────────────────────────────────────────────────
 
-def load_report_context(ticker: str) -> ReportContext:
+def load_report_context(ticker: str, run_id: str | None = None) -> "ReportContext":
     """Load a fully-populated ReportContext for *ticker* from valuation artifacts.
 
+    When *run_id* is provided, artifacts are resolved deterministically from the
+    run manifest.  Without *run_id*, the loader falls back to globbing for the
+    most-recent file and emits a DeprecationWarning.
+
     Falls back to DB canonical facts for any missing numbers.
-    Uses data-driven placeholder text for narrative fields where data is absent.
+    Uses typed missing values (None → N/A) instead of coercing to zero.
     """
     ticker = ticker.upper()
+    manifest = None
+    if run_id:
+        from backend.reporting.artifact_manifest import read_manifest
+        manifest = read_manifest(run_id, base_dir=ROOT / "artifacts")
+        if manifest is None:
+            _loader_logger.warning(
+                "run_id=%s provided but no manifest found — falling back to glob", run_id
+            )
+
     company_name, exchange = _COMPANIES.get(ticker, (ticker, "HOSE"))
 
     from datetime import datetime
     report_date = datetime.now().strftime("%Y-%m-%d")
 
     # ── Load valuation artifact ────────────────────────────────────────
-    val = _latest_valuation(ticker)
-    blend = val.get("blend_dcf", {})
-    mult = val.get("multiples", {})
+    val = _resolve_artifact(
+        "valuation",
+        f"artifacts/valuation/{ticker}_*_valuation.json",
+        manifest,
+    )
+    valuation_result = _resolve_artifact(
+        "valuation_result",
+        f"artifacts/valuation_results/*_{ticker}_valuation_result.json",
+        manifest,
+    )
     ratios = val.get("ratios", {})
     fc = val.get("forecast", {})
-    fcff_v = val.get("fcff", {})
-    sens = val.get("sensitivity", {})
+    fcff_v = _extract_fcff(val)
+    mult = _extract_multiples(val)
+    sens_norm = _extract_sensitivity(val)
     fy_periods: list[str] = val.get("fy_periods", [])
 
-    # ── Core pricing & rating ──────────────────────────────────────────
-    current_price = blend.get("current_price_vnd", 0.0)
-    target_price = blend.get("target_price_dcf_vnd", 0.0)
-    raw_upside = blend.get("upside_pct", 0.0) or 0.0
-    upside_pct = round(raw_upside * 100, 1)
-    rating = _rating_from_upside(upside_pct) if (current_price or target_price) else "UNDER_REVIEW"
+    # ── Core pricing & rating (None = genuinely missing, not 0) ───────
+    price_source = valuation_result or val
+    current_price, target_price, upside_pct = _extract_prices(price_source)
+    valuation_passed = _valuation_publishable(
+        val, fcff_v, valuation_result, current_price, target_price
+    )
 
-    # ── Ratio extracts ─────────────────────────────────────────────────
+    # Only assign a rating when valuation is validated and assumptions are approved.
+    if not valuation_passed:
+        target_price = None
+        upside_pct = None
+        rating = "UNDER_REVIEW"
+    elif upside_pct is not None:
+        rating = _rating_from_upside(upside_pct)
+    else:
+        rating = "UNDER_REVIEW"
+
+    # ── Ratio extracts (None = missing) ───────────────────────────────
     gm = ratios.get("gross_margin", {})
     nm = ratios.get("net_margin", {})
     roe_r = ratios.get("roe", {})
     roa_r = ratios.get("roa", {})
 
-    gross_margin_pct = _pct(_latest_val(gm, fy_periods))
-    net_margin_pct = _pct(_latest_val(nm, fy_periods))
-    roe_pct = _pct(_latest_val(roe_r, fy_periods))
-    roa_pct = _pct(_latest_val(roa_r, fy_periods))
+    gross_margin_pct = _pct(_latest_val_or_none(gm, fy_periods))
+    net_margin_pct = _pct(_latest_val_or_none(nm, fy_periods))
+    roe_pct = _pct(_latest_val_or_none(roe_r, fy_periods))
+    roa_pct = _pct(_latest_val_or_none(roa_r, fy_periods))
 
-    shares_mn = mult.get("shares_mn", 0.0)
-    eps_vnd = mult.get("eps_vnd", 0.0)
-    pe_x = round(mult.get("pe_ratio", 0.0), 1)
-    pb_x = round(mult.get("pb_ratio", 0.0), 2)
-    market_cap_bn = round(current_price * shares_mn * 1e6 / 1e9) if (current_price and shares_mn) else 0
+    shares_mn = mult.get("shares_mn", 0.0) or 0.0
+    eps_vnd = mult.get("eps_vnd") or None
+    pe_x = mult.get("pe_ratio") or None
+    pb_x = mult.get("pb_ratio") or None
 
-    wacc_pct = round(fcff_v.get("wacc", 0.10) * 100, 1)
-    terminal_growth_pct = round(fcff_v.get("terminal_growth", 0.03) * 100, 1)
+    if current_price and shares_mn:
+        market_cap_bn = round(current_price * shares_mn * 1e6 / 1e9)
+    else:
+        market_cap_bn = None
+
+    wacc_pct = round(fcff_v.get("wacc", 0.10) * 100, 1) if valuation_passed and fcff_v else 0.0
+    terminal_growth_pct = round(fcff_v.get("terminal_growth", 0.03) * 100, 1) if valuation_passed and fcff_v else 0.0
     fiscal_year = fy_periods[-1].replace("FY", "") if fy_periods else "—"
+
+    # ── Valuation artifact status ──────────────────────────────────────
+    has_valuation = valuation_passed
+    valuation_assumption_status = fcff_v.get("assumption_status", "default_unapproved") if fcff_v else "missing"
+    has_forecast_table = _forecast_publishable(fcff_v, valuation_result)
+    has_sensitivity = _sensitivity_publishable(sens_norm, has_valuation, valuation_result)
 
     # ── Tables ────────────────────────────────────────────────────────
     fin_table = _build_fin_table(ratios, fy_periods) if (ratios and fy_periods) else _PLACEHOLDER
-    dcf_table = _build_dcf_table(fcff_v)
-    val_summary = _build_val_summary(blend, target_price) if blend else _PLACEHOLDER
-    val_assumptions = _build_val_assumptions(fcff_v, mult, current_price)
-    sens_matrix = _build_sensitivity_matrix(sens)
-    assumptions_table = _build_forecast_assumptions(fc)
-    forecast_table = _build_forecast_table(fcff_v)
+    dcf_table = _build_dcf_table(fcff_v) if has_valuation else (
+        "> _DCF bị chặn: valuation artifact chưa PASS hoặc assumptions chưa được phê duyệt. Không hiển thị WACC, terminal growth, hay FCFF bridge cho đến khi gate định giá hợp lệ._"
+    )
+    val_summary = _build_val_summary(val, target_price, current_price) if has_valuation else (
+        "> _Bảng định giá bị chặn: thiếu target price hợp lệ. Cần valuation artifact có trạng thái PASS._"
+    )
+    val_assumptions = _build_val_assumptions(fcff_v, mult, current_price) if has_valuation and fcff_v else (
+        "> _Giả định định giá bị chặn: cần valuation artifact PASS và analyst approval trước khi công bố WACC, terminal growth, shares, net debt trong mục định giá._"
+    )
+    sens_matrix = _build_sensitivity_matrix(sens_norm) if has_sensitivity else (
+        "> _Ma trận độ nhạy chưa có. Cần sensitivity artifact với trạng thái PASS._"
+    )
+    assumptions_table = _build_forecast_assumptions_table(fc)
+    forecast_table = _build_forecast_table(fcff_v) if has_forecast_table else (
+        "> _Bảng dự phóng bị chặn: forecast artifact chưa PASS hoặc assumptions chưa được phê duyệt. Chỉ hiển thị trạng thái assumptions và hành động cần bổ sung._"
+    )
 
-    # ── Peer table (static template — no live data available) ─────────
+    # ── Peer table ────────────────────────────────────────────────────
+    pe_str = f"{pe_x:.1f}x" if pe_x else _NA
+    pb_str = f"{pb_x:.2f}x" if pb_x else _NA
+    mc_str = f"{market_cap_bn:,.0f}" if market_cap_bn else _NA
     peer_table = (
         "| Ticker | Market Cap (tỷ) | P/E | P/B | ROE | Net Margin |\n"
         "|---|---:|---:|---:|---:|---:|\n"
-        f"| {ticker} | {market_cap_bn:,.0f} | {pe_x}x | {pb_x}x"
-        f" | {roe_pct:.1f}% | {net_margin_pct:.1f}% |\n"
+        f"| **{ticker}** | {mc_str} | {pe_str} | {pb_str}"
+        f" | {f'{roe_pct:.1f}%' if roe_pct else _NA}"
+        f" | {f'{net_margin_pct:.1f}%' if net_margin_pct else _NA} |\n"
         "| IMP | ~3,200 | ~14x | ~2.8x | ~18% | ~12% |\n"
         "| DMC | ~2,800 | ~13x | ~2.2x | ~16% | ~10% |\n"
         "| TRA | ~3,500 | ~18x | ~3.0x | ~22% | ~12% |\n"
         "| Peer Median | — | ~14x | ~2.8x | ~18% | ~12% |\n"
-    ) if ticker == "DHG" else _PLACEHOLDER
+        "\n> _Dữ liệu peer là ước tính tham khảo — chưa được xác minh từ nguồn chính thức._"
+    ) if ticker != "DHG" else (
+        "| Ticker | Market Cap (tỷ) | P/E | P/B | ROE | Net Margin |\n"
+        "|---|---:|---:|---:|---:|---:|\n"
+        f"| **DHG** | {mc_str} | {pe_str} | {pb_str}"
+        f" | {f'{roe_pct:.1f}%' if roe_pct else _NA}"
+        f" | {f'{net_margin_pct:.1f}%' if net_margin_pct else _NA} |\n"
+        "| IMP | ~3,200 | ~14x | ~2.8x | ~18% | ~12% |\n"
+        "| DMC | ~2,800 | ~13x | ~2.2x | ~16% | ~10% |\n"
+        "| TRA | ~3,500 | ~18x | ~3.0x | ~22% | ~12% |\n"
+        "| Peer Median | — | ~14x | ~2.8x | ~18% | ~12% |\n"
+        "\n> _Dữ liệu peer là ước tính tham khảo — chưa được xác minh từ nguồn chính thức._"
+    )
 
     # ── Narrative fields ───────────────────────────────────────────────
     company_overview = _SECTOR_BLURB.get(ticker, _PLACEHOLDER)
-    if current_price:
-        company_overview += f" Doanh thu {fiscal_year} và giá cổ phiếu hiện tại {current_price:,.0f} VND/CP."
+    if current_price and fiscal_year != "—":
+        company_overview += f"\n\n**Giá cổ phiếu hiện tại:** {current_price:,.0f} VND/CP (nguồn: market data)."
 
-    if current_price and target_price:
+    if has_valuation and current_price and target_price:
+        upside_display = f"{upside_pct:+.1f}%" if upside_pct is not None else _NA
         investment_thesis = (
-            f"{company_name} — Rating {rating}: Giá mục tiêu DCF {target_price:,.0f} VND/CP, "
-            f"giá thị trường {current_price:,.0f} VND/CP (upside {upside_pct:+.1f}%). "
-            f"Biên gộp {gross_margin_pct:.1f}%, ROE {roe_pct:.1f}%. "
-            f"WACC={wacc_pct:.1f}%, terminal growth={terminal_growth_pct:.1f}%."
+            f"**Rating:** {rating} | **Target:** {target_price:,.0f} VND/CP | "
+            f"**Giá hiện tại:** {current_price:,.0f} VND/CP | **Upside:** {upside_display}\n\n"
+            f"**Luận điểm cơ sở (draft):** {company_name} có nền tảng tài chính ổn định với "
+            f"biên gộp {f'{gross_margin_pct:.1f}%' if gross_margin_pct else _NA}, "
+            f"ROE {f'{roe_pct:.1f}%' if roe_pct else _NA}. "
+            f"Định giá DCF (WACC={wacc_pct:.1f}%, g={terminal_growth_pct:.1f}%) "
+            f"cho target price {target_price:,.0f} VND/CP.\n\n"
+            f"_Luận điểm này dựa trên assumptions mặc định chưa được phê duyệt. "
+            f"Cần analyst review trước khi publish._"
         )
     else:
-        investment_thesis = _PLACEHOLDER
+        investment_thesis = (
+            f"> _Luận điểm đầu tư bị chặn: thiếu giá thị trường hoặc target price._\n\n"
+            f"**Trạng thái:** Rating = UNDER_REVIEW — cần xác nhận giá thị trường và "
+            f"phê duyệt assumptions valuation."
+        )
 
-    financial_narrative = (
-        f"Tỷ suất sinh lợi: biên gộp {gross_margin_pct:.1f}%, biên ròng {net_margin_pct:.1f}%, "
-        f"ROE {roe_pct:.1f}%, ROA {roa_pct:.1f}% (năm {fiscal_year})."
-        if (gross_margin_pct or net_margin_pct) else _PLACEHOLDER
+    financial_narrative = _build_analyst_financial_narrative(
+        ratios, fy_periods, gross_margin_pct, net_margin_pct, roe_pct, roa_pct, fiscal_year, ticker
     )
 
     forecast_narrative = (
-        f"Base case WACC={wacc_pct:.1f}%, terminal growth={terminal_growth_pct:.1f}%."
-        if fcff_v else _PLACEHOLDER
+        f"**Trạng thái dự phóng:** Assumptions chưa được phê duyệt (status: {valuation_assumption_status}). "
+        "WACC và terminal growth không được hiển thị cho đến khi valuation artifact PASS. "
+        "Forecast chart (C5) và bảng dự phóng sẽ bị chặn cho đến khi analyst phê duyệt assumptions."
+        if not has_forecast_table
+        else (
+            f"Base case: WACC={wacc_pct:.1f}%, terminal growth={terminal_growth_pct:.1f}%. "
+            "Dự phóng được tính từ lịch sử FCF, cần analyst review assumptions trước khi finalize."
+        )
     )
 
-    valuation_narrative = (
-        f"Phương pháp chính: FCFF DCF (60%) + FCFE DCF (40%). "
-        f"WACC={wacc_pct:.1f}%, terminal growth={terminal_growth_pct:.1f}%. "
-        f"Target price DCF blend: {target_price:,.0f} VND/CP."
-        if target_price else _PLACEHOLDER
+    valuation_narrative = _build_valuation_narrative(
+        fcff_v if has_valuation else {},
+        target_price,
+        current_price,
+        upside_pct,
+        val,
     )
 
     # ── Quality / source tables ────────────────────────────────────────
+    # Determine consistency of gate statuses — no contradictions
+    val_repro_status = "PASS" if has_valuation else "N/A"
+    # Note: PASS is ONLY shown if target price is actually computable
+    numeric_consistency_status = "WARN" if (ratios and fy_periods) else "N/A"
+    human_review_status = "PENDING"  # Always pending until explicitly approved
+
     quality_summary_table = (
         "| Quality Item | Trạng thái | Ghi chú |\n"
         "|---|---|---|\n"
-        "| Data Confidence | Medium | Dữ liệu từ vnstock API (Tier 3) |\n"
-        "| Source Coverage | ~70% | Draft mode |\n"
-        "| Numeric Consistency | WARN | Cần kiểm tra sau reconciliation |\n"
-        "| Valuation Reproducibility | PASS | Target price tái lập được từ artifact |\n"
+        f"| Data Confidence | Medium | Dữ liệu từ vnstock API (Tier 3) |\n"
+        f"| Source Coverage | ~70% | Draft mode — cần OCR báo cáo chính thức |\n"
+        f"| Numeric Consistency | {numeric_consistency_status} | Cần reconciliation với BCTC chính thức |\n"
+        f"| Valuation Reproducibility | {val_repro_status} | "
+        f"{'Target price tái lập được từ artifact' if val_repro_status == 'PASS' else 'Không có valuation artifact PASS hoặc assumptions chưa được phê duyệt'} |\n"
+        f"| Forecast Assumptions | {valuation_assumption_status} | |\n"
         f"| Data Cutoff | {fiscal_year}-12-31 | |\n"
-        "| Human Review | PENDING | Assumptions chưa được phê duyệt |\n"
+        f"| Human Review | {human_review_status} | Assumptions chưa được analyst phê duyệt |\n"
+        f"| Publish Status | DRAFT | Không export final cho đến khi các gate pass |\n"
     )
 
     key_sources_table = (
         "| Nguồn | Loại | Kỳ | Tier |\n"
         "|---|---|---|---|\n"
-        f"| vnstock API (VCI) | Báo cáo tài chính | {fy_periods[0] if fy_periods else '—'}"
-        f"–{fy_periods[-1] if fy_periods else '—'} | Tier 3 |\n"
+        f"| vnstock API (VCI) | Báo cáo tài chính | "
+        f"{fy_periods[0] if fy_periods else '—'}–{fy_periods[-1] if fy_periods else '—'} | Tier 3 |\n"
         f"| {ticker} Annual Report | Báo cáo thường niên | {fiscal_year} | Tier 0 (cần OCR) |\n"
         f"| Market data (vnstock) | Giá thị trường | {report_date} | Tier 3 |\n"
     )
@@ -426,7 +981,7 @@ def load_report_context(ticker: str) -> ReportContext:
     )
 
     business_driver_table = (
-        "| Driver | Business Meaning | Financial Line Item | Direction | Evidence |\n"
+        "| Driver | Ý nghĩa kinh doanh | Line Item | Direction | Bằng chứng |\n"
         "|---|---|---|---|---|\n"
         "| Kênh ETC/đấu thầu | Doanh thu bệnh viện | Revenue, Gross margin | Tích cực nếu thắng thầu | Tender data |\n"
         "| Giá trung thầu | Áp lực giá bán | Revenue, Gross margin | Tiêu cực nếu giảm | Tender results |\n"
@@ -439,42 +994,75 @@ def load_report_context(ticker: str) -> ReportContext:
         "|---|---|---|---|---|---|\n"
         "| Kết quả đấu thầu thuốc 2026 | Q1-Q2 2026 | Revenue ETC | Tích cực nếu thắng thầu | Trung bình | Tender |\n"
         "| Tăng trưởng OTC | 2026 | Revenue | Tích cực | Cao | Market data |\n"
+        "\n> _Catalyst dựa trên nhận định ngành — cần gắn với bằng chứng cụ thể trước khi publish._"
     )
 
     risks_table = (
         "| Rủi ro | Driver bị ảnh hưởng | Tác động tài chính | Theo dõi |\n"
         "|---|---|---|---|\n"
-        "| Giảm giá trung thầu | Gross margin, Revenue | Cao (-2-3% margin/năm) | Kết quả đấu thầu |\n"
+        "| Giảm giá trung thầu | Gross margin, Revenue | Cao (-2 đến -3% margin/năm) | Kết quả đấu thầu |\n"
         "| Nguyên liệu nhập khẩu tăng | COGS, Gross margin | Trung bình | Tỷ giá USD/VND |\n"
         "| Cạnh tranh generic | Revenue, margin | Trung bình | Market share |\n"
+        "| OCR báo cáo thường niên | Data quality | Ảnh hưởng đến gate | Tiến độ OCR |\n"
     )
 
     risk_narrative = (
-        "Rủi ro trọng yếu nhất: áp lực giá thầu thuốc ETC. "
-        "Nếu giá trung thầu giảm thêm 5%, gross margin có thể giảm 150-200 bps."
+        "Rủi ro trọng yếu nhất với doanh nghiệp dược generic kênh ETC: áp lực giá thầu thuốc. "
+        "Nếu giá trung thầu giảm 5%, gross margin có thể giảm ~150-200 bps nếu không kiểm soát được "
+        "chi phí đầu vào. Điều này sẽ giảm EBIT và FCFF, tạo downside risk với target price. "
+        "Mức độ rủi ro phụ thuộc vào tỷ lệ doanh thu ETC so với OTC — "
+        "cần dữ liệu channel mix để định lượng chính xác."
     )
 
-    key_takeaways = (
-        f"- {ticker} có nền tảng vững: biên gộp {gross_margin_pct:.1f}%, ROE {roe_pct:.1f}%.\n"
-        f"- Định giá DCF blend {target_price:,.0f} VND/CP — giá thị trường {current_price:,.0f} VND/CP "
-        f"(upside {upside_pct:+.1f}%).\n"
-        f"- Rating **{rating}**.\n"
-        "- Final export cần reviewer phê duyệt assumptions và OCR BCTC chính thức.\n"
-    ) if target_price else _PLACEHOLDER
+    if has_valuation and target_price:
+        upside_display = f"{upside_pct:+.1f}%" if upside_pct is not None else _NA
+        key_takeaways = (
+            f"- Nền tảng tài chính: biên gộp {f'{gross_margin_pct:.1f}%' if gross_margin_pct else _NA}, "
+            f"ROE {f'{roe_pct:.1f}%' if roe_pct else _NA}.\n"
+            f"- Định giá DCF (draft): target {target_price:,.0f} VND/CP vs "
+            f"thị trường {f'{current_price:,.0f}' if current_price else _NA} VND/CP "
+            f"(upside {upside_display}).\n"
+            f"- Rating draft: **{rating}** — chưa chính thức (assumptions chưa được phê duyệt).\n"
+            f"- Điều kiện để export final: (1) OCR BCTC chính thức, (2) analyst phê duyệt assumptions, "
+            f"(3) human review PASS.\n"
+        )
+    else:
+        key_takeaways = (
+            "- Rating: **UNDER_REVIEW** — thiếu giá thị trường hoặc target price hợp lệ.\n"
+            "- Cần: (1) xác nhận giá thị trường từ nguồn data, (2) valuation artifact với blend_dcf.\n"
+            "- Không export final cho đến khi tất cả gate pass.\n"
+        )
 
-    scenario_table = (
-        "| Scenario | Revenue CAGR | WACC | Target Price | Upside | Rating |\n"
-        "|---|---:|---:|---:|---:|---|\n"
-        "| Bear | +2.0% | 11.0% | — | — | — |\n"
-        f"| Base | +5.0% | {wacc_pct:.1f}% | {target_price:,.0f} VND | {upside_pct:+.1f}% | {rating} |\n"
-        "| Bull | +8.0% | 9.0% | — | — | — |\n"
-    ) if target_price else _PLACEHOLDER
+    # Scenario table: only show if we have target
+    if has_valuation and target_price:
+        upside_display = f"{upside_pct:+.1f}%" if upside_pct is not None else _NA
+        scenario_table = (
+            "| Scenario | Revenue CAGR | WACC | Target Price | Upside | Rating |\n"
+            "|---|---:|---:|---:|---:|---|\n"
+            "| Bear | +2.0% | 12.0% | — | — | — |\n"
+            f"| Base | +5.0% | {wacc_pct:.1f}% | {target_price:,.0f} VND | {upside_display} | {rating} |\n"
+            "| Bull | +8.0% | 8.0% | — | — | — |\n"
+            "\n> _Bear và Bull scenario chưa được tính — cần scenario analysis artifact._"
+        )
+    else:
+        scenario_table = (
+            "> _Bảng kịch bản bị chặn: thiếu target price. Cần valuation artifact hợp lệ._"
+        )
 
     sensitivity_narrative = (
-        f"Target price nhạy cảm nhất với WACC và terminal growth. "
-        f"WACC tăng 100 bps → target price giảm ~15%."
-        if sens else _PLACEHOLDER
+        f"Target price nhạy cảm nhất với thay đổi WACC và tăng trưởng dài hạn (g). "
+        f"Tại WACC={wacc_pct:.1f}%, g={terminal_growth_pct:.1f}%: target = "
+        f"{f'{target_price:,.0f} VND/CP' if target_price else _NA}. "
+        f"WACC tăng 100 bps → target price giảm khoảng 10-15% tùy g. "
+        f"Xem ma trận độ nhạy để đánh giá downside/upside range."
+        if has_sensitivity else (
+            "> _Phân tích độ nhạy bị chặn: không có sensitivity artifact hợp lệ._"
+        )
     )
+
+    # ── Report status ──────────────────────────────────────────────────
+    # Report is DRAFT unless all gates pass
+    report_status = "DRAFT — Cần analyst review"
 
     return ReportContext(
         ticker=ticker,
@@ -483,24 +1071,31 @@ def load_report_context(ticker: str) -> ReportContext:
         report_date=report_date,
         data_cutoff=f"{fiscal_year}-12-31" if fiscal_year != "—" else "—",
         rating=rating,
-        current_price=current_price,
-        target_price=target_price,
-        upside_pct=upside_pct,
+        current_price=current_price or 0.0,
+        target_price=target_price or 0.0,
+        upside_pct=upside_pct if upside_pct is not None else 0.0,
         risk_level="Trung bình",
-        data_confidence="Medium",
-        status="NEEDS_REVIEW",
-        # Financials
-        market_cap_bn=market_cap_bn,
-        gross_margin_pct=gross_margin_pct,
-        net_margin_pct=net_margin_pct,
-        roe_pct=roe_pct,
-        roa_pct=roa_pct,
-        eps_vnd=eps_vnd,
-        pe_x=pe_x,
-        pb_x=pb_x,
+        data_confidence="Medium (Tier 3)",
+        status=report_status,
+        # Financials (0 means unknown — section_builder will display N/A)
+        market_cap_bn=market_cap_bn or 0.0,
+        gross_margin_pct=gross_margin_pct or 0.0,
+        net_margin_pct=net_margin_pct or 0.0,
+        roe_pct=roe_pct or 0.0,
+        roa_pct=roa_pct or 0.0,
+        eps_vnd=eps_vnd or 0.0,
+        pe_x=pe_x or 0.0,
+        pb_x=pb_x or 0.0,
         fiscal_year=fiscal_year,
         wacc_pct=wacc_pct,
         terminal_growth_pct=terminal_growth_pct,
+        # Missing price flags (used by section_builder for N/A display)
+        _current_price_missing=(current_price is None),
+        _target_price_missing=(target_price is None),
+        _upside_missing=(upside_pct is None),
+        _has_valuation=has_valuation,
+        _has_sensitivity=has_sensitivity,
+        _has_forecast_table=has_forecast_table,
         # Narrative
         company_overview=company_overview,
         investment_thesis=investment_thesis,
@@ -527,10 +1122,19 @@ def load_report_context(ticker: str) -> ReportContext:
         quality_summary_table=quality_summary_table,
         key_sources_table=key_sources_table,
         # Charts
-        chart_paths=_load_chart_paths(ticker),
+        chart_paths={
+            k: v
+            for k, v in _load_chart_paths(ticker).items()
+            if not (
+                (k == "C3" and current_price is None)
+                or (k == "C5" and not has_forecast_table)
+                or (k == "C6" and not has_valuation)
+                or (k == "C7" and not has_sensitivity)
+            )
+        },
         # Quality gate fields
         source_coverage_pct=70.0,
-        numeric_consistency="WARN",
-        valuation_reproducibility="PASS" if target_price else "N/A",
-        human_review="PENDING",
+        numeric_consistency=numeric_consistency_status,
+        valuation_reproducibility=val_repro_status,
+        human_review=human_review_status,
     )
