@@ -1,0 +1,295 @@
+/* Vietnam Pharma Equity Research — A4 Report Stylesheet */
+
+@page {
+    size: A4 portrait;
+    margin: 18mm 16mm 18mm 16mm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    color: #1a1a1a;
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Typography ─────────────────────────────────────────── */
+
+h1 {
+    font-size: 18pt;
+    font-weight: 700;
+    color: #1a3a6b;
+    margin: 0 0 8pt 0;
+    padding-bottom: 4pt;
+    border-bottom: 2px solid #1a3a6b;
+}
+
+h2 {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #1a3a6b;
+    border-bottom: 1.5px solid #1a3a6b;
+    padding-bottom: 3pt;
+    margin: 14pt 0 6pt 0;
+}
+
+h3 {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: #2c5282;
+    margin: 10pt 0 4pt 0;
+}
+
+h4 {
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 8pt 0 3pt 0;
+}
+
+p {
+    margin: 4pt 0 6pt 0;
+}
+
+strong {
+    font-weight: 700;
+    color: #1a202c;
+}
+
+em {
+    font-style: italic;
+    color: #4a5568;
+}
+
+/* ── Tables ─────────────────────────────────────────────── */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin: 8pt 0;
+    page-break-inside: avoid;
+}
+
+thead th {
+    background-color: #1a3a6b;
+    color: #ffffff;
+    padding: 4pt 6pt;
+    text-align: left;
+    font-weight: 600;
+    font-size: 8.5pt;
+}
+
+tbody td {
+    padding: 3pt 6pt;
+    border-bottom: 0.5px solid #d0d7de;
+    vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f6f8fa;
+}
+
+tbody tr:hover {
+    background-color: #eef2f7;
+}
+
+/* Numeric columns — right-align by convention */
+td:last-child,
+th:last-child {
+    text-align: right;
+}
+
+/* Exception: first column (labels) left-align */
+td:first-child,
+th:first-child {
+    text-align: left;
+}
+
+/* ── Images / Charts ─────────────────────────────────────── */
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 6pt auto;
+    page-break-inside: avoid;
+}
+
+/* ── Blockquotes ─────────────────────────────────────────── */
+
+blockquote {
+    border-left: 3px solid #cbd5e0;
+    margin: 6pt 0;
+    padding: 4pt 8pt;
+    color: #4a5568;
+    background: #f7fafc;
+    font-size: 9pt;
+}
+
+blockquote p {
+    margin: 0;
+}
+
+/* ── Code ─────────────────────────────────────────────────── */
+
+code {
+    font-family: "Courier New", monospace;
+    font-size: 8pt;
+    background: #f0f4f8;
+    padding: 1pt 3pt;
+    border-radius: 2px;
+    color: #2d3748;
+}
+
+pre {
+    background: #f0f4f8;
+    padding: 6pt 8pt;
+    border-radius: 3px;
+    overflow-x: auto;
+    font-size: 8pt;
+    line-height: 1.4;
+    margin: 6pt 0;
+    page-break-inside: avoid;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+}
+
+/* ── Lists ───────────────────────────────────────────────── */
+
+ul, ol {
+    margin: 4pt 0 6pt 0;
+    padding-left: 18pt;
+}
+
+li {
+    margin-bottom: 2pt;
+}
+
+/* ── Horizontal rule ─────────────────────────────────────── */
+
+hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 10pt 0;
+}
+
+/* ── Page structure ──────────────────────────────────────── */
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid #1a3a6b;
+    padding-bottom: 6pt;
+    margin-bottom: 12pt;
+}
+
+.report-header-left {
+    font-size: 8pt;
+    color: #4a5568;
+}
+
+.report-header-ticker {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #1a3a6b;
+    letter-spacing: 1px;
+}
+
+.report-header-date {
+    font-size: 8pt;
+    color: #718096;
+    text-align: right;
+}
+
+.report-section {
+    margin-bottom: 0;
+}
+
+.page-break {
+    page-break-after: always;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+/* ── Disclaimer ──────────────────────────────────────────── */
+
+.disclaimer {
+    font-size: 7.5pt;
+    color: #555555;
+    border-top: 1px solid #cccccc;
+    padding-top: 6pt;
+    margin-top: 10pt;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* ── Report footer ───────────────────────────────────────── */
+
+.report-footer {
+    font-size: 7pt;
+    color: #718096;
+    text-align: center;
+    border-top: 0.5px solid #e2e8f0;
+    padding-top: 4pt;
+    margin-top: 8pt;
+}
+
+/* ── Rating badge ─────────────────────────────────────────── */
+
+.rating-badge {
+    display: inline-block;
+    padding: 2pt 8pt;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 9pt;
+    letter-spacing: 0.5px;
+}
+
+.rating-buy    { background: #c6f6d5; color: #22543d; }
+.rating-hold   { background: #fefcbf; color: #744210; }
+.rating-sell   { background: #fed7d7; color: #742a2a; }
+.rating-review { background: #e9d8fd; color: #44337a; }
+
+/* ── Snapshot table special styling ──────────────────────── */
+
+.snapshot-table td:first-child {
+    color: #2d3748;
+    font-weight: 500;
+    width: 55%;
+}
+
+.snapshot-table td:last-child {
+    font-weight: 700;
+    color: #1a3a6b;
+    text-align: right;
+}
+
+/* ── Print overrides ─────────────────────────────────────── */
+
+@media print {
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .page-break {
+        page-break-after: always;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+}

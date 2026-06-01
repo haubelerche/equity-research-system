@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Vietnam Pharma Equity Research Report — {{ ticker }}">
+  <title>{{ ticker }} — Báo cáo nghiên cứu cổ phiếu | {{ report_date }}</title>
+  <style>
+{{ css }}
+  </style>
+</head>
+<body>
+
+  <!-- ── Report Header ─────────────────────────────────── -->
+  <div class="report-header">
+    <div class="report-header-left">
+      <div class="report-header-ticker">{{ ticker }}</div>
+      <div>{{ company_name }}</div>
+    </div>
+    <div class="report-header-date">
+      <div>Ngày báo cáo: <strong>{{ report_date }}</strong></div>
+      <div>Rating: <strong>{{ rating }}</strong></div>
+      <div>Trạng thái: {{ status }}</div>
+    </div>
+  </div>
+
+  <!-- ── Report Sections ───────────────────────────────── -->
+  {% for section in sections %}
+  <div class="report-section" id="section-{{ section.page }}">
+    {{ section.html | safe }}
+  </div>
+  {% if not loop.last %}
+  <div class="page-break"></div>
+  {% endif %}
+  {% endfor %}
+
+  <!-- ── Report Footer ─────────────────────────────────── -->
+  <div class="report-footer">
+    Vietnam Pharma Equity Research | {{ ticker }} | {{ report_date }} |
+    Tài liệu này chỉ dành cho mục đích nghiên cứu học thuật.
+  </div>
+
+</body>
+</html>
