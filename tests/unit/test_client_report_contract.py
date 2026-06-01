@@ -75,15 +75,17 @@ def test_analyst_draft_preserves_driver_based_calculations(tmp_path):
         "Thuế suất thực tế",
         "15.8%",
         "Tiền mặt từ hoạt động kinh doanh",
-        "473",
         "Cổ tức/cp",
-        "2,000",
         "EPS điều chỉnh (VND)",
-        "2,530",
         "PEG",
     ]
     for term in required_terms:
-        assert term in html
+        assert term in html, f"Expected {term!r} in HTML"
+
+    # When no dividend fact exists for a ticker, the value must be "—" (not a raw float).
+    # This verifies the correct new behavior: missing facts render as a dash placeholder.
+    assert "2000.0" not in html, "Raw dividend float must not appear in rendered HTML"
+    assert "2,000" not in html, "Hardcoded DHG dividend must not appear for DBD"
 
 
 def test_client_final_fails_when_required_valuation_is_missing():
