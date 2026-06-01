@@ -8,6 +8,7 @@ from backend.harness.graph import GRAPH_STAGES, build_langgraph
 from backend.harness.model_adapter import OpenAIModelAdapter
 from backend.harness.state import ResearchGraphState, stable_hash
 from backend.harness.tools import (
+    auto_ingest_tool,
     build_facts_tool,
     build_index_tool,
     evaluate_quality_tool,
@@ -203,18 +204,31 @@ class ResearchGraphRunner:
             state.plan = result.payload
             self._merge_agent_result(state, result)
         elif stage == "DATA_RETRIEVAL_RUN":
+            # Step 1: auto-ingest official documents FIRST.
+            # Non-blocking: failure produces status="warn" in summary, pipeline continues with Tier-3.
+            auto_result = auto_ingest_tool(
+                state.ticker, state.from_year, state.to_year, ocr=state.ocr
+            )
+            state.artifacts["auto_ingest"] = auto_result.summary
+            self._merge_result(state, auto_result)
+
+            # Step 2: build canonical facts (reads from DB — needs ingest to have run)
             result = build_facts_tool(state.ticker, state.from_year, state.to_year)
             state.artifacts["build_facts"] = result.summary
             state.data_inventory = result.summary
             state.snapshot_id = result.summary.get("snapshot_id")
             self._merge_result(state, result)
 
+            # Step 3: build evidence index
             index_result = build_index_tool(state.ticker, state.from_year, state.to_year)
             state.artifacts["index"] = index_result.summary
             state.retrieval_results = index_result.summary
             self._merge_result(state, index_result)
 
-            agent_result = self._run_agent(state, "data_retrieval", "Review data inventory, source coverage, and retrieval readiness.")
+            agent_result = self._run_agent(
+                state, "data_retrieval",
+                "Review data inventory, source coverage, and retrieval readiness.",
+            )
             state.artifacts["data_retrieval_review"] = agent_result.payload
             self._merge_agent_result(state, agent_result)
         elif stage == "DATA_QUALITY_GATE":

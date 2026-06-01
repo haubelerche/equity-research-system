@@ -108,6 +108,8 @@ class ResearchGraphState(BaseModel):
     errors: list[str] = Field(default_factory=list)
     next_resume_stage: str | None = None
     checkpoint_version: int = 0
+    ocr: bool = False
+    manifest_path: str | None = None
 
     def stable_hash(self) -> str:
         payload = self.model_dump(mode="json")

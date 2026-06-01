@@ -53,6 +53,54 @@ def build_facts_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int =
     )
 
 
+def auto_ingest_tool(
+    ticker: str,
+    from_year: int = MVP_FROM_YEAR,
+    to_year: int = MVP_TO_YEAR,
+    ocr: bool = False,
+) -> ServiceNodeResult:
+    """Run auto-ingestion of official documents (web + PDF) for *ticker*.
+
+    Non-blocking: if ingestion fails, returns status='completed' with warn info
+    in the summary and the pipeline continues with Tier-3-only facts. The warning
+    is recorded in state.artifacts.
+    """
+    import logging
+    _logger = logging.getLogger(__name__)
+    try:
+        from scripts.auto_ingest_official_documents import AutoIngestConfig, run_pipeline as _run
+        cfg = AutoIngestConfig(
+            ticker=ticker,
+            from_year=from_year,
+            to_year=to_year,
+            dry_run=False,
+            channels=["cafef", "pdf"],
+            ocr=ocr,
+        )
+        results = _run(cfg)
+        promoted = sum(r.promoted for r in results)
+        summary: dict = {
+            "ticker": ticker,
+            "promoted": promoted,
+            "channels_run": len(results),
+            "status": "completed",
+        }
+        node_status = "completed"
+    except Exception as exc:  # noqa: BLE001
+        summary = {
+            "ticker": ticker,
+            "promoted": 0,
+            "status": "warn",
+            "warning": f"auto_ingest skipped: {str(exc)[:200]}",
+        }
+        node_status = "completed"
+        _logger.warning(
+            "auto_ingest_tool failed for %s — pipeline continues with Tier-3 facts only: %s",
+            ticker, exc,
+        )
+    return _result("AUTO_INGEST", node_status, summary)
+
+
 def build_index_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int = MVP_TO_YEAR) -> ServiceNodeResult:
     from scripts.build_index import build_index
 
