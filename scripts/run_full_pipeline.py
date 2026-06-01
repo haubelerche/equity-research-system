@@ -103,7 +103,11 @@ def _write_artifacts(ticker: str) -> tuple[str, int]:
     # Load latest valuation JSON if available
     val_pattern = str(ROOT / "artifacts" / "valuation" / f"{ticker}_*_valuation.json")
     files = sorted(glob.glob(val_pattern))
-    val: dict[str, Any] = json.load(open(files[-1])) if files else {}
+    if files:
+        with open(files[-1], encoding="utf-8") as _f:
+            val: dict[str, Any] = json.load(_f)
+    else:
+        val = {}
 
     run_id = f"RUN_{ticker}_{datetime.now().strftime('%Y%m%dT%H%M%S')}"
     arts = RunArtifacts(
@@ -111,7 +115,7 @@ def _write_artifacts(ticker: str) -> tuple[str, int]:
         ticker=ticker,
         report_date=datetime.now().strftime("%Y-%m-%d"),
         data_cutoff="2025-12-31",
-        rating=val.get("recommendation_allowed", False) and "UNDER_REVIEW" or "UNDER_REVIEW",
+        rating="UNDER_REVIEW",
         current_price=float(val.get("current_price", 0.0) or 0.0),
         target_price=float(val.get("target_price", 0.0) or 0.0),
         upside_pct=float(val.get("upside_pct", 0.0) or 0.0),

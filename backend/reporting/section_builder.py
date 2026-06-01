@@ -190,8 +190,9 @@ def _build_financial_performance(ctx: ReportContext) -> dict:
     """Page 3 — Financial Performance."""
     fin_table = _or_placeholder(ctx.financial_summary_table)
     narrative = _or_placeholder(ctx.financial_narrative)
-    chart_rev = _chart_ref(ctx, "C2", "Doanh thu & Lợi nhuận lịch sử")
-    chart_margin = _chart_ref(ctx, "C3", "Biên lợi nhuận gộp & ròng")
+    chart_rev = _chart_ref(ctx, "C2", "Doanh thu & EBITDA Trend")
+    chart_eps = _chart_ref(ctx, "C3", "EPS & P/E Trend")
+    chart_margin = _chart_ref(ctx, "C4", "Biên lợi nhuận & ROE Trend")
 
     md = f"""\
 # Kết quả tài chính lịch sử — {ctx.ticker}
@@ -200,11 +201,15 @@ def _build_financial_performance(ctx: ReportContext) -> dict:
 
 {fin_table}
 
-## Biểu đồ doanh thu & lợi nhuận (C2)
+## Biểu đồ doanh thu & EBITDA (C2)
 
 {chart_rev}
 
-## Biểu đồ biên lợi nhuận (C3)
+## Biểu đồ EPS & P/E (C3)
+
+{chart_eps}
+
+## Biểu đồ biên lợi nhuận & ROE (C4)
 
 {chart_margin}
 
@@ -217,7 +222,7 @@ def _build_financial_performance(ctx: ReportContext) -> dict:
         "page_number": 3,
         "title": "Kết quả tài chính lịch sử",
         "markdown": md,
-        "chart_ids": ["C2", "C3"],
+        "chart_ids": ["C2", "C3", "C4"],
         "word_count": len(md.split()),
     }
 
@@ -228,7 +233,7 @@ def _build_forecast_assumptions(ctx: ReportContext) -> dict:
     driver_table = _or_placeholder(ctx.driver_table)
     assumptions_table = _or_placeholder(ctx.assumptions_table)
     narrative = _or_placeholder(ctx.forecast_narrative)
-    chart = _chart_ref(ctx, "C4", "Dự phóng doanh thu & lợi nhuận")
+    chart = _chart_ref(ctx, "C5", "Dự phóng doanh thu & lợi nhuận")
 
     md = f"""\
 # Dự phóng & Giả định — {ctx.ticker}
@@ -245,7 +250,7 @@ def _build_forecast_assumptions(ctx: ReportContext) -> dict:
 
 {assumptions_table}
 
-## Biểu đồ dự phóng (C4)
+## Biểu đồ dự phóng (C5)
 
 {chart}
 
@@ -258,7 +263,7 @@ def _build_forecast_assumptions(ctx: ReportContext) -> dict:
         "page_number": 4,
         "title": "Dự phóng & Giả định",
         "markdown": md,
-        "chart_ids": ["C4"],
+        "chart_ids": ["C5"],
         "word_count": len(md.split()),
     }
 
@@ -269,7 +274,7 @@ def _build_valuation(ctx: ReportContext) -> dict:
     val_summary = _or_placeholder(ctx.valuation_summary_table)
     val_assumptions = _or_placeholder(ctx.valuation_assumptions_table)
     narrative = _or_placeholder(ctx.valuation_narrative)
-    chart = _chart_ref(ctx, "C5", "DCF Waterfall / Football Field")
+    chart = _chart_ref(ctx, "C6", "DCF Value Bridge")
 
     md = f"""\
 # Định giá — {ctx.ticker}
@@ -288,7 +293,7 @@ def _build_valuation(ctx: ReportContext) -> dict:
 
 {val_assumptions}
 
-## Biểu đồ định giá (C5)
+## Biểu đồ định giá (C6)
 
 {chart}
 
@@ -301,7 +306,7 @@ def _build_valuation(ctx: ReportContext) -> dict:
         "page_number": 5,
         "title": "Định giá",
         "markdown": md,
-        "chart_ids": ["C5"],
+        "chart_ids": ["C6"],
         "word_count": len(md.split()),
     }
 
@@ -312,7 +317,7 @@ def _build_sensitivity_peer(ctx: ReportContext) -> dict:
     scenario_table = _or_placeholder(ctx.scenario_table)
     peer_table = _or_placeholder(ctx.peer_table)
     narrative = _or_placeholder(ctx.sensitivity_narrative)
-    chart = _chart_ref(ctx, "C6", "Peer Comparison Bubble Chart")
+    chart = _chart_ref(ctx, "C7", "Sensitivity Heatmap")
 
     md = f"""\
 # Phân tích độ nhạy & So sánh đồng ngành — {ctx.ticker}
@@ -329,7 +334,7 @@ def _build_sensitivity_peer(ctx: ReportContext) -> dict:
 
 {peer_table}
 
-## Biểu đồ peer (C6)
+## Biểu đồ độ nhạy (C7)
 
 {chart}
 
@@ -342,7 +347,7 @@ def _build_sensitivity_peer(ctx: ReportContext) -> dict:
         "page_number": 6,
         "title": "Phân tích độ nhạy & So sánh đồng ngành",
         "markdown": md,
-        "chart_ids": ["C6"],
+        "chart_ids": ["C7"],
         "word_count": len(md.split()),
     }
 
