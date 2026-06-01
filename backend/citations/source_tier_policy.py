@@ -112,7 +112,7 @@ def evaluate_source_tier_gate(
         is_material = rec.metric in material_metrics
         has_official = rec.official_document_id is not None
 
-        # Rule 3: unknown/None tier OR a bad/generic label → always blocked.
+        # Rule 3: unknown/None tier → always blocked. Bad/generic label → blocks in final mode, warns in draft mode.
         if tier is None:
             tier_counts["unknown"] += 1
             blocking.append(f"{key}: unknown/ungrounded source tier (Tier 4) — always blocked")
