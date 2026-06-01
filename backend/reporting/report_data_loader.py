@@ -148,7 +148,11 @@ def _load_db_facts(ticker: str) -> dict[tuple[str, str], float]:
                 seen[key] = float(value)
         conn.close()
         return seen
-    except Exception:
+    except Exception as exc:
+        _loader_logger.warning(
+            "DB canonical_facts load failed for ticker=%s: %s — using empty dict fallback",
+            ticker, exc,
+        )
         return {}
 
 

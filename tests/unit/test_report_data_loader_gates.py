@@ -142,3 +142,21 @@ def test_load_report_context_warns_without_run_id(monkeypatch):
     assert dep_warnings, (
         "Expected DeprecationWarning when run_id=None, but none was emitted"
     )
+
+
+def test_db_fact_load_failure_is_logged_not_swallowed(caplog):
+    """_load_db_facts must log a WARNING when DB connection fails — not silently return {}."""
+    import logging
+    from backend.reporting.report_data_loader import _load_db_facts
+    with caplog.at_level(logging.WARNING, logger="backend.reporting.report_data_loader"):
+        result = _load_db_facts("NONEXISTENT_TICKER_ZZZZZ_TEST")
+    # Graceful degradation is correct (returns empty dict)
+    assert result == {}
+    # But must log the failure
+    assert any(
+        "canonical_facts" in r.message
+        or "DB" in r.message
+        or "psycopg2" in r.message
+        or "NONEXISTENT_TICKER" in r.message
+        for r in caplog.records
+    ), f"DB failure must be logged at WARNING. Got records: {[r.message for r in caplog.records]}"
