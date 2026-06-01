@@ -173,15 +173,19 @@ class ResearchRunner:
             if not self.skip_ingest:
                 def _build_facts():
                     from scripts.build_facts import build_facts
-                    report, artifact = build_facts(
+                    artifact = build_facts(
                         ticker=self.ticker,
                         from_year=self.from_year,
                         to_year=self.to_year,
-                        strict=True,
+                        strict_completeness=True,
                     )
-                    dq_gate = report.get("valuation_gate", "fail")
+                    validation = artifact.get("validation", {})
+                    dq_gate = validation.get("valuation_gate", "fail")
                     if dq_gate != "pass":
-                        raise RuntimeError(f"DQ gate failed: {dq_gate}. Gates: {report.get('gates', {})}")
+                        raise RuntimeError(
+                            f"DQ gate failed: {dq_gate}. "
+                            f"Blocking reasons: {validation.get('blocking_reasons', [])}"
+                        )
                     return {"valuation_gate": dq_gate, "snapshot_id": artifact.get("snapshot_id")}
 
                 facts_result = self._step("build_facts", _build_facts)
