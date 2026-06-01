@@ -51,5 +51,18 @@ frontend/dist/
 # Data / artifacts (large files, not for git)
 data/raw/
 data/cache/
-artifacts/
+
 dataset/raw/
+
+# Browser automation profile — not source data
+artifacts/chrome-profile/
+artifacts/.chrome-profile/
+
+# Generated report outputs — reproducible, not for git
+artifacts/reports_html/
+artifacts/reports_pdf/
+artifacts/charts/
+artifacts/manifests/
+
+# Analyst reference reports (large PDFs, not source-tier)
+data/reference_reports/
