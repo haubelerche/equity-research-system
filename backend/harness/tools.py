@@ -25,9 +25,11 @@ def build_facts_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int =
     artifact = build_facts(ticker=ticker, from_year=from_year, to_year=to_year, strict_completeness=False)
     validation = artifact.get("validation", {})
     snapshot_id = artifact.get("snapshot_id")
+    artifact_path = artifact.get("artifact_path", "")
     summary = {
         "ticker": ticker,
         "snapshot_id": snapshot_id,
+        "artifact_path": artifact_path,
         "valuation_gate": validation.get("valuation_gate"),
         "valuation_ready": validation.get("valuation_ready"),
         "source_tier_coverage_status": validation.get("source_tier_coverage_status"),
@@ -45,9 +47,11 @@ def build_facts_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int =
         artifact_refs=[
             ArtifactRef(
                 artifact_id=f"{ticker}_fact_report",
-                artifact_type="run_log_json",
-                section_key="build_facts",
+                artifact_type="fact_report_json",
+                section_key="facts",
                 is_locked=False,
+                storage_path=artifact_path if artifact_path else None,
+                producer="BUILD_FACTS",
             )
         ],
     )

@@ -28,9 +28,10 @@ class ArtifactRef(BaseModel):
     artifact_type: str = "run_log_json"
     section_key: str | None = None
     version: int = 1
-    storage_path: str | None = None
+    storage_path: str | None = None  # actual file path written by the tool; None = tool didn't report one
     checksum: str | None = None
     is_locked: bool = False
+    producer: str = ""  # stage name that produced this artifact
 
 
 class EvidenceRef(BaseModel):

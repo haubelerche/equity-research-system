@@ -362,6 +362,7 @@ def build_facts(
     ts = generated_at.strftime("%Y%m%dT%H%M%S")
     out_path = FACTS_DIR / f"{ticker}_{ts}_fact_report.json"
     out_path.write_text(json.dumps(artifact, indent=2, default=str), encoding="utf-8")
+    artifact["artifact_path"] = str(out_path)
     print(f"\n[build_facts] Artifact saved: {out_path}")
 
     # Persist DQ gate summary to DB
