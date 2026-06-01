@@ -8,32 +8,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
-from pathlib import Path
 
-from backend.reporting.section_builder import ReportContext, build_report_sections
+from backend.reporting.report_data_loader import load_report_context, _COMPANIES
+from backend.reporting.section_builder import build_report_sections
 from backend.reporting.html_renderer import HTMLRenderer
 from backend.reporting.pdf_renderer import PDFRenderer
-
-_COMPANIES = {
-    "DHG": ("Công ty CP Dược Hậu Giang", "HOSE"),
-    "IMP": ("Công ty CP Dược phẩm Imexpharm", "HOSE"),
-    "DMC": ("Công ty CP XNK Y tế Domesco", "HOSE"),
-    "TRA": ("Công ty CP Traphaco", "HOSE"),
-    "DBD": ("Công ty CP Dược Bình Định", "HNX"),
-}
-
-
-def _load_chart_paths(ticker: str) -> dict[str, str]:
-    """Return a dict of chart key → file path for charts that exist."""
-    charts_dir = Path("artifacts/charts")
-    result: dict[str, str] = {}
-    for n in range(1, 8):
-        key = f"C{n}"
-        candidate = charts_dir / f"{ticker}_{key}.png"
-        if candidate.exists():
-            result[key] = str(candidate)
-    return result
 
 
 def main() -> None:
@@ -49,23 +28,11 @@ def main() -> None:
             f"Unknown ticker '{ticker}'. Supported: {', '.join(_COMPANIES)}"
         )
 
-    company_name, exchange = _COMPANIES[ticker]
-    report_date = datetime.now().strftime("%Y-%m-%d")
-
-    ctx = ReportContext(
-        ticker=ticker,
-        company_name=company_name,
-        exchange=exchange,
-        report_date=report_date,
-        data_cutoff="2025-12-31",
-        rating="UNDER_REVIEW",
-        current_price=0,
-        target_price=0,
-        upside_pct=0,
-        risk_level="—",
-        data_confidence="Medium",
-        status="DRAFT",
-        chart_paths=_load_chart_paths(ticker),
+    # Load a fully-populated context from valuation artifacts
+    ctx = load_report_context(ticker)
+    print(
+        f"[ctx] {ticker}: current={ctx.current_price:,.0f} target={ctx.target_price:,.0f} "
+        f"upside={ctx.upside_pct:+.1f}% rating={ctx.rating}"
     )
 
     sections = build_report_sections(ctx)

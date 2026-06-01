@@ -48,11 +48,11 @@ def test_output_filename_with_run_id(tmp_path):
 
 
 def test_stub_contains_helpful_message(tmp_path):
-    """Verify stub file contains 'HTML report' when both backends are unavailable."""
+    """Verify stub file contains 'HTML report' when all PDF backends are unavailable."""
     original_import = builtins.__import__
 
     def mock_import(name, *args, **kwargs):
-        if name in ("weasyprint", "pdfkit"):
+        if name in ("weasyprint", "pdfkit", "xhtml2pdf"):
             raise ImportError(f"mocked: {name} not available")
         return original_import(name, *args, **kwargs)
 

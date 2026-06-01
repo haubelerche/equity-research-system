@@ -17,7 +17,7 @@ class PDFRenderer:
         pass
 
     def is_available(self) -> bool:
-        """Return True if weasyprint or pdfkit is importable."""
+        """Return True if weasyprint, pdfkit, or xhtml2pdf is importable."""
         try:
             import weasyprint  # noqa: F401
             return True
@@ -25,6 +25,11 @@ class PDFRenderer:
             pass
         try:
             import pdfkit  # noqa: F401
+            return True
+        except (ImportError, OSError):
+            pass
+        try:
+            from xhtml2pdf import pisa  # noqa: F401
             return True
         except (ImportError, OSError):
             pass
@@ -89,6 +94,20 @@ class PDFRenderer:
             pdfkit.from_file(str(html_path), str(pdf_path))
             print(f"[pdf] saved: {pdf_path}")
             return pdf_path
+        except ImportError:
+            pass
+        except Exception:
+            pass
+
+        # --- Try xhtml2pdf (pure-Python, no system deps) ---
+        try:
+            from xhtml2pdf import pisa  # type: ignore
+            html_content = html_path.read_text(encoding="utf-8")
+            with open(str(pdf_path), "wb") as f:
+                result = pisa.CreatePDF(html_content, dest=f)
+            if not result.err and pdf_path.exists() and pdf_path.stat().st_size > 0:
+                print(f"[pdf] saved (xhtml2pdf): {pdf_path}")
+                return pdf_path
         except ImportError:
             pass
         except Exception:
