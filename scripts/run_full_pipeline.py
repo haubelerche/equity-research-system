@@ -30,6 +30,27 @@ if str(ROOT) not in sys.path:
 
 from backend.reporting.artifact_writer import ArtifactWriter, RunArtifacts  # noqa: E402
 
+# ---------------------------------------------------------------------------
+# Deprecation Guard
+# ---------------------------------------------------------------------------
+import os as _os_dep
+
+_FORCE_LEGACY = "--force-legacy" in sys.argv or _os_dep.getenv("ALLOW_LEGACY_PIPELINE") == "1"
+if not _FORCE_LEGACY:
+    print(
+        "\n[DEPRECATED] run_full_pipeline.py is a render-only demo script.\n"
+        "It does NOT run ingestion, facts, valuation, citation, or evaluation.\n"
+        "Canonical artifacts written by this script are EMPTY placeholders.\n"
+        "\nUse the production pipeline instead:\n"
+        "  python scripts/run_research.py --ticker DHG\n"
+        "\nFor local chart rendering only (bypasses all gates):\n"
+        "  python scripts/run_full_pipeline.py --ticker DHG --force-legacy\n",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+# Strip --force-legacy from argv before argparse sees it
+sys.argv = [a for a in sys.argv if a != "--force-legacy"]
+
 MVP_TICKERS = ["DHG", "IMP", "DMC", "TRA", "DBD"]
 
 
