@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re as _re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
@@ -14,6 +15,7 @@ from typing import Any, Optional
 _logger = logging.getLogger(__name__)
 
 CURRENT_SCHEMA_VERSION = 1
+_SAFE_RUN_ID_RE = _re.compile(r'^[a-zA-Z0-9_\-\.]{1,200}$')
 
 
 @dataclass
@@ -59,6 +61,10 @@ class ArtifactManifest:
 
 def write_manifest(manifest: ArtifactManifest, base_dir: Path) -> Path:
     """Write manifest to ``<base_dir>/manifests/<run_id>_manifest.json``."""
+    if not _SAFE_RUN_ID_RE.match(manifest.run_id):
+        raise ValueError(
+            f"Unsafe run_id={manifest.run_id!r}: must match [a-zA-Z0-9_\\-.] (max 200 chars)"
+        )
     target_dir = Path(base_dir) / "manifests"
     target_dir.mkdir(parents=True, exist_ok=True)
     path = target_dir / f"{manifest.run_id}_manifest.json"
@@ -80,6 +86,9 @@ def write_manifest(manifest: ArtifactManifest, base_dir: Path) -> Path:
 
 def read_manifest(run_id: str, base_dir: Path) -> Optional[ArtifactManifest]:
     """Load manifest by run_id. Returns None if not found."""
+    if not _SAFE_RUN_ID_RE.match(run_id):
+        _logger.warning("read_manifest: rejected unsafe run_id=%r", run_id)
+        return None
     path = Path(base_dir) / "manifests" / f"{run_id}_manifest.json"
     if not path.exists():
         return None

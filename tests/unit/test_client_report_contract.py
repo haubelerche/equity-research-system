@@ -179,3 +179,15 @@ def test_periods_not_a_hardcoded_five_year_literal():
     assert '["2021F", "2022F", "2023F", "2024F", "2025F"]' not in src, (
         "_PERIODS must be derived from available fact periods"
     )
+
+
+def test_view_model_logs_warning_when_run_id_provided_but_manifest_missing(caplog):
+    """build_client_report_view_model must log WARNING when run_id given but manifest not found."""
+    import logging
+    with caplog.at_level(logging.WARNING, logger="backend.reporting.client_report_view_model"):
+        from backend.reporting.client_report_view_model import build_client_report_view_model
+        build_client_report_view_model("DHG", "analyst_draft", run_id="run_nonexistent_manifest_xyz")
+    assert any(
+        "manifest" in r.message.lower() or "run_id" in r.message.lower()
+        for r in caplog.records
+    ), f"Expected WARNING about missing manifest. Got: {[r.message for r in caplog.records]}"

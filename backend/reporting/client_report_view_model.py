@@ -9,12 +9,15 @@ from __future__ import annotations
 
 import glob
 import json
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
 
 from backend.reporting.report_data_loader import _COMPANIES, ROOT
+
+_logger = logging.getLogger(__name__)
 
 RenderMode = Literal["client_final", "analyst_draft", "internal_debug"]
 
@@ -851,6 +854,11 @@ def build_client_report_view_model(
     if run_id:
         from backend.reporting.artifact_manifest import read_manifest
         manifest = read_manifest(run_id, base_dir=ROOT / "artifacts")
+        if manifest is None:
+            _logger.warning(
+                "run_id=%s provided but no manifest found in artifacts/manifests/ — falling back to glob",
+                run_id,
+            )
 
     facts = _facts(ticker, manifest)
     val = _valuation(ticker, manifest)

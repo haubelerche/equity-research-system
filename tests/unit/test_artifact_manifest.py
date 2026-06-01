@@ -66,3 +66,28 @@ def test_build_manifest_from_artifact_refs(tmp_path):
     assert manifest.resolve("facts") == "/artifacts/facts.json"
     assert manifest.resolve("") is None  # empty key skipped
     assert len(manifest.artifacts) == 2  # only 2 valid entries
+
+
+def test_read_manifest_rejects_path_traversal():
+    """run_id with ../ path traversal must be rejected."""
+    from pathlib import Path
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        result = read_manifest("../../etc/passwd", base_dir=Path(td))
+        assert result is None, "Path traversal run_id must return None, not crash"
+
+
+def test_write_manifest_rejects_unsafe_run_id():
+    """write_manifest must raise ValueError for unsafe run_id."""
+    from pathlib import Path
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        m = ArtifactManifest(
+            run_id="../../evil",
+            ticker="DHG",
+            created_at="2026-06-01",
+            schema_version=1,
+            artifacts={},
+        )
+        with pytest.raises(ValueError, match="Unsafe run_id"):
+            write_manifest(m, base_dir=Path(td))
