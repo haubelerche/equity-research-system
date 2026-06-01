@@ -148,3 +148,32 @@ def test_build_client_report_view_model_uses_manifest_not_glob(tmp_path, monkeyp
     assert not wrong_reads, (
         f"view model opened the glob-latest file instead of the manifest file: {wrong_reads}"
     )
+
+
+def test_no_hardcoded_dhg_shares_in_source():
+    """Module must not contain hardcoded DHG share count 109.1773."""
+    import inspect
+    from backend.reporting import client_report_view_model as m
+    src = inspect.getsource(m)
+    assert "109.1773" not in src, "109.1773 is DHG share count — must come from facts"
+
+
+def test_no_hardcoded_dividend_constant_in_source():
+    """Module must not contain _DIVIDEND_PER_SHARE = 2000.0 as a module constant."""
+    import inspect
+    from backend.reporting import client_report_view_model as m
+    src = inspect.getsource(m)
+    assert "_DIVIDEND_PER_SHARE = 2000.0" not in src, (
+        "_DIVIDEND_PER_SHARE = 2000.0 is DHG-specific — must come from facts per ticker"
+    )
+
+
+def test_periods_not_a_hardcoded_five_year_literal():
+    """_PERIODS must not be a fixed literal like ['2021F', ..., '2025F']."""
+    import inspect
+    from backend.reporting import client_report_view_model as m
+    src = inspect.getsource(m)
+    # Check the literal that was originally there
+    assert '["2021F", "2022F", "2023F", "2024F", "2025F"]' not in src, (
+        "_PERIODS must be derived from available fact periods"
+    )

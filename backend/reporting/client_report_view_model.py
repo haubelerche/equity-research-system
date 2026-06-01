@@ -100,9 +100,39 @@ class ClientReportViewModel:
 
 
 _DASH = "—"
-_PERIODS = ["2024A", "2025A", "2026F", "2027F", "2028F"]
-_SHARES_MN = 109.1773
-_DIVIDEND_PER_SHARE = 2000.0
+_PERIODS_FALLBACK = ["2024A", "2025A", "2026F", "2027F", "2028F"]
+
+
+def _derive_periods(facts: dict[str, dict[str, float]]) -> list[str]:
+    """Derive period labels from fact keys. Falls back to MVP default if empty."""
+    if not facts:
+        return list(_PERIODS_FALLBACK)
+    all_periods: set[str] = set()
+    for metric_dict in facts.values():
+        if isinstance(metric_dict, dict):
+            all_periods.update(metric_dict.keys())
+    fy_periods = sorted(p for p in all_periods if p.endswith(("FY", "A")))
+    return fy_periods if fy_periods else list(_PERIODS_FALLBACK)
+
+
+def _derive_shares_mn(facts: dict[str, dict[str, float]], periods: list[str]) -> float:
+    """Shares outstanding in millions from canonical facts. 0.0 if unavailable."""
+    shares_fact = facts.get("shares_outstanding.total", {})
+    for p in reversed(periods):
+        v = shares_fact.get(p)
+        if v and v > 0:
+            return v / 1_000_000
+    return 0.0
+
+
+def _derive_dividend_per_share(facts: dict[str, dict[str, float]], periods: list[str]) -> float | None:
+    """Cash dividend per share from canonical facts, or None if unavailable."""
+    div_fact = facts.get("dividends_per_share.cash", {})
+    for p in reversed(periods):
+        v = div_fact.get(p)
+        if v and v > 0:
+            return v
+    return None
 
 
 def _latest_json(pattern: str) -> dict[str, Any]:
@@ -242,54 +272,62 @@ def _row_values(
     facts: dict[str, dict[str, float]],
     forecast_rows: dict[str, dict[str, Any]],
     metric: str,
+    periods: list[str],
 ) -> list[float | None]:
-    return [_period_value(facts, forecast_rows, metric, period) for period in _PERIODS]
+    return [_period_value(facts, forecast_rows, metric, period) for period in periods]
 
 
-def _revenue_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]]) -> list[float | None]:
-    values = _row_values(facts, forecast_rows, "revenue")
-    prev_2023 = _fact_value(facts, "revenue.net", "2023FY")
-    previous_values = [prev_2023] + values[:-1]
+def _revenue_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
+    values = _row_values(facts, forecast_rows, "revenue", periods)
+    # Use the period one step before the first in periods as the baseline
+    prev_period = periods[0].replace("A", "FY") if periods else "2023FY"
+    prev_metric_year = str(int(prev_period[:4]) - 1) + prev_period[4:]
+    prev_val = _fact_value(facts, "revenue.net", prev_metric_year)
+    previous_values = [prev_val] + values[:-1]
     return [_pct_change(v, prev) for v, prev in zip(values, previous_values)]
 
 
-def _net_profit_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]]) -> list[float | None]:
-    values = _row_values(facts, forecast_rows, "net_income")
-    prev_2023 = _fact_value(facts, "net_income.parent", "2023FY")
-    previous_values = [prev_2023] + values[:-1]
+def _net_profit_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
+    values = _row_values(facts, forecast_rows, "net_income", periods)
+    prev_period = periods[0].replace("A", "FY") if periods else "2023FY"
+    prev_metric_year = str(int(prev_period[:4]) - 1) + prev_period[4:]
+    prev_val = _fact_value(facts, "net_income.parent", prev_metric_year)
+    previous_values = [prev_val] + values[:-1]
     return [_pct_change(v, prev) for v, prev in zip(values, previous_values)]
 
 
-def _eps_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]]) -> list[float | None]:
-    values = _row_values(facts, forecast_rows, "eps")
-    prev_2023 = _fact_value(facts, "eps.basic", "2023FY")
-    previous_values = [prev_2023] + values[:-1]
+def _eps_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
+    values = _row_values(facts, forecast_rows, "eps", periods)
+    prev_period = periods[0].replace("A", "FY") if periods else "2023FY"
+    prev_metric_year = str(int(prev_period[:4]) - 1) + prev_period[4:]
+    prev_val = _fact_value(facts, "eps.basic", prev_metric_year)
+    previous_values = [prev_val] + values[:-1]
     return [_pct_change(v, prev) for v, prev in zip(values, previous_values)]
 
 
-def _roe(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]]) -> list[float | None]:
+def _roe(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
     return [
         _safe_div(ni, eq)
         for ni, eq in zip(
-            _row_values(facts, forecast_rows, "net_income"),
-            _row_values(facts, forecast_rows, "equity"),
+            _row_values(facts, forecast_rows, "net_income", periods),
+            _row_values(facts, forecast_rows, "equity", periods),
         )
     ]
 
 
-def _roa(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]]) -> list[float | None]:
+def _roa(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
     return [
         _safe_div(ni, assets)
         for ni, assets in zip(
-            _row_values(facts, forecast_rows, "net_income"),
-            _row_values(facts, forecast_rows, "total_assets"),
+            _row_values(facts, forecast_rows, "net_income", periods),
+            _row_values(facts, forecast_rows, "total_assets", periods),
         )
     ]
 
 
-def _ebit_values(forecast_rows: dict[str, dict[str, Any]], facts: dict[str, dict[str, float]]) -> list[float | None]:
+def _ebit_values(forecast_rows: dict[str, dict[str, Any]], facts: dict[str, dict[str, float]], periods: list[str]) -> list[float | None]:
     ebit: list[float | None] = []
-    for period in _PERIODS:
+    for period in periods:
         if period.endswith("F"):
             value = forecast_rows.get(period, {}).get("ebit")
         else:
@@ -301,18 +339,18 @@ def _ebit_values(forecast_rows: dict[str, dict[str, Any]], facts: dict[str, dict
     return ebit
 
 
-def _ebitda_values(forecast_rows: dict[str, dict[str, Any]], facts: dict[str, dict[str, float]]) -> list[float | None]:
-    ebit = _ebit_values(forecast_rows, facts)
-    depreciation = _row_values(facts, forecast_rows, "depreciation")
+def _ebitda_values(forecast_rows: dict[str, dict[str, Any]], facts: dict[str, dict[str, float]], periods: list[str]) -> list[float | None]:
+    ebit = _ebit_values(forecast_rows, facts, periods)
+    depreciation = _row_values(facts, forecast_rows, "depreciation", periods)
     return [None if e is None or d is None else e + d for e, d in zip(ebit, depreciation)]
 
 
-def _fcff_values(facts: dict[str, dict[str, float]], fcff_rows: dict[str, dict[str, Any]]) -> list[float | None]:
-    actual = [
-        _fact_value(facts, "free_cash_flow.total", "2024FY"),
-        _fact_value(facts, "free_cash_flow.total", "2025FY"),
-    ]
-    forecast = [fcff_rows.get(period, {}).get("fcff") for period in _PERIODS[2:]]
+def _fcff_values(facts: dict[str, dict[str, float]], fcff_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
+    # Actual periods: those ending in "A"; forecast: those ending in "F"
+    actual_periods = [p for p in periods if p.endswith("A")]
+    forecast_periods = [p for p in periods if p.endswith("F")]
+    actual = [_fact_value(facts, "free_cash_flow.total", p.replace("A", "FY")) for p in actual_periods]
+    forecast = [fcff_rows.get(period, {}).get("fcff") for period in forecast_periods]
     return actual + forecast
 
 
@@ -320,14 +358,17 @@ def _delta_nwc_values(
     facts: dict[str, dict[str, float]],
     forecast_rows: dict[str, dict[str, Any]],
     fcff_rows: dict[str, dict[str, Any]],
+    periods: list[str],
 ) -> list[float | None]:
     actual: list[float | None] = []
-    for period in ["2024A", "2025A"]:
+    actual_periods = [p for p in periods if p.endswith("A")]
+    forecast_periods = [p for p in periods if p.endswith("F")]
+    for period in actual_periods:
         ni = _period_value(facts, forecast_rows, "net_income", period)
         dep = _period_value(facts, forecast_rows, "depreciation", period)
         cfo = _period_value(facts, forecast_rows, "cfo", period)
         actual.append(None if None in (ni, dep, cfo) else ni + dep - cfo)
-    forecast = [fcff_rows.get(period, {}).get("delta_nwc") for period in _PERIODS[2:]]
+    forecast = [fcff_rows.get(period, {}).get("delta_nwc") for period in forecast_periods]
     return actual + forecast
 
 
@@ -335,13 +376,16 @@ def _cfo_values(
     facts: dict[str, dict[str, float]],
     forecast_rows: dict[str, dict[str, Any]],
     fcff_rows: dict[str, dict[str, Any]],
+    periods: list[str],
 ) -> list[float | None]:
+    actual_periods = [p for p in periods if p.endswith("A")]
+    forecast_periods = [p for p in periods if p.endswith("F")]
     actual = [
-        _fact_value(facts, "operating_cash_flow.total", "2024FY"),
-        _fact_value(facts, "operating_cash_flow.total", "2025FY"),
+        _fact_value(facts, "operating_cash_flow.total", p.replace("A", "FY"))
+        for p in actual_periods
     ]
     forecast: list[float | None] = []
-    for period in _PERIODS[2:]:
+    for period in forecast_periods:
         row = forecast_rows.get(period, {})
         fcff_row = fcff_rows.get(period, {})
         ni = row.get("net_income")
@@ -355,14 +399,19 @@ def _cash_values(
     facts: dict[str, dict[str, float]],
     forecast_rows: dict[str, dict[str, Any]],
     fcff_rows: dict[str, dict[str, Any]],
+    periods: list[str],
+    shares_mn: float,
+    dividend_per_share: float | None,
 ) -> list[float | None]:
-    values = [
-        _fact_value(facts, "cash_and_equivalents.ending", "2024FY"),
-        _fact_value(facts, "cash_and_equivalents.ending", "2025FY"),
+    actual_periods = [p for p in periods if p.endswith("A")]
+    forecast_periods = [p for p in periods if p.endswith("F")]
+    values: list[float | None] = [
+        _fact_value(facts, "cash_and_equivalents.ending", p.replace("A", "FY"))
+        for p in actual_periods
     ]
-    prior = values[-1] or 0.0
-    annual_dividend = _SHARES_MN * _DIVIDEND_PER_SHARE / 1000.0
-    for period in _PERIODS[2:]:
+    prior = (values[-1] if values else None) or 0.0
+    annual_dividend = shares_mn * (dividend_per_share or 0.0) / 1000.0
+    for period in forecast_periods:
         fcff_value = fcff_rows.get(period, {}).get("fcff")
         capex = abs(forecast_rows.get(period, {}).get("capex") or 0.0)
         if fcff_value is None:
@@ -379,20 +428,24 @@ def _net_debt_values(
     facts: dict[str, dict[str, float]],
     forecast_rows: dict[str, dict[str, Any]],
     fcff_rows: dict[str, dict[str, Any]],
+    periods: list[str],
+    shares_mn: float,
+    dividend_per_share: float | None,
 ) -> list[float | None]:
-    debt = _row_values(facts, forecast_rows, "debt")
-    cash = _cash_values(facts, forecast_rows, fcff_rows)
+    debt = _row_values(facts, forecast_rows, "debt", periods)
+    cash = _cash_values(facts, forecast_rows, fcff_rows, periods, shares_mn, dividend_per_share)
     return [None if d is None or c is None else d - c for d, c in zip(debt, cash)]
 
 
 def _finance_income_values(
     facts: dict[str, dict[str, float]],
     forecast_rows: dict[str, dict[str, Any]],
+    periods: list[str],
 ) -> list[float | None]:
-    ebit = _ebit_values(forecast_rows, facts)
-    interest = _row_values(facts, forecast_rows, "interest_expense")
+    ebit = _ebit_values(forecast_rows, facts, periods)
+    interest = _row_values(facts, forecast_rows, "interest_expense", periods)
     result: list[float | None] = []
-    for i, period in enumerate(_PERIODS):
+    for i, period in enumerate(periods):
         if period.endswith("A"):
             pbt = _fact_value(facts, "profit_before_tax.total", period.replace("A", "FY"))
         else:
@@ -434,105 +487,130 @@ def _recommendation(upside: float | None, mode: RenderMode) -> str:
     return "GIỮ"
 
 
-def _table_financial_summary(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], current_price: float | None) -> TableData:
-    eps = _row_values(facts, forecast_rows, "eps")
-    equity = _row_values(facts, forecast_rows, "equity")
+def _table_financial_summary(
+    facts: dict[str, dict[str, float]],
+    forecast_rows: dict[str, dict[str, Any]],
+    current_price: float | None,
+    periods: list[str],
+    dividend_per_share: float | None,
+) -> TableData:
+    n = len(periods)
+    forecast_periods = [p for p in periods if p.endswith("F")]
+    actual_count = n - len(forecast_periods)
+    eps = _row_values(facts, forecast_rows, "eps", periods)
+    equity = _row_values(facts, forecast_rows, "equity", periods)
     shares = [
         None if e in (None, 0) or bvps in (None, 0) else e * 1_000_000_000 / bvps
-        for e, bvps in zip(equity, [None, None] + [forecast_rows.get(p, {}).get("bvps") for p in _PERIODS[2:]])
+        for e, bvps in zip(equity, [None] * actual_count + [forecast_rows.get(p, {}).get("bvps") for p in forecast_periods])
     ]
     pe = [None if current_price is None or e in (None, 0) else current_price / e for e in eps]
     pb = [None if current_price is None or eq in (None, 0) or sh in (None, 0) else current_price / (eq * 1_000_000_000 / sh) for eq, sh in zip(equity, shares)]
     return TableData(
         title="TÓM TẮT TÀI CHÍNH",
-        periods=_PERIODS,
+        periods=periods,
         unit="Đơn vị: tỷ đồng, trừ khi có ghi chú khác",
         rows=[
-            ("Doanh thu thuần", _row_values(facts, forecast_rows, "revenue")),
-            ("Tăng trưởng doanh thu", _revenue_growth(facts, forecast_rows)),
-            ("Lợi nhuận ròng", _row_values(facts, forecast_rows, "net_income")),
-            ("Tăng trưởng lợi nhuận", _net_profit_growth(facts, forecast_rows)),
+            ("Doanh thu thuần", _row_values(facts, forecast_rows, "revenue", periods)),
+            ("Tăng trưởng doanh thu", _revenue_growth(facts, forecast_rows, periods)),
+            ("Lợi nhuận ròng", _row_values(facts, forecast_rows, "net_income", periods)),
+            ("Tăng trưởng lợi nhuận", _net_profit_growth(facts, forecast_rows, periods)),
             ("EPS điều chỉnh (VND)", eps),
-            ("Tăng trưởng EPS", _eps_growth(facts, forecast_rows)),
-            ("ROE", _roe(facts, forecast_rows)),
-            ("ROA", _roa(facts, forecast_rows)),
-            ("Nợ ròng / EBITDA", [_DASH] * len(_PERIODS)),
+            ("Tăng trưởng EPS", _eps_growth(facts, forecast_rows, periods)),
+            ("ROE", _roe(facts, forecast_rows, periods)),
+            ("ROA", _roa(facts, forecast_rows, periods)),
+            ("Nợ ròng / EBITDA", [_DASH] * n),
             ("P/E", pe),
             ("P/B", pb),
-            ("Cổ tức/cp", [_DIVIDEND_PER_SHARE] * len(_PERIODS)),
-            ("Suất sinh lợi cổ tức", [_DASH] * len(_PERIODS)),
+            ("Cổ tức/cp", [dividend_per_share] * n),
+            ("Suất sinh lợi cổ tức", [_DASH] * n),
         ],
     )
 
 
-def _table_valuation_model(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], fcff_rows: dict[str, dict[str, Any]]) -> TableData:
-    revenue = _row_values(facts, forecast_rows, "revenue")
-    ebit = _ebit_values(forecast_rows, facts)
-    depreciation = _row_values(facts, forecast_rows, "depreciation")
-    ebitda = _ebitda_values(forecast_rows, facts)
-    net_income = _row_values(facts, forecast_rows, "net_income")
-    tax = _row_values(facts, forecast_rows, "tax")
+def _table_valuation_model(
+    facts: dict[str, dict[str, float]],
+    forecast_rows: dict[str, dict[str, Any]],
+    fcff_rows: dict[str, dict[str, Any]],
+    periods: list[str],
+    shares_mn: float,
+) -> TableData:
+    n = len(periods)
+    revenue = _row_values(facts, forecast_rows, "revenue", periods)
+    ebit = _ebit_values(forecast_rows, facts, periods)
+    depreciation = _row_values(facts, forecast_rows, "depreciation", periods)
+    ebitda = _ebitda_values(forecast_rows, facts, periods)
+    net_income = _row_values(facts, forecast_rows, "net_income", periods)
+    tax = _row_values(facts, forecast_rows, "tax", periods)
     pbt = [None if ni is None or tx is None else ni - tx for ni, tx in zip(net_income, tax)]
-    shares = [109.1773] * len(_PERIODS)
+    shares = [shares_mn] * n
     return TableData(
         title="MÔ HÌNH ĐỊNH GIÁ",
-        periods=_PERIODS,
+        periods=periods,
         unit="Đơn vị: tỷ đồng nếu không có ghi chú khác",
         rows=[
             ("Doanh thu thuần", revenue),
-            ("Tăng trưởng doanh thu", _revenue_growth(facts, forecast_rows)),
-            ("GVHB trừ khấu hao", _row_values(facts, forecast_rows, "cogs")),
-            ("Chi phí bán hàng và quản lý", _row_values(facts, forecast_rows, "sga")),
-            ("Doanh thu tài chính", [_DASH] * len(_PERIODS)),
-            ("Chi phí tài chính", _row_values(facts, forecast_rows, "interest_expense")),
+            ("Tăng trưởng doanh thu", _revenue_growth(facts, forecast_rows, periods)),
+            ("GVHB trừ khấu hao", _row_values(facts, forecast_rows, "cogs", periods)),
+            ("Chi phí bán hàng và quản lý", _row_values(facts, forecast_rows, "sga", periods)),
+            ("Doanh thu tài chính", [_DASH] * n),
+            ("Chi phí tài chính", _row_values(facts, forecast_rows, "interest_expense", periods)),
             ("EBITDA", ebitda),
             ("Tỷ suất EBITDA", [_safe_div(e, r) for e, r in zip(ebitda, revenue)]),
             ("Khấu hao", depreciation),
             ("Lợi nhuận từ HĐKD / EBIT", ebit),
             ("Biên lợi nhuận HĐKD / EBIT margin", [_safe_div(e, r) for e, r in zip(ebit, revenue)]),
-            ("Lợi nhuận khác", [_DASH] * len(_PERIODS)),
-            ("Chi phí lãi vay ròng", _row_values(facts, forecast_rows, "interest_expense")),
+            ("Lợi nhuận khác", [_DASH] * n),
+            ("Chi phí lãi vay ròng", _row_values(facts, forecast_rows, "interest_expense", periods)),
             ("Thuế", tax),
             ("Thuế suất thực tế", [_safe_div(abs(tx) if tx is not None else None, p) for tx, p in zip(tax, pbt)]),
             ("LNST sau CĐKKS / LNST CĐ mẹ", net_income),
-            ("Tiền mặt từ hoạt động kinh doanh", _cfo_values(facts, forecast_rows, fcff_rows)),
+            ("Tiền mặt từ hoạt động kinh doanh", _cfo_values(facts, forecast_rows, fcff_rows, periods)),
             ("Số lượng cổ phiếu (triệu)", shares),
-            ("EPS", _row_values(facts, forecast_rows, "eps")),
-            ("EPS hiệu chỉnh", _row_values(facts, forecast_rows, "eps")),
-            ("Tăng trưởng EPS hiệu chỉnh", _eps_growth(facts, forecast_rows)),
+            ("EPS", _row_values(facts, forecast_rows, "eps", periods)),
+            ("EPS hiệu chỉnh", _row_values(facts, forecast_rows, "eps", periods)),
+            ("Tăng trưởng EPS hiệu chỉnh", _eps_growth(facts, forecast_rows, periods)),
         ],
     )
 
 
-def _table_bs_cf(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], fcff_rows: dict[str, dict[str, Any]]) -> TableData:
-    fcff_vals = [None, None] + [fcff_rows.get(p, {}).get("fcff") for p in _PERIODS[2:]]
-    delta_nwc = [None, None] + [fcff_rows.get(p, {}).get("delta_nwc") for p in _PERIODS[2:]]
-    capex = _row_values(facts, forecast_rows, "capex")
-    debt = _row_values(facts, forecast_rows, "debt")
-    cash = _row_values(facts, forecast_rows, "cash")
+def _table_bs_cf(
+    facts: dict[str, dict[str, float]],
+    forecast_rows: dict[str, dict[str, Any]],
+    fcff_rows: dict[str, dict[str, Any]],
+    periods: list[str],
+    shares_mn: float,
+) -> TableData:
+    n = len(periods)
+    actual_periods = [p for p in periods if p.endswith("A")]
+    forecast_periods = [p for p in periods if p.endswith("F")]
+    fcff_vals = [None] * len(actual_periods) + [fcff_rows.get(p, {}).get("fcff") for p in forecast_periods]
+    delta_nwc = [None] * len(actual_periods) + [fcff_rows.get(p, {}).get("delta_nwc") for p in forecast_periods]
+    capex = _row_values(facts, forecast_rows, "capex", periods)
+    debt = _row_values(facts, forecast_rows, "debt", periods)
+    cash = _row_values(facts, forecast_rows, "cash", periods)
     net_debt = [None if d is None else d - (c or 0) for d, c in zip(debt, cash)]
-    equity = _row_values(facts, forecast_rows, "equity")
-    eps = _row_values(facts, forecast_rows, "eps")
-    bvps = [None if eq is None else eq * 1_000_000_000 / 109_177_300 for eq in equity]
+    equity = _row_values(facts, forecast_rows, "equity", periods)
+    shares_count = shares_mn * 1_000_000 if shares_mn else 0.0
+    bvps = [None if eq is None or shares_count == 0 else eq * 1_000_000_000 / shares_count for eq in equity]
     return TableData(
         title="CÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN",
-        periods=_PERIODS,
+        periods=periods,
         unit="Đơn vị: tỷ đồng nếu không có ghi chú khác",
         rows=[
             ("Thay đổi vốn lưu động", delta_nwc),
             ("Capex", [abs(v) if isinstance(v, (int, float)) else v for v in capex]),
-            ("Đầu tư vào công ty liên kết/liên doanh", [_DASH] * len(_PERIODS)),
-            ("Các khoản mục dòng tiền khác", [_DASH] * len(_PERIODS)),
+            ("Đầu tư vào công ty liên kết/liên doanh", [_DASH] * n),
+            ("Các khoản mục dòng tiền khác", [_DASH] * n),
             ("Dòng tiền tự do", fcff_vals),
-            ("Phát hành cổ phiếu", [_DASH] * len(_PERIODS)),
-            ("Cổ tức", [_DASH] * len(_PERIODS)),
-            ("Thay đổi nợ ròng", [_DASH] * len(_PERIODS)),
+            ("Phát hành cổ phiếu", [_DASH] * n),
+            ("Cổ tức", [_DASH] * n),
+            ("Thay đổi nợ ròng", [_DASH] * n),
             ("Nợ ròng cuối năm", net_debt),
             ("Vốn CSH", equity),
             ("Giá trị sổ sách/cp (VND)", bvps),
             ("Nợ ròng / VCSH", [_safe_div(nd, eq) for nd, eq in zip(net_debt, equity)]),
-            ("Nợ ròng / EBITDA", [_DASH] * len(_PERIODS)),
-            ("Tổng tài sản", _row_values(facts, forecast_rows, "total_assets")),
+            ("Nợ ròng / EBITDA", [_DASH] * n),
+            ("Tổng tài sản", _row_values(facts, forecast_rows, "total_assets", periods)),
         ],
     )
 
@@ -542,17 +620,20 @@ def _table_profitability_valuation(
     forecast_rows: dict[str, dict[str, Any]],
     current_price: float | None,
     fcff: dict[str, Any],
+    periods: list[str],
+    shares_mn: float,
 ) -> TableData:
-    revenue = _row_values(facts, forecast_rows, "revenue")
-    ebitda = _ebitda_values(forecast_rows, facts)
-    fcf = _row_values(facts, forecast_rows, "fcf")
-    eps = _row_values(facts, forecast_rows, "eps")
-    equity = _row_values(facts, forecast_rows, "equity")
-    assets = _row_values(facts, forecast_rows, "total_assets")
-    net_income = _row_values(facts, forecast_rows, "net_income")
-    ebit = _ebit_values(forecast_rows, facts)
+    n = len(periods)
+    revenue = _row_values(facts, forecast_rows, "revenue", periods)
+    ebitda = _ebitda_values(forecast_rows, facts, periods)
+    fcf = _row_values(facts, forecast_rows, "fcf", periods)
+    eps = _row_values(facts, forecast_rows, "eps", periods)
+    equity = _row_values(facts, forecast_rows, "equity", periods)
+    assets = _row_values(facts, forecast_rows, "total_assets", periods)
+    net_income = _row_values(facts, forecast_rows, "net_income", periods)
+    ebit = _ebit_values(forecast_rows, facts, periods)
     tax_rate = fcff.get("wacc_breakdown", {}).get("tax_rate", 0.1579)
-    market_cap = None if current_price is None else current_price * 109.1773 / 1000
+    market_cap = None if current_price is None or shares_mn == 0 else current_price * shares_mn / 1000
     enterprise_value = market_cap
     invested_capital = [None if eq is None else eq for eq in equity]
     roic = [_safe_div(None if e is None else e * (1 - tax_rate), ic) for e, ic in zip(ebit, invested_capital)]
@@ -563,13 +644,13 @@ def _table_profitability_valuation(
     ps = [None if market_cap is None or rev in (None, 0) else market_cap / rev for rev in revenue]
     return TableData(
         title="CHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ",
-        periods=_PERIODS,
+        periods=periods,
         unit="Đơn vị: lần hoặc %, trừ khi có ghi chú khác",
         rows=[
             ("ROE", [_safe_div(ni, eq) for ni, eq in zip(net_income, equity)]),
             ("ROA", [_safe_div(ni, asset) for ni, asset in zip(net_income, assets)]),
             ("ROIC", roic),
-            ("WACC", [fcff.get("wacc")] * len(_PERIODS)),
+            ("WACC", [fcff.get("wacc")] * n),
             ("EVA", [None if r is None or fcff.get("wacc") is None else r - fcff.get("wacc") for r in roic]),
             ("P/E", pe),
             ("EV/EBITDA", ev_ebitda),
@@ -577,8 +658,8 @@ def _table_profitability_valuation(
             ("P/B", pb),
             ("P/S", ps),
             ("EV/Doanh thu", [None if enterprise_value is None or rev in (None, 0) else enterprise_value / rev for rev in revenue]),
-            ("PEG", [_DASH] * len(_PERIODS)),
-            ("Suất sinh lợi cổ tức", [_DASH] * len(_PERIODS)),
+            ("PEG", [_DASH] * n),
+            ("Suất sinh lợi cổ tức", [_DASH] * n),
         ],
     )
 
@@ -783,7 +864,10 @@ def build_client_report_view_model(
     recommendation = _recommendation(upside, mode)
     charts = _charts(ticker)
 
-    market_cap = None if current_price is None else current_price * 109.1773 / 1000
+    periods = _derive_periods(facts)
+    shares_mn = _derive_shares_mn(facts, periods)
+    dividend_per_share = _derive_dividend_per_share(facts, periods)
+    market_cap = None if current_price is None or shares_mn == 0 else current_price * shares_mn / 1000
     missing: list[str] = []
     if current_price is None:
         missing.append("current_price")
@@ -859,7 +943,7 @@ def build_client_report_view_model(
             "Sàn": exchange,
             "Ngành": "Dược phẩm",
             "Vốn hóa": market_cap,
-            "Số lượng cổ phiếu": 109.1773,
+            "Số lượng cổ phiếu": shares_mn if shares_mn else _DASH,
             "Giá cao/thấp 52 tuần": _DASH,
             "KLGD bình quân 3 tháng": _DASH,
             "Tỷ giá VND/USD": _DASH,
@@ -874,10 +958,10 @@ def build_client_report_view_model(
             periods=["YTD", "1T", "3T", "12T"],
             rows=[("Tuyệt đối", [_DASH] * 4), ("Tương đối", [_DASH] * 4)],
         ),
-        financial_summary_table=_table_financial_summary(facts, forecast_rows, current_price),
-        valuation_model_table=_table_valuation_model(facts, forecast_rows, fcff_rows),
-        balance_sheet_cashflow_table=_table_bs_cf(facts, forecast_rows, fcff_rows),
-        profitability_valuation_table=_table_profitability_valuation(facts, forecast_rows, current_price, fcff),
+        financial_summary_table=_table_financial_summary(facts, forecast_rows, current_price, periods, dividend_per_share),
+        valuation_model_table=_table_valuation_model(facts, forecast_rows, fcff_rows, periods, shares_mn),
+        balance_sheet_cashflow_table=_table_bs_cf(facts, forecast_rows, fcff_rows, periods, shares_mn),
+        profitability_valuation_table=_table_profitability_valuation(facts, forecast_rows, current_price, fcff, periods, shares_mn),
         peer_table=None,
         catalyst_table=None,
         risk_table=TableData(
