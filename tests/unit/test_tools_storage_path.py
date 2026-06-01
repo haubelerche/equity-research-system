@@ -27,6 +27,25 @@ def test_build_facts_tool_artifact_ref_has_storage_path(monkeypatch, tmp_path):
     )
 
 
+def test_run_valuation_tool_artifact_ref_has_storage_path(monkeypatch, tmp_path):
+    """run_valuation_tool must include the valuation file path in ArtifactRef.storage_path."""
+    fake_artifact_path = str(tmp_path / "DHG_valuation.json")
+    fake_artifact = {
+        "artifact_path": fake_artifact_path,
+        "dcf": {"base": {"intrinsic_value_per_share_vnd": 50000}},
+        "snapshot_id": "snap_002",
+    }
+    monkeypatch.setattr("scripts.run_valuation.run_valuation", lambda **kw: fake_artifact)
+
+    from backend.harness.tools import run_valuation_tool
+    result = run_valuation_tool("DHG", 2021, 2025)
+
+    paths = [ref.storage_path for ref in result.artifact_refs if ref.section_key == "valuation"]
+    assert any(p for p in paths), (
+        f"run_valuation_tool ArtifactRef must have storage_path. Got: {[ref.storage_path for ref in result.artifact_refs]}"
+    )
+
+
 def test_artifact_ref_has_storage_path_field():
     """ArtifactRef must have storage_path and producer fields."""
     from backend.harness.state import ArtifactRef

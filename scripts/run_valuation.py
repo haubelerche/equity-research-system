@@ -611,6 +611,8 @@ def run_valuation(
     out_path.write_text(json.dumps(artifact, indent=2, default=str), encoding="utf-8")
     print(f"\n[run_valuation] Artifact saved: {out_path}")
 
+    artifact["artifact_path"] = str(out_path)
+
     return artifact
 
 

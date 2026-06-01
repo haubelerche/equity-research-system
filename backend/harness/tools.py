@@ -126,9 +126,11 @@ def run_valuation_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int
     from scripts.run_valuation import run_valuation
 
     artifact = run_valuation(ticker=ticker, from_year=from_year, to_year=to_year)
+    artifact_path = artifact.get("artifact_path", "")
     summary = {
         "ticker": ticker,
         "snapshot_id": artifact.get("snapshot_id"),
+        "artifact_path": artifact_path,
         "formula_version": artifact.get("formula_version"),
         "assumption_version": artifact.get("assumption_version"),
         "unit_policy": artifact.get("unit_policy"),
@@ -152,8 +154,10 @@ def run_valuation_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int
             ArtifactRef(
                 artifact_id=f"{ticker}_valuation",
                 artifact_type="valuation_result_json",
-                section_key="valuation_draft",
+                section_key="valuation",
                 is_locked=False,
+                storage_path=artifact_path if artifact_path else None,
+                producer="VALUATION_RUN",
             )
         ],
     )
