@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
+
+ROOT = Path(__file__).resolve().parents[2]
 
 from backend.harness.agent_registry import AgentRegistry
 from backend.harness.gates import citation_gate, data_quality_gate, export_gate, financial_analyst_gate, valuation_gate
@@ -72,6 +75,16 @@ class ResearchGraphRunner:
             current = self._run_stage(current, stage)
             if stage in {"WAITING_ASSUMPTIONS_APPROVAL", "WAITING_FINAL_APPROVAL", "PUBLISHED"}:
                 break
+
+        # Write manifest so render_report --run-id can resolve artifacts deterministically
+        try:
+            self._write_run_manifest(current)
+        except Exception as _exc:  # noqa: BLE001
+            import logging
+            logging.getLogger(__name__).warning(
+                "Failed to write run manifest for run=%s: %s", current.run_id, _exc
+            )
+
         return current
 
     def handle_approval(self, run_id: str, stage: str, decision: str, reviewer: str, feedback_patch: dict[str, Any]) -> None:
@@ -430,6 +443,46 @@ class ResearchGraphRunner:
             actor="ResearchGraphRunner",
             action="graph_checkpoint",
             payload={"stage": state.current_stage, "version": state.checkpoint_version, "checksum": checksum},
+        )
+
+    def _write_run_manifest(self, state: "ResearchGraphState") -> None:
+        """Write an ArtifactManifest from the ArtifactRefs collected during this run.
+
+        Uses paths reported by tools via ArtifactRef.storage_path — not glob.
+        Called at end of run_until_pause() and on checkpoint writes.
+        """
+        import logging
+        from datetime import UTC, datetime
+
+        from backend.reporting.artifact_manifest import (
+            build_manifest_from_artifact_refs,
+            write_manifest,
+        )
+
+        artifact_entries: list[dict[str, str]] = []
+
+        # Collect from stage artifacts dict (tools store artifact_path in summary)
+        for stage_key, stage_data in state.artifacts.items():
+            if isinstance(stage_data, dict):
+                path = stage_data.get("artifact_path", "")
+                if path:
+                    artifact_entries.append({
+                        "key": stage_key,
+                        "path": path,
+                        "producer": stage_key.upper(),
+                    })
+
+        manifest = build_manifest_from_artifact_refs(
+            run_id=state.run_id,
+            ticker=state.ticker,
+            created_at=datetime.now(UTC).isoformat(),
+            artifact_refs=artifact_entries,
+        )
+        manifest_path = write_manifest(manifest, base_dir=ROOT / "artifacts")
+        state.manifest_path = str(manifest_path)
+        logging.getLogger(__name__).info(
+            "Manifest written for run=%s: %s (%d artifacts)",
+            state.run_id, manifest_path, len(artifact_entries),
         )
 
     @staticmethod
