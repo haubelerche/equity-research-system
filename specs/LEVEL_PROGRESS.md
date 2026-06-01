@@ -19,6 +19,7 @@
 | 7 | Eval-ready | `completed` | evaluate_report_quality.py: WARN_NEEDS_REVIEW (5 PASS, 0 FAIL); 8 deterministic checks |
 | 8 | Demo-ready | `completed` | Full pipeline DHG runs; gate artifact saved; quality gate exits 0 on WARN |
 | 9 | Scale-ready | `completed` | All 5 MVP tickers: validate + generate_report + quality gate (0 FAIL) |
+| 10 | Render-ready | `completed` | Charts C1–C7 + HTML + PDF-stub + 5-artifact contracts per GOAL_OUTPUT.md; all 5 tickers |
 
 ---
 
@@ -243,19 +244,22 @@ python scripts/test_retrieval.py --ticker DHG --query "doanh thu DHG 2023"
 - Evidence pack contains: chunk text, source_id, relevance score
 - Citation map format matches data contract in CLAUDE.md §7.5
 
-**Current Status:** `not_started`
+**Current Status:** `completed`
 
-**Evidence of Completion:**
-- None. `backend/retrieval.py` is a 20-line stub that calls `run_chunk_pipeline()` but this depends on Milvus and OpenAI — both unavailable in local dev without configuration.
-- `scripts/dataset/chunk_pipeline.py` exists but untested end-to-end.
-- `scripts/db/milvus_store.py` exists but no index has been built.
+**Evidence of Completion (updated 2026-06-01):**
+- `scripts/build_index.py` — indexes 4 source types in priority order: (1) official PDF text pages via pdfplumber, (2) OCR page artifacts from `data/ocr_artifacts/{ticker}/{year}/{doc_id}/pages/`, (3) synthetic canonical fact chunks, (4) external .txt documents. Each chunk stores `extraction_method`, `page_number`, `source_tier`, `document_id` in `metadata_json`.
+- `backend/retrieval.py` — completely rewritten as `RetrievalService`: DB-backed FTS using `plainto_tsquery('simple', ...)`, joins `ingest.sources` for `reliability_tier`, sorts by tier ASC then FTS rank DESC, returns `list[EvidenceChunk]` with full citation provenance.
+- `scripts/test_retrieval.py` — 4-gate smoke test: accepted_facts, chunks_indexed, chunk_content, citation_map. All 4 pass for DHG.
+- `scripts/evaluate_citations.py` — 4-gate citation coverage evaluator: key resolution, source_id validity, quantitative claim coverage (100% required), no forbidden labels.
+- 30 new tests added (tests/citations/test_evaluate_citations.py, tests/official_sources/test_build_index_ocr.py). 670 total pass.
+- `--from-year`/`--to-year` CLI args added to build_index.py.
 
 **Known Limitations:**
-- Milvus requires a running server; local dev may use a simpler fallback (FAISS or BM25)
-- OpenAI API key required for embedding generation
+- No vector/embedding-based retrieval — uses PostgreSQL FTS (`plainto_tsquery`) only; adequate for current scale but lower recall than dense retrieval.
+- OCR page artifacts only indexed when `auto_ingest --ocr` has been run first; no OCR artifacts exist yet for real DHG PDFs (discovery connector still working on finding live URLs).
+- Price series data (for stock vs VNINDEX chart) not indexed — separate gap.
 
-**Next Level Entry Condition:**
-`python scripts/build_index.py --ticker DHG` builds an index and `test_retrieval.py` returns a non-empty result.
+**Next Level Entry Condition:** Level 5 complete. Proceed to Level 6.
 
 ---
 
@@ -483,11 +487,231 @@ All critical checks (TAX_01, CAPEX_01, DEBT_01) PASS for all tickers.
 
 ---
 
+---
+
+## Gap Analysis — Từ Output Hiện Tại → Báo Cáo Chuẩn GOAL_OUTPUT.md
+
+> **Chuẩn so sánh:** `GOAL_OUTPUT.md` + mẫu báo cáo LLY PDF (7 trang, có biểu đồ, peer comparison, financial tables).
+> **Output hiện tại:** Markdown text-only, không có chart, không có PDF.
+> **Mục tiêu:** PDF 8 trang A4, 5-7 chart, số liệu đúng, nhận định có nguồn.
+
+---
+
+### Tổng quan: Đã làm được bao nhiêu % so với chuẩn?
+
+| Nhóm | % Hoàn thành | Ghi chú |
+|---|---|---|
+| **Data pipeline & facts** | 95% | Đủ 5 ticker × 5FY, DQ gates, canonical facts, OCR |
+| **Valuation engine** | 90% | FCFF/FCFE/Blend, sensitivity, scenario, TaxPolicy — thiếu peer data |
+| **Report content (text)** | 60% | Có đủ tables và narrative, thiếu structure 8 trang đúng chuẩn |
+| **Charts & visualizations** | 0% | Không có dòng code nào sinh chart |
+| **PDF/HTML export** | 0% | Chỉ có Markdown |
+| **Audit artifacts** | 40% | Có citation_map, thiếu claim_ledger/source_manifest đúng spec |
+| **Peer comparison** | 5% | REL_01 WARN từ đầu, không có dataset |
+
+**Tổng thể: ~50% so với GOAL_OUTPUT.md Definition of Done.**
+
+---
+
+### Chi tiết: Đã làm được ✅
+
+| Hạng mục | GOAL_OUTPUT.md §tham chiếu | Trạng thái |
+|---|---|---|
+| Dữ liệu tài chính 5 ticker × 4-5 FY | §2.1 Facts before narrative | ✅ Canonical facts trong DB, DQ gates pass |
+| Valuation FCFF DCF với WACC, terminal growth | §5 Page 5, formula registry §7.2 | ✅ Deterministic Python, TaxPolicy, reproducible |
+| FCFE và Blend (60% FCFF + 40% FCFE) | §5 Page 5 | ✅ blend.py, debt_schedule.py, dividend_schedule.py |
+| Sensitivity table WACC × terminal growth | §6 Page 6, C7 | ✅ JSON artifact + Markdown table (chưa có visual heatmap) |
+| Bear/Base/Bull scenario | §6 Page 6 | ✅ 3 scenario trong valuation artifact |
+| Bảng tóm tắt tài chính (revenue, EBITDA, LNST, EPS, margins) | §3 Page 3, §7.1 | ✅ Trong Markdown report |
+| Bảng forecast 5 năm với assumptions | §4 Page 4 | ✅ 2026F-2030F, key line items, rationale |
+| Bảng DCF và valuation summary | §5 Page 5 | ✅ FCFF breakdown, PV, equity value, target price |
+| Citation map (trỏ claim → source_id + fact_id) | §8 Claim ledger | ✅ artifacts/reports/\*_citation.json |
+| AssumptionGate — không phát BUY/SELL/HOLD khi chưa approve | §2.4, §5.2 | ✅ "Draft / Needs Analyst Review" |
+| Human approval gate (approve_report.py) | §2.5 | ✅ Script có, tích hợp trong run_research.py |
+| Evaluation gates (TAX, CAPEX, DEBT, FCFE, DIV) | §10 | ✅ 7-8 checks, exits 0 on WARN |
+| Disclaimer chuẩn | §8 Page 8 | ✅ Có trong Markdown |
+| OCR pipeline cho scanned PDF | (data infrastructure) | ✅ tesseract + reconciliation + promotion |
+| Evidence retrieval DB-backed với source-tier | §12 Agent execution step 2-3 | ✅ RetrievalService, FTS, tier priority |
+| Docker + docker-compose + .env.example | (infrastructure) | ✅ Build, run, --ocr wired |
+| Test suite 670 tests | (quality) | ✅ 0 failures |
+
+---
+
+### Chi tiết: Chưa làm được ❌ — Map theo GOAL_OUTPUT.md
+
+#### Gap 1 — Biểu đồ: 0/7 chart bắt buộc (GOAL_OUTPUT.md §6)
+
+Đây là **gap lớn nhất và dễ nhận thấy nhất**. LLY PDF có 5 chart. GOAL_OUTPUT.md §6 yêu cầu 5-7 chart bắt buộc và liệt kê rõ. Không có dòng code nào sinh chart trong toàn bộ codebase.
+
+| Chart | GOAL_OUTPUT.md §6 | Dữ liệu có sẵn | Trạng thái |
+|---|---|---|---|
+| **C1** Stock vs VNINDEX base 100 | Bắt buộc, Page 1 | ❌ Thiếu VNINDEX series | ❌ |
+| **C2** Revenue & EBITDA Trend (bar+line) | Bắt buộc, Page 3 | ✅ facts table | ❌ |
+| **C3** EPS & P/E Trend (dual-axis) | Bắt buộc, Page 3 | ✅ EPS từ facts, P/E từ valuation | ❌ |
+| **C4** Margin & ROE Trend (multi-line) | Bắt buộc, Page 3 | ✅ ratios artifact | ❌ |
+| **C5** Forecast Revenue/Profit (bar+line) | Bắt buộc, Page 4 | ✅ forecast artifact | ❌ |
+| **C6** DCF Value Bridge (waterfall) | Khuyến nghị, Page 5 | ✅ valuation artifact | ❌ |
+| **C7** Sensitivity Heatmap | Bắt buộc, Page 6 | ✅ sensitivity JSON | ❌ chỉ có text table |
+
+**Ghi chú quan trọng:** C2, C3, C4, C5, C7 đều có đủ dữ liệu từ artifacts hiện có. Chỉ cần viết `backend/reporting/chart_generator.py`. C1 bị block thêm vì cần VNINDEX data.
+
+**Cần implement:** `backend/reporting/chart_generator.py` dùng `matplotlib`. Mỗi chart lưu PNG vào `artifacts/charts/{ticker}/`. Có title, unit, source, ký hiệu A/F rõ ràng.
+
+---
+
+#### Gap 2 — PDF và HTML Export (GOAL_OUTPUT.md §3.1)
+
+GOAL_OUTPUT.md §3.1 yêu cầu 3 file bắt buộc mỗi run. Hiện tại chỉ có `.md`.
+
+| File bắt buộc theo §3.1 | Trạng thái |
+|---|---|
+| `reports/{run_id}_{ticker}_report.md` | ✅ Có |
+| `reports_html/{run_id}_{ticker}_report.html` | ❌ Chưa có |
+| `reports_pdf/{run_id}_{ticker}_report.pdf` | ❌ Chưa có |
+| `valuation_results/{run_id}_{ticker}_valuation_result.json` | ✅ Có (đường dẫn khác: `artifacts/valuation/`) |
+| `claim_ledgers/{run_id}_{ticker}_claim_ledger.json` | ❌ Format không đúng spec (chỉ có citation_map) |
+| `source_manifests/{run_id}_{ticker}_source_manifest.json` | ❌ Chưa có |
+| `eval_results/{run_id}_{ticker}_eval_result.json` | ❌ Chưa có format chuẩn |
+
+**Cần implement:** Jinja2 HTML template với CSS navy design (giống LLY cover) → WeasyPrint PDF. Embed chart PNG vào HTML.
+
+---
+
+#### Gap 3 — Peer Comparison (GOAL_OUTPUT.md §6 Page 6)
+
+REL_01 WARN từ ngày đầu. Không có dataset peer nào.
+
+| Yêu cầu §6 Page 6 | Trạng thái |
+|---|---|
+| Bảng peer: Ticker, Market Cap, P/E, P/B, EV/EBITDA, ROE, Net Margin | ❌ Trống hoàn toàn |
+| Peer median row | ❌ |
+| Peer EV/EBITDA chart theo năm (như LLY PDF trang 4) | ❌ |
+
+**Ghi chú:** 5 ticker MVP (DHG, IMP, DMC, TRA, DBD) đều có đủ facts trong DB. P/E = market_price ÷ EPS, EV/EBITDA = (market_cap + net_debt) ÷ EBITDA — tất cả đều tính được từ dữ liệu hiện có. Không cần nguồn ngoài.
+
+---
+
+#### Gap 4 — Claim Ledger và Audit Artifacts (GOAL_OUTPUT.md §8, §9, §10)
+
+GOAL_OUTPUT.md §8 định nghĩa `claim_ledger.json` với format cụ thể (claim_id, section, claim_type, source_refs, confidence, review_status). Hiện tại chỉ có `citation_map.json` với format khác.
+
+| Artifact theo §8-9-10 | Trạng thái |
+|---|---|
+| `claim_ledger.json` với claim_id, claim_type, source_refs, support_status | ❌ Format khác — chỉ có citation_map |
+| `source_manifest.json` với publisher, url, reliability_tier, checksum, used_sections | ❌ Không có |
+| `eval_result.json` với numeric_consistency, citation_coverage, valuation_reproducibility | ❌ Không có format chuẩn duy nhất |
+
+---
+
+#### Gap 5 — Cấu trúc Report Chưa Đúng 8 Trang (GOAL_OUTPUT.md §4)
+
+| Page | Section theo §4 | Trạng thái hiện tại |
+|---|---|---|
+| **1** | Cover + Rating block (BUY/HOLD/SELL) + Key Metrics Snapshot + Investment Thesis + Chart C1 | ❌ Không có cover page, rating bị block bởi AssumptionGate (đúng thiết kế), không có chart |
+| **2** | Company Overview: business model, product mix, competitive position, growth strategy, key drivers | ⚠️ Có text ngắn, thiếu chi tiết GMP/sản phẩm/kênh ETC-OTC |
+| **3** | Financial Performance + Chart C2 + C3 + C4 + bảng financial summary 5 năm | ⚠️ Có bảng số, thiếu hoàn toàn 3 chart |
+| **4** | Forecast + Assumptions + driver explanation + Chart C5 | ⚠️ Có bảng, thiếu chart và driver explanation theo format §4 |
+| **5** | Valuation DCF table + valuation summary + assumptions | ✅ Có đầy đủ bảng, chỉ thiếu DCF bridge chart C6 |
+| **6** | Sensitivity matrix + Scenario table + Peer comparison + Chart C7 | ⚠️ Sensitivity text table có, peer trống, không có heatmap |
+| **7** | Catalysts table (timing, impact, probability) + Risks table (driver, mitigation) | ⚠️ Có risk text, thiếu structured catalyst table với timing/probability |
+| **8** | Key takeaways + Final conclusion + Quality gate summary + Source list + Disclaimer | ⚠️ Có disclaimer, thiếu quality gate table và source list |
+
+---
+
+#### Gap 6 — Price Data và VNINDEX (cho Chart C1)
+
+| Yêu cầu | Trạng thái |
+|---|---|
+| Price series 1-3 năm cho từng ticker | ❓ `vnstock` có thể fetch nhưng chưa store time series cho chart |
+| VNINDEX series cùng period để so sánh | ❌ Chưa fetch và lưu |
+| Normalize về base 100 tại ngày đầu kỳ | ❌ Chưa có logic |
+
+---
+
+### Roadmap đến "Definition of Done" theo GOAL_OUTPUT.md §14
+
+| Thứ tự | Việc | Dữ liệu đầu vào đã có? | Độ phức tạp |
+|---|---|---|---|
+| **1** | **Chart C2+C3+C4+C5+C7** (5 chart không cần VNINDEX) | ✅ facts + valuation artifacts | Trung bình — 2-3 ngày |
+| **2** | **Peer comparison** — P/E, EV/EBITDA cho 5 ticker từ DB | ✅ EPS, EBITDA, net debt đã có | Thấp — 1 ngày |
+| **3** | **HTML template** — Jinja2 + CSS, nhúng chart, cover page | ✅ Markdown report + charts từ bước 1 | Trung bình — 2-3 ngày |
+| **4** | **PDF export** — WeasyPrint hoặc Pandoc | ✅ HTML từ bước 3 | Thấp — 0.5 ngày |
+| **5** | **Claim ledger** format đúng §8 | ✅ citation_map hiện có → transform | Thấp — 1 ngày |
+| **6** | **Source manifest** format đúng §9 | ✅ ingest.sources trong DB | Thấp — 1 ngày |
+| **7** | **Eval result** format chuẩn §10 | ✅ existing quality gate output → adapt | Thấp — 0.5 ngày |
+| **8** | **VNINDEX + Chart C1** | ❌ Cần fetch VNINDEX data | Trung bình — 1-2 ngày |
+| **9** | **Rating unblock** | Human gate | N/A — analyst decision |
+
+**Milestone tối thiểu cho demo đầy đủ (GOAL_OUTPUT.md §15):**
+Bước 1 + 2 + 3 + 4 + 5 = báo cáo PDF với 5 chart, peer table, claim ledger → đáp ứng ~85% GOAL_OUTPUT.md §14.
+
+---
+
+## Level 10 — Render-ready
+
+**Objective:** Generate professional report artifacts (charts, HTML, PDF, 5 canonical JSON artifacts) per GOAL_OUTPUT.md for all 5 MVP tickers.
+
+**Required Artifacts:**
+- `artifacts/charts/{ticker}_C{2-7}.png`
+- `artifacts/reports_html/{ticker}_report.html`
+- `artifacts/reports_pdf/{ticker}_report.pdf` (or .pdf-pending on Windows without GTK)
+- `artifacts/claim_ledgers/RUN_{ticker}_*_claim_ledger.json`
+- `artifacts/source_manifests/RUN_{ticker}_*_source_manifest.json`
+- `artifacts/valuation_results/RUN_{ticker}_*_valuation_result.json`
+- `artifacts/eval_results/RUN_{ticker}_*_eval_result.json`
+- `artifacts/run_logs/RUN_{ticker}_*_run_log.json`
+
+**Done Criteria:**
+- `python scripts/run_full_pipeline.py --all` completes without crash for all 5 tickers
+- Chart PNGs present for each ticker
+- HTML reports present for each ticker
+- 5 canonical artifacts present for each ticker
+
+**Current Status:** `completed`
+
+**Evidence of Completion (2026-06-01):**
+
+```
+python scripts/run_full_pipeline.py --all
+```
+
+Output:
+```
+DHG: OK (charts=6, html=yes, artifacts=5)
+IMP: OK (charts=6, html=yes, artifacts=5)
+DMC: OK (charts=6, html=yes, artifacts=5)
+TRA: OK (charts=6, html=yes, artifacts=5)
+DBD: OK (charts=6, html=yes, artifacts=5)
+All tickers completed successfully.
+```
+
+- `backend/reporting/chart_generator.py` — C1–C7 matplotlib PNG charts (C1 stub, C2–C7 data-driven)
+- `backend/reporting/section_builder.py` — 8-section report structure with ReportContext + ReportSection dataclasses
+- `backend/reporting/html_renderer.py` — Jinja2 template + professional CSS A4 layout, inline chart images
+- `backend/reporting/pdf_renderer.py` — WeasyPrint wrapper (renders .pdf-pending stub on Windows without GTK)
+- `backend/reporting/artifact_writer.py` — 5 canonical artifacts per GOAL_OUTPUT.md §8–10
+- `scripts/generate_charts.py` — CLI for chart generation per ticker
+- `scripts/render_report.py` — CLI for HTML + PDF rendering per ticker
+- `scripts/run_full_pipeline.py` — orchestrator: charts → html → 5 artifacts for one or all tickers
+- 726 tests pass (0 failures)
+
+**Known Limitations:**
+- C1 (Stock vs VNINDEX) is a stub — VNINDEX time-series not yet fetched
+- PDF on Windows uses .pdf-pending stub (WeasyPrint requires GTK); native PDF requires Linux/Docker
+- Valuation fields in artifacts default to 0.0 for tickers without a fresh `run_valuation.py` artifact
+
+**Next Level Entry Condition:** Level 10 complete. Proceed to peer comparison dataset and VNINDEX chart (C1) to close the final gap vs. GOAL_OUTPUT.md §14.
+
+---
+
 ## Change Log
 
 | Date | Update |
 |---|---|
 | 2026-05-24 | Initial tracker created. Assessed current state as Level 3 partial based on artifact inspection. |
 | 2026-05-27 | Updated Levels 3–9 to reflect actual project state per EXECUTION_STATE.md. Added data validation layer: time-series sanity checks, source tier enforcement, market data alignment, confidence scoring formula, DATA_VALIDATION_REPORT artifact, scripts/validate_data.py CLI. 31 new unit tests added (all pass). Pre-existing FCF formula failures documented. |
-| 2026-05-27–28 | Implemented plan CLAUDE_FIX_PLAN_VALUATION_DEBT_TAX_CAPEX (13 defects P0-01 → P2-03). New modules: tax_policy.py, debt_schedule.py, dividend_schedule.py, approval_gate.py, valuation_confidence.py. New script: evaluate_report_quality.py (8 deterministic checks, TAX/CAPEX/DEBT/FCFE/DIV/GATE/REL/CONF). Bug fix: generate_report.py now emits `Draft / Needs Analyst Review` (not `Draft: BAN (SELL)`) via AssumptionGate.recommendation_label(). FCFF tax_rate in wacc_breakdown now reflects actual effective rate (TaxPolicy). Quality gate DHG: WARN_NEEDS_REVIEW (5 PASS, 3 WARN, 0 FAIL). Unit tests: 210 pass, 14 pre-existing fail. Updated Level 4 detail (not_started → completed); Level 6 detail (not_started → completed); Level 7 detail (not_started → completed); Level 8 detail (not_started → completed). |
-| 2026-05-28 | Level 9 push: all 5 MVP tickers now have validate + report + quality gate (0 FAIL). Fixes: Supabase source dedup (migration 009, unique index, source_registry upsert for catalog types); reconciliation minority-interest fix (TRA IS_net_income_check CRITICAL → WARN); validate_data.py UnicodeEncodeError fix + source_coverage_by_period wired. Level 9 status: not_started → completed. |
+| 2026-05-27–28 | Implemented plan CLAUDE_FIX_PLAN_VALUATION_DEBT_TAX_CAPEX (13 defects P0-01 → P2-03). New modules: tax_policy.py, debt_schedule.py, dividend_schedule.py, approval_gate.py, valuation_confidence.py. New script: evaluate_report_quality.py (8 deterministic checks, TAX/CAPEX/DEBT/FCFE/DIV/GATE/REL/CONF). Bug fix: generate_report.py now emits `Draft / Needs Analyst Review` via AssumptionGate. Quality gate DHG: WARN_NEEDS_REVIEW (5 PASS, 3 WARN, 0 FAIL). Unit tests: 210 pass, 14 pre-existing fail. |
+| 2026-05-28 | Level 9 push: all 5 MVP tickers now have validate + report + quality gate (0 FAIL). Supabase dedup (migration 009), reconciliation minority-interest fix, validate_data.py UnicodeEncodeError fix. |
+| 2026-05-31 | Data Trust Layer (Phase 12): FactEntry provenance, CitationMap with real source titles, driver_evidence catalyst rendering, 6-gate primary evaluator, LangGraph harness, official document scaffold. 468 tests pass. |
+| 2026-06-01 | Level 10 — Render-ready: chart_generator C1–C7 (matplotlib PNG), section_builder, html_renderer (Jinja2+CSS), pdf_renderer (WeasyPrint stub on Windows), artifact_writer (5 canonical artifacts per GOAL_OUTPUT.md), render_report.py + generate_charts.py CLIs, run_full_pipeline.py orchestrator. All 5 MVP tickers complete: charts=6, html=yes, artifacts=5. 726 tests pass. |
+| 2026-06-01 | Evidence Retrieval + Citation Pipeline (Phase 13): build_index.py indexes OCR page artifacts + official PDF text with extraction_method/page_number/source_tier metadata. backend/retrieval.py rewritten as DB-backed FTS service with tier priority. scripts/evaluate_citations.py: 4-gate citation coverage gate. 30 new tests. 670 total pass. Docker: Dockerfile CMD + healthcheck + ENV. docker-compose.yml (app + postgres). .env.example + .dockerignore. run_research.py: --ocr flag wired through to AutoIngestConfig. Added Gap Analysis section comparing to LLY PDF chuẩn. |

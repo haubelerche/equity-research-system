@@ -7,13 +7,15 @@
 ## Current State
 
 ```
-Current Level:       Level 9 — Pipeline Complete + Data Trust Layer DONE
-Target Level:        Level 9 — Production-ready (5-ticker MVP)
-Current Phase:       Phase 12 — Data Trust Layer (Phases 0-5) COMPLETE — merged to main 2026-05-31
-Last Completed Task: Data Trust Layer rebuild: FactEntry provenance, CitationMap with real source titles,
-                     driver_evidence catalyst rendering, 6-gate primary evaluator, LangGraph harness,
-                     official document scaffold. 468 tests pass. Final export RED-by-design until
-                     real DHG BCTC PDFs placed under data/official_documents/DHG/<year>/.
+Current Level:       Level 10 — Render-ready
+Target Level:        Level 10 — Render-ready (charts + HTML + PDF + 5 artifact contracts per GOAL_OUTPUT.md)
+Current Phase:       Phase 14 — Full Rendering Pipeline COMPLETE — 2026-06-01
+Last Completed Task: Full rendering pipeline — charts C1–C7 (matplotlib), HTML (Jinja2/CSS),
+                     PDF (weasyprint stub on Windows), 5 artifact contracts per GOAL_OUTPUT.md,
+                     all 5 MVP tickers run via run_full_pipeline.py.
+                     - scripts/run_full_pipeline.py: orchestrates charts → HTML → 5 artifacts
+                     - All 5 tickers: charts=6, html=yes, artifacts=5 (OK)
+                     - 726 tests pass, 0 failures.
 ```
 
 ---
@@ -37,6 +39,8 @@ Last Completed Task: Data Trust Layer rebuild: FactEntry provenance, CitationMap
 | 10 — DataFoundationAgent | `backend/agents/data_foundation_agent.py` | DONE | All 5 tickers READY |
 | 11 — Unit Tests | `tests/unit/` | DONE | 94 tests, 0 failures |
 | 12 — Data Trust Layer | `backend/citations/`, `backend/evaluation/` | DONE | 468 tests, 0 failures; FactEntry provenance; 6-gate evaluator; catalyst rendering |
+| 13 — Evidence Retrieval + Citation Pipeline | `scripts/build_index.py`, `backend/retrieval.py`, `scripts/evaluate_citations.py` | DONE | 670 tests, 0 failures; OCR page indexing; DB retrieval with tier priority; citation coverage gate |
+| 14 — Full Rendering Pipeline | `backend/reporting/`, `scripts/generate_charts.py`, `scripts/render_report.py`, `scripts/run_full_pipeline.py` | DONE | 726 tests, 0 failures; all 5 tickers: charts=6, html=yes, artifacts=5 |
 
 ---
 
@@ -76,16 +80,17 @@ Artifact paths:
 
 ```
 tests/unit/                        — normalizer, ratios, dcf, data_quality, gate_validation, etc.
-tests/citations/                   — citation_map, event_linker, validator, driver_evidence (33 new)
+tests/citations/                   — citation_map, event_linker, validator, driver_evidence,
+                                     evaluate_citations (19 new)
 tests/evaluation/                  — numeric_claim_gates, catalyst_evidence_gates, final_source_gates
 tests/catalysts/                   — event_extraction
 tests/reconciliation/              — financial_fact_reconciliation
 tests/sources/                     — source_registry, document_fetcher
-tests/official_sources/            — official_document_ingestion
+tests/official_sources/            — official_document_ingestion, build_index_ocr (11 new)
 tests/schema/                      — dual_source_schema
 tests/documents/                   — company_ir_connector
 
-Total: 468 passed, 22 skipped, 0 failed (as of 2026-05-31)
+Total: 726 passed, 0 failed (as of 2026-06-01)
 ```
 
 ---
