@@ -1,0 +1,308 @@
+{
+  "ticker": "DHG",
+  "from_year": 2025,
+  "to_year": 2025,
+  "generated_at": "2026-05-31T02:32:31.828008+00:00",
+  "per_source_counts": {
+    "company_ir": 11,
+    "hose_disclosure": 0,
+    "hnx_disclosure": 0,
+    "ssc_ids": 0
+  },
+  "candidates": [
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "audited_financial_statement",
+      "title": "DHG-Audited-FS-2025-VN.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-03/DHG-Audited-FS-2025-VN.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.905,
+      "ranking_reason": "selected: source=company_ir (priority 0), confidence=0.91 ≥ 0.6"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "audited_financial_statement",
+      "title": "DHG-CBTT-giai-trinh-chenh-lech-BCTC-kiem-toan-2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-03/DHG-CBTT-giai-trinh-chenh-lech-BCTC-kiem-toan-2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.905,
+      "ranking_reason": "superseded by company_ir for 2025/audited_financial_statement"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "financial_statement",
+      "title": "VN-DHG-BCTC-Q4.2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-01/VN-DHG-BCTC-Q4.2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "selected: source=company_ir (priority 0), confidence=0.81 ≥ 0.6"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "disclosure",
+      "title": "DHG-CBTT-giai-trinh-KQKD-Q4.2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-01/DHG-CBTT-giai-trinh-KQKD-Q4.2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "selected: source=company_ir (priority 0), confidence=0.81 ≥ 0.6"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "financial_statement",
+      "title": "DHG-BCTC-Q3.2025_1.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-10/DHG-BCTC-Q3.2025_1.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/financial_statement"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "disclosure",
+      "title": "DHG-CBTT-giai-trinh-KQKD-Q3.2025_1.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-10/DHG-CBTT-giai-trinh-KQKD-Q3.2025_1.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/disclosure"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "financial_statement",
+      "title": "DHG-BCTC-6T.2025-soat-xet.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-08/DHG-BCTC-6T.2025-soat-xet.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/financial_statement"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "disclosure",
+      "title": "DHG-CBTT-giai-trinh-KQKD-6T.2025-SX.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-08/DHG-CBTT-giai-trinh-KQKD-6T.2025-SX.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/disclosure"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "financial_statement",
+      "title": "DHG-BCTC-Q2.2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-07/DHG-BCTC-Q2.2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/financial_statement"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "disclosure",
+      "title": "DHG-CBTT-giai-trinh-KQKD-Q2.2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-07/DHG-CBTT-giai-trinh-KQKD-Q2.2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/disclosure"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "annual_report",
+      "title": "VN-Annual-Report-2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-04/VN-Annual-Report-2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.905,
+      "ranking_reason": "selected: source=company_ir (priority 0), confidence=0.91 ≥ 0.6"
+    }
+  ],
+  "selected": [
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "audited_financial_statement",
+      "title": "DHG-Audited-FS-2025-VN.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-03/DHG-Audited-FS-2025-VN.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.905,
+      "ranking_reason": "selected: source=company_ir (priority 0), confidence=0.91 ≥ 0.6"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "financial_statement",
+      "title": "VN-DHG-BCTC-Q4.2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-01/VN-DHG-BCTC-Q4.2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "selected: source=company_ir (priority 0), confidence=0.81 ≥ 0.6"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "disclosure",
+      "title": "DHG-CBTT-giai-trinh-KQKD-Q4.2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-01/DHG-CBTT-giai-trinh-KQKD-Q4.2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "selected: source=company_ir (priority 0), confidence=0.81 ≥ 0.6"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "annual_report",
+      "title": "VN-Annual-Report-2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-04/VN-Annual-Report-2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.905,
+      "ranking_reason": "selected: source=company_ir (priority 0), confidence=0.91 ≥ 0.6"
+    }
+  ],
+  "needs_review": [],
+  "superseded": [
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "audited_financial_statement",
+      "title": "DHG-CBTT-giai-trinh-chenh-lech-BCTC-kiem-toan-2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-03/DHG-CBTT-giai-trinh-chenh-lech-BCTC-kiem-toan-2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.905,
+      "ranking_reason": "superseded by company_ir for 2025/audited_financial_statement"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "financial_statement",
+      "title": "DHG-BCTC-Q3.2025_1.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-10/DHG-BCTC-Q3.2025_1.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/financial_statement"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "financial_statement",
+      "title": "DHG-BCTC-6T.2025-soat-xet.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-08/DHG-BCTC-6T.2025-soat-xet.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/financial_statement"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "financial_statement",
+      "title": "DHG-BCTC-Q2.2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-07/DHG-BCTC-Q2.2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/financial_statement"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "disclosure",
+      "title": "DHG-CBTT-giai-trinh-KQKD-Q3.2025_1.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-10/DHG-CBTT-giai-trinh-KQKD-Q3.2025_1.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/disclosure"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "disclosure",
+      "title": "DHG-CBTT-giai-trinh-KQKD-6T.2025-SX.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-08/DHG-CBTT-giai-trinh-KQKD-6T.2025-SX.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/disclosure"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "disclosure",
+      "title": "DHG-CBTT-giai-trinh-KQKD-Q2.2025.pdf",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2025-07/DHG-CBTT-giai-trinh-KQKD-Q2.2025.pdf",
+      "publisher": "Công ty Cổ phần Dược Hậu Giang",
+      "discovery_method": "ir_page_link_scan",
+      "confidence": 0.815,
+      "ranking_reason": "superseded by company_ir for 2025/disclosure"
+    }
+  ],
+  "fetched": [
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "audited_financial_statement",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-03/DHG-Audited-FS-2025-VN.pdf",
+      "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\raw\\official_documents\\DHG\\2025\\audited_financial_statement.pdf",
+      "file_hash": "abaaac8d3813329db1987e769f325fbee7b8c4776b4205b26a4673f95b589973",
+      "content_type": "application/pdf",
+      "fetched_at": "2026-05-31T02:32:30.913862+00:00"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "document_type": "annual_report",
+      "source_name": "company_ir",
+      "source_url": "https://dhgpharma.com.vn/sites/default/files/2026-04/VN-Annual-Report-2025.pdf",
+      "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\raw\\official_documents\\DHG\\2025\\annual_report.pdf",
+      "file_hash": "a71af4c5b8e7694365ba1e8056eddeafcd37e5678aec864fb9b0e4a41cd726e5",
+      "content_type": "application/pdf",
+      "fetched_at": "2026-05-31T02:32:31.827443+00:00"
+    }
+  ],
+  "fetch_errors": []
+}

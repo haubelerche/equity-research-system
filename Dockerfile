@@ -1,12 +1,87 @@
 FROM python:3.11-slim
 
+# ── System dependencies ────────────────────────────────────────────────────────
+# tesseract + Vietnamese language data for OCR on scanned PDFs
+# poppler-utils for pdf2image (PDF→image conversion before OCR)
+# libpq-dev for psycopg2 native compilation (psycopg2-binary covers this but kept for safety)
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    python3-dev \
     tesseract-ocr \
     tesseract-ocr-vie \
     poppler-utils \
+    libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
+# ── Python dependencies (cached layer) ────────────────────────────────────────
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --upgrade pip setuptools wheel && \
+    ok=0 && \
+    for i in 1 2 3 4 5; do \
+      pip install \
+        --no-cache-dir \
+        --retries 20 \
+        --timeout 120 \
+        --prefer-binary \
+        -r requirements.txt && ok=1 && break; \
+      echo "pip install failed (attempt $i/5), retrying in 10s..."; \
+      sleep 10; \
+    done && \
+    test "$ok" -eq 1
+
+# ── Application code ───────────────────────────────────────────────────────────
 COPY . .
+
+# ── Data directories (created at build time so they exist in container) ────────
+RUN mkdir -p \
+    data/raw \
+    data/processed \
+    data/facts \
+    data/official_documents \
+    data/ocr_artifacts \
+    data/candidate_facts \
+    data/reconciliation \
+    reports \
+    reports/approved \
+    artifacts/valuation \
+    artifacts/evaluation \
+    artifacts/runs \
+    artifacts/facts \
+    artifacts/index \
+    artifacts/reports \
+    artifacts/official_sources
+
+# ── Runtime configuration via environment variables ───────────────────────────
+# Override these at runtime: docker run -e TICKER=IMP -e ENABLE_OCR=true ...
+ENV TICKER=DHG
+ENV FROM_YEAR=2021
+ENV TO_YEAR=2025
+# Set to "true" to enable OCR pipeline for scanned official PDFs
+ENV ENABLE_OCR=false
+# Passed through to psycopg2; override with docker-compose or -e flag
+ENV DATABASE_URL=""
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# ── OCR runtime smoke test at build time (verifies tesseract install) ──────────
+RUN python scripts/check_ocr_runtime.py || true
+
+# ── Healthcheck: verify the DB migrations table is reachable ──────────────────
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD python -c "import psycopg2, os; psycopg2.connect(os.environ['DATABASE_URL']).close()" \
+      || exit 1
+
+# ── Entrypoint: run DB migrations then the research pipeline ──────────────────
+# ENABLE_OCR=true adds --ocr flag automatically
+CMD ["sh", "-c", \
+  "python scripts/db/migrate.py && \
+   python scripts/run_research.py \
+     --ticker ${TICKER} \
+     --from-year ${FROM_YEAR} \
+     --to-year ${TO_YEAR} \
+     --legacy-pipeline \
+     $([ \"${ENABLE_OCR}\" = \"true\" ] && echo --ocr || echo '')"]

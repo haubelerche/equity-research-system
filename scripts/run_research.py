@@ -106,12 +106,14 @@ class StepFailed(Exception):
 
 
 class ResearchRunner:
-    def __init__(self, ticker: str, run_type: str, from_year: int, to_year: int, skip_ingest: bool) -> None:
+    def __init__(self, ticker: str, run_type: str, from_year: int, to_year: int,
+                 skip_ingest: bool, ocr: bool = False) -> None:
         self.ticker = ticker.strip().upper()
         self.run_type = run_type
         self.from_year = from_year
         self.to_year = to_year
         self.skip_ingest = skip_ingest
+        self.ocr = ocr
         self.run_id = _run_id(self.ticker)
         self.trace: list[dict] = []
         self.conn: psycopg2.connection | None = None
@@ -209,6 +211,7 @@ class ResearchRunner:
                     to_year=self.to_year,
                     dry_run=False,
                     channels=["cafef", "pdf"],
+                    ocr=self.ocr,
                 )
                 _auto_results = _run_auto_ingest(_auto_cfg)
                 _total_promoted = sum(r.promoted for r in _auto_results)
@@ -340,6 +343,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--report-type", default="full_report", dest="run_type")
     parser.add_argument("--skip-ingest", action="store_true", dest="skip_ingest",
                         help="Skip build_facts step and reuse existing snapshot.")
+    parser.add_argument("--ocr", action="store_true", default=False,
+                        help="Enable OCR for scanned official PDFs (requires tesseract + poppler).")
     parser.add_argument("--legacy-pipeline", action="store_true", dest="legacy_pipeline",
                         help="Use the pre-harness script pipeline instead of the LangGraph harness.")
     return parser.parse_args()
@@ -400,6 +405,7 @@ def main() -> None:
         from_year=args.from_year,
         to_year=args.to_year,
         skip_ingest=args.skip_ingest,
+        ocr=args.ocr,
     )
     result = runner.run()
     if result.get("status") == "failed":

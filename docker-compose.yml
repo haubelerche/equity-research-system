@@ -1,0 +1,67 @@
+version: "3.9"
+
+# ── Vietnam Pharma Equity Research — Local Development Stack ──────────────────
+#
+# Services:
+#   db   — PostgreSQL 15 (local dev database, replaces Supabase for offline work)
+#   app  — Research pipeline: migrations + auto_ingest + valuation + report
+#
+# Quick start:
+#   cp .env.example .env                       # fill in API keys
+#   docker compose up --build           # build image, start DB, run pipeline
+#   docker compose run app python scripts/check_ocr_runtime.py   # verify OCR
+#
+# Run a specific ticker:
+#   docker compose run -e TICKER=IMP -e ENABLE_OCR=true app
+#
+# Run only ingest (no valuation/report):
+#   docker compose run app python scripts/auto_ingest_official_documents.py \
+#       --ticker DHG --from-year 2021 --to-year 2025 --ocr
+
+services:
+
+  # ── Local PostgreSQL (mirrors Supabase schema for offline dev) ───────────────
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: maer
+      POSTGRES_PASSWORD: maer_local
+      POSTGRES_DB: maer_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maer -d maer_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Research pipeline app ─────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env                       # local secrets; copy from .env.example
+    environment:
+      # Point to the local db service (overrides Supabase URL in .env.local)
+      DATABASE_URL: postgresql://maer:maer_local@db:5432/maer_dev
+      TICKER: ${TICKER:-DHG}
+      FROM_YEAR: ${FROM_YEAR:-2021}
+      TO_YEAR: ${TO_YEAR:-2025}
+      ENABLE_OCR: ${ENABLE_OCR:-true}    # OCR on by default in Docker (runtime is installed)
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      # Persist generated artifacts and downloaded PDFs outside the container
+      - ./data:/app/data
+      - ./reports:/app/reports
+      - ./artifacts:/app/artifacts
+    restart: "no"                        # pipeline runs once and exits
+
+volumes:
+  postgres_data:

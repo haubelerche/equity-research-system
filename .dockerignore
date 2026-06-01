@@ -1,0 +1,51 @@
+# Secrets — never bake into the image
+.env
+.env.local
+.env.*.local
+*.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Generated data and artifacts — mounted as volumes at runtime instead
+data/raw/
+data/processed/
+data/facts/
+data/official_documents/
+data/ocr_artifacts/
+data/candidate_facts/
+data/reconciliation/
+reports/
+artifacts/
+
+# Git and IDE
+.git/
+.gitignore
+.claude/
+.worktrees/
+*.md
+!README.md
+
+# Reference codebases (not needed at runtime)
+FinRobot/
+vnstock/
+
+# Dev tooling
+.vscode/
+.idea/
+*.swp
+*.swo
