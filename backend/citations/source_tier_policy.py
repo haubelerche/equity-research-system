@@ -118,9 +118,22 @@ def evaluate_source_tier_gate(
             blocking.append(f"{key}: unknown/ungrounded source tier (Tier 4) — always blocked")
             continue
         tier_counts[tier] = tier_counts.get(tier, 0) + 1
-        if _label_is_bad(rec):
-            blocking.append(f"{key}: provider/generic source label '{rec.source_title}' — blocked")
-            continue
+        label_bad = _label_is_bad(rec)
+        if label_bad:
+            if mode == "final":
+                # Final export: a provider/generic label is never acceptable as a citation.
+                blocking.append(
+                    f"{key}: provider/generic source label '{rec.source_title}' — blocked for final export"
+                )
+                continue
+            else:
+                # Draft mode: provider labels are allowed with a warning (Tier-3 label
+                # produced from a known URI is legitimate in draft; must be improved before final).
+                warnings.append(
+                    f"{key}: provider/generic source label '{rec.source_title}' — allowed in draft, "
+                    "must be replaced with an official document citation before final export"
+                )
+                continue
 
         if mode == "final":
             # Rule 2 + 4: final quantitative claim cannot rely on Tier 3 alone, and
