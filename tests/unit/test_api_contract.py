@@ -9,9 +9,33 @@ class FakeStore:
     def __init__(self) -> None:
         self.runs: dict[str, dict] = {}
         self.artifacts: dict[str, list[dict]] = {}
+        self.companies: dict[str, dict] = {}
 
     def check_schema_version(self) -> None:
         return None
+
+    def ensure_company_reference(
+        self,
+        *,
+        ticker,
+        company_name_vi,
+        company_name_en,
+        exchange,
+        sector,
+        subsector,
+        universe_id,
+        universe_name,
+        peer_group,
+        enabled_methods,
+    ) -> None:
+        self.companies[ticker] = {
+            "ticker": ticker,
+            "company_name_vi": company_name_vi,
+            "exchange": exchange,
+            "sector": sector,
+            "universe_id": universe_id,
+            "enabled_methods": enabled_methods,
+        }
 
     def create_run(
         self,
@@ -124,6 +148,20 @@ def test_research_start_status_and_artifacts_endpoints() -> None:
     artifacts_response = client.get(f"/research/{run_id}/artifacts")
     assert artifacts_response.status_code == 200
     assert artifacts_response.json()["artifacts"][0]["section_key"] == "graph_state_snapshot"
+
+
+def test_research_start_registers_non_mvp_universe_ticker() -> None:
+    client, store, _, executor = _client()
+
+    response = client.post(
+        "/research/start",
+        json={"ticker": "dp3", "run_type": "full_report", "objective": "api contract", "requested_by": "tester"},
+    )
+
+    assert response.status_code == 200
+    assert executor.submitted[0].ticker == "DP3"
+    assert store.companies["DP3"]["exchange"] == "UPCOM"
+    assert store.companies["DP3"]["sector"] == "pharma"
 
 
 def test_approval_endpoint_preserves_public_aliases() -> None:

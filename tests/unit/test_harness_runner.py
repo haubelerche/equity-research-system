@@ -91,6 +91,144 @@ def _service(node_name: str, summary: dict) -> ServiceNodeResult:
     return ServiceNodeResult(node_name=node_name, status="completed", summary=summary)
 
 
+def _tool_spec(tool_id: str, owner: str, impl):
+    return SimpleNamespace(
+        tool_id=tool_id,
+        owner_agent_ids=(owner,),
+        implementation=impl,
+        permission_level="test",
+        artifact_producer_key=tool_id.upper(),
+    )
+
+
+def _install_fake_tools(monkeypatch, runner_mod, overrides: dict | None = None) -> None:
+    overrides = overrides or {}
+    valuation_summary = {
+        "snapshot_id": "snap1",
+        "artifact_path": "artifacts/valuation/DHG.json",
+        "formula_version": "valuation_v1",
+        "assumption_version": "assumptions_v1",
+        "unit_policy": "VND",
+        "currency": "VND",
+        "period_scope": {"period_type": "FY"},
+        "valuation_methods": ["fcff", "fcfe", "blend"],
+        "has_fcff": True,
+        "has_fcfe": True,
+        "has_blend": True,
+        "has_sensitivity": True,
+        "sensitivity_summary": {"fcff_wacc_g": {"matrix": [[1]]}},
+        "assumptions": {"wacc": 0.1},
+        "assumption_gate": {},
+        "formula_traces": [
+            {
+                "trace_id": "trace_fcff",
+                "formula_id": "fcff_target",
+                "formula_version": "valuation_v1",
+                "calculation_steps": [{"step": "sum_pv_fcff"}],
+            }
+        ],
+    }
+    impls = {
+        "auto_ingest": lambda ticker, from_year, to_year, ocr=False: _service(
+            "AUTO_INGEST",
+            {
+                "web_ingest_attempted": True,
+                "cafef_rows": 1,
+                "pdf_rows": 0,
+                "ocr_candidates": 0,
+                "promoted": 0,
+                "official_ready": False,
+                "continued_with_tier2_or_tier3_fallback": True,
+            },
+        ),
+        "build_facts": lambda ticker, from_year, to_year: _service(
+            "BUILD_FACTS",
+            {"valuation_gate": "pass", "snapshot_id": "snap1", "blocking_reasons": []},
+        ),
+        "build_index": lambda ticker, from_year, to_year: _service("BUILD_INDEX", {"chunks_inserted": 3}),
+        "read_snapshot": lambda ticker, snapshot_id: _service(
+            "READ_SNAPSHOT",
+            {"snapshot_id": snapshot_id, "metric_refs": ["revenue.net"], "period_refs": ["2025FY"]},
+        ),
+        "read_ratio_artifact": lambda ticker, snapshot_id: _service(
+            "READ_RATIO_ARTIFACT",
+            {"snapshot_id": snapshot_id, "metric_refs": ["gross_margin"], "period_refs": ["2025FY"]},
+        ),
+        "run_valuation": lambda ticker, from_year, to_year: _service("VALUATION_DRAFT", valuation_summary),
+        "read_valuation_artifact": lambda artifact_path: _service(
+            "READ_VALUATION_ARTIFACT",
+            {"artifact_path": artifact_path},
+        ),
+        "generate_report": lambda ticker, snapshot_id, from_year, to_year, mode="draft": _service(
+            "REPORT_GENERATION",
+            {"report_path": "reports/DHG.md", "snapshot_id": snapshot_id, "claims_count": 0, "citation_count": 0},
+        ),
+        "evaluate_report_quality": lambda ticker, report_path, valuation_path=None: _service(
+            "QUALITY_EVALUATION",
+            {"overall_status": "PASS"},
+        ),
+    }
+    impls.update(overrides)
+    owners = {
+        "auto_ingest": "data_retrieval",
+        "build_facts": "data_retrieval",
+        "build_index": "data_retrieval",
+        "read_snapshot": "financial_analyst",
+        "read_ratio_artifact": "financial_analyst",
+        "run_valuation": "valuation",
+        "read_valuation_artifact": "valuation",
+        "generate_report": "report_writer_critic",
+        "evaluate_report_quality": "report_writer_critic",
+    }
+
+    def fake_get_tool(self, tool_id):
+        return _tool_spec(tool_id, owners[tool_id], impls[tool_id])
+
+    def fake_run_tool(self, state, agent_id, tool_id, *args, **kwargs):
+        result = impls[tool_id](*args, **kwargs)
+        result.gate_inputs.setdefault(
+            "tool_permission",
+            {
+                "tool_id": tool_id,
+                "agent_id": agent_id,
+                "permission_level": "test",
+                "artifact_producer_key": tool_id.upper(),
+            },
+        )
+        return result
+
+    monkeypatch.setattr(runner_mod.ToolRegistry, "get_tool", fake_get_tool)
+    monkeypatch.setattr(runner_mod.ToolRegistry, "validate_agent_tool_policy", lambda self, configs: None)
+    monkeypatch.setattr(runner_mod.ResearchGraphRunner, "_run_tool", fake_run_tool)
+
+
+def _handoffs() -> list[dict]:
+    return [
+        {
+            "agent_id": agent_id,
+            "handoff_hash": f"hash_{agent_id}",
+            "review_status": "completed",
+        }
+        for agent_id in [
+            "supervisor",
+            "data_retrieval",
+            "financial_analyst",
+            "valuation",
+            "report_writer_critic",
+        ]
+    ]
+
+
+def _required_export_gates() -> dict:
+    return {
+        "TOOL_PERMISSION_GATE": {"passed": True},
+        "ARTIFACT_MANIFEST_GATE": {"passed": True},
+        "FORMULA_TRACE_GATE": {"passed": True},
+        "EVIDENCE_PACKET_GATE": {"passed": True},
+        "AGENT_HANDOFF_GATE": {"passed": True},
+    }
+
+
 def test_runner_happy_path_stops_at_assumption_approval(monkeypatch) -> None:
     import backend.harness.runner as runner_mod
     from backend.harness.model_adapter import OpenAIModelAdapter
@@ -104,49 +242,20 @@ def test_runner_happy_path_stops_at_assumption_approval(monkeypatch) -> None:
             agent_id=agent_config.agent_id,
             action=task,
             status="completed",
-            payload={"agent_id": agent_config.agent_id, "task": task},
+            payload={
+                "agent_id": agent_config.agent_id,
+                "task": task,
+                "metric_refs": ["revenue.net"],
+                "period_refs": ["2025FY"],
+            },
+            input_summary={"input_refs": ["snapshot_fact_report", "ratio_artifact"]},
             confidence=0.9,
             confidence_breakdown={"test": 1.0},
             next_action="continue",
         ),
     )
 
-    monkeypatch.setattr(
-        runner_mod,
-        "build_facts_tool",
-        lambda ticker, from_year, to_year: _service(
-            "BUILD_FACTS",
-            {"valuation_gate": "pass", "snapshot_id": "snap1", "blocking_reasons": []},
-        ),
-    )
-    monkeypatch.setattr(
-        runner_mod,
-        "build_index_tool",
-        lambda ticker, from_year, to_year: _service("BUILD_INDEX", {"chunks_inserted": 3}),
-    )
-    monkeypatch.setattr(
-        runner_mod,
-        "run_valuation_tool",
-        lambda ticker, from_year, to_year: _service(
-            "VALUATION_DRAFT",
-            {
-                "snapshot_id": "snap1",
-                "formula_version": "valuation_v1",
-                "assumption_version": "assumptions_v1",
-                "unit_policy": "VND",
-                "currency": "VND",
-                "period_scope": {"period_type": "FY"},
-                "valuation_methods": ["fcff", "fcfe", "blend"],
-                "has_fcff": True,
-                "has_fcfe": True,
-                "has_blend": True,
-                "has_sensitivity": True,
-                "sensitivity_summary": {"fcff_wacc_g": {"matrix": [[1]]}},
-                "assumptions": {"wacc": 0.1},
-                "assumption_gate": {},
-            },
-        ),
-    )
+    _install_fake_tools(monkeypatch, runner_mod)
 
     store = FakeStore()
     runner = ResearchGraphRunner(store=store)
@@ -185,25 +294,18 @@ def test_assumption_approval_resumes_to_final_approval(monkeypatch) -> None:
             agent_id=agent_config.agent_id,
             action=task,
             status="completed",
-            payload={"agent_id": agent_config.agent_id},
+            payload={
+                "agent_id": agent_config.agent_id,
+                "metric_refs": ["revenue.net"],
+                "period_refs": ["2025FY"],
+            },
+            input_summary={"input_refs": ["snapshot_fact_report", "ratio_artifact"]},
             confidence=0.9,
             confidence_breakdown={"test": 1.0},
             next_action="continue",
         ),
     )
-    monkeypatch.setattr(
-        runner_mod,
-        "generate_report_tool",
-        lambda ticker, snapshot_id, from_year, to_year, mode="draft": _service(
-            "REPORT_GENERATION",
-            {"report_path": "reports/DHG.md", "snapshot_id": snapshot_id, "claims_count": 0, "citation_count": 0},
-        ),
-    )
-    monkeypatch.setattr(
-        runner_mod,
-        "evaluate_quality_tool",
-        lambda ticker, report_path, valuation_path=None: _service("QUALITY_EVALUATION", {"overall_status": "PASS"}),
-    )
+    _install_fake_tools(monkeypatch, runner_mod)
 
     store = FakeStore()
     runner = ResearchGraphRunner(store=store)
@@ -226,15 +328,25 @@ def test_assumption_approval_resumes_to_final_approval(monkeypatch) -> None:
             "has_blend": True,
             "has_sensitivity": True,
             "sensitivity_summary": {"fcff_wacc_g": {"matrix": [[1]]}},
-            "assumptions": {"wacc": 0.1},
-            "assumption_gate": {},
-        },
-        "snapshot_id": "snap1",
-        "gate_results": {
-            "DATA_QUALITY_GATE": {"passed": True},
-            "FINANCIAL_ANALYST_GATE": {"passed": True},
-            "VALUATION_GATE": {"passed": True},
-        },
+                "assumptions": {"wacc": 0.1},
+                "assumption_gate": {},
+                "formula_traces": [
+                    {
+                        "trace_id": "trace_fcff",
+                        "formula_id": "fcff_target",
+                        "formula_version": "valuation_v1",
+                        "calculation_steps": [{"step": "sum_pv_fcff"}],
+                    }
+                ],
+            },
+            "snapshot_id": "snap1",
+            "artifacts": {"agent_handoffs": _handoffs()},
+            "gate_results": {
+                **_required_export_gates(),
+                "DATA_QUALITY_GATE": {"passed": True},
+                "FINANCIAL_ANALYST_GATE": {"passed": True},
+                "VALUATION_GATE": {"passed": True},
+            },
     }
     store.save_artifact(run_id="run1", section_key="graph_state_snapshot", payload=paused_state)
 
@@ -274,10 +386,22 @@ def test_final_approval_publishes_only_after_export_gate() -> None:
         "objective": "test",
         "current_stage": "WAITING_FINAL_APPROVAL",
         "requires_human": True,
-        "valuation_outputs": {"snapshot_id": "snap1"},
+        "valuation_outputs": {
+            "snapshot_id": "snap1",
+            "formula_traces": [
+                {
+                    "trace_id": "trace_fcff",
+                    "formula_id": "fcff_target",
+                    "formula_version": "valuation_v1",
+                    "calculation_steps": [{"step": "sum_pv_fcff"}],
+                }
+            ],
+        },
         "draft_report": {"snapshot_id": "snap1"},
-        "artifacts": {"valuation_lock": {"locked": True}},
+        "artifacts": {"valuation_lock": {"locked": True}, "agent_handoffs": _handoffs()},
         "gate_results": {
+            **_required_export_gates(),
+            "APPROVAL_PATH_GATE": {"passed": True},
             "DATA_QUALITY_GATE": {"passed": True},
             "FINANCIAL_ANALYST_GATE": {"passed": True},
             "VALUATION_GATE": {"passed": True},

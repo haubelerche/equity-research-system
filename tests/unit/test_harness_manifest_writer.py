@@ -101,3 +101,79 @@ def test_evidence_packet_is_manifested(tmp_path, monkeypatch):
     evidence_entry = manifest["artifacts"]["evidence_packet"]
     assert evidence_entry["producer"] == "ResearchGraphRunner"
     assert (tmp_path / "artifacts" / "evidence_packets" / "run_evidence_manifest_test_evidence_packet.json").exists()
+
+
+def test_agent_effectiveness_audit_is_written_and_manifestable(tmp_path, monkeypatch):
+    """Agent audit must prove tool/model execution and data-source fallback state."""
+    from backend.harness.runner import ResearchGraphRunner
+    from backend.harness.state import ResearchGraphState
+
+    store = MagicMock()
+    runner = ResearchGraphRunner(store=store)
+    state = ResearchGraphState(
+        run_id="run_agent_audit_test",
+        ticker="DP3",
+        objective="test objective",
+    )
+    state.artifacts["auto_ingest"] = {
+        "web_ingest_attempted": True,
+        "cafef_rows": 12,
+        "pdf_rows": 0,
+        "ocr_candidates": 0,
+        "ocr_promoted": 0,
+        "promoted": 0,
+        "year_statuses": ["TIER2_ONLY"],
+        "official_ready": False,
+        "continued_with_tier2_or_tier3_fallback": True,
+    }
+    state.artifacts["financial_analyst_review"] = {
+        "diagnostics": [{"metric": "revenue.net", "period": "2025FY"}]
+    }
+    state.draft_report = {
+        "claims_count": 3,
+        "citation_count": 3,
+        "export_blocked": True,
+        "report_path": "reports/DP3.md",
+    }
+    state.trace.extend(
+        [
+            {
+                "kind": "tool_call",
+                "tool_name": "AUTO_INGEST",
+                "agent_role": "DataRetrievalAgent",
+                "output_hash": "abc",
+                "output_summary": state.artifacts["auto_ingest"],
+            },
+            {
+                "kind": "agent_message",
+                "agent_id": "financial_analyst",
+                "action": "Interpret deterministic financial tables.",
+                "status": "completed",
+                "latency_ms": 100,
+                "cost_estimate": 0.001,
+                "confidence": 0.8,
+                "warnings": [],
+                "requires_human": False,
+                "output_summary": {"metric_refs": ["revenue.net"], "period_refs": ["2025FY"]},
+            },
+        ]
+    )
+
+    import backend.harness.runner as runner_mod
+    monkeypatch.setattr(runner_mod, "ROOT", tmp_path, raising=False)
+
+    runner._write_agent_effectiveness_audit(state)
+    runner._write_run_manifest(state)
+
+    audit_path = tmp_path / "artifacts" / "audits" / "run_agent_audit_test_agent_effectiveness_audit.json"
+    audit = json.loads(audit_path.read_text(encoding="utf-8"))
+    assert audit["ticker"] == "DP3"
+    assert audit["data_retrieval_effectiveness"]["web_ingest_attempted"] is True
+    assert audit["data_retrieval_effectiveness"]["cafef_rows"] == 12
+    assert audit["data_retrieval_effectiveness"]["continued_with_tier2_or_tier3_fallback"] is True
+    assert audit["financial_analyst_effectiveness"]["metric_reference_count"] >= 1
+    assert audit["report_writer_effectiveness"]["claims_count"] == 3
+
+    manifest_path = tmp_path / "artifacts" / "manifests" / "run_agent_audit_test_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert "agent_effectiveness_audit" in manifest["artifacts"]

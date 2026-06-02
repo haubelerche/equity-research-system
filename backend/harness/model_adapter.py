@@ -103,7 +103,7 @@ class OpenAIModelAdapter:
             agent_id=agent_config.agent_id,
             action=task,
             status=status,
-            input_summary={"input_refs": input_refs or [], "state_stage": state.get("current_stage")},
+            input_summary={"input_refs": input_refs or [], "state_stage": state.get("current_stage") or state.get("stage")},
             output_summary=raw.get("output_summary", {}),
             payload=raw.get("payload", {}),
             artifact_refs=raw.get("artifact_refs", []),
@@ -124,7 +124,9 @@ class OpenAIModelAdapter:
     @staticmethod
     def _compact_state(state: dict[str, Any]) -> dict[str, Any]:
         keys = [
-            "run_id", "ticker", "run_type", "objective", "current_stage",
+            "run_id", "ticker", "run_type", "objective", "current_stage", "stage",
+            "task", "allowed_tools", "input_artifact_refs", "evidence_packet_path",
+            "relevant_gate_results", "known_limitations", "required_handoff_fields",
             "snapshot_id", "artifacts", "gate_results", "approvals",
             "artifact_refs", "evidence_refs", "errors",
         ]

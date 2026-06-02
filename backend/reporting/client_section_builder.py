@@ -10,13 +10,20 @@ from backend.reporting.client_report_view_model import (
 )
 
 
+DASH = "—"
+
+
 def _e(value: Any) -> str:
     return escape(str(value))
 
 
+def _is_missing(value: Any) -> bool:
+    return value is None or value == "" or value == DASH
+
+
 def _fmt_money(value: Any) -> str:
-    if value is None or value == "�":
-        return "�"
+    if _is_missing(value):
+        return DASH
     try:
         return f"{float(value):,.0f}"
     except (TypeError, ValueError):
@@ -24,33 +31,60 @@ def _fmt_money(value: Any) -> str:
 
 
 def _fmt_metric(label: str, value: Any) -> str:
-    if value is None or value == "�":
-        return "�"
+    if _is_missing(value):
+        return DASH
     try:
         number = float(value)
     except (TypeError, ValueError):
         return _e(value)
+
     lower = label.lower()
-    if any(token in lower for token in ["tang tru?ng", "revenue growth", "gross margin", "sga", "sg&a", "depreciation", "kh?u hao /", "capex /", "effective tax rate", "cash conversion", "terminal growth", "t? su?t", "thu? su?t", "bi�n", "roe", "roa", "roic", "wacc", "eva", "yield", "su?t sinh l?i", "n? r�ng / vcsh", "upside/downside", "stress"]):
+    percent_tokens = [
+        "tăng trưởng",
+        "revenue growth",
+        "gross margin",
+        "biên",
+        "sga",
+        "sg&a",
+        "khấu hao /",
+        "capex /",
+        "effective tax rate",
+        "cash conversion",
+        "terminal growth",
+        "tỷ suất",
+        "thuế suất",
+        "roe",
+        "roa",
+        "roic",
+        "wacc",
+        "eva",
+        "yield",
+        "suất sinh lời",
+        "nợ ròng / vcsh",
+        "upside/downside",
+        "stress",
+    ]
+    multiple_tokens = ["p/e", "p/b", "p/s", "ev/", "peg", "nợ ròng / ebitda"]
+    if any(token in lower for token in percent_tokens):
         return f"{number * 100:.1f}%"
-    if any(token in lower for token in ["p/e", "p/b", "p/s", "ev/", "peg", "n? r�ng / ebitda"]):
+    if any(token in lower for token in multiple_tokens):
         return f"{number:.1f}x"
-    if "eps" in lower or "gi� tr? s? s�ch" in lower:
+    if "eps" in lower or "giá trị sổ sách" in lower:
         return f"{number:,.0f}"
-    if "target price" in lower or "gi� m?c ti�u" in lower:
+    if "target price" in lower or "giá mục tiêu" in lower:
         return f"{number:,.0f}"
     return f"{number:,.0f}"
 
 
 def _format_price(money: Any) -> str:
     if money is None:
-        return "�"
+        return DASH
     return f"{money.amount:,.0f}"
 
 
 def _format_percent(percent: Any) -> str:
     if percent is None:
-        return "�"
+        return DASH
     return f"{percent.value * 100:+.1f}%"
 
 
@@ -59,8 +93,8 @@ def _render_table(table: TableData, class_name: str = "financial-model-table") -
     body = []
     for label, values in table.rows:
         cells = "".join(
-            f'<td class="numeric">{_fmt_metric(label, v)}</td>'
-            for v in values
+            f'<td class="numeric">{_fmt_metric(label, value)}</td>'
+            for value in values
         )
         body.append(f"<tr><td>{_e(label)}</td>{cells}</tr>")
     unit = f'<div class="table-unit">{_e(table.unit)}</div>' if table.unit else ""
@@ -69,7 +103,7 @@ def _render_table(table: TableData, class_name: str = "financial-model-table") -
   <h2>{_e(table.title)}</h2>
   {unit}
   <table class="{class_name}">
-    <thead><tr><th>Ch? ti�u</th>{header}</tr></thead>
+    <thead><tr><th>Chỉ tiêu</th>{header}</tr></thead>
     <tbody>{''.join(body)}</tbody>
   </table>
 </div>
@@ -110,42 +144,41 @@ def _rec_css(recommendation: str) -> str:
 
 
 def _snapshot_page(vm: ClientReportViewModel) -> str:
-    stats = list(vm.market_statistics.items())
     sidebar_rows = [
-        ("Gi� m?c ti�u (VND)", _format_price(vm.target_price)),
-        ("Gi� hi?n t?i (VND)", _format_price(vm.current_price)),
-        ("T? l? tang/gi?m", _format_percent(vm.upside_downside)),
-        ("Su?t sinh l?i c? t?c", _format_percent(vm.dividend_yield)),
-        ("T?ng t? su?t l?i nhu?n", _format_percent(vm.total_return)),
+        ("Giá mục tiêu (VND)", _format_price(vm.target_price)),
+        ("Giá hiện tại (VND)", _format_price(vm.current_price)),
+        ("Tỷ lệ tăng/giảm", _format_percent(vm.upside_downside)),
+        ("Suất sinh lời cổ tức", _format_percent(vm.dividend_yield)),
+        ("Tổng tỷ suất lợi nhuận", _format_percent(vm.total_return)),
     ]
     stats_rows = [
-        ("M� giao d?ch", vm.market_statistics.get("M� giao d?ch", "�")),
-        ("S�n", vm.exchange),
-        ("Ng�nh", vm.sector),
-        ("V?n h�a", vm.market_statistics.get("V?n h�a")),
-        ("S? lu?ng c? phi?u", vm.market_statistics.get("S? lu?ng c? phi?u")),
-        ("K? ho?ch doanh thu 2026", vm.market_statistics.get("K? ho?ch doanh thu 2026", "�")),
-        ("K? ho?ch LNTT 2026", vm.market_statistics.get("K? ho?ch LNTT 2026", "�")),
-        ("T�i s?n Q1/2026", vm.market_statistics.get("T�i s?n Q1/2026", "�")),
-        ("V?n ch? s? h?u Q1/2026", vm.market_statistics.get("V?n ch? s? h?u Q1/2026", "�")),
+        ("Mã giao dịch", vm.market_statistics.get("Mã giao dịch", DASH)),
+        ("Sàn", vm.exchange),
+        ("Ngành", vm.sector),
+        ("Vốn hóa", vm.market_statistics.get("Vốn hóa")),
+        ("Số lượng cổ phiếu", vm.market_statistics.get("Số lượng cổ phiếu")),
+        ("Kế hoạch doanh thu 2026", vm.market_statistics.get("Kế hoạch doanh thu 2026", DASH)),
+        ("Kế hoạch LNTT 2026", vm.market_statistics.get("Kế hoạch LNTT 2026", DASH)),
+        ("Tài sản Q1/2026", vm.market_statistics.get("Tài sản Q1/2026", DASH)),
+        ("Vốn chủ sở hữu Q1/2026", vm.market_statistics.get("Vốn chủ sở hữu Q1/2026", DASH)),
     ]
     return f"""
 <div class="client-report-page snapshot-page">
   <div class="acbs-titlebar">
     <div>
       <div class="acbs-report-kicker">{_e(vm.report_title)} - {_e(vm.recommendation)}</div>
-      <div class="acbs-date">Ng�y {_e(vm.report_date)}</div>
+      <div class="acbs-date">Ngày {_e(vm.report_date)}</div>
     </div>
     <div class="acbs-brand">Vietnam Pharma Equity Research</div>
   </div>
   <div class="acbs-layout">
     <aside class="acbs-sidebar">
       <div class="analyst-card">
-        <div class="analyst-name">Nh�m ph�n t�ch</div>
-        <div>B�o c�o c?p nh?t</div>
+        <div class="analyst-name">Nhóm phân tích</div>
+        <div>Báo cáo cập nhật</div>
       </div>
       <div class="recommendation-card {_rec_css(vm.recommendation)}">
-        <div class="rec-label">Khuy?n ngh?</div>
+        <div class="rec-label">Khuyến nghị</div>
         <div class="rec-value">{_e(vm.recommendation)}</div>
         <div class="rec-sub">{_e(vm.exchange)}: {_e(vm.ticker)}</div>
         <div class="rec-sector">{_e(vm.sector)}</div>
@@ -154,17 +187,17 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
       <div class="side-section-title">{_e(vm.trading_performance_table.title)}</div>
       {_render_table(vm.trading_performance_table, "broker-side-table compact")}
       {_chart(vm, "C1")}
-      <div class="side-section-title">Th?ng k� th? tru?ng</div>
+      <div class="side-section-title">Thống kê thị trường</div>
       {_render_key_value_table(stats_rows, "broker-side-table compact")}
     </aside>
     <main class="acbs-main">
       <h1>{_e(vm.company_name)} ({_e(vm.ticker)} VN)</h1>
       <div class="lead-thesis">{_e(vm.investment_thesis)}</div>
-      <h2>Lu?n di?m c?p nh?t</h2>
+      <h2>Luận điểm cập nhật</h2>
       <p>{_e(vm.latest_business_update)}</p>
-      <h2>B?i c?nh hi?n t?i</h2>
+      <h2>Bối cảnh hiện tại</h2>
       <p>{_e(vm.current_context)}</p>
-      <h2>�?ng l?c tang tru?ng</h2>
+      <h2>Động lực tăng trưởng</h2>
       <p>{_e(vm.key_growth_drivers)}</p>
       {_render_table(vm.financial_summary_table)}
     </main>
@@ -176,16 +209,16 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
 def _narrative_page(vm: ClientReportViewModel) -> str:
     return f"""
 <div class="client-report-page">
-  <h1>C?p nh?t ho?t d?ng kinh doanh</h1>
+  <h1>Cập nhật hoạt động kinh doanh</h1>
   <div class="two-chart-grid">
     {_chart(vm, "C2")}
     {_chart(vm, "C4")}
   </div>
-  <h2>Tri?n v?ng d?u tu</h2>
+  <h2>Triển vọng đầu tư</h2>
   <p>{_e(vm.key_growth_drivers)}</p>
-  <h2>�?ng l?c bi�n l?i nhu?n</h2>
+  <h2>Động lực biên lợi nhuận</h2>
   <p>{_e(vm.key_margin_drivers)}</p>
-  <h2>S? ki?n tr?ng y?u</h2>
+  <h2>Sự kiện trọng yếu</h2>
   <p>{_e(vm.material_events)}</p>
   {_render_table(vm.key_forecast_drivers_table)}
 </div>
@@ -195,7 +228,7 @@ def _narrative_page(vm: ClientReportViewModel) -> str:
 def _forecast_page(vm: ClientReportViewModel) -> str:
     return f"""
 <div class="client-report-page">
-  <h1>D? ph�ng v� d?nh gi�</h1>
+  <h1>Dự phóng và định giá</h1>
   <p>{_e(vm.forecast_valuation_narrative)}</p>
   {_render_table(vm.sensitivity_table)}
   {_render_table(vm.valuation_model_table)}
@@ -219,14 +252,14 @@ def _risks_disclaimer_page(vm: ClientReportViewModel) -> str:
     )
     return f"""
 <div class="client-report-page">
-  <h1>R?i ro d?u tu v� khuy?n c�o</h1>
+  <h1>Rủi ro đầu tư và khuyến cáo</h1>
   <table class="financial-model-table">
-    <thead><tr><th>R?i ro</th>{''.join(f'<th>{_e(p)}</th>' for p in vm.risk_table.periods)}</tr></thead>
+    <thead><tr><th>Rủi ro</th>{''.join(f'<th>{_e(p)}</th>' for p in vm.risk_table.periods)}</tr></thead>
     <tbody>{risk_body}</tbody>
   </table>
-  <h2>Khuy?n c�o</h2>
+  <h2>Khuyến cáo</h2>
   <p>{_e(vm.disclaimer)}</p>
-  <h2>Ngu?n tham kh?o ch�nh</h2>
+  <h2>Nguồn tham khảo chính</h2>
   <p>{_e(vm.source_captions.get("current_context", ""))}</p>
 </div>
 """

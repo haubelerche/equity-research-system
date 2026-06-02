@@ -103,6 +103,69 @@ class RuntimeStore:
                         "public.schema_migrations table missing; run: python -m backend.database.migrate"
                     ) from exc
 
+    def ensure_company_reference(
+        self,
+        *,
+        ticker: str,
+        company_name_vi: str,
+        company_name_en: str | None,
+        exchange: str | None,
+        sector: str,
+        subsector: str | None,
+        universe_id: str,
+        universe_name: str,
+        peer_group: str,
+        enabled_methods: list[str],
+    ) -> None:
+        """Register a company and universe membership before run creation.
+
+        research.runs has a strict FK to ref.companies. This method turns the
+        configured universe CSV into canonical reference rows so non-MVP
+        tickers can enter the harness without weakening referential integrity.
+        """
+        with self.conn() as connection:
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO ref.companies
+                    (ticker, company_name_vi, company_name_en, exchange, sector, subsector)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (ticker) DO UPDATE
+                    SET company_name_vi = COALESCE(EXCLUDED.company_name_vi, ref.companies.company_name_vi),
+                        company_name_en = COALESCE(EXCLUDED.company_name_en, ref.companies.company_name_en),
+                        exchange        = COALESCE(EXCLUDED.exchange,        ref.companies.exchange),
+                        sector          = COALESCE(EXCLUDED.sector,          ref.companies.sector),
+                        subsector       = COALESCE(EXCLUDED.subsector,       ref.companies.subsector),
+                        updated_at      = NOW()
+                    """,
+                    (ticker, company_name_vi, company_name_en, exchange, sector, subsector),
+                )
+                cur.execute(
+                    """
+                    INSERT INTO ref.universes (universe_id, universe_name, description)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (universe_id) DO UPDATE
+                    SET universe_name = EXCLUDED.universe_name,
+                        description   = EXCLUDED.description
+                    """,
+                    (
+                        universe_id,
+                        universe_name,
+                        "Configured universe from config/dataset/universe/pharma_vn_universe.csv",
+                    ),
+                )
+                cur.execute(
+                    """
+                    INSERT INTO ref.universe_members (universe_id, ticker, peer_group, enabled_methods)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (universe_id, ticker) DO UPDATE
+                    SET peer_group      = EXCLUDED.peer_group,
+                        enabled_methods = EXCLUDED.enabled_methods,
+                        is_enabled      = TRUE
+                    """,
+                    (universe_id, ticker, peer_group, enabled_methods),
+                )
+
     def create_run(
         self,
         run_id: str,

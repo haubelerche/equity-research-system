@@ -18,6 +18,7 @@ from backend.schemas import (
     StartRunResponse,
 )
 from backend.settings import settings
+from backend.universe_registration import ensure_ticker_registered_from_universe
 from backend.utils import deterministic_id
 from backend.runtime_store import to_public_status
 
@@ -81,6 +82,7 @@ def create_app(
             "fallback_model": settings.fallback_model,
         }
         try:
+            ensure_ticker_registered_from_universe(store, request.ticker.upper())
             store.create_run(
                 run_id=run_id,
                 ticker=request.ticker.upper(),

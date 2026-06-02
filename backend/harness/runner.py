@@ -6,16 +6,32 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 
 from backend.harness.agent_registry import AgentRegistry
-from backend.harness.gates import citation_gate, data_quality_gate, export_gate, financial_analyst_gate, valuation_gate
+from backend.harness.gates import (
+    agent_handoff_gate,
+    approval_path_gate,
+    artifact_manifest_gate,
+    citation_gate,
+    data_quality_gate,
+    evidence_packet_gate,
+    export_gate,
+    financial_analyst_gate,
+    formula_trace_gate,
+    tool_permission_gate,
+    valuation_gate,
+)
 from backend.harness.graph import GRAPH_STAGES, build_langgraph
 from backend.harness.model_adapter import OpenAIModelAdapter
-from backend.harness.state import ResearchGraphState, stable_hash
+from backend.harness.state import AgentExecutionContext, AgentHandoff, ResearchGraphState, stable_hash
+from backend.harness.tool_registry import ToolRegistry
 from backend.harness.tools import (
     auto_ingest_tool,
     build_facts_tool,
     build_index_tool,
     evaluate_quality_tool,
     generate_report_tool,
+    read_ratio_artifact_tool,
+    read_snapshot_tool,
+    read_valuation_artifact_tool,
     run_valuation_tool,
 )
 from backend.runtime_store import RuntimeStore
@@ -40,12 +56,29 @@ PUBLIC_TO_DB_APPROVAL_DECISION = {
 }
 
 
+def _count_metric_references(payload: Any) -> int:
+    import json
+    import re
+
+    text = json.dumps(payload or {}, ensure_ascii=False, default=str)
+    return len(set(re.findall(r"\b[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+\b", text)))
+
+
+def _count_period_references(payload: Any) -> int:
+    import json
+    import re
+
+    text = json.dumps(payload or {}, ensure_ascii=False, default=str)
+    return len(set(re.findall(r"\b20\d{2}(?:FY|A|F)?\b", text)))
+
+
 class ResearchGraphRunner:
     def __init__(self, store: RuntimeStore, app_settings: Settings | None = None) -> None:
         self.store = store
         self.settings = app_settings or settings
         self.budget = BudgetGuard(store, self.settings)
         self.agent_registry = AgentRegistry()
+        self.tool_registry = ToolRegistry()
         self.model_adapter = OpenAIModelAdapter()
         self._compiled_graph = build_langgraph(self._node_map())
 
@@ -83,6 +116,7 @@ class ResearchGraphRunner:
         # resolve artifacts deterministically.
         try:
             self._write_evidence_packet(current)
+            self._write_agent_effectiveness_audit(current)
             self._write_run_manifest(current)
         except Exception as _exc:  # noqa: BLE001
             import logging
@@ -224,21 +258,22 @@ class ResearchGraphRunner:
         elif stage == "DATA_RETRIEVAL_RUN":
             # Step 1: auto-ingest official documents FIRST.
             # Non-blocking: failure produces status="warn" in summary, pipeline continues with Tier-3.
-            auto_result = auto_ingest_tool(
+            auto_result = self._run_tool(
+                state, "data_retrieval", "auto_ingest",
                 state.ticker, state.from_year, state.to_year, ocr=state.ocr
             )
             state.artifacts["auto_ingest"] = auto_result.summary
             self._merge_result(state, auto_result)
 
             # Step 2: build canonical facts (reads from DB — needs ingest to have run)
-            result = build_facts_tool(state.ticker, state.from_year, state.to_year)
+            result = self._run_tool(state, "data_retrieval", "build_facts", state.ticker, state.from_year, state.to_year)
             state.artifacts["build_facts"] = result.summary
             state.data_inventory = result.summary
             state.snapshot_id = result.summary.get("snapshot_id")
             self._merge_result(state, result)
 
             # Step 3: build evidence index
-            index_result = build_index_tool(state.ticker, state.from_year, state.to_year)
+            index_result = self._run_tool(state, "data_retrieval", "build_index", state.ticker, state.from_year, state.to_year)
             state.artifacts["index"] = index_result.summary
             state.retrieval_results = index_result.summary
             self._merge_result(state, index_result)
@@ -253,6 +288,18 @@ class ResearchGraphRunner:
             gate = data_quality_gate(state.data_inventory or state.artifacts.get("build_facts", {}))
             self._record_gate(state, gate)
         elif stage == "FINANCIAL_ANALYST_RUN":
+            snapshot_result = self._run_tool(state, "financial_analyst", "read_snapshot", state.ticker, state.snapshot_id)
+            state.artifacts["snapshot"] = snapshot_result.summary
+            self._merge_result(state, snapshot_result)
+            if snapshot_result.blocking_reason:
+                raise RuntimeError(snapshot_result.blocking_reason)
+
+            ratio_result = self._run_tool(state, "financial_analyst", "read_ratio_artifact", state.ticker, state.snapshot_id)
+            state.artifacts["ratios"] = ratio_result.summary
+            self._merge_result(state, ratio_result)
+            if ratio_result.blocking_reason:
+                raise RuntimeError(ratio_result.blocking_reason)
+
             result = self._run_agent(state, "financial_analyst", "Interpret deterministic financial tables and identify traceable diagnostics.")
             state.financial_tables = result.model_dump(mode="json")
             state.artifacts["financial_analyst_review"] = result.payload
@@ -261,11 +308,15 @@ class ResearchGraphRunner:
             gate = financial_analyst_gate(state.financial_tables)
             self._record_gate(state, gate)
         elif stage == "VALUATION_RUN":
-            result = run_valuation_tool(state.ticker, state.from_year, state.to_year)
+            result = self._run_tool(state, "valuation", "run_valuation", state.ticker, state.from_year, state.to_year)
             state.valuation_outputs = result.summary
             state.artifacts["valuation"] = result.summary
             state.snapshot_id = result.summary.get("snapshot_id") or state.snapshot_id
             self._merge_result(state, result)
+
+            valuation_read = self._run_tool(state, "valuation", "read_valuation_artifact", result.summary.get("artifact_path"))
+            state.artifacts["valuation_read"] = valuation_read.summary
+            self._merge_result(state, valuation_read)
 
             agent_result = self._run_agent(state, "valuation", "Review deterministic valuation outputs, assumptions, and model limitations.")
             state.artifacts["valuation_review"] = agent_result.payload
@@ -282,7 +333,10 @@ class ResearchGraphRunner:
             state.artifacts.setdefault("valuation_lock", {"locked": True, "approval": state.approvals.get("valuation_assumptions")})
             state.status = "running"
         elif stage == "REPORT_WRITER_CRITIC_RUN":
-            result = generate_report_tool(state.ticker, state.snapshot_id, state.from_year, state.to_year, mode="draft")
+            result = self._run_tool(
+                state, "report_writer_critic", "generate_report",
+                state.ticker, state.snapshot_id, state.from_year, state.to_year, mode="draft"
+            )
             state.artifacts["report"] = result.summary
             state.draft_report = result.summary
             self._merge_result(state, result)
@@ -293,7 +347,10 @@ class ResearchGraphRunner:
         elif stage == "QUALITY_EVALUATION":
             report_path = (state.draft_report or state.artifacts.get("report") or {}).get("report_path")
             valuation_path = (state.valuation_outputs or state.artifacts.get("valuation") or {}).get("artifact_path")
-            result = evaluate_quality_tool(state.ticker, report_path, valuation_path=valuation_path)
+            result = self._run_tool(
+                state, "report_writer_critic", "evaluate_report_quality",
+                state.ticker, report_path, valuation_path=valuation_path
+            )
             state.artifacts["quality"] = result.summary
             state.evaluation_results = result.summary
             self._merge_result(state, result)
@@ -303,6 +360,12 @@ class ResearchGraphRunner:
             gate = citation_gate(state.draft_report or state.artifacts.get("report", {}))
             self._record_gate(state, gate)
         elif stage == "EXPORT_GATE":
+            self._write_evidence_packet(state)
+            self._record_gate(state, tool_permission_gate(state.trace))
+            self._record_gate(state, artifact_manifest_gate(state.model_dump(mode="json")))
+            self._record_gate(state, formula_trace_gate(state.valuation_outputs or state.artifacts.get("valuation", {})))
+            self._record_gate(state, evidence_packet_gate(state.model_dump(mode="json")))
+            self._record_gate(state, agent_handoff_gate(state.model_dump(mode="json")))
             gate = export_gate(state.model_dump(mode="json"), final_approval_required=False)
             self._record_gate(state, gate)
         elif stage == "WAITING_FINAL_APPROVAL":
@@ -311,6 +374,13 @@ class ResearchGraphRunner:
             state.next_resume_stage = "PUBLISHED"
             self.store.update_run_state(state.run_id, "needs_human_review", stage)
         elif stage == "PUBLISHED":
+            self._write_evidence_packet(state)
+            self._record_gate(state, tool_permission_gate(state.trace))
+            self._record_gate(state, artifact_manifest_gate(state.model_dump(mode="json")))
+            self._record_gate(state, formula_trace_gate(state.valuation_outputs or state.artifacts.get("valuation", {})))
+            self._record_gate(state, evidence_packet_gate(state.model_dump(mode="json")))
+            self._record_gate(state, agent_handoff_gate(state.model_dump(mode="json")))
+            self._record_gate(state, approval_path_gate(state.model_dump(mode="json"), final_approval_required=True))
             gate = export_gate(state.model_dump(mode="json"), final_approval_required=True)
             self._record_gate(state, gate)
             if not gate["passed"]:
@@ -329,7 +399,8 @@ class ResearchGraphRunner:
         if not state.ticker or len(state.ticker) > 10:
             raise ValueError(f"Invalid ticker: {state.ticker!r}")
         self.store.check_schema_version()
-        self.agent_registry.validate()
+        configs = self.agent_registry.load()
+        self.tool_registry.validate_agent_tool_policy(configs)
         self.model_adapter.validate_environment()
 
     def _record_gate(self, state: ResearchGraphState, gate: dict[str, Any]) -> None:
@@ -343,7 +414,7 @@ class ResearchGraphRunner:
     def _merge_result(self, state: ResearchGraphState, result) -> None:
         state.artifact_refs.extend([ref.model_dump(mode="json") for ref in result.artifact_refs])
         state.evidence_refs.extend([ref.model_dump(mode="json") for ref in result.evidence_refs])
-        self._record_tool_trace(state, result.node_name, result.summary, result.output_hash)
+        self._record_tool_trace(state, result.node_name, result.summary, result.output_hash, result.gate_inputs)
 
     def _merge_agent_result(self, state: ResearchGraphState, result) -> None:
         state.artifact_refs.extend([ref if isinstance(ref, dict) else dict(ref) for ref in result.artifact_refs])
@@ -354,15 +425,70 @@ class ResearchGraphRunner:
             state.blocking_reason = result.review_reason or result.blocking_reason
             self.store.update_run_state(state.run_id, "needs_human_review", state.current_stage)
         self._record_agent_trace(state, result)
+        self._write_agent_handoff(state, result)
+
+    def _run_tool(self, state: ResearchGraphState, agent_id: str, tool_id: str, *args, **kwargs):
+        spec = self.tool_registry.get_tool(tool_id)
+        if agent_id not in spec.owner_agent_ids:
+            raise PermissionError(f"Tool {tool_id!r} is not owned by agent {agent_id!r}")
+        config = self.agent_registry.get_agent_config(agent_id)
+        if tool_id not in config.allowed_tools:
+            raise PermissionError(f"Tool {tool_id!r} is not declared in allowed_tools for agent {agent_id!r}")
+        legacy_aliases = {
+            "auto_ingest": "auto_ingest_tool",
+            "build_facts": "build_facts_tool",
+            "build_index": "build_index_tool",
+            "read_snapshot": "read_snapshot_tool",
+            "read_ratio_artifact": "read_ratio_artifact_tool",
+            "run_valuation": "run_valuation_tool",
+            "read_valuation_artifact": "read_valuation_artifact_tool",
+            "generate_report": "generate_report_tool",
+            "evaluate_report_quality": "evaluate_quality_tool",
+        }
+        implementation = globals().get(legacy_aliases.get(tool_id, ""), spec.implementation)
+        result = implementation(*args, **kwargs)
+        result.gate_inputs.setdefault(
+            "tool_permission",
+            {
+                "tool_id": tool_id,
+                "agent_id": agent_id,
+                "permission_level": spec.permission_level,
+                "artifact_producer_key": spec.artifact_producer_key,
+            },
+        )
+        return result
 
     def _run_agent(self, state: ResearchGraphState, agent_id: str, task: str):
         config = self.agent_registry.get_agent_config(agent_id)
         self._charge_agent_step(state, config.agent_id, config.model)
+        context = self._build_agent_context(state, config.agent_id, task)
         return self.model_adapter.run_agent(
             agent_config=config,
-            state=state.model_dump(mode="json"),
+            state=context.model_dump(mode="json"),
             task=task,
-            input_refs=[ref.get("artifact_id", "") for ref in state.artifact_refs if isinstance(ref, dict)],
+            input_refs=[ref.get("artifact_id", "") for ref in context.input_artifact_refs if isinstance(ref, dict)],
+        )
+
+    def _build_agent_context(self, state: ResearchGraphState, agent_id: str, task: str) -> AgentExecutionContext:
+        config = self.agent_registry.get_agent_config(agent_id)
+        failed_gate_issues = [
+            issue.get("issue_id")
+            for gate in state.gate_results.values()
+            if isinstance(gate, dict) and gate.get("passed") is False
+            for issue in gate.get("issues", [])
+            if isinstance(issue, dict)
+        ]
+        known_limitations = list(filter(None, [state.blocking_reason, *state.errors, *failed_gate_issues]))
+        return AgentExecutionContext(
+            run_id=state.run_id,
+            ticker=state.ticker,
+            stage=state.current_stage,
+            task=task,
+            allowed_tools=config.allowed_tools,
+            input_artifact_refs=state.artifact_refs,
+            evidence_packet_path=self._artifact_path_for_section(state, "evidence_packet"),
+            relevant_gate_results=state.gate_results,
+            known_limitations=sorted(set(str(item) for item in known_limitations)),
         )
 
     def _charge_agent_step(self, state: ResearchGraphState, step_name: str, model_name: str) -> None:
@@ -408,7 +534,63 @@ class ResearchGraphRunner:
             payload=payload,
         )
 
-    def _record_tool_trace(self, state: ResearchGraphState, tool_name: str, summary: dict[str, Any], output_hash: str | None) -> None:
+    def _write_agent_handoff(self, state: ResearchGraphState, result) -> None:
+        import json
+
+        handoff_dir = ROOT / "artifacts" / "handoffs"
+        handoff_dir.mkdir(parents=True, exist_ok=True)
+        agent_id = result.agent_id or self._agent_id_for_stage(state.current_stage)
+        artifact_refs = [
+            ref if isinstance(ref, dict) else dict(ref)
+            for ref in result.artifact_refs
+        ]
+        output_refs = [
+            str(ref.get("artifact_id"))
+            for ref in artifact_refs
+            if ref.get("artifact_id")
+        ]
+        issue_ids = []
+        if result.requires_human or result.status in {"needs_review", "failed"}:
+            reason = result.review_reason or result.blocking_reason or "agent_requires_review"
+            issue_ids.append(f"{agent_id}:{reason}")
+        handoff = AgentHandoff(
+            run_id=state.run_id,
+            agent_id=agent_id,
+            stage=state.current_stage,
+            input_refs=[
+                ref.get("artifact_id", "")
+                for ref in state.artifact_refs
+                if isinstance(ref, dict) and ref.get("artifact_id")
+            ],
+            output_refs=output_refs,
+            review_status=result.status,
+            blocking_issue_ids=issue_ids,
+            unresolved_questions=[str(w) for w in result.warnings],
+            recommended_next_stage=result.next_action,
+        ).with_hash()
+        path = handoff_dir / f"{state.run_id}_{agent_id}_{state.current_stage}_handoff.json"
+        path.write_text(json.dumps(handoff.model_dump(mode="json"), indent=2, default=str), encoding="utf-8")
+        ref = {
+            "artifact_id": f"{state.run_id}_{agent_id}_{state.current_stage}_handoff",
+            "artifact_type": "agent_handoff_json",
+            "section_key": f"handoff_{agent_id}",
+            "version": 1,
+            "storage_path": str(path),
+            "checksum": handoff.handoff_hash,
+            "is_locked": False,
+            "producer": agent_id,
+        }
+        state.artifact_refs.append(ref)
+        state.artifacts.setdefault("agent_handoffs", []).append(handoff.model_dump(mode="json"))
+
+    def _record_tool_trace(
+        self,
+        state: ResearchGraphState,
+        tool_name: str,
+        summary: dict[str, Any],
+        output_hash: str | None,
+        gate_inputs: dict[str, Any] | None = None,
+    ) -> None:
         payload = {
             "kind": "tool_call",
             "run_id": state.run_id,
@@ -420,6 +602,7 @@ class ResearchGraphRunner:
             "retry_policy": "no_retry",
             "output_hash": output_hash,
             "output_summary": summary,
+            "gate_inputs": gate_inputs or {},
         }
         state.trace.append(payload)
         self.store.add_audit_event(
@@ -428,6 +611,13 @@ class ResearchGraphRunner:
             action="tool_call",
             payload=payload,
         )
+
+    @staticmethod
+    def _artifact_path_for_section(state: ResearchGraphState, section_key: str) -> str | None:
+        for ref in reversed(state.artifact_refs):
+            if isinstance(ref, dict) and ref.get("section_key") == section_key and ref.get("storage_path"):
+                return str(ref["storage_path"])
+        return None
 
     def _checkpoint(self, state: ResearchGraphState) -> None:
         state.checkpoint_version += 1
@@ -524,6 +714,118 @@ class ResearchGraphRunner:
             )
         ]
         state.artifact_refs.append(ref)
+
+    def _write_agent_effectiveness_audit(self, state: "ResearchGraphState") -> None:
+        """Write a per-run audit proving which tools and agents executed."""
+        import json
+        from datetime import UTC, datetime
+
+        audit_dir = ROOT / "artifacts" / "audits"
+        audit_dir.mkdir(parents=True, exist_ok=True)
+        audit_path = audit_dir / f"{state.run_id}_agent_effectiveness_audit.json"
+
+        tool_calls = [entry for entry in state.trace if entry.get("kind") == "tool_call"]
+        agent_messages = [entry for entry in state.trace if entry.get("kind") == "agent_message"]
+        auto_ingest = state.artifacts.get("auto_ingest") or {}
+        financial_review = state.artifacts.get("financial_analyst_review") or {}
+        report_summary = state.draft_report or state.artifacts.get("report") or {}
+        quality_summary = state.evaluation_results or state.artifacts.get("quality") or {}
+
+        payload = {
+            "schema_version": 1,
+            "run_id": state.run_id,
+            "ticker": state.ticker,
+            "generated_at": datetime.now(UTC).isoformat(),
+            "current_stage": state.current_stage,
+            "status": state.status,
+            "requires_human": state.requires_human,
+            "blocking_reason": state.blocking_reason,
+            "tool_execution": [
+                {
+                    "tool_name": entry.get("tool_name"),
+                    "agent_role": entry.get("agent_role"),
+                    "output_hash": entry.get("output_hash"),
+                    "output_summary": entry.get("output_summary", {}),
+                }
+                for entry in tool_calls
+            ],
+            "agent_execution": [
+                {
+                    "agent_id": entry.get("agent_id") or entry.get("agent_role"),
+                    "action": entry.get("action"),
+                    "status": entry.get("status"),
+                    "latency_ms": entry.get("latency_ms"),
+                    "cost_estimate": entry.get("cost_estimate"),
+                    "confidence": entry.get("confidence"),
+                    "warnings": entry.get("warnings", []),
+                    "requires_human": entry.get("requires_human", False),
+                    "output_summary": entry.get("output_summary", {}),
+                }
+                for entry in agent_messages
+            ],
+            "data_retrieval_effectiveness": {
+                "web_ingest_attempted": bool(auto_ingest.get("web_ingest_attempted")),
+                "cafef_rows": int(auto_ingest.get("cafef_rows") or 0),
+                "pdf_rows": int(auto_ingest.get("pdf_rows") or 0),
+                "ocr_candidates": int(auto_ingest.get("ocr_candidates") or 0),
+                "ocr_promoted": int(auto_ingest.get("ocr_promoted") or 0),
+                "promoted_official_facts": int(auto_ingest.get("promoted") or 0),
+                "year_statuses": auto_ingest.get("year_statuses", []),
+                "official_ready": bool(auto_ingest.get("official_ready")),
+                "continued_with_tier2_or_tier3_fallback": bool(
+                    auto_ingest.get("continued_with_tier2_or_tier3_fallback")
+                ),
+            },
+            "financial_analyst_effectiveness": {
+                "payload_keys": sorted(financial_review.keys()) if isinstance(financial_review, dict) else [],
+                "metric_reference_count": _count_metric_references(financial_review),
+                "period_reference_count": _count_period_references(financial_review),
+                "review_payload_length": len(json.dumps(financial_review, ensure_ascii=False, default=str)),
+            },
+            "report_writer_effectiveness": {
+                "claims_count": int(report_summary.get("claims_count") or 0),
+                "citation_count": int(report_summary.get("citation_count") or 0),
+                "export_blocked": bool(report_summary.get("export_blocked")),
+                "report_path": report_summary.get("report_path"),
+                "quality_status": quality_summary.get("overall_status"),
+                "blocking_reason": quality_summary.get("blocking_reason") or report_summary.get("blocking_reason"),
+            },
+        }
+        audit_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        ref = {
+            "artifact_id": f"{state.run_id}_agent_effectiveness_audit",
+            "artifact_type": "agent_effectiveness_audit_json",
+            "section_key": "agent_effectiveness_audit",
+            "version": 1,
+            "storage_path": str(audit_path),
+            "checksum": stable_hash(payload),
+            "is_locked": False,
+            "producer": "ResearchGraphRunner",
+        }
+        state.artifact_refs = [
+            existing
+            for existing in state.artifact_refs
+            if not (
+                isinstance(existing, dict)
+                and existing.get("section_key") == "agent_effectiveness_audit"
+            )
+        ]
+        state.artifact_refs.append(ref)
+
+    @staticmethod
+    def _agent_id_for_stage(stage: str) -> str:
+        if stage == "SUPERVISOR_PLAN":
+            return "supervisor"
+        if stage in {"DATA_RETRIEVAL_RUN", "DATA_QUALITY_GATE"}:
+            return "data_retrieval"
+        if stage in {"FINANCIAL_ANALYST_RUN", "FINANCIAL_ANALYST_GATE"}:
+            return "financial_analyst"
+        if stage in {"VALUATION_RUN", "VALUATION_GATE", "WAITING_ASSUMPTIONS_APPROVAL", "VALUATION_LOCKED"}:
+            return "valuation"
+        if stage in {"REPORT_WRITER_CRITIC_RUN", "QUALITY_EVALUATION", "CITATION_GATE", "EXPORT_GATE", "WAITING_FINAL_APPROVAL", "PUBLISHED"}:
+            return "report_writer_critic"
+        return "service_node"
 
     @staticmethod
     def _agent_name(stage: str) -> str:

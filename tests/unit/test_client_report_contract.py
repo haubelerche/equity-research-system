@@ -163,6 +163,22 @@ def test_analyst_draft_contains_required_imp_style_tables(tmp_path, monkeypatch)
         assert term in html
 
 
+def test_analyst_draft_has_no_encoding_corruption_markers(tmp_path, monkeypatch):
+    html = _client_html_text(tmp_path, monkeypatch)
+    forbidden_markers = ["\ufffd", "\u00ef\u00bf\u00bd", "Gi\u00ef", "Ch?", "B->o", "c->o"]
+    for marker in forbidden_markers:
+        assert marker not in html
+    assert ">?</" not in html
+
+
+def test_non_mvp_universe_ticker_can_render_analyst_draft_fixture(tmp_path, monkeypatch):
+    html = _client_html_text(tmp_path, monkeypatch, ticker="DP3")
+    assert "DP3" in html
+    assert "Dược phẩm" in html
+    assert "financial-model-table" in html
+    assert "\ufffd" not in html
+
+
 def test_analyst_draft_preserves_driver_based_calculations(tmp_path, monkeypatch):
     html = _client_html_text(tmp_path, monkeypatch)
     required_terms = [

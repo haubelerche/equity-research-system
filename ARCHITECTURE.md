@@ -268,7 +268,7 @@ vietnam-pharma-equity-agent/
 │   ├── evaluate_report.py    — Phase 7: legacy 5-gate evaluation
 │   ├── evaluate_report_quality.py — Phase 7: 8-check quality gate (current)
 │   ├── run_research.py       — Phase 8: full pipeline orchestration
-│   ├── approve_report.py     — Phase 9: human approval + export
+│   ├── approve_report.py     — Phase 9: run-scoped harness approval
 │   ├── validate_data.py      — Data validation across all 5 tickers
 │   ├── cleanup_financial_facts.py
 │   ├── debug_vnstock_financial_coverage.py

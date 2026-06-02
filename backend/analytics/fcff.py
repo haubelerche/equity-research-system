@@ -14,6 +14,7 @@ from typing import Any
 
 from backend.analytics.forecasting import ForecastArtifact, ForecastYear
 from backend.analytics.tax_policy import TaxPolicy
+from backend.analytics.shares import explicit_shares_mn
 
 from backend.facts.normalizer import FactTable
 
@@ -219,9 +220,14 @@ def compute_fcff(
         wacc_invalid = True
         terminal_growth = wacc - 0.01  # prevent ZeroDivisionError; result will not yield target price
 
-    # Shares outstanding
+    # Shares outstanding. Target price requires explicit share-count facts; EPS-
+    # implied shares are reserved for reconciliation diagnostics.
     if shares_mn is None:
         shares_mn = _derive_shares(fact_table, latest_fy)
+    if shares_mn is None:
+        warnings.append(
+            "FCFF: shares_outstanding fact missing — target price blocked to avoid EPS-implied share-count error."
+        )
 
     # ── Build FCFF table ───────────────────────────────────────────────────
     n = len(forecast.forecast_years)
@@ -315,12 +321,4 @@ def compute_fcff(
 
 
 def _derive_shares(fact_table: FactTable, latest_fy: str | None) -> float | None:
-    if not latest_fy:
-        return None
-    ni_e = fact_table.get("net_income.parent", {}).get(latest_fy)
-    eps_e = fact_table.get("eps.basic", {}).get(latest_fy)
-    ni = (ni_e.value if hasattr(ni_e, "value") else float(ni_e)) if ni_e is not None else None
-    eps = (eps_e.value if hasattr(eps_e, "value") else float(eps_e)) if eps_e is not None else None
-    if ni and eps and eps > 0:
-        return (ni * 1_000) / eps
-    return None
+    return explicit_shares_mn(fact_table, latest_fy)

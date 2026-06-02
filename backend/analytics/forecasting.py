@@ -29,6 +29,7 @@ from typing import Any
 from backend.analytics.tax_policy import TaxPolicy, build_tax_policy
 from backend.analytics.dividend_schedule import build_dividend_schedule
 from backend.analytics.debt_schedule import build_debt_schedule, DebtSchedule
+from backend.analytics.shares import explicit_shares_mn
 
 from backend.facts.normalizer import FactTable
 
@@ -347,14 +348,14 @@ def run_forecast(
     # Non-debt liabilities: carry forward as constant (trade payables, accruals, etc.)
     other_liabilities = max(0.0, start_assets - start_equity - start_debt)
 
-    # Shares outstanding
+    # Shares outstanding. Use explicit share-count facts only; EPS-implied shares
+    # are too unstable for forecast EPS/BVPS and target-price arithmetic.
     if shares_mn is None:
-        ni_latest = _get(fact_table, "net_income.parent", latest_fy)
-        eps_latest = _get(fact_table, "eps.basic", latest_fy)
-        if ni_latest and eps_latest and eps_latest > 0:
-            shares_mn = (ni_latest * 1_000) / eps_latest
-        else:
-            shares_mn = None
+        shares_mn = explicit_shares_mn(fact_table, latest_fy)
+        if shares_mn is None:
+            warnings.append(
+                "Shares outstanding fact missing — forecast EPS/BVPS omitted to avoid EPS-implied share-count error."
+            )
 
     # ── Build debt schedule (before main loop — determines interest expense) ──
     debt_sched = build_debt_schedule(

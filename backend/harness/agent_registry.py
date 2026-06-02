@@ -29,6 +29,7 @@ VALID_AGENT_ROLES = {
 }
 
 VALID_AGENT_TOOLS = {
+    "auto_ingest",
     "build_facts",
     "build_index",
     "read_snapshot",

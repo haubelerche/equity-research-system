@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from backend.facts.normalizer import FactTable
+from backend.analytics.shares import explicit_shares_mn
 
 
 @dataclass
@@ -129,10 +130,13 @@ def compute_multiples(
     total_debt = _get(fact_table, "total_debt.ending", latest_fy) or 0.0
     cash = _get(fact_table, "cash_and_equivalents.ending", latest_fy) or 0.0
 
-    # Shares outstanding (mn)
-    shares_mn: float | None = None
-    if ni is not None and eps is not None and eps > 0:
-        shares_mn = (ni * 1_000) / eps  # VND bn * 1000 / VND per share = mn shares
+    # Shares outstanding (mn). Use explicit canonical shares only; EPS-implied
+    # shares are a reconciliation diagnostic, not a target-price denominator.
+    shares_mn = explicit_shares_mn(fact_table, latest_fy)
+    if shares_mn is None:
+        warnings.append(
+            "Shares outstanding unavailable — BVPS, P/B, and EV/EBITDA price bridge are blocked."
+        )
 
     # Book value per share
     bvps: float | None = None

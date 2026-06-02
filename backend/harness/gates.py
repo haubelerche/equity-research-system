@@ -4,6 +4,8 @@ import re
 from typing import Any
 
 _FY_PATTERN = re.compile(r"^20\d{2}FY$")
+_METRIC_REF_PATTERN = re.compile(r"\b[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+\b")
+_PERIOD_REF_PATTERN = re.compile(r"\b20\d{2}(?:FY|A|F)?\b")
 
 
 def _issue_id(gate_name: str, reason: str) -> str:
@@ -100,6 +102,39 @@ def financial_analyst_gate(financial_summary: dict[str, Any]) -> dict[str, Any]:
         return fail_gate("FINANCIAL_ANALYST_GATE", financial_summary.get("review_reason") or "financial_analyst_requires_review", financial_summary)
     if financial_summary.get("status") in {"failed", "needs_review"}:
         return fail_gate("FINANCIAL_ANALYST_GATE", "financial_analyst_failed", financial_summary)
+    import json
+    text = json.dumps(
+        {
+            "payload": financial_summary.get("payload", {}),
+            "output_summary": financial_summary.get("output_summary", {}),
+            "warnings": financial_summary.get("warnings", []),
+        },
+        ensure_ascii=False,
+        default=str,
+    )
+    metric_refs = set(_METRIC_REF_PATTERN.findall(text))
+    period_refs = set(_PERIOD_REF_PATTERN.findall(text))
+    input_refs = set(financial_summary.get("input_summary", {}).get("input_refs") or [])
+    financial_summary.setdefault("effectiveness", {})
+    financial_summary["effectiveness"].update(
+        {
+            "metric_reference_count": len(metric_refs),
+            "period_reference_count": len(period_refs),
+            "input_ref_count": len(input_refs),
+        }
+    )
+    if not metric_refs or not period_refs:
+        return fail_gate(
+            "FINANCIAL_ANALYST_GATE",
+            "financial_analyst_missing_traceable_metric_or_period_refs",
+            financial_summary,
+        )
+    if not any("fact" in ref or "snapshot" in ref for ref in input_refs) or not any("ratio" in ref for ref in input_refs):
+        return fail_gate(
+            "FINANCIAL_ANALYST_GATE",
+            "financial_analyst_missing_snapshot_or_ratio_artifact_ref",
+            financial_summary,
+        )
     return pass_gate("FINANCIAL_ANALYST_GATE", financial_summary)
 
 
@@ -116,34 +151,142 @@ def citation_gate(report_summary: dict[str, Any]) -> dict[str, Any]:
     return pass_gate("CITATION_GATE", report_summary)
 
 
+def tool_permission_gate(trace: list[dict[str, Any]]) -> dict[str, Any]:
+    tool_calls = [entry for entry in trace if entry.get("kind") == "tool_call"]
+    missing = [
+        entry.get("tool_name") or "unknown_tool"
+        for entry in tool_calls
+        if not (entry.get("gate_inputs") or {}).get("tool_permission")
+    ]
+    if missing:
+        return _gate_result("TOOL_PERMISSION_GATE", False, [f"tool_permission_missing:{','.join(sorted(set(missing)))}"], {"tool_calls": len(tool_calls)})
+    return pass_gate("TOOL_PERMISSION_GATE", {"tool_calls": len(tool_calls)})
+
+
+def artifact_manifest_gate(state: dict[str, Any]) -> dict[str, Any]:
+    refs = state.get("artifact_refs") or []
+    missing_paths = [
+        str(ref.get("artifact_id") or ref.get("section_key") or "unknown_artifact")
+        for ref in refs
+        if isinstance(ref, dict)
+        and ref.get("artifact_type") not in {"agent_message"}
+        and not ref.get("storage_path")
+        and ref.get("section_key") in {"facts", "index", "ratios", "valuation", "report", "full_report_draft", "evidence_packet"}
+    ]
+    if missing_paths:
+        return _gate_result("ARTIFACT_MANIFEST_GATE", False, [f"artifact_storage_path_missing:{','.join(sorted(set(missing_paths)))}"], {"artifact_refs": len(refs)})
+    return pass_gate("ARTIFACT_MANIFEST_GATE", {"artifact_refs": len(refs)})
+
+
+def formula_trace_gate(valuation_summary: dict[str, Any]) -> dict[str, Any]:
+    if not valuation_summary:
+        return pass_gate("FORMULA_TRACE_GATE", {"valuation_present": False})
+    traces = valuation_summary.get("formula_traces") or []
+    if not traces or valuation_summary.get("formula_trace_status") == "missing":
+        return fail_gate("FORMULA_TRACE_GATE", "missing_formula_trace", valuation_summary)
+    invalid = [
+        str(trace.get("trace_id") or trace.get("formula_id") or "unknown_trace")
+        for trace in traces
+        if not isinstance(trace, dict)
+        or not trace.get("formula_id")
+        or not trace.get("formula_version")
+        or not trace.get("calculation_steps")
+    ]
+    if invalid:
+        return _gate_result("FORMULA_TRACE_GATE", False, [f"invalid_formula_trace:{','.join(invalid[:10])}"], {"trace_count": len(traces)})
+    return pass_gate("FORMULA_TRACE_GATE", {"trace_count": len(traces)})
+
+
+def evidence_packet_gate(state: dict[str, Any]) -> dict[str, Any]:
+    refs = state.get("artifact_refs") or []
+    evidence_refs = [
+        ref for ref in refs
+        if isinstance(ref, dict) and ref.get("section_key") == "evidence_packet" and ref.get("storage_path")
+    ]
+    if not evidence_refs:
+        return fail_gate("EVIDENCE_PACKET_GATE", "evidence_packet_missing", {"artifact_refs": len(refs)})
+    valuation = state.get("valuation_outputs") or (state.get("artifacts") or {}).get("valuation") or {}
+    if valuation and not valuation.get("formula_traces"):
+        return fail_gate("EVIDENCE_PACKET_GATE", "evidence_packet_missing_formula_traces", valuation)
+    return pass_gate("EVIDENCE_PACKET_GATE", {"evidence_packet_path": evidence_refs[-1].get("storage_path")})
+
+
+def agent_handoff_gate(state: dict[str, Any]) -> dict[str, Any]:
+    handoffs = (state.get("artifacts") or {}).get("agent_handoffs") or []
+    expected_agents = {"supervisor", "data_retrieval", "financial_analyst", "valuation", "report_writer_critic"}
+    seen = {handoff.get("agent_id") for handoff in handoffs if isinstance(handoff, dict)}
+    missing = sorted(expected_agents - seen)
+    if missing:
+        return _gate_result("AGENT_HANDOFF_GATE", False, [f"agent_handoff_missing:{','.join(missing)}"], {"handoff_count": len(handoffs)})
+    invalid = [
+        str(handoff.get("agent_id") or "unknown_agent")
+        for handoff in handoffs
+        if isinstance(handoff, dict) and not handoff.get("handoff_hash")
+    ]
+    if invalid:
+        return _gate_result("AGENT_HANDOFF_GATE", False, [f"agent_handoff_hash_missing:{','.join(invalid)}"], {"handoff_count": len(handoffs)})
+    return pass_gate("AGENT_HANDOFF_GATE", {"handoff_count": len(handoffs)})
+
+
+def approval_path_gate(state: dict[str, Any], final_approval_required: bool = True) -> dict[str, Any]:
+    if not final_approval_required:
+        return pass_gate("APPROVAL_PATH_GATE", {"final_approval_required": False})
+    approvals = state.get("approvals") or {}
+    decisions = state.get("human_review_decisions") or {}
+    final_decision = decisions.get("final_report") or {}
+    if approvals.get("final_report") != "approved" or final_decision.get("decision") != "approved":
+        return fail_gate("APPROVAL_PATH_GATE", "final_approval_not_recorded_by_runner", {"approvals": approvals, "human_review_decisions": decisions})
+    return pass_gate("APPROVAL_PATH_GATE", {"final_approval_required": True, "reviewer": final_decision.get("reviewer")})
+
+
 def export_gate(state: dict[str, Any], final_approval_required: bool = True) -> dict[str, Any]:
     gate_results = state.get("gate_results") or {}
+    blocking_reasons: list[str] = []
+    required_gates = {
+        "TOOL_PERMISSION_GATE",
+        "ARTIFACT_MANIFEST_GATE",
+        "FORMULA_TRACE_GATE",
+        "EVIDENCE_PACKET_GATE",
+        "AGENT_HANDOFF_GATE",
+    }
+    if final_approval_required:
+        required_gates.add("APPROVAL_PATH_GATE")
+    missing_required = sorted(name for name in required_gates if name not in gate_results)
+    if missing_required:
+        blocking_reasons.append(f"required_harness_gate_missing:{','.join(missing_required)}")
     failed = [name for name, gate in gate_results.items() if isinstance(gate, dict) and gate.get("passed") is False]
     if failed:
-        return fail_gate("EXPORT_GATE", f"upstream_gate_failed:{','.join(failed)}", {"failed": failed})
+        blocking_reasons.append(f"upstream_gate_failed:{','.join(failed)}")
     if final_approval_required and (state.get("approvals") or {}).get("final_report") != "approved":
-        return fail_gate("EXPORT_GATE", "final_human_approval_missing", {})
+        blocking_reasons.append("final_human_approval_missing")
     evaluation = state.get("evaluation_results") or (state.get("artifacts") or {}).get("quality") or {}
     if evaluation.get("overall_status") in {"FAIL", "failed", "fail"}:
-        return fail_gate("EXPORT_GATE", "quality_evaluation_failed", evaluation)
+        blocking_reasons.append("quality_evaluation_failed")
     valuation = state.get("valuation_outputs") or (state.get("artifacts") or {}).get("valuation") or {}
     report = state.get("draft_report") or (state.get("artifacts") or {}).get("report") or {}
-    report_blockers = _report_export_blockers(report)
-    if report_blockers:
-        return _gate_result("EXPORT_GATE", False, report_blockers, report)
-    valuation_blockers = _valuation_export_blockers(valuation)
-    if valuation_blockers:
-        return _gate_result("EXPORT_GATE", False, valuation_blockers, valuation)
-    evaluation_blockers = _evaluation_export_blockers(evaluation)
-    if evaluation_blockers:
-        return _gate_result("EXPORT_GATE", False, evaluation_blockers, evaluation)
+    blocking_reasons.extend(_report_export_blockers(report))
+    blocking_reasons.extend(_valuation_export_blockers(valuation))
+    blocking_reasons.extend(_evaluation_export_blockers(evaluation))
     if valuation and report and valuation.get("snapshot_id") != report.get("snapshot_id"):
-        return fail_gate("EXPORT_GATE", "report_not_linked_to_valuation_snapshot", {"valuation": valuation, "report": report})
+        blocking_reasons.append("report_not_linked_to_valuation_snapshot")
     if final_approval_required and valuation and not (state.get("artifacts") or {}).get("valuation_lock"):
-        return fail_gate("EXPORT_GATE", "approved_valuation_lock_missing", {})
+        blocking_reasons.append("approved_valuation_lock_missing")
     audit = (state.get("artifacts") or {}).get("audit_review", {})
     if audit and audit.get("passed") is False:
-        return fail_gate("EXPORT_GATE", "audit_review_failed", audit)
+        blocking_reasons.append("audit_review_failed")
+    if blocking_reasons:
+        return _gate_result(
+            "EXPORT_GATE",
+            False,
+            sorted(set(blocking_reasons)),
+            {
+                "missing_required_gates": missing_required,
+                "failed_gates": failed,
+                "valuation": valuation,
+                "report": report,
+                "evaluation": evaluation,
+            },
+        )
     return pass_gate("EXPORT_GATE", {})
 
 

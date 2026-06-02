@@ -12,6 +12,8 @@
     "gate_results",
     "quality_gate_results",
     "known_limitations",
+    "agent_handoffs",
+    "tool_execution_summary",
     "packet_hash"
   ],
   "properties": {
@@ -31,9 +33,32 @@
     "gate_results": {"type": "object"},
     "quality_gate_results": {"type": "object"},
     "known_limitations": {"type": "array", "items": {"type": "string"}},
+    "agent_handoffs": {"type": "array"},
+    "tool_execution_summary": {"type": "array"},
     "trace_summary": {"type": "array"},
     "created_at": {"type": "string"},
     "packet_hash": {"type": "string", "minLength": 64, "maxLength": 64}
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "valuation_outputs": {
+            "type": "object",
+            "minProperties": 1
+          }
+        },
+        "required": ["valuation_outputs"]
+      },
+      "then": {
+        "properties": {
+          "formula_traces": {
+            "type": "array",
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
   "additionalProperties": false
 }

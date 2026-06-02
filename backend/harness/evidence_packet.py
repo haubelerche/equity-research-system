@@ -31,6 +31,8 @@ def build_evidence_packet(state: ResearchGraphState) -> dict[str, Any]:
         "gate_results": state.gate_results,
         "quality_gate_results": state.evaluation_results or artifacts.get("quality", {}),
         "known_limitations": _known_limitations(state),
+        "agent_handoffs": artifacts.get("agent_handoffs", []),
+        "tool_execution_summary": _tool_execution_summary(state.trace),
         "trace_summary": _trace_summary(state.trace),
         "created_at": datetime.now(UTC).isoformat(),
     }
@@ -77,3 +79,16 @@ def _trace_summary(trace: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "output_hash": item.get("output_hash"),
         })
     return summary
+
+
+def _tool_execution_summary(trace: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "tool_name": item.get("tool_name"),
+            "agent_role": item.get("agent_role"),
+            "output_hash": item.get("output_hash"),
+            "permission": (item.get("gate_inputs") or {}).get("tool_permission", {}),
+        }
+        for item in trace
+        if item.get("kind") == "tool_call"
+    ]

@@ -43,12 +43,73 @@ class EvidenceRef(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class FormulaTrace(BaseModel):
+    trace_id: str
+    formula_id: str
+    formula_version: str
+    output_name: str
+    output_value: Any = None
+    unit: str | None = None
+    period: str | None = None
+    input_fact_ids: list[Any] = Field(default_factory=list)
+    input_values: dict[str, Any] = Field(default_factory=dict)
+    calculation_steps: list[dict[str, Any]] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
+class AgentExecutionContext(BaseModel):
+    run_id: str
+    ticker: str
+    stage: str
+    task: str
+    allowed_tools: list[str] = Field(default_factory=list)
+    input_artifact_refs: list[dict[str, Any]] = Field(default_factory=list)
+    evidence_packet_path: str | None = None
+    relevant_gate_results: dict[str, Any] = Field(default_factory=dict)
+    known_limitations: list[str] = Field(default_factory=list)
+    required_handoff_fields: list[str] = Field(default_factory=lambda: [
+        "run_id",
+        "agent_id",
+        "stage",
+        "input_refs",
+        "output_refs",
+        "review_status",
+        "blocking_issue_ids",
+        "unresolved_questions",
+        "recommended_next_stage",
+        "handoff_hash",
+    ])
+
+
+class AgentHandoff(BaseModel):
+    run_id: str
+    agent_id: str
+    stage: str
+    input_refs: list[str] = Field(default_factory=list)
+    output_refs: list[str] = Field(default_factory=list)
+    review_status: str
+    blocking_issue_ids: list[str] = Field(default_factory=list)
+    unresolved_questions: list[str] = Field(default_factory=list)
+    recommended_next_stage: str | None = None
+    created_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
+    handoff_hash: str | None = None
+
+    def with_hash(self) -> "AgentHandoff":
+        payload = self.model_dump(mode="json")
+        payload.pop("handoff_hash", None)
+        self.handoff_hash = stable_hash(payload)
+        return self
+
+
 class ServiceNodeResult(BaseModel):
     node_name: str
     status: NodeStatus
     summary: dict[str, Any] = Field(default_factory=dict)
     artifact_refs: list[ArtifactRef] = Field(default_factory=list)
     evidence_refs: list[EvidenceRef] = Field(default_factory=list)
+    gate_inputs: dict[str, Any] = Field(default_factory=dict)
+    formula_traces: list[FormulaTrace] = Field(default_factory=list)
+    handoff_refs: list[ArtifactRef] = Field(default_factory=list)
     blocking_reason: str | None = None
     warnings: list[str] = Field(default_factory=list)
     input_hash: str | None = None

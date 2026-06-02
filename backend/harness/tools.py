@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -83,11 +85,28 @@ def auto_ingest_tool(
         )
         results = _run(cfg)
         promoted = sum(r.promoted for r in results)
+        cafef_rows = sum(r.cafef_rows for r in results)
+        pdf_rows = sum(r.pdf_rows for r in results)
+        ocr_candidates = sum(getattr(r, "ocr_candidates", 0) for r in results)
+        ocr_promoted = sum(getattr(r, "ocr_promoted", 0) for r in results)
+        statuses = [
+            getattr(getattr(r, "ingest_status", ""), "value", str(getattr(r, "ingest_status", "")))
+            for r in results
+        ]
+        official_ready = any(status in {"OFFICIAL_FACTS_READY", "OCR_PROMOTED"} for status in statuses)
         summary: dict = {
             "ticker": ticker,
             "promoted": promoted,
             "channels_run": len(results),
             "status": "completed",
+            "web_ingest_attempted": True,
+            "cafef_rows": cafef_rows,
+            "pdf_rows": pdf_rows,
+            "ocr_candidates": ocr_candidates,
+            "ocr_promoted": ocr_promoted,
+            "year_statuses": statuses,
+            "official_ready": official_ready,
+            "continued_with_tier2_or_tier3_fallback": not official_ready,
         }
         node_status = "completed"
     except Exception as exc:  # noqa: BLE001
@@ -95,6 +114,14 @@ def auto_ingest_tool(
             "ticker": ticker,
             "promoted": 0,
             "status": "warn",
+            "web_ingest_attempted": True,
+            "cafef_rows": 0,
+            "pdf_rows": 0,
+            "ocr_candidates": 0,
+            "ocr_promoted": 0,
+            "year_statuses": [],
+            "official_ready": False,
+            "continued_with_tier2_or_tier3_fallback": True,
             "warning": f"auto_ingest skipped: {str(exc)[:200]}",
         }
         node_status = "completed"
@@ -106,9 +133,6 @@ def auto_ingest_tool(
 
 
 def build_index_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int = MVP_TO_YEAR) -> ServiceNodeResult:
-    import json
-    from datetime import UTC, datetime
-
     from scripts.build_index import build_index
 
     summary = build_index(ticker=ticker, years=list(range(from_year, to_year + 1)))
@@ -142,6 +166,7 @@ def run_valuation_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int
 
     artifact = run_valuation(ticker=ticker, from_year=from_year, to_year=to_year)
     artifact_path = artifact.get("artifact_path", "")
+    formula_traces = artifact.get("formula_traces") or []
     summary = {
         "ticker": ticker,
         "snapshot_id": artifact.get("snapshot_id"),
@@ -160,6 +185,10 @@ def run_valuation_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int
         "assumptions": artifact.get("assumptions", {}),
         "assumption_gate": artifact.get("assumption_gate", {}),
         "valuation_confidence": artifact.get("valuation_confidence", {}),
+        "formula_trace_status": "present" if formula_traces else "missing",
+        "formula_trace_count": len(formula_traces),
+        "missing_formula_trace_count": 0 if formula_traces else 1,
+        "formula_traces": formula_traces,
     }
     return _result(
         "VALUATION_DRAFT",
@@ -235,6 +264,151 @@ def generate_report_tool(
                 ("citation", "citation_path"),
             )
             if artifact.get(path_key)
+        ],
+    )
+
+
+def read_valuation_artifact_tool(artifact_path: str | None) -> ServiceNodeResult:
+    if not artifact_path:
+        return _result(
+            "READ_VALUATION_ARTIFACT",
+            "failed",
+            {"artifact_path": artifact_path, "blocking_reason": "valuation_artifact_path_missing"},
+            blocking_reason="valuation_artifact_path_missing",
+        )
+    path = Path(artifact_path)
+    if not path.exists():
+        return _result(
+            "READ_VALUATION_ARTIFACT",
+            "failed",
+            {"artifact_path": artifact_path, "blocking_reason": "valuation_artifact_not_found"},
+            blocking_reason="valuation_artifact_not_found",
+        )
+    artifact = json.loads(path.read_text(encoding="utf-8"))
+    traces = artifact.get("formula_traces") or []
+    summary = {
+        "artifact_path": str(path),
+        "ticker": artifact.get("ticker"),
+        "snapshot_id": artifact.get("snapshot_id"),
+        "valuation_methods": artifact.get("valuation_methods", []),
+        "formula_trace_status": "present" if traces else "missing",
+        "formula_trace_count": len(traces),
+        "formula_traces": traces[:50],
+    }
+    return _result(
+        "READ_VALUATION_ARTIFACT",
+        "completed",
+        summary,
+        artifact_refs=[
+            ArtifactRef(
+                artifact_id=f"{artifact.get('ticker', 'ticker')}_valuation_read",
+                artifact_type="valuation_result_json",
+                section_key="valuation_read",
+                storage_path=str(path),
+                producer="READ_VALUATION_ARTIFACT",
+            )
+        ],
+    )
+
+
+def read_snapshot_tool(ticker: str, snapshot_id: str | None) -> ServiceNodeResult:
+    if not snapshot_id:
+        return _result(
+            "READ_SNAPSHOT",
+            "failed",
+            {"ticker": ticker, "snapshot_id": snapshot_id, "blocking_reason": "snapshot_id_missing"},
+            blocking_reason="snapshot_id_missing",
+        )
+    from backend.dataops.snapshot import load_snapshot_facts
+
+    try:
+        facts = load_snapshot_facts(snapshot_id)
+    except Exception as exc:  # noqa: BLE001
+        return _result(
+            "READ_SNAPSHOT",
+            "failed",
+            {"ticker": ticker, "snapshot_id": snapshot_id, "blocking_reason": f"snapshot_read_failed:{exc}"},
+            blocking_reason="snapshot_read_failed",
+        )
+    periods = sorted({f"{row.get('fiscal_year')}FY" for row in facts if row.get("fiscal_year")})
+    metric_ids = sorted({str(row.get("line_item_code")) for row in facts if row.get("line_item_code")})
+    source_tiers = sorted({
+        int(row.get("source_tier"))
+        for row in facts
+        if row.get("source_tier") is not None
+    })
+    summary = {
+        "ticker": ticker,
+        "snapshot_id": snapshot_id,
+        "facts_count": len(facts),
+        "periods": periods,
+        "metric_ids": metric_ids[:100],
+        "source_tiers": source_tiers,
+        "sample_facts": facts[:20],
+    }
+    return _result(
+        "READ_SNAPSHOT",
+        "completed",
+        summary,
+        evidence_refs=[
+            EvidenceRef(
+                evidence_type="financial_fact",
+                evidence_id=snapshot_id,
+                metadata={"facts_count": len(facts), "periods": periods, "metric_count": len(metric_ids)},
+            )
+        ],
+    )
+
+
+def read_ratio_artifact_tool(ticker: str, snapshot_id: str | None) -> ServiceNodeResult:
+    if not snapshot_id:
+        return _result(
+            "READ_RATIO_ARTIFACT",
+            "failed",
+            {"ticker": ticker, "snapshot_id": snapshot_id, "blocking_reason": "snapshot_id_missing"},
+            blocking_reason="snapshot_id_missing",
+        )
+    from backend.analytics.ratios import compute_ratios
+    from backend.dataops.snapshot import load_snapshot_facts
+    from backend.facts.normalizer import build_fact_table, compute_derived, periods_sorted
+
+    try:
+        raw_facts = load_snapshot_facts(snapshot_id)
+    except Exception as exc:  # noqa: BLE001
+        return _result(
+            "READ_RATIO_ARTIFACT",
+            "failed",
+            {"ticker": ticker, "snapshot_id": snapshot_id, "blocking_reason": f"ratio_snapshot_read_failed:{exc}"},
+            blocking_reason="ratio_snapshot_read_failed",
+        )
+    fact_table = compute_derived(build_fact_table(raw_facts))
+    periods = sorted(p for p in periods_sorted(fact_table) if str(p).endswith("FY"))
+    ratios = compute_ratios(fact_table)
+    ratio_payload = {
+        "ticker": ticker,
+        "snapshot_id": snapshot_id,
+        "periods": periods,
+        "ratios": {metric: dict(values) for metric, values in ratios.items()},
+        "metric_ids": sorted(ratios.keys()),
+        "unit": "ratio",
+    }
+    out_dir = Path.cwd() / "artifacts" / "analysis"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
+    artifact_path = out_dir / f"{ticker.upper()}_{ts}_ratio_artifact.json"
+    artifact_path.write_text(json.dumps(ratio_payload, indent=2, default=str), encoding="utf-8")
+    return _result(
+        "READ_RATIO_ARTIFACT",
+        "completed",
+        {**ratio_payload, "artifact_path": str(artifact_path)},
+        artifact_refs=[
+            ArtifactRef(
+                artifact_id=f"{ticker}_ratio_artifact",
+                artifact_type="ratio_artifact_json",
+                section_key="ratios",
+                storage_path=str(artifact_path),
+                producer="READ_RATIO_ARTIFACT",
+            )
         ],
     )
 

@@ -13,6 +13,7 @@ def _make_ft() -> dict:
         "ebitda.total": {"2024FY": 280.0},
         "total_debt.ending": {"2024FY": 100.0},
         "cash_and_equivalents.ending": {"2024FY": 50.0},
+        "shares_outstanding.ending": {"2024FY": 25_000_000.0},
     }
 
 
@@ -78,6 +79,7 @@ class TestEVEBITDABridge:
             "net_income.parent": {"2024FY": 200.0},
             "equity.parent": {"2024FY": 1500.0},
             "ebitda.total": {"2024FY": 280.0},
+            "shares_outstanding.ending": {"2024FY": 25_000_000.0},
             # No debt or cash data — net_debt defaults to 0, but that's acceptable
             # The real guard is when we cannot compute net_debt at all
         }
@@ -89,6 +91,18 @@ class TestEVEBITDABridge:
         )
         # net_debt = 0.0 - 0.0 = 0.0 → bridge still works
         assert result.implied_price_ev_ebitda is not None
+
+    def test_ev_ebitda_blocked_without_explicit_shares(self):
+        ft = _make_ft()
+        del ft["shares_outstanding.ending"]
+        result = compute_multiples(
+            "TEST", ft,
+            target_ev_ebitda=10.0,
+            peer_data_source="VN pharma peers",
+        )
+        assert result.shares_mn is None
+        assert result.implied_price_ev_ebitda is None
+        assert any("Shares outstanding" in w for w in result.warnings)
 
     def test_to_dict_includes_peer_status(self):
         result = compute_multiples("TEST", _make_ft())

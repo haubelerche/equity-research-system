@@ -5,7 +5,7 @@ Standard 2-stage DCF:
   Stage 2: Gordon Growth terminal value at period n
 
 FCF = operating_cash_flow.total + capex.total  (capex stored negative from CFS)
-Shares (mn) derived from net_income / EPS (avoids needing a separate shares field).
+Shares (mn) are accepted only from explicit shares_outstanding facts.
 
 NOTE: This is a simplified OCF-CAPEX reference DCF.
 The primary valuation uses the 60% FCFF + 40% FCFE blend in fcff.py / fcfe.py / blend.py.
@@ -16,6 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from backend.analytics.shares import explicit_shares_mn
 from backend.facts.normalizer import FactTable
 
 
@@ -102,7 +103,7 @@ def run_dcf(
     """Run a simplified OCF-CAPEX DCF for a single scenario (reference model only).
 
     FCF = OCF + CAPEX_CFS  (CAPEX stored as negative from CFS; + adds it back correctly).
-    Derives shares from net_income / eps.basic.
+    Uses explicit shares_outstanding facts for per-share valuation.
     """
     warnings: list[str] = [
         "Simplified OCF-CAPEX DCF — sử dụng CAGR lịch sử, không phải driver-based forecast. "
@@ -235,12 +236,12 @@ def run_dcf(
 
     equity_val = ev - net_debt
 
-    # Shares outstanding (millions) from EPS + net income
-    shares_mn: float | None = None
-    ni = _get(fact_table, "net_income.parent", latest_fy)
-    eps = _get(fact_table, "eps.basic", latest_fy)
-    if ni is not None and eps is not None and eps > 0:
-        shares_mn = (ni * 1_000) / eps  # VND bn * 1000 / VND per share = mn shares
+    shares_mn = explicit_shares_mn(fact_table, latest_fy)
+    if shares_mn is None:
+        warnings.append(
+            "Simplified DCF: shares_outstanding fact missing; target price blocked "
+            "to avoid EPS-implied share-count error."
+        )
 
     # Block target price when model assumptions are invalid or FCF history is unreliable
     intrinsic_per_share: float | None = None

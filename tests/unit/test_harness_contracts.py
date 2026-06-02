@@ -70,11 +70,27 @@ def test_citation_and_export_gates_block_missing_approval() -> None:
     assert not citation_gate({"claims_count": 1, "citation_count": 0})["passed"]
     assert not citation_gate({"claims_count": 1, "citation_count": 1, "tier3_only_material_count": 1})["passed"]
     assert not export_gate({"gate_results": {}, "approvals": {}}, final_approval_required=True)["passed"]
-    assert export_gate({"gate_results": {}, "approvals": {"final_report": "approved"}}, final_approval_required=True)["passed"]
+    required = {
+        "TOOL_PERMISSION_GATE": {"passed": True},
+        "ARTIFACT_MANIFEST_GATE": {"passed": True},
+        "FORMULA_TRACE_GATE": {"passed": True},
+        "EVIDENCE_PACKET_GATE": {"passed": True},
+        "AGENT_HANDOFF_GATE": {"passed": True},
+        "APPROVAL_PATH_GATE": {"passed": True},
+    }
+    assert export_gate(
+        {
+            "gate_results": required,
+            "approvals": {"final_report": "approved"},
+            "human_review_decisions": {"final_report": {"decision": "approved"}},
+        },
+        final_approval_required=True,
+    )["passed"]
     assert not export_gate(
         {
-            "gate_results": {},
+            "gate_results": required,
             "approvals": {"final_report": "approved"},
+            "human_review_decisions": {"final_report": {"decision": "approved"}},
             "valuation_outputs": {"snapshot_id": "snap1"},
             "draft_report": {"snapshot_id": "snap2"},
             "artifacts": {"valuation_lock": {"locked": True}},

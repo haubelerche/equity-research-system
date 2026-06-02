@@ -24,7 +24,8 @@ def _minimal_table() -> dict:
             "2023FY": -220.0,
         },
         "net_income.parent": {"2023FY": 600.0},
-        "eps.basic":         {"2023FY": 6000.0},  # → 600bn * 1000 / 6000 = 100mn shares
+        "eps.basic": {"2023FY": 6000.0},
+        "shares_outstanding.ending": {"2023FY": 100_000_000.0},
         "total_debt.ending": {"2023FY": 400.0},
         "cash_and_equivalents.ending": {"2023FY": 150.0},
     }
@@ -46,10 +47,17 @@ class TestRunDcf:
         assert len(result.projected_fcf_vnd_bn) == 5
         assert len(result.pv_fcf_vnd_bn) == 5
 
-    def test_shares_derived_from_eps(self):
+    def test_shares_read_from_explicit_fact(self):
         result = run_dcf("DHG", _minimal_table(), DCFAssumptions())
-        # shares_mn = (600 bn * 1000) / 6000 VND = 100 mn
         assert result.shares_mn == pytest.approx(100.0, abs=0.01)
+
+    def test_missing_explicit_shares_blocks_intrinsic_value(self):
+        table = _minimal_table()
+        table.pop("shares_outstanding.ending")
+        result = run_dcf("DHG", table, DCFAssumptions())
+        assert result.shares_mn is None
+        assert result.intrinsic_value_per_share_vnd is None
+        assert any("shares_outstanding" in w for w in result.warnings)
 
     def test_intrinsic_value_positive(self):
         result = run_dcf("DHG", _minimal_table(), DCFAssumptions())
@@ -140,7 +148,7 @@ class TestRunDcf:
         """to_dict() must not coerce 0.0 to None for numeric fields."""
         result = run_dcf("DHG", _minimal_table(), DCFAssumptions())
         d = result.to_dict()
-        # shares_mn is derived from EPS so should be non-None; field must use is not None check
+        # shares_mn should be non-None; field must use is not None check.
         assert d["shares_mn"] is not None
 
     def test_periods_used_sorted(self):

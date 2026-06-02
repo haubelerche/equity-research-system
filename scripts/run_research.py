@@ -76,6 +76,7 @@ def submit_harness_run(args: argparse.Namespace) -> str:
     from backend.orchestrator import RunContext
     from backend.runtime_store import RuntimeStore
     from backend.settings import settings
+    from backend.universe_registration import ensure_ticker_registered_from_universe
 
     ticker = args.ticker.strip().upper()
     run_id = _run_id(ticker)
@@ -95,6 +96,7 @@ def submit_harness_run(args: argparse.Namespace) -> str:
 
     store = RuntimeStore(dsn=settings.database_url)
     store.check_schema_version()
+    ensure_ticker_registered_from_universe(store, ticker)
     store.create_run(
         run_id=run_id,
         ticker=ticker,

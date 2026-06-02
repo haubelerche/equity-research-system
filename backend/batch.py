@@ -8,6 +8,7 @@ from backend.executor import RunExecutor
 from backend.orchestrator import RunContext, Supervisor
 from backend.runtime_store import RuntimeStore
 from backend.settings import settings
+from backend.universe_registration import ensure_ticker_registered_from_universe
 from backend.utils import deterministic_id
 
 
@@ -38,6 +39,7 @@ def submit_universe_runs(limit: int | None = None) -> list[str]:
             "fallback_model": settings.fallback_model,
         }
         try:
+            ensure_ticker_registered_from_universe(store, ticker)
             store.create_run(
                 run_id=run_id,
                 ticker=ticker,

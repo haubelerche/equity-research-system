@@ -39,3 +39,16 @@ def test_internal_debug_mode_does_not_require_run_id():
         cwd="c:\\Users\\Admin\\Desktop\\multi-agent-equity-research",
     )
     assert result.returncode != 2
+
+
+def test_universe_ticker_is_not_rejected_by_renderer_allowlist():
+    """DP3 is configured in the universe CSV and must pass ticker validation."""
+    result = subprocess.run(
+        [sys.executable, "scripts/render_report.py", "--ticker", "DP3", "--mode", "analyst_draft"],
+        capture_output=True, text=True,
+        cwd="c:\\Users\\Admin\\Desktop\\multi-agent-equity-research",
+    )
+    combined = f"{result.stdout}\n{result.stderr}"
+    assert "Unknown ticker" not in combined
+    assert result.returncode == 2
+    assert "run-id" in combined.lower() or "run_id" in combined.lower()

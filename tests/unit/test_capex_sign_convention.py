@@ -38,6 +38,10 @@ _FACT_TABLE: dict = {
     "cash_and_equivalents.ending": {"2024FY": 50.0},
     "equity.parent": {"2024FY": 1200.0},
 }
+_FACT_TABLE_WITH_SHARES: dict = {
+    **_FACT_TABLE,
+    "shares_outstanding.ending": {"2024FY": 20_000_000.0},
+}
 
 
 class TestFCFFCapexConvention:
@@ -68,6 +72,18 @@ class TestFCFFCapexConvention:
         d = result.to_dict()
         assert d.get("capex_convention") == "positive_outflow"
         assert "capex_formula_note" in d
+
+    def test_target_price_blocked_without_explicit_shares(self):
+        forecast = _make_forecast_with_capex()
+        result = compute_fcff("TEST", forecast, _FACT_TABLE)
+        assert result.target_price_vnd is None
+        assert any("shares_outstanding" in w for w in result.warnings)
+
+    def test_target_price_uses_explicit_shares(self):
+        forecast = _make_forecast_with_capex()
+        result = compute_fcff("TEST", forecast, _FACT_TABLE_WITH_SHARES)
+        assert result.shares_mn == pytest.approx(20.0)
+        assert result.target_price_vnd is not None
 
     def test_negative_input_capex_gives_same_fcff_as_positive_input(self):
         """Whether ForecastYear.capex = -50 or +50, FCFFYear CAPEX and FCFF value must be equal."""
@@ -103,3 +119,15 @@ class TestFCFECapexConvention:
         d = result.to_dict()
         assert d.get("capex_convention") == "positive_outflow"
         assert "capex_formula_note" in d
+
+    def test_target_price_blocked_without_explicit_shares(self):
+        forecast = _make_forecast_with_capex()
+        result = compute_fcfe("TEST", forecast, _FACT_TABLE)
+        assert result.target_price_vnd is None
+        assert any("shares_outstanding" in w for w in result.warnings)
+
+    def test_target_price_uses_explicit_shares(self):
+        forecast = _make_forecast_with_capex()
+        result = compute_fcfe("TEST", forecast, _FACT_TABLE_WITH_SHARES)
+        assert result.shares_mn == pytest.approx(20.0)
+        assert result.target_price_vnd is not None

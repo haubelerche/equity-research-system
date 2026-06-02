@@ -26,6 +26,7 @@ try:
 except ImportError:
     _HAS_DB = False
 
+from backend.dataset.config_io import load_universe_rows
 from backend.reporting.section_builder import ReportContext
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -79,6 +80,13 @@ _COMPANIES: dict[str, tuple[str, str]] = {
     "TRA": ("Công ty CP Traphaco", "HOSE"),
     "DBD": ("Công ty CP Dược Bình Định", "HOSE"),
 }
+for _row in load_universe_rows():
+    _ticker = (_row.get("ticker") or "").strip().upper()
+    if _ticker:
+        _COMPANIES.setdefault(
+            _ticker,
+            ((_row.get("company_name") or _ticker).strip(), (_row.get("exchange") or "HOSE").strip()),
+        )
 
 _SECTOR_BLURB: dict[str, str] = {
     "DHG": (
@@ -107,7 +115,7 @@ _SECTOR_BLURB: dict[str, str] = {
     ),
     "DBD": (
         "Công ty CP Dược Bình Định (DBD) là nhà sản xuất dược phẩm khu vực miền Trung Việt Nam, "
-        "niêm yết HNX. Công ty cung cấp đa dạng sản phẩm dược generic cho cả kênh ETC (đấu thầu "
+        "niêm yết HOSE. Công ty cung cấp đa dạng sản phẩm dược generic cho cả kênh ETC (đấu thầu "
         "bệnh viện) và OTC, phục vụ thị trường miền Trung và Tây Nguyên. Biên gộp ổn định trong "
         "vùng 47-49% phản ánh cơ cấu sản phẩm cân bằng."
     ),

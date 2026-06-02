@@ -22,6 +22,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from backend.analytics.shares import explicit_shares_mn
 from backend.analytics.forecasting import ForecastArtifact, ForecastYear  # noqa: F401
 
 from backend.facts.normalizer import FactTable
@@ -183,12 +184,14 @@ def compute_fcfe(
             return None
         return entry.value if hasattr(entry, "value") else float(entry)
 
-    # Derive shares from latest historical EPS + net income
+    # Target price requires explicit share-count facts; EPS-implied shares are a
+    # reconciliation diagnostic and must not drive report-facing valuation.
     if shares_mn is None:
-        ni_hist = _get("net_income.parent", latest_fy)
-        eps_hist = _get("eps.basic", latest_fy)
-        if ni_hist and eps_hist and eps_hist > 0:
-            shares_mn = (ni_hist * 1_000) / eps_hist  # VND bn * 1000 / VND/share = mn shares
+        shares_mn = explicit_shares_mn(fact_table, latest_fy)
+    if shares_mn is None:
+        warnings.append(
+            "FCFE: shares_outstanding fact missing — target price blocked to avoid EPS-implied share-count error."
+        )
 
     if net_borrowing_schedule is None:
         warnings.append(

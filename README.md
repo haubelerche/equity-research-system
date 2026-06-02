@@ -44,7 +44,7 @@ Dữ liệu thị trường (vnstock)
         ▼
 [Human Approval] approve_report.py
   → Reviewer xem xét + approve/reject
-  → Export → reports/approved/
+  → ResearchGraphRunner.handle_approval → EXPORT_GATE → published run state
 ```
 
 ---
@@ -218,22 +218,22 @@ Kết quả `PASS` mới được phép export. `CRITICAL FAIL` chặn export t�
 
 ```bash
 # Phê duyệt (sau khi tất cả evaluation gates PASS)
-python scripts/approve_report.py --ticker DHG --decision approve --reviewer analyst --comment "Verified"
+python scripts/approve_report.py --run-id <run_id> --decision approve --reviewer analyst --comment "Verified"
 
 # Từ chối
-python scripts/approve_report.py --ticker DHG --decision reject --comment "WACC assumption cần review lại"
+python scripts/approve_report.py --run-id <run_id> --decision reject --reviewer analyst --comment "WACC assumption cần review lại"
 ```
 
 Kết quả:
-- Báo cáo đã duyệt tại `reports/approved/DHG_{timestamp}_APPROVED_{run_id}.md`
-- Approval record tại `reports/approved/DHG_{timestamp}_approval.json`
+- Quyết định phê duyệt được ghi qua `ResearchGraphRunner.handle_approval`.
+- Runner resume từ checkpoint và chỉ publish khi `EXPORT_GATE` final pass.
 
 ---
 
 ## Chạy end-to-end một lệnh (Phase 8)
 
 ```bash
-python scripts/run_research.py --ticker DHG --report-type full_report
+python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025
 ```
 
 Lệnh này chạy toàn bộ pipeline từ ingestion đến evaluation, ghi run trace vào DB.
@@ -292,7 +292,7 @@ Draft rating: BAN (SELL) — chưa được analyst phê duyệt
 │   ├── generate_report.py  # Phase 6: Report generation
 │   ├── evaluate_report.py  # Phase 7: Evaluation gates
 │   ├── run_research.py     # Phase 8: End-to-end pipeline
-│   ├── approve_report.py   # Phase 9: Human approval & export
+│   ├── approve_report.py   # Phase 9: run-scoped harness approval
 │   └── connectors/         # vnstock connector layer
 │
 ├── reports/

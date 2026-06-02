@@ -14,7 +14,7 @@ agents:
     model: ${DEFAULT_MODEL_NAME}
     temperature: 0.0
     prompt_path: prompts/data_retrieval.md
-    allowed_tools: [build_facts, build_index]
+    allowed_tools: [auto_ingest, build_facts, build_index]
     output_schema: AgentResult
     budget_class: light_review
     timeout_seconds: 60
