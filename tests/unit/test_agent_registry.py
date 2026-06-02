@@ -75,6 +75,7 @@ def test_financial_analyst_prompt_has_output_schema_fields():
         "investment_thesis",
         "risk_narrative",
         "forecast_narrative",
+        "key_data_quality_notes",
     ]
     for field in required_fields:
         assert field in cfg.prompt, f"Narrative field '{field}' not defined in Output JSON Schema"

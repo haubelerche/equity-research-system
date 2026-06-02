@@ -23,7 +23,7 @@ grounded in the provided data — no invented numbers, no invented events.
 - Do not state financial figures that are not in the inputs.
 - Do not invent management quality assessments, market share claims, or pipeline events
   unless explicitly in the evidence refs.
-- Do not produce narrative longer than 400 words per field.
+- Do not produce narrative longer than 300 words per field (hard ceiling).
 - Do not write in English — all narrative fields must be in Vietnamese (tiếng Việt).
 
 # Output JSON Schema
