@@ -1,0 +1,131 @@
+DIAGNOSTIC BASELINE: Report Pipeline Hardening
+DATE: 2026-06-03
+BRANCH: report-pipeline-hardening (worktree)
+
+=============================================================
+STEP 1: Valuation Artifacts Check
+=============================================================
+Location checked: artifacts/valuation/ (in worktree)
+Result: Directory does not exist in worktree.
+
+Location checked: C:\Users\Admin\Desktop\multi-agent-equity-research\artifacts\valuation\ (main repo)
+Result: DBD artifacts only:
+  - DBD_20260602T141552_valuation.json
+  - DBD_20260602T143750_valuation.json
+  - DBD_20260602T144040_valuation.json
+  - DBD_20260602T190218_valuation.json
+  - DBD_20260602T141608_gate.json (+ 4 more gate files)
+
+DHG, IMP, DMC, TRA: NO valuation artifacts exist anywhere.
+
+=============================================================
+STEP 2: DBD Render (has main-repo artifacts but NOT in worktree)
+=============================================================
+Command: python scripts/render_report.py --ticker DBD --allow-latest-artifacts
+Result: [html] saved: artifacts\reports_html\DBD_report.html
+Exit: 0
+
+Failure mode: SILENT DATA FAILURE
+- No crash, no error, but ALL financial numbers show as "—"
+- Root cause: glob searches worktree's artifacts/valuation/ -> empty -> returns {}
+- Even if artifact loaded: assumption_gate has wacc_approved=False, tax_policy_approved=False
+  -> _assumptions_approved() -> False -> _valuation_publishable() -> False
+  -> target_price blocked, upside blocked, rating blocked
+  -> fin_table (historical ratios) WOULD show if artifact loaded correctly
+
+DBD valuation artifact data quality (if loadable):
+  - gross_margin: {2022FY: 49.4%, 2023FY: 48.3%, 2024FY: 48.2%, 2025FY: 47.4%}  ✓
+  - current_price_vnd: 50200.0  ✓
+  - fy_periods: [2022FY, 2023FY, 2024FY, 2025FY]  ✓
+  - assumption_gate.status: draft_needs_analyst_review
+  - All approval flags False (wacc, tax, terminal_growth, etc.)
+
+=============================================================
+STEP 3: DHG Render (no artifacts anywhere)
+=============================================================
+Command: python scripts/render_report.py --ticker DHG --allow-latest-artifacts
+Result: [html] saved: artifacts\reports_html\DHG_report.html
+Exit: 0
+
+Failure mode: SILENT DATA FAILURE (identical to DBD)
+- HTML renders, all numbers are "—"
+- No error raised — graceful fallback to placeholder display
+
+=============================================================
+STEP 4: Run Valuation for DHG
+=============================================================
+Command: python scripts/run_valuation.py --ticker DHG
+Output:
+  [run_valuation] DHG — creating/loading research snapshot
+  [run_valuation] DHG snapshot: snap_a34dc5981f802a079aff (0 facts, periods=[])
+  [run_valuation] ERROR: No accepted facts in snapshot. Run build_facts.py first.
+Exit: 1 (FAILURE)
+
+Root cause: Database has 0 accepted facts for DHG.
+Required prerequisite: python scripts/build_facts.py --ticker DHG
+Which requires: python scripts/ingest_ticker.py --ticker DHG --years 5
+
+=============================================================
+STEP 5: Re-render DHG after valuation attempt
+=============================================================
+Result: Identical to Step 3 — no change (valuation failed, no new artifacts).
+
+=============================================================
+STEP 6: PDF Backend Check
+=============================================================
+Command: python scripts/render_report.py --ticker DHG --pdf --allow-latest-artifacts
+Output: [pdf] saved (chrome): artifacts\reports_pdf\DHG_report.pdf
+PDF Backend: CHROME (Playwright headless)
+Status: SUCCESS (PDF created, but contains "—" placeholder data)
+
+PDF encoding: OK — Chrome backend handles UTF-8/Vietnamese natively.
+No Mojibake observed in PDF generation itself.
+
+=============================================================
+SUMMARY OF FAILURES
+=============================================================
+
+FAILURE 1: Worktree artifact isolation
+- The worktree has its own artifacts/ directory.
+- Valuation artifacts from main repo are NOT accessible from worktree.
+- Scripts resolve paths relative to their own location (worktree root).
+- Impact: DBD artifacts exist in main repo but are invisible to worktree scripts.
+
+FAILURE 2: No facts/valuation for DHG, IMP, DMC, TRA
+- Database has 0 accepted facts for these tickers.
+- run_valuation.py requires accepted facts from build_facts.py.
+- build_facts.py requires ingested data from ingest_ticker.py.
+- Full ingest pipeline has not been run for these tickers in this environment.
+
+FAILURE 3: Assumption gate blocks all valuation display
+- Even when DBD artifact is loaded, _valuation_publishable() returns False.
+- fcff.assumption_status = "default_unapproved" (not "APPROVED" or "PASS").
+- All assumption_gate flags are False (wacc, tax_policy, terminal_growth, etc.).
+- Result: target_price=None, upside=None, rating="UNDER_REVIEW" -> "ĐANG HOÀN THIỆN"
+- Historical ratio table (gross_margin, ROE, etc.) WOULD render if artifact loaded.
+
+FAILURE 4: render_report.py requires --allow-latest-artifacts or --run-id
+- Without either flag: hard error raised immediately.
+- This is intentional (non-deterministic glob is blocked in production mode).
+- For diagnostics: --allow-latest-artifacts bypasses the guard.
+
+WHAT WORKS:
+- HTML renderer: correctly generates UTF-8 encoded Vietnamese HTML.
+- PDF renderer: Chrome backend successfully creates PDF from HTML.
+- Placeholder display: gracefully shows "—" instead of crashing on missing data.
+- DBD valuation artifact structure: has correct ratios, fy_periods, current_price_vnd.
+- Vietnamese text in HTML/PDF: correctly encoded (not Mojibake).
+
+WHAT IS BROKEN:
+- No path from worktree to main repo artifacts (isolation issue).
+- No ingested facts/valuation artifacts for DHG, IMP, DMC, TRA.
+- Assumption gate permanently blocks valuation display until human approval.
+- run_valuation.py cannot run without prior ingest+build_facts pipeline.
+
+=============================================================
+NEXT STEPS (not part of this diagnostic task)
+=============================================================
+1. Run ingest + build_facts for DHG: python scripts/ingest_ticker.py --ticker DHG --years 5
+2. Run run_valuation.py after facts are available.
+3. Decide whether worktree should symlink/share main repo artifacts/ or copy them.
+4. Address assumption approval gate for analyst_draft mode rendering.

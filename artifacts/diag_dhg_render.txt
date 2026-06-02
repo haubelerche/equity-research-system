@@ -1,0 +1,46 @@
+DIAGNOSTIC: scripts/render_report.py --ticker DHG --allow-latest-artifacts
+DATE: 2026-06-03
+WORKTREE: report-pipeline-hardening
+
+NOTE: First attempt without --allow-latest-artifacts failed with:
+  [ERROR] --run-id is required for production rendering (mode='analyst_draft').
+  Options:
+    1. Provide run_id:  --run-id run_dhg_20260601T...
+    2. Allow glob (debug only):  --allow-latest-artifacts
+    3. Use debug mode:  --mode internal_debug
+
+COMMAND (with flag): python scripts/render_report.py --ticker DHG --allow-latest-artifacts 2>&1
+
+COMMAND OUTPUT:
+[ctx] DHG: mode=analyst_draft current=— target=— upside=— recommendation=ĐANG HOÀN THIỆN
+[html] saved: artifacts\reports_html\DHG_report.html
+
+EXIT CODE: 0 (success — but with empty data)
+
+FINDINGS:
+- Render completed without error.
+- current=—, target=—, upside=— (all missing — no valuation artifact).
+- Financial model table: ALL cells show "—" (no numbers at all).
+- No valuation artifacts exist for DHG in the worktree OR main repo.
+- run_valuation.py --ticker DHG fails: "No accepted facts in snapshot. Run build_facts.py first."
+- The database has no accepted facts for DHG (snapshot has 0 facts, periods=[]).
+
+ROOT CAUSE CHAIN:
+  build_facts.py not run for DHG
+  -> no accepted facts in PostgresFactStore for DHG
+  -> run_valuation.py fails with: "[run_valuation] ERROR: No accepted facts in snapshot."
+  -> no valuation artifacts generated
+  -> render_report.py globs for artifacts/valuation/DHG_*_valuation.json -> [] (empty)
+  -> all data fields are None/missing
+  -> HTML shows "—" for every number
+
+RELATED FAILURES (from run_valuation.py output):
+  [run_valuation] DHG — creating/loading research snapshot
+  [run_valuation] DHG snapshot: snap_a34dc5981f802a079aff (0 facts, periods=[])
+  [run_valuation] ERROR: No accepted facts in snapshot. Run build_facts.py first.
+
+ENCODING STATUS:
+- HTML file written successfully, charset=UTF-8, Vietnamese diacritics present in headers.
+- Python stdout required sys.stdout.reconfigure(encoding='utf-8') to print HTML content
+  (default Windows cp1252 console raises UnicodeEncodeError on Vietnamese chars).
+- HTML itself is correctly encoded — encoding bug is in diagnostic tooling only, not output file.

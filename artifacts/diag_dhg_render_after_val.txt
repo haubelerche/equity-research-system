@@ -1,0 +1,42 @@
+DIAGNOSTIC: scripts/render_report.py --ticker DHG --allow-latest-artifacts (AFTER valuation attempt)
+DATE: 2026-06-03
+WORKTREE: report-pipeline-hardening
+
+VALUATION ATTEMPT:
+  Command: python scripts/run_valuation.py --ticker DHG
+  Output:
+    [run_valuation] DHG — creating/loading research snapshot
+    [run_valuation] DHG snapshot: snap_a34dc5981f802a079aff (0 facts, periods=[])
+    [run_valuation] ERROR: No accepted facts in snapshot. Run build_facts.py first.
+  Exit code: 1 (FAILURE)
+  Artifacts created: NONE
+
+RENDER ATTEMPT AFTER VALUATION:
+  Command: python scripts/render_report.py --ticker DHG --allow-latest-artifacts
+
+COMMAND OUTPUT:
+[ctx] DHG: mode=analyst_draft current=— target=— upside=— recommendation=ĐANG HOÀN THIỆN
+[html] saved: artifacts\reports_html\DHG_report.html
+
+EXIT CODE: 0 (success — but identical to pre-valuation attempt)
+
+FINDINGS:
+- Output is identical to pre-valuation render (as expected — valuation failed, no new artifacts).
+- No change in financial data display — all "—" placeholders remain.
+- HTML generated successfully with proper UTF-8 encoding.
+
+PDF TEST:
+  Command: python scripts/render_report.py --ticker DHG --pdf --allow-latest-artifacts
+  Output:
+    [ctx] DHG: mode=analyst_draft current=— target=— upside=— recommendation=ĐANG HOÀN THIỆN
+    [html] saved: artifacts\reports_html\DHG_report.html
+    [pdf] saved (chrome): artifacts\reports_pdf\DHG_report.pdf
+    [pdf]  path : artifacts\reports_pdf\DHG_report.pdf
+  PDF BACKEND: chrome (Playwright/Chrome headless)
+  PDF STATUS: SUCCESS — PDF generated but contains all "—" placeholder data.
+
+CONCLUSION:
+- Rendering infrastructure (HTML + PDF via Chrome) works correctly.
+- The pipeline blocker is upstream: no facts -> no valuation -> no numbers in report.
+- PDF encoding appears fine (chrome backend handles UTF-8/Vietnamese natively).
+- Next step: run ingest + build_facts for DHG to populate the database.
