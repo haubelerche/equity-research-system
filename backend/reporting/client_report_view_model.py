@@ -128,7 +128,7 @@ def _derive_shares_mn(facts: dict[str, dict[str, float]], periods: list[str]) ->
     for key in ("shares_outstanding.ending", "shares_outstanding.weighted_avg", "shares_outstanding.total"):
         shares_fact = facts.get(key, {})
         for p in reversed(periods):
-            period_key = p.replace("A", "FY") if p.endswith("A") else p
+            period_key = _to_fact_period(p)
             raw = shares_fact.get(period_key) or shares_fact.get(p)
             v = raw.get("value") if isinstance(raw, dict) else raw
             if v and v > 0:
@@ -277,7 +277,7 @@ def _period_value(
         "eps": "eps.basic",
     }
     if period.endswith("A") or period.endswith("FY"):
-        fact_period = period if period.endswith("FY") else period.replace("A", "FY")
+        fact_period = _to_fact_period(period)
         value = _fact_value(facts, actual_map.get(metric, metric), fact_period)
         if value is None:
             return None
@@ -328,7 +328,7 @@ def _row_values(
 def _revenue_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
     values = _row_values(facts, forecast_rows, "revenue", periods)
     # Use the period one step before the first in periods as the baseline
-    prev_period = periods[0].replace("A", "FY") if periods else "2023FY"
+    prev_period = _to_fact_period(periods[0]) if periods else "2023FY"
     prev_metric_year = str(int(prev_period[:4]) - 1) + prev_period[4:]
     prev_val = _fact_value(facts, "revenue.net", prev_metric_year)
     previous_values = [prev_val] + values[:-1]
@@ -337,7 +337,7 @@ def _revenue_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[str,
 
 def _net_profit_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
     values = _row_values(facts, forecast_rows, "net_income", periods)
-    prev_period = periods[0].replace("A", "FY") if periods else "2023FY"
+    prev_period = _to_fact_period(periods[0]) if periods else "2023FY"
     prev_metric_year = str(int(prev_period[:4]) - 1) + prev_period[4:]
     prev_val = _fact_value(facts, "net_income.parent", prev_metric_year)
     previous_values = [prev_val] + values[:-1]
@@ -346,7 +346,7 @@ def _net_profit_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[s
 
 def _eps_growth(facts: dict[str, dict[str, float]], forecast_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
     values = _row_values(facts, forecast_rows, "eps", periods)
-    prev_period = periods[0].replace("A", "FY") if periods else "2023FY"
+    prev_period = _to_fact_period(periods[0]) if periods else "2023FY"
     prev_metric_year = str(int(prev_period[:4]) - 1) + prev_period[4:]
     prev_val = _fact_value(facts, "eps.basic", prev_metric_year)
     previous_values = [prev_val] + values[:-1]
@@ -399,7 +399,12 @@ def _is_actual(period: str) -> bool:
 
 
 def _to_fact_period(period: str) -> str:
-    """Convert display period label to canonical FY period key used in fact dicts."""
+    """Normalize a display period label to the canonical "FY"-suffix fact key.
+
+    Canonical facts use "YYYYFY" keys (e.g. "2024FY").
+    Display labels may use "YYYYA" suffix for actuals. This helper converts both.
+    Expected input format: "<4-digit-year>FY" or "<4-digit-year>A".
+    """
     return period if period.endswith("FY") else period.replace("A", "FY")
 
 
