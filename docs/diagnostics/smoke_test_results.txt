@@ -1,0 +1,31 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.4, pytest-9.0.3, pluggy-1.6.0 -- C:\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Admin\Desktop\multi-agent-equity-research\.worktrees\report-pipeline-hardening
+configfile: pytest.ini
+plugins: anyio-4.13.0, langsmith-0.8.3, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 20 items
+
+tests/smoke/test_render_all_tickers.py::test_render_produces_html[DHG] PASSED [  5%]
+tests/smoke/test_render_all_tickers.py::test_render_produces_html[IMP] PASSED [ 10%]
+tests/smoke/test_render_all_tickers.py::test_render_produces_html[DMC] PASSED [ 15%]
+tests/smoke/test_render_all_tickers.py::test_render_produces_html[TRA] PASSED [ 20%]
+tests/smoke/test_render_all_tickers.py::test_render_produces_html[DBD] PASSED [ 25%]
+tests/smoke/test_render_all_tickers.py::test_html_has_formatted_numbers[DHG] PASSED [ 30%]
+tests/smoke/test_render_all_tickers.py::test_html_has_formatted_numbers[IMP] PASSED [ 35%]
+tests/smoke/test_render_all_tickers.py::test_html_has_formatted_numbers[DMC] PASSED [ 40%]
+tests/smoke/test_render_all_tickers.py::test_html_has_formatted_numbers[TRA] PASSED [ 45%]
+tests/smoke/test_render_all_tickers.py::test_html_has_formatted_numbers[DBD] PASSED [ 50%]
+tests/smoke/test_render_all_tickers.py::test_html_has_no_mojibake[DHG] PASSED [ 55%]
+tests/smoke/test_render_all_tickers.py::test_html_has_no_mojibake[IMP] PASSED [ 60%]
+tests/smoke/test_render_all_tickers.py::test_html_has_no_mojibake[DMC] PASSED [ 65%]
+tests/smoke/test_render_all_tickers.py::test_html_has_no_mojibake[TRA] PASSED [ 70%]
+tests/smoke/test_render_all_tickers.py::test_html_has_no_mojibake[DBD] PASSED [ 75%]
+tests/smoke/test_render_all_tickers.py::test_html_contains_ticker_name[DHG] PASSED [ 80%]
+tests/smoke/test_render_all_tickers.py::test_html_contains_ticker_name[IMP] PASSED [ 85%]
+tests/smoke/test_render_all_tickers.py::test_html_contains_ticker_name[DMC] PASSED [ 90%]
+tests/smoke/test_render_all_tickers.py::test_html_contains_ticker_name[TRA] PASSED [ 95%]
+tests/smoke/test_render_all_tickers.py::test_html_contains_ticker_name[DBD] PASSED [100%]
+
+============================= 20 passed in 1.26s ==============================
