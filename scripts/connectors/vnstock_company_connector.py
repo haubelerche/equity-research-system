@@ -15,10 +15,10 @@ if "" in sys.path:
 import pandas as pd
 from vnstock.api.company import Company
 
-from scripts.dataset.config_io import ROOT, load_universe_rows
-from scripts.dataset.dqf import infer_materiality, validate_catalyst_event
-from scripts.db.fact_store import PostgresFactStore
-from scripts.db.source_registry import SourceInput, SourceRegistry
+from backend.dataset.config_io import ROOT, load_universe_rows
+from backend.dataset.dqf import infer_materiality, validate_catalyst_event
+from backend.database.fact_store import PostgresFactStore
+from backend.database.source_registry import SourceInput, SourceRegistry
 
 
 CONNECTOR_VERSION = "vn_company_v1"
@@ -44,7 +44,7 @@ def _register_payload(
 ) -> str:
     payload = json.dumps(payload_obj, ensure_ascii=False, default=str).encode("utf-8")
     source_uri = f"vnstock://kbs/company/{endpoint}/{ticker}"
-    raw_path = ROOT / "dataset" / "raw" / "market" / datetime.now(UTC).date().isoformat() / f"{ticker}_{endpoint}.json"
+    raw_path = ROOT / "data" / "raw" / "market" / datetime.now(UTC).date().isoformat() / f"{ticker}_{endpoint}.json"
     checksum = registry.save_raw_snapshot(payload=payload, out_path=raw_path)
     source_id = registry.register_source(
         SourceInput(

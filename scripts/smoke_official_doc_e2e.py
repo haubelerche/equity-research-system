@@ -99,7 +99,7 @@ def run(ticker: str, year: int) -> int:
         return 0
 
     import scripts.ingest_official_documents as ing
-    from scripts.db.official_documents import OfficialDocumentRegistry
+    from backend.database.official_documents import OfficialDocumentRegistry
 
     # 1. metadata.json valid
     try:

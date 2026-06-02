@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import os
+import re
 from pathlib import Path
 
 import yaml
 from pydantic import BaseModel, Field
+
+from backend.settings import settings
 
 REQUIRED_PROMPT_SECTIONS = [
     "# Objective",
@@ -34,6 +38,8 @@ VALID_AGENT_TOOLS = {
     "generate_report",
     "evaluate_report_quality",
 }
+
+MODEL_ENV_PATTERN = re.compile(r"^\$\{([A-Z0-9_]+)(?::-(.+))?\}$")
 
 
 class AgentConfig(BaseModel):
@@ -80,7 +86,9 @@ class AgentRegistry:
             missing = [section for section in REQUIRED_PROMPT_SECTIONS if section not in prompt]
             if missing:
                 raise ValueError(f"Prompt {prompt_path} missing required sections: {missing}")
-            configs[agent_id] = AgentConfig(agent_id=agent_id, prompt=prompt, **spec)
+            resolved_spec = dict(spec)
+            resolved_spec["model"] = self._resolve_model(str(spec.get("model") or "default"))
+            configs[agent_id] = AgentConfig(agent_id=agent_id, prompt=prompt, **resolved_spec)
         self._configs = configs
         return configs
 
@@ -92,3 +100,16 @@ class AgentRegistry:
         if agent_id not in configs:
             raise KeyError(f"Unknown agent_id: {agent_id}")
         return configs[agent_id]
+
+    @staticmethod
+    def _resolve_model(model: str) -> str:
+        if model in {"default", "${DEFAULT_MODEL_NAME}", "${DEFAULT_MODEL}"}:
+            return settings.default_model_name
+        match = MODEL_ENV_PATTERN.match(model)
+        if not match:
+            return model
+        env_name, fallback = match.groups()
+        resolved = os.getenv(env_name) or fallback
+        if not resolved:
+            raise ValueError(f"Model environment variable is not set: {env_name}")
+        return resolved

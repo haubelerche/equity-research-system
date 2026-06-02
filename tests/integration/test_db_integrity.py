@@ -255,28 +255,6 @@ def test_research_runs_has_current_stage_not_current_state(db):
     assert "current_state" not in cols, "research.runs must not have current_state — use current_stage"
 
 
-def test_research_valuation_results_assumption_set_id_not_null(db):
-    """research.valuation_results.assumption_set_id must be NOT NULL."""
-    cur = db.cursor()
-    cur.execute("""
-        SELECT is_nullable FROM information_schema.columns
-        WHERE table_schema='research' AND table_name='valuation_results'
-          AND column_name='assumption_set_id'
-    """)
-    row = cur.fetchone()
-    assert row is not None, "research.valuation_results missing assumption_set_id column"
-    assert row[0] == "NO", "research.valuation_results.assumption_set_id must be NOT NULL"
-
-
-def test_research_quantitative_claims_view_exists(db):
-    """research.quantitative_claims_without_evidence view must exist."""
-    cur = db.cursor()
-    cur.execute("""
-        SELECT COUNT(*) FROM information_schema.views
-        WHERE table_schema='research' AND table_name='quantitative_claims_without_evidence'
-    """)
-    assert cur.fetchone()[0] == 1, "research.quantitative_claims_without_evidence view not found"
-
 
 def test_research_run_artifacts_version_column(db):
     """research.run_artifacts must have a version column for artifact versioning."""

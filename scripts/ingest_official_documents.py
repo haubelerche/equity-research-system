@@ -148,7 +148,7 @@ def ingest_year(ticker: str, year: int, *, dry_run: bool) -> dict:
         for r in rows:
             ingested_metrics.append(canonical_metric(r["metric_id"]))
     else:
-        from scripts.db.official_documents import (
+        from backend.database.official_documents import (
             OfficialDocumentInput,
             OfficialDocumentRegistry,
         )

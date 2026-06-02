@@ -11,10 +11,10 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-from scripts.dataset.config_io import ROOT, load_universe_tickers
-from scripts.dataset.dqf import infer_materiality, validate_catalyst_event
-from scripts.db.fact_store import PostgresFactStore
-from scripts.db.source_registry import SourceInput, SourceRegistry
+from backend.dataset.config_io import ROOT, load_universe_tickers
+from backend.dataset.dqf import infer_materiality, validate_catalyst_event
+from backend.database.fact_store import PostgresFactStore
+from backend.database.source_registry import SourceInput, SourceRegistry
 
 
 CONNECTOR_VERSION = "catalyst_dav_connector_v1"
@@ -68,7 +68,7 @@ def sync_dav_connector(tickers: list[str] | None = None) -> int:
     for feed in DAV_FEEDS:
         entries = _parse_feed(feed)
         raw_payload = json.dumps(entries, ensure_ascii=False).encode("utf-8")
-        raw_path = ROOT / "dataset" / "raw" / "catalyst" / "regulatory" / now.date().isoformat() / "dav_feed.json"
+        raw_path = ROOT / "data" / "raw" / "catalyst" / "regulatory" / now.date().isoformat() / "dav_feed.json"
         checksum = registry.save_raw_snapshot(raw_payload, raw_path)
         source_version_id = registry.register_source(
             SourceInput(

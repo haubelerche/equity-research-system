@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "project": "ERR Vietnam Pharma Equity Research",
+  "failures": [
+    {
+      "failure_id": "ERR-KF-001",
+      "severity": "high",
+      "component": "workspace_hygiene",
+      "status": "accepted_open",
+      "description": "The active .worktrees/feat-data-ingestion worktree contains uncommitted changes and was intentionally not deleted during repo hygiene.",
+      "risk": "Duplicate ignored code remains on disk outside the canonical main-tree runtime and can confuse broad filesystem searches.",
+      "blocking": false,
+      "required_resolution": "Commit, stash, or explicitly discard the worktree changes before removing .worktrees with git worktree remove."
+    }
+  ]
+}

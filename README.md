@@ -68,14 +68,14 @@ pip install -r requirements.txt
 Cần một PostgreSQL instance (local hoặc Supabase). Chạy migrations theo thứ tự:
 
 ```bash
-psql $DATABASE_URL -f scripts/db/migrations/001_ref_schema.sql
-psql $DATABASE_URL -f scripts/db/migrations/002_ingest_schema.sql
-psql $DATABASE_URL -f scripts/db/migrations/003_fact_schema.sql
-psql $DATABASE_URL -f scripts/db/migrations/004_research_schema.sql
-psql $DATABASE_URL -f scripts/db/migrations/005_seed_reference_data.sql
-psql $DATABASE_URL -f scripts/db/migrations/006_grants_and_privileges.sql
-psql $DATABASE_URL -f scripts/db/migrations/007_expand_line_items.sql
-psql $DATABASE_URL -f scripts/db/migrations/008_research_snapshots.sql
+psql $DATABASE_URL -f backend/database/migrations/001_ref_schema.sql
+psql $DATABASE_URL -f backend/database/migrations/002_ingest_schema.sql
+psql $DATABASE_URL -f backend/database/migrations/003_fact_schema.sql
+psql $DATABASE_URL -f backend/database/migrations/004_research_schema.sql
+psql $DATABASE_URL -f backend/database/migrations/005_seed_reference_data.sql
+psql $DATABASE_URL -f backend/database/migrations/006_grants_and_privileges.sql
+psql $DATABASE_URL -f backend/database/migrations/007_expand_line_items.sql
+psql $DATABASE_URL -f backend/database/migrations/008_research_snapshots.sql
 ```
 
 ### OCR Runtime Requirements
@@ -280,8 +280,9 @@ Draft rating: BAN (SELL) — chưa được analyst phê duyệt
 │   │   ├── ratios.py       # Financial ratios
 │   │   └── multiples.py    # P/E, EV/EBITDA cross-check
 │   ├── facts/              # Fact normalization, taxonomy
+│   ├── database/           # DB repositories and SQL migrations
+│   ├── dataset/            # Dataset contract/taxonomy helper code
 │   ├── harness/            # LangGraph 5-agent harness, gates, checkpoints
-│   └── agents/             # Compatibility wrappers; production flow uses config/agents
 │
 ├── scripts/
 │   ├── ingest_ticker.py    # Phase 2: Data ingestion
@@ -292,9 +293,7 @@ Draft rating: BAN (SELL) — chưa được analyst phê duyệt
 │   ├── evaluate_report.py  # Phase 7: Evaluation gates
 │   ├── run_research.py     # Phase 8: End-to-end pipeline
 │   ├── approve_report.py   # Phase 9: Human approval & export
-│   ├── connectors/         # vnstock connector layer
-│   └── db/
-│       └── migrations/     # 8 SQL migrations (chạy theo thứ tự)
+│   └── connectors/         # vnstock connector layer
 │
 ├── reports/
 │   ├── *.md                # Draft reports
@@ -306,12 +305,10 @@ Draft rating: BAN (SELL) — chưa được analyst phê duyệt
 │   ├── runs/               # Run trace logs
 │   └── index/              # Citation maps & chunks
 │
-├── dataset/
-│   ├── taxonomy/           # Financial fact taxonomy (VN pharma)
-│   └── universe/           # Ticker universe config
-│
 ├── config/
-│   └── agents/             # 5 product-agent YAML config and prompt library
+│   ├── agents/             # 5 product-agent YAML config and prompt library
+│   ├── dataset/            # Dataset contracts, taxonomy, universe, and golden fixtures
+│   └── harness/            # Harness policies, schemas, registries, and contracts
 │
 ├── specs/                  # Architecture & data contract docs
 ├── tests/                  # Unit + integration tests

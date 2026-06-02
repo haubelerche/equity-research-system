@@ -11,7 +11,7 @@
 **Status:** Accepted
 
 **Context:**
-CLAUDE.md proposes `backend/connectors/` as the connector location. The existing repository has connectors under `scripts/connectors/`. Both locations are valid Python packages. Moving them would require updating all imports across `scripts/dataset/`, `scripts/db/`, and any orchestrator integrations.
+CLAUDE.md proposes `backend/connectors/` as the connector location. The existing repository has connectors under `scripts/connectors/`. Both locations are valid Python packages. Moving them would require updating all imports across `backend/dataset/`, `backend/database/`, and any orchestrator integrations.
 
 **Decision:**
 Keep connectors under `scripts/connectors/` for now. Create a thin `backend/connectors/` re-export layer only when the backend agents need to call connectors directly (Phase 8+). Do not move or duplicate the connector implementations.
@@ -48,7 +48,7 @@ source_versions
 - `DATABASE_URL` environment variable overrides the default.
 - If PostgreSQL is unavailable, connectors fail loudly — no silent degradation.
 
-**Outstanding:** The SQL migration/init script is not yet committed to this repository. This is a blocker for new contributors. Add a `db/migrations/` or `scripts/db/init_schema.sql` in Phase 2.
+**Outstanding:** The SQL migration/init script is not yet committed to this repository. This is a blocker for new contributors. Add a `db/migrations/` or `backend/database/init_schema.sql` in Phase 2.
 
 ---
 
@@ -58,7 +58,7 @@ source_versions
 **Status:** Deferred (Phase 5)
 
 **Context:**
-`scripts/db/milvus_store.py` and `backend/retrieval.py` reference Milvus as the vector store for document chunk retrieval.
+`backend/database/milvus_store.py` and `backend/retrieval.py` reference Milvus as the vector store for document chunk retrieval.
 
 **Decision:**
 Do not activate Milvus until Phase 5. The retrieval service is a stub. Phase 2 and 3 work entirely from PostgreSQL facts.
@@ -84,7 +84,7 @@ Follow the CLAUDE.md separation strictly:
 |---|---|---|
 | Ingestion | `scripts/connectors/` services | No |
 | Fact normalization | `backend/facts/normalizer.py` | No |
-| DQF validation | `scripts/dataset/dqf.py` | No |
+| DQF validation | `backend/dataset/dqf.py` | No |
 | Valuation | `backend/valuation/` modules | No |
 | Citation validation | `backend/citations/validator.py` | Minimal |
 | Evidence retrieval | `backend/retrieval/retriever.py` | No (vector search) |
@@ -106,25 +106,25 @@ Follow the CLAUDE.md separation strictly:
 **Status:** Accepted
 
 **Context:**
-Each connector saves a raw JSON snapshot to disk before writing to PostgreSQL. The `SourceRegistry.save_raw_snapshot()` method writes to `dataset/raw/`.
+Each connector saves a raw JSON snapshot to disk before writing to PostgreSQL. The `SourceRegistry.save_raw_snapshot()` method writes to `data/raw/`.
 
 **Decision:**
 Keep file-based raw snapshots. Each snapshot is checksum-deduplicated and registered in `source_versions`. This provides an audit trail independent of the database.
 
 **Directory structure:**
 ```text
-dataset/raw/bctc/<ticker>/income_statement_quarter.json
-dataset/raw/bctc/<ticker>/balance_sheet_quarter.json
-dataset/raw/bctc/<ticker>/cash_flow_quarter.json
-dataset/raw/bctc/<ticker>/ratio_quarter.json
-dataset/raw/market/<date>/<ticker>_quote_history.json
-dataset/raw/market/<date>/<ticker>_overview.json
+data/raw/bctc/<ticker>/income_statement_quarter.json
+data/raw/bctc/<ticker>/balance_sheet_quarter.json
+data/raw/bctc/<ticker>/cash_flow_quarter.json
+data/raw/bctc/<ticker>/ratio_quarter.json
+data/raw/market/<date>/<ticker>_quote_history.json
+data/raw/market/<date>/<ticker>_overview.json
 ```
 
 **Consequences:**
 - Raw data is auditable without querying PostgreSQL.
 - Disk usage grows per sync; periodic cleanup of old snapshots may be needed.
-- `dataset/` directory must be excluded from `.gitignore` for raw data, or kept local only.
+- `data/` is ignored by git; source-controlled dataset config lives under `config/dataset/`.
 
 ---
 
@@ -166,7 +166,7 @@ No LLM API calls in Phases 0–4. All code in these phases must be deterministic
 **Consequences:**
 - No `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` required to run Phases 0–4.
 - Phase 6 (report generation) is the first phase that requires an LLM API key.
-- Agent stubs in `backend/agents.py` remain stubs until Phase 6+.
+- Agent runtime is configured through `config/agents/` and executed through `backend/harness`; no standalone agent-stub package is retained.
 
 ---
 
@@ -284,7 +284,7 @@ valuation_ready = false
 run_status    = needs_fallback
 ```
 
-**Fallback source (future):** `dataset/golden/financials/{ticker}.csv` — annual FY rows only,
+**Fallback source (future):** `config/dataset/golden/financials/{ticker}.csv` — annual FY rows only,
 no quarterly rows permitted. If fallback provides `2021FY`, merge with vnstock annual data for
 `2022FY–2025FY`. Every merged fact must preserve source lineage.
 

@@ -27,11 +27,11 @@ Provenance JSON schema:
 
 Usage:
     python scripts/connectors/manual_upload_connector.py \\
-        --file dataset/golden/docs/DHG_BCTC_2023.pdf \\
+        --file config/dataset/golden/docs/DHG_BCTC_2023.pdf \\
         --ticker DHG
 
     python scripts/connectors/manual_upload_connector.py \\
-        --dir dataset/golden/docs/DHG/ \\
+        --dir config/dataset/golden/docs/DHG/ \\
         --ticker DHG
 """
 from __future__ import annotations
@@ -47,8 +47,8 @@ _PROJECT_ROOT = str(Path(__file__).resolve().parents[2])
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
-from scripts.db.fact_store import PostgresFactStore
-from scripts.db.source_registry import SourceInput, SourceRegistry
+from backend.database.fact_store import PostgresFactStore
+from backend.database.source_registry import SourceInput, SourceRegistry
 
 CONNECTOR_VERSION = "manual_upload_v1"
 _SUPPORTED_EXTENSIONS = {".pdf", ".xlsx", ".xls", ".csv", ".html", ".htm", ".json"}

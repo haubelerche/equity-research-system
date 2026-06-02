@@ -12,7 +12,7 @@ description: Use when working on evidence retrieval, document chunking, vector s
 - Modifying the citation map or citation validation logic.
 - Adding or changing how evidence packs are built for report sections.
 - Debugging hallucinated claims in a generated report.
-- Modifying `scripts/db/milvus_store.py` or any vector store integration.
+- Modifying `backend/database/milvus_store.py` or any vector store integration.
 
 ---
 
@@ -23,7 +23,7 @@ scripts/build_index.py
 scripts/test_retrieval.py
 backend/retrieval.py
 backend/schemas.py               # DocumentChunk, CitationMap schemas
-scripts/db/milvus_store.py
+backend/database/milvus_store.py
 ```
 
 Also read `specs/` citation coverage rubric if present.

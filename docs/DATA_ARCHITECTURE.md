@@ -1,18 +1,18 @@
-# Thiết kế hệ thống dữ liệu cho Vietnam Pharma Equity Research Agent
+ Thi?t k? h? th?ng d? li?u cho Vietnam Pharma Equity Research Agent
 
-## 1. Mục tiêu
+## 1. M?c ti�u
 
-Tài liệu này mô tả thiết kế dữ liệu tối ưu cho dự án **Vietnam Pharma Equity Research Agent**. Hệ thống không được thiết kế như một nền tảng dữ liệu thời gian thực, mà là một **research data platform chuyên biệt cho cổ phiếu dược/y tế Việt Nam**.
+T�i li?u n�y m� t? thi?t k? d? li?u t?i uu cho d? �n **Vietnam Pharma Equity Research Agent**. H? th?ng kh�ng du?c thi?t k? nhu m?t n?n t?ng d? li?u th?i gian th?c, m� l� m?t **research data platform chuy�n bi?t cho c? phi?u du?c/y t? Vi?t Nam**.
 
-Mục tiêu chính:
+M?c ti�u ch�nh:
 
-- Thu thập dữ liệu từ các nguồn Việt Nam có liên quan đến doanh nghiệp dược/y tế.
-- Chuẩn hóa dữ liệu thành `canonical facts` dùng được cho phân tích và định giá.
-- Lưu vết nguồn, phiên bản, checksum, parser version và trạng thái kiểm định.
-- Hỗ trợ sinh báo cáo có citation, valuation artifact, audit trail và human approval.
-- Tránh thiết kế thừa: không dùng Kafka, không dùng streaming phức tạp, không dùng data warehouse lớn như Snowflake/BigQuery trong MVP.
+- Thu th?p d? li?u t? c�c ngu?n Vi?t Nam c� li�n quan d?n doanh nghi?p du?c/y t?.
+- Chu?n h�a d? li?u th�nh `canonical facts` d�ng du?c cho ph�n t�ch v� d?nh gi�.
+- Luu v?t ngu?n, phi�n b?n, checksum, parser version v� tr?ng th�i ki?m d?nh.
+- H? tr? sinh b�o c�o c� citation, valuation artifact, audit trail v� human approval.
+- Tr�nh thi?t k? th?a: kh�ng d�ng Kafka, kh�ng d�ng streaming ph?c t?p, kh�ng d�ng data warehouse l?n nhu Snowflake/BigQuery trong MVP.
 
-Nguyên tắc cốt lõi:
+Nguy�n t?c c?t l�i:
 
 ```text
 Facts before narrative.
@@ -25,11 +25,11 @@ Object storage for raw files and generated artifacts.
 
 ---
 
-## 2. Bản chất bài toán dữ liệu
+## 2. B?n ch?t b�i to�n d? li?u
 
-Dữ liệu ngành dược/y tế Việt Nam có độ biến động thấp đến trung bình. Phần lớn dữ liệu phục vụ equity research không thay đổi theo giây/phút, mà theo ngày, quý, năm hoặc khi có công bố/catalyst mới.
+D? li?u ng�nh du?c/y t? Vi?t Nam c� d? bi?n d?ng th?p d?n trung b�nh. Ph?n l?n d? li?u ph?c v? equity research kh�ng thay d?i theo gi�y/ph�t, m� theo ng�y, qu�, nam ho?c khi c� c�ng b?/catalyst m?i.
 
-Vì vậy, hệ thống nên dùng:
+V� v?y, h? th?ng n�n d�ng:
 
 ```text
 Scheduled batch ingestion
@@ -40,66 +40,66 @@ Scheduled batch ingestion
 + audit trail
 ```
 
-Không nên dùng:
+Kh�ng n�n d�ng:
 
 ```text
 Kafka-first architecture
 realtime streaming
-full recompute mỗi ngày
-LLM tự đọc dữ liệu raw và tự suy luận số liệu
+full recompute m?i ng�y
+LLM t? d?c d? li?u raw v� t? suy lu?n s? li?u
 ```
 
 ---
 
-## 3. Các nhóm dữ liệu cần quản lý
+## 3. C�c nh�m d? li?u c?n qu?n l�
 
-| Nhóm dữ liệu | Ví dụ | Độ biến động | Cách quản lý |
+| Nh�m d? li?u | V� d? | �? bi?n d?ng | C�ch qu?n l� |
 |---|---|---:|---|
-| Reference data | Ticker, sàn, tên công ty, peer group, subsector | Rất thấp | YAML + bảng cấu hình trong DB |
-| Market data | Giá đóng cửa, volume, market cap, P/E, P/B | Hằng ngày | Bảng `market_prices` |
-| Financial statements | BCTC quý/năm, income statement, balance sheet, cash flow | Theo quý/năm | `canonical_facts` sau validation |
-| Annual reports | Báo cáo thường niên, báo cáo quản trị | Theo năm | Object storage + `document_chunks` |
-| Disclosures | Công bố thông tin, nghị quyết, cổ tức, phát hành | Không đều | Object storage + event table |
-| News/catalysts | Tin doanh nghiệp, đấu thầu, BHYT, regulatory notices | Không đều | `corporate_events` + evidence chunks |
-| Derived analytics | Ratios, growth, margins, peer metrics | Khi facts thay đổi | Artifact hoặc bảng derived |
-| Valuation artifacts | DCF, multiples, sensitivity, scenarios | Khi assumptions/facts/price thay đổi | `valuation_results` + artifact JSON |
-| Workflow/audit | Research runs, steps, approvals, eval results | Theo từng run | Workflow tables |
+| Reference data | Ticker, s�n, t�n c�ng ty, peer group, subsector | R?t th?p | YAML + b?ng c?u h�nh trong DB |
+| Market data | Gi� d�ng c?a, volume, market cap, P/E, P/B | H?ng ng�y | B?ng `market_prices` |
+| Financial statements | BCTC qu�/nam, income statement, balance sheet, cash flow | Theo qu�/nam | `canonical_facts` sau validation |
+| Annual reports | B�o c�o thu?ng ni�n, b�o c�o qu?n tr? | Theo nam | Object storage + `document_chunks` |
+| Disclosures | C�ng b? th�ng tin, ngh? quy?t, c? t?c, ph�t h�nh | Kh�ng d?u | Object storage + event table |
+| News/catalysts | Tin doanh nghi?p, d?u th?u, BHYT, regulatory notices | Kh�ng d?u | `corporate_events` + evidence chunks |
+| Derived analytics | Ratios, growth, margins, peer metrics | Khi facts thay d?i | Artifact ho?c b?ng derived |
+| Valuation artifacts | DCF, multiples, sensitivity, scenarios | Khi assumptions/facts/price thay d?i | `valuation_results` + artifact JSON |
+| Workflow/audit | Research runs, steps, approvals, eval results | Theo t?ng run | Workflow tables |
 
 ---
 
-## 4. Kiến trúc dữ liệu tổng thể
+## 4. Ki?n tr�c d? li?u t?ng th?
 
-Hệ thống nên được thiết kế như một **mini financial data lakehouse** gồm 5 lớp.
+H? th?ng n�n du?c thi?t k? nhu m?t **mini financial data lakehouse** g?m 5 l?p.
 
 ```text
 Source Registry
-    ↓
+    ?
 Raw Zone 
-    ↓
+    ?
 Parsed & Normalized Zone 
-    ↓
+    ?
 Canonical Financial Warehouse 
-    ↓
+    ?
 Research Snapshot
-    ↓
+    ?
 Analytics + Valuation + Report Artifacts
 ```
 
 ### 4.1. Source Registry
 
-Lưu danh mục nguồn được phép dùng.
+Luu danh m?c ngu?n du?c ph�p d�ng.
 
-Ví dụ nguồn:
+V� d? ngu?n:
 
-- Vnstock hoặc API dữ liệu thị trường hợp lệ.
-- File CSV/golden dataset do nhóm kiểm toán thủ công.
-- Báo cáo tài chính.
-- Báo cáo thường niên.
-- Công bố thông tin doanh nghiệp.
-- Tin tức doanh nghiệp/ngành.
-- Nguồn đấu thầu, BHYT, regulatory nếu có quyền truy cập hợp lệ.
+- Vnstock ho?c API d? li?u th? tru?ng h?p l?.
+- File CSV/golden dataset do nh�m ki?m to�n th? c�ng.
+- B�o c�o t�i ch�nh.
+- B�o c�o thu?ng ni�n.
+- C�ng b? th�ng tin doanh nghi?p.
+- Tin t?c doanh nghi?p/ng�nh.
+- Ngu?n d?u th?u, BHYT, regulatory n?u c� quy?n truy c?p h?p l?.
 
-Mỗi nguồn cần có:
+M?i ngu?n c?n c�:
 
 ```text
 source_id
@@ -114,122 +114,122 @@ enabled
 
 ### 4.2. Raw Zone
 
-Lưu dữ liệu gốc, không chỉnh sửa.
+Luu d? li?u g?c, kh�ng ch?nh s?a.
 
-Ví dụ:
+V� d?:
 
 ```text
 storage/raw/
-├── market_data/
-├── financial_statements/
-├── annual_reports/
-├── disclosures/
-├── news/
-└── manual_uploads/
++-- market_data/
++-- financial_statements/
++-- annual_reports/
++-- disclosures/
++-- news/
++-- manual_uploads/
 ```
 
-Quy tắc:
+Quy t?c:
 
-- Raw file là immutable.
-- Nếu nguồn thay đổi, tạo phiên bản mới.
-- Không dùng raw data trực tiếp cho valuation/report.
-- Mỗi raw object phải có checksum để dedup và phát hiện thay đổi.
+- Raw file l� immutable.
+- N?u ngu?n thay d?i, t?o phi�n b?n m?i.
+- Kh�ng d�ng raw data tr?c ti?p cho valuation/report.
+- M?i raw object ph?i c� checksum d? dedup v� ph�t hi?n thay d?i.
 
 ### 4.3. Parsed & Normalized Zone 
 
-Chuyển raw data thành cấu trúc thống nhất.
+Chuy?n raw data th�nh c?u tr�c th?ng nh?t.
 
-Nhiệm vụ:
+Nhi?m v?:
 
-- Chuẩn hóa ticker.
-- Chuẩn hóa kỳ báo cáo.
-- Chuẩn hóa đơn vị và tiền tệ.
-- Map line item về taxonomy nội bộ.
-- Parse document thành text/chunks.
-- Chuẩn hóa news/disclosures thành event records.
+- Chu?n h�a ticker.
+- Chu?n h�a k? b�o c�o.
+- Chu?n h�a don v? v� ti?n t?.
+- Map line item v? taxonomy n?i b?.
+- Parse document th�nh text/chunks.
+- Chu?n h�a news/disclosures th�nh event records.
 
-Ví dụ mapping:
+V� d? mapping:
 
 ```text
-"Doanh thu thuần" → revenue
-"Lợi nhuận sau thuế" → net_income
-"Tổng tài sản" → total_assets
-"Vốn chủ sở hữu" → total_equity
+"Doanh thu thu?n" ? revenue
+"L?i nhu?n sau thu?" ? net_income
+"T?ng t�i s?n" ? total_assets
+"V?n ch? s? h?u" ? total_equity
 ```
 
-### 4.4. Canonical Financial Warehouse (quan trọng nhất)
+### 4.4. Canonical Financial Warehouse (quan tr?ng nh?t)
 
-Đây là lớp sự thật tài chính đã kiểm định. Chỉ dữ liệu qua validation mới được ghi vào đây.
+��y l� l?p s? th?t t�i ch�nh d� ki?m d?nh. Ch? d? li?u qua validation m?i du?c ghi v�o d�y.
 
-Dùng cho:
+D�ng cho:
 
 - Ratio calculation.
 - Peer comparison.
 - DCF/multiples.
 - Numeric consistency check.
-- Citation cho claim định lượng.
+- Citation cho claim d?nh lu?ng.
 
-Không cho phép:
+Kh�ng cho ph�p:
 
-- LLM ghi trực tiếp vào canonical facts.
-- Số liệu thiếu source/version.
-- Ghi đè fact cũ mà không tạo version.
+- LLM ghi tr?c ti?p v�o canonical facts.
+- S? li?u thi?u source/version.
+- Ghi d� fact cu m� kh�ng t?o version.
 
 ### 4.5. Research Snapshot
 
-Mỗi report phải sinh từ một snapshot đã đóng băng.
+M?i report ph?i sinh t? m?t snapshot d� d�ng bang.
 
-Snapshot ghi lại:
+Snapshot ghi l?i:
 
-- Facts nào được dùng.
-- Market price ngày nào được dùng.
-- Document chunks nào được dùng.
-- Assumptions version nào được dùng.
-- Valuation artifact version nào được dùng.
+- Facts n�o du?c d�ng.
+- Market price ng�y n�o du?c d�ng.
+- Document chunks n�o du?c d�ng.
+- Assumptions version n�o du?c d�ng.
+- Valuation artifact version n�o du?c d�ng.
 
-Nguyên tắc:
+Nguy�n t?c:
 
 ```text
-Report không query dữ liệu live trực tiếp.
-Report chỉ đọc từ research_snapshot + artifacts đã khóa nguồn.
+Report kh�ng query d? li?u live tr?c ti?p.
+Report ch? d?c t? research_snapshot + artifacts d� kh�a ngu?n.
 ```
 
 ---
 
-## 5. Tech stack đề xuất
+## 5. Tech stack d? xu?t
 
 ### 5.1. MVP stack
 
-| Layer | Công nghệ | Vai trò |
+| Layer | C�ng ngh? | Vai tr� |
 |---|---|---|
 | Backend API | FastAPI | API cho research run, report, approval |
 | Workflow | LangGraph | Stateful multi-agent workflow |
-| Schema | Pydantic v2 | Data contract và structured output |
-| Database | Supabase PostgreSQL hoặc PostgreSQL local | Source of truth cho metadata/facts/runs |
-| Object storage | Supabase Storage hoặc local filesystem | Raw files, PDFs, JSON, generated reports |
+| Schema | Pydantic v2 | Data contract v� structured output |
+| Database | Supabase PostgreSQL ho?c PostgreSQL local | Source of truth cho metadata/facts/runs |
+| Object storage | Supabase Storage ho?c local filesystem | Raw files, PDFs, JSON, generated reports |
 | Retrieval | PostgreSQL full-text search + pgvector | Evidence retrieval cho documents |
-| Scheduler | APScheduler hoặc cron | Batch refresh theo lịch |
-| Data processing | pandas, numpy | Normalize và financial calculations |
-| Validation | Pydantic + pytest + custom checks | Schema validation và financial sanity checks |
+| Scheduler | APScheduler ho?c cron | Batch refresh theo l?ch |
+| Data processing | pandas, numpy | Normalize v� financial calculations |
+| Validation | Pydantic + pytest + custom checks | Schema validation v� financial sanity checks |
 | Reporting | Jinja2 + Markdown/HTML | Render report package |
-| HITL UI | Streamlit | Giao diện duyệt assumptions/report |
+| HITL UI | Streamlit | Giao di?n duy?t assumptions/report |
 
-### 5.2. Không dùng trong MVP
+### 5.2. Kh�ng d�ng trong MVP
 
-| Công nghệ | Lý do chưa cần |
+| C�ng ngh? | L� do chua c?n |
 |---|---|
-| Kafka | Dữ liệu không realtime, volume thấp, vận hành phức tạp |
-| Snowflake/BigQuery | Quy mô 5–23 mã chưa cần data warehouse cloud lớn |
-| Qdrant/Weaviate | pgvector đủ cho MVP và dễ quản lý hơn |
-| Celery/Redis | Chỉ cần khi batch nhiều mã hoặc job dài |
-| MinIO/S3 riêng | Supabase Storage/local filesystem đủ cho giai đoạn đầu |
-| Microservices | Tăng độ phức tạp, không tăng chất lượng report |
+| Kafka | D? li?u kh�ng realtime, volume th?p, v?n h�nh ph?c t?p |
+| Snowflake/BigQuery | Quy m� 5�23 m� chua c?n data warehouse cloud l?n |
+| Qdrant/Weaviate | pgvector d? cho MVP v� d? qu?n l� hon |
+| Celery/Redis | Ch? c?n khi batch nhi?u m� ho?c job d�i |
+| MinIO/S3 ri�ng | Supabase Storage/local filesystem d? cho giai do?n d?u |
+| Microservices | Tang d? ph?c t?p, kh�ng tang ch?t lu?ng report |
 
 ---
 
-## 6. Database schema tối thiểu
+## 6. Database schema t?i thi?u
 
-### 6.1. Nhóm source và ingestion
+### 6.1. Nh�m source v� ingestion
 
 ```text
 source_registry
@@ -240,7 +240,7 @@ ingestion_runs
 
 #### `source_registry`
 
-Lưu nguồn dữ liệu được phép dùng.
+Luu ngu?n d? li?u du?c ph�p d�ng.
 
 ```text
 source_id
@@ -256,7 +256,7 @@ created_at
 
 #### `source_versions`
 
-Lưu từng phiên bản dữ liệu lấy về.
+Luu t?ng phi�n b?n d? li?u l?y v?.
 
 ```text
 source_version_id
@@ -273,7 +273,7 @@ created_at
 
 #### `raw_objects`
 
-Lưu metadata của file raw, không lưu file lớn trực tiếp trong DB.
+Luu metadata c?a file raw, kh�ng luu file l?n tr?c ti?p trong DB.
 
 ```text
 raw_object_id
@@ -286,7 +286,7 @@ created_at
 
 #### `ingestion_runs`
 
-Lưu lịch sử ingest.
+Luu l?ch s? ingest.
 
 ```text
 ingestion_run_id
@@ -303,7 +303,7 @@ error_message
 
 ---
 
-### 6.2. Nhóm warehouse tài chính
+### 6.2. Nh�m warehouse t�i ch�nh
 
 ```text
 companies
@@ -340,7 +340,7 @@ notes
 
 #### `canonical_facts`
 
-Bảng quan trọng nhất của hệ thống.
+B?ng quan tr?ng nh?t c?a h? th?ng.
 
 ```text
 fact_id
@@ -361,7 +361,7 @@ validation_status
 created_at
 ```
 
-Ràng buộc dedup khuyến nghị:
+R�ng bu?c dedup khuy?n ngh?:
 
 ```text
 unique(ticker, metric_name, statement_type, period, source_version_id)
@@ -382,7 +382,7 @@ source_version_id
 created_at
 ```
 
-Ràng buộc dedup:
+R�ng bu?c dedup:
 
 ```text
 unique(ticker, trade_date, source_version_id)
@@ -390,7 +390,7 @@ unique(ticker, trade_date, source_version_id)
 
 #### `financial_metrics`
 
-Lưu chỉ số đã tính bằng code.
+Luu ch? s? d� t�nh b?ng code.
 
 ```text
 metric_id
@@ -407,7 +407,7 @@ created_at
 
 ---
 
-### 6.3. Nhóm document/evidence retrieval
+### 6.3. Nh�m document/evidence retrieval
 
 ```text
 documents
@@ -447,7 +447,7 @@ checksum
 created_at
 ```
 
-Ràng buộc dedup:
+R�ng bu?c dedup:
 
 ```text
 unique(document_id, checksum)
@@ -470,7 +470,7 @@ created_at
 
 ---
 
-### 6.4. Nhóm research snapshot và artifact
+### 6.4. Nh�m research snapshot v� artifact
 
 ```text
 research_snapshots
@@ -544,7 +544,7 @@ run_log
 
 ---
 
-### 6.5. Nhóm workflow, approval và evaluation
+### 6.5. Nh�m workflow, approval v� evaluation
 
 ```text
 research_runs
@@ -626,29 +626,29 @@ created_at
 
 ---
 
-## 7. Data pipeline chuẩn
+## 7. Data pipeline chu?n
 
 ### 7.1. Batch ingestion pipeline
 
 ```text
 Scheduler / Manual Trigger
-    ↓
+    ?
 Connector
-    ↓
+    ?
 Save raw object
-    ↓
+    ?
 Compute checksum
-    ↓
+    ?
 Dedup check
-    ↓
+    ?
 Parse / normalize
-    ↓
+    ?
 Validate / reconcile
-    ↓
+    ?
 Promote to canonical store
-    ↓
+    ?
 Update document chunks / evidence index
-    ↓
+    ?
 Mark affected artifacts as stale
 ```
 
@@ -656,59 +656,59 @@ Mark affected artifacts as stale
 
 ```text
 User request
-    ↓
+    ?
 Check data inventory + freshness
-    ↓
+    ?
 Create research snapshot
-    ↓
+    ?
 Run analytics from canonical facts
-    ↓
+    ?
 Run valuation from analytics artifacts
-    ↓
+    ?
 Retrieve evidence from document chunks
-    ↓
+    ?
 Generate grounded report
-    ↓
+    ?
 Run evaluation gates
-    ↓
+    ?
 HITL approval
-    ↓
+    ?
 Export report package
 ```
 
 ---
 
-## 8. Dedup và versioning
+## 8. Dedup v� versioning
 
 ### 8.1. Dedup theo checksum
 
-Mỗi raw file/API response phải tính checksum.
+M?i raw file/API response ph?i t�nh checksum.
 
 ```text
 checksum = hash(raw_content)
 ```
 
-Nếu checksum không đổi:
+N?u checksum kh�ng d?i:
 
 ```text
 status = no_change
-không parse lại
-không embed lại
-không tạo fact mới
+kh�ng parse l?i
+kh�ng embed l?i
+kh�ng t?o fact m?i
 ```
 
-Nếu checksum thay đổi:
+N?u checksum thay d?i:
 
 ```text
-lưu source_version mới
-parse lại source đó
-validate lại facts liên quan
-invalidate artifacts phụ thuộc
+luu source_version m?i
+parse l?i source d�
+validate l?i facts li�n quan
+invalidate artifacts ph? thu?c
 ```
 
 ### 8.2. Dedup theo business key
 
-Financial facts không được trùng theo business key.
+Financial facts kh�ng du?c tr�ng theo business key.
 
 Business key:
 
@@ -716,54 +716,54 @@ Business key:
 ticker + metric_name + statement_type + period + source_version_id
 ```
 
-Document chunks không được trùng theo:
+Document chunks kh�ng du?c tr�ng theo:
 
 ```text
 document_id + chunk_checksum
 ```
 
-Market prices không được trùng theo:
+Market prices kh�ng du?c tr�ng theo:
 
 ```text
 ticker + trade_date + source_version_id
 ```
 
-### 8.3. Không update đè dữ liệu đã dùng trong report
+### 8.3. Kh�ng update d� d? li?u d� d�ng trong report
 
-Nếu fact đã được dùng trong một `research_snapshot`, không được sửa trực tiếp. Phải tạo version mới và để report sau dùng version mới.
+N?u fact d� du?c d�ng trong m?t `research_snapshot`, kh�ng du?c s?a tr?c ti?p. Ph?i t?o version m?i v� d? report sau d�ng version m?i.
 
 ---
 
 ## 9. Data quality gates
 
-Dữ liệu chỉ được promote vào canonical store nếu qua gate.
+D? li?u ch? du?c promote v�o canonical store n?u qua gate.
 
 ### 9.1. Schema checks
 
-- Đúng kiểu dữ liệu.
-- Đúng ticker.
-- Đúng period.
-- Đúng currency/unit.
-- Không thiếu trường bắt buộc.
+- ��ng ki?u d? li?u.
+- ��ng ticker.
+- ��ng period.
+- ��ng currency/unit.
+- Kh�ng thi?u tru?ng b?t bu?c.
 
 ### 9.2. Financial sanity checks
 
-- Doanh thu không được null nếu là BCTC chính.
-- Tổng tài sản phải lớn hơn 0.
-- Vốn chủ sở hữu không được thiếu.
-- Gross profit không được lớn hơn revenue nếu có đủ dữ liệu.
-- Cash flow period phải khớp fiscal period.
-- EPS không dùng nếu shares outstanding thiếu hoặc không rõ.
+- Doanh thu kh�ng du?c null n?u l� BCTC ch�nh.
+- T?ng t�i s?n ph?i l?n hon 0.
+- V?n ch? s? h?u kh�ng du?c thi?u.
+- Gross profit kh�ng du?c l?n hon revenue n?u c� d? d? li?u.
+- Cash flow period ph?i kh?p fiscal period.
+- EPS kh�ng d�ng n?u shares outstanding thi?u ho?c kh�ng r�.
 
 ### 9.3. Reconciliation checks
 
-- Subtotal và total phải khớp trong tolerance.
-- Cùng một metric từ nhiều nguồn phải được so sánh.
-- Nếu nguồn mâu thuẫn, không tự chọn theo LLM; phải dùng rule hoặc human review.
+- Subtotal v� total ph?i kh?p trong tolerance.
+- C�ng m?t metric t? nhi?u ngu?n ph?i du?c so s�nh.
+- N?u ngu?n m�u thu?n, kh�ng t? ch?n theo LLM; ph?i d�ng rule ho?c human review.
 
 ### 9.4. Source confidence
 
-Gợi ý thứ tự độ tin cậy:
+G?i � th? t? d? tin c?y:
 
 ```text
 official filings / company disclosure
@@ -778,7 +778,7 @@ official filings / company disclosure
 
 ## 10. Freshness policy
 
-Dữ liệu không cần realtime, nhưng phải có freshness rule rõ ràng.
+D? li?u kh�ng c?n realtime, nhung ph?i c� freshness rule r� r�ng.
 
 ```yaml
 freshness_policy:
@@ -809,150 +809,150 @@ freshness_policy:
 
 ---
 
-## 11. Lịch cập nhật dữ liệu đề xuất
+## 11. L?ch c?p nh?t d? li?u d? xu?t
 
-| Job | Tần suất MVP | Ghi chú |
+| Job | T?n su?t MVP | Ghi ch� |
 |---|---:|---|
-| `refresh_market_prices` | Hằng ngày sau giờ giao dịch | Cập nhật giá và multiples |
-| `check_financial_statements` | Hằng tuần; hằng ngày trong mùa báo cáo | BCTC quý/năm |
-| `check_annual_reports` | Hằng tuần hoặc manual upload | BCTN theo năm |
-| `check_disclosures` | Hằng ngày | Công bố thông tin có thể ảnh hưởng valuation |
-| `check_news` | Hằng ngày hoặc 2–3 ngày/lần | Tin ngành dược không quá dày |
-| `check_pharma_catalysts` | Hằng tuần hoặc hằng ngày nếu nguồn ổn định | Đấu thầu/BHYT/regulatory |
-| `build_document_index` | Chỉ khi có document mới | Không embed lại toàn bộ |
-| `generate_full_report` | Khi user yêu cầu | Không cron-generate toàn bộ report |
+| `refresh_market_prices` | H?ng ng�y sau gi? giao d?ch | C?p nh?t gi� v� multiples |
+| `check_financial_statements` | H?ng tu?n; h?ng ng�y trong m�a b�o c�o | BCTC qu�/nam |
+| `check_annual_reports` | H?ng tu?n ho?c manual upload | BCTN theo nam |
+| `check_disclosures` | H?ng ng�y | C�ng b? th�ng tin c� th? ?nh hu?ng valuation |
+| `check_news` | H?ng ng�y ho?c 2�3 ng�y/l?n | Tin ng�nh du?c kh�ng qu� d�y |
+| `check_pharma_catalysts` | H?ng tu?n ho?c h?ng ng�y n?u ngu?n ?n d?nh | �?u th?u/BHYT/regulatory |
+| `build_document_index` | Ch? khi c� document m?i | Kh�ng embed l?i to�n b? |
+| `generate_full_report` | Khi user y�u c?u | Kh�ng cron-generate to�n b? report |
 
 ---
 
 ## 12. Incremental recompute
 
-Không chạy lại toàn bộ pipeline nếu chỉ một phần dữ liệu thay đổi.
+Kh�ng ch?y l?i to�n b? pipeline n?u ch? m?t ph?n d? li?u thay d?i.
 
-| Dữ liệu mới | Cần recompute | Không cần recompute |
+| D? li?u m?i | C?n recompute | Kh�ng c?n recompute |
 |---|---|---|
-| Giá mới | Market multiples, valuation spread, price chart | Business profile, annual report summary |
-| BCTC mới | Ratios, growth, peer metrics, DCF | Document chunks cũ |
-| Báo cáo thường niên mới | Business narrative, risk evidence, document index | Market price history |
-| Công bố cổ tức/phát hành | Share count, dividend/corporate event, valuation per share | Toàn bộ financial history |
-| Tin/catalyst lớn | Catalyst section, scenario assumptions, flash memo | Full report nếu materiality thấp |
+| Gi� m?i | Market multiples, valuation spread, price chart | Business profile, annual report summary |
+| BCTC m?i | Ratios, growth, peer metrics, DCF | Document chunks cu |
+| B�o c�o thu?ng ni�n m?i | Business narrative, risk evidence, document index | Market price history |
+| C�ng b? c? t?c/ph�t h�nh | Share count, dividend/corporate event, valuation per share | To�n b? financial history |
+| Tin/catalyst l?n | Catalyst section, scenario assumptions, flash memo | Full report n?u materiality th?p |
 
-Mỗi artifact cần có dependency metadata để biết khi nào stale.
-
----
-
-## 13. Vai trò của Data Foundation Agent
-
-`Data Foundation Agent` không được tự crawl hoặc tự sửa dữ liệu tùy ý. Agent này chỉ điều phối các tool dữ liệu theo config.
-
-Nhiệm vụ:
-
-1. Nhận `ResearchPlan` từ Orchestrator.
-2. Kiểm tra data inventory của ticker.
-3. Kiểm tra freshness theo từng source.
-4. Nếu thiếu/stale, gọi đúng connector/job.
-5. Lấy canonical facts mới nhất.
-6. Lấy evidence chunks liên quan.
-7. Tạo `DataSnapshot` hoặc `ResearchSnapshot`.
-8. Tạo `DataQualityReport`.
-9. Nếu fail gate, dừng hoặc chuyển human review.
-
-Không được:
-
-- Tự sửa số liệu thiếu nguồn.
-- Tự forecast số liệu còn thiếu.
-- Tự chọn nguồn ngoài allowlist.
-- Tự kết luận doanh nghiệp tốt/xấu.
-- Ghi vào canonical facts khi chưa qua validation.
+M?i artifact c?n c� dependency metadata d? bi?t khi n�o stale.
 
 ---
 
-## 14. Report package và artifact storage
+## 13. Vai tr� c?a Data Foundation Agent
 
-Mỗi research run sinh một report package.
+`Data Foundation Agent` kh�ng du?c t? crawl ho?c t? s?a d? li?u t�y �. Agent n�y ch? di?u ph?i c�c tool d? li?u theo config.
+
+Nhi?m v?:
+
+1. Nh?n `ResearchPlan` t? Orchestrator.
+2. Ki?m tra data inventory c?a ticker.
+3. Ki?m tra freshness theo t?ng source.
+4. N?u thi?u/stale, g?i d�ng connector/job.
+5. L?y canonical facts m?i nh?t.
+6. L?y evidence chunks li�n quan.
+7. T?o `DataSnapshot` ho?c `ResearchSnapshot`.
+8. T?o `DataQualityReport`.
+9. N?u fail gate, d?ng ho?c chuy?n human review.
+
+Kh�ng du?c:
+
+- T? s?a s? li?u thi?u ngu?n.
+- T? forecast s? li?u c�n thi?u.
+- T? ch?n ngu?n ngo�i allowlist.
+- T? k?t lu?n doanh nghi?p t?t/x?u.
+- Ghi v�o canonical facts khi chua qua validation.
+
+---
+
+## 14. Report package v� artifact storage
+
+M?i research run sinh m?t report package.
 
 ```text
 artifacts/
-├── reports/{run_id}_{ticker}_report.md
-├── reports_html/{run_id}_{ticker}_report.html
-├── valuation_results/{run_id}_{ticker}_valuation_result.json
-├── claim_ledgers/{run_id}_{ticker}_claim_ledger.json
-├── source_manifests/{run_id}_{ticker}_source_manifest.json
-├── eval_results/{run_id}_{ticker}_eval_result.json
-└── run_logs/{run_id}_{ticker}_run_log.json
++-- reports/{run_id}_{ticker}_report.md
++-- reports_html/{run_id}_{ticker}_report.html
++-- valuation_results/{run_id}_{ticker}_valuation_result.json
++-- claim_ledgers/{run_id}_{ticker}_claim_ledger.json
++-- source_manifests/{run_id}_{ticker}_source_manifest.json
++-- eval_results/{run_id}_{ticker}_eval_result.json
++-- run_logs/{run_id}_{ticker}_run_log.json
 ```
 
-DB chỉ lưu metadata và `storage_path`, không lưu toàn bộ nội dung artifact lớn trong bảng.
+DB ch? luu metadata v� `storage_path`, kh�ng luu to�n b? n?i dung artifact l?n trong b?ng.
 
 ---
 
-## 15. Thứ tự triển khai tối ưu
+## 15. Th? t? tri?n khai t?i uu
 
-### Phase 1 — Data foundation tối thiểu
+### Phase 1 � Data foundation t?i thi?u
 
-- Tạo PostgreSQL/Supabase schema.
-- Tạo `source_registry`, `source_versions`, `raw_objects`, `canonical_facts`.
-- Ingest golden dataset cho 5 mã MVP hoặc ít nhất 3 mã đầu.
+- T?o PostgreSQL/Supabase schema.
+- T?o `source_registry`, `source_versions`, `raw_objects`, `canonical_facts`.
+- Ingest golden dataset cho 5 m� MVP ho?c �t nh?t 3 m� d?u.
 - Implement checksum dedup.
-- Implement validation cơ bản.
+- Implement validation co b?n.
 
-### Phase 2 — Financial warehouse
+### Phase 2 � Financial warehouse
 
-- Chuẩn hóa financial statements thành canonical facts.
-- Tạo `market_prices`.
-- Tạo `financial_metrics` bằng code.
-- Tạo unit tests cho ratios và metrics.
+- Chu?n h�a financial statements th�nh canonical facts.
+- T?o `market_prices`.
+- T?o `financial_metrics` b?ng code.
+- T?o unit tests cho ratios v� metrics.
 
-### Phase 3 — Evidence retrieval
+### Phase 3 � Evidence retrieval
 
-- Tạo `documents` và `document_chunks`.
+- T?o `documents` v� `document_chunks`.
 - Chunk documents theo metadata.
-- Dùng PostgreSQL full-text search trước.
-- Thêm pgvector khi cần semantic search.
+- D�ng PostgreSQL full-text search tru?c.
+- Th�m pgvector khi c?n semantic search.
 
-### Phase 4 — Research snapshot
+### Phase 4 � Research snapshot
 
-- Tạo `research_snapshots` và `snapshot_items`.
-- Report/valuation chỉ đọc từ snapshot.
-- Tạo artifact versioning.
+- T?o `research_snapshots` v� `snapshot_items`.
+- Report/valuation ch? d?c t? snapshot.
+- T?o artifact versioning.
 
-### Phase 5 — Evaluation và HITL
+### Phase 5 � Evaluation v� HITL
 
-- Tạo `evaluation_results`, `approval_events`, `model_usage_logs`.
-- Chặn export nếu fail citation/numeric/valuation gate.
-- Lưu approval history theo artifact version.
-
----
-
-## 16. Quyết định thiết kế cuối cùng
-
-### Nên làm
-
-- Dùng PostgreSQL/Supabase làm source of truth.
-- Lưu raw files trong object storage/local filesystem.
-- Dùng checksum để dedup.
-- Dùng canonical facts cho mọi phép tính tài chính.
-- Dùng research snapshot trước khi sinh report.
-- Dùng incremental recompute.
-- Dùng pgvector chỉ cho evidence retrieval, không cho số liệu chính.
-- Dùng cron/APScheduler cho batch refresh.
-
-### Không nên làm trong MVP
-
-- Không dùng Kafka.
-- Không dùng Snowflake/BigQuery.
-- Không dùng microservices.
-- Không cron-generate full report mỗi ngày cho mọi ticker.
-- Không để LLM ghi hoặc sửa financial facts.
-- Không embed toàn bộ financial table rồi để LLM tìm số.
-- Không update đè fact đã được dùng trong report.
+- T?o `evaluation_results`, `approval_events`, `model_usage_logs`.
+- Ch?n export n?u fail citation/numeric/valuation gate.
+- Luu approval history theo artifact version.
 
 ---
 
-## 17. Kết luận
+## 16. Quy?t d?nh thi?t k? cu?i c�ng
 
-Hệ thống dữ liệu của dự án nên là một **mini financial research lakehouse** cho ngành dược/y tế Việt Nam, không phải realtime streaming platform.
+### N�n l�m
 
-Thiết kế tối ưu là:
+- D�ng PostgreSQL/Supabase l�m source of truth.
+- Luu raw files trong object storage/local filesystem.
+- D�ng checksum d? dedup.
+- D�ng canonical facts cho m?i ph�p t�nh t�i ch�nh.
+- D�ng research snapshot tru?c khi sinh report.
+- D�ng incremental recompute.
+- D�ng pgvector ch? cho evidence retrieval, kh�ng cho s? li?u ch�nh.
+- D�ng cron/APScheduler cho batch refresh.
+
+### Kh�ng n�n l�m trong MVP
+
+- Kh�ng d�ng Kafka.
+- Kh�ng d�ng Snowflake/BigQuery.
+- Kh�ng d�ng microservices.
+- Kh�ng cron-generate full report m?i ng�y cho m?i ticker.
+- Kh�ng d? LLM ghi ho?c s?a financial facts.
+- Kh�ng embed to�n b? financial table r?i d? LLM t�m s?.
+- Kh�ng update d� fact d� du?c d�ng trong report.
+
+---
+
+## 17. K?t lu?n
+
+H? th?ng d? li?u c?a d? �n n�n l� m?t **mini financial research lakehouse** cho ng�nh du?c/y t? Vi?t Nam, kh�ng ph?i realtime streaming platform.
+
+Thi?t k? t?i uu l�:
 
 ```text
 PostgreSQL/Supabase
@@ -965,12 +965,12 @@ PostgreSQL/Supabase
 + evaluation/HITL audit
 ```
 
-Kiến trúc này đủ mạnh để đảm bảo:
+Ki?n tr�c n�y d? m?nh d? d?m b?o:
 
-- Dữ liệu không bị trùng lặp.
-- Mọi số liệu có nguồn và version.
-- Báo cáo có thể tái lập.
-- Valuation không phụ thuộc vào LLM.
-- Claim định lượng có citation.
-- Workflow có thể resume/retry/review.
-- Hệ thống không bị phức tạp quá mức so với bản chất dữ liệu ngành dược Việt Nam.
+- D? li?u kh�ng b? tr�ng l?p.
+- M?i s? li?u c� ngu?n v� version.
+- B�o c�o c� th? t�i l?p.
+- Valuation kh�ng ph? thu?c v�o LLM.
+- Claim d?nh lu?ng c� citation.
+- Workflow c� th? resume/retry/review.
+- H? th?ng kh�ng b? ph?c t?p qu� m?c so v?i b?n ch?t d? li?u ng�nh du?c Vi?t Nam.

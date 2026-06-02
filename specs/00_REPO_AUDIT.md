@@ -8,11 +8,12 @@
 ## 1. Root Structure
 
 ```text
-backend/          FastAPI backend — orchestrator, agents, runtime store, API
-dataset/          Static data assets — universe CSV, taxonomy YAML, contracts JSON
+backend/          FastAPI backend, harness runtime, database, dataset helper code
+config/dataset/   Static dataset config: universe CSV, taxonomy YAML, contracts JSON
+data/             Runtime raw/staging data, ignored by git
 FinRobot/         Cloned reference project (do not couple to internals)
 frontend/         React/Next.js frontend (secondary priority)
-scripts/          Operational scripts — connectors, db layer, dataset pipeline
+scripts/          Operational scripts and connectors
 vnstock/          Local vnstock library (reference; wrap behind our connector)
 ```
 
@@ -50,7 +51,7 @@ vnstock/          Local vnstock library (reference; wrap behind our connector)
 | `catalyst_dav_connector.py` | DAV drug authority events | Regulatory recall / approval |
 | `vn_market_data_adapter.py` | Peer metrics adapter | Bridges fact store to agent format |
 
-### 3.2 Database (`scripts/db/`)
+### 3.2 Database (`backend/database/`)
 
 | Module | Role |
 |---|---|
@@ -58,7 +59,7 @@ vnstock/          Local vnstock library (reference; wrap behind our connector)
 | `source_registry.py` | `SourceRegistry` — registers and deduplicates source versions; saves raw snapshots |
 | `milvus_store.py` | Vector store client for document chunks |
 
-### 3.3 Dataset Pipeline (`scripts/dataset/`)
+### 3.3 Dataset Pipeline (`backend/dataset/`)
 
 | Script | Role |
 |---|---|
@@ -75,7 +76,7 @@ vnstock/          Local vnstock library (reference; wrap behind our connector)
 
 ---
 
-## 4. Static Assets (`dataset/`)
+## 4. Static Assets (`config/dataset/`)
 
 | Asset | Role |
 |---|---|
@@ -94,7 +95,7 @@ vnstock/          Local vnstock library (reference; wrap behind our connector)
 
 | Concept | Applicable to This Project |
 |---|---|
-| **Agent role separation** (DataAgent, QuantAgent, ResearcherAgent, AuditorAgent) | Already adopted in `backend/agents.py` |
+| **Agent role separation** (DataAgent, QuantAgent, ResearcherAgent, AuditorAgent) | Adopted through `config/agents/` policy and `backend/harness` execution |
 | **Supervisor / orchestrator pattern** | Already adopted in `backend/orchestrator.py` |
 | **Workflow state machine** (INGESTING → AUDITING → PUBLISHED) | Already adopted |
 | **Evidence grounding before synthesis** | Must implement; FinRobot shows the pattern |

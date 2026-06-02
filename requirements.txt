@@ -8,6 +8,7 @@ pdfplumber
 pyyaml
 langgraph
 openai
+langfuse>=4.0
 pytest
 pytesseract
 pdf2image

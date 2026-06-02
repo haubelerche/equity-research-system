@@ -9,10 +9,10 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-from scripts.dataset.config_io import ROOT, load_universe_tickers
-from scripts.dataset.dqf import infer_materiality, validate_catalyst_event
-from scripts.db.fact_store import PostgresFactStore
-from scripts.db.source_registry import SourceInput, SourceRegistry
+from backend.dataset.config_io import ROOT, load_universe_tickers
+from backend.dataset.dqf import infer_materiality, validate_catalyst_event
+from backend.database.fact_store import PostgresFactStore
+from backend.database.source_registry import SourceInput, SourceRegistry
 
 
 CONNECTOR_VERSION = "catalyst_hose_connector_v1"
@@ -62,7 +62,7 @@ def sync_hose_hnx_connector(tickers: list[str] | None = None) -> int:
     all_events: list[dict] = []
     for url, html in responses:
         entries = _parse_anchors(base_url=url, html=html, tracked_tickers=tracked)
-        raw_path = ROOT / "dataset" / "raw" / "catalyst" / "company_news" / now.date().isoformat() / f"{'hose' if 'hsx' in url else 'hnx'}_announcements.html"
+        raw_path = ROOT / "data" / "raw" / "catalyst" / "company_news" / now.date().isoformat() / f"{'hose' if 'hsx' in url else 'hnx'}_announcements.html"
         exchange_label = "hose" if "hsx" in url else "hnx"
         checksum = registry.save_raw_snapshot(html.encode("utf-8"), raw_path)
         source_version_id = registry.register_source(

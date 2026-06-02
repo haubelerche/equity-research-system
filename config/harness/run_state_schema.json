@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResearchGraphState",
+  "type": "object",
+  "required": ["run_id", "ticker", "run_type", "objective", "current_stage", "status", "gate_results", "trace"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 1},
+    "ticker": {"type": "string", "minLength": 1, "maxLength": 10},
+    "run_type": {"type": "string", "const": "full_report"},
+    "objective": {"type": "string", "minLength": 1},
+    "current_stage": {"type": "string"},
+    "status": {
+      "type": "string",
+      "enum": ["initialized", "running", "data_ready", "analysis_ready", "valuation_ready", "report_ready", "needs_human_review", "approved", "failed", "cancelled"]
+    },
+    "from_year": {"type": "integer", "minimum": 2021},
+    "to_year": {"type": "integer", "minimum": 2021},
+    "snapshot_id": {"type": ["string", "null"]},
+    "artifacts": {"type": "object"},
+    "artifact_refs": {"type": "array"},
+    "evidence_refs": {"type": "array"},
+    "gate_results": {"type": "object"},
+    "approvals": {"type": "object"},
+    "trace": {"type": "array"},
+    "requires_human": {"type": "boolean"},
+    "blocking_reason": {"type": ["string", "null"]},
+    "manifest_path": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}

@@ -46,7 +46,7 @@ if _env_file.exists():
 
 ROOT = Path(__file__).resolve().parents[1]
 FACTS_DIR = ROOT / "artifacts" / "facts"
-GOLDEN_DIR = ROOT / "dataset" / "golden" / "financials"
+GOLDEN_DIR = ROOT / "config" / "dataset" / "golden" / "financials"
 REPORTS_DIR = ROOT / "reports"
 
 MVP_FROM_YEAR = 2021
@@ -156,7 +156,7 @@ def run_validation(
 
     Does NOT run valuation.
     """
-    from scripts.db.fact_store import PostgresFactStore
+    from backend.database.fact_store import PostgresFactStore
     from backend.facts.normalizer import (
         build_fact_table,
         build_validation_status_table,

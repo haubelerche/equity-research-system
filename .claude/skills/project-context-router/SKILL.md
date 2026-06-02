@@ -46,9 +46,9 @@ Consult sources in this order. Stop as soon as the question is answered.
 | Ingestion / connector bug | `scripts/connectors/<connector>.py` + `scripts/ingest_ticker.py` + relevant test |
 | Canonical facts bug | `backend/facts/normalizer.py` + `scripts/build_facts.py` + `tests/unit/test_normalizer.py` |
 | Valuation calculation | `backend/analytics/<module>.py` + `.claude/plan/FORMULA_FINANCE.md` + relevant test |
-| Report generation | `scripts/generate_report.py` + `backend/orchestrator.py` + `backend/agents/` |
+| Report generation | `scripts/generate_report.py` + `backend/orchestrator.py` + `backend/harness/` + `config/agents/` |
 | Evaluation gate | `scripts/evaluate_report.py` + `backend/dataops/quality_report.py` |
-| DB / migration change | `scripts/db/migrate.py` + `scripts/db/migrations/` + `tests/integration/` |
+| DB / migration change | `backend/database/migrate.py` + `backend/database/migrations/` + `tests/integration/` |
 | New feature | Start from `docs/PRD.md` section → `specs/` → `backend/` module plan |
 | Ambiguous task | Read `docs/PRD.md` + `docs/PROBLEM-BRIEF.md` before asking user |
 

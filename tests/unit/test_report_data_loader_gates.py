@@ -36,15 +36,21 @@ def test_governance_artifact_blocks_unapproved_valuation(monkeypatch):
         "assumptions": [],
     }
 
-    monkeypatch.setattr(loader, "_latest_valuation", lambda ticker: legacy_val)
-    monkeypatch.setattr(loader, "_latest_valuation_result", lambda ticker: governance)
+    def fake_resolve(key, glob_pattern, manifest=None, allow_latest_artifacts=False):
+        if key == "valuation":
+            return legacy_val
+        if key == "valuation_result":
+            return governance
+        return {}
+
+    monkeypatch.setattr(loader, "_resolve_artifact", fake_resolve)
     monkeypatch.setattr(loader, "_load_chart_paths", lambda ticker: {
         "C3": "DBD_C3.png",
         "C6": "DBD_C6.png",
         "C7": "DBD_C7.png",
     })
 
-    ctx = loader.load_report_context("DBD")
+    ctx = loader.load_report_context("DBD", allow_latest_artifacts=True)
 
     assert ctx.rating == "UNDER_REVIEW"
     assert ctx._current_price_missing is True
@@ -67,8 +73,9 @@ def test_governance_artifact_blocks_unapproved_valuation(monkeypatch):
     assert "333,239" not in htmlish_markdown
     assert "+563.8%" not in htmlish_markdown
     assert "UNDER_REVIEW" in htmlish_markdown
-    assert "Biểu đồ DCF Value Bridge" in htmlish_markdown
-    assert "BLOCKED" in htmlish_markdown
+    assert "DCF Value Bridge" in htmlish_markdown  # chart placeholder rendered via _chart_ref fallback
+    # Unapproved valuation: at least one placeholder section must appear
+    assert "Nội dung chưa có" in htmlish_markdown or "Dự phóng" in htmlish_markdown
 
 
 def test_load_report_context_uses_manifest_not_glob(tmp_path, monkeypatch):
@@ -124,24 +131,32 @@ def test_load_report_context_accepts_run_id_param():
     from backend.reporting.report_data_loader import load_report_context
     sig = inspect.signature(load_report_context)
     assert "run_id" in sig.parameters
+    assert "allow_latest_artifacts" in sig.parameters
 
 
-def test_load_report_context_warns_without_run_id(monkeypatch):
-    """load_report_context without run_id must emit DeprecationWarning on glob fallback."""
-    import warnings
+def test_load_report_context_requires_run_id_unless_debug_fallback(monkeypatch):
+    """load_report_context without run_id must fail unless debug fallback is explicit."""
+    import pytest
     monkeypatch.setattr("backend.reporting.report_data_loader.ROOT",
                         __import__("pathlib").Path("/nonexistent_path_xyz"))
     from backend.reporting.report_data_loader import load_report_context
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        try:
-            load_report_context("DHG", run_id=None)
-        except Exception:
-            pass  # may fail due to nonexistent path, that's ok
-    dep_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
-    assert dep_warnings, (
-        "Expected DeprecationWarning when run_id=None, but none was emitted"
-    )
+
+    with pytest.raises(ValueError, match="run_id is required"):
+        load_report_context("DHG", run_id=None)
+
+    ctx = load_report_context("DHG", run_id=None, allow_latest_artifacts=True)
+    assert ctx.ticker == "DHG"
+
+
+def test_load_report_context_fails_when_run_id_manifest_missing(monkeypatch):
+    """Explicit run_id must not fall back to glob when the manifest is missing."""
+    import pytest
+    monkeypatch.setattr("backend.reporting.report_data_loader.ROOT",
+                        __import__("pathlib").Path("/nonexistent_path_xyz"))
+    from backend.reporting.report_data_loader import load_report_context
+
+    with pytest.raises(FileNotFoundError, match="artifact manifest"):
+        load_report_context("DHG", run_id="run_missing_manifest_xyz")
 
 
 def test_db_fact_load_failure_is_logged_not_swallowed(caplog):

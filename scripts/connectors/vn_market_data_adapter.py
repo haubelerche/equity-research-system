@@ -6,8 +6,8 @@ from typing import Any
 
 import pandas as pd
 
-from scripts.dataset.config_io import load_universe_rows
-from scripts.db.fact_store import PostgresFactStore
+from backend.dataset.config_io import load_universe_rows
+from backend.database.fact_store import PostgresFactStore
 
 
 STORE = PostgresFactStore()

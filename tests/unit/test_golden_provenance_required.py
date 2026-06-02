@@ -102,10 +102,10 @@ class TestGoldenProvenanceRequired:
         """Phase 3: DHG_golden_provenance.json must exist in the repo."""
         prov_path = (
             Path(__file__).resolve().parents[2]
-            / "dataset" / "golden" / "financials" / "DHG_golden_provenance.json"
+            / "config" / "dataset" / "golden" / "financials" / "DHG_golden_provenance.json"
         )
         assert prov_path.exists(), (
-            "dataset/golden/financials/DHG_golden_provenance.json is missing. "
+            "config/dataset/golden/financials/DHG_golden_provenance.json is missing. "
             "This file is required for Phase 3 to classify DHG 2021FY data as Tier 1."
         )
 
@@ -113,7 +113,7 @@ class TestGoldenProvenanceRequired:
         """DHG_golden_provenance.json must have all required fields."""
         prov_path = (
             Path(__file__).resolve().parents[2]
-            / "dataset" / "golden" / "financials" / "DHG_golden_provenance.json"
+            / "config" / "dataset" / "golden" / "financials" / "DHG_golden_provenance.json"
         )
         if not prov_path.exists():
             pytest.skip("DHG provenance file not found")

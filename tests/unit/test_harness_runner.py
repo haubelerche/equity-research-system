@@ -202,7 +202,7 @@ def test_assumption_approval_resumes_to_final_approval(monkeypatch) -> None:
     monkeypatch.setattr(
         runner_mod,
         "evaluate_quality_tool",
-        lambda ticker, report_path: _service("QUALITY_EVALUATION", {"overall_status": "PASS"}),
+        lambda ticker, report_path, valuation_path=None: _service("QUALITY_EVALUATION", {"overall_status": "PASS"}),
     )
 
     store = FakeStore()

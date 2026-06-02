@@ -45,7 +45,7 @@ MVP_TO_YEAR = 2025
 
 
 def _load_universe_segment(ticker: str) -> str:
-    from scripts.dataset.config_io import load_universe_rows
+    from backend.dataset.config_io import load_universe_rows
 
     for row in load_universe_rows():
         if row["ticker"].strip().upper() == ticker.upper():
@@ -150,8 +150,8 @@ def ingest_ticker(
     debug_coverage: bool = False,
     strict_completeness: bool = False,
 ) -> dict[str, Any]:
-    from scripts.db.fact_store import PostgresFactStore
-    from scripts.db.source_registry import SourceRegistry
+    from backend.database.fact_store import PostgresFactStore
+    from backend.database.source_registry import SourceRegistry
 
     if period == "quarter":
         print(

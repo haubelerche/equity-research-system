@@ -72,7 +72,7 @@ Classify before patching:
 - Change **only the code responsible for the root cause**.
 - Do not refactor surrounding code while fixing a bug.
 - Do not rename functions while fixing a bug.
-- If the fix requires a schema change, create a migration in `scripts/db/migrations/`.
+- If the fix requires a schema change, create a migration in `backend/database/migrations/`.
 
 ### Step 7 — Add or update regression test
 
@@ -86,8 +86,8 @@ Test location by module:
 | `backend/analytics/ratios.py` | `tests/unit/test_ratios.py` |
 | `backend/analytics/dcf.py` | `tests/unit/test_dcf.py` |
 | `backend/dataops/quality_report.py` | `tests/unit/test_data_quality.py` |
-| `scripts/db/migrate.py` | `tests/unit/test_migrate_runner.py` |
-| `scripts/db/` (integration) | `tests/integration/test_db_integrity.py` |
+| `backend/database/migrate.py` | `tests/unit/test_migrate_runner.py` |
+| `backend/database/` (integration) | `tests/integration/test_db_integrity.py` |
 | Any new module | Create `tests/unit/test_<module>.py` |
 
 ### Step 8 — Run the full relevant test suite

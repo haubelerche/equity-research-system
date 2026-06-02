@@ -150,7 +150,7 @@ scripts/
   run_research.py
   generate_report.py
   check_ocr_runtime.py
-scripts/db/
+backend/database/
   migrations/
 tests/
   unit/
@@ -837,12 +837,12 @@ session handoff summary
 If missing, propose adding:
 
 ```text
-harness/run_state_schema.json
-harness/task_registry.json
-harness/known_failures.json
-harness/agent_roles.md
-harness/tool_contracts.md
-harness/export_gate_policy.md
+config/harness/run_state_schema.json
+config/harness/task_registry.json
+config/harness/known_failures.json
+config/harness/agent_roles.md
+config/harness/tool_contracts.md
+config/harness/export_gate_policy.yml
 ```
 
 ### Hard Fail Conditions

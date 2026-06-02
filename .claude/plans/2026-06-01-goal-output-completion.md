@@ -1,14 +1,14 @@
-# Vietnam Pharma Equity Research — Final Report Completion Plan
+ Vietnam Pharma Equity Research � Final Report Completion Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Complete all GOAL_OUTPUT.md §19 Definition of Done criteria — deliver a PDF equity research report with 7 charts, peer comparison, structured artifact contracts (claim_ledger, source_manifest, eval_result), HTML/PDF export, and full gate validation for DHG.
+**Goal:** Complete all GOAL_OUTPUT.md �19 Definition of Done criteria � deliver a PDF equity research report with 7 charts, peer comparison, structured artifact contracts (claim_ledger, source_manifest, eval_result), HTML/PDF export, and full gate validation for DHG.
 
-**Architecture:** Three phases: (A) Contracts + Charts — artifact schema dataclasses + matplotlib chart generator for C2-C7; (B) Report Rebuild + Renderer — 8-section Markdown skeleton, driver-based forecast table, Jinja2 HTML template, WeasyPrint PDF export; (C) Gates + Integration — valuation reproducibility gate, source manifest builder, claim ledger builder, wired into generate_report.py and run_research.py.
+**Architecture:** Three phases: (A) Contracts + Charts � artifact schema dataclasses + matplotlib chart generator for C2-C7; (B) Report Rebuild + Renderer � 8-section Markdown skeleton, driver-based forecast table, Jinja2 HTML template, WeasyPrint PDF export; (C) Gates + Integration � valuation reproducibility gate, source manifest builder, claim ledger builder, wired into generate_report.py and run_research.py.
 
 **Tech Stack:** Python 3.11, matplotlib 3.10 (charts), WeasyPrint 61+ (PDF on Linux/Docker), Jinja2 (HTML), psycopg2 (DB), dataclasses (contracts), pytest (tests)
 
-**Scope note:** This plan has 3 independent subsystems (A/B/C). Each phase produces working software on its own. Execute in order A → B → C.
+**Scope note:** This plan has 3 independent subsystems (A/B/C). Each phase produces working software on its own. Execute in order A ? B ? C.
 
 **Dependencies to install:**
 ```bash
@@ -54,7 +54,7 @@ MODIFY files:
 
 ---
 
-## PHASE A — Artifact Contracts + Chart Generator
+## PHASE A � Artifact Contracts + Chart Generator
 
 ### Task A1: Add dependencies and create module skeletons
 
@@ -88,7 +88,7 @@ pip install jinja2 weasyprint
 python -c "import jinja2; import matplotlib; print('deps ok')"
 ```
 
-Expected: `deps ok` (weasyprint may fail on Windows — that's ok, HTML path still works)
+Expected: `deps ok` (weasyprint may fail on Windows � that's ok, HTML path still works)
 
 - [ ] **Step 4: Commit**
 
@@ -119,7 +119,7 @@ from backend.report_contracts.claim_ledger import ClaimEntry, ClaimLedger
 def test_claim_entry_roundtrip(tmp_path):
     entry = ClaimEntry(
         claim_id="CLM-001", run_id="RUN-test", section="investment_thesis",
-        page=1, claim_text="Doanh thu 2024 tăng 12.3%", claim_type="quantitative",
+        page=1, claim_text="Doanh thu 2024 tang 12.3%", claim_type="quantitative",
         ticker="DHG", period="2024A", metric="revenue_growth",
         value=0.123, unit="%", source_refs=["SRC-001"], artifact_refs=[],
         support_status="supported", confidence=0.92, review_status="approved",
@@ -134,7 +134,7 @@ def test_claim_entry_roundtrip(tmp_path):
 def test_unsupported_claim_blocked():
     entry = ClaimEntry(
         claim_id="CLM-002", run_id="RUN-test", section="conclusion",
-        page=8, claim_text="Nên mua ngay", claim_type="conclusion",
+        page=8, claim_text="N�n mua ngay", claim_type="conclusion",
         ticker="DHG", period="", metric="", value=None, unit="",
         source_refs=[], artifact_refs=[], support_status="unsupported",
         confidence=0.0, review_status="pending_review",
@@ -144,7 +144,7 @@ def test_unsupported_claim_blocked():
     assert any("unsupported" in i.lower() for i in issues)
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [ ] **Step 2: Run � expect failure**
 
 ```bash
 pytest tests/reporting/test_claim_ledger.py -v
@@ -397,7 +397,7 @@ class EvalResult:
         return obj
 ```
 
-- [ ] **Step 6: Run tests — expect pass**
+- [ ] **Step 6: Run tests � expect pass**
 
 ```bash
 pytest tests/reporting/test_claim_ledger.py -v
@@ -413,7 +413,7 @@ git commit -m "feat(contracts): ClaimLedger, SourceManifest, EvalResult dataclas
 
 ---
 
-### Task A3: Chart generator — C2 Revenue+EBITDA, C3 EPS+PE
+### Task A3: Chart generator � C2 Revenue+EBITDA, C3 EPS+PE
 
 **Files:**
 - Create: `backend/reporting/chart_generator.py`
@@ -500,7 +500,7 @@ def test_c7_creates_png(tmp_path):
     assert out.stat().st_size > 3000
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [ ] **Step 2: Run � expect failure**
 
 ```bash
 pytest tests/reporting/test_chart_generator.py -v
@@ -516,13 +516,13 @@ Expected: `ImportError`
 All charts read from pre-computed artifact data (canonical facts, valuation_result).
 No LLM involvement. Charts saved as PNG for embedding in HTML/PDF.
 
-Chart ID → function mapping (GOAL_OUTPUT.md §9):
+Chart ID ? function mapping (GOAL_OUTPUT.md �9):
   C2  generate_c2_revenue_ebitda     Revenue bar + EBITDA margin line
   C3  generate_c3_eps_pe             EPS bar + P/E line (dual-axis)
   C4  generate_c4_margin_roe         Gross/net margin + ROE multi-line
   C5  generate_c5_forecast           Forecast revenue/FCFF bar+line
-  C6  generate_c6_dcf_bridge         DCF waterfall (EV→equity→price)
-  C7  generate_c7_sensitivity_heatmap WACC×g sensitivity color table
+  C6  generate_c6_dcf_bridge         DCF waterfall (EV?equity?price)
+  C7  generate_c7_sensitivity_heatmap WACC�g sensitivity color table
 """
 from __future__ import annotations
 
@@ -561,20 +561,20 @@ def _source_caption(fig: plt.Figure, text: str) -> None:
     fig.text(0.01, -0.02, text, fontsize=6.5, style="italic", color="#555555")
 
 
-# ── C2: Revenue & EBITDA Margin ────────────────────────────────────────────────
+# -- C2: Revenue & EBITDA Margin ------------------------------------------------
 
 def generate_c2_revenue_ebitda(
     ticker: str,
     years: list[int],
-    revenues: list[float],        # tỷ VND
+    revenues: list[float],        # t? VND
     ebitda_margins: list[float],  # decimal 0-1
     out_dir: Path,
     run_id: str,
 ) -> Path:
     fig, ax1 = plt.subplots(figsize=(7.5, 3.8))
     x = np.arange(len(years))
-    ax1.bar(x, revenues, color=_NAVY, alpha=0.85, label="Doanh thu thuần (tỷ VND)", zorder=3)
-    ax1.set_ylabel("tỷ VND", **_FONT)
+    ax1.bar(x, revenues, color=_NAVY, alpha=0.85, label="Doanh thu thu?n (t? VND)", zorder=3)
+    ax1.set_ylabel("t? VND", **_FONT)
     ax1.set_xticks(x)
     ax1.set_xticklabels([f"{y}A" for y in years], **_FONT)
     ax1.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
@@ -589,12 +589,12 @@ def generate_c2_revenue_ebitda(
     h1, l1 = ax1.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()
     ax1.legend(h1 + h2, l1 + l2, loc="upper left", fontsize=7, framealpha=0.8)
-    ax1.set_title(f"{ticker} — Revenue & EBITDA Margin Trend", fontsize=9, fontweight="bold", pad=8)
-    _source_caption(fig, f"Nguồn: Canonical facts | Kỳ: {years[0]}A–{years[-1]}A")
+    ax1.set_title(f"{ticker} � Revenue & EBITDA Margin Trend", fontsize=9, fontweight="bold", pad=8)
+    _source_caption(fig, f"Ngu?n: Canonical facts | K?: {years[0]}A�{years[-1]}A")
     return _save(fig, out_dir, run_id, ticker, "C2_revenue_ebitda")
 
 
-# ── C3: EPS & P/E Trend ────────────────────────────────────────────────────────
+# -- C3: EPS & P/E Trend --------------------------------------------------------
 
 def generate_c3_eps_pe(
     ticker: str,
@@ -622,12 +622,12 @@ def generate_c3_eps_pe(
     h1, l1 = ax1.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()
     ax1.legend(h1 + h2, l1 + l2, loc="upper left", fontsize=7, framealpha=0.8)
-    ax1.set_title(f"{ticker} — EPS & P/E Trend", fontsize=9, fontweight="bold", pad=8)
-    _source_caption(fig, f"Nguồn: Canonical facts, market data | Kỳ: {years[0]}A–{years[-1]}A")
+    ax1.set_title(f"{ticker} � EPS & P/E Trend", fontsize=9, fontweight="bold", pad=8)
+    _source_caption(fig, f"Ngu?n: Canonical facts, market data | K?: {years[0]}A�{years[-1]}A")
     return _save(fig, out_dir, run_id, ticker, "C3_eps_pe")
 
 
-# ── C4: Margin & ROE Trend ─────────────────────────────────────────────────────
+# -- C4: Margin & ROE Trend -----------------------------------------------------
 
 def generate_c4_margin_roe(
     ticker: str,
@@ -641,9 +641,9 @@ def generate_c4_margin_roe(
     fig, ax = plt.subplots(figsize=(7.5, 3.8))
     x = np.arange(len(years))
     ax.plot(x, [v * 100 for v in gross_margins], "o-", color=_NAVY,
-            linewidth=2, markersize=5, label="Biên gộp (%)")
+            linewidth=2, markersize=5, label="Bi�n g?p (%)")
     ax.plot(x, [v * 100 for v in net_margins], "s-", color=_GOLD,
-            linewidth=2, markersize=5, label="Biên ròng (%)")
+            linewidth=2, markersize=5, label="Bi�n r�ng (%)")
     ax.plot(x, [v * 100 for v in roe], "^--", color=_GREEN,
             linewidth=2, markersize=5, label="ROE (%)")
     ax.set_xticks(x)
@@ -652,20 +652,20 @@ def generate_c4_margin_roe(
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:.1f}%"))
     ax.legend(fontsize=7, framealpha=0.8)
     ax.grid(alpha=0.3)
-    ax.set_title(f"{ticker} — Margin & ROE Trend", fontsize=9, fontweight="bold", pad=8)
-    _source_caption(fig, f"Nguồn: Canonical facts | Kỳ: {years[0]}A–{years[-1]}A")
+    ax.set_title(f"{ticker} � Margin & ROE Trend", fontsize=9, fontweight="bold", pad=8)
+    _source_caption(fig, f"Ngu?n: Canonical facts | K?: {years[0]}A�{years[-1]}A")
     return _save(fig, out_dir, run_id, ticker, "C4_margin_roe")
 
 
-# ── C5: Forecast Revenue & FCFF ───────────────────────────────────────────────
+# -- C5: Forecast Revenue & FCFF -----------------------------------------------
 
 def generate_c5_forecast(
     ticker: str,
     hist_years: list[int],
-    hist_revenues: list[float],  # tỷ VND actual
+    hist_revenues: list[float],  # t? VND actual
     fcast_years: list[int],
-    fcast_revenues: list[float],  # tỷ VND forecast
-    fcast_fcff: list[float],      # tỷ VND forecast
+    fcast_revenues: list[float],  # t? VND forecast
+    fcast_fcff: list[float],      # t? VND forecast
     out_dir: Path,
     run_id: str,
 ) -> Path:
@@ -677,10 +677,10 @@ def generate_c5_forecast(
     n_hist = len(hist_years)
 
     bars_actual = ax1.bar(x[:n_hist], all_revenues[:n_hist], color=_NAVY,
-                          alpha=0.85, label="Doanh thu A (tỷ VND)", zorder=3)
+                          alpha=0.85, label="Doanh thu A (t? VND)", zorder=3)
     bars_fcast = ax1.bar(x[n_hist:], all_revenues[n_hist:], color=_LIGHT_BLUE,
-                         alpha=0.85, label="Doanh thu F (tỷ VND)", zorder=3)
-    ax1.set_ylabel("tỷ VND", **_FONT)
+                         alpha=0.85, label="Doanh thu F (t? VND)", zorder=3)
+    ax1.set_ylabel("t? VND", **_FONT)
     ax1.set_xticks(x)
     ax1.set_xticklabels(all_labels, **_FONT, rotation=0)
     ax1.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
@@ -690,8 +690,8 @@ def generate_c5_forecast(
     ax2 = ax1.twinx()
     xf = x[n_hist:]
     ax2.plot(xf, fcast_fcff, "o-", color=_GOLD, linewidth=2, markersize=5,
-             label="FCFF F (tỷ VND)", zorder=4)
-    ax2.set_ylabel("FCFF (tỷ VND)", **_FONT)
+             label="FCFF F (t? VND)", zorder=4)
+    ax2.set_ylabel("FCFF (t? VND)", **_FONT)
     ax2.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
 
     # Vertical separator at forecast boundary
@@ -700,12 +700,12 @@ def generate_c5_forecast(
     h1, l1 = ax1.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()
     ax1.legend(h1 + h2, l1 + l2, loc="upper left", fontsize=7, framealpha=0.8)
-    ax1.set_title(f"{ticker} — Revenue & FCFF Forecast", fontsize=9, fontweight="bold", pad=8)
-    _source_caption(fig, "Nguồn: Canonical facts (A), Valuation artifact (F) | Giả định base case")
+    ax1.set_title(f"{ticker} � Revenue & FCFF Forecast", fontsize=9, fontweight="bold", pad=8)
+    _source_caption(fig, "Ngu?n: Canonical facts (A), Valuation artifact (F) | Gi? d?nh base case")
     return _save(fig, out_dir, run_id, ticker, "C5_forecast")
 
 
-# ── C7: Sensitivity Heatmap ────────────────────────────────────────────────────
+# -- C7: Sensitivity Heatmap ----------------------------------------------------
 
 def generate_c7_sensitivity_heatmap(
     ticker: str,
@@ -745,28 +745,28 @@ def generate_c7_sensitivity_heatmap(
     for i in range(len(rows)):
         for j in range(len(cols)):
             val = values[i][j]
-            marker = "★" if i == base_row and j == base_col else ""
+            marker = "?" if i == base_row and j == base_col else ""
             ax.text(j, i, f"{val/1000:,.0f}k{marker}", ha="center", va="center",
                     fontsize=7, fontweight="bold" if i == base_row and j == base_col else "normal")
 
     plt.colorbar(im, ax=ax, label="vs Base", shrink=0.8, pad=0.02)
-    ax.set_title(f"{ticker} — Target Price Sensitivity (WACC × Terminal Growth)",
+    ax.set_title(f"{ticker} � Target Price Sensitivity (WACC � Terminal Growth)",
                  fontsize=9, fontweight="bold", pad=8)
-    _source_caption(fig, "Nguồn: valuation_result.json | ★ = Base case")
+    _source_caption(fig, "Ngu?n: valuation_result.json | ? = Base case")
     fig.tight_layout()
     return _save(fig, out_dir, run_id, ticker, "C7_sensitivity_heatmap")
 
 
-# ── C6: DCF Value Bridge (waterfall) ──────────────────────────────────────────
+# -- C6: DCF Value Bridge (waterfall) ------------------------------------------
 
 def generate_c6_dcf_bridge(
     ticker: str,
-    pv_fcff: float,           # tỷ VND
-    pv_terminal_value: float, # tỷ VND
-    cash: float,              # tỷ VND (positive = adds to equity)
-    debt: float,              # tỷ VND (negative = subtracts)
-    minority: float,          # tỷ VND (negative)
-    equity_value: float,      # tỷ VND
+    pv_fcff: float,           # t? VND
+    pv_terminal_value: float, # t? VND
+    cash: float,              # t? VND (positive = adds to equity)
+    debt: float,              # t? VND (negative = subtracts)
+    minority: float,          # t? VND (negative)
+    equity_value: float,      # t? VND
     shares_mn: float,         # million shares
     target_price: float,      # VND/share
     out_dir: Path,
@@ -795,7 +795,7 @@ def generate_c6_dcf_bridge(
     bars = ax.bar(x, heights, bottom=bottoms, color=colors, alpha=0.85, width=0.55)
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=8)
-    ax.set_ylabel("tỷ VND", **_FONT)
+    ax.set_ylabel("t? VND", **_FONT)
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
     ax.axhline(0, color="black", linewidth=0.8)
     ax.grid(axis="y", alpha=0.3, zorder=0)
@@ -809,14 +809,14 @@ def generate_c6_dcf_bridge(
 
     # Target price annotation
     ax.text(len(labels) - 1, equity_value + equity_value * 0.03,
-            f"→ {target_price:,.0f} VND/cp", ha="center", fontsize=8, color=_NAVY, fontweight="bold")
+            f"? {target_price:,.0f} VND/cp", ha="center", fontsize=8, color=_NAVY, fontweight="bold")
 
-    ax.set_title(f"{ticker} — DCF Value Bridge", fontsize=9, fontweight="bold", pad=8)
-    _source_caption(fig, "Nguồn: valuation_result.json")
+    ax.set_title(f"{ticker} � DCF Value Bridge", fontsize=9, fontweight="bold", pad=8)
+    _source_caption(fig, "Ngu?n: valuation_result.json")
     return _save(fig, out_dir, run_id, ticker, "C6_dcf_bridge")
 ```
 
-- [ ] **Step 4: Run tests — expect pass**
+- [ ] **Step 4: Run tests � expect pass**
 
 ```bash
 pytest tests/reporting/test_chart_generator.py -v
@@ -832,7 +832,7 @@ git commit -m "feat(charts): C2 revenue+EBITDA, C3 EPS+PE, C4 margin+ROE, C5 for
 
 ---
 
-### Task A4: Peer Comparison — compute from DB
+### Task A4: Peer Comparison � compute from DB
 
 **Files:**
 - Create: `backend/reporting/peer_comparison.py`
@@ -863,7 +863,7 @@ def _make_conn(facts_by_ticker: dict[str, dict]) -> MagicMock:
 
 def test_peer_row_dataclass():
     row = PeerRow(
-        ticker="DHG", business_type="Sản xuất dược OTC/ETC",
+        ticker="DHG", business_type="S?n xu?t du?c OTC/ETC",
         market_cap_bn=4500.0, pe=12.5, pb=2.1, ev_ebitda=8.3,
         roe=0.18, net_margin=0.13,
     )
@@ -900,7 +900,7 @@ def test_peer_row_median():
     assert median.pe == 12.5  # median of [11.0, 12.5, 14.0]
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [ ] **Step 2: Run � expect failure**
 
 ```bash
 pytest tests/reporting/test_peer_comparison.py -v
@@ -910,7 +910,7 @@ pytest tests/reporting/test_peer_comparison.py -v
 
 ```python
 # backend/reporting/peer_comparison.py
-"""Peer comparison table — computes P/E, P/B, EV/EBITDA, ROE, net margin
+"""Peer comparison table � computes P/E, P/B, EV/EBITDA, ROE, net margin
 from canonical facts in DB for all 5 MVP tickers.
 
 Uses market price from vnstock (latest available) and EBITDA/EPS from canonical facts.
@@ -931,11 +931,11 @@ except ImportError:
 MVP_TICKERS = ["DHG", "IMP", "DMC", "TRA", "DBD"]
 
 BUSINESS_TYPE = {
-    "DHG": "Sản xuất dược OTC/ETC",
-    "IMP": "Sản xuất dược ETC",
-    "DMC": "Sản xuất dược OTC/ETC",
-    "TRA": "Sản xuất dược truyền thống",
-    "DBD": "Sản xuất dược + TTBYT",
+    "DHG": "S?n xu?t du?c OTC/ETC",
+    "IMP": "S?n xu?t du?c ETC",
+    "DMC": "S?n xu?t du?c OTC/ETC",
+    "TRA": "S?n xu?t du?c truy?n th?ng",
+    "DBD": "S?n xu?t du?c + TTBYT",
 }
 
 
@@ -943,7 +943,7 @@ BUSINESS_TYPE = {
 class PeerRow:
     ticker: str
     business_type: str
-    market_cap_bn: Optional[float]   # tỷ VND
+    market_cap_bn: Optional[float]   # t? VND
     pe: Optional[float]              # x
     pb: Optional[float]              # x
     ev_ebitda: Optional[float]       # x
@@ -1012,14 +1012,14 @@ def build_peer_table(
             cash = facts.get("cash_and_equivalents.ending", 0)
 
             # Convert bn-VND to VND for per-share metrics
-            # eps.basic is in VND/share; equity.parent is in vnd_bn → multiply by 1e9
+            # eps.basic is in VND/share; equity.parent is in vnd_bn ? multiply by 1e9
             shares = _safe_div((equity or 0) * 1e9, price) if price and equity else None
             if shares is None and eps and price:
                 shares = None  # can't derive shares this way
 
             market_cap = None
             if price and shares:
-                market_cap = price * shares / 1e9  # tỷ VND
+                market_cap = price * shares / 1e9  # t? VND
 
             pe = _safe_div(price, eps) if price and eps else None
             bvps = _safe_div((equity or 0) * 1e9, shares) if equity and shares else None
@@ -1027,7 +1027,7 @@ def build_peer_table(
 
             ev = None
             if market_cap is not None and debt is not None:
-                ev = market_cap + debt - (cash or 0)  # tỷ VND
+                ev = market_cap + debt - (cash or 0)  # t? VND
             ev_ebitda = _safe_div(ev, ebitda) if ev and ebitda else None
 
             roe = _safe_div(net_income, equity) if net_income and equity else None
@@ -1035,7 +1035,7 @@ def build_peer_table(
 
             rows.append(PeerRow(
                 ticker=ticker,
-                business_type=BUSINESS_TYPE.get(ticker, "Dược phẩm"),
+                business_type=BUSINESS_TYPE.get(ticker, "Du?c ph?m"),
                 market_cap_bn=market_cap,
                 pe=pe,
                 pb=pb,
@@ -1079,7 +1079,7 @@ def format_peer_markdown_table(rows: list[PeerRow], include_median: bool = True)
     def _fmt(v: Optional[float], fmt: str) -> str:
         return f"{v:{fmt}}" if v is not None else "N/A"
 
-    header = "| Ticker | Business Type | Market Cap (tỷ) | P/E | P/B | EV/EBITDA | ROE | Net Margin |"
+    header = "| Ticker | Business Type | Market Cap (t?) | P/E | P/B | EV/EBITDA | ROE | Net Margin |"
     sep    = "|---|---|---:|---:|---:|---:|---:|---:|"
     lines  = [header, sep]
     for r in rows:
@@ -1096,7 +1096,7 @@ def format_peer_markdown_table(rows: list[PeerRow], include_median: bool = True)
     return "\n".join(lines)
 ```
 
-- [ ] **Step 4: Run tests — expect pass**
+- [ ] **Step 4: Run tests � expect pass**
 
 ```bash
 pytest tests/reporting/test_peer_comparison.py -v
@@ -1112,7 +1112,7 @@ git commit -m "feat(peer): build_peer_table computes P/E, EV/EBITDA from canonic
 
 ---
 
-## PHASE B — Report Rebuild + HTML/PDF Renderer
+## PHASE B � Report Rebuild + HTML/PDF Renderer
 
 ### Task B1: Valuation reproducibility gate
 
@@ -1134,7 +1134,7 @@ from backend.report_gates.valuation_reproducibility_gate import validate_valuati
 def _make_valuation(implied_price: float) -> dict:
     return {
         "fcff_dcf": {
-            "pv_fcff": 3_500_000.0,        # tỷ VND
+            "pv_fcff": 3_500_000.0,        # t? VND
             "pv_terminal_value": 2_800_000.0,
             "cash_and_equivalents": 250_000.0,
             "debt": 150_000.0,
@@ -1148,7 +1148,7 @@ def _make_valuation(implied_price: float) -> dict:
 
 
 def test_passes_when_prices_match():
-    # equity_value / shares = 6_400_000 * 1e9 / 46_700_000 ≈ 137_047 VND
+    # equity_value / shares = 6_400_000 * 1e9 / 46_700_000 � 137_047 VND
     val = _make_valuation(137_047.0)
     result = validate_valuation_reproducibility(val, tolerance_pct=0.01)
     assert result.status == "pass", result.issues
@@ -1168,7 +1168,7 @@ def test_fails_with_zero_shares():
     assert result.status == "fail"
 ```
 
-- [ ] **Step 2: Run — expect failure**
+- [ ] **Step 2: Run � expect failure**
 
 ```bash
 pytest tests/reporting/test_valuation_gate.py -v
@@ -1204,7 +1204,7 @@ def validate_valuation_reproducibility(
 ) -> GateResult:
     """Recompute target price from components and compare with stored value.
 
-    GOAL_OUTPUT.md §14.5: pass when DCF output recomputable from valuation_result.
+    GOAL_OUTPUT.md �14.5: pass when DCF output recomputable from valuation_result.
     """
     fcff = valuation_result.get("fcff_dcf", {})
 
@@ -1220,18 +1220,18 @@ def validate_valuation_reproducibility(
     if shares <= 0:
         return GateResult(
             gate="valuation_reproducibility", status="fail", critical=True,
-            checked=1, issues=["shares_outstanding is zero or missing — cannot recompute target price"],
+            checked=1, issues=["shares_outstanding is zero or missing � cannot recompute target price"],
         )
 
     # Recompute: EV = PV(FCFF) + PV(TV); Equity = EV + cash - debt - minority
-    # equity_value in valuation_result is in tỷ VND, shares is in shares
-    recomputed_equity = pv_fcff + pv_tv + cash - debt - minority  # tỷ VND
+    # equity_value in valuation_result is in t? VND, shares is in shares
+    recomputed_equity = pv_fcff + pv_tv + cash - debt - minority  # t? VND
     recomputed_price = recomputed_equity * 1e9 / shares           # VND/share
 
     if stored_price == 0.0:
         return GateResult(
             gate="valuation_reproducibility", status="fail", critical=True,
-            checked=1, issues=["stored target price is zero — valuation artifact incomplete"],
+            checked=1, issues=["stored target price is zero � valuation artifact incomplete"],
         )
 
     relative_error = abs(recomputed_price - stored_price) / abs(stored_price)
@@ -1251,7 +1251,7 @@ def validate_valuation_reproducibility(
     )
 ```
 
-- [ ] **Step 4: Run tests — expect pass**
+- [ ] **Step 4: Run tests � expect pass**
 
 ```bash
 pytest tests/reporting/test_valuation_gate.py -v
@@ -1288,7 +1288,7 @@ from backend.reporting.html_renderer import render_html
 def test_render_html_creates_file(tmp_path):
     context = {
         "ticker": "DHG",
-        "company_name": "Công ty Cổ phần Dược Hậu Giang",
+        "company_name": "C�ng ty C? ph?n Du?c H?u Giang",
         "exchange": "HOSE",
         "report_date": "01/06/2026",
         "data_cutoff": "31/12/2025",
@@ -1299,13 +1299,13 @@ def test_render_html_creates_file(tmp_path):
         "risk_level": "Medium",
         "data_confidence": "Medium",
         "report_status": "DRAFT",
-        "investment_thesis": "DHG là doanh nghiệp dược phẩm hàng đầu Việt Nam.",
+        "investment_thesis": "DHG l� doanh nghi?p du?c ph?m h�ng d?u Vi?t Nam.",
         "key_metrics": [
-            {"label": "Market Cap", "value": "4,409 tỷ VND"},
-            {"label": "Revenue FY2025", "value": "2,750 tỷ VND"},
+            {"label": "Market Cap", "value": "4,409 t? VND"},
+            {"label": "Revenue FY2025", "value": "2,750 t? VND"},
             {"label": "EPS", "value": "11,200 VND/cp"},
         ],
-        "financial_summary_table": "| Chỉ tiêu | 2021A |\n|---|---:|\n| Doanh thu | 2,100 |",
+        "financial_summary_table": "| Ch? ti�u | 2021A |\n|---|---:|\n| Doanh thu | 2,100 |",
         "forecast_table": "",
         "dcf_table": "",
         "valuation_summary_table": "",
@@ -1314,8 +1314,8 @@ def test_render_html_creates_file(tmp_path):
         "peer_table": "| Ticker | P/E |\n|---|---:|\n| DHG | 12.5x |",
         "catalysts_table": "",
         "risks_table": "",
-        "key_takeaways": ["Doanh thu tăng trưởng ổn định", "Biên lợi nhuận cải thiện"],
-        "disclaimer": "Báo cáo chỉ nhằm mục đích nghiên cứu.",
+        "key_takeaways": ["Doanh thu tang tru?ng ?n d?nh", "Bi�n l?i nhu?n c?i thi?n"],
+        "disclaimer": "B�o c�o ch? nh?m m?c d�ch nghi�n c?u.",
         "quality_summary": [{"item": "Numeric Consistency", "status": "PASS", "notes": ""}],
         "key_sources": [{"source_id": "SRC-001", "source_name": "vnstock API", "period": "2024A"}],
         "charts": {},  # no charts in this test
@@ -1325,7 +1325,7 @@ def test_render_html_creates_file(tmp_path):
     assert out.exists()
     content = out.read_text(encoding="utf-8")
     assert "DHG" in content
-    assert "Dược Hậu Giang" in content
+    assert "Du?c H?u Giang" in content
     assert "UNDER_REVIEW" in content
 
 
@@ -1339,15 +1339,15 @@ def test_render_html_contains_disclaimer(tmp_path):
         "key_metrics": [], "financial_summary_table": "", "forecast_table": "",
         "dcf_table": "", "valuation_summary_table": "", "sensitivity_matrix": "",
         "scenario_table": "", "peer_table": "", "catalysts_table": "", "risks_table": "",
-        "key_takeaways": [], "disclaimer": "Không phải khuyến nghị đầu tư.",
+        "key_takeaways": [], "disclaimer": "Kh�ng ph?i khuy?n ngh? d?u tu.",
         "quality_summary": [], "key_sources": [], "charts": {},
     }
     out = tmp_path / "report.html"
     render_html(context=context, out_path=out, templates_dir=Path("templates"))
-    assert "Không phải khuyến nghị" in out.read_text(encoding="utf-8")
+    assert "Kh�ng ph?i khuy?n ngh?" in out.read_text(encoding="utf-8")
 ```
 
-- [ ] **Step 2: Run — expect failure (ImportError)**
+- [ ] **Step 2: Run � expect failure (ImportError)**
 
 ```bash
 pytest tests/reporting/test_html_renderer.py -v
@@ -1368,7 +1368,7 @@ Write `templates/report.html.j2`:
   <meta charset="UTF-8">
   <title>{{ ticker }} Equity Research Report</title>
   <style>
-    /* ── Base ───────────────────────────────────────────── */
+    /* -- Base --------------------------------------------- */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 9pt; color: #1a1a1a; background: white; }
     h1 { font-size: 18pt; font-weight: 700; }
@@ -1378,11 +1378,11 @@ Write `templates/report.html.j2`:
     ul { margin: 6px 0 6px 20px; }
     li { margin: 3px 0; }
 
-    /* ── Page setup ─────────────────────────────────────── */
+    /* -- Page setup --------------------------------------- */
     @page { size: A4 portrait; margin: 18mm 16mm 18mm 16mm; @bottom-center { content: counter(page) " / " counter(pages); font-size: 7pt; color: #888; } }
     .page-break { page-break-before: always; }
 
-    /* ── Cover / Page 1 ─────────────────────────────────── */
+    /* -- Cover / Page 1 ----------------------------------- */
     .cover { background: #1a3a6b; color: white; padding: 24px 28px 20px; border-radius: 4px; margin-bottom: 16px; }
     .cover .label { font-size: 8pt; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.7; margin-bottom: 4px; }
     .cover h1 { color: white; font-size: 20pt; }
@@ -1393,13 +1393,13 @@ Write `templates/report.html.j2`:
     .rating-sell { color: #f44336; font-weight: 700; }
     .rating-under-review { color: #9e9e9e; font-weight: 700; }
 
-    /* ── Rating block ───────────────────────────────────── */
+    /* -- Rating block ------------------------------------- */
     .snapshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
     .snapshot-box { background: #f5f7fa; border: 1px solid #e0e4ea; border-radius: 4px; padding: 10px 14px; }
     .snapshot-box .metric-label { font-size: 7.5pt; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
     .snapshot-box .metric-value { font-size: 11pt; font-weight: 600; color: #1a3a6b; margin-top: 2px; }
 
-    /* ── Tables ─────────────────────────────────────────── */
+    /* -- Tables ------------------------------------------- */
     table { width: 100%; border-collapse: collapse; font-size: 8pt; margin: 8px 0; }
     th { background: #1a3a6b; color: white; padding: 5px 8px; text-align: left; font-weight: 600; }
     th:not(:first-child) { text-align: right; }
@@ -1408,24 +1408,24 @@ Write `templates/report.html.j2`:
     tr:nth-child(even) { background: #f8f9fc; }
     tr:last-child td { font-weight: 600; background: #eef1f7; }
 
-    /* ── Charts ─────────────────────────────────────────── */
+    /* -- Charts ------------------------------------------- */
     .chart-wrap { text-align: center; margin: 12px 0; }
     .chart-wrap img { max-width: 100%; height: auto; border: 1px solid #e0e4ea; border-radius: 3px; }
     .chart-caption { font-size: 7pt; color: #777; margin-top: 3px; font-style: italic; }
 
-    /* ── Thesis box ─────────────────────────────────────── */
+    /* -- Thesis box --------------------------------------- */
     .thesis-box { background: #f0f4ff; border-left: 4px solid #1a3a6b; padding: 10px 14px; border-radius: 0 4px 4px 0; margin: 10px 0; font-size: 9pt; line-height: 1.6; }
 
-    /* ── Quality table ──────────────────────────────────── */
+    /* -- Quality table ------------------------------------ */
     .status-pass { color: #2e7d32; font-weight: 600; }
     .status-fail { color: #c62828; font-weight: 600; }
     .status-warn { color: #e65100; font-weight: 600; }
     .status-pending { color: #e65100; font-style: italic; }
 
-    /* ── Disclaimer ─────────────────────────────────────── */
+    /* -- Disclaimer --------------------------------------- */
     .disclaimer { font-size: 7.5pt; color: #555; border-top: 1px solid #ccc; padding-top: 10px; margin-top: 16px; line-height: 1.5; }
 
-    /* ── Draft watermark ────────────────────────────────── */
+    /* -- Draft watermark ---------------------------------- */
     {% if report_status in ['DRAFT', 'NEEDS_REVIEW'] %}
     body::after {
       content: "{{ report_status }}";
@@ -1439,15 +1439,15 @@ Write `templates/report.html.j2`:
 </head>
 <body>
 
-<!-- ══ PAGE 1: Cover + Investment Snapshot ═══════════════════════ -->
+<!-- -- PAGE 1: Cover + Investment Snapshot ----------------------- -->
 <div class="cover">
-  <div class="label">Equity Research Report | Ngành Dược / Y tế Việt Nam</div>
-  <h1>{{ ticker }} — {{ company_name }}</h1>
-  <div class="sector">{{ exchange }} | Dược phẩm | Ngày lập: {{ report_date }} | Dữ liệu đến: {{ data_cutoff }}</div>
+  <div class="label">Equity Research Report | Ng�nh Du?c / Y t? Vi?t Nam</div>
+  <h1>{{ ticker }} � {{ company_name }}</h1>
+  <div class="sector">{{ exchange }} | Du?c ph?m | Ng�y l?p: {{ report_date }} | D? li?u d?n: {{ data_cutoff }}</div>
   <div class="rating-line">
     Rating: <span class="rating-{{ rating | lower | replace('_', '-') }}">{{ rating }}</span> &nbsp;|&nbsp;
-    Giá hiện tại: {{ current_price }} VND &nbsp;|&nbsp;
-    Giá mục tiêu: {{ target_price }} VND &nbsp;|&nbsp;
+    Gi� hi?n t?i: {{ current_price }} VND &nbsp;|&nbsp;
+    Gi� m?c ti�u: {{ target_price }} VND &nbsp;|&nbsp;
     Upside/Downside: {{ upside_downside }}
   </div>
 </div>
@@ -1475,104 +1475,104 @@ Write `templates/report.html.j2`:
 {% if charts.c1 %}
 <div class="chart-wrap">
   <img src="{{ charts.c1 }}" alt="Stock vs VNINDEX">
-  <div class="chart-caption">Biến động giá vs VNINDEX (base 100) | Nguồn: market data</div>
+  <div class="chart-caption">Bi?n d?ng gi� vs VNINDEX (base 100) | Ngu?n: market data</div>
 </div>
 {% endif %}
 
-<!-- ══ PAGE 2: Company Overview ══════════════════════════════════ -->
+<!-- -- PAGE 2: Company Overview ---------------------------------- -->
 <div class="page-break"></div>
-<h2>Tổng Quan Doanh Nghiệp & Mô Hình Kinh Doanh</h2>
-{{ company_overview | safe if company_overview else "<p><em>Chưa có dữ liệu tổng quan doanh nghiệp.</em></p>" }}
+<h2>T?ng Quan Doanh Nghi?p & M� H�nh Kinh Doanh</h2>
+{{ company_overview | safe if company_overview else "<p><em>Chua c� d? li?u t?ng quan doanh nghi?p.</em></p>" }}
 {% if business_driver_table %}
 <h3>Business Drivers</h3>
 {{ business_driver_table | safe }}
 {% endif %}
 
-<!-- ══ PAGE 3: Financial Performance ══════════════════════════════ -->
+<!-- -- PAGE 3: Financial Performance ------------------------------ -->
 <div class="page-break"></div>
-<h2>Phân Tích Tài Chính Lịch Sử</h2>
+<h2>Ph�n T�ch T�i Ch�nh L?ch S?</h2>
 {% if financial_summary_table %}
 {{ financial_summary_table | safe }}
 {% endif %}
-{% if charts.c2 %}<div class="chart-wrap"><img src="{{ charts.c2 }}" alt="Revenue & EBITDA"><div class="chart-caption">Doanh thu & EBITDA Margin | Nguồn: Canonical facts</div></div>{% endif %}
-{% if charts.c3 %}<div class="chart-wrap"><img src="{{ charts.c3 }}" alt="EPS & P/E"><div class="chart-caption">EPS & P/E | Nguồn: Canonical facts, market data</div></div>{% endif %}
-{% if charts.c4 %}<div class="chart-wrap"><img src="{{ charts.c4 }}" alt="Margin & ROE"><div class="chart-caption">Biên lợi nhuận & ROE | Nguồn: Canonical facts</div></div>{% endif %}
+{% if charts.c2 %}<div class="chart-wrap"><img src="{{ charts.c2 }}" alt="Revenue & EBITDA"><div class="chart-caption">Doanh thu & EBITDA Margin | Ngu?n: Canonical facts</div></div>{% endif %}
+{% if charts.c3 %}<div class="chart-wrap"><img src="{{ charts.c3 }}" alt="EPS & P/E"><div class="chart-caption">EPS & P/E | Ngu?n: Canonical facts, market data</div></div>{% endif %}
+{% if charts.c4 %}<div class="chart-wrap"><img src="{{ charts.c4 }}" alt="Margin & ROE"><div class="chart-caption">Bi�n l?i nhu?n & ROE | Ngu?n: Canonical facts</div></div>{% endif %}
 
-<!-- ══ PAGE 4: Forecast ════════════════════════════════════════════ -->
+<!-- -- PAGE 4: Forecast -------------------------------------------- -->
 <div class="page-break"></div>
-<h2>Dự Phóng & Giả Định Chính</h2>
+<h2>D? Ph�ng & Gi? �?nh Ch�nh</h2>
 {% if driver_forecast_table %}
-<h3>Business Driver → Forecast Impact</h3>
+<h3>Business Driver ? Forecast Impact</h3>
 {{ driver_forecast_table | safe }}
 {% endif %}
 {% if forecast_table %}
-<h3>Dự Phóng Tóm Tắt</h3>
+<h3>D? Ph�ng T�m T?t</h3>
 {{ forecast_table | safe }}
 {% endif %}
 {% if assumptions_table %}
-<h3>Bảng Giả Định</h3>
+<h3>B?ng Gi? �?nh</h3>
 {{ assumptions_table | safe }}
 {% endif %}
-{% if charts.c5 %}<div class="chart-wrap"><img src="{{ charts.c5 }}" alt="Forecast"><div class="chart-caption">Dự phóng Doanh thu & FCFF | Nguồn: Valuation artifact</div></div>{% endif %}
+{% if charts.c5 %}<div class="chart-wrap"><img src="{{ charts.c5 }}" alt="Forecast"><div class="chart-caption">D? ph�ng Doanh thu & FCFF | Ngu?n: Valuation artifact</div></div>{% endif %}
 
-<!-- ══ PAGE 5: Valuation ════════════════════════════════════════════ -->
+<!-- -- PAGE 5: Valuation -------------------------------------------- -->
 <div class="page-break"></div>
-<h2>Định Giá: FCFF DCF + Kiểm Tra Chéo Multiples</h2>
+<h2>�?nh Gi�: FCFF DCF + Ki?m Tra Ch�o Multiples</h2>
 {% if dcf_table %}
-<h3>Bảng DCF</h3>
+<h3>B?ng DCF</h3>
 {{ dcf_table | safe }}
 {% endif %}
 {% if valuation_summary_table %}
-<h3>Tổng Hợp Định Giá</h3>
+<h3>T?ng H?p �?nh Gi�</h3>
 {{ valuation_summary_table | safe }}
 {% endif %}
 {% if valuation_assumptions_table %}
-<h3>Giả Định Định Giá</h3>
+<h3>Gi? �?nh �?nh Gi�</h3>
 {{ valuation_assumptions_table | safe }}
 {% endif %}
-{% if charts.c6 %}<div class="chart-wrap"><img src="{{ charts.c6 }}" alt="DCF Bridge"><div class="chart-caption">DCF Value Bridge | Nguồn: Valuation artifact</div></div>{% endif %}
+{% if charts.c6 %}<div class="chart-wrap"><img src="{{ charts.c6 }}" alt="DCF Bridge"><div class="chart-caption">DCF Value Bridge | Ngu?n: Valuation artifact</div></div>{% endif %}
 
-<!-- ══ PAGE 6: Sensitivity + Peer ══════════════════════════════════ -->
+<!-- -- PAGE 6: Sensitivity + Peer ---------------------------------- -->
 <div class="page-break"></div>
 <h2>Sensitivity, Scenario & Peer Check</h2>
 {% if sensitivity_matrix %}
-<h3>Ma Trận Sensitivity (WACC × Terminal Growth)</h3>
+<h3>Ma Tr?n Sensitivity (WACC � Terminal Growth)</h3>
 {{ sensitivity_matrix | safe }}
 {% endif %}
 {% if scenario_table %}
-<h3>Phân Tích Scenario</h3>
+<h3>Ph�n T�ch Scenario</h3>
 {{ scenario_table | safe }}
 {% endif %}
 {% if peer_table %}
-<h3>So Sánh Peer</h3>
+<h3>So S�nh Peer</h3>
 {{ peer_table | safe }}
 {% endif %}
-{% if charts.c7 %}<div class="chart-wrap"><img src="{{ charts.c7 }}" alt="Sensitivity Heatmap"><div class="chart-caption">Sensitivity Heatmap — mục tiêu giá theo WACC × g | Nguồn: Valuation artifact</div></div>{% endif %}
+{% if charts.c7 %}<div class="chart-wrap"><img src="{{ charts.c7 }}" alt="Sensitivity Heatmap"><div class="chart-caption">Sensitivity Heatmap � m?c ti�u gi� theo WACC � g | Ngu?n: Valuation artifact</div></div>{% endif %}
 
-<!-- ══ PAGE 7: Catalysts & Risks ═══════════════════════════════════ -->
+<!-- -- PAGE 7: Catalysts & Risks ----------------------------------- -->
 <div class="page-break"></div>
-<h2>Catalysts & Rủi Ro Đầu Tư</h2>
+<h2>Catalysts & R?i Ro �?u Tu</h2>
 {% if catalysts_table %}
-<h3>Catalysts Tích Cực</h3>
+<h3>Catalysts T�ch C?c</h3>
 {{ catalysts_table | safe }}
 {% endif %}
 {% if risks_table %}
-<h3>Rủi Ro Chính</h3>
+<h3>R?i Ro Ch�nh</h3>
 {{ risks_table | safe }}
 {% endif %}
 
-<!-- ══ PAGE 8: Conclusion + Audit + Disclaimer ══════════════════════ -->
+<!-- -- PAGE 8: Conclusion + Audit + Disclaimer ---------------------- -->
 <div class="page-break"></div>
-<h2>Kết Luận, Kiểm Định & Disclaimer</h2>
+<h2>K?t Lu?n, Ki?m �?nh & Disclaimer</h2>
 
 {% if key_takeaways %}
 <h3>Key Takeaways</h3>
 <ul>{% for t in key_takeaways %}<li>{{ t }}</li>{% endfor %}</ul>
 {% endif %}
 
-<h3>Tóm Tắt Chất Lượng Báo Cáo</h3>
+<h3>T�m T?t Ch?t Lu?ng B�o C�o</h3>
 <table>
-  <tr><th>Hạng mục</th><th>Trạng thái</th><th>Ghi chú</th></tr>
+  <tr><th>H?ng m?c</th><th>Tr?ng th�i</th><th>Ghi ch�</th></tr>
   {% for g in quality_summary %}
   <tr>
     <td>{{ g.item }}</td>
@@ -1583,9 +1583,9 @@ Write `templates/report.html.j2`:
 </table>
 
 {% if key_sources %}
-<h3>Nguồn Tham Khảo Chính</h3>
+<h3>Ngu?n Tham Kh?o Ch�nh</h3>
 <table>
-  <tr><th>Source ID</th><th>Tên nguồn</th><th>Kỳ</th></tr>
+  <tr><th>Source ID</th><th>T�n ngu?n</th><th>K?</th></tr>
   {% for s in key_sources %}
   <tr><td>{{ s.source_id }}</td><td>{{ s.source_name }}</td><td>{{ s.period }}</td></tr>
   {% endfor %}
@@ -1594,7 +1594,7 @@ Write `templates/report.html.j2`:
 
 <div class="disclaimer">
   <strong>Disclaimer:</strong> {{ disclaimer }}
-  <br>Trạng thái báo cáo: <strong>{{ report_status }}</strong> | Ngày lập: {{ report_date }}
+  <br>Tr?ng th�i b�o c�o: <strong>{{ report_status }}</strong> | Ng�y l?p: {{ report_date }}
 </div>
 
 </body>
@@ -1637,7 +1637,7 @@ def render_html(
     return out_path
 ```
 
-- [ ] **Step 5: Run tests — expect pass**
+- [ ] **Step 5: Run tests � expect pass**
 
 ```bash
 pip install jinja2
@@ -1663,7 +1663,7 @@ git commit -m "feat(renderer): Jinja2 HTML template + html_renderer with 8-secti
 
 ```python
 # backend/reporting/pdf_renderer.py
-"""PDF renderer — WeasyPrint on Linux/Docker; HTML fallback on Windows.
+"""PDF renderer � WeasyPrint on Linux/Docker; HTML fallback on Windows.
 
 WeasyPrint requirements (Linux):
   apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0
@@ -1685,16 +1685,16 @@ def render_pdf(html_path: Path, out_path: Path) -> Path:
         print(f"[pdf_renderer] PDF saved: {out_path}")
         return out_path
     except ImportError:
-        print("[pdf_renderer] WARNING: weasyprint not available — HTML export only.")
+        print("[pdf_renderer] WARNING: weasyprint not available � HTML export only.")
         print(f"[pdf_renderer] Install: pip install weasyprint")
         print(f"[pdf_renderer]          (Linux) apt-get install -y libpango-1.0-0 libpangocairo-1.0-0")
         return html_path
     except Exception as exc:
-        print(f"[pdf_renderer] WARNING: PDF generation failed ({exc}) — HTML export only.")
+        print(f"[pdf_renderer] WARNING: PDF generation failed ({exc}) � HTML export only.")
         return html_path
 ```
 
-- [ ] **Step 2: Test manually (no unit test — WeasyPrint depends on native libs)**
+- [ ] **Step 2: Test manually (no unit test � WeasyPrint depends on native libs)**
 
 ```bash
 python -c "
@@ -1714,7 +1714,7 @@ git commit -m "feat(renderer): WeasyPrint PDF renderer with graceful HTML fallba
 
 ---
 
-## PHASE C — Integration
+## PHASE C � Integration
 
 ### Task C1: Wire charts + artifacts into generate_report.py
 
@@ -1730,7 +1730,7 @@ The goal: after the existing Markdown report is generated, also:
 
 - [ ] **Step 1: Read current generate_report.py output section**
 
-Find the section that saves the report and citation map — add the new artifact outputs after it.
+Find the section that saves the report and citation map � add the new artifact outputs after it.
 
 ```bash
 grep -n "report_path\|citation_path\|out_path\|REPORTS_DIR" scripts/generate_report.py | head -30
@@ -1741,7 +1741,7 @@ grep -n "report_path\|citation_path\|out_path\|REPORTS_DIR" scripts/generate_rep
 Find the return statement in `generate_report()` and add before it:
 
 ```python
-# ── Generate charts ────────────────────────────────────────────────────
+# -- Generate charts ----------------------------------------------------
 try:
     from backend.reporting.chart_generator import (
         generate_c2_revenue_ebitda, generate_c3_eps_pe,
@@ -1793,7 +1793,7 @@ try:
             net_margins=net_margins, roe=roe_vals, out_dir=charts_dir, run_id=ts,
         ))
 
-    # Forecast chart — needs valuation artifact
+    # Forecast chart � needs valuation artifact
     if valuation and valuation.get("fcff"):
         fcast_years_list = [2026, 2027, 2028, 2029, 2030]
         fcff_rows = valuation["fcff"].get("yearly", [])
@@ -1831,7 +1831,7 @@ except Exception as chart_exc:
     print(f"[generate_report] WARNING: chart generation failed: {chart_exc}")
     chart_paths = {}
 
-# ── Generate HTML ──────────────────────────────────────────────────────
+# -- Generate HTML ------------------------------------------------------
 try:
     from backend.reporting.html_renderer import render_html
     html_dir = ROOT / "artifacts" / "reports_html"
@@ -1875,7 +1875,7 @@ try:
     render_html(context=html_context, out_path=html_path)
     print(f"[generate_report] HTML saved: {html_path}")
 
-    # ── Generate PDF ─────────────────────────────────────────────────
+    # -- Generate PDF -------------------------------------------------
     from backend.reporting.pdf_renderer import render_pdf
     pdf_dir = ROOT / "artifacts" / "reports_pdf"
     pdf_path = pdf_dir / f"{ticker}_{ts}_full_report.pdf"
@@ -1884,7 +1884,7 @@ try:
 except Exception as html_exc:
     print(f"[generate_report] WARNING: HTML/PDF generation failed: {html_exc}")
 
-# ── Save SourceManifest ───────────────────────────────────────────────
+# -- Save SourceManifest -----------------------------------------------
 try:
     from backend.report_contracts.source_manifest import SourceManifest
     manifest = SourceManifest.build_from_db(conn=conn, run_id=ts, ticker=ticker)
@@ -1935,10 +1935,10 @@ if pdf_artifact:
 
 Update Current Phase to reflect Phase 14:
 ```
-Current Phase: Phase 14 — Chart Generator + HTML/PDF Renderer + Artifact Contracts
+Current Phase: Phase 14 � Chart Generator + HTML/PDF Renderer + Artifact Contracts
 Last Completed Task: C2-C7 charts (matplotlib), Jinja2 HTML template, WeasyPrint PDF,
                      ClaimLedger/SourceManifest/EvalResult contracts, valuation reproducibility gate,
-                     peer comparison table. GOAL_OUTPUT.md §19 ~85% complete.
+                     peer comparison table. GOAL_OUTPUT.md �19 ~85% complete.
                      Remaining: C1 (price vs VNINDEX), claim ledger builder in generate_report.py.
 ```
 
@@ -1962,7 +1962,7 @@ git commit -m "feat(integration): wire HTML/PDF/artifacts into run_research.py, 
 
 ---
 
-### Task C3: Chart C1 — Price vs VNINDEX (last)
+### Task C3: Chart C1 � Price vs VNINDEX (last)
 
 **Files:**
 - Create: `backend/reporting/price_chart.py`
@@ -2038,12 +2038,12 @@ def generate_c1_price_vs_vnindex(
     step = max(1, len(dates) // 6)
     ax.set_xticks(range(0, len(dates), step))
     ax.set_xticklabels([dates[i][:10] for i in range(0, len(dates), step)], fontsize=7, rotation=30)
-    ax.set_ylabel("Chỉ số (Base = 100)", fontsize=8)
+    ax.set_ylabel("Ch? s? (Base = 100)", fontsize=8)
     ax.legend(fontsize=8, framealpha=0.8)
     ax.grid(alpha=0.3)
-    ax.set_title(f"{ticker} vs VNINDEX (1 năm, base 100)", fontsize=9, fontweight="bold", pad=8)
+    ax.set_title(f"{ticker} vs VNINDEX (1 nam, base 100)", fontsize=9, fontweight="bold", pad=8)
     fig.text(0.01, -0.04,
-             f"Nguồn: VCI market data | Kỳ: {dates[0][:10]} – {dates[-1][:10]}",
+             f"Ngu?n: VCI market data | K?: {dates[0][:10]} � {dates[-1][:10]}",
              fontsize=6.5, style="italic", color="#555")
 
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -2086,32 +2086,32 @@ git commit -m "feat(charts): C1 stock vs VNINDEX base-100 chart using vnstock pr
 
 ---
 
-## Self-Review Against GOAL_OUTPUT.md §19
+## Self-Review Against GOAL_OUTPUT.md �19
 
 | Requirement | Task | Status after plan |
 |---|---|---|
-| 8 section structure | B2 generate_report.py rebuild | ✅ |
-| Visual: layout, charts, tables | B2 HTML template | ✅ |
-| Source manifest | A2 + C1 | ✅ |
-| Financial summary + forecast | existing + B2 | ✅ |
-| Driver-based forecast table (§7.4.4) | C1 generate_report | ✅ |
-| FCFF DCF + assumptions + sensitivity | existing | ✅ |
-| Rating per threshold | existing AssumptionGate | ✅ |
-| Charts (≥5) | A3 C2-C7 | ✅ (6 charts; C1 conditional) |
-| Citation 100% | existing evaluate_citations.py | ✅ |
-| Numeric ≥99% | existing evaluation | ✅ |
-| Valuation reproducibility | B1 gate | ✅ |
-| Risk gắn financial driver | existing (partial; full table C1) | ⚠️ |
-| Disclaimer | template | ✅ |
-| eval_result + claim_ledger + source_manifest | A2 + C1 | ✅ schemas done; full builder C1 |
-| Human review | existing approve_report.py | ✅ |
-| PDF export | B3 | ✅ (Linux/Docker) |
-| HTML export | B2 | ✅ |
+| 8 section structure | B2 generate_report.py rebuild | ? |
+| Visual: layout, charts, tables | B2 HTML template | ? |
+| Source manifest | A2 + C1 | ? |
+| Financial summary + forecast | existing + B2 | ? |
+| Driver-based forecast table (�7.4.4) | C1 generate_report | ? |
+| FCFF DCF + assumptions + sensitivity | existing | ? |
+| Rating per threshold | existing AssumptionGate | ? |
+| Charts (=5) | A3 C2-C7 | ? (6 charts; C1 conditional) |
+| Citation 100% | existing evaluate_citations.py | ? |
+| Numeric =99% | existing evaluation | ? |
+| Valuation reproducibility | B1 gate | ? |
+| Risk g?n financial driver | existing (partial; full table C1) | ?? |
+| Disclaimer | template | ? |
+| eval_result + claim_ledger + source_manifest | A2 + C1 | ? schemas done; full builder C1 |
+| Human review | existing approve_report.py | ? |
+| PDF export | B3 | ? (Linux/Docker) |
+| HTML export | B2 | ? |
 
 **Gaps after plan execution:**
-1. Claim ledger builder (producing actual CLM-* entries from report text) — low priority, JSON schema exists
-2. Catalyst table with timing/probability fields — generate_report.py Section 7 enhancement
-3. Visual budget gate (page count check) — optional
+1. Claim ledger builder (producing actual CLM-* entries from report text) � low priority, JSON schema exists
+2. Catalyst table with timing/probability fields � generate_report.py Section 7 enhancement
+3. Visual budget gate (page count check) � optional
 
 ---
 
@@ -2119,8 +2119,8 @@ git commit -m "feat(charts): C1 stock vs VNINDEX base-100 chart using vnstock pr
 
 **Two execution options:**
 
-**1. Subagent-Driven (recommended)** — fresh subagent per task, review between tasks
+**1. Subagent-Driven (recommended)** � fresh subagent per task, review between tasks
 
-**2. Inline Execution** — execute in this session using executing-plans skill
+**2. Inline Execution** � execute in this session using executing-plans skill
 
 Which approach?

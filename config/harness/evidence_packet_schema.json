@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EvidencePacket",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "ticker",
+    "periods",
+    "artifact_refs",
+    "evidence_refs",
+    "gate_results",
+    "quality_gate_results",
+    "known_limitations",
+    "packet_hash"
+  ],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "run_id": {"type": "string", "minLength": 1},
+    "ticker": {"type": "string", "minLength": 1},
+    "periods": {"type": "array", "items": {"type": "string"}},
+    "source_documents": {"type": "array"},
+    "canonical_facts": {"type": "array"},
+    "reconciliation_results": {"type": "array"},
+    "formula_traces": {"type": "array"},
+    "forecast_assumptions": {"type": "array"},
+    "valuation_outputs": {"type": "object"},
+    "citation_map": {"type": ["array", "object"]},
+    "artifact_refs": {"type": "array"},
+    "evidence_refs": {"type": "array"},
+    "gate_results": {"type": "object"},
+    "quality_gate_results": {"type": "object"},
+    "known_limitations": {"type": "array", "items": {"type": "string"}},
+    "trace_summary": {"type": "array"},
+    "created_at": {"type": "string"},
+    "packet_hash": {"type": "string", "minLength": 64, "maxLength": 64}
+  },
+  "additionalProperties": false
+}

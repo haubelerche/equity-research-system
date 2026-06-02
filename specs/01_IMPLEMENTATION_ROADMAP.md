@@ -39,7 +39,7 @@
 - [ ] `specs/07_EVALUATION_RUBRIC.md`
 
 **Notes:**
-- `dataset/contracts/*.schema.json` already exists — Phase 1 formalizes and cross-references these.
+- `config/dataset/contracts/*.schema.json` already exists — Phase 1 formalizes and cross-references these.
 - Schemas should reference the existing JSON Schema files.
 - The taxonomy files are the source of truth for canonical metric names.
 
@@ -55,7 +55,7 @@ python scripts/ingest_ticker.py --ticker DHG --years 5
 ```
 
 **Expected output:**
-- Raw snapshots saved under `dataset/raw/`
+- Raw snapshots saved under `data/raw/`
 - Source versions registered in `source_versions` table
 - Financial facts upserted into `financial_facts` table
 - Price rows upserted into `price_history` table
@@ -70,8 +70,8 @@ python scripts/ingest_ticker.py --ticker DHG --years 5
 - `scripts/connectors/vnstock_finance_connector.py` ✅
 - `scripts/connectors/vnstock_price_connector.py` ✅
 - `scripts/connectors/vnstock_company_connector.py` ✅
-- `scripts/db/fact_store.py` ✅
-- `scripts/db/source_registry.py` ✅
+- `backend/database/fact_store.py` ✅
+- `backend/database/source_registry.py` ✅
 
 **Pre-requisites:**
 - PostgreSQL running at `DATABASE_URL` (default: `postgresql://maer:maer_local@localhost:5432/maer_dev`)
@@ -100,7 +100,7 @@ python scripts/build_facts.py --ticker DHG
 - [ ] `backend/quality/fact_validators.py`
 
 **Notes:**
-- The DQF framework in `scripts/dataset/dqf.py` already validates individual facts.
+- The DQF framework in `backend/dataset/dqf.py` already validates individual facts.
 - This phase wraps DQF into a per-ticker report.
 
 ---

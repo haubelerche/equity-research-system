@@ -14,9 +14,9 @@ if "" in sys.path:
 import pandas as pd
 from vnstock.api.quote import Quote
 
-from scripts.dataset.config_io import ROOT, load_universe_tickers
-from scripts.db.fact_store import PostgresFactStore, PriceRow
-from scripts.db.source_registry import SourceInput, SourceRegistry
+from backend.dataset.config_io import ROOT, load_universe_tickers
+from backend.database.fact_store import PostgresFactStore, PriceRow
+from backend.database.source_registry import SourceInput, SourceRegistry
 
 
 CONNECTOR_VERSION = "vn_price_v1"
@@ -105,7 +105,7 @@ def sync_ticker_price(
     payload_json = frame.to_json(date_format="iso", orient="records")
     payload = payload_json.encode("utf-8")
     source_uri = f"vnstock://{provider_used.lower()}/quote/history/{ticker}?start={start}&end={end}&interval=1D"
-    raw_path = ROOT / "dataset" / "raw" / "market" / end.isoformat() / f"{ticker}_quote_history.json"
+    raw_path = ROOT / "data" / "raw" / "market" / end.isoformat() / f"{ticker}_quote_history.json"
     checksum = registry.save_raw_snapshot(payload=payload, out_path=raw_path)
 
     latest = registry.get_latest_by_uri("price_history", source_uri)

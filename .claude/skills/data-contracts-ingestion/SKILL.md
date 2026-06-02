@@ -10,9 +10,9 @@ description: Use when working on connectors, raw payloads, source metadata, cano
 - Adding or modifying a connector in `scripts/connectors/`.
 - Modifying `scripts/ingest_ticker.py` or `scripts/build_facts.py`.
 - Changing `backend/facts/normalizer.py` or `backend/facts/completeness.py`.
-- Adding or changing a DB table in `scripts/db/migrations/`.
+- Adding or changing a DB table in `backend/database/migrations/`.
 - Debugging a quality gate failure or coverage gate failure.
-- Modifying `scripts/db/fact_store.py`, `scripts/db/source_registry.py`, or `backend/dataops/quality_report.py`.
+- Modifying `backend/database/fact_store.py`, `backend/database/source_registry.py`, or `backend/dataops/quality_report.py`.
 
 ---
 
@@ -25,9 +25,9 @@ scripts/build_facts.py
 backend/facts/normalizer.py
 backend/facts/completeness.py
 backend/dataops/quality_report.py
-scripts/db/fact_store.py
-scripts/db/migrate.py
-scripts/db/migrations/<latest>.sql
+backend/database/fact_store.py
+backend/database/migrate.py
+backend/database/migrations/<latest>.sql
 tests/unit/test_normalizer.py
 tests/unit/test_data_quality.py
 ```
@@ -71,7 +71,7 @@ Must produce:
 | Preserve source trace | `source_id` must be present on every canonical fact. Do not strip lineage. |
 | Unit consistency | All percentage values stored as decimal (e.g. `0.15` not `15`). All monetary values in same unit as source (VND billions). |
 | No mutation after ingest | Raw payloads must not be modified after initial storage. Reingestion creates a new record. |
-| Schema change = migration | Any addition of a column, table, or index requires a new file in `scripts/db/migrations/` numbered in sequence. |
+| Schema change = migration | Any addition of a column, table, or index requires a new file in `backend/database/migrations/` numbered in sequence. |
 | Migration must be backward-compatible | Do not drop columns that are referenced by application code without first removing the references. |
 | Duplicate detection | Ingestion must detect and skip or version duplicate records for the same (ticker, fiscal_year, quarter, source_type). |
 

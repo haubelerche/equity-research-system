@@ -9,13 +9,19 @@
 ```
 Current Level:       Level 10 — Render-ready
 Target Level:        Level 10 — Render-ready (charts + HTML + PDF + 5 artifact contracts per GOAL_OUTPUT.md)
-Current Phase:       Phase 14 — Full Rendering Pipeline COMPLETE — 2026-06-01
-Last Completed Task: Full rendering pipeline — charts C1–C7 (matplotlib), HTML (Jinja2/CSS),
-                     PDF (weasyprint stub on Windows), 5 artifact contracts per GOAL_OUTPUT.md,
-                     all 5 MVP tickers run via run_full_pipeline.py.
-                     - scripts/run_full_pipeline.py: orchestrates charts → HTML → 5 artifacts
-                     - All 5 tickers: charts=6, html=yes, artifacts=5 (OK)
-                     - 726 tests pass, 0 failures.
+Current Phase:       Phase 16 — Database Quality & Schema Cleanup — 2026-06-02
+Last Completed Task: DATABASE_QUALITY_SYSTEM_CONSISTENCY_AUDIT.md — schema cleanup.
+                     - Migration 015: drops 7 unused research schema tables (metric_values,
+                       valuation_assumption_sets, valuation_results, report_sections,
+                       report_claims, claim_evidence, evaluation_results) + their trigger/
+                       views; drops fact.financial_facts_legacy dead-alias view.
+                     - Migration 015: fixes corrupted Vietnamese company names in ref.companies
+                       (005 had N'' T-SQL prefix that stored '?' instead of UTF-8 chars).
+                     - 005_seed_reference_data.sql: removed N'' prefix, corrected all
+                       Vietnamese display_name_vi strings to proper UTF-8.
+                     - CURRENT_SCHEMA_VERSION bumped to 015_cleanup_redundant_schema.
+                     - Removed 2 dead integration tests for dropped schema objects.
+                     - 553 unit tests pass, 0 failures.
 ```
 
 ---
@@ -41,6 +47,8 @@ Last Completed Task: Full rendering pipeline — charts C1–C7 (matplotlib), HT
 | 12 — Data Trust Layer | `backend/citations/`, `backend/evaluation/` | DONE | 468 tests, 0 failures; FactEntry provenance; 6-gate evaluator; catalyst rendering |
 | 13 — Evidence Retrieval + Citation Pipeline | `scripts/build_index.py`, `backend/retrieval.py`, `scripts/evaluate_citations.py` | DONE | 670 tests, 0 failures; OCR page indexing; DB retrieval with tier priority; citation coverage gate |
 | 14 — Full Rendering Pipeline | `backend/reporting/`, `scripts/generate_charts.py`, `scripts/render_report.py`, `scripts/run_full_pipeline.py` | DONE | 726 tests, 0 failures; all 5 tickers: charts=6, html=yes, artifacts=5 |
+| 15 — Code Quality Audit | `CODE_QUALITY_SYSTEM_CONSISTENCY_AUDIT.md` | DONE | 779 tests, 0 failures; encoding fixed, period regex hardened, source_id coercion removed, forbidden terms corrected |
+| 16 — DB Schema Cleanup | `DATABASE_QUALITY_SYSTEM_CONSISTENCY_AUDIT.md` | DONE | 553 tests, 0 failures; migration 015, 7 dead tables dropped, company names fixed, schema_version 015 |
 
 ---
 

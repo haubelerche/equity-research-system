@@ -1,4 +1,4 @@
-"""Citation coverage evaluation gate — Phase 5 citation pipeline.
+"""Citation coverage evaluation gate � Phase 5 citation pipeline.
 
 Validates that every quantitative claim in a report has a valid citation that
 resolves to a real source_id in ingest.sources (or the citation map artifact).
@@ -11,9 +11,9 @@ Rules (all deterministic, no LLM):
   4. No citation may point to a forbidden generic source label.
 
 Exit codes:
-  0 — all gates pass (EXPORT ALLOWED)
-  1 — one or more critical gates fail (EXPORT BLOCKED)
-  2 — non-critical warnings only (EXPORT ALLOWED WITH WARNINGS)
+  0 � all gates pass (EXPORT ALLOWED)
+  1 � one or more critical gates fail (EXPORT BLOCKED)
+  2 � non-critical warnings only (EXPORT ALLOWED WITH WARNINGS)
 
 Usage:
     python scripts/evaluate_citations.py --ticker DHG --report reports/latest.md
@@ -55,7 +55,15 @@ _QUANT_PATTERN = re.compile(
         |\d+(?:[,\.]\d+)?        # or plain number
     )
     \s*                          # optional space
-    (?:tỷ\s*VND|triệu\s*VND|VND|tỷ đồng|%|x\b|lần)  # units
+    (?:
+        t[ỷy]\s*VND              # tỷ VND / ty VND
+        |tri[eệ]u\s*VND         # triệu VND / trieu VND
+        |VND
+        |t[ỷy]\s*[đd][ôồo]ng   # tỷ đồng / ty dong
+        |%
+        |x\b
+        |l[aầ]n                  # lần / lan
+    )
     """,
     re.VERBOSE | re.IGNORECASE,
 )
@@ -66,7 +74,8 @@ _REF_USE_PATTERN = re.compile(r"\[\^([\w\-\.\/]+)\](?!:)")
 # Citation definition: [^key]: ... at start of line
 _REF_DEF_PATTERN = re.compile(r"^\[\^([\w\-\.\/]+)\]:", re.MULTILINE)
 
-# Forbidden generic source labels (from backend/citations/citation_map.py)
+# Forbidden generic source labels — must stay in sync with FORBIDDEN_GENERIC_LABELS
+# in backend/citations/citation_map.py (comparison is done after .lower().strip())
 _FORBIDDEN_LABELS = {
     "báo cáo tài chính (vnstock api)",
     "báo cáo tài chính (nguồn không xác định)",
@@ -98,7 +107,7 @@ def _source_id_exists(source_id: str) -> bool:
         svc = RetrievalService()
         return svc.source_exists(source_id)
     except Exception:
-        return True  # DB unavailable — don't block on this check
+        return True  # DB unavailable � don't block on this check
 
 
 def _find_quantitative_claims(text: str) -> list[tuple[int, str]]:
@@ -141,7 +150,7 @@ def evaluate_citations(
     report_text = report_path.read_text(encoding="utf-8", errors="ignore")
     citation_map = _load_citation_map(ticker)
 
-    # ── Gate 1: All inline [^key] references must resolve in the citation map ─
+    # -- Gate 1: All inline [^key] references must resolve in the citation map -
     ref_uses = _find_citation_refs(report_text)
     ref_defs = {m.group(1) for m in _REF_DEF_PATTERN.finditer(report_text)}
     used_keys = [key for _, key in ref_uses]
@@ -163,7 +172,7 @@ def evaluate_citations(
         "critical": True,
     }
 
-    # ── Gate 2: All citation map entries must have valid source_ids ────────────
+    # -- Gate 2: All citation map entries must have valid source_ids ------------
     invalid_sources: list[str] = []
     for key, record in citation_map.items():
         source_id = record.get("source_id")
@@ -183,7 +192,7 @@ def evaluate_citations(
         "critical": True,
     }
 
-    # ── Gate 3: Every quantitative claim must have a nearby citation ───────────
+    # -- Gate 3: Every quantitative claim must have a nearby citation -----------
     quant_claims = _find_quantitative_claims(report_text)
     ref_positions = [(pos, key) for pos, key in ref_uses]
     uncited_claims: list[str] = []
@@ -215,7 +224,7 @@ def evaluate_citations(
         "critical": gate3_critical,
     }
 
-    # ── Gate 4: No forbidden generic source labels in citation map ─────────────
+    # -- Gate 4: No forbidden generic source labels in citation map -------------
     forbidden_found: list[str] = []
     for key, record in citation_map.items():
         source_title = (record.get("source_title") or "").lower().strip()
@@ -233,7 +242,7 @@ def evaluate_citations(
         "critical": False,  # warning only
     }
 
-    # ── Summary ────────────────────────────────────────────────────────────────
+    # -- Summary ----------------------------------------------------------------
     gates = {
         "citation_key_resolution": gate1,
         "source_id_validity": gate2,
@@ -274,7 +283,7 @@ def _print_report(result: dict) -> None:
     report = result.get("report", "")
 
     print(f"\n{'='*65}")
-    print(f"  CITATION EVALUATION — {ticker}")
+    print(f"  CITATION EVALUATION � {ticker}")
     print(f"  Report: {Path(report).name}")
     print(f"{'='*65}")
     print(f"  Citation map entries : {result.get('citation_map_entries', 0)}")
@@ -302,11 +311,11 @@ def _print_report(result: dict) -> None:
 
     print()
     if status == "FAIL":
-        print(f"  EXPORT BLOCKED — critical gate(s) failed: {result['critical_fails']}")
+        print(f"  EXPORT BLOCKED � critical gate(s) failed: {result['critical_fails']}")
     elif status == "WARN":
         print("  EXPORT ALLOWED WITH WARNINGS")
     else:
-        print("  EXPORT ALLOWED — all citation gates pass")
+        print("  EXPORT ALLOWED � all citation gates pass")
 
     print(f"{'='*65}\n")
 

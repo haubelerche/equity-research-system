@@ -17,10 +17,10 @@ import unicodedata
 import pandas as pd
 from vnstock.api.financial import Finance
 
-from scripts.dataset.config_io import ROOT, load_financial_taxonomy, load_universe_tickers
-from scripts.dataset.dqf import validate_financial_fact
-from scripts.db.fact_store import FinancialFact, PostgresFactStore
-from scripts.db.source_registry import SourceInput, SourceRegistry
+from backend.dataset.config_io import ROOT, load_financial_taxonomy, load_universe_tickers
+from backend.dataset.dqf import validate_financial_fact
+from backend.database.fact_store import FinancialFact, PostgresFactStore
+from backend.database.source_registry import SourceInput, SourceRegistry
 
 
 CONNECTOR_VERSION = "vn_finance_v2"
@@ -275,7 +275,7 @@ def _register_source_version(
 ) -> str:
     payload = frame.to_json(date_format="iso", orient="split").encode("utf-8")
     source_uri = f"vnstock://{source.lower()}/finance/{statement}/{ticker}?period={period}"
-    raw_path = ROOT / "dataset" / "raw" / "bctc" / ticker / f"{statement}_{period}.json"
+    raw_path = ROOT / "data" / "raw" / "bctc" / ticker / f"{statement}_{period}.json"
     checksum = registry.save_raw_snapshot(payload=payload, out_path=raw_path)
     # financial_statement via vnstock API = Tier 3. When Phase 1B introduces
     # bctc_audited source_type backed by actual PDFs, those rows will be Tier 0.

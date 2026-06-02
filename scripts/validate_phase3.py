@@ -7,7 +7,7 @@ from pathlib import Path
 failures = []
 
 # 1. Provenance file exists and is valid JSON
-prov_path = Path("dataset/golden/financials/DHG_golden_provenance.json")
+prov_path = Path("config/dataset/golden/financials/DHG_golden_provenance.json")
 if prov_path.exists():
     try:
         prov = json.loads(prov_path.read_text(encoding="utf-8"))

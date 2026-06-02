@@ -8,10 +8,10 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-from scripts.dataset.config_io import ROOT
-from scripts.dataset.dqf import infer_materiality, validate_catalyst_event
-from scripts.db.fact_store import PostgresFactStore
-from scripts.db.source_registry import SourceInput, SourceRegistry
+from backend.dataset.config_io import ROOT
+from backend.dataset.dqf import infer_materiality, validate_catalyst_event
+from backend.database.fact_store import PostgresFactStore
+from backend.database.source_registry import SourceInput, SourceRegistry
 
 
 CONNECTOR_VERSION = "catalyst_tender_connector_v1"
@@ -54,7 +54,7 @@ def sync_tender_connector() -> int:
     html = response.text
     rows = _parse_tender_page(base_url=TENDER_FEED, html=html)
 
-    raw_path = ROOT / "dataset" / "raw" / "catalyst" / "tender" / now.date().isoformat() / "tender_feed.html"
+    raw_path = ROOT / "data" / "raw" / "catalyst" / "tender" / now.date().isoformat() / "tender_feed.html"
     checksum = registry.save_raw_snapshot(html.encode("utf-8"), raw_path)
     source_version_id = registry.register_source(
         SourceInput(

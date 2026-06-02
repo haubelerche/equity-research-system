@@ -3,8 +3,8 @@
 **Date:** 2026-05-22
 **Status:** Active
 
-All contracts are enforced at ingestion time via `scripts/dataset/dqf.py`.
-JSON Schema files live in `dataset/contracts/`.
+All contracts are enforced at ingestion time via `backend/dataset/dqf.py`.
+JSON Schema files live in `config/dataset/contracts/`.
 
 ---
 
@@ -12,7 +12,7 @@ JSON Schema files live in `dataset/contracts/`.
 
 ### 1.1 Ticker Universe
 
-**Source:** `dataset/universe/pharma_vn_universe.csv`
+**Source:** `config/dataset/universe/pharma_vn_universe.csv`
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
@@ -23,13 +23,13 @@ JSON Schema files live in `dataset/contracts/`.
 | `is_mvp` | boolean | Yes | `true` for DHG, IMP, DMC, TRA, DBD |
 | `notes` | string | No | Free text |
 
-**MVP tickers:** DHG, IMP, DMC, TRA, DBD (as per `dataset/mvp/mvp5_scope.yaml`)
+**MVP tickers:** DHG, IMP, DMC, TRA, DBD (as per `config/dataset/mvp/mvp5_scope.yaml`)
 
 ---
 
 ### 1.2 Source Version
 
-**Schema:** `dataset/contracts/source_version.schema.json`
+**Schema:** `config/dataset/contracts/source_version.schema.json`
 **Store:** `source_versions` Postgres table via `SourceRegistry`
 
 | Field | Type | Required | Notes |
@@ -55,9 +55,9 @@ Raw data is saved to disk before normalization.
 
 **Storage path pattern:**
 ```text
-dataset/raw/bctc/<ticker>/<statement>_quarter.json        # financial statements
-dataset/raw/market/<date>/<ticker>_quote_history.json     # price history
-dataset/raw/market/<date>/<ticker>_<endpoint>.json        # company profile/news
+data/raw/bctc/<ticker>/<statement>_quarter.json        # financial statements
+data/raw/market/<date>/<ticker>_quote_history.json     # price history
+data/raw/market/<date>/<ticker>_<endpoint>.json        # company profile/news
 ```
 
 Each raw file has a companion `.sha256` sidecar.
@@ -66,7 +66,7 @@ Each raw file has a companion `.sha256` sidecar.
 
 ### 1.4 Canonical Financial Fact
 
-**Schema:** `dataset/contracts/financial_fact.schema.json`
+**Schema:** `config/dataset/contracts/financial_fact.schema.json`
 **Store:** `financial_facts` Postgres table via `PostgresFactStore`
 
 | Field | Type | Required | Notes |
@@ -136,7 +136,7 @@ Each raw file has a companion `.sha256` sidecar.
 
 ### 1.7 Catalyst Event
 
-**Schema:** `dataset/contracts/catalyst_event.schema.json`
+**Schema:** `config/dataset/contracts/catalyst_event.schema.json`
 **Store:** `catalyst_events` Postgres table
 
 | Field | Type | Required | Notes |
@@ -161,7 +161,7 @@ Each raw file has a companion `.sha256` sidecar.
 
 ### 1.8 Document Chunk
 
-**Schema:** `dataset/contracts/document_chunk.schema.json`
+**Schema:** `config/dataset/contracts/document_chunk.schema.json`
 **Store:** Milvus vector collection (Phase 5+)
 
 | Field | Type | Required | Notes |
@@ -182,7 +182,7 @@ Each raw file has a companion `.sha256` sidecar.
 
 ### 1.9 Citation
 
-**Schema:** `dataset/contracts/citation.schema.json`
+**Schema:** `config/dataset/contracts/citation.schema.json`
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
@@ -217,16 +217,16 @@ No orphaned facts are permitted.
 
 ## 3. Contract Validation
 
-Contracts are validated at ingestion time by `scripts/dataset/dqf.py`.
+Contracts are validated at ingestion time by `backend/dataset/dqf.py`.
 
 To validate a payload against a contract schema:
 ```python
-from scripts.dataset.dqf import validate_financial_fact, validate_catalyst_event
+from backend.dataset.dqf import validate_financial_fact, validate_catalyst_event
 result = validate_financial_fact(payload)
 # result.status: "accepted" | "needs_review" | "rejected"
 ```
 
 Full contract schema validation:
 ```bash
-python scripts/dataset/validate_contracts.py
+python backend/dataset/validate_contracts.py
 ```

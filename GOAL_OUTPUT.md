@@ -1,11 +1,11 @@
-# GOAL_OUTPUT.md — Chuẩn đầu ra báo cáo định giá cổ phiếu
+ GOAL_OUTPUT.md � Chu?n d?u ra b�o c�o d?nh gi� c? phi?u
 
 **Project:** Vietnam Pharma Multi-Agent Equity Research Agent  
 **Document type:** Final report output specification + artifact contract + export gates  
-**Primary output artifact:** Vietnamese professional equity research report, PDF-ready, tối đa khoảng 8 trang A4  
-**Primary audience:** analyst, reviewer, giảng viên, nhà đầu tư có kiến thức cơ bản  
-**Report language:** Tiếng Việt chuyên nghiệp, trung lập, có nguồn, không viết kiểu quảng cáo  
-**Reference style:** Báo cáo equity research chuyên nghiệp như mẫu LLY, nhưng được nâng cấp bằng citation, lineage, valuation reproducibility và human review  
+**Primary output artifact:** Vietnamese professional equity research report, PDF-ready, t?i da kho?ng 8 trang A4  
+**Primary audience:** analyst, reviewer, gi?ng vi�n, nh� d?u tu c� ki?n th?c co b?n  
+**Report language:** Ti?ng Vi?t chuy�n nghi?p, trung l?p, c� ngu?n, kh�ng vi?t ki?u qu?ng c�o  
+**Reference style:** B�o c�o equity research chuy�n nghi?p nhu m?u LLY, nhung du?c n�ng c?p b?ng citation, lineage, valuation reproducibility v� human review  
 **Version:** v2.0  
 **Status:** Revised after output-spec audit  
 
@@ -13,51 +13,51 @@
 
 ## 0. Executive Summary
 
-Tài liệu này định nghĩa chuẩn đầu ra cuối cùng cho hệ thống **Vietnam Pharma Multi-Agent Equity Research Agent** khi sinh báo cáo phân tích và định giá cổ phiếu ngành dược/y tế Việt Nam.
+T�i li?u n�y d?nh nghia chu?n d?u ra cu?i c�ng cho h? th?ng **Vietnam Pharma Multi-Agent Equity Research Agent** khi sinh b�o c�o ph�n t�ch v� d?nh gi� c? phi?u ng�nh du?c/y t? Vi?t Nam.
 
-Chuẩn này dùng mẫu equity research như LLY làm tham chiếu về **nhịp đọc, bố cục, độ cô đọng và kiểu trình bày**, nhưng không copy nguyên mẫu. Báo cáo của dự án phải mạnh hơn mẫu tham chiếu ở các điểm sau:
+Chu?n n�y d�ng m?u equity research nhu LLY l�m tham chi?u v? **nh?p d?c, b? c?c, d? c� d?ng v� ki?u tr�nh b�y**, nhung kh�ng copy nguy�n m?u. B�o c�o c?a d? �n ph?i m?nh hon m?u tham chi?u ? c�c di?m sau:
 
-1. Mỗi số liệu quan trọng phải truy vết được về `canonical_fact`, `computed_metric` hoặc `valuation_result`.
-2. Mỗi claim định lượng phải có citation hoặc artifact reference hợp lệ.
-3. Valuation phải chạy bằng deterministic Python engine, không để LLM tự tính toán trong văn bản.
-4. Forecast phải dựa trên driver rõ ràng: business driver -> financial line item -> assumption -> valuation impact.
-5. Report final chỉ được export khi pass các gate bắt buộc: source, numeric consistency, valuation reproducibility, citation, risk language và human review.
-6. PDF phải đủ chuyên nghiệp về layout, bảng, biểu đồ, nguồn, disclaimer và page budget.
+1. M?i s? li?u quan tr?ng ph?i truy v?t du?c v? `canonical_fact`, `computed_metric` ho?c `valuation_result`.
+2. M?i claim d?nh lu?ng ph?i c� citation ho?c artifact reference h?p l?.
+3. Valuation ph?i ch?y b?ng deterministic Python engine, kh�ng d? LLM t? t�nh to�n trong van b?n.
+4. Forecast ph?i d?a tr�n driver r� r�ng: business driver -> financial line item -> assumption -> valuation impact.
+5. Report final ch? du?c export khi pass c�c gate b?t bu?c: source, numeric consistency, valuation reproducibility, citation, risk language v� human review.
+6. PDF ph?i d? chuy�n nghi?p v? layout, b?ng, bi?u d?, ngu?n, disclaimer v� page budget.
 
-Tài liệu này là **single-file master spec** để tiện cho Claude/code agent triển khai. Tuy nhiên, về mặt kiến trúc, nội dung được chia logic thành ba lớp:
+T�i li?u n�y l� **single-file master spec** d? ti?n cho Claude/code agent tri?n khai. Tuy nhi�n, v? m?t ki?n tr�c, n?i dung du?c chia logic th�nh ba l?p:
 
 ```text
-Layer A — Report Output Spec
-  Quy định nội dung, cấu trúc, page budget, chart, layout và văn phong của báo cáo PDF/Markdown.
+Layer A � Report Output Spec
+  Quy d?nh n?i dung, c?u tr�c, page budget, chart, layout v� van phong c?a b�o c�o PDF/Markdown.
 
-Layer B — Artifact Contracts
-  Quy định schema tối thiểu cho claim_ledger, source_manifest, valuation_result, eval_result và run_log.
+Layer B � Artifact Contracts
+  Quy d?nh schema t?i thi?u cho claim_ledger, source_manifest, valuation_result, eval_result v� run_log.
 
-Layer C — Generation Gates
-  Quy định các điều kiện kiểm định trước khi report được export thành final.
+Layer C � Generation Gates
+  Quy d?nh c�c di?u ki?n ki?m d?nh tru?c khi report du?c export th�nh final.
 ```
 
 ---
 
-## 1. Mục tiêu của tài liệu
+## 1. M?c ti�u c?a t�i li?u
 
-### 1.1. Mục tiêu sản phẩm
+### 1.1. M?c ti�u s?n ph?m
 
-Đầu ra cuối cùng của hệ thống là một **báo cáo equity research tiếng Việt** cho cổ phiếu ngành dược/y tế Việt Nam, có khả năng:
+�?u ra cu?i c�ng c?a h? th?ng l� m?t **b�o c�o equity research ti?ng Vi?t** cho c? phi?u ng�nh du?c/y t? Vi?t Nam, c� kh? nang:
 
-- trình bày thesis đầu tư rõ ràng;
-- giải thích doanh nghiệp kiếm tiền từ đâu;
-- phân tích xu hướng tài chính lịch sử;
-- dự phóng dựa trên driver;
-- định giá bằng FCFF DCF và kiểm tra chéo bằng multiples;
-- trình bày sensitivity, scenario, peer comparison;
-- nêu catalyst và rủi ro gắn với financial driver;
-- có citation, audit summary và disclaimer;
-- export được thành Markdown, HTML và PDF.
+- tr�nh b�y thesis d?u tu r� r�ng;
+- gi?i th�ch doanh nghi?p ki?m ti?n t? d�u;
+- ph�n t�ch xu hu?ng t�i ch�nh l?ch s?;
+- d? ph�ng d?a tr�n driver;
+- d?nh gi� b?ng FCFF DCF v� ki?m tra ch�o b?ng multiples;
+- tr�nh b�y sensitivity, scenario, peer comparison;
+- n�u catalyst v� r?i ro g?n v?i financial driver;
+- c� citation, audit summary v� disclaimer;
+- export du?c th�nh Markdown, HTML v� PDF.
 
-### 1.2. Mục tiêu kỹ thuật
+### 1.2. M?c ti�u k? thu?t
 
-Báo cáo không được là kết quả viết tự do của LLM. Báo cáo chỉ được sinh từ các artifact đã kiểm soát:
+B�o c�o kh�ng du?c l� k?t qu? vi?t t? do c?a LLM. B�o c�o ch? du?c sinh t? c�c artifact d� ki?m so�t:
 
 ```text
 canonical financial facts
@@ -71,60 +71,60 @@ eval_result.json
 run_log.json
 ```
 
-LLM chỉ đóng vai trò:
+LLM ch? d�ng vai tr�:
 
-1. tổng hợp và diễn giải các artifact đã có;
-2. viết narrative theo cấu trúc đã khóa;
-3. giải thích logic driver, rủi ro và valuation bằng ngôn ngữ analyst;
-4. không được tự tạo số liệu hoặc tự sửa kết quả valuation.
+1. t?ng h?p v� di?n gi?i c�c artifact d� c�;
+2. vi?t narrative theo c?u tr�c d� kh�a;
+3. gi?i th�ch logic driver, r?i ro v� valuation b?ng ng�n ng? analyst;
+4. kh�ng du?c t? t?o s? li?u ho?c t? s?a k?t qu? valuation.
 
-### 1.3. Mục tiêu trình bày
+### 1.3. M?c ti�u tr�nh b�y
 
-Báo cáo final cần đạt hai yêu cầu đồng thời:
+B�o c�o final c?n d?t hai y�u c?u d?ng th?i:
 
-| Yêu cầu | Ý nghĩa |
+| Y�u c?u | � nghia |
 |---|---|
-| Professional readability | Đọc giống một equity research report chuyên nghiệp, không giống log kỹ thuật. |
-| Machine-auditable output | Mọi số, claim, chart và conclusion quan trọng có thể truy vết về artifact. |
+| Professional readability | �?c gi?ng m?t equity research report chuy�n nghi?p, kh�ng gi?ng log k? thu?t. |
+| Machine-auditable output | M?i s?, claim, chart v� conclusion quan tr?ng c� th? truy v?t v? artifact. |
 
-Vì vậy, trong PDF client-facing chỉ hiển thị audit summary gọn. Chi tiết kỹ thuật như mismatch list, full claim ledger, full source manifest, trace và gate failure phải nằm trong appendix artifact hoặc JSON, không làm rối thân báo cáo.
+V� v?y, trong PDF client-facing ch? hi?n th? audit summary g?n. Chi ti?t k? thu?t nhu mismatch list, full claim ledger, full source manifest, trace v� gate failure ph?i n?m trong appendix artifact ho?c JSON, kh�ng l�m r?i th�n b�o c�o.
 
 ---
 
-## 2. Phạm vi đầu ra
+## 2. Ph?m vi d?u ra
 
 ### 2.1. In-scope
 
-Báo cáo output chuẩn áp dụng cho:
+B�o c�o output chu?n �p d?ng cho:
 
-- cổ phiếu dược/y tế Việt Nam trên HOSE, HNX, UPCOM;
+- c? phi?u du?c/y t? Vi?t Nam tr�n HOSE, HNX, UPCOM;
 - full equity research report;
-- report bằng tiếng Việt;
-- forecast tối thiểu 3 năm, khuyến nghị 5 năm;
-- valuation bằng FCFF DCF làm phương pháp chính;
-- P/E, P/B, EV/EBITDA làm kiểm tra chéo nếu dữ liệu đủ;
-- sensitivity và scenario analysis;
-- catalyst/risk đặc thù ngành dược Việt Nam;
-- citation và audit trail.
+- report b?ng ti?ng Vi?t;
+- forecast t?i thi?u 3 nam, khuy?n ngh? 5 nam;
+- valuation b?ng FCFF DCF l�m phuong ph�p ch�nh;
+- P/E, P/B, EV/EBITDA l�m ki?m tra ch�o n?u d? li?u d?;
+- sensitivity v� scenario analysis;
+- catalyst/risk d?c th� ng�nh du?c Vi?t Nam;
+- citation v� audit trail.
 
 ### 2.2. Out-of-scope
 
-Report final không được thể hiện như:
+Report final kh�ng du?c th? hi?n nhu:
 
-- hệ thống tự động khuyến nghị giao dịch;
-- tín hiệu mua/bán ngắn hạn;
-- báo cáo không nguồn;
-- báo cáo chỉ dựa trên dữ liệu thị trường từ API mà không có kiểm chứng;
-- báo cáo dùng LLM để tự tính financial facts hoặc valuation;
-- báo cáo cá nhân hóa cho một nhà đầu tư cụ thể.
+- h? th?ng t? d?ng khuy?n ngh? giao d?ch;
+- t�n hi?u mua/b�n ng?n h?n;
+- b�o c�o kh�ng ngu?n;
+- b�o c�o ch? d?a tr�n d? li?u th? tru?ng t? API m� kh�ng c� ki?m ch?ng;
+- b�o c�o d�ng LLM d? t? t�nh financial facts ho?c valuation;
+- b�o c�o c� nh�n h�a cho m?t nh� d?u tu c? th?.
 
 ---
 
-## 3. Nguyên tắc bắt buộc
+## 3. Nguy�n t?c b?t bu?c
 
 ### 3.1. Facts before narrative
 
-Không được viết nhận định tài chính trước khi có số liệu, nguồn và phép tính. Mọi số như doanh thu, lợi nhuận, EPS, WACC, FCFF, target price, upside/downside, market cap, P/E, P/B, ROE, ROA, biên lợi nhuận phải truy vết được về một trong các artifact sau:
+Kh�ng du?c vi?t nh?n d?nh t�i ch�nh tru?c khi c� s? li?u, ngu?n v� ph�p t�nh. M?i s? nhu doanh thu, l?i nhu?n, EPS, WACC, FCFF, target price, upside/downside, market cap, P/E, P/B, ROE, ROA, bi�n l?i nhu?n ph?i truy v?t du?c v? m?t trong c�c artifact sau:
 
 ```text
 canonical_fact
@@ -133,13 +133,13 @@ valuation_result
 approved_assumption
 ```
 
-Nếu một số không truy vết được, số đó không được xuất hiện trong báo cáo final.
+N?u m?t s? kh�ng truy v?t du?c, s? d� kh�ng du?c xu?t hi?n trong b�o c�o final.
 
 ### 3.2. Code-first valuation
 
-LLM không được tự tính DCF, FCFF, EPS, CAGR, P/E, P/B, EV/EBITDA, ROE, ROA, WACC hoặc target price bằng văn bản. LLM chỉ được diễn giải kết quả do deterministic Python engine trả về.
+LLM kh�ng du?c t? t�nh DCF, FCFF, EPS, CAGR, P/E, P/B, EV/EBITDA, ROE, ROA, WACC ho?c target price b?ng van b?n. LLM ch? du?c di?n gi?i k?t qu? do deterministic Python engine tr? v?.
 
-Các phép tính bắt buộc phải do code thực hiện:
+C�c ph�p t�nh b?t bu?c ph?i do code th?c hi?n:
 
 ```text
 financial ratio calculation
@@ -159,19 +159,19 @@ weighted valuation summary
 
 ### 3.3. Citation-first reporting
 
-Mọi claim định lượng và mọi claim định tính quan trọng phải có nguồn.
+M?i claim d?nh lu?ng v� m?i claim d?nh t�nh quan tr?ng ph?i c� ngu?n.
 
-| Loại claim | Ví dụ | Citation bắt buộc |
+| Lo?i claim | V� d? | Citation b?t bu?c |
 |---|---|---|
-| Số liệu tài chính | Doanh thu 2024 đạt X tỷ đồng | Có |
-| Dự phóng | Doanh thu 2026F tăng X% | Có, trỏ về valuation artifact hoặc approved assumption |
-| Thông tin doanh nghiệp | Công ty sở hữu nhà máy GMP-WHO | Có |
-| Catalyst | Kết quả đấu thầu, BHYT, đăng ký thuốc | Có |
-| Rủi ro | Phụ thuộc sản phẩm chính, áp lực giá thầu | Có |
-| Peer comparison | P/E thấp hơn trung vị ngành | Có |
-| Nhận định chung | “vị thế tốt”, “tăng trưởng ổn định” | Có evidence hoặc viết thận trọng |
+| S? li?u t�i ch�nh | Doanh thu 2024 d?t X t? d?ng | C� |
+| D? ph�ng | Doanh thu 2026F tang X% | C�, tr? v? valuation artifact ho?c approved assumption |
+| Th�ng tin doanh nghi?p | C�ng ty s? h?u nh� m�y GMP-WHO | C� |
+| Catalyst | K?t qu? d?u th?u, BHYT, dang k� thu?c | C� |
+| R?i ro | Ph? thu?c s?n ph?m ch�nh, �p l?c gi� th?u | C� |
+| Peer comparison | P/E th?p hon trung v? ng�nh | C� |
+| Nh?n d?nh chung | �v? th? t?t�, �tang tru?ng ?n d?nh� | C� evidence ho?c vi?t th?n tr?ng |
 
-Không được dùng citation chung chung kiểu:
+Kh�ng du?c d�ng citation chung chung ki?u:
 
 ```text
 Source: database
@@ -180,37 +180,37 @@ Source: market data
 Source: company filings
 ```
 
-Trừ khi source tag đó có thể click hoặc truy ngược về `source_manifest.source_id`, `fact_id`, document chunk, URL hoặc file path cụ thể.
+Tr? khi source tag d� c� th? click ho?c truy ngu?c v? `source_manifest.source_id`, `fact_id`, document chunk, URL ho?c file path c? th?.
 
 ### 3.4. Driver-based forecast
 
-Forecast không được chỉ là kéo dài số quá khứ. Forecast phải thể hiện logic:
+Forecast kh�ng du?c ch? l� k�o d�i s? qu� kh?. Forecast ph?i th? hi?n logic:
 
 ```text
 business driver -> affected financial line item -> assumption -> forecast output -> valuation impact
 ```
 
-Ví dụ:
+V� d?:
 
 ```text
-Đấu thầu thuốc -> doanh thu ETC / gross margin -> giả định giá bán giảm x bps -> EBIT giảm -> FCFF giảm
-Tồn kho tăng -> net working capital -> ΔNWC tăng -> FCFF giảm
-Mở rộng nhà máy -> sản lượng / CAPEX / depreciation -> revenue tăng nhưng FCFF ngắn hạn giảm
+�?u th?u thu?c -> doanh thu ETC / gross margin -> gi? d?nh gi� b�n gi?m x bps -> EBIT gi?m -> FCFF gi?m
+T?n kho tang -> net working capital -> ?NWC tang -> FCFF gi?m
+M? r?ng nh� m�y -> s?n lu?ng / CAPEX / depreciation -> revenue tang nhung FCFF ng?n h?n gi?m
 ```
 
-### 3.5. Không đưa lời khuyên cá nhân hóa
+### 3.5. Kh�ng dua l?i khuy�n c� nh�n h�a
 
-Báo cáo có thể có rating cấp độ báo cáo như `BUY`, `HOLD`, `SELL`, `UNDER REVIEW`, nhưng phải diễn đạt là **kết luận định giá dựa trên mô hình, dữ liệu và giả định hiện tại**, không phải lời khuyên đầu tư cá nhân hóa.
+B�o c�o c� th? c� rating c?p d? b�o c�o nhu `BUY`, `HOLD`, `SELL`, `UNDER REVIEW`, nhung ph?i di?n d?t l� **k?t lu?n d?nh gi� d?a tr�n m� h�nh, d? li?u v� gi? d?nh hi?n t?i**, kh�ng ph?i l?i khuy�n d?u tu c� nh�n h�a.
 
-Câu chuẩn bắt buộc đưa vào disclaimer hoặc phần rating note:
+C�u chu?n b?t bu?c dua v�o disclaimer ho?c ph?n rating note:
 
 ```text
-Rating trong báo cáo là kết luận mô hình dựa trên dữ liệu, giả định và mức sinh lời kỳ vọng tại thời điểm lập báo cáo; không phải khuyến nghị đầu tư cá nhân hóa.
+Rating trong b�o c�o l� k?t lu?n m� h�nh d?a tr�n d? li?u, gi? d?nh v� m?c sinh l?i k? v?ng t?i th?i di?m l?p b�o c�o; kh�ng ph?i khuy?n ngh? d?u tu c� nh�n h�a.
 ```
 
 ### 3.6. Human approval gate
 
-Báo cáo chỉ được chuyển sang `final_exportable` khi pass toàn bộ gate:
+B�o c�o ch? du?c chuy?n sang `final_exportable` khi pass to�n b? gate:
 
 ```text
 source_gate = pass
@@ -222,30 +222,30 @@ human_assumption_approval = pass
 human_final_review = pass
 ```
 
-Nếu một trong các gate fail, hệ thống phải xuất `NEEDS_REVIEW`, `PENDING_APPROVAL` hoặc `BLOCKED`, không được giả vờ hoàn chỉnh.
+N?u m?t trong c�c gate fail, h? th?ng ph?i xu?t `NEEDS_REVIEW`, `PENDING_APPROVAL` ho?c `BLOCKED`, kh�ng du?c gi? v? ho�n ch?nh.
 
 ---
 
-## 4. File đầu ra bắt buộc
+## 4. File d?u ra b?t bu?c
 
-Mỗi research run phải tạo tối thiểu các file sau:
+M?i research run ph?i t?o t?i thi?u c�c file sau:
 
 ```text
 artifacts/
-├── reports/{run_id}_{ticker}_report.md
-├── reports_html/{run_id}_{ticker}_report.html
-├── reports_pdf/{run_id}_{ticker}_report.pdf
-├── charts/{run_id}_{ticker}_{chart_id}.png
-├── valuation_results/{run_id}_{ticker}_valuation_result.json
-├── claim_ledgers/{run_id}_{ticker}_claim_ledger.json
-├── source_manifests/{run_id}_{ticker}_source_manifest.json
-├── eval_results/{run_id}_{ticker}_eval_result.json
-└── run_logs/{run_id}_{ticker}_run_log.json
++-- reports/{run_id}_{ticker}_report.md
++-- reports_html/{run_id}_{ticker}_report.html
++-- reports_pdf/{run_id}_{ticker}_report.pdf
++-- charts/{run_id}_{ticker}_{chart_id}.png
++-- valuation_results/{run_id}_{ticker}_valuation_result.json
++-- claim_ledgers/{run_id}_{ticker}_claim_ledger.json
++-- source_manifests/{run_id}_{ticker}_source_manifest.json
++-- eval_results/{run_id}_{ticker}_eval_result.json
++-- run_logs/{run_id}_{ticker}_run_log.json
 ```
 
 ### 4.1. Report status
 
-Mỗi report phải có trạng thái rõ ràng:
+M?i report ph?i c� tr?ng th�i r� r�ng:
 
 ```yaml
 report_status:
@@ -257,11 +257,11 @@ report_status:
   - FINAL_EXPORTABLE
 ```
 
-Không được xuất PDF final nếu status chưa phải `FINAL_EXPORTABLE`.
+Kh�ng du?c xu?t PDF final n?u status chua ph?i `FINAL_EXPORTABLE`.
 
 ### 4.2. Artifact immutability
 
-Các artifact dùng để sinh final report phải được version hóa. Nếu số liệu, source, assumption hoặc valuation thay đổi, report phải tạo version mới thay vì ghi đè âm thầm.
+C�c artifact d�ng d? sinh final report ph?i du?c version h�a. N?u s? li?u, source, assumption ho?c valuation thay d?i, report ph?i t?o version m?i thay v� ghi d� �m th?m.
 
 ```text
 same_run_id + changed_artifact_hash = invalid final export
@@ -274,46 +274,46 @@ new_artifact_hash -> rerun affected stages -> regenerate report version
 
 ### 5.1. Page setup
 
-| Thuộc tính | Chuẩn |
+| Thu?c t�nh | Chu?n |
 |---|---|
-| Khổ giấy | A4 portrait |
-| Độ dài | Tối đa khoảng 8 trang cho full report body |
-| Margin | 16-20mm mỗi cạnh |
+| Kh? gi?y | A4 portrait |
+| �? d�i | T?i da kho?ng 8 trang cho full report body |
+| Margin | 16-20mm m?i c?nh |
 | Header | Ticker, company name, report type, report date |
 | Footer | Page number, short source/disclaimer note |
-| Ngôn ngữ | Tiếng Việt |
-| Tông giọng | Chuyên nghiệp, phân tích, trung lập |
-| Citation | Source tag ngắn trong thân bài; full source trong artifact |
-| Disclaimer | Bắt buộc cuối báo cáo |
-| Executive summary | Bắt buộc trang 1 |
-| Valuation assumptions | Bắt buộc ở phần định giá |
-| Sensitivity | Bắt buộc nếu có target price |
+| Ng�n ng? | Ti?ng Vi?t |
+| T�ng gi?ng | Chuy�n nghi?p, ph�n t�ch, trung l?p |
+| Citation | Source tag ng?n trong th�n b�i; full source trong artifact |
+| Disclaimer | B?t bu?c cu?i b�o c�o |
+| Executive summary | B?t bu?c trang 1 |
+| Valuation assumptions | B?t bu?c ? ph?n d?nh gi� |
+| Sensitivity | B?t bu?c n?u c� target price |
 
 ### 5.2. Typography
 
 | Element | Recommended size | Rule |
 |---|---:|---|
-| Report title | 18-22pt | Không quá dài, ưu tiên ticker + company |
-| Section heading | 13-15pt | Rõ cấp bậc, không dùng quá nhiều cấp |
-| Body text | 8.5-10pt | Dễ đọc trên A4 |
-| Table text | 7.5-9pt | Không nhồi quá nhiều cột |
-| Chart title | 9-11pt | Phải có kỳ và đơn vị |
-| Source caption | 6.5-8pt | Bắt buộc dưới chart/table nếu có nguồn |
+| Report title | 18-22pt | Kh�ng qu� d�i, uu ti�n ticker + company |
+| Section heading | 13-15pt | R� c?p b?c, kh�ng d�ng qu� nhi?u c?p |
+| Body text | 8.5-10pt | D? d?c tr�n A4 |
+| Table text | 7.5-9pt | Kh�ng nh?i qu� nhi?u c?t |
+| Chart title | 9-11pt | Ph?i c� k? v� don v? |
+| Source caption | 6.5-8pt | B?t bu?c du?i chart/table n?u c� ngu?n |
 
 ### 5.3. Layout grid
 
-| Page type | Layout khuyến nghị |
+| Page type | Layout khuy?n ngh? |
 |---|---|
 | Page 1 | Snapshot layout: rating block + key metrics + thesis + 1 chart |
-| Analytical pages | 55/45 hoặc 60/40 text-chart split |
-| Valuation page | Bảng lớn full-width + commentary ngắn |
-| Sensitivity page | Matrix/table full-width, narrative ngắn |
-| Risk page | Bảng catalysts và risks, ít prose |
+| Analytical pages | 55/45 ho?c 60/40 text-chart split |
+| Valuation page | B?ng l?n full-width + commentary ng?n |
+| Sensitivity page | Matrix/table full-width, narrative ng?n |
+| Risk page | B?ng catalysts v� risks, �t prose |
 | Final page | Key takeaways + client-facing quality summary + key sources + disclaimer |
 
 ### 5.4. Chart rendering rules
 
-Mỗi chart phải có:
+M?i chart ph?i c�:
 
 ```text
 title
@@ -323,55 +323,55 @@ source_caption
 actual_or_forecast_marker
 ```
 
-Không được dùng chart nếu:
+Kh�ng du?c d�ng chart n?u:
 
-- dữ liệu thiếu kỳ;
-- dữ liệu nhầm đơn vị;
-- dữ liệu chưa pass numeric gate;
-- chart không hỗ trợ decision-making;
-- chart chỉ được thêm để làm đẹp.
+- d? li?u thi?u k?;
+- d? li?u nh?m don v?;
+- d? li?u chua pass numeric gate;
+- chart kh�ng h? tr? decision-making;
+- chart ch? du?c th�m d? l�m d?p.
 
 ### 5.5. Table rendering rules
 
-| Rule | Mô tả |
+| Rule | M� t? |
 |---|---|
-| Max columns | Tối đa 10 cột trong PDF, trừ sensitivity matrix |
-| Unit clarity | Phải ghi rõ tỷ VND, %, x, VND/share |
-| Forecast marker | Actual dùng `A`, forecast dùng `F`, TTM ghi rõ `TTM` |
-| Negative values | Phải hiển thị nhất quán, không mất dấu âm |
-| Source | Bảng tài chính phải có source tag hoặc artifact reference |
+| Max columns | T?i da 10 c?t trong PDF, tr? sensitivity matrix |
+| Unit clarity | Ph?i ghi r� t? VND, %, x, VND/share |
+| Forecast marker | Actual d�ng `A`, forecast d�ng `F`, TTM ghi r� `TTM` |
+| Negative values | Ph?i hi?n th? nh?t qu�n, kh�ng m?t d?u �m |
+| Source | B?ng t�i ch�nh ph?i c� source tag ho?c artifact reference |
 
 ---
 
-## 6. Quy tắc nén nội dung 8 trang
+## 6. Quy t?c n�n n?i dung 8 trang
 
-Báo cáo không được cố đưa toàn bộ bảng dự phóng chi tiết vào thân PDF. PDF chỉ hiển thị bảng tóm tắt; chi tiết nằm trong appendix hoặc JSON artifact.
+B�o c�o kh�ng du?c c? dua to�n b? b?ng d? ph�ng chi ti?t v�o th�n PDF. PDF ch? hi?n th? b?ng t�m t?t; chi ti?t n?m trong appendix ho?c JSON artifact.
 
-| Nội dung | Cách xử lý trong PDF 8 trang |
+| N?i dung | C�ch x? l� trong PDF 8 trang |
 |---|---|
-| Bảng KQKD 10 năm | Chỉ hiển thị 5-7 dòng chính: doanh thu thuần, lợi nhuận gộp, EBIT/EBITDA, LNST, EPS, biên gộp, biên ròng |
-| Bảng cân đối kế toán | Chỉ hiển thị tài sản, nợ vay, VCSH, tiền, hàng tồn kho, phải thu nếu liên quan thesis |
-| Bảng lưu chuyển tiền tệ | Chỉ hiển thị CFO, CAPEX, FCF/FCFF, working capital |
-| Ratio table | Chọn 10-14 chỉ số chính |
-| Industry overview | Không viết thành section riêng trong MVP; lồng vào catalyst/risk nếu có evidence |
-| News list | Không liệt kê quá nhiều; chỉ chọn catalyst material |
-| Peer comparison | Chỉ hiển thị peer median và 3-5 peer liên quan |
+| B?ng KQKD 10 nam | Ch? hi?n th? 5-7 d�ng ch�nh: doanh thu thu?n, l?i nhu?n g?p, EBIT/EBITDA, LNST, EPS, bi�n g?p, bi�n r�ng |
+| B?ng c�n d?i k? to�n | Ch? hi?n th? t�i s?n, n? vay, VCSH, ti?n, h�ng t?n kho, ph?i thu n?u li�n quan thesis |
+| B?ng luu chuy?n ti?n t? | Ch? hi?n th? CFO, CAPEX, FCF/FCFF, working capital |
+| Ratio table | Ch?n 10-14 ch? s? ch�nh |
+| Industry overview | Kh�ng vi?t th�nh section ri�ng trong MVP; l?ng v�o catalyst/risk n?u c� evidence |
+| News list | Kh�ng li?t k� qu� nhi?u; ch? ch?n catalyst material |
+| Peer comparison | Ch? hi?n th? peer median v� 3-5 peer li�n quan |
 | Audit detail | Client-facing summary trong PDF; full detail trong `eval_result.json` |
 
-### 6.1. Page budget bắt buộc
+### 6.1. Page budget b?t bu?c
 
-| Page | Nội dung | Budget |
+| Page | N?i dung | Budget |
 |---|---|---|
-| 1 | Cover + Investment Snapshot | 1 chart hoặc chart mini; thesis 180-220 từ |
-| 2 | Company Overview + Business Model | 450-650 từ hoặc 1 bảng driver |
-| 3 | Financial Performance | 1 bảng summary + tối đa 3 chart |
+| 1 | Cover + Investment Snapshot | 1 chart ho?c chart mini; thesis 180-220 t? |
+| 2 | Company Overview + Business Model | 450-650 t? ho?c 1 b?ng driver |
+| 3 | Financial Performance | 1 b?ng summary + t?i da 3 chart |
 | 4 | Forecast & Key Assumptions | 1 forecast table + 1 driver table + 1 chart |
 | 5 | Valuation | 1 DCF table + 1 valuation summary + 1 assumptions table |
 | 6 | Sensitivity, Scenario & Peer Check | 1 sensitivity matrix + 1 scenario table + 1 peer table |
-| 7 | Catalysts & Risks | 2 bảng chính, narrative tối đa 250 từ |
-| 8 | Conclusion, Quality Summary, Sources & Disclaimer | Gọn, không biến thành technical log |
+| 7 | Catalysts & Risks | 2 b?ng ch�nh, narrative t?i da 250 t? |
+| 8 | Conclusion, Quality Summary, Sources & Disclaimer | G?n, kh�ng bi?n th�nh technical log |
 
-Nếu nội dung vượt quá budget, renderer phải ưu tiên:
+N?u n?i dung vu?t qu� budget, renderer ph?i uu ti�n:
 
 ```text
 Correctness > Traceability > Valuation Reproducibility > Decision Utility > Visual Design > Completeness of prose
@@ -379,15 +379,15 @@ Correctness > Traceability > Valuation Reproducibility > Decision Utility > Visu
 
 ---
 
-## 7. Cấu trúc báo cáo 8 trang
+## 7. C?u tr�c b�o c�o 8 trang
 
-## Page 1 — Cover + Investment Snapshot
+## Page 1 � Cover + Investment Snapshot
 
-### 7.1.1. Mục tiêu
+### 7.1.1. M?c ti�u
 
-Người đọc phải hiểu ngay:
+Ngu?i d?c ph?i hi?u ngay:
 
-- mã cổ phiếu;
+- m� c? phi?u;
 - rating;
 - current price;
 - target price;
@@ -395,11 +395,11 @@ Người đọc phải hiểu ngay:
 - horizon;
 - risk level;
 - data confidence;
-- thesis chính;
-- rủi ro chính;
-- dữ liệu được cập nhật đến ngày nào.
+- thesis ch�nh;
+- r?i ro ch�nh;
+- d? li?u du?c c?p nh?t d?n ng�y n�o.
 
-### 7.1.2. Input bắt buộc
+### 7.1.2. Input b?t bu?c
 
 ```text
 ticker_metadata
@@ -412,17 +412,17 @@ price_history
 benchmark_price_history
 ```
 
-### 7.1.3. Bố cục bắt buộc
+### 7.1.3. B? c?c b?t bu?c
 
 1. Header:
    - `Equity Research Report`
    - Ticker
-   - Tên doanh nghiệp
-   - Sàn giao dịch
-   - Ngành: Dược/Y tế
-   - Ngày lập báo cáo
+   - T�n doanh nghi?p
+   - S�n giao d?ch
+   - Ng�nh: Du?c/Y t?
+   - Ng�y l?p b�o c�o
    - Data cutoff
-   - Kỳ dữ liệu gần nhất
+   - K? d? li?u g?n nh?t
 
 2. Rating block:
    - `Rating`: BUY / HOLD / SELL / UNDER REVIEW
@@ -435,7 +435,7 @@ benchmark_price_history
 
 3. Key metrics snapshot:
    - Market Cap
-   - Net Revenue FY gần nhất hoặc TTM
+   - Net Revenue FY g?n nh?t ho?c TTM
    - Revenue Growth YoY
    - Gross Margin
    - Net Margin
@@ -444,25 +444,25 @@ benchmark_price_history
    - EPS
    - P/E
    - P/B
-   - EV/EBITDA nếu có
-   - Dividend Yield nếu có
+   - EV/EBITDA n?u c�
+   - Dividend Yield n?u c�
 
 4. Investment thesis:
-   - 5-7 dòng.
-   - 180-220 từ.
-   - Phải bao gồm: growth driver, profitability outlook, valuation view, key risk.
-   - Mỗi claim chính phải map vào claim ledger.
+   - 5-7 d�ng.
+   - 180-220 t?.
+   - Ph?i bao g?m: growth driver, profitability outlook, valuation view, key risk.
+   - M?i claim ch�nh ph?i map v�o claim ledger.
 
 5. Chart 1:
-   - So sánh diễn biến giá cổ phiếu với VNINDEX trong 1Y hoặc 3Y.
-   - Chuẩn hóa base 100 tại ngày đầu kỳ.
-   - Có source caption.
+   - So s�nh di?n bi?n gi� c? phi?u v?i VNINDEX trong 1Y ho?c 3Y.
+   - Chu?n h�a base 100 t?i ng�y d?u k?.
+   - C� source caption.
 
 ### 7.1.4. Template
 
 ```markdown
-# {TICKER} — {COMPANY_NAME}
-## Equity Research Report | Ngành Dược/Y tế Việt Nam
+# {TICKER} � {COMPANY_NAME}
+## Equity Research Report | Ng�nh Du?c/Y t? Vi?t Nam
 
 | Rating | Current Price | Target Price | Upside/Downside | Horizon | Risk | Data Confidence |
 |---|---:|---:|---:|---|---|---|
@@ -472,10 +472,10 @@ benchmark_price_history
 
 | Metric | Value |
 |---|---:|
-| Market Cap | {market_cap} tỷ VND |
-| Revenue FY{year} | {revenue} tỷ VND |
+| Market Cap | {market_cap} t? VND |
+| Revenue FY{year} | {revenue} t? VND |
 | Revenue Growth | {revenue_growth}% |
-| Net Profit | {net_profit} tỷ VND |
+| Net Profit | {net_profit} t? VND |
 | EPS | {eps} VND |
 | P/E | {pe}x |
 | P/B | {pb}x |
@@ -483,149 +483,149 @@ benchmark_price_history
 
 ### Investment Thesis
 
-{5-7 dòng ngắn, có citation hoặc claim ledger reference.}
+{5-7 d�ng ng?n, c� citation ho?c claim ledger reference.}
 
 ![Stock vs VNINDEX](charts/{ticker}_price_vs_vnindex.png)
 ```
 
 ### 7.1.5. Fallback
 
-Nếu không có price history hoặc VNINDEX benchmark hợp lệ:
+N?u kh�ng c� price history ho?c VNINDEX benchmark h?p l?:
 
 ```text
-Không vẽ Chart 1.
-Thay bằng note: Dữ liệu diễn biến giá chưa đủ điều kiện kiểm định để hiển thị trong báo cáo final.
-Report status tối thiểu là NEEDS_REVIEW nếu current price cũng không đáng tin cậy.
+Kh�ng v? Chart 1.
+Thay b?ng note: D? li?u di?n bi?n gi� chua d? di?u ki?n ki?m d?nh d? hi?n th? trong b�o c�o final.
+Report status t?i thi?u l� NEEDS_REVIEW n?u current price cung kh�ng d�ng tin c?y.
 ```
 
 ---
 
-## Page 2 — Company Overview + Business Model
+## Page 2 � Company Overview + Business Model
 
-### 7.2.1. Mục tiêu
+### 7.2.1. M?c ti�u
 
-Giải thích doanh nghiệp kiếm tiền từ đâu, sản phẩm hoặc kênh nào đóng góp chính, và các driver vận hành nào ảnh hưởng đến forecast.
+Gi?i th�ch doanh nghi?p ki?m ti?n t? d�u, s?n ph?m ho?c k�nh n�o d�ng g�p ch�nh, v� c�c driver v?n h�nh n�o ?nh hu?ng d?n forecast.
 
-### 7.2.2. Nội dung bắt buộc
+### 7.2.2. N?i dung b?t bu?c
 
-| Block | Nội dung |
+| Block | N?i dung |
 |---|---|
-| Company profile | Tên đầy đủ, năm thành lập, sàn, lĩnh vực chính |
-| Business model | Sản xuất, phân phối, ETC/OTC, thiết bị y tế, bệnh viện, dịch vụ y tế tùy doanh nghiệp |
-| Product/revenue mix | Sản phẩm/nhóm sản phẩm chính nếu có dữ liệu |
-| Competitive position | GMP, hệ thống phân phối, thương hiệu, danh mục thuốc, năng lực đấu thầu nếu có evidence |
-| Growth strategy | Mở rộng nhà máy, sản phẩm mới, kênh ETC/OTC, M&A, xuất khẩu |
-| Key operating drivers | Giá bán, sản lượng, biên gộp, đấu thầu, BHYT, tồn kho, working capital |
+| Company profile | T�n d?y d?, nam th�nh l?p, s�n, linh v?c ch�nh |
+| Business model | S?n xu?t, ph�n ph?i, ETC/OTC, thi?t b? y t?, b?nh vi?n, d?ch v? y t? t�y doanh nghi?p |
+| Product/revenue mix | S?n ph?m/nh�m s?n ph?m ch�nh n?u c� d? li?u |
+| Competitive position | GMP, h? th?ng ph�n ph?i, thuong hi?u, danh m?c thu?c, nang l?c d?u th?u n?u c� evidence |
+| Growth strategy | M? r?ng nh� m�y, s?n ph?m m?i, k�nh ETC/OTC, M&A, xu?t kh?u |
+| Key operating drivers | Gi� b�n, s?n lu?ng, bi�n g?p, d?u th?u, BHYT, t?n kho, working capital |
 
-### 7.2.3. Business driver table bắt buộc nếu có dữ liệu
+### 7.2.3. Business driver table b?t bu?c n?u c� d? li?u
 
 ```markdown
 | Driver | Business Meaning | Financial Line Item | Direction | Evidence |
 |---|---|---|---|---|
-| Kênh ETC | Doanh thu bệnh viện/đấu thầu | Revenue, gross margin | Positive/Negative | SRC-... |
-| Giá thầu thuốc | Áp lực giá bán | Revenue, gross margin | Negative | SRC-... |
-| Nguyên liệu nhập khẩu | Chi phí đầu vào | COGS, gross margin | Negative/Neutral | SRC-... |
-| Tồn kho/phải thu | Vốn lưu động | ΔNWC, FCFF | Negative if rising | FACT-... |
+| K�nh ETC | Doanh thu b?nh vi?n/d?u th?u | Revenue, gross margin | Positive/Negative | SRC-... |
+| Gi� th?u thu?c | �p l?c gi� b�n | Revenue, gross margin | Negative | SRC-... |
+| Nguy�n li?u nh?p kh?u | Chi ph� d?u v�o | COGS, gross margin | Negative/Neutral | SRC-... |
+| T?n kho/ph?i thu | V?n luu d?ng | ?NWC, FCFF | Negative if rising | FACT-... |
 ```
 
 ### 7.2.4. Writing constraints
 
-Không được:
+Kh�ng du?c:
 
-- viết lịch sử doanh nghiệp quá dài;
-- tuyên bố “dẫn đầu ngành” nếu không có nguồn;
-- copy nguyên văn báo cáo thường niên;
-- đưa nhận định tăng trưởng nếu chưa gắn với driver và evidence;
-- viết generic như “công ty có vị thế tốt” mà không giải thích bằng số hoặc source.
+- vi?t l?ch s? doanh nghi?p qu� d�i;
+- tuy�n b? �d?n d?u ng�nh� n?u kh�ng c� ngu?n;
+- copy nguy�n van b�o c�o thu?ng ni�n;
+- dua nh?n d?nh tang tru?ng n?u chua g?n v?i driver v� evidence;
+- vi?t generic nhu �c�ng ty c� v? th? t?t� m� kh�ng gi?i th�ch b?ng s? ho?c source.
 
-Độ dài: 450-650 từ.
+�? d�i: 450-650 t?.
 
 ---
 
-## Page 3 — Financial Performance
+## Page 3 � Financial Performance
 
-### 7.3.1. Mục tiêu
+### 7.3.1. M?c ti�u
 
-Cho thấy xu hướng tài chính lịch sử, chất lượng tăng trưởng, biên lợi nhuận, hiệu quả sử dụng vốn và điểm bất thường.
+Cho th?y xu hu?ng t�i ch�nh l?ch s?, ch?t lu?ng tang tru?ng, bi�n l?i nhu?n, hi?u qu? s? d?ng v?n v� di?m b?t thu?ng.
 
-### 7.3.2. Nội dung bắt buộc
+### 7.3.2. N?i dung b?t bu?c
 
 1. Revenue & profitability:
-   - Doanh thu thuần 3-5 năm.
-   - Lợi nhuận gộp, EBIT/EBITDA, LNST.
-   - Biên gộp, biên EBIT/EBITDA, biên ròng.
+   - Doanh thu thu?n 3-5 nam.
+   - L?i nhu?n g?p, EBIT/EBITDA, LNST.
+   - Bi�n g?p, bi�n EBIT/EBITDA, bi�n r�ng.
 
 2. Growth analysis:
    - CAGR doanh thu.
    - CAGR LNST.
-   - Giải thích các năm bất thường.
+   - Gi?i th�ch c�c nam b?t thu?ng.
 
 3. Operating efficiency:
-   - Vòng quay hàng tồn kho, phải thu, phải trả hoặc cash conversion cycle nếu dữ liệu đủ.
-   - Chỉ giải thích nếu có biến động đáng kể.
+   - V�ng quay h�ng t?n kho, ph?i thu, ph?i tr? ho?c cash conversion cycle n?u d? li?u d?.
+   - Ch? gi?i th�ch n?u c� bi?n d?ng d�ng k?.
 
 4. Abnormal movement analysis:
-   - Flag nếu biến động YoY vượt ngưỡng cấu hình.
-   - Mỗi flag phải có reason và source.
+   - Flag n?u bi?n d?ng YoY vu?t ngu?ng c?u h�nh.
+   - M?i flag ph?i c� reason v� source.
 
-### 7.3.3. Bảng financial summary
+### 7.3.3. B?ng financial summary
 
 ```markdown
-| Chỉ tiêu | 2021A | 2022A | 2023A | 2024A | 2025A/TTM |
+| Ch? ti�u | 2021A | 2022A | 2023A | 2024A | 2025A/TTM |
 |---|---:|---:|---:|---:|---:|
-| Doanh thu thuần | | | | | |
-| Lợi nhuận gộp | | | | | |
+| Doanh thu thu?n | | | | | |
+| L?i nhu?n g?p | | | | | |
 | EBITDA/EBIT | | | | | |
-| LNST CĐ mẹ | | | | | |
+| LNST C� m? | | | | | |
 | EPS | | | | | |
-| Biên gộp | | | | | |
-| Biên ròng | | | | | |
+| Bi�n g?p | | | | | |
+| Bi�n r�ng | | | | | |
 | ROE | | | | | |
 ```
 
-### 7.3.4. Charts bắt buộc nếu dữ liệu đủ
+### 7.3.4. Charts b?t bu?c n?u d? li?u d?
 
-| Chart | Loại | Nội dung |
+| Chart | Lo?i | N?i dung |
 |---|---|---|
 | C2 | Bar + line | Revenue + EBITDA/EBIT margin |
-| C3 | Line/bar | EPS + P/E hoặc LNST + biên ròng |
+| C3 | Line/bar | EPS + P/E ho?c LNST + bi�n r�ng |
 | C4 | Multi-line | Gross margin, net margin, ROE |
 
-### 7.3.5. Narrative chuẩn
+### 7.3.5. Narrative chu?n
 
-Thứ tự viết bắt buộc:
+Th? t? vi?t b?t bu?c:
 
 ```text
-1. Nêu xu hướng chính.
-2. Nêu driver hoặc nguyên nhân có evidence.
-3. Chỉ ra điểm bất thường nếu có.
-4. Giải thích tác động tới forecast hoặc valuation.
+1. N�u xu hu?ng ch�nh.
+2. N�u driver ho?c nguy�n nh�n c� evidence.
+3. Ch? ra di?m b?t thu?ng n?u c�.
+4. Gi?i th�ch t�c d?ng t?i forecast ho?c valuation.
 ```
 
-Không được nói “tốt/xấu” chung chung. Phải nói biến động ảnh hưởng thế nào đến revenue, margin, working capital, WACC, multiple hoặc FCFF.
+Kh�ng du?c n�i �t?t/x?u� chung chung. Ph?i n�i bi?n d?ng ?nh hu?ng th? n�o d?n revenue, margin, working capital, WACC, multiple ho?c FCFF.
 
 ---
 
-## Page 4 — Forecast & Key Assumptions
+## Page 4 � Forecast & Key Assumptions
 
-### 7.4.1. Mục tiêu
+### 7.4.1. M?c ti�u
 
-Trình bày forecast một cách có logic, có driver, có assumption, có source và có trạng thái approval.
+Tr�nh b�y forecast m?t c�ch c� logic, c� driver, c� assumption, c� source v� c� tr?ng th�i approval.
 
 ### 7.4.2. Forecast horizon
 
-Khuyến nghị:
+Khuy?n ngh?:
 
 ```text
-Base actual year: FY gần nhất đã kiểm định hoặc TTM nếu đủ tin cậy
-Forecast horizon: 2026F-2030F hoặc 5 năm tính từ năm base
-Minimum horizon: 3 năm
-Preferred horizon: 5 năm
+Base actual year: FY g?n nh?t d� ki?m d?nh ho?c TTM n?u d? tin c?y
+Forecast horizon: 2026F-2030F ho?c 5 nam t�nh t? nam base
+Minimum horizon: 3 nam
+Preferred horizon: 5 nam
 ```
 
-### 7.4.3. Forecast logic bắt buộc
+### 7.4.3. Forecast logic b?t bu?c
 
-Forecast phải bao gồm tối thiểu:
+Forecast ph?i bao g?m t?i thi?u:
 
 - Revenue growth driver.
 - Gross margin assumption.
@@ -633,33 +633,33 @@ Forecast phải bao gồm tối thiểu:
 - Tax rate.
 - Working capital assumption.
 - CAPEX/depreciation assumption.
-- Terminal growth hoặc exit multiple nếu dùng.
+- Terminal growth ho?c exit multiple n?u d�ng.
 
 ### 7.4.4. Driver-based planning table
 
-Bảng này là bắt buộc, vì đây là cầu nối giữa business analysis và valuation.
+B?ng n�y l� b?t bu?c, v� d�y l� c?u n?i gi?a business analysis v� valuation.
 
 ```markdown
 | Driver | Linked Line Item | Direction | Base Assumption | Evidence | Valuation Impact | Approval Status |
 |---|---|---|---:|---|---|---|
-| Sản lượng/kênh ETC | Revenue | Positive | +x% | SRC-... | Tăng FCFF | approved/pending_review |
-| Giá thầu thuốc | Gross margin | Negative | -x bps | SRC-... | Giảm EBIT, giảm FCFF | approved/pending_review |
-| Chi phí nguyên liệu | COGS | Negative | +x bps | SRC-... | Giảm gross margin | approved/pending_review |
-| Tồn kho/phải thu | ΔNWC | Negative | +x ngày | FACT-... | Giảm FCFF | approved/pending_review |
+| S?n lu?ng/k�nh ETC | Revenue | Positive | +x% | SRC-... | Tang FCFF | approved/pending_review |
+| Gi� th?u thu?c | Gross margin | Negative | -x bps | SRC-... | Gi?m EBIT, gi?m FCFF | approved/pending_review |
+| Chi ph� nguy�n li?u | COGS | Negative | +x bps | SRC-... | Gi?m gross margin | approved/pending_review |
+| T?n kho/ph?i thu | ?NWC | Negative | +x ng�y | FACT-... | Gi?m FCFF | approved/pending_review |
 ```
 
 ### 7.4.5. Forecast table
 
 ```markdown
-| Chỉ tiêu | 2025A/TTM | 2026F | 2027F | 2028F | 2029F | 2030F |
+| Ch? ti�u | 2025A/TTM | 2026F | 2027F | 2028F | 2029F | 2030F |
 |---|---:|---:|---:|---:|---:|---:|
-| Doanh thu thuần | | | | | | |
-| Tăng trưởng DT | | | | | | |
-| Lợi nhuận gộp | | | | | | |
-| Biên gộp | | | | | | |
+| Doanh thu thu?n | | | | | | |
+| Tang tru?ng DT | | | | | | |
+| L?i nhu?n g?p | | | | | | |
+| Bi�n g?p | | | | | | |
 | EBIT/EBITDA | | | | | | |
-| Biên EBIT/EBITDA | | | | | | |
-| LNST CĐ mẹ | | | | | | |
+| Bi�n EBIT/EBITDA | | | | | | |
+| LNST C� m? | | | | | | |
 | EPS | | | | | | |
 | FCFF | | | | | | |
 ```
@@ -677,15 +677,15 @@ Bảng này là bắt buộc, vì đây là cầu nối giữa business analysis
 | Terminal growth | {x}% | {rationale} | valuation_result | approved/pending_review |
 ```
 
-### 7.4.7. Chart bắt buộc nếu dữ liệu đủ
+### 7.4.7. Chart b?t bu?c n?u d? li?u d?
 
-| Chart | Loại | Nội dung |
+| Chart | Lo?i | N?i dung |
 |---|---|---|
-| C5 | Bar + line | Forecast revenue and profit hoặc revenue and FCFF |
+| C5 | Bar + line | Forecast revenue and profit ho?c revenue and FCFF |
 
 ### 7.4.8. Forecast writing rules
 
-Agent phải giải thích ít nhất 3 driver lớn nhất làm thay đổi forecast:
+Agent ph?i gi?i th�ch �t nh?t 3 driver l?n nh?t l�m thay d?i forecast:
 
 ```yaml
 driver_name:
@@ -697,39 +697,39 @@ assumption_status: approved | pending_review
 valuation_impact:
 ```
 
-Không được viết:
+Kh�ng du?c vi?t:
 
 ```text
-Doanh thu được dự phóng tăng ổn định do triển vọng ngành tích cực.
+Doanh thu du?c d? ph�ng tang ?n d?nh do tri?n v?ng ng�nh t�ch c?c.
 ```
 
-Nếu không có driver và source, phải viết:
+N?u kh�ng c� driver v� source, ph?i vi?t:
 
 ```text
-Chưa đủ bằng chứng để gán nguyên nhân cụ thể cho giả định tăng trưởng; assumption cần reviewer phê duyệt trước khi export final.
+Chua d? b?ng ch?ng d? g�n nguy�n nh�n c? th? cho gi? d?nh tang tru?ng; assumption c?n reviewer ph� duy?t tru?c khi export final.
 ```
 
 ---
 
-## Page 5 — Valuation: FCFF DCF + Relative Multiples
+## Page 5 � Valuation: FCFF DCF + Relative Multiples
 
-### 7.5.1. Mục tiêu
+### 7.5.1. M?c ti�u
 
-Chốt giá mục tiêu bằng mô hình định giá có thể tái lập, minh bạch assumption và có kiểm tra chéo bằng multiples.
+Ch?t gi� m?c ti�u b?ng m� h�nh d?nh gi� c� th? t�i l?p, minh b?ch assumption v� c� ki?m tra ch�o b?ng multiples.
 
-### 7.5.2. Phương pháp bắt buộc
+### 7.5.2. Phuong ph�p b?t bu?c
 
-1. FCFF DCF là phương pháp chính.
-2. P/E, P/B, EV/EBITDA là phương pháp kiểm tra chéo nếu dữ liệu đủ.
-3. EV/Sales chỉ dùng nếu doanh nghiệp đặc thù và có giải thích.
-4. Không dùng multiples nếu peer không đủ tương đồng hoặc dữ liệu không đáng tin cậy.
+1. FCFF DCF l� phuong ph�p ch�nh.
+2. P/E, P/B, EV/EBITDA l� phuong ph�p ki?m tra ch�o n?u d? li?u d?.
+3. EV/Sales ch? d�ng n?u doanh nghi?p d?c th� v� c� gi?i th�ch.
+4. Kh�ng d�ng multiples n?u peer kh�ng d? tuong d?ng ho?c d? li?u kh�ng d�ng tin c?y.
 
-### 7.5.3. Công thức chuẩn
+### 7.5.3. C�ng th?c chu?n
 
 ```text
-FCFF = EBIT × (1 - Tax Rate) + Depreciation - CAPEX - ΔNWC
+FCFF = EBIT � (1 - Tax Rate) + Depreciation - CAPEX - ?NWC
 
-EV = Σ PV(FCFF_t) + PV(Terminal Value)
+EV = S PV(FCFF_t) + PV(Terminal Value)
 
 Equity Value = EV + Cash & Equivalents - Debt - Minority Interest
 
@@ -738,9 +738,9 @@ Target Price = Equity Value / Diluted Shares Outstanding
 Upside/Downside = (Target Price / Current Price) - 1
 ```
 
-Các công thức phải được implement trong Python engine. Markdown report chỉ diễn giải kết quả.
+C�c c�ng th?c ph?i du?c implement trong Python engine. Markdown report ch? di?n gi?i k?t qu?.
 
-### 7.5.4. Bảng DCF summary
+### 7.5.4. B?ng DCF summary
 
 ```markdown
 | Valuation Item | 2026F | 2027F | 2028F | 2029F | 2030F |
@@ -750,7 +750,7 @@ Các công thức phải được implement trong Python engine. Markdown report
 | EBIT(1-T) | | | | | |
 | Depreciation | | | | | |
 | CAPEX | | | | | |
-| ΔNWC | | | | | |
+| ?NWC | | | | | |
 | FCFF | | | | | |
 | Discount Factor | | | | | |
 | PV of FCFF | | | | | |
@@ -787,46 +787,46 @@ Các công thức phải được implement trong Python engine. Markdown report
 
 ### 7.5.7. DCF value bridge
 
-Khuyến nghị có chart C6 nếu dữ liệu đủ:
+Khuy?n ngh? c� chart C6 n?u d? li?u d?:
 
-| Chart | Loại | Nội dung |
+| Chart | Lo?i | N?i dung |
 |---|---|---|
 | C6 | Waterfall | Enterprise value -> net debt/cash -> equity value -> target price |
 
-### 7.5.8. Narrative chuẩn
+### 7.5.8. Narrative chu?n
 
-Thứ tự viết bắt buộc:
+Th? t? vi?t b?t bu?c:
 
 ```text
-1. Nêu phương pháp chính và lý do phù hợp.
-2. Giải thích target price đến từ đâu.
-3. So sánh target price với current price.
-4. Nêu assumption nhạy nhất.
-5. Nêu điều kiện khiến rating thay đổi.
+1. N�u phuong ph�p ch�nh v� l� do ph� h?p.
+2. Gi?i th�ch target price d?n t? d�u.
+3. So s�nh target price v?i current price.
+4. N�u assumption nh?y nh?t.
+5. N�u di?u ki?n khi?n rating thay d?i.
 ```
 
-Không được kết luận chắc chắn. Phải viết theo điều kiện assumptions.
+Kh�ng du?c k?t lu?n ch?c ch?n. Ph?i vi?t theo di?u ki?n assumptions.
 
-Ví dụ đúng:
+V� d? d�ng:
 
 ```text
-Trong base case đã được phê duyệt, FCFF DCF cho ra giá trị hợp lý X VND/cp. Kết quả này nhạy nhất với WACC và terminal growth; khi WACC tăng 100 bps, target price giảm về Y VND/cp. Do đó, rating hiện tại phụ thuộc đáng kể vào khả năng duy trì biên EBIT và kiểm soát vốn lưu động.
+Trong base case d� du?c ph� duy?t, FCFF DCF cho ra gi� tr? h?p l� X VND/cp. K?t qu? n�y nh?y nh?t v?i WACC v� terminal growth; khi WACC tang 100 bps, target price gi?m v? Y VND/cp. Do d�, rating hi?n t?i ph? thu?c d�ng k? v�o kh? nang duy tr� bi�n EBIT v� ki?m so�t v?n luu d?ng.
 ```
 
 ---
 
-## Page 6 — Sensitivity, Scenario & Peer Check
+## Page 6 � Sensitivity, Scenario & Peer Check
 
-### 7.6.1. Mục tiêu
+### 7.6.1. M?c ti�u
 
-Cho reviewer thấy mô hình có bền không khi giả định thay đổi.
+Cho reviewer th?y m� h�nh c� b?n kh�ng khi gi? d?nh thay d?i.
 
-### 7.6.2. Sensitivity bắt buộc
+### 7.6.2. Sensitivity b?t bu?c
 
-Phải có ít nhất một trong hai dạng:
+Ph?i c� �t nh?t m?t trong hai d?ng:
 
-1. Sensitivity target price theo `WACC` và `terminal growth`.
-2. Sensitivity theo `revenue CAGR` và `EBIT/EBITDA margin` nếu terminal assumptions không phù hợp.
+1. Sensitivity target price theo `WACC` v� `terminal growth`.
+2. Sensitivity theo `revenue CAGR` v� `EBIT/EBITDA margin` n?u terminal assumptions kh�ng ph� h?p.
 
 ### 7.6.3. Sensitivity matrix
 
@@ -859,30 +859,30 @@ Phải có ít nhất một trong hai dạng:
 
 ### 7.6.6. Peer rules
 
-- Peer phải thuộc ngành dược/y tế Việt Nam hoặc có lý do tương đồng rõ.
-- Nếu không có peer đủ tương đồng, ghi `peer comparison limited` thay vì ép so sánh.
-- Không dùng peer global nếu không điều chỉnh khác biệt thị trường, quy mô và mô hình kinh doanh.
-- Peer comparison không được tự động kéo rating nếu DCF và data confidence không đủ.
+- Peer ph?i thu?c ng�nh du?c/y t? Vi?t Nam ho?c c� l� do tuong d?ng r�.
+- N?u kh�ng c� peer d? tuong d?ng, ghi `peer comparison limited` thay v� �p so s�nh.
+- Kh�ng d�ng peer global n?u kh�ng di?u ch?nh kh�c bi?t th? tru?ng, quy m� v� m� h�nh kinh doanh.
+- Peer comparison kh�ng du?c t? d?ng k�o rating n?u DCF v� data confidence kh�ng d?.
 
 ### 7.6.7. Sensitivity risk flag
 
-Report phải flag `valuation_extreme_sensitivity` nếu một trong các điều kiện xảy ra:
+Report ph?i flag `valuation_extreme_sensitivity` n?u m?t trong c�c di?u ki?n x?y ra:
 
 ```text
-WACC +1.0% làm target price đổi rating từ BUY sang SELL hoặc từ SELL sang BUY
-terminal growth +/-0.5% làm target price thay đổi quá ngưỡng cấu hình
-base case target price nằm ngoài vùng hợp lý của peer check mà không có giải thích
+WACC +1.0% l�m target price d?i rating t? BUY sang SELL ho?c t? SELL sang BUY
+terminal growth +/-0.5% l�m target price thay d?i qu� ngu?ng c?u h�nh
+base case target price n?m ngo�i v�ng h?p l� c?a peer check m� kh�ng c� gi?i th�ch
 ```
 
-Nếu flag này bật, rating tối đa là `UNDER REVIEW` cho đến khi reviewer approve.
+N?u flag n�y b?t, rating t?i da l� `UNDER REVIEW` cho d?n khi reviewer approve.
 
 ---
 
-## Page 7 — Catalysts & Investment Risks
+## Page 7 � Catalysts & Investment Risks
 
-### 7.7.1. Mục tiêu
+### 7.7.1. M?c ti�u
 
-Trình bày điều gì có thể làm thesis đúng hoặc sai trong 6-12 tháng tới.
+Tr�nh b�y di?u g� c� th? l�m thesis d�ng ho?c sai trong 6-12 th�ng t?i.
 
 ### 7.7.2. Positive catalysts table
 
@@ -897,61 +897,61 @@ Trình bày điều gì có thể làm thesis đúng hoặc sai trong 6-12 thán
 ```markdown
 | Risk | Affected Driver | Financial Impact | Mitigation/Monitor | Evidence |
 |---|---|---|---|---|
-| Áp lực giảm giá thầu | Gross margin/revenue | High | Theo dõi kết quả đấu thầu | SRC-... |
-| Phụ thuộc sản phẩm chính | Revenue stability | Medium | Theo dõi product mix | SRC-... |
-| Tồn kho/phải thu tăng | Working capital/FCFF | Medium | Theo dõi CCC | FACT-... |
+| �p l?c gi?m gi� th?u | Gross margin/revenue | High | Theo d�i k?t qu? d?u th?u | SRC-... |
+| Ph? thu?c s?n ph?m ch�nh | Revenue stability | Medium | Theo d�i product mix | SRC-... |
+| T?n kho/ph?i thu tang | Working capital/FCFF | Medium | Theo d�i CCC | FACT-... |
 ```
 
-### 7.7.4. Rủi ro đặc thù ngành dược/y tế Việt Nam cần kiểm tra
+### 7.7.4. R?i ro d?c th� ng�nh du?c/y t? Vi?t Nam c?n ki?m tra
 
-- Rủi ro đấu thầu thuốc.
+- R?i ro d?u th?u thu?c.
 - BHYT/reimbursement.
-- Thay đổi quy định đăng ký/lưu hành thuốc.
-- GMP/nhà máy/chất lượng sản xuất.
-- Cạnh tranh generic.
-- Phụ thuộc kênh ETC hoặc OTC.
-- Biến động nguyên liệu nhập khẩu.
-- Hàng tồn kho, phải thu bệnh viện/nhà thuốc.
-- Tỷ giá nếu nhập nguyên liệu.
-- Cổ tức, thanh khoản, free float.
-- Rủi ro tập trung sản phẩm.
-- Rủi ro thu hồi thuốc hoặc chất lượng sản phẩm.
+- Thay d?i quy d?nh dang k�/luu h�nh thu?c.
+- GMP/nh� m�y/ch?t lu?ng s?n xu?t.
+- C?nh tranh generic.
+- Ph? thu?c k�nh ETC ho?c OTC.
+- Bi?n d?ng nguy�n li?u nh?p kh?u.
+- H�ng t?n kho, ph?i thu b?nh vi?n/nh� thu?c.
+- T? gi� n?u nh?p nguy�n li?u.
+- C? t?c, thanh kho?n, free float.
+- R?i ro t?p trung s?n ph?m.
+- R?i ro thu h?i thu?c ho?c ch?t lu?ng s?n ph?m.
 
-### 7.7.5. Quy tắc viết risk
+### 7.7.5. Quy t?c vi?t risk
 
-Mỗi rủi ro phải gắn với một financial driver.
+M?i r?i ro ph?i g?n v?i m?t financial driver.
 
-Không viết:
+Kh�ng vi?t:
 
 ```text
-Thị trường biến động có thể ảnh hưởng đến giá cổ phiếu.
+Th? tru?ng bi?n d?ng c� th? ?nh hu?ng d?n gi� c? phi?u.
 ```
 
-Phải viết:
+Ph?i vi?t:
 
 ```text
-Nếu giá trúng thầu giảm mạnh hơn giả định base case, gross margin có thể giảm x bps, làm EBIT và FCFF thấp hơn mô hình hiện tại.
+N?u gi� tr�ng th?u gi?m m?nh hon gi? d?nh base case, gross margin c� th? gi?m x bps, l�m EBIT v� FCFF th?p hon m� h�nh hi?n t?i.
 ```
 
 ---
 
-## Page 8 — Conclusion, Quality Summary, Sources & Disclaimer
+## Page 8 � Conclusion, Quality Summary, Sources & Disclaimer
 
-### 7.8.1. Mục tiêu
+### 7.8.1. M?c ti�u
 
-Chốt lại báo cáo, hiển thị kết luận định giá, mức tin cậy, trạng thái kiểm định và disclaimer.
+Ch?t l?i b�o c�o, hi?n th? k?t lu?n d?nh gi�, m?c tin c?y, tr?ng th�i ki?m d?nh v� disclaimer.
 
-### 7.8.2. Nội dung bắt buộc
+### 7.8.2. N?i dung b?t bu?c
 
 1. Key takeaways:
    - 3-5 bullet.
-   - Mỗi bullet phải là kết luận có căn cứ.
+   - M?i bullet ph?i l� k?t lu?n c� can c?.
 
 2. Final valuation conclusion:
    - Rating.
    - Target price.
    - Upside/downside.
-   - Điều kiện để rating thay đổi.
+   - �i?u ki?n d? rating thay d?i.
 
 3. Client-facing quality summary:
    - Data confidence.
@@ -962,9 +962,9 @@ Chốt lại báo cáo, hiển thị kết luận định giá, mức tin cậy,
    - Human review status.
 
 4. Key sources:
-   - Không liệt kê toàn bộ source nếu quá dài.
-   - Hiển thị 5-10 nguồn quan trọng nhất.
-   - Toàn bộ nguồn nằm trong `source_manifest.json`.
+   - Kh�ng li?t k� to�n b? source n?u qu� d�i.
+   - Hi?n th? 5-10 ngu?n quan tr?ng nh?t.
+   - To�n b? ngu?n n?m trong `source_manifest.json`.
 
 5. Disclaimer.
 
@@ -983,7 +983,7 @@ Chốt lại báo cáo, hiển thị kết luận định giá, mức tin cậy,
 
 ### 7.8.4. Internal gate summary
 
-Bảng gate chi tiết không bắt buộc hiển thị đầy đủ trong PDF client-facing. Full detail phải nằm trong `eval_result.json`.
+B?ng gate chi ti?t kh�ng b?t bu?c hi?n th? d?y d? trong PDF client-facing. Full detail ph?i n?m trong `eval_result.json`.
 
 ```markdown
 | Gate | Status | Notes |
@@ -997,10 +997,10 @@ Bảng gate chi tiết không bắt buộc hiển thị đầy đủ trong PDF c
 | Final Review | PASS/PENDING | |
 ```
 
-### 7.8.5. Disclaimer chuẩn
+### 7.8.5. Disclaimer chu?n
 
 ```text
-Báo cáo này chỉ nhằm mục đích nghiên cứu và tham khảo học thuật/sản phẩm. Nội dung không phải là khuyến nghị đầu tư cá nhân hóa, không phải lời mời mua/bán chứng khoán, và không thay thế tư vấn từ chuyên gia được cấp phép. Rating trong báo cáo là kết luận mô hình dựa trên dữ liệu, giả định và mức sinh lời kỳ vọng tại thời điểm lập báo cáo; không phải khuyến nghị đầu tư cá nhân hóa. Kết quả định giá phụ thuộc vào dữ liệu đầu vào, giả định mô hình và điều kiện thị trường tại thời điểm lập báo cáo. Hiệu suất quá khứ không đảm bảo kết quả tương lai. Người đọc chịu trách nhiệm độc lập khi sử dụng thông tin.
+B�o c�o n�y ch? nh?m m?c d�ch nghi�n c?u v� tham kh?o h?c thu?t/s?n ph?m. N?i dung kh�ng ph?i l� khuy?n ngh? d?u tu c� nh�n h�a, kh�ng ph?i l?i m?i mua/b�n ch?ng kho�n, v� kh�ng thay th? tu v?n t? chuy�n gia du?c c?p ph�p. Rating trong b�o c�o l� k?t lu?n m� h�nh d?a tr�n d? li?u, gi? d?nh v� m?c sinh l?i k? v?ng t?i th?i di?m l?p b�o c�o; kh�ng ph?i khuy?n ngh? d?u tu c� nh�n h�a. K?t qu? d?nh gi� ph? thu?c v�o d? li?u d?u v�o, gi? d?nh m� h�nh v� di?u ki?n th? tru?ng t?i th?i di?m l?p b�o c�o. Hi?u su?t qu� kh? kh�ng d?m b?o k?t qu? tuong lai. Ngu?i d?c ch?u tr�ch nhi?m d?c l?p khi s? d?ng th�ng tin.
 ```
 
 ---
@@ -1044,7 +1044,7 @@ rating_thresholds:
 
 ### 8.3. Enhanced rating rule
 
-Rating không chỉ dựa vào upside/downside. Rating phải là hàm của:
+Rating kh�ng ch? d?a v�o upside/downside. Rating ph?i l� h�m c?a:
 
 ```text
 rating = function(
@@ -1059,36 +1059,36 @@ rating = function(
 )
 ```
 
-### 8.4. Không được đưa BUY/SELL/HOLD nếu
+### 8.4. Kh�ng du?c dua BUY/SELL/HOLD n?u
 
-- Không có current price đáng tin cậy.
-- Không có shares outstanding hợp lệ.
-- Valuation không tái lập được.
-- Target price thay đổi quá mạnh theo sensitivity.
-- Dữ liệu tài chính stale hoặc chưa đủ kỳ.
-- Claim định lượng chính thiếu citation.
-- Reviewer chưa approve assumptions.
-- Source mâu thuẫn ở financial facts trọng yếu.
-- Thanh khoản quá thấp nhưng chưa được flag trong risk.
-- Data confidence thấp hơn ngưỡng cấu hình.
+- Kh�ng c� current price d�ng tin c?y.
+- Kh�ng c� shares outstanding h?p l?.
+- Valuation kh�ng t�i l?p du?c.
+- Target price thay d?i qu� m?nh theo sensitivity.
+- D? li?u t�i ch�nh stale ho?c chua d? k?.
+- Claim d?nh lu?ng ch�nh thi?u citation.
+- Reviewer chua approve assumptions.
+- Source m�u thu?n ? financial facts tr?ng y?u.
+- Thanh kho?n qu� th?p nhung chua du?c flag trong risk.
+- Data confidence th?p hon ngu?ng c?u h�nh.
 
-Trong các trường hợp trên, rating phải là `UNDER REVIEW`.
+Trong c�c tru?ng h?p tr�n, rating ph?i l� `UNDER REVIEW`.
 
 ---
 
 ## 9. Chart registry
 
-Báo cáo 8 trang nên có tối đa 5-7 biểu đồ.
+B�o c�o 8 trang n�n c� t?i da 5-7 bi?u d?.
 
-| Chart ID | Tên | Loại | Trang | Bắt buộc nếu dữ liệu đủ |
+| Chart ID | T�n | Lo?i | Trang | B?t bu?c n?u d? li?u d? |
 |---|---|---|---|---|
-| C1 | Stock vs VNINDEX | Line, base 100 | Page 1 | Có |
-| C2 | Revenue & EBITDA/EBIT Trend | Bar + line | Page 3 | Có |
-| C3 | EPS & P/E Trend | Dual-axis line/bar | Page 3 | Có |
-| C4 | Margin & ROE Trend | Multi-line | Page 3 | Có |
-| C5 | Forecast Revenue/Profit | Bar + line | Page 4 | Có |
-| C6 | DCF Value Bridge | Waterfall | Page 5 | Khuyến nghị |
-| C7 | Sensitivity Heatmap | Heatmap/table | Page 6 | Có |
+| C1 | Stock vs VNINDEX | Line, base 100 | Page 1 | C� |
+| C2 | Revenue & EBITDA/EBIT Trend | Bar + line | Page 3 | C� |
+| C3 | EPS & P/E Trend | Dual-axis line/bar | Page 3 | C� |
+| C4 | Margin & ROE Trend | Multi-line | Page 3 | C� |
+| C5 | Forecast Revenue/Profit | Bar + line | Page 4 | C� |
+| C6 | DCF Value Bridge | Waterfall | Page 5 | Khuy?n ngh? |
+| C7 | Sensitivity Heatmap | Heatmap/table | Page 6 | C� |
 
 ### 9.1. Chart generation contract
 
@@ -1108,7 +1108,7 @@ Báo cáo 8 trang nên có tối đa 5-7 biểu đồ.
 
 ### 9.2. Chart fallback
 
-Nếu chart bắt buộc không đủ dữ liệu:
+N?u chart b?t bu?c kh�ng d? d? li?u:
 
 ```yaml
 chart_status: omitted_due_to_missing_data
@@ -1122,20 +1122,20 @@ required_action:
 
 ## 10. Financial metric checklist
 
-### 10.1. Metrics bắt buộc
+### 10.1. Metrics b?t bu?c
 
-| Nhóm | Chỉ số |
+| Nh�m | Ch? s? |
 |---|---|
 | Growth | Revenue growth, net profit growth, revenue CAGR, net profit CAGR |
 | Profitability | Gross margin, EBIT/EBITDA margin, net margin, ROE, ROA |
-| Valuation | EPS, BVPS, P/E, P/B, EV/EBITDA, dividend yield nếu có |
-| Balance sheet | Debt/equity, net debt/cash, current ratio nếu có |
-| Working capital | Inventory days, receivable days, payable days, cash conversion cycle nếu đủ dữ liệu |
-| Cash flow | CFO, CAPEX, FCFF, FCF conversion nếu đủ dữ liệu |
+| Valuation | EPS, BVPS, P/E, P/B, EV/EBITDA, dividend yield n?u c� |
+| Balance sheet | Debt/equity, net debt/cash, current ratio n?u c� |
+| Working capital | Inventory days, receivable days, payable days, cash conversion cycle n?u d? d? li?u |
+| Cash flow | CFO, CAPEX, FCFF, FCF conversion n?u d? d? li?u |
 
 ### 10.2. Formula registry requirement
 
-Formula IDs trong code phải đồng bộ chính xác với `FORMULA_FINANCE.md` nếu file đó tồn tại trong repository. Mục tiêu là để agent/tool calling gọi đúng deterministic Python function, không tự tính bằng ngôn ngữ tự nhiên.
+Formula IDs trong code ph?i d?ng b? ch�nh x�c v?i `FORMULA_FINANCE.md` n?u file d� t?n t?i trong repository. M?c ti�u l� d? agent/tool calling g?i d�ng deterministic Python function, kh�ng t? t�nh b?ng ng�n ng? t? nhi�n.
 
 ```yaml
 formulas:
@@ -1175,19 +1175,19 @@ formulas:
 
 | Data type | Internal storage | PDF display |
 |---|---|---|
-| VND amount | raw VND or normalized numeric with unit metadata | tỷ VND |
+| VND amount | raw VND or normalized numeric with unit metadata | t? VND |
 | Per-share | VND/share | VND/cp |
 | Percent | decimal internally | % in PDF |
 | Multiple | numeric | x |
-| Date | ISO date | dd/mm/yyyy hoặc yyyy |
+| Date | ISO date | dd/mm/yyyy ho?c yyyy |
 
-Không được trộn `triệu VND`, `tỷ VND`, `nghìn VND` nếu không có unit conversion rõ.
+Kh�ng du?c tr?n `tri?u VND`, `t? VND`, `ngh�n VND` n?u kh�ng c� unit conversion r�.
 
 ---
 
 ## 11. Claim ledger contract
 
-Mỗi claim trong report phải được ghi vào `claim_ledger.json`.
+M?i claim trong report ph?i du?c ghi v�o `claim_ledger.json`.
 
 ### 11.1. Minimal schema
 
@@ -1197,7 +1197,7 @@ Mỗi claim trong report phải được ghi vào `claim_ledger.json`.
   "run_id": "RUN-...",
   "section": "investment_thesis",
   "page": 1,
-  "claim_text": "Doanh thu thuần 2024 tăng 12.3% so với cùng kỳ.",
+  "claim_text": "Doanh thu thu?n 2024 tang 12.3% so v?i c�ng k?.",
   "claim_type": "quantitative",
   "ticker": "DHG",
   "period": "2024A",
@@ -1231,10 +1231,10 @@ claim_types:
 
 ```yaml
 support_status:
-  supported: "Có đủ nguồn hoặc artifact"
-  partially_supported: "Có nguồn nhưng thiếu một phần logic"
-  unsupported: "Không được phép xuất hiện trong final report"
-  conflicting: "Nguồn mâu thuẫn, cần review"
+  supported: "C� d? ngu?n ho?c artifact"
+  partially_supported: "C� ngu?n nhung thi?u m?t ph?n logic"
+  unsupported: "Kh�ng du?c ph�p xu?t hi?n trong final report"
+  conflicting: "Ngu?n m�u thu?n, c?n review"
 ```
 
 ### 11.4. Final report rule
@@ -1256,7 +1256,7 @@ conflicting claims allowed in final report = 0 unless explicitly labeled as conf
   "run_id": "RUN-...",
   "ticker": "DHG",
   "source_type": "annual_report",
-  "source_name": "Báo cáo thường niên 2024",
+  "source_name": "B�o c�o thu?ng ni�n 2024",
   "publisher": "Company",
   "published_date": "2025-03-30",
   "retrieval_timestamp": "2026-05-07T10:00:00+07:00",
@@ -1296,7 +1296,7 @@ reliability_tier:
 
 ## 13. Valuation result contract
 
-`valuation_result.json` là nguồn duy nhất cho target price, upside/downside, DCF output, multiples output, sensitivity và scenario.
+`valuation_result.json` l� ngu?n duy nh?t cho target price, upside/downside, DCF output, multiples output, sensitivity v� scenario.
 
 ### 13.1. Minimal schema
 
@@ -1340,13 +1340,13 @@ reliability_tier:
 
 ### 13.2. Valuation reproducibility
 
-Report final phải có khả năng recompute target price từ `valuation_result.json`.
+Report final ph?i c� kh? nang recompute target price t? `valuation_result.json`.
 
 ```text
 recomputed_target_price == reported_target_price within configured tolerance
 ```
 
-Nếu không pass, export phải bị block.
+N?u kh�ng pass, export ph?i b? block.
 
 ---
 
@@ -1370,24 +1370,24 @@ evaluation_thresholds:
 
 Pass khi:
 
-- tất cả financial facts chính có source;
-- source tồn tại trong source manifest;
-- source không thuộc tier `unknown` cho claim quan trọng;
-- financial facts chính ưu tiên official hoặc reconciled source;
-- không có source conflict chưa xử lý.
+- t?t c? financial facts ch�nh c� source;
+- source t?n t?i trong source manifest;
+- source kh�ng thu?c tier `unknown` cho claim quan tr?ng;
+- financial facts ch�nh uu ti�n official ho?c reconciled source;
+- kh�ng c� source conflict chua x? l�.
 
 ### 14.3. Numeric consistency gate
 
-Agent phải kiểm tra:
+Agent ph?i ki?m tra:
 
-- số trong report khớp với `canonical facts` hoặc `valuation_result`;
-- đơn vị không bị sai: VND, tỷ VND, triệu VND, %, x;
-- năm/kỳ không bị nhầm;
-- forecast và actual được ký hiệu đúng;
-- tổng tài sản = tổng nguồn vốn nếu hiển thị bảng cân đối kế toán;
-- FCFF có thể recompute từ các thành phần;
-- target price có thể recompute từ equity value và shares outstanding;
-- chart data khớp với data trong bảng.
+- s? trong report kh?p v?i `canonical facts` ho?c `valuation_result`;
+- don v? kh�ng b? sai: VND, t? VND, tri?u VND, %, x;
+- nam/k? kh�ng b? nh?m;
+- forecast v� actual du?c k� hi?u d�ng;
+- t?ng t�i s?n = t?ng ngu?n v?n n?u hi?n th? b?ng c�n d?i k? to�n;
+- FCFF c� th? recompute t? c�c th�nh ph?n;
+- target price c� th? recompute t? equity value v� shares outstanding;
+- chart data kh?p v?i data trong b?ng.
 
 ### 14.4. Citation gate
 
@@ -1406,21 +1406,21 @@ Pass khi:
 Pass khi:
 
 ```text
-DCF output recompute được từ valuation_result
-final target price recompute được từ weighted valuation summary
-upside/downside recompute được từ target price và current price
-sensitivity matrix recompute được từ assumptions
+DCF output recompute du?c t? valuation_result
+final target price recompute du?c t? weighted valuation summary
+upside/downside recompute du?c t? target price v� current price
+sensitivity matrix recompute du?c t? assumptions
 ```
 
 ### 14.6. Risk language gate
 
 Pass khi:
 
-- không có “chắc chắn”, “đảm bảo”, “nên mua ngay”;
-- rating được giải thích là model conclusion;
-- risks gắn với financial driver;
-- disclaimer đầy đủ;
-- report không đưa lời khuyên cá nhân hóa.
+- kh�ng c� �ch?c ch?n�, �d?m b?o�, �n�n mua ngay�;
+- rating du?c gi?i th�ch l� model conclusion;
+- risks g?n v?i financial driver;
+- disclaimer d?y d?;
+- report kh�ng dua l?i khuy�n c� nh�n h�a.
 
 ### 14.7. Human review gate
 
@@ -1442,13 +1442,13 @@ Pass khi:
 
 | Dimension | Score 1 | Score 3 | Score 5 |
 |---|---|---|---|
-| Accuracy | Nhiều lỗi số/nguồn | Có lỗi nhỏ | Số và nguồn nhất quán |
-| Logicality | Luận điểm rời rạc | Có logic nhưng thiếu driver | Driver -> forecast -> valuation -> risk rõ |
-| Storytelling | Dài, khó đọc | Đọc được | Ngắn gọn, chuyên nghiệp, có insight |
-| Grounding | Thiếu citation | Citation chưa đều | Claim quan trọng đều có source |
-| Valuation transparency | Assumption mơ hồ | Có bảng assumption | Reproducible, có sensitivity |
-| Risk balance | Thiên lệch | Có rủi ro nhưng chung | Rủi ro cụ thể, gắn financial driver |
-| Visual design | Rối, khó đọc | Đạt mức cơ bản | PDF gọn, chuyên nghiệp, đúng page budget |
+| Accuracy | Nhi?u l?i s?/ngu?n | C� l?i nh? | S? v� ngu?n nh?t qu�n |
+| Logicality | Lu?n di?m r?i r?c | C� logic nhung thi?u driver | Driver -> forecast -> valuation -> risk r� |
+| Storytelling | D�i, kh� d?c | �?c du?c | Ng?n g?n, chuy�n nghi?p, c� insight |
+| Grounding | Thi?u citation | Citation chua d?u | Claim quan tr?ng d?u c� source |
+| Valuation transparency | Assumption mo h? | C� b?ng assumption | Reproducible, c� sensitivity |
+| Risk balance | Thi�n l?ch | C� r?i ro nhung chung | R?i ro c? th?, g?n financial driver |
+| Visual design | R?i, kh� d?c | �?t m?c co b?n | PDF g?n, chuy�n nghi?p, d�ng page budget |
 
 ### 15.1. Minimum target
 
@@ -1467,7 +1467,7 @@ quality_targets:
 
 ## 16. Markdown skeleton cho report final
 
-Agent có thể dùng skeleton sau để sinh `report.md`.
+Agent c� th? d�ng skeleton sau d? sinh `report.md`.
 
 ```markdown
 ---
@@ -1475,7 +1475,7 @@ report_type: equity_research
 ticker: "{TICKER}"
 company_name: "{COMPANY_NAME}"
 exchange: "{EXCHANGE}"
-sector: "Dược/Y tế"
+sector: "Du?c/Y t?"
 report_date: "{REPORT_DATE}"
 data_cutoff: "{DATA_CUTOFF}"
 rating: "{RATING}"
@@ -1487,7 +1487,7 @@ data_confidence: "{DATA_CONFIDENCE}"
 status: "{DRAFT|NEEDS_REVIEW|PENDING_APPROVAL|APPROVED|BLOCKED|FINAL_EXPORTABLE}"
 ---
 
-# {TICKER} — {COMPANY_NAME}
+# {TICKER} � {COMPANY_NAME}
 ## Equity Research Report | {REPORT_DATE}
 
 ### Investment Snapshot
@@ -1607,7 +1607,7 @@ status: "{DRAFT|NEEDS_REVIEW|PENDING_APPROVAL|APPROVED|BLOCKED|FINAL_EXPORTABLE}
 
 ## 17. Agent execution instruction
 
-Khi được yêu cầu sinh báo cáo, agent phải tuân thủ thứ tự sau:
+Khi du?c y�u c?u sinh b�o c�o, agent ph?i tu�n th? th? t? sau:
 
 ```text
 1. Load run state and ticker metadata.
@@ -1644,7 +1644,7 @@ Khi được yêu cầu sinh báo cáo, agent phải tuân thủ thứ tự sau:
 
 ### 17.2. LLM prompt boundary
 
-LLM prompt phải nhận artifact đã chuẩn hóa, không nhận raw unverified data để tự suy đoán.
+LLM prompt ph?i nh?n artifact d� chu?n h�a, kh�ng nh?n raw unverified data d? t? suy do�n.
 
 ```text
 LLM input allowed:
@@ -1667,61 +1667,61 @@ LLM input not allowed:
 
 ## 18. Failure handling
 
-Nếu thiếu dữ liệu hoặc kiểm định không pass, báo cáo không được giả vờ hoàn chỉnh.
+N?u thi?u d? li?u ho?c ki?m d?nh kh�ng pass, b�o c�o kh�ng du?c gi? v? ho�n ch?nh.
 
 ### 18.1. Failure messages
 
 | Failure | Report Status | Required Message |
 |---|---|---|
-| Missing financial facts | `NEEDS_REVIEW` | Thiếu dữ liệu tài chính cho kỳ X; không thể hoàn tất valuation |
-| Source conflict | `NEEDS_REVIEW` | Nguồn A và B mâu thuẫn tại chỉ tiêu X |
-| Failed numeric audit | `BLOCKED` | Số trong report không khớp artifact |
-| Failed citation audit | `BLOCKED` | Có claim quan trọng thiếu nguồn |
-| Failed valuation reproducibility | `BLOCKED` | Target price không tái lập được từ valuation_result |
-| Extreme sensitivity | `NEEDS_REVIEW` | Target price quá nhạy với WACC/growth |
-| Missing human approval | `PENDING_APPROVAL` | Assumptions/final report chưa được duyệt |
-| Missing chart data | `NEEDS_REVIEW` hoặc `DRAFT` | Chart X bị bỏ vì thiếu dữ liệu đã kiểm định |
-| Layout overflow | `NEEDS_REVIEW` | Report vượt page budget; cần nén nội dung hoặc chuyển appendix |
+| Missing financial facts | `NEEDS_REVIEW` | Thi?u d? li?u t�i ch�nh cho k? X; kh�ng th? ho�n t?t valuation |
+| Source conflict | `NEEDS_REVIEW` | Ngu?n A v� B m�u thu?n t?i ch? ti�u X |
+| Failed numeric audit | `BLOCKED` | S? trong report kh�ng kh?p artifact |
+| Failed citation audit | `BLOCKED` | C� claim quan tr?ng thi?u ngu?n |
+| Failed valuation reproducibility | `BLOCKED` | Target price kh�ng t�i l?p du?c t? valuation_result |
+| Extreme sensitivity | `NEEDS_REVIEW` | Target price qu� nh?y v?i WACC/growth |
+| Missing human approval | `PENDING_APPROVAL` | Assumptions/final report chua du?c duy?t |
+| Missing chart data | `NEEDS_REVIEW` ho?c `DRAFT` | Chart X b? b? v� thi?u d? li?u d� ki?m d?nh |
+| Layout overflow | `NEEDS_REVIEW` | Report vu?t page budget; c?n n�n n?i dung ho?c chuy?n appendix |
 
-### 18.2. Không được dùng các câu sau
+### 18.2. Kh�ng du?c d�ng c�c c�u sau
 
-- “Có thể công ty sẽ tăng trưởng mạnh” nếu không có driver và nguồn.
-- “Cổ phiếu chắc chắn hấp dẫn”.
-- “Nên mua ngay”.
-- “Theo dữ liệu thị trường” nhưng không nêu nguồn cụ thể.
-- “Target price được tính toán” nhưng không có valuation artifact.
-- “Rủi ro thấp” nếu chưa có risk scoring.
-- “Nguồn: database” mà không có source id/fact id.
+- �C� th? c�ng ty s? tang tru?ng m?nh� n?u kh�ng c� driver v� ngu?n.
+- �C? phi?u ch?c ch?n h?p d?n�.
+- �N�n mua ngay�.
+- �Theo d? li?u th? tru?ng� nhung kh�ng n�u ngu?n c? th?.
+- �Target price du?c t�nh to�n� nhung kh�ng c� valuation artifact.
+- �R?i ro th?p� n?u chua c� risk scoring.
+- �Ngu?n: database� m� kh�ng c� source id/fact id.
 
 ---
 
 ## 19. Definition of Done
 
-Một báo cáo được coi là đạt chuẩn nếu thỏa toàn bộ tiêu chí:
+M?t b�o c�o du?c coi l� d?t chu?n n?u th?a to�n b? ti�u ch�:
 
 | Category | Requirement |
 |---|---|
-| Structure | Đủ 8 section chính, PDF khoảng 8 trang |
-| Visual | Layout chuyên nghiệp, chart/table rõ, không tràn page budget |
-| Data | Có source manifest và data cutoff |
-| Financials | Có bảng financial summary và forecast summary |
-| Forecast | Có driver-based forecast table |
-| Valuation | Có FCFF DCF, assumptions, target price, sensitivity |
-| Rating | BUY/HOLD/SELL/UNDER_REVIEW theo threshold, data confidence và review |
-| Charts | Có tối thiểu 5 chart chính nếu dữ liệu đủ |
-| Citation | 100% claim định lượng có citation hoặc artifact reference |
+| Structure | �? 8 section ch�nh, PDF kho?ng 8 trang |
+| Visual | Layout chuy�n nghi?p, chart/table r�, kh�ng tr�n page budget |
+| Data | C� source manifest v� data cutoff |
+| Financials | C� b?ng financial summary v� forecast summary |
+| Forecast | C� driver-based forecast table |
+| Valuation | C� FCFF DCF, assumptions, target price, sensitivity |
+| Rating | BUY/HOLD/SELL/UNDER_REVIEW theo threshold, data confidence v� review |
+| Charts | C� t?i thi?u 5 chart ch�nh n?u d? li?u d? |
+| Citation | 100% claim d?nh lu?ng c� citation ho?c artifact reference |
 | Numeric | >=99% numeric consistency |
-| Reproducibility | Target price recompute được từ valuation_result |
-| Risk | Rủi ro cụ thể, gắn financial driver |
-| Disclaimer | Có disclaimer chuẩn |
-| Audit | Có eval_result, claim_ledger, source_manifest, run_log |
-| Human Review | Có approval record trước final export |
+| Reproducibility | Target price recompute du?c t? valuation_result |
+| Risk | R?i ro c? th?, g?n financial driver |
+| Disclaimer | C� disclaimer chu?n |
+| Audit | C� eval_result, claim_ledger, source_manifest, run_log |
+| Human Review | C� approval record tru?c final export |
 
 ---
 
-## 20. Minimal viable report cho demo 6 tuần
+## 20. Minimal viable report cho demo 6 tu?n
 
-Nếu không đủ thời gian làm bản full 8 trang, demo tối thiểu phải có:
+N?u kh�ng d? th?i gian l�m b?n full 8 trang, demo t?i thi?u ph?i c�:
 
 1. Page 1: Investment snapshot + thesis + price chart.
 2. Page 2: Company overview + business model.
@@ -1731,7 +1731,7 @@ Nếu không đủ thời gian làm bản full 8 trang, demo tối thiểu phả
 6. Page 6: Sensitivity + risks.
 7. Appendix artifacts: `claim_ledger`, `source_manifest`, `valuation_result`, `eval_result`.
 
-Không được cắt bỏ valuation audit, citation audit hoặc numeric audit, vì đây là lõi tin cậy của dự án.
+Kh�ng du?c c?t b? valuation audit, citation audit ho?c numeric audit, v� d�y l� l�i tin c?y c?a d? �n.
 
 ### 20.1. MVP minimum gates
 
@@ -1751,7 +1751,7 @@ mvp_minimum_gates:
 
 ### 21.1. Recommended module split
 
-Dù tài liệu này là single-file spec, implementation nên tách code theo module:
+D� t�i li?u n�y l� single-file spec, implementation n�n t�ch code theo module:
 
 ```text
 report_renderer/
@@ -1787,7 +1787,7 @@ report_sections/
 
 ### 21.2. Rendering strategy
 
-Khuyến nghị pipeline:
+Khuy?n ngh? pipeline:
 
 ```text
 Markdown section builder
@@ -1797,11 +1797,11 @@ Markdown section builder
   -> final export
 ```
 
-Không nên render PDF trực tiếp từ raw LLM text nếu chưa qua structured section builder.
+Kh�ng n�n render PDF tr?c ti?p t? raw LLM text n?u chua qua structured section builder.
 
 ### 21.3. Test requirements
 
-Cần có test cho:
+C?n c� test cho:
 
 - missing citation blocks export;
 - fake citation blocks export;
@@ -1818,13 +1818,13 @@ Cần có test cho:
 
 ## 22. Final instruction for report-generating agent
 
-Sinh báo cáo như một analyst chuyên nghiệp, nhưng vận hành như một hệ thống kiểm định dữ liệu nghiêm ngặt.
+Sinh b�o c�o nhu m?t analyst chuy�n nghi?p, nhung v?n h�nh nhu m?t h? th?ng ki?m d?nh d? li?u nghi�m ng?t.
 
-Ưu tiên theo thứ tự:
+Uu ti�n theo th? t?:
 
 ```text
 Correctness > Traceability > Valuation Reproducibility > Risk Balance > Readability > Visual Design
 ```
 
-Không được đánh đổi độ đúng số liệu để lấy văn phong hay. Một báo cáo ngắn nhưng đúng nguồn, đúng số, đúng valuation tốt hơn một báo cáo dài, đẹp nhưng không thể kiểm chứng.
+Kh�ng du?c d�nh d?i d? d�ng s? li?u d? l?y van phong hay. M?t b�o c�o ng?n nhung d�ng ngu?n, d�ng s?, d�ng valuation t?t hon m?t b�o c�o d�i, d?p nhung kh�ng th? ki?m ch?ng.
 

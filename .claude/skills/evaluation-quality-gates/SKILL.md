@@ -9,7 +9,7 @@ description: Use when working on offline evaluation, report quality gates, citat
 
 - Modifying `scripts/evaluate_report.py`.
 - Adding a new quality gate or changing a gate threshold.
-- Adding eval fixtures or golden datasets under `dataset/golden/`.
+- Adding eval fixtures or golden datasets under `config/dataset/golden/`.
 - Running regression evaluation after changes to parser, prompt, retrieval, or model.
 - Debugging a gate `FAIL` or `WARN` result.
 - Designing a new eval for hallucination, citation coverage, or numeric consistency.
@@ -22,7 +22,7 @@ description: Use when working on offline evaluation, report quality gates, citat
 scripts/evaluate_report.py
 backend/dataops/quality_report.py
 backend/facts/completeness.py
-dataset/golden/
+config/dataset/golden/
 tests/unit/test_data_quality.py
 tests/unit/test_gate_validation_status.py
 ```
@@ -104,7 +104,7 @@ Output must be machine-readable JSON saved to `artifacts/evaluation/<report_id>_
 3. Re-run on same golden reports.
 4. Any new `FAIL` or score regression blocks promotion.
 
-Golden reports: `dataset/golden/`
+Golden reports: `config/dataset/golden/`
 
 ---
 

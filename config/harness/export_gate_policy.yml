@@ -1,0 +1,35 @@
+schema_version: 1
+policy_id: err_harness_export_gate_v1
+scope:
+  product: vietnam_pharma_equity_research
+  report_type: full_report
+  default_ticker: DHG
+  period_type: FY
+  required_periods:
+    from_year: 2021
+    to_year: 2025
+block_on:
+  - missing_source_trace_for_material_claim
+  - tier3_only_material_fact
+  - unresolved_major_source_discrepancy
+  - missing_formula_trace
+  - missing_forecast_driver
+  - missing_debt_forecast_when_required
+  - unresolved_na_in_valuation
+  - generic_citation_only
+  - llm_only_evaluation_pass
+  - report_not_linked_to_valuation_snapshot
+  - final_human_approval_missing
+warn_on:
+  - minor_source_discrepancy
+  - low_confidence_ocr_fact
+  - terminal_value_dominance
+  - weak_qualitative_event_evidence
+required_gate_outputs:
+  - gate
+  - passed
+  - status
+  - severity
+  - issues
+  - blocking_reasons
+  - summary

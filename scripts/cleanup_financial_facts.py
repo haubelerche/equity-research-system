@@ -35,7 +35,7 @@ if _env_file.exists():
 
 
 def cleanup(ticker: str, dry_run: bool = True) -> None:
-    from scripts.db.fact_store import PostgresFactStore
+    from backend.database.fact_store import PostgresFactStore
 
     ticker = ticker.strip().upper()
     store = PostgresFactStore()

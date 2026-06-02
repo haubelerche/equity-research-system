@@ -50,7 +50,7 @@ MVP_TO_YEAR = 2025
 def _get_current_price(ticker: str) -> float | None:
     """Fetch latest close price from fact.price_history."""
     try:
-        from scripts.db.fact_store import PostgresFactStore
+        from backend.database.fact_store import PostgresFactStore
         store = PostgresFactStore()
         from datetime import timedelta
         end = datetime.now(UTC).date()

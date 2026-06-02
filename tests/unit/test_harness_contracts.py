@@ -81,3 +81,49 @@ def test_citation_and_export_gates_block_missing_approval() -> None:
         },
         final_approval_required=True,
     )["passed"]
+
+
+# ── Period format regression tests (gate must enforce ^20\d{2}FY$ exactly) ──
+
+def test_data_quality_gate_accepts_valid_fy_periods() -> None:
+    base = {"valuation_gate": "pass", "snapshot_id": "snap1"}
+    # All valid FY periods — gate must pass
+    assert data_quality_gate({**base, "periods_available": ["2021FY", "2022FY", "2023FY"]})["passed"]
+    assert data_quality_gate({**base, "periods_available": ["2024FY"]})["passed"]
+    # Empty period list is also valid (no period constraint to violate)
+    assert data_quality_gate({**base, "periods_available": []})["passed"]
+    assert data_quality_gate({**base})["passed"]  # key absent
+
+
+def test_data_quality_gate_rejects_non_fy_periods() -> None:
+    base = {"valuation_gate": "pass", "snapshot_id": "snap1"}
+    # Quarterly period — must fail
+    assert not data_quality_gate({**base, "periods_available": ["2023Q1"]})["passed"]
+    assert not data_quality_gate({**base, "periods_available": ["2023Q4"]})["passed"]
+    # TTM/partial labels — must fail
+    assert not data_quality_gate({**base, "periods_available": ["2023TTM"]})["passed"]
+    # FY suffix but wrong century / garbage prefix — must fail
+    assert not data_quality_gate({**base, "periods_available": ["abcFY"]})["passed"]
+    assert not data_quality_gate({**base, "periods_available": ["1999FY"]})["passed"]
+    # Mixed valid and invalid — the single invalid entry must block the gate
+    assert not data_quality_gate({**base, "periods_available": ["2022FY", "2023Q2"]})["passed"]
+
+
+def test_data_quality_gate_period_reason_is_invalid_period_scope() -> None:
+    base = {"valuation_gate": "pass", "snapshot_id": "snap1"}
+    result = data_quality_gate({**base, "periods_available": ["2023Q1"]})
+    assert not result["passed"]
+    assert "invalid_period_scope" in result["blocking_reasons"]
+
+
+def test_gate_result_has_structured_issues() -> None:
+    result = data_quality_gate({"valuation_gate": "fail"})
+    assert not result["passed"]
+    assert result["status"] == "fail"
+    assert isinstance(result["issues"], list)
+    assert len(result["issues"]) > 0
+    issue = result["issues"][0]
+    assert "issue_id" in issue
+    assert "severity" in issue
+    assert "message" in issue
+    assert issue["blocking"] is True

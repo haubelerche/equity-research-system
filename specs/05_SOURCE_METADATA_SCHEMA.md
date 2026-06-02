@@ -1,8 +1,8 @@
 # 05 — Source Metadata Schema
 
 **Date:** 2026-05-22
-**Schema:** `dataset/contracts/source_version.schema.json`
-**Implementation:** `scripts/db/source_registry.py`
+**Schema:** `config/dataset/contracts/source_version.schema.json`
+**Implementation:** `backend/database/source_registry.py`
 
 ---
 
@@ -99,8 +99,8 @@ The `vnstock_price_connector` has an additional early-exit: it checks the latest
 Every source version has a corresponding raw file on disk:
 
 ```text
-dataset/raw/bctc/<ticker>/income_statement_quarter.json   ← raw bytes
-dataset/raw/bctc/<ticker>/income_statement_quarter.json.sha256  ← checksum sidecar
+data/raw/bctc/<ticker>/income_statement_quarter.json   ← raw bytes
+data/raw/bctc/<ticker>/income_statement_quarter.json.sha256  ← checksum sidecar
 ```
 
 The checksum sidecar allows integrity verification without re-reading the database.

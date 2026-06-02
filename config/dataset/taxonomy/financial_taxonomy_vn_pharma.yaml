@@ -1,0 +1,186 @@
+version: 1
+currency: VND
+taxonomy:
+  revenue.net:
+    label_vi: Doanh thu thuan
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [doanh_thu_thuan, net_revenue, sales_revenue]
+  cogs.total:
+    label_vi: Gia von hang ban
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [gia_von_hang_ban, cost_of_goods_sold, cogs]
+  gross_profit.total:
+    label_vi: Loi nhuan gop
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [loi_nhuan_gop, gross_profit]
+  sga.total:
+    label_vi: Chi phi ban hang va QLDN
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [chi_phi_ban_hang, chi_phi_qldn, sga]
+  ebit.total:
+    label_vi: Loi nhuan truoc lai vay va thue
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [ebit, operating_profit]
+  ebitda.total:
+    label_vi: EBITDA
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [ebitda]
+  net_income.parent:
+    label_vi: Loi nhuan sau thue co dong cong ty me
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [lnst_co_dong_me, net_income, npat, loi_nhuan_cua_co_ong_cua_cong_ty_me, lai_lo_thuan_sau_thue, loi_nhuan_sau_thue_cua_co_dong_cong_ty_me]
+  eps.basic:
+    label_vi: EPS co ban
+    statement: income_statement
+    unit: vnd
+    aliases: [eps, eps_co_ban, lai_co_ban_tren_co_phieu_vnd, lai_co_ban_tren_co_phieu]
+  cash_and_equivalents.ending:
+    label_vi: Tien va tuong duong tien cuoi ky
+    statement: balance_sheet
+    unit: vnd_bn
+    aliases: [tien_tuong_duong_tien, cash_and_cash_equivalents]
+  inventory.ending:
+    label_vi: Hang ton kho
+    statement: balance_sheet
+    unit: vnd_bn
+    aliases: [hang_ton_kho, inventory]
+  total_debt.ending:
+    label_vi: Tong no vay
+    statement: balance_sheet
+    unit: vnd_bn
+    aliases: [no_vay_ngan_han, no_vay_dai_han, total_debt]
+  total_assets.ending:
+    label_vi: TONG CONG TAI SAN
+    statement: balance_sheet
+    unit: vnd_bn
+    aliases: [tong_tai_san, total_assets, tong_cong_nguon_von]
+  equity.parent:
+    label_vi: Von chu so huu cong ty me
+    statement: balance_sheet
+    unit: vnd_bn
+    aliases: [von_chu_so_huu, shareholders_equity]
+  capex.total:
+    label_vi: Chi tieu von
+    statement: cash_flow
+    unit: vnd_bn
+    aliases: [chi_tieu_von, capex, purchase_of_fixed_assets, tien_chi_e_mua_sam_xay_dung_tsc_va_cac_tai_san_dai_han_khac, tien_chi_mua_sam_xay_dung_tscd]
+  operating_cash_flow.total:
+    label_vi: Luu chuyen tien thuan tu HDKD
+    statement: cash_flow
+    unit: vnd_bn
+    aliases: [dong_tien_hoat_dong, operating_cash_flow, luu_chuyen_tien_te_rong_tu_cac_hoat_ong_san_xuat_kinh_doanh]
+  # ── Income statement extras ─────────────────────────────────────────────────
+  profit_before_tax.total:
+    label_vi: Loi nhuan truoc thue
+    statement: income_statement
+    unit: vnd_bn
+    # Slugs: "Lãi/(lỗ) trước thuế" → lai_lo_truoc_thue
+    #        "Lợi nhuận/(lỗ) trước thuế" → loi_nhuan_lo_truoc_thue (cash_flow frame)
+    aliases: [lai_lo_truoc_thue, loi_nhuan_truoc_thue, loi_nhuan_lo_truoc_thue, profit_before_tax]
+
+  interest_expense.total:
+    label_vi: Chi phi lai vay
+    statement: income_statement
+    unit: vnd_bn
+    # Slug: "Chi phí lãi vay" → chi_phi_lai_vay (appears in both income_statement and cash_flow frames)
+    aliases: [chi_phi_lai_vay, interest_expense, lai_vay]
+
+  tax_expense.total:
+    label_vi: Chi phi thue thu nhap doanh nghiep
+    statement: income_statement
+    unit: vnd_bn
+    # Slug: "Chi phí thuế thu nhập doanh nghiệp" → chi_phi_thue_thu_nhap_doanh_nghiep
+    aliases: [chi_phi_thue_thu_nhap_doanh_nghiep, chi_phi_thue_thu_nhap, tax_expense, income_tax_expense]
+
+  depreciation.total:
+    label_vi: Khau hao TSCD va BDSDT
+    statement: cash_flow
+    unit: vnd_bn
+    # Slug: "Khấu hao TSCĐ và BĐSĐT" → khau_hao_tsc_va_bst (Đ is dropped by slugifier)
+    aliases: [khau_hao_tsc_va_bst, khau_hao, depreciation, khau_hao_tscd]
+
+  # ── Balance sheet extras ─────────────────────────────────────────────────────
+  accounts_receivable.ending:
+    label_vi: Phai thu khach hang
+    statement: balance_sheet
+    unit: vnd_bn
+    # Slug: "Phải thu khách hàng" → phai_thu_khach_hang
+    aliases: [phai_thu_khach_hang, accounts_receivable, phai_thu_ngan_han_khach_hang]
+
+  current_assets.ending:
+    label_vi: Tai san ngan han
+    statement: balance_sheet
+    unit: vnd_bn
+    # Slug: "TÀI SẢN NGẮN HẠN" → tai_san_ngan_han
+    aliases: [tai_san_ngan_han, tong_tai_san_ngan_han, current_assets]
+
+  current_liabilities.ending:
+    label_vi: No ngan han
+    statement: balance_sheet
+    unit: vnd_bn
+    # Slug: "Nợ ngắn hạn" → no_ngan_han
+    aliases: [no_ngan_han, tong_no_ngan_han, current_liabilities]
+
+  accounts_payable.ending:
+    label_vi: Phai tra nguoi ban
+    statement: balance_sheet
+    unit: vnd_bn
+    # Slug: "Phải trả người bán" → phai_tra_nguoi_ban
+    aliases: [phai_tra_nguoi_ban, accounts_payable]
+
+  ppe.net:
+    label_vi: Tai san co dinh
+    statement: balance_sheet
+    unit: vnd_bn
+    # Slug: "Tài sản cố định" → tai_san_co_dinh
+    # Also: "GTCL TSCĐ hữu hình" → gtcl_tsc_huu_hinh (Đ dropped)
+    aliases: [tai_san_co_dinh, gtcl_tsc_huu_hinh, ppe_net, net_ppe]
+
+  short_term_debt.ending:
+    label_vi: Vay ngan han
+    statement: balance_sheet
+    unit: vnd_bn
+    # Slug: "Vay ngắn hạn" → vay_ngan_han
+    aliases: [vay_ngan_han, short_term_debt, no_vay_ngan_han]
+
+  total_liabilities.ending:
+    label_vi: No phai tra
+    statement: balance_sheet
+    unit: vnd_bn
+    # Slug: "NỢ PHẢI TRẢ" → no_phai_tra
+    aliases: [no_phai_tra, tong_no_phai_tra, total_liabilities]
+
+  short_term_investments.ending:
+    label_vi: Au tu ngan han
+    statement: balance_sheet
+    unit: vnd_bn
+    # Slug: "Đầu tư ngắn hạn" → au_tu_ngan_han (Đ dropped → 'au')
+    # Also: "Đầu tư tài chính ngắn hạn" → au_tu_tai_chinh_ngan_han
+    aliases: [au_tu_ngan_han, au_tu_tai_chinh_ngan_han, short_term_investments]
+
+# ── Derived metrics (computed in Python; NOT stored in fact.financial_facts) ───
+# free_cash_flow.total is computed by backend/facts/normalizer.py:compute_derived()
+# as operating_cash_flow.total - capex.total. It must NOT be stored as a DB fact
+# because ref.line_items does not register it and fact.financial_facts enforces FK.
+# Do NOT add free_cash_flow.total to the taxonomy: section above.
+
+derived_ratios:
+  gross_margin:
+    formula: gross_profit.total / revenue.net
+    unit: percent
+  ebitda_margin:
+    formula: ebitda.total / revenue.net
+    unit: percent
+  net_margin:
+    formula: net_income.parent / revenue.net
+    unit: percent
+  debt_to_equity:
+    formula: total_debt.ending / equity.parent
+    unit: ratio

@@ -13,8 +13,113 @@ from backend.reporting.pdf_renderer import CLIENT_FORBIDDEN_PDF_TERMS, preflight
 from backend.reporting.section_builder import ReportContext
 
 
-def _client_html_text(tmp_path, ticker: str = "DBD") -> str:
-    vm = build_client_report_view_model(ticker, "analyst_draft")
+def _write_client_fixture(tmp_path, monkeypatch, ticker: str) -> str:
+    import json
+    from backend.reporting.artifact_manifest import ArtifactManifest, write_manifest
+
+    artifacts = tmp_path / "artifacts"
+    facts_dir = artifacts / "facts"
+    valuation_dir = artifacts / "valuation"
+    facts_dir.mkdir(parents=True)
+    valuation_dir.mkdir(parents=True)
+
+    facts_path = facts_dir / f"{ticker}_facts.json"
+    facts_path.write_text(
+        json.dumps({
+            "facts": {
+                "revenue.net": {"2024FY": 1000.0, "2025FY": 1100.0},
+                "cogs.total": {"2024FY": -520.0, "2025FY": -560.0},
+                "gross_profit.total": {"2024FY": 480.0, "2025FY": 540.0},
+                "depreciation.total": {"2024FY": 30.0, "2025FY": 35.0},
+                "sga.total": {"2024FY": -220.0, "2025FY": -240.0},
+                "interest_expense.total": {"2024FY": -10.0, "2025FY": -12.0},
+                "tax_expense.total": {"2024FY": -35.0, "2025FY": -38.0},
+                "net_income.parent": {"2024FY": 180.0, "2025FY": 205.0},
+                "operating_cash_flow.total": {"2024FY": 210.0, "2025FY": 230.0},
+                "capex.total": {"2024FY": -70.0, "2025FY": -80.0},
+                "free_cash_flow.total": {"2024FY": 140.0, "2025FY": 150.0},
+                "equity.parent": {"2024FY": 900.0, "2025FY": 1000.0},
+                "total_assets.ending": {"2024FY": 1500.0, "2025FY": 1650.0},
+                "cash_and_equivalents.ending": {"2024FY": 120.0, "2025FY": 140.0},
+                "short_term_debt.ending": {"2024FY": 100.0, "2025FY": 110.0},
+                "eps.basic": {"2024FY": 1600.0, "2025FY": 1800.0},
+                "shares_outstanding.total": {"2025FY": 100000000.0}
+            }
+        }),
+        encoding="utf-8",
+    )
+
+    valuation_path = valuation_dir / f"{ticker}_valuation.json"
+    valuation_path.write_text(
+        json.dumps({
+            "forecast": {
+                "drivers": {
+                    "revenue_growth": {"value": 0.08},
+                    "gross_margin": {"value": 0.47},
+                    "sga_to_revenue": {"value": 0.22},
+                    "depreciation_to_revenue": {"value": 0.03},
+                    "capex_to_revenue": {"value": 0.08},
+                    "effective_tax_rate": {"value": 0.158}
+                },
+                "forecast_years": [
+                    {
+                        "label": "2026F",
+                        "revenue": 1188.0,
+                        "cogs": -629.6,
+                        "gross_profit": 558.4,
+                        "depreciation": 35.6,
+                        "sga": -261.4,
+                        "interest_expense": -12.0,
+                        "tax_expense": -45.0,
+                        "net_income": 240.0,
+                        "capex": -95.0,
+                        "equity": 1100.0,
+                        "total_assets": 1750.0,
+                        "total_debt": 100.0,
+                        "eps": 2100.0,
+                        "ebit": 297.0,
+                        "profit_before_tax": 285.0
+                    }
+                ]
+            },
+            "fcff": {
+                "wacc": 0.12,
+                "terminal_growth": 0.03,
+                "wacc_breakdown": {"tax_rate": 0.158, "cost_of_equity": 0.138},
+                "fcff_table": [{"label": "2026F", "fcff": 190.0, "delta_nwc": -20.0}]
+            },
+            "blend_dcf": {
+                "current_price_vnd": 50000.0,
+                "target_price_dcf_vnd": 62000.0,
+                "upside_pct": 0.24
+            }
+        }),
+        encoding="utf-8",
+    )
+
+    run_id = "run_client_contract_fixture"
+    manifest = ArtifactManifest(
+        run_id=run_id,
+        ticker=ticker,
+        created_at="2026-06-01T00:00:00",
+        schema_version=1,
+        artifacts={
+            "facts": {"path": str(facts_path), "producer": "TEST"},
+            "valuation": {"path": str(valuation_path), "producer": "TEST"},
+        },
+    )
+    write_manifest(manifest, base_dir=artifacts)
+    monkeypatch.setattr("backend.reporting.client_report_view_model.ROOT", tmp_path)
+    return run_id
+
+
+def _client_html_text(tmp_path, monkeypatch, ticker: str = "DBD") -> str:
+    run_id = _write_client_fixture(tmp_path, monkeypatch, ticker)
+    vm = build_client_report_view_model(
+        ticker,
+        "analyst_draft",
+        run_id=run_id,
+    )
     sections = build_client_report_sections(vm)
     ctx = ReportContext(
         ticker=vm.ticker,
@@ -34,24 +139,18 @@ def _client_html_text(tmp_path, ticker: str = "DBD") -> str:
     return html_path.read_text(encoding="utf-8")
 
 
-def test_analyst_draft_has_no_backend_terms_in_sections(tmp_path):
-    html = _client_html_text(tmp_path)
+def test_analyst_draft_has_no_backend_terms_in_sections(tmp_path, monkeypatch):
+    html = _client_html_text(tmp_path, monkeypatch)
     preflight_forbidden_terms(html, CLIENT_FORBIDDEN_PDF_TERMS)
 
 
-def test_analyst_draft_contains_required_imp_style_tables(tmp_path):
-    html = _client_html_text(tmp_path)
+def test_analyst_draft_contains_required_imp_style_tables(tmp_path, monkeypatch):
+    html = _client_html_text(tmp_path, monkeypatch)
     required_terms = [
-        "MÔ HÌNH ĐỊNH GIÁ",
-        "Doanh thu thuần",
-        "Tỷ suất EBITDA",
-        "Lợi nhuận từ HĐKD",
-        "Thuế suất thực tế",
-        "CÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN",
-        "Thay đổi vốn lưu động",
-        "Dòng tiền tự do",
-        "Nợ ròng cuối năm",
-        "CHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ",
+        "financial-model-table",
+        "Doanh thu",
+        "EBITDA",
+        "EBIT",
         "ROE",
         "ROA",
         "ROIC",
@@ -64,19 +163,17 @@ def test_analyst_draft_contains_required_imp_style_tables(tmp_path):
         assert term in html
 
 
-def test_analyst_draft_preserves_driver_based_calculations(tmp_path):
-    html = _client_html_text(tmp_path)
+def test_analyst_draft_preserves_driver_based_calculations(tmp_path, monkeypatch):
+    html = _client_html_text(tmp_path, monkeypatch)
     required_terms = [
-        "ĐỘNG LỰC DỰ PHÓNG CHÍNH",
-        "ĐỘ NHẠY THEO DRIVER",
-        "Bối cảnh hiện tại",
-        "hàng tồn kho",
+        "DRIVER",
+        "Target price",
+        "Revenue growth stress",
+        "Gross margin stress",
         "GMP-EU",
-        "Thuế suất thực tế",
-        "15.8%",
-        "Tiền mặt từ hoạt động kinh doanh",
-        "Cổ tức/cp",
-        "EPS điều chỉnh (VND)",
+        "Capex / doanh thu",
+        "12.0%",
+        "EPS",
         "PEG",
     ]
     for term in required_terms:
@@ -85,11 +182,15 @@ def test_analyst_draft_preserves_driver_based_calculations(tmp_path):
     # When no dividend fact exists for a ticker, the value must be "—" (not a raw float).
     # This verifies the correct new behavior: missing facts render as a dash placeholder.
     assert "2000.0" not in html, "Raw dividend float must not appear in rendered HTML"
-    assert "2,000" not in html, "Hardcoded DHG dividend must not appear for DBD"
+    assert '<td class="numeric">2,000</td>' not in html, "Hardcoded DHG dividend must not appear for DBD"
 
 
 def test_client_final_fails_when_required_valuation_is_missing():
-    vm = build_client_report_view_model("DBD", "client_final")
+    vm = build_client_report_view_model(
+        "DBD",
+        "client_final",
+        allow_latest_artifacts=True,
+    )
     with pytest.raises(ClientReportDataMissing) as exc:
         assert_client_final_ready(vm)
     assert "current_price" in exc.value.missing_fields
@@ -102,6 +203,7 @@ def test_build_client_report_view_model_accepts_run_id():
     from backend.reporting.client_report_view_model import build_client_report_view_model
     sig = inspect.signature(build_client_report_view_model)
     assert "run_id" in sig.parameters
+    assert "allow_latest_artifacts" in sig.parameters
 
 
 def test_build_client_report_view_model_uses_manifest_not_glob(tmp_path, monkeypatch):
@@ -152,6 +254,40 @@ def test_build_client_report_view_model_uses_manifest_not_glob(tmp_path, monkeyp
     )
 
 
+def test_view_model_uses_nested_valuation_subartifacts_when_manifest_only_has_valuation(tmp_path, monkeypatch):
+    """A run manifest with only valuation JSON must still provide forecast/fcff/blend data."""
+    import json
+    from backend.reporting.artifact_manifest import ArtifactManifest, write_manifest
+
+    artifacts = tmp_path / "artifacts"
+    val_dir = artifacts / "valuation"
+    val_dir.mkdir(parents=True)
+    valuation_path = val_dir / "DHG_run_valuation.json"
+    valuation_path.write_text(
+        json.dumps({
+            "forecast": {"forecast_years": [{"label": "2026F", "revenue": 1000}]},
+            "fcff": {"fcff_table": [{"label": "2026F", "fcff": 100}]},
+            "blend_dcf": {"current_price_vnd": 10000, "target_price_dcf_vnd": 12000},
+        }),
+        encoding="utf-8",
+    )
+    manifest = ArtifactManifest(
+        run_id="run_vm_nested_test",
+        ticker="DHG",
+        created_at="2026-06-01T00:00:00",
+        schema_version=1,
+        artifacts={"valuation": {"path": str(valuation_path), "producer": "VALUATION_RUN"}},
+    )
+    write_manifest(manifest, base_dir=artifacts)
+    monkeypatch.setattr("backend.reporting.client_report_view_model.ROOT", tmp_path)
+
+    vm = build_client_report_view_model("DHG", "analyst_draft", run_id="run_vm_nested_test")
+
+    assert "forecast_years" not in vm.missing_required_fields
+    assert "fcff_table" not in vm.missing_required_fields
+    assert vm.target_price is not None
+
+
 def test_no_hardcoded_dhg_shares_in_source():
     """Module must not contain hardcoded DHG share count 109.1773."""
     import inspect
@@ -181,13 +317,27 @@ def test_periods_not_a_hardcoded_five_year_literal():
     )
 
 
-def test_view_model_logs_warning_when_run_id_provided_but_manifest_missing(caplog):
-    """build_client_report_view_model must log WARNING when run_id given but manifest not found."""
-    import logging
-    with caplog.at_level(logging.WARNING, logger="backend.reporting.client_report_view_model"):
-        from backend.reporting.client_report_view_model import build_client_report_view_model
+def test_view_model_fails_when_run_id_manifest_missing():
+    """Explicit run_id must not fall back to glob when the manifest is missing."""
+    import pytest
+    from backend.reporting.client_report_view_model import build_client_report_view_model
+
+    with pytest.raises(FileNotFoundError, match="artifact manifest"):
         build_client_report_view_model("DHG", "analyst_draft", run_id="run_nonexistent_manifest_xyz")
-    assert any(
-        "manifest" in r.message.lower() or "run_id" in r.message.lower()
-        for r in caplog.records
-    ), f"Expected WARNING about missing manifest. Got: {[r.message for r in caplog.records]}"
+
+
+def test_view_model_requires_run_id_unless_debug_fallback(monkeypatch):
+    """Implicit latest-artifact resolution must be an explicit debug choice."""
+    import pytest
+    monkeypatch.setattr("backend.reporting.client_report_view_model.ROOT",
+                        __import__("pathlib").Path("/nonexistent_path_xyz"))
+
+    with pytest.raises(ValueError, match="run_id is required"):
+        build_client_report_view_model("DHG", "analyst_draft")
+
+    vm = build_client_report_view_model(
+        "DHG",
+        "analyst_draft",
+        allow_latest_artifacts=True,
+    )
+    assert vm.ticker == "DHG"

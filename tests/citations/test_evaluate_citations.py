@@ -1,4 +1,4 @@
-"""Unit tests for scripts/evaluate_citations.py — citation coverage gates.
+"""Unit tests for scripts/evaluate_citations.py � citation coverage gates.
 
 All tests are purely deterministic (no DB required). DB-dependent gate 2
 (source_id_exists) is patched to always return True.
@@ -26,7 +26,7 @@ from scripts.evaluate_citations import (
 )
 
 
-# ── helpers ───────────────────────────────────────────────────────────────────
+# -- helpers -------------------------------------------------------------------
 
 def _write_report(tmp_path: Path, content: str) -> Path:
     p = tmp_path / "report.md"
@@ -42,11 +42,11 @@ def _write_citation_map(tmp_path: Path, ticker: str, citation_map: dict) -> None
     )
 
 
-# ── _find_citation_refs ────────────────────────────────────────────────────────
+# -- _find_citation_refs --------------------------------------------------------
 
 class TestFindCitationRefs:
     def test_finds_inline_ref(self):
-        text = "Doanh thu đạt 2,450 tỷ VND[^dhg_rev_2023] trong năm."
+        text = "Doanh thu d?t 2,450 tỷ VND[^dhg_rev_2023] trong nam."
         refs = _find_citation_refs(text)
         assert len(refs) == 1
         assert refs[0][1] == "dhg_rev_2023"
@@ -64,27 +64,27 @@ class TestFindCitationRefs:
         assert "r2" in keys
 
     def test_no_refs(self):
-        assert _find_citation_refs("Không có trích dẫn nào.") == []
+        assert _find_citation_refs("Kh�ng c� tr�ch d?n n�o.") == []
 
 
-# ── _find_quantitative_claims ─────────────────────────────────────────────────
+# -- _find_quantitative_claims -------------------------------------------------
 
 class TestFindQuantitativeClaims:
-    def test_tỷ_vnd(self):
+    def test_t_vnd(self):
         text = "Doanh thu 2,450 tỷ VND đạt kỷ lục."
         claims = _find_quantitative_claims(text)
         assert len(claims) == 1
         assert "2,450" in claims[0][1]
 
     def test_percentage(self):
-        text = "Biên lợi nhuận gộp tăng 32.5%."
+        text = "Bi�n l?i nhu?n g?p tang 32.5%."
         claims = _find_quantitative_claims(text)
         assert len(claims) == 1
         assert "32.5%" in claims[0][1]
 
     def test_no_unit_no_match(self):
-        # Bare number without VND/tỷ/% should NOT match
-        claims = _find_quantitative_claims("Số liệu năm 2024.")
+        # Bare number without VND/t?/% should NOT match
+        claims = _find_quantitative_claims("S? li?u nam 2024.")
         assert claims == []
 
     def test_multiple_claims(self):
@@ -93,7 +93,7 @@ class TestFindQuantitativeClaims:
         assert len(claims) >= 2
 
 
-# ── _has_nearby_citation ──────────────────────────────────────────────────────
+# -- _has_nearby_citation ------------------------------------------------------
 
 class TestHasNearbyCitation:
     def test_within_window(self):
@@ -112,7 +112,7 @@ class TestHasNearbyCitation:
         assert _has_nearby_citation(0, refs, _CITATION_WINDOW) is True
 
 
-# ── evaluate_citations (integration, no DB) ───────────────────────────────────
+# -- evaluate_citations (integration, no DB) -----------------------------------
 
 @pytest.fixture()
 def patch_source_exists():
@@ -145,7 +145,7 @@ class TestEvaluateCitations:
         }
         _write_citation_map(tmp_path, "DHG", citation_map)
 
-        report = "Doanh thu 2,450 tỷ VND[^dhg/2023fy/revenue.net] đạt kỷ lục.\n\n"
+        report = "Doanh thu 2,450 tỷ VND[^dhg/2023fy/revenue.net] d?t k? l?c.\n\n"
         report += "[^dhg/2023fy/revenue.net]: Báo cáo tài chính kiểm toán DHG 2023\n"
         path = _write_report(tmp_path, report)
 
@@ -157,7 +157,7 @@ class TestEvaluateCitations:
 
     def test_unresolved_citation_key_fails(self, tmp_path, patch_source_exists, patch_load_citation_map):
         _write_citation_map(tmp_path, "DHG", {})
-        report = "Doanh thu 2,450 tỷ VND[^missing_key] tăng trưởng.\n"
+        report = "Doanh thu 2,450 tỷ VND[^missing_key] tang tru?ng.\n"
         path = _write_report(tmp_path, report)
 
         result = evaluate_citations("DHG", path)
@@ -169,7 +169,7 @@ class TestEvaluateCitations:
         citation_map = {
             "dhg/2023fy/revenue.net": {
                 "source_id": "src_dhg_2023",
-                "source_title": "Báo cáo kiểm toán DHG 2023",
+                "source_title": "B�o c�o ki?m to�n DHG 2023",
             }
         }
         _write_citation_map(tmp_path, "DHG", citation_map)
@@ -178,7 +178,7 @@ class TestEvaluateCitations:
         path = _write_report(tmp_path, report)
 
         result = evaluate_citations("DHG", path)
-        # Any uncited quantitative claim is critical — blocks final export
+        # Any uncited quantitative claim is critical � blocks final export
         assert result["gates"]["quantitative_citation_coverage"]["pass"] is False
         assert result["gates"]["quantitative_citation_coverage"]["critical"] is True
         assert result["export_allowed"] is False
@@ -202,7 +202,7 @@ class TestEvaluateCitations:
         }
         _write_citation_map(tmp_path, "DHG", citation_map)
         report = "Doanh thu 2,450 tỷ VND[^dhg/2023fy/revenue.net].\n"
-        report += "[^dhg/2023fy/revenue.net]: nguồn vnstock\n"
+        report += "[^dhg/2023fy/revenue.net]: ngu?n vnstock\n"
         path = _write_report(tmp_path, report)
 
         result = evaluate_citations("DHG", path)
@@ -218,7 +218,7 @@ class TestEvaluateCitations:
 
     def test_empty_report_no_claims_passes(self, tmp_path, patch_source_exists, patch_load_citation_map):
         _write_citation_map(tmp_path, "DHG", {})
-        path = _write_report(tmp_path, "Đây là báo cáo không có số liệu tài chính cụ thể.\n")
+        path = _write_report(tmp_path, "��y l� b�o c�o kh�ng c� s? li?u t�i ch�nh c? th?.\n")
         result = evaluate_citations("DHG", path)
         # No quantitative claims means 100% coverage
         assert result["quantitative_claims"] == 0

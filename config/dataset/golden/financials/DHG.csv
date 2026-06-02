@@ -1,0 +1,14 @@
+ticker,fiscal_year,period,statement_type,canonical_key,raw_label,value,unit,currency,source_type,source_uri,source_title,provider,confidence,validation_status
+DHG,2021,2021FY,income_statement,revenue.net,Doanh thu thuan,4127.4,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,income_statement,cogs.total,Gia von hang ban,-2293.0,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,income_statement,gross_profit.total,Loi nhuan gop,1834.4,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,income_statement,sga.total,Chi phi ban hang va QLDN,-806.2,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,income_statement,net_income.parent,Loi nhuan sau thue co dong cong ty me,803.1,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,income_statement,eps.basic,EPS co ban,5939.0,vnd,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,balance_sheet,cash_and_equivalents.ending,Tien va tuong duong tien cuoi ky,36.1,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,balance_sheet,inventory.ending,Hang ton kho,1042.9,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,balance_sheet,total_assets.ending,TONG CONG TAI SAN,4741.8,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,balance_sheet,equity.parent,Von chu so huu cong ty me,3963.2,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,cash_flow,operating_cash_flow.total,Luu chuyen tien te rong tu cac hoat ong san xuat kinh doanh,811.6,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,cash_flow,capex.total,Tien chi de mua sam xay dung TSCD va cac tai san dai han khac,-273.6,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted
+DHG,2021,2021FY,balance_sheet,total_liabilities.ending,Tong no phai tra,778.6,vnd_bn,VND,annual_report,https://dhg.com.vn/bao-cao-thuong-nien,DHG Annual Report 2021,golden_csv,0.75,accepted

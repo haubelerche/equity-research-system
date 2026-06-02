@@ -118,7 +118,11 @@ def main() -> None:
         _sys.exit(2)
 
     if args.mode == "internal_debug":
-        ctx = load_report_context(ticker, run_id=args.run_id or None)
+        ctx = load_report_context(
+            ticker,
+            run_id=args.run_id or None,
+            allow_latest_artifacts=_allows_glob,
+        )
         current_display = "N/A" if ctx._current_price_missing else f"{ctx.current_price:,.0f}"
         target_display = "N/A" if ctx._target_price_missing else f"{ctx.target_price:,.0f}"
         upside_display = "N/A" if ctx._upside_missing else f"{ctx.upside_pct:+.1f}%"
@@ -129,7 +133,12 @@ def main() -> None:
         sections = build_report_sections(ctx)
         forbidden_terms = None
     else:
-        vm = build_client_report_view_model(ticker, args.mode, run_id=args.run_id or None)
+        vm = build_client_report_view_model(
+            ticker,
+            args.mode,
+            run_id=args.run_id or None,
+            allow_latest_artifacts=_allows_glob,
+        )
         try:
             if args.mode == "client_final" or args.strict:
                 assert_client_final_ready(vm)

@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "project": "ERR Vietnam Pharma Equity Research",
+  "owner_mode": "harness_engineering",
+  "protected_paths": ["FinRobot/", "vnstock/"],
+  "phase_commitments": [
+    {
+      "phase_id": "phase_1_repo_hygiene",
+      "status": "completed",
+      "commitment": "Remove archive, legacy migration, generated artifact, reference-report, pytest cache, and __pycache__ surfaces from the active repository tree.",
+      "acceptance_check": "No main-tree paths remain under docs/archive, docs/superpowers, backend/database/migrations/_legacy, artifacts, .pytest_cache, .deepeval, data/reference_reports, or __pycache__."
+    },
+    {
+      "phase_id": "phase_2_harness_contracts",
+      "status": "completed",
+      "commitment": "Provide durable machine-readable state, export policy, known-failure tracking, and gate issue contracts.",
+      "acceptance_check": "Unit tests validate the harness policy files and gate output contract."
+    },
+    {
+      "phase_id": "phase_3_pipeline_consolidation",
+      "status": "completed",
+      "commitment": "Preserve one canonical research entrypoint and mark render-only or legacy scripts as non-production paths.",
+      "acceptance_check": "Entrypoint tests prove the canonical harness path is discoverable and legacy/demo paths cannot masquerade as production."
+    },
+    {
+      "phase_id": "phase_5_deterministic_report_resolution",
+      "status": "completed",
+      "commitment": "Require run_id and manifest-based artifact resolution for production report loading; allow latest-artifact glob only as an explicit debug fallback.",
+      "acceptance_check": "Report loader and client report contract tests pass without relying on workspace artifacts."
+    },
+    {
+      "phase_id": "phase_6_evidence_packet_contract",
+      "status": "completed",
+      "commitment": "Write a machine-readable evidence packet from ResearchGraphState and include it in the per-run artifact manifest.",
+      "acceptance_check": "Evidence packet and harness manifest tests validate packet hash, refs, limitations, and manifest integration."
+    },
+    {
+      "phase_id": "phase_7_report_artifact_writer_decomposition",
+      "status": "completed",
+      "commitment": "Extract low-risk citation artifact I/O from scripts/generate_report.py without changing the returned citation artifact contract.",
+      "acceptance_check": "Citation artifact writer tests and report/harness targeted tests pass."
+    }
+  ]
+}

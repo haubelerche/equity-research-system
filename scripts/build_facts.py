@@ -42,7 +42,7 @@ if _env_file.exists():
 
 ROOT = _Path(__file__).resolve().parents[1]
 FACTS_DIR = ROOT / "artifacts" / "facts"
-GOLDEN_DIR = ROOT / "dataset" / "golden" / "financials"
+GOLDEN_DIR = ROOT / "config" / "dataset" / "golden" / "financials"
 
 MVP_FROM_YEAR = 2021
 MVP_TO_YEAR = 2025
@@ -100,7 +100,7 @@ def _load_golden_fallback(
     from_year: int,
     to_year: int,
 ) -> list[dict]:
-    """Load annual FY facts from dataset/golden/financials/{ticker}.csv.
+    """Load annual FY facts from config/dataset/golden/financials/{ticker}.csv.
 
     Source tier assignment:
       - Tier 1: companion *_golden_provenance.json exists and is valid
@@ -183,7 +183,7 @@ def build_facts(
     to_year: int = MVP_TO_YEAR,
     strict_completeness: bool = False,
 ) -> dict:
-    from scripts.db.fact_store import PostgresFactStore
+    from backend.database.fact_store import PostgresFactStore
     from backend.facts.normalizer import (
         build_fact_table, build_validation_status_table, compute_derived,
         periods_sorted, build_source_conflict_report, build_source_tier_coverage,

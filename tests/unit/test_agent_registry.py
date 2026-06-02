@@ -6,6 +6,7 @@ import pytest
 
 from backend.harness.agent_registry import AgentRegistry, REQUIRED_PROMPT_SECTIONS
 from backend.harness.model_adapter import OpenAIModelAdapter
+from backend.settings import settings
 
 
 def test_agent_registry_loads_five_product_agents() -> None:
@@ -21,6 +22,31 @@ def test_agent_registry_loads_five_product_agents() -> None:
     for cfg in configs.values():
         for section in REQUIRED_PROMPT_SECTIONS:
             assert section in cfg.prompt
+        assert cfg.model == settings.default_model_name
+
+
+def test_agent_registry_resolves_model_env_placeholder(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    prompt_dir = tmp_path / "prompts"
+    prompt_dir.mkdir()
+    prompt = "\n".join(REQUIRED_PROMPT_SECTIONS)
+    (prompt_dir / "supervisor.md").write_text(prompt, encoding="utf-8")
+    config = tmp_path / "agents.yml"
+    config.write_text(
+        """
+agents:
+  supervisor:
+    role: SupervisorAgent
+    model: ${TEST_AGENT_MODEL}
+    prompt_path: prompts/supervisor.md
+    allowed_tools: []
+""".strip(),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("TEST_AGENT_MODEL", "gpt-test-model")
+
+    cfg = AgentRegistry(config).get_agent_config("supervisor")
+
+    assert cfg.model == "gpt-test-model"
 
 
 def test_model_adapter_requires_openai_key(monkeypatch) -> None:

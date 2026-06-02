@@ -115,6 +115,69 @@ class TestComputeRatios:
         assert "ebitda_margin" in ratios
         assert ratios["ebitda_margin"]["2023FY"] == pytest.approx(1000.0 / 5000.0, abs=1e-5)
 
+    # ── Single-source-of-truth contract ──────────────────────────────────────
+
+    def test_compute_ratios_reads_gross_margin_from_compute_derived(self):
+        """compute_ratios() must use gross_margin already in FactTable (set by compute_derived).
+
+        Regression: if the raw formula in compute_ratios() diverges from compute_derived,
+        callers would get different values depending on which path ran last.
+        This test verifies normalizer.compute_derived() is the single source of truth.
+        """
+        from backend.facts.normalizer import FactEntry, compute_derived
+
+        base = {
+            "revenue.net":        {"2023FY": FactEntry(value=5000.0, source_id="s1", source_tier=3)},
+            "gross_profit.total": {"2023FY": FactEntry(value=2000.0, source_id="s1", source_tier=3)},
+            "net_income.parent":  {"2023FY": FactEntry(value=600.0,  source_id="s1", source_tier=3)},
+            "equity.parent":      {"2023FY": FactEntry(value=2400.0, source_id="s1", source_tier=3)},
+        }
+        full_table = compute_derived(base)
+        # compute_derived sets gross_margin = 2000/5000 = 0.4
+        assert full_table["gross_margin"]["2023FY"].value == pytest.approx(0.4, abs=1e-6)
+
+        ratios = compute_ratios(full_table)
+        # compute_ratios must read from full_table["gross_margin"], not recompute
+        assert ratios["gross_margin"]["2023FY"] == pytest.approx(0.4, abs=1e-6)
+
+    def test_compute_ratios_reads_net_margin_and_debt_to_equity_from_compute_derived(self):
+        """net_margin and debt_to_equity from compute_derived are reused in compute_ratios."""
+        from backend.facts.normalizer import FactEntry, compute_derived
+
+        base = {
+            "revenue.net":        {"2023FY": FactEntry(value=5000.0, source_id="s1", source_tier=3)},
+            "gross_profit.total": {"2023FY": FactEntry(value=2000.0, source_id="s1", source_tier=3)},
+            "net_income.parent":  {"2023FY": FactEntry(value=500.0,  source_id="s1", source_tier=3)},
+            "total_debt.ending":  {"2023FY": FactEntry(value=1000.0, source_id="s1", source_tier=3)},
+            "equity.parent":      {"2023FY": FactEntry(value=4000.0, source_id="s1", source_tier=3)},
+        }
+        full_table = compute_derived(base)
+        ratios = compute_ratios(full_table)
+
+        # net_margin = 500/5000 = 0.1
+        assert ratios["net_margin"]["2023FY"] == pytest.approx(0.1, abs=1e-6)
+        # debt_to_equity = 1000/4000 = 0.25
+        assert ratios["debt_to_equity"]["2023FY"] == pytest.approx(0.25, abs=1e-6)
+
+    def test_compute_ratios_uses_free_cash_flow_from_compute_derived(self):
+        """fcf_margin and fcf_absolute_bn are computed from free_cash_flow.total in FactTable."""
+        from backend.facts.normalizer import FactEntry, compute_derived
+
+        base = {
+            "revenue.net":                {"2023FY": FactEntry(value=5000.0, source_id="s1", source_tier=3)},
+            "gross_profit.total":         {"2023FY": FactEntry(value=2000.0, source_id="s1", source_tier=3)},
+            "net_income.parent":          {"2023FY": FactEntry(value=500.0,  source_id="s1", source_tier=3)},
+            "operating_cash_flow.total":  {"2023FY": FactEntry(value=700.0,  source_id="s1", source_tier=3)},
+            "capex.total":                {"2023FY": FactEntry(value=-120.0, source_id="s1", source_tier=3)},
+        }
+        full_table = compute_derived(base)
+        # free_cash_flow.total = 700 + (-120) = 580
+        assert full_table["free_cash_flow.total"]["2023FY"].value == pytest.approx(580.0, abs=1e-3)
+
+        ratios = compute_ratios(full_table)
+        assert ratios["fcf_absolute_bn"]["2023FY"] == pytest.approx(580.0, abs=1e-3)
+        assert ratios["fcf_margin"]["2023FY"] == pytest.approx(580.0 / 5000.0, abs=1e-6)
+
 
 class TestRatioTableForDisplay:
     def _ratios(self):

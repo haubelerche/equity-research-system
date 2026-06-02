@@ -55,7 +55,7 @@
 - `CLAUDE.md` — 21 sections, covers scope, data model, phases, coding standards, agent boundaries, evaluation
 
 **Known Limitations:**
-- specs/03 through 07 (data contracts, canonical fact schema, source metadata, report template, evaluation rubric) as named in CLAUDE.md §1 are not in specs/ — this content lives in CLAUDE.md, docs/, and dataset/ instead
+- specs/03 through 07 (data contracts, canonical fact schema, source metadata, report template, evaluation rubric) as named in CLAUDE.md §1 are not in specs/ — this content lives in CLAUDE.md, docs/, and config/dataset/ instead
 
 **Next Level Entry Condition:** Level 1 is complete. Proceed to Level 2.
 
@@ -69,7 +69,7 @@
 - `artifacts/raw/vnstock/{TICKER}/` — raw CSV files per statement type
 - `artifacts/runs/{TICKER}_{timestamp}_inventory.json` — run log with overall_status = ok
 - `artifacts/data_quality/{TICKER}_vnstock_raw_coverage.json` — data quality report
-- `dataset/golden/financials/{TICKER}.csv` — golden reference data for at least DHG
+- `config/dataset/golden/financials/{TICKER}.csv` — golden reference data for at least DHG
 
 **Required Commands:**
 ```bash
@@ -95,7 +95,7 @@ python scripts/ingest_ticker.py --ticker DHG --years 5
 - Run logs: `artifacts/runs/DHG_20260523T032312_inventory.json` — `overall_status: ok`, `facts_upserted: 48`
 - Data quality: `artifacts/data_quality/DHG_vnstock_raw_coverage.json` — income_statement year: 4 FY periods, VCI provider
 - Data quality also exists for all 5 tickers
-- Golden reference: `dataset/golden/financials/DHG.csv` — exists
+- Golden reference: `config/dataset/golden/financials/DHG.csv` — exists
 - DB layer: Supabase/PostgreSQL with schema migrations, source_versions, financial_facts tables
 
 **Known Limitations:**
@@ -147,7 +147,7 @@ python scripts/build_facts.py --ticker DHG
 **What is Missing:**
 - Fact reports generated only for DHG — IMP, DMC, TRA, DBD have raw data in DB but no `artifacts/facts/` output yet
 - No unit tests for normalizer (no `tests/unit/test_normalizer.py` in main branch)
-- `dataset/taxonomy/financial_taxonomy_vn_pharma.yaml` exists but partial mapping coverage (unmatched labels listed in `artifacts/data_quality/unmatched_labels_audit.txt`)
+- `config/dataset/taxonomy/financial_taxonomy_vn_pharma.yaml` exists but partial mapping coverage (unmatched labels listed in `artifacts/data_quality/unmatched_labels_audit.txt`)
 
 **Known Limitations:**
 - Level 3 is considered partial until at least one more ticker has a fact report, or until DHG is confirmed to fully pass the `--strict-completeness` gate

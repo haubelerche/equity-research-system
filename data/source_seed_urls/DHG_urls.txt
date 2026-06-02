@@ -1,9 +1,0 @@
-# Catalyst source seed URLs for DHG — Source-Provenance Rebuild, Phase 5.
-# One source per line:  source_name | url | title  [| local_file]
-# - source_name must match a `name:` in config/source_registry.yaml
-# - local_file is required for manual/connector fetch methods (path to a placed document)
-# Lines starting with # are ignored. This file is intentionally empty of real URLs until
-# an analyst seeds it; the pipeline never invents sources.
-#
-# Example (commented):
-# company_ir_dhg | https://www.dhgpharma.com.vn/vi/quan-he-co-dong/abc | DHG công bố KQKD Q4 2025

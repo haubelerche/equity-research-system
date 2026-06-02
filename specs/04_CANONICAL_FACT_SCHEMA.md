@@ -1,8 +1,8 @@
 # 04 — Canonical Fact Schema
 
 **Date:** 2026-05-22
-**Source of truth:** `dataset/taxonomy/financial_taxonomy_vn_pharma.yaml`
-**JSON Schema:** `dataset/contracts/financial_fact.schema.json`
+**Source of truth:** `config/dataset/taxonomy/financial_taxonomy_vn_pharma.yaml`
+**JSON Schema:** `config/dataset/contracts/financial_fact.schema.json`
 
 ---
 
@@ -17,7 +17,7 @@
 
 ## 2. Taxonomy Keys (MVP Required Set)
 
-These keys are required for all 5 MVP tickers per `dataset/mvp/mvp5_scope.yaml`.
+These keys are required for all 5 MVP tickers per `config/dataset/mvp/mvp5_scope.yaml`.
 
 ### Income Statement
 
@@ -104,7 +104,7 @@ This means: only taxonomy-registered metrics are stored as canonical facts. New 
 
 ## 6. Adding New Taxonomy Keys
 
-Edit `dataset/taxonomy/financial_taxonomy_vn_pharma.yaml`:
+Edit `config/dataset/taxonomy/financial_taxonomy_vn_pharma.yaml`:
 
 ```yaml
 taxonomy:

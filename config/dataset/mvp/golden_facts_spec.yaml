@@ -1,0 +1,27 @@
+version: 1
+description: Golden set fields for manual verification before scaling beyond MVP5
+must_match_exact:
+  - company_ticker
+  - fiscal_year
+  - fiscal_period
+  - taxonomy_key
+  - source_version_id
+tolerance_rules:
+  revenue.net:
+    tolerance_ratio: 0.005
+  gross_profit.total:
+    tolerance_ratio: 0.005
+  ebitda.total:
+    tolerance_ratio: 0.01
+  net_income.parent:
+    tolerance_ratio: 0.01
+  eps.basic:
+    tolerance_ratio: 0.02
+  operating_cash_flow.total:
+    tolerance_ratio: 0.02
+  capex.total:
+    tolerance_ratio: 0.02
+required_coverage:
+  min_tickers: 5
+  min_years_per_ticker: 3
+  min_quantitative_claim_citation_ratio: 1.0

@@ -187,7 +187,7 @@ ALTER TABLE research.snapshots ADD COLUMN input_fact_ids VARCHAR(64)[];
 |---|---|---|
 | `config/material_metrics.yml` | Defines which metrics require Tier 0/1 corroboration | ❌ Missing |
 | `source_tier_policy.yml` | Maps connector names → source_tier | ❌ Missing |
-| `dataset/golden/financials/DHG_golden_provenance.json` | Provenance for DHG golden CSV | ❌ Missing |
+| `config/dataset/golden/financials/DHG_golden_provenance.json` | Provenance for DHG golden CSV | ❌ Missing |
 
 ---
 

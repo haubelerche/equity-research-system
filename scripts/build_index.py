@@ -1,14 +1,14 @@
-"""Phase 5 — Evidence Index Builder.
+"""Phase 5 � Evidence Index Builder.
 
 Synthesizes grounded text evidence chunks from accepted canonical financial
 facts and catalyst events, then stores them in ingest.document_chunks so the
 report generator can cite them.
 
 Sources indexed (in priority order):
-  1. Official PDF pages — text extracted by pdfplumber, page by page
-  2. OCR page artifacts — data/ocr_artifacts/{ticker}/{year}/{doc_id}/pages/
-  3. External .txt documents — data/documents/{ticker}/
-  4. Synthetic fact chunks — built from accepted canonical facts in DB
+  1. Official PDF pages � text extracted by pdfplumber, page by page
+  2. OCR page artifacts � data/ocr_artifacts/{ticker}/{year}/{doc_id}/pages/
+  3. External .txt documents � data/documents/{ticker}/
+  4. Synthetic fact chunks � built from accepted canonical facts in DB
 
 All chunks include metadata_json with extraction_method, page_number (where
 applicable), source_tier, and document_id for downstream citation resolution.
@@ -51,32 +51,32 @@ OCR_ARTIFACTS_DIR = ROOT / "data" / "ocr_artifacts"
 OFFICIAL_DOCS_DIR = ROOT / "data" / "official_documents"
 
 _FACT_LABEL = {
-    "revenue.net": "Doanh thu thuần",
-    "gross_profit.total": "Lợi nhuận gộp",
-    "net_income.parent": "Lợi nhuận sau thuế (cổ đông công ty mẹ)",
-    "operating_cash_flow.total": "Dòng tiền từ hoạt động kinh doanh",
-    "free_cash_flow.total": "Dòng tiền tự do",
-    "total_assets.ending": "Tổng tài sản",
-    "equity.parent": "Vốn chủ sở hữu (cổ đông công ty mẹ)",
-    "eps.basic": "EPS cơ bản",
+    "revenue.net": "Doanh thu thu?n",
+    "gross_profit.total": "L?i nhu?n g?p",
+    "net_income.parent": "L?i nhu?n sau thu? (c? d�ng c�ng ty m?)",
+    "operating_cash_flow.total": "D�ng ti?n t? ho?t d?ng kinh doanh",
+    "free_cash_flow.total": "D�ng ti?n t? do",
+    "total_assets.ending": "T?ng t�i s?n",
+    "equity.parent": "V?n ch? s? h?u (c? d�ng c�ng ty m?)",
+    "eps.basic": "EPS co b?n",
     "ebitda.total": "EBITDA",
-    "capex.total": "Chi đầu tư TSCĐ (CAPEX)",
-    "total_liabilities.ending": "Tổng nợ phải trả",
-    "cash_and_equivalents.ending": "Tiền và tương đương tiền",
-    "short_term_debt.ending": "Vay ngắn hạn",
-    "interest_expense.total": "Chi phí lãi vay",
-    "depreciation.total": "Khấu hao",
-    "profit_before_tax.total": "Lợi nhuận trước thuế",
-    "cogs.total": "Giá vốn hàng bán",
-    "sga.total": "Chi phí bán hàng và quản lý",
-    "inventory.ending": "Hàng tồn kho",
-    "accounts_receivable.ending": "Phải thu khách hàng",
+    "capex.total": "Chi d?u tu TSC� (CAPEX)",
+    "total_liabilities.ending": "T?ng n? ph?i tr?",
+    "cash_and_equivalents.ending": "Ti?n v� tuong duong ti?n",
+    "short_term_debt.ending": "Vay ng?n h?n",
+    "interest_expense.total": "Chi ph� l�i vay",
+    "depreciation.total": "Kh?u hao",
+    "profit_before_tax.total": "L?i nhu?n tru?c thu?",
+    "cogs.total": "Gi� v?n h�ng b�n",
+    "sga.total": "Chi ph� b�n h�ng v� qu?n l�",
+    "inventory.ending": "H�ng t?n kho",
+    "accounts_receivable.ending": "Ph?i thu kh�ch h�ng",
 }
 
 _STATEMENT_CONTEXT = {
-    "income_statement": "Báo cáo kết quả kinh doanh",
-    "balance_sheet": "Bảng cân đối kế toán",
-    "cash_flow": "Báo cáo lưu chuyển tiền tệ",
+    "income_statement": "B�o c�o k?t qu? kinh doanh",
+    "balance_sheet": "B?ng c�n d?i k? to�n",
+    "cash_flow": "B�o c�o luu chuy?n ti?n t?",
 }
 
 
@@ -141,7 +141,7 @@ def _ensure_synthetic_source(conn, ticker: str) -> str:
                 f"synthetic_facts_{ticker.lower()}",
                 ticker,
                 f"internal://canonical_facts/{ticker}",
-                f"Synthetic evidence from canonical financial facts — {ticker}",
+                f"Synthetic evidence from canonical financial facts � {ticker}",
                 checksum,
                 f"internal://canonical_facts/{ticker}",
             ),
@@ -183,13 +183,13 @@ def _build_fact_chunks(facts: list[dict]) -> list[tuple[str, str, int | None]]:
     chunks: list[tuple[str, str, int | None]] = []  # (section_title, chunk_text, fiscal_year)
     for year in sorted(by_year):
         year_facts = by_year[year]
-        lines = [f"## Tóm tắt tài chính {ticker_placeholder} năm {year} (FY)\n"]
+        lines = [f"## T�m t?t t�i ch�nh {ticker_placeholder} nam {year} (FY)\n"]
         for f in sorted(year_facts, key=lambda x: x["line_item_code"]):
             label = _FACT_LABEL.get(f["line_item_code"], f["line_item_code"])
             unit = f.get("unit", "")
             val = f["value"]
             if unit == "vnd_bn":
-                formatted = f"{val:,.1f} tỷ VND"
+                formatted = f"{val:,.1f} t? VND"
             elif unit == "vnd":
                 formatted = f"{val:,.0f} VND"
             elif unit == "ratio":
@@ -201,7 +201,7 @@ def _build_fact_chunks(facts: list[dict]) -> list[tuple[str, str, int | None]]:
             currency = f.get("currency", "VND")
             stmt = _STATEMENT_CONTEXT.get(f.get("statement_type") or "", "")
             lines.append(f"- {label} ({stmt}): {formatted} ({currency})")
-        lines.append(f"\nDữ liệu từ báo cáo tài chính kiểm toán năm {year}.")
+        lines.append(f"\nD? li?u t? b�o c�o t�i ch�nh ki?m to�n nam {year}.")
         chunks.append((f"Financial Data {year}FY", "\n".join(lines), year))
     return chunks
 
@@ -209,7 +209,7 @@ def _build_fact_chunks(facts: list[dict]) -> list[tuple[str, str, int | None]]:
 def _build_catalyst_chunk(events: list[dict]) -> tuple[str, str, int | None] | None:
     if not events:
         return None
-    lines = ["## Sự kiện doanh nghiệp và môi trường kinh doanh\n"]
+    lines = ["## S? ki?n doanh nghi?p v� m�i tru?ng kinh doanh\n"]
     for ev in events[:20]:
         date_str = str(ev.get("event_date", ""))[:10]
         event_type = ev.get("event_type", "")
@@ -226,7 +226,7 @@ def _ensure_ocr_source(conn, ticker: str, fiscal_year: int, document_id: str, me
     """
     source_id = f"ocr_{ticker.lower()}_{fiscal_year}_{document_id[:16]}"
     source_uri = meta.get("source_uri", f"ocr://{ticker}/{fiscal_year}/{document_id}")
-    source_title = f"BCTC {ticker} {fiscal_year}FY — OCR ({document_id[:8]})"
+    source_title = f"BCTC {ticker} {fiscal_year}FY � OCR ({document_id[:8]})"
     raw_checksum = meta.get("source_checksum", "")
     # Ensure 64-char SHA-256 hex; pad with zeros if shorter (e.g. from _sha())
     checksum = (raw_checksum if len(raw_checksum) == 64
@@ -259,7 +259,7 @@ def _ensure_pdf_source(conn, ticker: str, fiscal_year: int, pdf_path: Path) -> s
     """Register a text-based official PDF as an ingest.sources entry. Returns source_id."""
     checksum = hashlib.sha256(str(pdf_path).encode()).hexdigest()
     source_id = f"pdf_{ticker.lower()}_{fiscal_year}_{checksum[:16]}"
-    source_title = f"BCTC {ticker} {fiscal_year}FY — PDF ({pdf_path.name[:30]})"
+    source_title = f"BCTC {ticker} {fiscal_year}FY � PDF ({pdf_path.name[:30]})"
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -480,7 +480,7 @@ def _index_official_pdf_text(conn, ticker: str, years: list[int]) -> list[dict]:
     try:
         import pdfplumber  # type: ignore[import-untyped]
     except ImportError:
-        print("[build_index] pdfplumber not available — skipping official PDF text indexing")
+        print("[build_index] pdfplumber not available � skipping official PDF text indexing")
         return []
 
     official_dir = OFFICIAL_DOCS_DIR / ticker
@@ -500,7 +500,7 @@ def _index_official_pdf_text(conn, ticker: str, years: list[int]) -> list[dict]:
         for pdf_path in sorted(pdf_files):
             try:
                 with pdfplumber.open(str(pdf_path)) as pdf:
-                    # Skip scanned PDFs — they have no text layer
+                    # Skip scanned PDFs � they have no text layer
                     sample_text = "".join(
                         p.extract_text() or "" for p in pdf.pages[:5]
                     )
@@ -558,19 +558,19 @@ def build_index(ticker: str, years: list[int], doc_dir: Path | None = None) -> d
     summary: dict = {"ticker": ticker, "years": years, "sources": []}
 
     try:
-        # ── 1. Official PDF text pages (tier 1, extraction_method=pdf_text) ───
+        # -- 1. Official PDF text pages (tier 1, extraction_method=pdf_text) ---
         pdf_sources = _index_official_pdf_text(conn, ticker, years)
         for s in pdf_sources:
             total_chunks += s["chunks"]
             summary["sources"].append(s)
 
-        # ── 2. OCR page artifacts (tier 1, extraction_method=ocr) ─────────────
+        # -- 2. OCR page artifacts (tier 1, extraction_method=ocr) -------------
         ocr_sources = _index_ocr_artifacts(conn, ticker, years)
         for s in ocr_sources:
             total_chunks += s["chunks"]
             summary["sources"].append(s)
 
-        # ── 3. Synthetic fact-based chunks (from accepted DB facts) ────────────
+        # -- 3. Synthetic fact-based chunks (from accepted DB facts) ------------
         facts = _get_accepted_facts(conn, ticker, years)
         print(f"[build_index] {ticker}: {len(facts)} accepted facts found across {years}")
 
@@ -598,7 +598,7 @@ def build_index(ticker: str, years: list[int], doc_dir: Path | None = None) -> d
             })
             print(f"[build_index] {ticker}: {len(fact_chunks)} fact-based chunks indexed (source={fact_source_id})")
 
-        # ── 4. External .txt documents ─────────────────────────────────────────
+        # -- 4. External .txt documents -----------------------------------------
         search_dir = doc_dir or (DOC_DIR / ticker)
         if search_dir.exists():
             txt_files = list(search_dir.rglob("*.txt"))
@@ -626,7 +626,7 @@ def build_index(ticker: str, years: list[int], doc_dir: Path | None = None) -> d
                 except Exception as exc:
                     print(f"[build_index] WARNING: failed to index {doc_path}: {exc}")
         else:
-            print(f"[build_index] {ticker}: no external docs at {search_dir} — skipping")
+            print(f"[build_index] {ticker}: no external docs at {search_dir} � skipping")
 
         summary["total_chunks"] = total_chunks
         print(f"[build_index] {ticker}: total {total_chunks} chunks indexed")
