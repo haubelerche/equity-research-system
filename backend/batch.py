@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from scripts.dataset.config_io import load_universe_tickers
+from backend.dataset.config_io import load_universe_tickers
 
 from backend.executor import RunExecutor
 from backend.orchestrator import RunContext, Supervisor

@@ -18,6 +18,9 @@ class RunContext:
     objective: str
     policy: dict[str, Any]
     flags: dict[str, Any]
+    from_year: int = 2021
+    to_year: int = 2025
+    ocr: bool = False
 
 
 class Supervisor:

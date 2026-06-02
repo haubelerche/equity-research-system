@@ -175,8 +175,8 @@ def reconcile_ticker(
     """
     import psycopg2.extras as _extras
 
-    from scripts.db.fact_store import PostgresFactStore
-    from scripts.db.official_documents import OfficialDocumentRegistry
+    from backend.database.fact_store import PostgresFactStore
+    from backend.database.official_documents import OfficialDocumentRegistry
 
     store = store or PostgresFactStore()
     reg = OfficialDocumentRegistry(store)

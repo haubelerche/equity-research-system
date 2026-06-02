@@ -9,7 +9,7 @@ import psycopg2
 from psycopg2.extras import Json
 
 
-REQUIRED_SCHEMA_VERSION = "014_fact_reconciliation_official"
+REQUIRED_SCHEMA_VERSION = "015_cleanup_redundant_schema"
 
 DB_TO_PUBLIC_STATUS = {
     "initialized": "INIT",
@@ -83,8 +83,8 @@ class RuntimeStore:
         """Verify the database schema is at the required version.
 
         Raises RuntimeError if public.schema_migrations does not contain
-        REQUIRED_SCHEMA_VERSION. Does NOT apply migrations — run
-        scripts/db/migrate.py first.
+        REQUIRED_SCHEMA_VERSION. Does NOT apply migrations; run
+        python -m backend.database.migrate first.
         """
         with self.conn() as connection:
             with connection.cursor() as cur:
@@ -96,11 +96,11 @@ class RuntimeStore:
                     if cur.fetchone() is None:
                         raise RuntimeError(
                             f"DB schema out of date: version '{REQUIRED_SCHEMA_VERSION}' not applied. "
-                            "Run: python scripts/db/migrate.py"
+                            "Run: python -m backend.database.migrate"
                         )
                 except psycopg2.errors.UndefinedTable as exc:
                     raise RuntimeError(
-                        "public.schema_migrations table missing — run: python scripts/db/migrate.py"
+                        "public.schema_migrations table missing; run: python -m backend.database.migrate"
                     ) from exc
 
     def create_run(

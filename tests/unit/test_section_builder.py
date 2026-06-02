@@ -7,6 +7,7 @@ from backend.reporting.section_builder import (
     build_report_sections,
     assemble_markdown,
     _chart_ref,
+    _build_valuation_bridge_md,
 )
 
 EXPECTED_PAGE_IDS = [
@@ -77,7 +78,7 @@ def test_page_numbers_are_1_to_8():
 
 
 # ---------------------------------------------------------------------------
-# Page 1 — cover_snapshot
+# Page 1 � cover_snapshot
 # ---------------------------------------------------------------------------
 
 def test_page_1_has_price_rating():
@@ -107,8 +108,8 @@ def test_page_1_has_investment_thesis_placeholder_when_empty():
     ctx = _minimal_ctx(investment_thesis="")
     sections = build_report_sections(ctx)
     md = sections[0]["markdown"]
-    # Should render a placeholder in Vietnamese
-    assert "Nội dung chưa có" in md or "chưa có" in md
+    # Should render the Vietnamese placeholder when thesis is empty
+    assert "Nội dung chưa có" in md or "[Nội dung chưa có]" in md
 
 
 def test_page_1_has_investment_thesis_when_provided():
@@ -124,7 +125,7 @@ def test_page_1_rating_under_review():
 
 
 # ---------------------------------------------------------------------------
-# Page 8 — conclusion / disclaimer
+# Page 8 � conclusion / disclaimer
 # ---------------------------------------------------------------------------
 
 def test_page_8_has_disclaimer():
@@ -228,3 +229,98 @@ def test_chart_ids_are_lists():
     sections = build_report_sections(ctx)
     for s in sections:
         assert isinstance(s["chart_ids"], list)
+
+
+# ---------------------------------------------------------------------------
+# New tests — valuation_bridge and citation_appendix fields
+# ---------------------------------------------------------------------------
+
+def test_valuation_bridge_field_in_context():
+    """ReportContext accepts valuation_bridge field."""
+    ctx = _minimal_ctx(valuation_bridge="## Some Bridge\n\nContent here.")
+    assert ctx.valuation_bridge == "## Some Bridge\n\nContent here."
+
+
+def test_valuation_section_includes_bridge_when_set():
+    """_build_valuation output contains the bridge text when valuation_bridge is set."""
+    ctx = _minimal_ctx(valuation_bridge="MY_BRIDGE_MARKER")
+    sections = build_report_sections(ctx)
+    val_section = next(s for s in sections if s["page"] == "valuation")
+    assert "MY_BRIDGE_MARKER" in val_section["markdown"]
+    assert "Valuation Bridge" in val_section["markdown"]
+
+
+def test_valuation_section_no_bridge_when_empty():
+    """No 'Valuation Bridge' header appears when valuation_bridge is empty."""
+    ctx = _minimal_ctx(valuation_bridge="")
+    sections = build_report_sections(ctx)
+    val_section = next(s for s in sections if s["page"] == "valuation")
+    assert "Valuation Bridge" not in val_section["markdown"]
+
+
+def test_build_valuation_bridge_md_all_values():
+    """_build_valuation_bridge_md returns markdown with expected headings for full input."""
+    md = _build_valuation_bridge_md(
+        sum_pv_fcff=1200.5,
+        pv_tv_fcff=3500.0,
+        ev_fcff=4700.5,
+        net_debt=500.0,
+        equity_value_fcff=4200.5,
+        shares_mn=43.8,
+        price_fcff=95890.0,
+        sum_pv_fcfe=800.0,
+        pv_tv_fcfe=2200.0,
+        equity_value_fcfe=3000.0,
+        price_fcfe=68493.0,
+        target_price=85000.0,
+        current_price=70000.0,
+    )
+    assert "### FCFF Bridge" in md
+    assert "### FCFE Bridge" in md
+    assert "### Giá mục tiêu gộp" in md
+    assert "Price_FCFF" in md
+    assert "Price_FCFE" in md
+    assert "Target Price" in md
+    assert "Tiềm năng tăng/giảm" in md
+    # Check a formatted number appears
+    assert "1,200.5" in md
+
+
+def test_build_valuation_bridge_md_none_values():
+    """None inputs produce '—' not a crash."""
+    md = _build_valuation_bridge_md(
+        sum_pv_fcff=None,
+        pv_tv_fcff=None,
+        ev_fcff=None,
+        net_debt=None,
+        equity_value_fcff=None,
+        shares_mn=None,
+        price_fcff=None,
+        sum_pv_fcfe=None,
+        pv_tv_fcfe=None,
+        equity_value_fcfe=None,
+        price_fcfe=None,
+        target_price=None,
+        current_price=None,
+    )
+    assert "—" in md
+    assert "### FCFF Bridge" in md
+    assert "### FCFE Bridge" in md
+    assert "### Giá mục tiêu gộp" in md
+
+
+def test_citation_appendix_in_conclusion():
+    """Conclusion section includes citation appendix when field is set."""
+    ctx = _minimal_ctx(citation_appendix="[C1] Source: DHG Annual Report 2024")
+    sections = build_report_sections(ctx)
+    conclusion = next(s for s in sections if s["page"] == "conclusion")
+    assert "[C1] Source: DHG Annual Report 2024" in conclusion["markdown"]
+    assert "Phụ lục Citation" in conclusion["markdown"]
+
+
+def test_citation_appendix_absent_when_empty():
+    """No 'Phụ lục Citation' header when citation_appendix is empty."""
+    ctx = _minimal_ctx(citation_appendix="")
+    sections = build_report_sections(ctx)
+    conclusion = next(s for s in sections if s["page"] == "conclusion")
+    assert "Phụ lục Citation" not in conclusion["markdown"]

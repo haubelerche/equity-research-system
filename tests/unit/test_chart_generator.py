@@ -135,3 +135,54 @@ def test_filename_without_run_id(tmp_path):
     path = gen.render_c4_margin_roe(spec)
     assert path.name.startswith("DHG_")
     assert "C4" in path.name
+
+
+def test_c8_peer_comparison_renders(tmp_path):
+    """C8 with peer_data list produces a PNG file."""
+    spec = ChartSpec(
+        chart_id="C8",
+        ticker="DHG",
+        run_id="TEST",
+        peer_data=[
+            {"ticker": "IMP", "pe": 12.8, "ev_ebitda": 9.5},
+            {"ticker": "TRA", "pe": 14.1, "ev_ebitda": 10.2},
+            {"ticker": "DMC", "pe": 13.5, "ev_ebitda": 10.0},
+            {"ticker": "DHG", "pe": 16.5, "ev_ebitda": 12.0},
+        ],
+    )
+    gen = ChartGenerator(output_dir=tmp_path)
+    path = gen.render_c8_peer_comparison(spec)
+    assert path.exists(), f"Expected PNG at {path}"
+    assert path.suffix == ".png"
+    assert path.stat().st_size > 1000, "PNG file too small — likely empty"
+
+
+def test_c8_peer_comparison_empty_peer_data(tmp_path):
+    """Empty peer_data produces a placeholder PNG without crashing."""
+    spec = ChartSpec(
+        chart_id="C8",
+        ticker="DHG",
+        run_id="TEST",
+        peer_data=[],
+    )
+    gen = ChartGenerator(output_dir=tmp_path)
+    path = gen.render_c8_peer_comparison(spec)
+    assert path.exists(), f"Expected placeholder PNG at {path}"
+    assert path.suffix == ".png"
+    assert path.stat().st_size > 500, "Placeholder PNG too small"
+
+
+def test_c8_chart_id_set_correctly(tmp_path):
+    """render_c8_peer_comparison sets spec.chart_id == 'C8'."""
+    spec = ChartSpec(
+        chart_id="",
+        ticker="DHG",
+        run_id="TEST",
+        peer_data=[
+            {"ticker": "IMP", "pe": 12.8, "ev_ebitda": 9.5},
+            {"ticker": "DHG", "pe": 16.5, "ev_ebitda": 12.0},
+        ],
+    )
+    gen = ChartGenerator(output_dir=tmp_path)
+    gen.render_c8_peer_comparison(spec)
+    assert spec.chart_id == "C8"

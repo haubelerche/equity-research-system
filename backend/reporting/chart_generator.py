@@ -9,6 +9,7 @@ C4 — Margin & ROE Trend (multi-line)                       — required
 C5 — Forecast Revenue/Profit (bar + line, dual Y)          — required
 C6 — DCF Value Bridge (waterfall bar)                      — recommended
 C7 — Sensitivity Heatmap (seaborn)                         — required
+C8 — Peer Comparison (horizontal grouped bar)              — required
 """
 
 from __future__ import annotations
@@ -80,6 +81,9 @@ class ChartSpec:
     # C6 — DCF Bridge: list of (label, value_billion_vnd) tuples
     bridge_items: list[tuple[str, float]] = field(default_factory=list)
 
+    # C8 — Peer Comparison: list of dicts with keys ticker, pe, ev_ebitda
+    peer_data: list[dict] = field(default_factory=list)
+
 
 # ---------------------------------------------------------------------------
 # ChartGenerator
@@ -105,12 +109,26 @@ class ChartGenerator:
 
     @staticmethod
     def _safe(lst: list[float], n: int = 1) -> list[float]:
-        """Return lst padded / truncated to n elements; replace None/NaN with 0."""
+        """Return lst padded/truncated to n elements; replace None/NaN with 0.
+
+        Zero-fill is used for display only on historical charts where the
+        absence of a value is visually obvious.  C5/C6/C7 must validate
+        data BEFORE calling this so they never render all-zero charts.
+        """
         out = [v if (v is not None and not (isinstance(v, float) and np.isnan(v))) else 0.0
                for v in lst]
         while len(out) < n:
             out.append(0.0)
         return out
+
+    @staticmethod
+    def _has_nonzero(lst: list[float], min_count: int = 1) -> bool:
+        """Return True if lst contains at least min_count non-zero, non-NaN values."""
+        count = sum(
+            1 for v in lst
+            if v is not None and v != 0.0 and not (isinstance(v, float) and np.isnan(v))
+        )
+        return count >= min_count
 
     @staticmethod
     def _source_caption(ax: plt.Axes, ticker: str) -> None:
@@ -286,12 +304,28 @@ class ChartGenerator:
     # ------------------------------------------------------------------
 
     def render_c5_forecast(self, spec: ChartSpec) -> Path:
-        """Bar (forecast revenue) + line (forecast profit) dual-axis."""
+        """Bar (forecast revenue) + line (forecast profit) dual-axis.
+
+        Renders a placeholder if the forecast data contains no non-zero values —
+        prevents publishing all-zero forecast charts when assumptions are pending.
+        """
         spec.chart_id = "C5"
         path = self._out_path(spec)
 
         periods = spec.forecast_periods or ["—"]
         n = len(periods)
+
+        # Validate before rendering — require at least 2 non-zero revenue values
+        if not self._has_nonzero(spec.forecast_revenue_bn, min_count=2):
+            fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
+            ax.text(0.5, 0.5,
+                    "Forecast chart blocked\nAssumptions pending analyst review",
+                    ha="center", va="center", fontsize=11, color=_GREY,
+                    transform=ax.transAxes)
+            self._style_ax(ax, title=f"{spec.ticker} — Revenue & Profit Forecast (BLOCKED)")
+            self._source_caption(ax, spec.ticker)
+            return self._save_close(fig, path)
+
         rev = self._safe(spec.forecast_revenue_bn, n)
         profit = self._safe(spec.forecast_profit_bn, n)
         x = np.arange(n)
@@ -402,11 +436,37 @@ class ChartGenerator:
         tg_range: list[float],
         matrix: list[list[float]],
     ) -> Path:
-        """Seaborn heatmap: rows = terminal growth, cols = WACC."""
+        """Seaborn heatmap: rows = terminal growth, cols = WACC.
+
+        Requires a non-empty matrix with no all-zero rows.
+        Missing cells are rendered as NaN (grey) not zero, to avoid
+        misleading the reader with a false target-price of zero.
+        """
         spec.chart_id = "C7"
         path = self._out_path(spec)
 
-        if not matrix or not wacc_range or not tg_range:
+        # Validate: matrix must exist and have at least one non-zero value
+        all_values = []
+        if matrix:
+            if isinstance(matrix, list):
+                for row in matrix:
+                    if isinstance(row, (list, tuple)):
+                        all_values.extend(row)
+                    elif isinstance(row, (int, float)):
+                        all_values.append(row)
+            elif isinstance(matrix, dict):
+                for row_d in matrix.values():
+                    if isinstance(row_d, dict):
+                        all_values.extend(row_d.values())
+                    elif isinstance(row_d, (int, float)):
+                        all_values.append(row_d)
+
+        has_valid_data = any(
+            v is not None and v != 0.0 and not (isinstance(v, float) and np.isnan(v))
+            for v in all_values
+        )
+
+        if not matrix or not wacc_range or not tg_range or not has_valid_data:
             # Placeholder
             fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
             ax.text(0.5, 0.5, "No sensitivity data available",
@@ -443,5 +503,114 @@ class ChartGenerator:
         ax.set_ylabel("Terminal Growth (%)", fontsize=9)
         ax.tick_params(axis="both", labelsize=8)
         self._source_caption(ax, spec.ticker)
+
+        return self._save_close(fig, path)
+
+    # ------------------------------------------------------------------
+    # C8 — Peer Comparison (horizontal grouped bar)
+    # ------------------------------------------------------------------
+
+    def render_c8_peer_comparison(self, spec: ChartSpec) -> Path:
+        """Horizontal grouped bar chart comparing ticker vs peers on P/E and EV/EBITDA.
+
+        Uses spec.peer_data for peer metrics. Expected format:
+            spec.peer_data = [
+                {"ticker": "DHG", "pe": 15.2, "ev_ebitda": 11.0},
+                {"ticker": "IMP", "pe": 12.8, "ev_ebitda": 9.5},
+                {"ticker": "TRA", "pe": 14.1, "ev_ebitda": 10.2},
+                {"ticker": spec.ticker, "pe": 16.5, "ev_ebitda": 12.0},
+            ]
+
+        If spec.peer_data is empty or missing: renders a placeholder chart with note.
+        Subject ticker bar is highlighted in a distinct color.
+        """
+        spec.chart_id = "C8"
+        path = self._out_path(spec)
+
+        _HIGHLIGHT = "#1a73e8"
+        _PEER_GREY = "#9e9e9e"
+        _MEDIAN_LINE = "#D97706"
+
+        peer_data = spec.peer_data if spec.peer_data else []
+
+        if not peer_data:
+            fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
+            ax.text(
+                0.5, 0.5,
+                "Chưa có dữ liệu peer group",
+                ha="center", va="center", fontsize=12, color=_GREY,
+                transform=ax.transAxes,
+            )
+            self._style_ax(ax, title=f"So sánh đồng ngành — {spec.ticker}")
+            self._source_caption(ax, spec.ticker)
+            return self._save_close(fig, path)
+
+        tickers = [d.get("ticker", "") for d in peer_data]
+        pe_vals = [d.get("pe") or 0.0 for d in peer_data]
+        ev_vals = [d.get("ev_ebitda") or 0.0 for d in peer_data]
+
+        subject = spec.ticker
+
+        def _bar_colors(vals_tickers: list[str]) -> list[str]:
+            return [_HIGHLIGHT if t == subject else _PEER_GREY for t in vals_tickers]
+
+        def _median_nonzero(vals: list[float]) -> float | None:
+            non_zero = [v for v in vals if v and v != 0.0]
+            if not non_zero:
+                return None
+            sorted_vals = sorted(non_zero)
+            mid = len(sorted_vals) // 2
+            if len(sorted_vals) % 2 == 0:
+                return (sorted_vals[mid - 1] + sorted_vals[mid]) / 2
+            return sorted_vals[mid]
+
+        y = np.arange(len(tickers))
+        bar_height = 0.55
+
+        fig, (ax_pe, ax_ev) = plt.subplots(1, 2, figsize=(_FIG_W * 1.2, max(_FIG_H, len(tickers) * 0.8 + 1.5)))
+
+        # --- P/E subplot ---
+        pe_colors = _bar_colors(tickers)
+        ax_pe.barh(y, pe_vals, height=bar_height, color=pe_colors, alpha=0.88)
+        ax_pe.set_yticks(y)
+        ax_pe.set_yticklabels(tickers, fontsize=9)
+        ax_pe.set_xlabel("P/E (x)", fontsize=9)
+        self._style_ax(ax_pe, title="P/E")
+        # Value labels
+        for i, val in enumerate(pe_vals):
+            if val:
+                ax_pe.text(val + max(pe_vals) * 0.01, i, f"{val:.1f}x",
+                           va="center", fontsize=8)
+        # Median line
+        pe_median = _median_nonzero(pe_vals)
+        if pe_median is not None:
+            ax_pe.axvline(pe_median, color=_MEDIAN_LINE, linewidth=1.2,
+                          linestyle="--", label=f"Median {pe_median:.1f}x")
+            ax_pe.legend(fontsize=8)
+
+        # --- EV/EBITDA subplot ---
+        ev_colors = _bar_colors(tickers)
+        ax_ev.barh(y, ev_vals, height=bar_height, color=ev_colors, alpha=0.88)
+        ax_ev.set_yticks(y)
+        ax_ev.set_yticklabels(tickers, fontsize=9)
+        ax_ev.set_xlabel("EV/EBITDA (x)", fontsize=9)
+        self._style_ax(ax_ev, title="EV/EBITDA")
+        # Value labels
+        for i, val in enumerate(ev_vals):
+            if val:
+                ax_ev.text(val + max(ev_vals) * 0.01, i, f"{val:.1f}x",
+                           va="center", fontsize=8)
+        # Median line
+        ev_median = _median_nonzero(ev_vals)
+        if ev_median is not None:
+            ax_ev.axvline(ev_median, color=_MEDIAN_LINE, linewidth=1.2,
+                          linestyle="--", label=f"Median {ev_median:.1f}x")
+            ax_ev.legend(fontsize=8)
+
+        fig.suptitle(f"So sánh đồng ngành — {spec.ticker}", fontsize=12, fontweight="bold")
+        fig.tight_layout(rect=[0, 0.04, 1, 0.95])
+
+        # Source caption on left subplot (conventional)
+        self._source_caption(ax_pe, spec.ticker)
 
         return self._save_close(fig, path)

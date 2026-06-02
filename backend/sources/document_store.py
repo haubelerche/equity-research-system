@@ -87,7 +87,7 @@ _SOURCE_TYPE_TO_OFFICIAL = {
 
 def persist_to_official_documents(doc: FetchedDocument, ticker: str | None, registry=None) -> int:
     """Persist a fetched catalyst document into ingest.official_documents. Returns its id."""
-    from scripts.db.official_documents import (
+    from backend.database.official_documents import (
         OfficialDocumentInput,
         OfficialDocumentRegistry,
     )

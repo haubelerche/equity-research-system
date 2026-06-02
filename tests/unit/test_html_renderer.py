@@ -7,12 +7,12 @@ from backend.reporting.section_builder import ReportContext, build_report_sectio
 from backend.reporting.html_renderer import HTMLRenderer
 
 
-# ── Shared fixture ────────────────────────────────────────────────────────────
+# -- Shared fixture ------------------------------------------------------------
 
 def _make_ctx() -> ReportContext:
     return ReportContext(
         ticker="DHG",
-        company_name="Dược Hậu Giang",
+        company_name="Du?c H?u Giang",
         exchange="HOSE",
         report_date="2026-06-01",
         data_cutoff="2025-12-31",
@@ -26,7 +26,7 @@ def _make_ctx() -> ReportContext:
     )
 
 
-# ── Tests ─────────────────────────────────────────────────────────────────────
+# -- Tests ---------------------------------------------------------------------
 
 def test_html_renderer_creates_html_file(tmp_path):
     """render() must create a file with .html suffix containing DOCTYPE and ticker."""

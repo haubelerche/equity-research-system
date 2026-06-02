@@ -106,15 +106,30 @@ def auto_ingest_tool(
 
 
 def build_index_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int = MVP_TO_YEAR) -> ServiceNodeResult:
+    import json
+    from datetime import UTC, datetime
+
     from scripts.build_index import build_index
 
     summary = build_index(ticker=ticker, years=list(range(from_year, to_year + 1)))
+    out_dir = Path.cwd() / "artifacts" / "index"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
+    artifact_path = out_dir / f"{ticker.upper()}_{ts}_index_summary.json"
+    artifact_path.write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
+    summary["artifact_path"] = str(artifact_path)
     return _result(
         "BUILD_INDEX",
         "completed",
         summary,
         artifact_refs=[
-            ArtifactRef(artifact_id=f"{ticker}_index_summary", artifact_type="source_manifest_json", section_key="index")
+            ArtifactRef(
+                artifact_id=f"{ticker}_index_summary",
+                artifact_type="source_manifest_json",
+                section_key="index",
+                storage_path=str(artifact_path),
+                producer="BUILD_INDEX",
+            )
         ],
         evidence_refs=[
             EvidenceRef(evidence_type="document_chunk", metadata={"indexed_chunks": summary.get("chunks_inserted", 0)})
@@ -183,6 +198,7 @@ def generate_report_tool(
     summary = {
         "ticker": ticker,
         "report_path": artifact.get("report_path"),
+        "artifact_path": artifact.get("report_path"),
         "snapshot_id": artifact.get("snapshot_id"),
         "export_blocked": artifact.get("export_blocked", False),
         "source_tier_gate": artifact.get("source_tier_gate", {}),
@@ -200,12 +216,34 @@ def generate_report_tool(
                 section_key=f"full_report_{mode}",
                 storage_path=artifact.get("report_path"),
                 is_locked=False,
+                producer="REPORT_GENERATION",
             )
+        ] + [
+            ArtifactRef(
+                artifact_id=f"{ticker}_{key}_{mode}",
+                artifact_type="run_log_json",
+                section_key=key,
+                storage_path=artifact.get(path_key),
+                is_locked=False,
+                producer="REPORT_GENERATION",
+            )
+            for key, path_key in (
+                ("forecast", "forecast_path"),
+                ("fcff", "fcff_path"),
+                ("fcfe", "fcfe_path"),
+                ("blend", "blend_path"),
+                ("citation", "citation_path"),
+            )
+            if artifact.get(path_key)
         ],
     )
 
 
-def evaluate_quality_tool(ticker: str, report_path: str | None = None) -> ServiceNodeResult:
+def evaluate_quality_tool(
+    ticker: str,
+    report_path: str | None = None,
+    valuation_path: str | None = None,
+) -> ServiceNodeResult:
     from scripts.evaluate_report_quality import run_quality_gate
     from scripts.evaluate_report_quality import _latest_file, _load_json
 
@@ -214,12 +252,27 @@ def evaluate_quality_tool(ticker: str, report_path: str | None = None) -> Servic
     forecast_dir = artifacts / "forecast"
     valuation_dir = artifacts / "valuation"
 
-    forecast_path = _latest_file(forecast_dir, ticker, "forecast")
-    fcff_path = _latest_file(forecast_dir, ticker, "fcff")
-    fcfe_path = _latest_file(forecast_dir, ticker, "fcfe")
-    multiples_path = _latest_file(valuation_dir, ticker, "multiples")
-    gate_path = _latest_file(valuation_dir, ticker, "gate")
-    confidence_path = _latest_file(valuation_dir, ticker, "confidence")
+    valuation_artifact = _load_json(Path(valuation_path)) if valuation_path else None
+    if valuation_artifact:
+        forecast = valuation_artifact.get("forecast")
+        fcff = valuation_artifact.get("fcff")
+        fcfe = valuation_artifact.get("fcfe")
+        multiples = valuation_artifact.get("multiples")
+        gate = valuation_artifact.get("assumption_gate") or valuation_artifact.get("gate")
+        confidence = valuation_artifact.get("valuation_confidence")
+    else:
+        forecast_path = _latest_file(forecast_dir, ticker, "forecast")
+        fcff_path = _latest_file(forecast_dir, ticker, "fcff")
+        fcfe_path = _latest_file(forecast_dir, ticker, "fcfe")
+        multiples_path = _latest_file(valuation_dir, ticker, "multiples")
+        gate_path = _latest_file(valuation_dir, ticker, "gate")
+        confidence_path = _latest_file(valuation_dir, ticker, "confidence")
+        forecast = _load_json(forecast_path) if forecast_path else None
+        fcff = _load_json(fcff_path) if fcff_path else None
+        fcfe = _load_json(fcfe_path) if fcfe_path else None
+        multiples = _load_json(multiples_path) if multiples_path else None
+        gate = _load_json(gate_path) if gate_path else None
+        confidence = _load_json(confidence_path) if confidence_path else None
 
     report_md = None
     if report_path and Path(report_path).exists():
@@ -227,12 +280,12 @@ def evaluate_quality_tool(ticker: str, report_path: str | None = None) -> Servic
 
     summary = run_quality_gate(
         ticker=ticker,
-        forecast=_load_json(forecast_path) if forecast_path else None,
-        fcff=_load_json(fcff_path) if fcff_path else None,
-        fcfe=_load_json(fcfe_path) if fcfe_path else None,
-        multiples=_load_json(multiples_path) if multiples_path else None,
-        gate=_load_json(gate_path) if gate_path else None,
-        confidence=_load_json(confidence_path) if confidence_path else None,
+        forecast=forecast,
+        fcff=fcff,
+        fcfe=fcfe,
+        multiples=multiples,
+        gate=gate,
+        confidence=confidence,
         report_md=report_md,
     )
     status = "failed" if summary.get("overall_status") == "FAIL" else "completed"

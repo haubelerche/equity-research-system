@@ -57,6 +57,9 @@ class ResearchGraphRunner:
             objective=context.objective,
             policy=context.policy,
             flags=context.flags,
+            from_year=getattr(context, "from_year", 2021),
+            to_year=getattr(context, "to_year", 2025),
+            ocr=getattr(context, "ocr", False),
         )
         self.run_until_pause(state)
 
@@ -76,8 +79,10 @@ class ResearchGraphRunner:
             if stage in {"WAITING_ASSUMPTIONS_APPROVAL", "WAITING_FINAL_APPROVAL", "PUBLISHED"}:
                 break
 
-        # Write manifest so render_report --run-id can resolve artifacts deterministically
+        # Write evidence packet and manifest so render_report --run-id can
+        # resolve artifacts deterministically.
         try:
+            self._write_evidence_packet(current)
             self._write_run_manifest(current)
         except Exception as _exc:  # noqa: BLE001
             import logging
@@ -287,7 +292,8 @@ class ResearchGraphRunner:
             self._merge_agent_result(state, agent_result)
         elif stage == "QUALITY_EVALUATION":
             report_path = (state.draft_report or state.artifacts.get("report") or {}).get("report_path")
-            result = evaluate_quality_tool(state.ticker, report_path)
+            valuation_path = (state.valuation_outputs or state.artifacts.get("valuation") or {}).get("artifact_path")
+            result = evaluate_quality_tool(state.ticker, report_path, valuation_path=valuation_path)
             state.artifacts["quality"] = result.summary
             state.evaluation_results = result.summary
             self._merge_result(state, result)
@@ -461,16 +467,26 @@ class ResearchGraphRunner:
 
         artifact_entries: list[dict[str, str]] = []
 
-        # Collect from stage artifacts dict (tools store artifact_path in summary)
-        for stage_key, stage_data in state.artifacts.items():
-            if isinstance(stage_data, dict):
-                path = stage_data.get("artifact_path", "")
-                if path:
-                    artifact_entries.append({
-                        "key": stage_key,
-                        "path": path,
-                        "producer": stage_key.upper(),
-                    })
+        # The manifest must be built from the explicit ArtifactRefs emitted by
+        # tools, not by rediscovering files after the run.
+        for ref in state.artifact_refs:
+            if not isinstance(ref, dict):
+                continue
+            path = str(ref.get("storage_path") or "")
+            if not path:
+                continue
+            section_key = str(ref.get("section_key") or "")
+            artifact_type = str(ref.get("artifact_type") or "")
+            key = section_key
+            if artifact_type == "report_md":
+                key = "report"
+            if not key:
+                key = str(ref.get("artifact_id") or "")
+            artifact_entries.append({
+                "key": key,
+                "path": path,
+                "producer": str(ref.get("producer") or self._agent_name(state.current_stage)),
+            })
 
         manifest = build_manifest_from_artifact_refs(
             run_id=state.run_id,
@@ -484,6 +500,30 @@ class ResearchGraphRunner:
             "Manifest written for run=%s: %s (%d artifacts)",
             state.run_id, manifest_path, len(artifact_entries),
         )
+
+    def _write_evidence_packet(self, state: "ResearchGraphState") -> None:
+        from backend.harness.evidence_packet import write_evidence_packet
+
+        packet_path = write_evidence_packet(state, base_dir=ROOT / "artifacts")
+        ref = {
+            "artifact_id": f"{state.run_id}_evidence_packet",
+            "artifact_type": "evidence_packet_json",
+            "section_key": "evidence_packet",
+            "version": 1,
+            "storage_path": str(packet_path),
+            "checksum": stable_hash(packet_path.read_text(encoding="utf-8")),
+            "is_locked": False,
+            "producer": "ResearchGraphRunner",
+        }
+        state.artifact_refs = [
+            existing
+            for existing in state.artifact_refs
+            if not (
+                isinstance(existing, dict)
+                and existing.get("section_key") == "evidence_packet"
+            )
+        ]
+        state.artifact_refs.append(ref)
 
     @staticmethod
     def _agent_name(stage: str) -> str:

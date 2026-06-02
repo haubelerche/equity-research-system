@@ -20,7 +20,7 @@ from pathlib import Path
 import markdown as _markdown
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from backend.reporting.section_builder import ReportContext
+from backend.reporting.section_builder import ReportContext, _rating_label
 
 # Markdown extensions for professional rendering
 _MD_EXTENSIONS = ["tables", "fenced_code", "nl2br", "sane_lists"]
@@ -149,6 +149,7 @@ class HTMLRenderer:
             company_name=ctx.company_name,
             report_date=ctx.report_date,
             rating=ctx.rating,
+            recommendation_label=_rating_label(ctx.rating),
             status=ctx.status,
         )
 

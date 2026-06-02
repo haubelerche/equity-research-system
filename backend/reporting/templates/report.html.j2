@@ -8,25 +8,72 @@
   <style>
 {{ css }}
   </style>
+  <!-- Recommendation colour classes (not in base CSS) -->
+  <style>
+.recommendation-buy        { background: #e6f4ea; border-left: 4px solid #34a853; }
+.recommendation-hold       { background: #fef7e0; border-left: 4px solid #fbbc04; }
+.recommendation-sell       { background: #fce8e6; border-left: 4px solid #ea4335; }
+.recommendation-accumulate { background: #e8f0fe; border-left: 4px solid #1a73e8; }
+.recommendation-reduce     { background: #fff3e0; border-left: 4px solid #ff9800; }
+.recommendation-review     { background: #f5f5f5; border-left: 4px solid #9e9e9e; }
+/* Override recommendation-card base when a colour modifier is present */
+.recommendation-card[class*="recommendation-buy"],
+.recommendation-card[class*="recommendation-hold"],
+.recommendation-card[class*="recommendation-sell"],
+.recommendation-card[class*="recommendation-accumulate"],
+.recommendation-card[class*="recommendation-reduce"],
+.recommendation-card[class*="recommendation-review"] {
+  border-top: none;
+  border-bottom: none;
+  padding: 10px 16px;
+  margin: 12px 0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+  </style>
 </head>
 <body>
 
-  <!-- ── Report Header ─────────────────────────────────── -->
-  <div class="report-header">
-    <div class="report-header-left">
-      <div class="report-header-ticker">{{ ticker }}</div>
-      <div>{{ company_name }}</div>
-    </div>
-    <div class="report-header-date">
-      <div>Ngày báo cáo: <strong>{{ report_date }}</strong></div>
-      <div>Rating: <strong>{{ rating }}</strong></div>
-      <div>Trạng thái: {{ status }}</div>
-    </div>
+  <!-- ── Rating → CSS class mapping ───────────────────────── -->
+  {% set _rating_class_map = {
+    "BUY":          "recommendation-buy",
+    "ACCUMULATE":   "recommendation-accumulate",
+    "HOLD":         "recommendation-hold",
+    "REDUCE":       "recommendation-reduce",
+    "SELL":         "recommendation-sell",
+    "UNDER_REVIEW": "recommendation-review"
+  } %}
+  {% set rec_class = _rating_class_map.get((rating or "") | upper, "recommendation-review") %}
+
+  <!-- ── Internal notice banner ──────────────────────────── -->
+  {% if status and ('DRAFT' in status or 'NEEDS_REVIEW' in status or 'PENDING' in status) %}
+  <div class="draft-banner">
+    BÁO CÁO NHÁP (DRAFT) — {{ status }} | Không xuất bản chính thức | Assumptions chưa được phê duyệt
+  </div>
+  {% endif %}
+
+  <!-- ── Recommendation summary banner ───────────────────── -->
+  <div class="recommendation-card {{ rec_class }}">
+    <strong>{{ ticker }}</strong> — {{ company_name | default(ticker) }}
+    &nbsp;|&nbsp;
+    <strong>{{ recommendation_label | default(rating) }}</strong>
+    &nbsp;|&nbsp;
+    Giá mục tiêu: <strong>{{ target_price_fmt | default("—") }}</strong>
+    &nbsp;|&nbsp;
+    Upside: <strong>{{ upside_fmt | default("—") }}</strong>
+    &nbsp;|&nbsp;
+    {{ report_date }}
   </div>
 
   <!-- ── Report Sections ───────────────────────────────── -->
   {% for section in sections %}
   <div class="report-section" id="section-{{ section.page }}">
+    {% if not loop.first %}
+    <div class="acbs-page-header">
+      <span>Cập nhật {{ ticker }} - {{ recommendation_label or rating }}</span>
+      <span>Ngày {{ report_date }}</span>
+    </div>
+    {% endif %}
     {{ section.html | safe }}
   </div>
   {% if not loop.last %}
@@ -38,6 +85,7 @@
   <div class="report-footer">
     Vietnam Pharma Equity Research | {{ ticker }} | {{ report_date }} |
     Tài liệu này chỉ dành cho mục đích nghiên cứu học thuật.
+    {% if status and 'DRAFT' in status %}| DRAFT — Chưa được phê duyệt{% endif %}
   </div>
 
 </body>

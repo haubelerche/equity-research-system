@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import time
@@ -26,7 +27,15 @@ class OpenAIModelAdapter:
         input_refs: list[str] | None = None,
     ) -> AgentResult:
         self.validate_environment()
-        from openai import OpenAI
+        # langfuse.openai is a drop-in replacement that auto-captures model, tokens, and latency.
+        # It must be imported after env vars are loaded (load_dotenv is called in the entry scripts).
+        from langfuse.openai import OpenAI
+
+        run_id: str = state.get("run_id") or ""
+        ticker: str = state.get("ticker") or ""
+        # Langfuse trace_id must be a 32 lowercase hex char string.
+        # Derive it deterministically from run_id so all generations link to one trace.
+        lf_trace_id: str = hashlib.md5(run_id.encode()).hexdigest()  # always 32 hex chars
 
         started = time.perf_counter()
         client = OpenAI()
@@ -55,6 +64,17 @@ class OpenAIModelAdapter:
                 {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False, default=str)},
             ],
             timeout=agent_config.timeout_seconds,
+            # Langfuse v4 tracing params: name, trace_id, metadata, langfuse_prompt.
+            # trace_id must be 32 lowercase hex chars — use md5(run_id) for stable linking.
+            name=agent_config.agent_id,
+            trace_id=lf_trace_id,
+            metadata={
+                "ticker": ticker,
+                "agent_id": agent_config.agent_id,
+                "task": task[:300],
+                "stage": state.get("current_stage"),
+                "run_type": state.get("run_type"),
+            },
         )
         latency_ms = int((time.perf_counter() - started) * 1000)
         content = response.choices[0].message.content or "{}"

@@ -5,7 +5,9 @@ All content comes from ReportContext fields — never invented.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
+from html import escape
 from typing import Any
 
 
@@ -29,6 +31,22 @@ def _fmt_price(price: float) -> str:
 def _or_placeholder(text: str) -> str:
     """Return text or Vietnamese placeholder if empty."""
     return text.strip() if text.strip() else _PLACEHOLDER
+
+
+_RATING_LABELS: dict[str, str] = {
+    "BUY": "MUA",
+    "ACCUMULATE": "TÍCH LŨY",
+    "HOLD": "NẮM GIỮ",
+    "REDUCE": "GIẢM",
+    "SELL": "BÁN",
+    "UNDER_REVIEW": "ĐANG XEM XÉT",
+    "ANALYST_REVIEW": "CHỜ ANALYST",
+}
+
+
+def _rating_label(rating: str) -> str:
+    """Return the Vietnamese display label for a rating code, or the raw code if unknown."""
+    return _RATING_LABELS.get((rating or "").upper(), rating or "")
 
 
 @dataclass
@@ -92,8 +110,19 @@ class ReportContext:
     quality_summary_table: str = ""
     key_sources_table: str = ""
 
+    valuation_bridge: str = ""    # Prebuilt markdown bridge: EV → Equity → Price steps
+    citation_appendix: str = ""   # Full citation appendix in markdown
+
     # Chart paths: chart_id → relative file path
     chart_paths: dict = field(default_factory=dict)
+
+    # Internal display flags — set by loaders, never invented by section builder
+    _current_price_missing: bool = False
+    _target_price_missing: bool = False
+    _upside_missing: bool = False
+    _has_valuation: bool = False
+    _has_sensitivity: bool = False
+    _has_forecast_table: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -111,6 +140,95 @@ def _chart_ref(ctx: ReportContext, chart_id: str, fallback_note: str = "") -> st
         return f"![{chart_id}]({path})"
     note = fallback_note if fallback_note else f"Biểu đồ {chart_id} chưa được tạo."
     return f"> _{note}_"
+
+
+def _build_valuation_bridge_md(
+    sum_pv_fcff: float | None,
+    pv_tv_fcff: float | None,
+    ev_fcff: float | None,
+    net_debt: float | None,
+    equity_value_fcff: float | None,
+    shares_mn: float | None,
+    price_fcff: float | None,
+    sum_pv_fcfe: float | None,
+    pv_tv_fcfe: float | None,
+    equity_value_fcfe: float | None,
+    price_fcfe: float | None,
+    target_price: float | None,
+    current_price: float | None,
+    fcff_weight: float = 0.60,
+    fcfe_weight: float = 0.40,
+) -> str:
+    """Build a valuation bridge markdown table showing every step from FCF to target price.
+
+    Returns a markdown string with two bridge tables (FCFF and FCFE) and the blend line.
+    Uses '—' for any missing value rather than crashing.
+    """
+
+    def _fv(v: float | None) -> str:
+        if v is None:
+            return "—"
+        return f"{v:,.1f}"
+
+    def _fv_price(v: float | None) -> str:
+        if v is None:
+            return "—"
+        return f"{int(round(v)):,}"
+
+    def _net_debt_display(v: float | None) -> str:
+        if v is None:
+            return "—"
+        if v < 0:
+            return f"({abs(v):,.1f}) _(Net Cash)_"
+        return f"{v:,.1f}"
+
+    # Upside/downside
+    if target_price is not None and current_price is not None and current_price != 0:
+        upside_pct = (target_price - current_price) / current_price * 100
+        upside_sign = "+" if upside_pct >= 0 else ""
+        upside_str = f"{upside_sign}{upside_pct:.1f}%"
+    else:
+        upside_str = "—"
+
+    fcff_weight_pct = int(round(fcff_weight * 100))
+    fcfe_weight_pct = int(round(fcfe_weight * 100))
+
+    fcff_block = f"""\
+### FCFF Bridge
+
+| Bước | Giá trị (tỷ VND) |
+|---|---|
+| Σ PV(FCFF 2026–2030) | {_fv(sum_pv_fcff)} |
+| + PV(Terminal Value FCFF) | {_fv(pv_tv_fcff)} |
+| = Enterprise Value | {_fv(ev_fcff)} |
+| − Net Debt (âm = Net Cash) | {_net_debt_display(net_debt)} |
+| = Equity Value (FCFF) | {_fv(equity_value_fcff)} |
+| ÷ Số cổ phiếu pha loãng (triệu CP) | {_fv(shares_mn)} |
+| **= Price_FCFF (VNĐ/CP)** | **{_fv_price(price_fcff)}** |"""
+
+    fcfe_block = f"""\
+### FCFE Bridge
+
+| Bước | Giá trị (tỷ VND) |
+|---|---|
+| Σ PV(FCFE 2026–2030) | {_fv(sum_pv_fcfe)} |
+| + PV(Terminal Value FCFE) | {_fv(pv_tv_fcfe)} |
+| = Equity Value (FCFE) | {_fv(equity_value_fcfe)} |
+| ÷ Số cổ phiếu pha loãng (triệu CP) | {_fv(shares_mn)} |
+| **= Price_FCFE (VNĐ/CP)** | **{_fv_price(price_fcfe)}** |"""
+
+    blend_block = f"""\
+### Giá mục tiêu gộp
+
+| | |
+|---|---|
+| Price_FCFF | {_fv_price(price_fcff)} VNĐ/CP |
+| Price_FCFE | {_fv_price(price_fcfe)} VNĐ/CP |
+| **Target Price ({fcff_weight_pct}% FCFF + {fcfe_weight_pct}% FCFE)** | **{_fv_price(target_price)} VNĐ/CP** |
+| Giá thị trường hiện tại | {_fv_price(current_price)} VNĐ/CP |
+| **Tiềm năng tăng/giảm** | **{upside_str}** |"""
+
+    return f"{fcff_block}\n\n{fcfe_block}\n\n{blend_block}"
 
 
 # ---------------------------------------------------------------------------
@@ -276,6 +394,10 @@ def _build_valuation(ctx: ReportContext) -> dict:
     narrative = _or_placeholder(ctx.valuation_narrative)
     chart = _chart_ref(ctx, "C6", "DCF Value Bridge")
 
+    bridge_section = ""
+    if ctx.valuation_bridge:
+        bridge_section = f"\n## Valuation Bridge\n\n{ctx.valuation_bridge}\n"
+
     md = f"""\
 # Định giá — {ctx.ticker}
 
@@ -284,7 +406,7 @@ def _build_valuation(ctx: ReportContext) -> dict:
 **WACC:** {ctx.wacc_pct:.1f}% | **Tăng trưởng dài hạn:** {ctx.terminal_growth_pct:.1f}%
 
 {dcf_table}
-
+{bridge_section}
 ## Tổng hợp định giá
 
 {val_summary}
@@ -318,6 +440,7 @@ def _build_sensitivity_peer(ctx: ReportContext) -> dict:
     peer_table = _or_placeholder(ctx.peer_table)
     narrative = _or_placeholder(ctx.sensitivity_narrative)
     chart = _chart_ref(ctx, "C7", "Sensitivity Heatmap")
+    chart_peer = _chart_ref(ctx, "C8", "Biểu đồ so sánh đồng ngành chưa được tạo.")
 
     md = f"""\
 # Phân tích độ nhạy & So sánh đồng ngành — {ctx.ticker}
@@ -338,6 +461,10 @@ def _build_sensitivity_peer(ctx: ReportContext) -> dict:
 
 {chart}
 
+## Biểu đồ so sánh đồng ngành (C8)
+
+{chart_peer}
+
 ## Nhận xét
 
 {narrative}
@@ -347,7 +474,7 @@ def _build_sensitivity_peer(ctx: ReportContext) -> dict:
         "page_number": 6,
         "title": "Phân tích độ nhạy & So sánh đồng ngành",
         "markdown": md,
-        "chart_ids": ["C7"],
+        "chart_ids": ["C7", "C8"],
         "word_count": len(md.split()),
     }
 
@@ -392,6 +519,10 @@ def _build_conclusion(ctx: ReportContext) -> dict:
     sources_table = _or_placeholder(ctx.key_sources_table)
     upside_sign = "+" if ctx.upside_pct >= 0 else ""
 
+    citation_section = ""
+    if ctx.citation_appendix:
+        citation_section = f"\n## Phụ lục Citation\n\n{ctx.citation_appendix}\n"
+
     md = f"""\
 # Kết luận & Phụ lục kiểm định — {ctx.ticker}
 
@@ -415,7 +546,7 @@ def _build_conclusion(ctx: ReportContext) -> dict:
 ## Nguồn dữ liệu chính
 
 {sources_table}
-
+{citation_section}
 ---
 
 ## Tuyên bố miễn trách nhiệm

@@ -1,14 +1,56 @@
 from __future__ import annotations
 
+import re
 from typing import Any
+
+_FY_PATTERN = re.compile(r"^20\d{2}FY$")
+
+
+def _issue_id(gate_name: str, reason: str) -> str:
+    prefix = re.sub(r"[^A-Z0-9]+", "_", gate_name.upper()).strip("_")
+    suffix = re.sub(r"[^A-Z0-9]+", "_", reason.upper()).strip("_")[:64]
+    return f"{prefix}:{suffix or 'FAILED'}"
+
+
+def _gate_result(
+    name: str,
+    passed: bool,
+    blocking_reasons: list[str] | None = None,
+    summary: dict[str, Any] | None = None,
+    severity: str | None = None,
+) -> dict[str, Any]:
+    reasons = blocking_reasons or []
+    result_severity = severity or ("none" if passed else "critical")
+    return {
+        "gate": name,
+        "passed": passed,
+        "status": "pass" if passed else "fail",
+        "severity": result_severity,
+        "blocking_reasons": reasons,
+        "issues": [
+            {
+                "issue_id": _issue_id(name, reason),
+                "severity": result_severity,
+                "message": reason,
+                "blocking": True,
+            }
+            for reason in reasons
+        ],
+        "summary": summary or {},
+    }
 
 
 def pass_gate(name: str, summary: dict[str, Any] | None = None) -> dict[str, Any]:
-    return {"gate": name, "passed": True, "blocking_reasons": [], "summary": summary or {}}
+    return _gate_result(name, True, [], summary, severity="none")
 
 
-def fail_gate(name: str, reason: str, summary: dict[str, Any] | None = None) -> dict[str, Any]:
-    return {"gate": name, "passed": False, "blocking_reasons": [reason], "summary": summary or {}}
+def fail_gate(
+    name: str,
+    reason: str,
+    summary: dict[str, Any] | None = None,
+    severity: str = "critical",
+) -> dict[str, Any]:
+    return _gate_result(name, False, [reason], summary, severity=severity)
 
 
 def data_quality_gate(build_facts_summary: dict[str, Any]) -> dict[str, Any]:
@@ -18,7 +60,7 @@ def data_quality_gate(build_facts_summary: dict[str, Any]) -> dict[str, Any]:
     if not build_facts_summary.get("snapshot_id"):
         blocking_reasons.append("snapshot_id_missing")
     periods = build_facts_summary.get("periods_available") or []
-    if periods and any(not str(period).endswith("FY") for period in periods):
+    if periods and any(not _FY_PATTERN.match(str(period)) for period in periods):
         blocking_reasons.append("invalid_period_scope")
     for gate_key in ("coverage_gate", "core_keys_gate", "source_validation_gate"):
         if build_facts_summary.get(gate_key) == "fail":
@@ -28,12 +70,7 @@ def data_quality_gate(build_facts_summary: dict[str, Any]) -> dict[str, Any]:
     if build_facts_summary.get("reconciliation_status") in {"fail", "manual_review"}:
         blocking_reasons.append("reconciliation_requires_review")
     if blocking_reasons:
-        return {
-            "gate": "DATA_QUALITY_GATE",
-            "passed": False,
-            "blocking_reasons": sorted(set(blocking_reasons)),
-            "summary": build_facts_summary,
-        }
+        return _gate_result("DATA_QUALITY_GATE", False, sorted(set(blocking_reasons)), build_facts_summary)
     return pass_gate("DATA_QUALITY_GATE", build_facts_summary)
 
 
@@ -91,6 +128,15 @@ def export_gate(state: dict[str, Any], final_approval_required: bool = True) -> 
         return fail_gate("EXPORT_GATE", "quality_evaluation_failed", evaluation)
     valuation = state.get("valuation_outputs") or (state.get("artifacts") or {}).get("valuation") or {}
     report = state.get("draft_report") or (state.get("artifacts") or {}).get("report") or {}
+    report_blockers = _report_export_blockers(report)
+    if report_blockers:
+        return _gate_result("EXPORT_GATE", False, report_blockers, report)
+    valuation_blockers = _valuation_export_blockers(valuation)
+    if valuation_blockers:
+        return _gate_result("EXPORT_GATE", False, valuation_blockers, valuation)
+    evaluation_blockers = _evaluation_export_blockers(evaluation)
+    if evaluation_blockers:
+        return _gate_result("EXPORT_GATE", False, evaluation_blockers, evaluation)
     if valuation and report and valuation.get("snapshot_id") != report.get("snapshot_id"):
         return fail_gate("EXPORT_GATE", "report_not_linked_to_valuation_snapshot", {"valuation": valuation, "report": report})
     if final_approval_required and valuation and not (state.get("artifacts") or {}).get("valuation_lock"):
@@ -99,6 +145,55 @@ def export_gate(state: dict[str, Any], final_approval_required: bool = True) -> 
     if audit and audit.get("passed") is False:
         return fail_gate("EXPORT_GATE", "audit_review_failed", audit)
     return pass_gate("EXPORT_GATE", {})
+
+
+def _positive(summary: dict[str, Any], *keys: str) -> bool:
+    return any(bool(summary.get(key, 0)) for key in keys)
+
+
+def _report_export_blockers(report: dict[str, Any]) -> list[str]:
+    if not report:
+        return []
+    blockers: list[str] = []
+    source_gate = report.get("source_tier_gate") or {}
+    if report.get("export_blocked") is True:
+        blockers.append("report_generation_marked_export_blocked")
+    if source_gate.get("export_decision") == "BLOCKED" or source_gate.get("blocking_count", 0) > 0:
+        blockers.append("source_tier_gate_blocked")
+    if _positive(report, "tier3_only_material_count"):
+        blockers.append("tier3_only_material_fact")
+    if _positive(report, "unsupported_numeric_claims_count", "missing_source_trace_count"):
+        blockers.append("missing_source_trace_for_material_claim")
+    if _positive(report, "unresolved_discrepancy_count", "major_discrepancy_count"):
+        blockers.append("unresolved_major_source_discrepancy")
+    if _positive(report, "generic_citation_count"):
+        blockers.append("generic_citation_only")
+    if _positive(report, "missing_formula_trace_count"):
+        blockers.append("missing_formula_trace")
+    if _positive(report, "missing_forecast_driver_count"):
+        blockers.append("missing_forecast_driver")
+    return sorted(set(blockers))
+
+
+def _valuation_export_blockers(valuation: dict[str, Any]) -> list[str]:
+    if not valuation:
+        return []
+    blockers: list[str] = []
+    if _positive(valuation, "missing_formula_trace_count") or valuation.get("formula_trace_status") == "missing":
+        blockers.append("missing_formula_trace")
+    if _positive(valuation, "na_input_count", "unresolved_na_count") or valuation.get("has_na_inputs") is True:
+        blockers.append("unresolved_na_in_valuation")
+    if valuation.get("debt_forecast_missing") is True:
+        blockers.append("missing_debt_forecast_when_required")
+    return sorted(set(blockers))
+
+
+def _evaluation_export_blockers(evaluation: dict[str, Any]) -> list[str]:
+    if not evaluation:
+        return []
+    if evaluation.get("llm_only_pass") is True:
+        return ["llm_only_evaluation_pass"]
+    return []
 
 
 def ocr_export_gate(
@@ -180,11 +275,11 @@ def ocr_export_gate(
 
     # If any facts are blocked in final mode, fail the gate
     if blocking_reasons:
-        return {
-            "gate": "OCR_EXPORT_GATE",
-            "passed": False,
-            "blocking_reasons": blocking_reasons,
-            "summary": {
+        return _gate_result(
+            "OCR_EXPORT_GATE",
+            False,
+            blocking_reasons,
+            {
                 "total_candidates": total,
                 "promoted": promoted,
                 "blocked": blocked,
@@ -192,7 +287,7 @@ def ocr_export_gate(
                 "action": "inspect reconciliation report, manually approve or correct candidate facts, rerun promotion",
                 "report_mode": "final",
             },
-        }
+        )
 
     # Final mode with no blocked facts: pass
     return pass_gate(

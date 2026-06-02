@@ -32,8 +32,25 @@ def _yoy_growth(curr: float | None, prev: float | None) -> float | None:
     return (curr - prev) / abs(prev)
 
 
+def _prefer(fact_table: FactTable, key: str, period: str, fallback: float | None) -> float | None:
+    """Return the pre-computed derived value from fact_table if present, else fallback.
+
+    Callers should pass the output of compute_derived() so that metrics like
+    gross_margin, net_margin, debt_to_equity that are computed there are reused
+    here rather than recomputed independently. This makes normalizer.compute_derived()
+    the single source of truth for those formulas.
+    """
+    v = _get(fact_table, key, period)
+    return v if v is not None else fallback
+
+
 def compute_ratios(fact_table: FactTable) -> RatioTable:
     """Compute all ratio metrics for every available period.
+
+    Expected contract: callers pass the output of normalizer.compute_derived()
+    so that derived metrics (gross_margin, net_margin, ebitda_margin,
+    debt_to_equity, free_cash_flow.total) are read from the table rather than
+    recomputed. compute_derived() is the single source of truth for those formulas.
 
     Returns RatioTable where None means the ratio cannot be computed
     (missing inputs or division by zero).
@@ -69,11 +86,11 @@ def compute_ratios(fact_table: FactTable) -> RatioTable:
         inv = _get(fact_table, "inventory.ending", period)
         pbt_tax = _get(fact_table, "profit_before_tax.total", period)
 
-        # Profitability
-        _set("gross_margin", period, _safe_div(gp, rev))
-        _set("ebitda_margin", period, _safe_div(ebitda, rev))
+        # Profitability — prefer values already in FactTable (from compute_derived)
+        _set("gross_margin", period, _prefer(fact_table, "gross_margin", period, _safe_div(gp, rev)))
+        _set("ebitda_margin", period, _prefer(fact_table, "ebitda_margin", period, _safe_div(ebitda, rev)))
         _set("ebit_margin", period, _safe_div(ebit, rev))
-        _set("net_margin", period, _safe_div(ni, rev))
+        _set("net_margin", period, _prefer(fact_table, "net_margin", period, _safe_div(ni, rev)))
 
         # Returns
         _set("roe", period, _safe_div(ni, equity))
@@ -84,7 +101,7 @@ def compute_ratios(fact_table: FactTable) -> RatioTable:
         _set("roce", period, _safe_div(ni, roce_base if roce_base > 0 else None))
 
         # Leverage: ONLY use interest-bearing debt — do NOT proxy with total_liabilities
-        _set("debt_to_equity", period, _safe_div(total_debt, equity))
+        _set("debt_to_equity", period, _prefer(fact_table, "debt_to_equity", period, _safe_div(total_debt, equity)))
         _set("net_debt_to_equity", period,
              _safe_div(
                  ((total_debt or 0) - (cash or 0)) if total_debt is not None else None,
@@ -101,9 +118,13 @@ def compute_ratios(fact_table: FactTable) -> RatioTable:
             _set("quick_ratio", period, _safe_div(curr_assets - inv, curr_liab))
 
         # Cash flow — CAPEX is stored negative (CFS outflow): FCF = OCF + CAPEX_signed
+        # Prefer free_cash_flow.total from FactTable (set by compute_derived); recompute as fallback.
         _set("ocf_margin", period, _safe_div(ocf, rev))
-        if ocf is not None and capex is not None:
-            fcf = ocf + capex   # capex negative → reduces FCF correctly
+        fcf_canonical = _get(fact_table, "free_cash_flow.total", period)
+        fcf = fcf_canonical if fcf_canonical is not None else (
+            (ocf + capex) if (ocf is not None and capex is not None) else None
+        )
+        if fcf is not None:
             _set("fcf_margin", period, _safe_div(fcf, rev))
             _set("fcf_absolute_bn", period, fcf)
         _set("ocf_to_net_income", period, _safe_div(ocf, ni))

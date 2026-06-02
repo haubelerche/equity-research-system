@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from scripts.dataset.dqf import stages_to_invalidate
+from backend.dataset.dqf import stages_to_invalidate
 
 from backend.runtime_store import RuntimeStore
 from backend.settings import Settings

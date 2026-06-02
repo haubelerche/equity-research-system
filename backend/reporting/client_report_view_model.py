@@ -15,7 +15,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from backend.reporting.report_data_loader import _COMPANIES, ROOT
+from backend.reporting.report_data_loader import _COMPANIES, ROOT, _read_manifest_or_raise
 
 _logger = logging.getLogger(__name__)
 
@@ -119,12 +119,19 @@ def _derive_periods(facts: dict[str, dict[str, float]]) -> list[str]:
 
 
 def _derive_shares_mn(facts: dict[str, dict[str, float]], periods: list[str]) -> float:
-    """Shares outstanding in millions from canonical facts. 0.0 if unavailable."""
-    shares_fact = facts.get("shares_outstanding.total", {})
-    for p in reversed(periods):
-        v = shares_fact.get(p)
-        if v and v > 0:
-            return v / 1_000_000
+    """Shares outstanding in millions from canonical facts. 0.0 if unavailable.
+
+    Tries keys in priority order: shares_outstanding.ending (period-end count),
+    shares_outstanding.weighted_avg (for EPS consistency), shares_outstanding.total
+    (legacy alias). Values stored as absolute share count (e.g. 94,000,000).
+    """
+    for key in ("shares_outstanding.ending", "shares_outstanding.weighted_avg", "shares_outstanding.total"):
+        shares_fact = facts.get(key, {})
+        for p in reversed(periods):
+            period_key = p.replace("A", "FY") if p.endswith("A") else p
+            v = shares_fact.get(period_key) or shares_fact.get(p)
+            if v and v > 0:
+                return v / 1_000_000
     return 0.0
 
 
@@ -138,25 +145,22 @@ def _derive_dividend_per_share(facts: dict[str, dict[str, float]], periods: list
     return None
 
 
-def _latest_json(pattern: str) -> dict[str, Any]:
-    files = sorted(glob.glob(str(ROOT / pattern)))
-    if not files:
-        return {}
-    with open(files[-1], encoding="utf-8") as f:
-        return json.load(f)
-
-
-def _resolve_json(pattern: str, manifest=None, key: str = "") -> dict[str, Any]:
+def _resolve_json(
+    pattern: str,
+    manifest=None,
+    key: str = "",
+    allow_latest_artifacts: bool = False,
+) -> dict[str, Any]:
     """Manifest-first artifact resolution; falls back to glob with DeprecationWarning."""
-    import warnings as _w
     if manifest is not None and key:
-        return manifest.load_json(key)
-    _w.warn(
-        f"No run_id — resolving '{key or pattern}' via glob. "
-        "Pass run_id= to build_client_report_view_model() for reproducibility.",
-        DeprecationWarning,
-        stacklevel=4,
-    )
+        if manifest.resolve(key):
+            return manifest.load_json(key)
+        return {}
+    if not allow_latest_artifacts:
+        raise ValueError(
+            f"run_id is required to resolve artifact '{key or pattern}'. "
+            "Pass allow_latest_artifacts=True only for internal debug rendering."
+        )
     files = sorted(glob.glob(str(ROOT / pattern)))
     if not files:
         return {}
@@ -164,28 +168,68 @@ def _resolve_json(pattern: str, manifest=None, key: str = "") -> dict[str, Any]:
         return json.load(f)
 
 
-def _facts(ticker: str, manifest=None) -> dict[str, dict[str, float]]:
-    return _resolve_json(f"artifacts/facts/{ticker}_*_fact_report.json", manifest, "facts").get("facts", {})
+def _facts(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, dict[str, float]]:
+    return _resolve_json(
+        f"artifacts/facts/{ticker}_*_fact_report.json",
+        manifest,
+        "facts",
+        allow_latest_artifacts,
+    ).get("facts", {})
 
 
-def _valuation(ticker: str, manifest=None) -> dict[str, Any]:
-    return _resolve_json(f"artifacts/valuation/{ticker}_*_valuation.json", manifest, "valuation")
+def _valuation(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
+    return _resolve_json(
+        f"artifacts/valuation/{ticker}_*_valuation.json",
+        manifest,
+        "valuation",
+        allow_latest_artifacts,
+    )
 
 
-def _valuation_result(ticker: str, manifest=None) -> dict[str, Any]:
-    return _resolve_json(f"artifacts/valuation_results/*_{ticker}_valuation_result.json", manifest, "valuation_result")
+def _valuation_result(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
+    return _resolve_json(
+        f"artifacts/valuation_results/*_{ticker}_valuation_result.json",
+        manifest,
+        "valuation_result",
+        allow_latest_artifacts,
+    )
 
 
-def _forecast(ticker: str, manifest=None) -> dict[str, Any]:
-    return _resolve_json(f"artifacts/forecast/{ticker}_*_forecast.json", manifest, "forecast")
+def _forecast(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
+    data = _resolve_json(
+        f"artifacts/forecast/{ticker}_*_forecast.json",
+        manifest,
+        "forecast",
+        allow_latest_artifacts,
+    )
+    if data or manifest is None:
+        return data
+    return _valuation(ticker, manifest, allow_latest_artifacts).get("forecast", {})
 
 
-def _fcff(ticker: str, manifest=None) -> dict[str, Any]:
-    return _resolve_json(f"artifacts/forecast/{ticker}_*_fcff.json", manifest, "fcff")
+def _fcff(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
+    data = _resolve_json(
+        f"artifacts/forecast/{ticker}_*_fcff.json",
+        manifest,
+        "fcff",
+        allow_latest_artifacts,
+    )
+    if data or manifest is None:
+        return data
+    return _valuation(ticker, manifest, allow_latest_artifacts).get("fcff", {})
 
 
-def _blend(ticker: str, manifest=None) -> dict[str, Any]:
-    return _resolve_json(f"artifacts/forecast/{ticker}_*_blend.json", manifest, "blend")
+def _blend(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
+    data = _resolve_json(
+        f"artifacts/forecast/{ticker}_*_blend.json",
+        manifest,
+        "blend",
+        allow_latest_artifacts,
+    )
+    if data or manifest is None:
+        return data
+    return _valuation(ticker, manifest, allow_latest_artifacts).get("blend_dcf", {})
+
 
 
 def _fact_value(facts: dict[str, dict[str, float]], metric: str, period: str) -> float | None:
@@ -586,7 +630,23 @@ def _table_bs_cf(
     n = len(periods)
     actual_periods = [p for p in periods if p.endswith("A")]
     forecast_periods = [p for p in periods if p.endswith("F")]
-    fcff_vals = [None] * len(actual_periods) + [fcff_rows.get(p, {}).get("fcff") for p in forecast_periods]
+
+    # Historical FCF: CFO - |CAPEX| using canonical facts (consistent sign convention).
+    # Forecast FCF: FCFF from the valuation engine.
+    cfo_hist = [
+        _fact_value(facts, "operating_cash_flow.total", p.replace("A", "FY"))
+        for p in actual_periods
+    ]
+    capex_hist = [
+        _fact_value(facts, "capex.total", p.replace("A", "FY"))
+        for p in actual_periods
+    ]
+    fcf_hist = [
+        None if cfo is None else cfo - abs(cap or 0.0)
+        for cfo, cap in zip(cfo_hist, capex_hist)
+    ]
+    fcff_vals = fcf_hist + [fcff_rows.get(p, {}).get("fcff") for p in forecast_periods]
+
     delta_nwc = [None] * len(actual_periods) + [fcff_rows.get(p, {}).get("delta_nwc") for p in forecast_periods]
     capex = _row_values(facts, forecast_rows, "capex", periods)
     debt = _row_values(facts, forecast_rows, "debt", periods)
@@ -595,6 +655,13 @@ def _table_bs_cf(
     equity = _row_values(facts, forecast_rows, "equity", periods)
     shares_count = shares_mn * 1_000_000 if shares_mn else 0.0
     bvps = [None if eq is None or shares_count == 0 else eq * 1_000_000_000 / shares_count for eq in equity]
+
+    # Dividend row: use forecast_rows for forecast periods (cash_dividend field), dash for historical.
+    dividends: list[Any] = [_DASH] * len(actual_periods) + [
+        forecast_rows.get(p, {}).get("cash_dividend")
+        for p in forecast_periods
+    ]
+
     return TableData(
         title="CÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN",
         periods=periods,
@@ -606,7 +673,7 @@ def _table_bs_cf(
             ("Các khoản mục dòng tiền khác", [_DASH] * n),
             ("Dòng tiền tự do", fcff_vals),
             ("Phát hành cổ phiếu", [_DASH] * n),
-            ("Cổ tức", [_DASH] * n),
+            ("Cổ tức", dividends),
             ("Thay đổi nợ ròng", [_DASH] * n),
             ("Nợ ròng cuối năm", net_debt),
             ("Vốn CSH", equity),
@@ -846,26 +913,21 @@ def build_client_report_view_model(
     ticker: str,
     mode: RenderMode | str = "analyst_draft",
     run_id: str | None = None,
+    allow_latest_artifacts: bool = False,
 ) -> ClientReportViewModel:
     ticker = ticker.upper()
     company_name, exchange = _COMPANIES.get(ticker, (ticker, "HOSE"))
 
     manifest = None
     if run_id:
-        from backend.reporting.artifact_manifest import read_manifest
-        manifest = read_manifest(run_id, base_dir=ROOT / "artifacts")
-        if manifest is None:
-            _logger.warning(
-                "run_id=%s provided but no manifest found in artifacts/manifests/ — falling back to glob",
-                run_id,
-            )
+        manifest = _read_manifest_or_raise(run_id, base_dir=ROOT)
 
-    facts = _facts(ticker, manifest)
-    val = _valuation(ticker, manifest)
-    val_result = _valuation_result(ticker, manifest)
-    forecast = _forecast(ticker, manifest)
-    fcff = _fcff(ticker, manifest)
-    blend = _blend(ticker, manifest)
+    facts = _facts(ticker, manifest, allow_latest_artifacts)
+    val = _valuation(ticker, manifest, allow_latest_artifacts)
+    val_result = _valuation_result(ticker, manifest, allow_latest_artifacts)
+    forecast = _forecast(ticker, manifest, allow_latest_artifacts)
+    fcff = _fcff(ticker, manifest, allow_latest_artifacts)
+    blend = _blend(ticker, manifest, allow_latest_artifacts)
     forecast_rows = _forecast_by_label(forecast)
     fcff_rows = _fcff_by_label(fcff)
     current_price, target_price, upside = _market_price_inputs(mode, val_result, blend)

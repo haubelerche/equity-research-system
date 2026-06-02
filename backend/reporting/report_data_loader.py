@@ -16,7 +16,6 @@ import glob
 import json
 import logging as _logging
 import os
-import warnings as _warnings
 from pathlib import Path
 from typing import Optional
 
@@ -34,7 +33,12 @@ ROOT = Path(__file__).resolve().parents[2]
 _loader_logger = _logging.getLogger(__name__)
 
 
-def _resolve_artifact(key: str, glob_pattern: str, manifest=None) -> dict:
+def _resolve_artifact(
+    key: str,
+    glob_pattern: str,
+    manifest=None,
+    allow_latest_artifacts: bool = False,
+) -> dict:
     """Resolve JSON artifact: manifest-first, then glob fallback with DeprecationWarning.
 
     If manifest is provided, only the manifest path is used — glob is never called.
@@ -43,17 +47,29 @@ def _resolve_artifact(key: str, glob_pattern: str, manifest=None) -> dict:
     if manifest is not None:
         return manifest.load_json(key)  # load_json already logs on failure, returns {}
 
-    _warnings.warn(
-        f"load_report_context called without run_id — resolving '{key}' via glob. "
-        "This is non-deterministic. Pass run_id= for reproducible rendering.",
-        DeprecationWarning,
-        stacklevel=4,
-    )
+    if not allow_latest_artifacts:
+        raise ValueError(
+            f"run_id is required to resolve artifact '{key}'. "
+            "Pass allow_latest_artifacts=True only for internal debug rendering."
+        )
     files = sorted(glob.glob(str(ROOT / glob_pattern)))
     if files:
         with open(files[-1], encoding="utf-8") as f:
             return json.load(f)
     return {}
+
+
+def _read_manifest_or_raise(run_id: str, base_dir: "Path | None" = None):
+    from backend.reporting.artifact_manifest import read_manifest
+
+    resolved = (base_dir if base_dir is not None else ROOT) / "artifacts"
+    manifest = read_manifest(run_id, base_dir=resolved)
+    if manifest is None:
+        raise FileNotFoundError(
+            f"No artifact manifest found for run_id={run_id!r}. "
+            "Run the canonical pipeline first or use debug rendering without run_id."
+        )
+    return manifest
 
 # ── Company master data ────────────────────────────────────────────────────────
 _COMPANIES: dict[str, tuple[str, str]] = {
@@ -61,7 +77,7 @@ _COMPANIES: dict[str, tuple[str, str]] = {
     "IMP": ("Công ty CP Dược phẩm Imexpharm", "HOSE"),
     "DMC": ("Công ty CP XNK Y tế Domesco", "HOSE"),
     "TRA": ("Công ty CP Traphaco", "HOSE"),
-    "DBD": ("Công ty CP Dược Bình Định", "HNX"),
+    "DBD": ("Công ty CP Dược Bình Định", "HOSE"),
 }
 
 _SECTOR_BLURB: dict[str, str] = {
@@ -760,7 +776,11 @@ def _build_valuation_narrative(
 
 # ── Main public function ───────────────────────────────────────────────────────
 
-def load_report_context(ticker: str, run_id: str | None = None) -> "ReportContext":
+def load_report_context(
+    ticker: str,
+    run_id: str | None = None,
+    allow_latest_artifacts: bool = False,
+) -> "ReportContext":
     """Load a fully-populated ReportContext for *ticker* from valuation artifacts.
 
     When *run_id* is provided, artifacts are resolved deterministically from the
@@ -773,12 +793,7 @@ def load_report_context(ticker: str, run_id: str | None = None) -> "ReportContex
     ticker = ticker.upper()
     manifest = None
     if run_id:
-        from backend.reporting.artifact_manifest import read_manifest
-        manifest = read_manifest(run_id, base_dir=ROOT / "artifacts")
-        if manifest is None:
-            _loader_logger.warning(
-                "run_id=%s provided but no manifest found — falling back to glob", run_id
-            )
+        manifest = _read_manifest_or_raise(run_id)
 
     company_name, exchange = _COMPANIES.get(ticker, (ticker, "HOSE"))
 
@@ -790,11 +805,13 @@ def load_report_context(ticker: str, run_id: str | None = None) -> "ReportContex
         "valuation",
         f"artifacts/valuation/{ticker}_*_valuation.json",
         manifest,
+        allow_latest_artifacts,
     )
     valuation_result = _resolve_artifact(
         "valuation_result",
         f"artifacts/valuation_results/*_{ticker}_valuation_result.json",
         manifest,
+        allow_latest_artifacts,
     )
     ratios = val.get("ratios", {})
     fc = val.get("forecast", {})
