@@ -1,0 +1,1480 @@
+{
+  "ticker": "DMC",
+  "generated_at": "2026-06-02T22:24:21.381070+00:00",
+  "formula_version": "valuation_v1_code_first_fcff_fcfe_blend",
+  "assumption_version": "default_assumptions_v1",
+  "unit_policy": "VND per share; financial statement values follow canonical fact units",
+  "currency": "VND",
+  "period_scope": {
+    "from_year": 2021,
+    "to_year": 2025,
+    "period_type": "FY"
+  },
+  "valuation_methods": [
+    "fcff",
+    "fcfe",
+    "blend_dcf",
+    "multiples",
+    "sensitivity"
+  ],
+  "snapshot_id": "snap_fc959e219ea9ae6a4630",
+  "snapshot_as_of": "2026-06-02",
+  "fy_periods": [
+    "2022FY",
+    "2023FY",
+    "2024FY",
+    "2025FY"
+  ],
+  "assumptions": {
+    "wacc": 0.1,
+    "terminal_growth": 0.03,
+    "forecast_years": 5,
+    "target_pe": 15.0,
+    "target_pb": 2.5,
+    "target_ev_ebitda": 10.0,
+    "note": "Assumptions are defaults \u2014 must be reviewed and approved before use in final reports."
+  },
+  "ratios": {
+    "gross_margin": {
+      "2022FY": 0.284348,
+      "2023FY": 0.216459,
+      "2024FY": 0.219793,
+      "2025FY": 0.197893
+    },
+    "ebitda_margin": {
+      "2022FY": 0.204914,
+      "2023FY": 0.16138,
+      "2024FY": 0.169043,
+      "2025FY": 0.154541
+    },
+    "net_margin": {
+      "2022FY": 0.125618,
+      "2023FY": 0.106649,
+      "2024FY": 0.10672,
+      "2025FY": 0.095969
+    },
+    "roe": {
+      "2022FY": 0.137084,
+      "2023FY": 0.120573,
+      "2024FY": 0.125704,
+      "2025FY": 0.117517
+    },
+    "roa": {
+      "2022FY": 0.108857,
+      "2023FY": 0.099144,
+      "2024FY": 0.11013,
+      "2025FY": 0.103559
+    },
+    "roce": {
+      "2022FY": 0.137084,
+      "2023FY": 0.120573,
+      "2024FY": 0.125704,
+      "2025FY": 0.117517
+    },
+    "current_ratio": {
+      "2022FY": 4.22546,
+      "2023FY": 5.091725,
+      "2024FY": 6.710699,
+      "2025FY": 7.467405
+    },
+    "quick_ratio": {
+      "2022FY": 3.160923,
+      "2023FY": 3.999086,
+      "2024FY": 4.539255,
+      "2025FY": 5.17095
+    },
+    "ocf_margin": {
+      "2022FY": 0.171837,
+      "2023FY": 0.086626,
+      "2024FY": 0.008259,
+      "2025FY": 0.07805
+    },
+    "fcf_margin": {
+      "2022FY": 0.165204,
+      "2023FY": 0.082379,
+      "2024FY": -0.013649,
+      "2025FY": 0.060299
+    },
+    "fcf_absolute_bn": {
+      "2022FY": 263.124073,
+      "2023FY": 141.611286,
+      "2024FY": -25.925035,
+      "2025FY": 124.657323
+    },
+    "ocf_to_net_income": {
+      "2022FY": 1.367928,
+      "2023FY": 0.812253,
+      "2024FY": 0.077388,
+      "2025FY": 0.813287
+    },
+    "roic": {
+      "2022FY": 0.137084,
+      "2023FY": 0.120573,
+      "2024FY": 0.125704,
+      "2025FY": 0.117517
+    },
+    "inventory_turnover": {
+      "2022FY": 2.830183,
+      "2023FY": 3.755231,
+      "2024FY": 2.998755,
+      "2025FY": 3.181308
+    },
+    "interest_coverage": {
+      "2025FY": 2678.277369
+    },
+    "revenue_growth": {
+      "2023FY": 0.079301,
+      "2024FY": 0.10494,
+      "2025FY": 0.08839
+    },
+    "net_income_growth": {
+      "2023FY": -0.083684,
+      "2024FY": 0.105676,
+      "2025FY": -0.021257
+    },
+    "eps_growth": {
+      "2023FY": -0.221142,
+      "2024FY": 0.105861,
+      "2025FY": -0.021362
+    },
+    "gross_profit_growth": {
+      "2023FY": -0.178384,
+      "2024FY": 0.121956,
+      "2025FY": -0.020054
+    }
+  },
+  "dcf_simplified": {
+    "bear": {
+      "ticker": "DMC",
+      "scenario": "bear",
+      "assumptions": {
+        "wacc": 0.12,
+        "terminal_growth": 0.02,
+        "forecast_years": 5,
+        "fcf_growth_override": -0.13
+      },
+      "periods_used": [
+        "2022FY",
+        "2023FY",
+        "2024FY",
+        "2025FY"
+      ],
+      "fcf_history_vnd_bn": {
+        "2022FY": 263.124073178,
+        "2023FY": 141.611285764,
+        "2024FY": -25.925035070999996,
+        "2025FY": 124.65732313799998
+      },
+      "fcf_cagr": null,
+      "projected_fcf_vnd_bn": [
+        108.4519,
+        94.3531,
+        82.0872,
+        71.4159,
+        62.1318
+      ],
+      "pv_fcf_vnd_bn": [
+        96.832,
+        75.2177,
+        58.4281,
+        45.3861,
+        35.2553
+      ],
+      "terminal_value_vnd_bn": 633.7445,
+      "pv_terminal_value_vnd_bn": 359.6037,
+      "enterprise_value_vnd_bn": 670.7228,
+      "net_debt_vnd_bn": -75.8422,
+      "equity_value_vnd_bn": 746.565,
+      "shares_mn": null,
+      "intrinsic_value_per_share_vnd": null,
+      "terminal_value_weight": 0.5361,
+      "warnings": [
+        "Simplified OCF-CAPEX DCF \u2014 s\u1eed d\u1ee5ng CAGR l\u1ecbch s\u1eed, kh\u00f4ng ph\u1ea3i driver-based forecast. D\u00f9ng FCFF/FCFE blend (60/40) l\u00e0m \u0111\u1ecbnh gi\u00e1 ch\u00ednh. K\u1ebft qu\u1ea3 n\u00e0y ch\u1ec9 mang t\u00ednh tham kh\u1ea3o.",
+        "Negative FCF in history: ['2024FY'] \u2014 CAGR-based projection unreliable; simplified DCF target price blocked",
+        "Simplified DCF: shares_outstanding fact missing; target price blocked to avoid EPS-implied share-count error."
+      ]
+    },
+    "base": {
+      "ticker": "DMC",
+      "scenario": "base",
+      "assumptions": {
+        "wacc": 0.1,
+        "terminal_growth": 0.03,
+        "forecast_years": 5,
+        "fcf_growth_override": null
+      },
+      "periods_used": [
+        "2022FY",
+        "2023FY",
+        "2024FY",
+        "2025FY"
+      ],
+      "fcf_history_vnd_bn": {
+        "2022FY": 263.124073178,
+        "2023FY": 141.611285764,
+        "2024FY": -25.925035070999996,
+        "2025FY": 124.65732313799998
+      },
+      "fcf_cagr": -0.2204348707732181,
+      "projected_fcf_vnd_bn": [
+        112.1916,
+        100.9724,
+        90.8752,
+        81.7877,
+        73.6089
+      ],
+      "pv_fcf_vnd_bn": [
+        101.9924,
+        83.4483,
+        68.2759,
+        55.8621,
+        45.7053
+      ],
+      "terminal_value_vnd_bn": 1083.1024,
+      "pv_terminal_value_vnd_bn": 672.5214,
+      "enterprise_value_vnd_bn": 1027.8053,
+      "net_debt_vnd_bn": -75.8422,
+      "equity_value_vnd_bn": 1103.6475,
+      "shares_mn": null,
+      "intrinsic_value_per_share_vnd": null,
+      "terminal_value_weight": 0.6543,
+      "warnings": [
+        "Simplified OCF-CAPEX DCF \u2014 s\u1eed d\u1ee5ng CAGR l\u1ecbch s\u1eed, kh\u00f4ng ph\u1ea3i driver-based forecast. D\u00f9ng FCFF/FCFE blend (60/40) l\u00e0m \u0111\u1ecbnh gi\u00e1 ch\u00ednh. K\u1ebft qu\u1ea3 n\u00e0y ch\u1ec9 mang t\u00ednh tham kh\u1ea3o.",
+        "Negative FCF in history: ['2024FY'] \u2014 CAGR-based projection unreliable; simplified DCF target price blocked",
+        "FCF CAGR -22.0% capped to -10.0% for projection",
+        "Simplified DCF: shares_outstanding fact missing; target price blocked to avoid EPS-implied share-count error."
+      ]
+    },
+    "bull": {
+      "ticker": "DMC",
+      "scenario": "bull",
+      "assumptions": {
+        "wacc": 0.08,
+        "terminal_growth": 0.04,
+        "forecast_years": 5,
+        "fcf_growth_override": -0.07
+      },
+      "periods_used": [
+        "2022FY",
+        "2023FY",
+        "2024FY",
+        "2025FY"
+      ],
+      "fcf_history_vnd_bn": {
+        "2022FY": 263.124073178,
+        "2023FY": 141.611285764,
+        "2024FY": -25.925035070999996,
+        "2025FY": 124.65732313799998
+      },
+      "fcf_cagr": null,
+      "projected_fcf_vnd_bn": [
+        115.9313,
+        107.8161,
+        100.269,
+        93.2502,
+        86.7226
+      ],
+      "pv_fcf_vnd_bn": [
+        107.3438,
+        92.4349,
+        79.5968,
+        68.5417,
+        59.022
+      ],
+      "terminal_value_vnd_bn": 2254.7889,
+      "pv_terminal_value_vnd_bn": 1534.5714,
+      "enterprise_value_vnd_bn": 1941.5106,
+      "net_debt_vnd_bn": -75.8422,
+      "equity_value_vnd_bn": 2017.3528,
+      "shares_mn": null,
+      "intrinsic_value_per_share_vnd": null,
+      "terminal_value_weight": 0.7904,
+      "warnings": [
+        "Simplified OCF-CAPEX DCF \u2014 s\u1eed d\u1ee5ng CAGR l\u1ecbch s\u1eed, kh\u00f4ng ph\u1ea3i driver-based forecast. D\u00f9ng FCFF/FCFE blend (60/40) l\u00e0m \u0111\u1ecbnh gi\u00e1 ch\u00ednh. K\u1ebft qu\u1ea3 n\u00e0y ch\u1ec9 mang t\u00ednh tham kh\u1ea3o.",
+        "Negative FCF in history: ['2024FY'] \u2014 CAGR-based projection unreliable; simplified DCF target price blocked",
+        "Terminal value weight 79.0% > 70% \u2014 sensitivity analysis required",
+        "Simplified DCF: shares_outstanding fact missing; target price blocked to avoid EPS-implied share-count error."
+      ]
+    }
+  },
+  "fcff": {
+    "ticker": "DMC",
+    "wacc": 0.138,
+    "terminal_growth": 0.03,
+    "assumption_status": "default_unapproved",
+    "wacc_breakdown": {
+      "risk_free_rate": 0.04,
+      "beta": 0.85,
+      "expected_market_return": 0.12,
+      "size_premium": 0.02,
+      "specific_risk_premium": 0.01,
+      "cost_of_equity": 0.138,
+      "cost_of_debt": 0.08,
+      "tax_rate": 0.20027,
+      "wacc_override": null
+    },
+    "capex_convention": "positive_outflow",
+    "capex_formula_note": "CAPEX displayed as positive outflow; formula: FCFF = NOPAT + D&A - CAPEX - \u0394NWC",
+    "fcff_table": [
+      {
+        "year": 2026,
+        "label": "2026F",
+        "ebit": 349.8,
+        "ebit_after_tax": 279.8,
+        "depreciation": 23.0,
+        "capex": 27.5,
+        "delta_nwc": 3.8,
+        "fcff": 271.5,
+        "discount_factor": 0.8787,
+        "pv_fcff": 238.6
+      },
+      {
+        "year": 2027,
+        "label": "2027F",
+        "ebit": 381.6,
+        "ebit_after_tax": 305.2,
+        "depreciation": 25.1,
+        "capex": 30.0,
+        "delta_nwc": 4.1,
+        "fcff": 296.2,
+        "discount_factor": 0.7722,
+        "pv_fcff": 228.7
+      },
+      {
+        "year": 2028,
+        "label": "2028F",
+        "ebit": 416.3,
+        "ebit_after_tax": 332.9,
+        "depreciation": 27.4,
+        "capex": 32.7,
+        "delta_nwc": 4.5,
+        "fcff": 323.1,
+        "discount_factor": 0.6785,
+        "pv_fcff": 219.2
+      },
+      {
+        "year": 2029,
+        "label": "2029F",
+        "ebit": 454.1,
+        "ebit_after_tax": 363.1,
+        "depreciation": 29.9,
+        "capex": 35.7,
+        "delta_nwc": 4.9,
+        "fcff": 352.4,
+        "discount_factor": 0.5963,
+        "pv_fcff": 210.1
+      },
+      {
+        "year": 2030,
+        "label": "2030F",
+        "ebit": 495.3,
+        "ebit_after_tax": 396.1,
+        "depreciation": 32.6,
+        "capex": 38.9,
+        "delta_nwc": 5.3,
+        "fcff": 384.4,
+        "discount_factor": 0.5239,
+        "pv_fcff": 201.4
+      }
+    ],
+    "sum_pv_fcff": 1098.1,
+    "terminal_value": 3666.5,
+    "pv_terminal_value": 1921.1,
+    "enterprise_value": 3019.2,
+    "net_debt": -75.8,
+    "equity_value": 3095.0,
+    "shares_mn": null,
+    "target_price_vnd": null,
+    "current_price_vnd": 59400.0,
+    "upside_pct": null,
+    "warnings": [
+      "Non-operating items (PBT gap) detected: ranged from -3.5% to -1.7% of revenue; median -2.6% applied to forecast.",
+      "Shares outstanding fact missing \u2014 forecast EPS/BVPS omitted to avoid EPS-implied share-count error.",
+      "[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.",
+      "Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to interest_expense/revenue ratio as proxy. Interest expense confidence: low.",
+      "[DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout \u2014 equity may be overstated. Recommend analyst review and explicit payout assumption.",
+      "FCFF: total_debt missing \u2014 net_debt may be understated; using 0",
+      "FCFF: shares_outstanding fact missing \u2014 target price blocked to avoid EPS-implied share-count error."
+    ]
+  },
+  "fcfe": {
+    "ticker": "DMC",
+    "cost_of_equity": 0.138,
+    "terminal_growth": 0.03,
+    "assumption_status": "default_unapproved",
+    "cost_of_equity_breakdown": {
+      "risk_free_rate": 0.04,
+      "beta": 0.85,
+      "equity_risk_premium": 0.08,
+      "size_premium": 0.02,
+      "specific_risk_premium": 0.01,
+      "re_override": null
+    },
+    "capex_convention": "positive_outflow",
+    "capex_formula_note": "CAPEX displayed as positive outflow; formula: FCFE = NI + D&A - CAPEX - \u0394NWC + Net Borrowing",
+    "fcfe_table": [
+      {
+        "year": 2026,
+        "label": "2026F",
+        "net_income": 233.2,
+        "depreciation": 23.0,
+        "capex": 27.5,
+        "delta_nwc": 3.8,
+        "net_borrowing": 0.0,
+        "fcfe": 225.0,
+        "discount_factor": 0.8787,
+        "pv_fcfe": 197.7
+      },
+      {
+        "year": 2027,
+        "label": "2027F",
+        "net_income": 254.4,
+        "depreciation": 25.1,
+        "capex": 30.0,
+        "delta_nwc": 4.1,
+        "net_borrowing": 0.0,
+        "fcfe": 245.4,
+        "discount_factor": 0.7722,
+        "pv_fcfe": 189.5
+      },
+      {
+        "year": 2028,
+        "label": "2028F",
+        "net_income": 277.5,
+        "depreciation": 27.4,
+        "capex": 32.7,
+        "delta_nwc": 4.5,
+        "net_borrowing": 0.0,
+        "fcfe": 267.7,
+        "discount_factor": 0.6785,
+        "pv_fcfe": 181.7
+      },
+      {
+        "year": 2029,
+        "label": "2029F",
+        "net_income": 302.7,
+        "depreciation": 29.9,
+        "capex": 35.7,
+        "delta_nwc": 4.9,
+        "net_borrowing": 0.0,
+        "fcfe": 292.0,
+        "discount_factor": 0.5963,
+        "pv_fcfe": 174.1
+      },
+      {
+        "year": 2030,
+        "label": "2030F",
+        "net_income": 330.2,
+        "depreciation": 32.6,
+        "capex": 38.9,
+        "delta_nwc": 5.3,
+        "net_borrowing": 0.0,
+        "fcfe": 318.6,
+        "discount_factor": 0.5239,
+        "pv_fcfe": 166.9
+      }
+    ],
+    "sum_pv_fcfe": 909.9,
+    "terminal_value": 3038.2,
+    "pv_terminal_value": 1591.9,
+    "equity_value": 2501.8,
+    "shares_mn": null,
+    "target_price_vnd": null,
+    "current_price_vnd": 59400.0,
+    "upside_pct": null,
+    "warnings": [
+      "Non-operating items (PBT gap) detected: ranged from -3.5% to -1.7% of revenue; median -2.6% applied to forecast.",
+      "Shares outstanding fact missing \u2014 forecast EPS/BVPS omitted to avoid EPS-implied share-count error.",
+      "[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.",
+      "Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to interest_expense/revenue ratio as proxy. Interest expense confidence: low.",
+      "[DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout \u2014 equity may be overstated. Recommend analyst review and explicit payout assumption.",
+      "FCFE: shares_outstanding fact missing \u2014 target price blocked to avoid EPS-implied share-count error."
+    ]
+  },
+  "blend_dcf": {
+    "ticker": "DMC",
+    "price_fcff_vnd": null,
+    "price_fcfe_vnd": null,
+    "fcff_weight": 0.6,
+    "fcfe_weight": 0.4,
+    "target_price_dcf_vnd": null,
+    "current_price_vnd": 59400.0,
+    "upside_pct": null,
+    "margin_of_safety": null,
+    "valuation_gap_pct": null,
+    "tv_weight_fcff": 0.6363,
+    "is_draft_only": false,
+    "warnings": [],
+    "formula": "Target Price_DCF = 0.60 \u00d7 Price_FCFF + 0.40 \u00d7 Price_FCFE"
+  },
+  "forecast": {
+    "ticker": "DMC",
+    "historical_periods": [
+      "2022FY",
+      "2023FY",
+      "2024FY",
+      "2025FY"
+    ],
+    "forecast_periods": [
+      "2026F",
+      "2027F",
+      "2028F",
+      "2029F",
+      "2030F"
+    ],
+    "revenue_cagr_historical": 0.0908,
+    "drivers": {
+      "revenue_growth": {
+        "2026": 0.0908,
+        "2027": 0.0908,
+        "2028": 0.0908,
+        "2029": 0.0908,
+        "2030": 0.0908
+      },
+      "gross_margin": {
+        "method": "historical_median",
+        "value": 0.2181
+      },
+      "sga_to_revenue": {
+        "method": "historical_median",
+        "value": 0.063
+      },
+      "depreciation_to_revenue": {
+        "method": "historical_median",
+        "value": 0.0102
+      },
+      "capex_to_revenue": {
+        "method": "historical_median",
+        "value": 0.0122
+      },
+      "effective_tax_rate": {
+        "method": "historical_median",
+        "value": 0.2003
+      },
+      "cost_of_debt": {
+        "method": "fallback_interest_to_revenue",
+        "value": 0.0
+      },
+      "other_items_to_revenue": {
+        "method": "historical_median",
+        "value": -0.0258
+      }
+    },
+    "assumption_status": "default_unapproved",
+    "forecast_years": [
+      {
+        "year": 2026,
+        "label": "2026F",
+        "revenue": 2255.1,
+        "cogs": -1763.2,
+        "gross_profit": 491.9,
+        "gross_margin": 0.2181,
+        "sga": -142.1,
+        "ebit": 349.8,
+        "ebit_margin": 0.1551,
+        "depreciation": 23.0,
+        "ebitda": 372.8,
+        "interest_expense": -0.0,
+        "other_items": -58.2,
+        "profit_before_tax": 291.6,
+        "tax_expense": -58.4,
+        "net_income": 233.2,
+        "net_margin": 0.1034,
+        "capex": -27.5,
+        "total_assets": 2149.0,
+        "equity": 1921.5,
+        "total_debt": 0.0,
+        "other_liabilities": 227.6,
+        "eps": null,
+        "bvps": null,
+        "beginning_debt": 0.0,
+        "ending_debt": 0.0,
+        "net_borrowing": 0.0,
+        "cost_of_debt": 0.0,
+        "cash_dividend": null,
+        "payout_ratio": null,
+        "retained_earnings_addition": 233.2
+      },
+      {
+        "year": 2027,
+        "label": "2027F",
+        "revenue": 2459.9,
+        "cogs": -1923.3,
+        "gross_profit": 536.6,
+        "gross_margin": 0.2181,
+        "sga": -155.0,
+        "ebit": 381.6,
+        "ebit_margin": 0.1551,
+        "depreciation": 25.1,
+        "ebitda": 406.7,
+        "interest_expense": -0.0,
+        "other_items": -63.5,
+        "profit_before_tax": 318.1,
+        "tax_expense": -63.7,
+        "net_income": 254.4,
+        "net_margin": 0.1034,
+        "capex": -30.0,
+        "total_assets": 2403.5,
+        "equity": 2175.9,
+        "total_debt": 0.0,
+        "other_liabilities": 227.6,
+        "eps": null,
+        "bvps": null,
+        "beginning_debt": 0.0,
+        "ending_debt": 0.0,
+        "net_borrowing": 0.0,
+        "cost_of_debt": 0.0,
+        "cash_dividend": null,
+        "payout_ratio": null,
+        "retained_earnings_addition": 254.4
+      },
+      {
+        "year": 2028,
+        "label": "2028F",
+        "revenue": 2683.3,
+        "cogs": -2098.0,
+        "gross_profit": 585.3,
+        "gross_margin": 0.2181,
+        "sga": -169.0,
+        "ebit": 416.3,
+        "ebit_margin": 0.1551,
+        "depreciation": 27.4,
+        "ebitda": 443.6,
+        "interest_expense": -0.0,
+        "other_items": -69.2,
+        "profit_before_tax": 347.0,
+        "tax_expense": -69.5,
+        "net_income": 277.5,
+        "net_margin": 0.1034,
+        "capex": -32.7,
+        "total_assets": 2681.0,
+        "equity": 2453.4,
+        "total_debt": 0.0,
+        "other_liabilities": 227.6,
+        "eps": null,
+        "bvps": null,
+        "beginning_debt": 0.0,
+        "ending_debt": 0.0,
+        "net_borrowing": 0.0,
+        "cost_of_debt": 0.0,
+        "cash_dividend": null,
+        "payout_ratio": null,
+        "retained_earnings_addition": 277.5
+      },
+      {
+        "year": 2029,
+        "label": "2029F",
+        "revenue": 2927.0,
+        "cogs": -2288.6,
+        "gross_profit": 638.5,
+        "gross_margin": 0.2181,
+        "sga": -184.4,
+        "ebit": 454.1,
+        "ebit_margin": 0.1551,
+        "depreciation": 29.9,
+        "ebitda": 483.9,
+        "interest_expense": -0.0,
+        "other_items": -75.5,
+        "profit_before_tax": 378.5,
+        "tax_expense": -75.8,
+        "net_income": 302.7,
+        "net_margin": 0.1034,
+        "capex": -35.7,
+        "total_assets": 2983.7,
+        "equity": 2756.2,
+        "total_debt": 0.0,
+        "other_liabilities": 227.6,
+        "eps": null,
+        "bvps": null,
+        "beginning_debt": 0.0,
+        "ending_debt": 0.0,
+        "net_borrowing": 0.0,
+        "cost_of_debt": 0.0,
+        "cash_dividend": null,
+        "payout_ratio": null,
+        "retained_earnings_addition": 302.7
+      },
+      {
+        "year": 2030,
+        "label": "2030F",
+        "revenue": 3192.9,
+        "cogs": -2496.4,
+        "gross_profit": 696.5,
+        "gross_margin": 0.2181,
+        "sga": -201.1,
+        "ebit": 495.3,
+        "ebit_margin": 0.1551,
+        "depreciation": 32.6,
+        "ebitda": 527.9,
+        "interest_expense": -0.0,
+        "other_items": -82.4,
+        "profit_before_tax": 412.9,
+        "tax_expense": -82.7,
+        "net_income": 330.2,
+        "net_margin": 0.1034,
+        "capex": -38.9,
+        "total_assets": 3313.9,
+        "equity": 3086.4,
+        "total_debt": 0.0,
+        "other_liabilities": 227.6,
+        "eps": null,
+        "bvps": null,
+        "beginning_debt": 0.0,
+        "ending_debt": 0.0,
+        "net_borrowing": 0.0,
+        "cost_of_debt": 0.0,
+        "cash_dividend": null,
+        "payout_ratio": null,
+        "retained_earnings_addition": 330.2
+      }
+    ],
+    "warnings": [
+      "Non-operating items (PBT gap) detected: ranged from -3.5% to -1.7% of revenue; median -2.6% applied to forecast.",
+      "Shares outstanding fact missing \u2014 forecast EPS/BVPS omitted to avoid EPS-implied share-count error.",
+      "[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.",
+      "Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to interest_expense/revenue ratio as proxy. Interest expense confidence: low.",
+      "[DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout \u2014 equity may be overstated. Recommend analyst review and explicit payout assumption."
+    ],
+    "tax_policy": {
+      "ticker": "DMC",
+      "valuation_year": 2025,
+      "effective_tax_rate": 0.2003,
+      "statutory_tax_rate": 0.2,
+      "source": "historical_effective_tax_rate",
+      "confidence": "medium",
+      "historical_observations": [
+        {
+          "period": "2022FY",
+          "pbt": 250.198432053,
+          "ni": 200.075859018,
+          "tax_expense": 50.122573035000016,
+          "rate": 0.200331
+        },
+        {
+          "period": "2023FY",
+          "pbt": 229.174765582,
+          "ni": 183.332760778,
+          "tax_expense": 45.842004804,
+          "rate": 0.200031
+        },
+        {
+          "period": "2024FY",
+          "pbt": 253.449578531,
+          "ni": 202.706657601,
+          "tax_expense": 50.74292093,
+          "rate": 0.200209
+        },
+        {
+          "period": "2025FY",
+          "pbt": 248.152544967,
+          "ni": 198.397731584,
+          "tax_expense": 49.754813383,
+          "rate": 0.200501
+        }
+      ],
+      "excluded_observations": [],
+      "fallback_reason": null,
+      "approved": false,
+      "source_refs": []
+    },
+    "dividend_schedule": {
+      "ticker": "DMC",
+      "method": "missing",
+      "historical_payout_ratio": null,
+      "forecast_rows": [
+        {
+          "year": 2026,
+          "label": "2026F",
+          "net_income": 233.2,
+          "payout_ratio": null,
+          "cash_dividend": null,
+          "retained_earnings_addition": 233.2,
+          "method": "missing",
+          "confidence": "low",
+          "warning": "Dividend unknown \u2014 treating all net income as retained earnings."
+        },
+        {
+          "year": 2027,
+          "label": "2027F",
+          "net_income": 254.4,
+          "payout_ratio": null,
+          "cash_dividend": null,
+          "retained_earnings_addition": 254.4,
+          "method": "missing",
+          "confidence": "low",
+          "warning": "Dividend unknown \u2014 treating all net income as retained earnings."
+        },
+        {
+          "year": 2028,
+          "label": "2028F",
+          "net_income": 277.5,
+          "payout_ratio": null,
+          "cash_dividend": null,
+          "retained_earnings_addition": 277.5,
+          "method": "missing",
+          "confidence": "low",
+          "warning": "Dividend unknown \u2014 treating all net income as retained earnings."
+        },
+        {
+          "year": 2029,
+          "label": "2029F",
+          "net_income": 302.7,
+          "payout_ratio": null,
+          "cash_dividend": null,
+          "retained_earnings_addition": 302.7,
+          "method": "missing",
+          "confidence": "low",
+          "warning": "Dividend unknown \u2014 treating all net income as retained earnings."
+        },
+        {
+          "year": 2030,
+          "label": "2030F",
+          "net_income": 330.2,
+          "payout_ratio": null,
+          "cash_dividend": null,
+          "retained_earnings_addition": 330.2,
+          "method": "missing",
+          "confidence": "low",
+          "warning": "Dividend unknown \u2014 treating all net income as retained earnings."
+        }
+      ],
+      "warnings": [
+        "Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout \u2014 equity may be overstated. Recommend analyst review and explicit payout assumption."
+      ]
+    },
+    "debt_schedule": {
+      "ticker": "DMC",
+      "forecast_method": "zero_debt_policy",
+      "historical_rows": [
+        {
+          "year": 2022,
+          "label": "2022FY",
+          "beginning_interest_bearing_debt": null,
+          "ending_interest_bearing_debt": 0.0,
+          "new_borrowing": null,
+          "debt_repayment": null,
+          "net_borrowing": null,
+          "interest_expense": 0.0,
+          "implied_cost_of_debt": null,
+          "method": "missing",
+          "confidence": "low",
+          "warning": "Insufficient data to compute net borrowing for this period.",
+          "source_refs": []
+        },
+        {
+          "year": 2023,
+          "label": "2023FY",
+          "beginning_interest_bearing_debt": 0.0,
+          "ending_interest_bearing_debt": 0.0,
+          "new_borrowing": null,
+          "debt_repayment": null,
+          "net_borrowing": 0.0,
+          "interest_expense": 0.0,
+          "implied_cost_of_debt": null,
+          "method": "balance_sheet_delta",
+          "confidence": "medium",
+          "warning": "Net borrowing approximated from change in interest-bearing debt due to missing direct borrowing/repayment detail in CFS.",
+          "source_refs": []
+        },
+        {
+          "year": 2024,
+          "label": "2024FY",
+          "beginning_interest_bearing_debt": 0.0,
+          "ending_interest_bearing_debt": 0.0,
+          "new_borrowing": null,
+          "debt_repayment": null,
+          "net_borrowing": 0.0,
+          "interest_expense": 0.0,
+          "implied_cost_of_debt": null,
+          "method": "balance_sheet_delta",
+          "confidence": "medium",
+          "warning": "Net borrowing approximated from change in interest-bearing debt due to missing direct borrowing/repayment detail in CFS.",
+          "source_refs": []
+        },
+        {
+          "year": 2025,
+          "label": "2025FY",
+          "beginning_interest_bearing_debt": 0.0,
+          "ending_interest_bearing_debt": 0.0,
+          "new_borrowing": null,
+          "debt_repayment": null,
+          "net_borrowing": 0.0,
+          "interest_expense": 0.092688396,
+          "implied_cost_of_debt": null,
+          "method": "balance_sheet_delta",
+          "confidence": "medium",
+          "warning": "Net borrowing approximated from change in interest-bearing debt due to missing direct borrowing/repayment detail in CFS.",
+          "source_refs": []
+        }
+      ],
+      "forecast_rows": [
+        {
+          "year": 2026,
+          "label": "2026F",
+          "beginning_interest_bearing_debt": 0.0,
+          "ending_interest_bearing_debt": 0.0,
+          "new_borrowing": null,
+          "debt_repayment": null,
+          "net_borrowing": 0.0,
+          "interest_expense": null,
+          "implied_cost_of_debt": null,
+          "method": "zero_debt_policy",
+          "confidence": "high",
+          "warning": null,
+          "source_refs": []
+        },
+        {
+          "year": 2027,
+          "label": "2027F",
+          "beginning_interest_bearing_debt": 0.0,
+          "ending_interest_bearing_debt": 0.0,
+          "new_borrowing": null,
+          "debt_repayment": null,
+          "net_borrowing": 0.0,
+          "interest_expense": null,
+          "implied_cost_of_debt": null,
+          "method": "zero_debt_policy",
+          "confidence": "high",
+          "warning": null,
+          "source_refs": []
+        },
+        {
+          "year": 2028,
+          "label": "2028F",
+          "beginning_interest_bearing_debt": 0.0,
+          "ending_interest_bearing_debt": 0.0,
+          "new_borrowing": null,
+          "debt_repayment": null,
+          "net_borrowing": 0.0,
+          "interest_expense": null,
+          "implied_cost_of_debt": null,
+          "method": "zero_debt_policy",
+          "confidence": "high",
+          "warning": null,
+          "source_refs": []
+        },
+        {
+          "year": 2029,
+          "label": "2029F",
+          "beginning_interest_bearing_debt": 0.0,
+          "ending_interest_bearing_debt": 0.0,
+          "new_borrowing": null,
+          "debt_repayment": null,
+          "net_borrowing": 0.0,
+          "interest_expense": null,
+          "implied_cost_of_debt": null,
+          "method": "zero_debt_policy",
+          "confidence": "high",
+          "warning": null,
+          "source_refs": []
+        },
+        {
+          "year": 2030,
+          "label": "2030F",
+          "beginning_interest_bearing_debt": 0.0,
+          "ending_interest_bearing_debt": 0.0,
+          "new_borrowing": null,
+          "debt_repayment": null,
+          "net_borrowing": 0.0,
+          "interest_expense": null,
+          "implied_cost_of_debt": null,
+          "method": "zero_debt_policy",
+          "confidence": "high",
+          "warning": null,
+          "source_refs": []
+        }
+      ],
+      "warnings": [
+        "Zero-debt policy applied: historical interest-bearing debt is negligible."
+      ]
+    }
+  },
+  "sensitivity": {
+    "simplified_dcf": {
+      "wacc_range": [
+        0.08,
+        0.09,
+        0.1,
+        0.11,
+        0.12
+      ],
+      "g_range": [
+        0.02,
+        0.025,
+        0.03,
+        0.035,
+        0.04
+      ],
+      "matrix": {
+        "0.080": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.090": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.100": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.110": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.120": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        }
+      },
+      "unit": "VND/share (simplified FCF = OCF \u2212 CAPEX)",
+      "warnings": [
+        "Simplified OCF-CAPEX DCF \u2014 s\u1eed d\u1ee5ng CAGR l\u1ecbch s\u1eed, kh\u00f4ng ph\u1ea3i driver-based forecast. D\u00f9ng FCFF/FCFE blend (60/40) l\u00e0m \u0111\u1ecbnh gi\u00e1 ch\u00ednh. K\u1ebft qu\u1ea3 n\u00e0y ch\u1ec9 mang t\u00ednh tham kh\u1ea3o.",
+        "Negative FCF in history: ['2024FY'] \u2014 CAGR-based projection unreliable; simplified DCF target price blocked",
+        "FCF CAGR -22.0% capped to -10.0% for projection",
+        "Simplified DCF: shares_outstanding fact missing; target price blocked to avoid EPS-implied share-count error.",
+        "Terminal value weight 71.5% > 70% \u2014 sensitivity analysis required",
+        "Terminal value weight 73.5% > 70% \u2014 sensitivity analysis required",
+        "Terminal value weight 75.6% > 70% \u2014 sensitivity analysis required",
+        "Terminal value weight 77.7% > 70% \u2014 sensitivity analysis required",
+        "Terminal value weight 71.2% > 70% \u2014 sensitivity analysis required",
+        "Terminal value weight 73.2% > 70% \u2014 sensitivity analysis required"
+      ]
+    },
+    "fcff_wacc_g": {
+      "wacc_range": [
+        0.08,
+        0.09,
+        0.1,
+        0.11,
+        0.12
+      ],
+      "g_range": [
+        0.02,
+        0.025,
+        0.03,
+        0.035,
+        0.04
+      ],
+      "matrix": {
+        "0.080": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.090": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.100": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.110": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.120": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        }
+      },
+      "unit": "VND/share (Price_FCFF)",
+      "base_wacc": 0.138,
+      "warnings": [
+        "Non-operating items (PBT gap) detected: ranged from -3.5% to -1.7% of revenue; median -2.6% applied to forecast.",
+        "Shares outstanding fact missing \u2014 forecast EPS/BVPS omitted to avoid EPS-implied share-count error.",
+        "[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.",
+        "Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to interest_expense/revenue ratio as proxy. Interest expense confidence: low.",
+        "[DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout \u2014 equity may be overstated. Recommend analyst review and explicit payout assumption.",
+        "FCFF: total_debt missing \u2014 net_debt may be understated; using 0",
+        "FCFF: shares_outstanding fact missing \u2014 target price blocked to avoid EPS-implied share-count error."
+      ]
+    },
+    "fcfe_re_g": {
+      "re_range": [
+        0.09,
+        0.1,
+        0.11,
+        0.12,
+        0.13
+      ],
+      "g_range": [
+        0.02,
+        0.025,
+        0.03,
+        0.035,
+        0.04
+      ],
+      "matrix": {
+        "0.090": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.100": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.110": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.120": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        },
+        "0.130": {
+          "0.02": null,
+          "0.025": null,
+          "0.03": null,
+          "0.035": null,
+          "0.04": null
+        }
+      },
+      "unit": "VND/share (Price_FCFE)",
+      "base_re": 0.138,
+      "warnings": [
+        "Non-operating items (PBT gap) detected: ranged from -3.5% to -1.7% of revenue; median -2.6% applied to forecast.",
+        "Shares outstanding fact missing \u2014 forecast EPS/BVPS omitted to avoid EPS-implied share-count error.",
+        "[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.",
+        "Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to interest_expense/revenue ratio as proxy. Interest expense confidence: low.",
+        "[DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout \u2014 equity may be overstated. Recommend analyst review and explicit payout assumption.",
+        "FCFE: shares_outstanding fact missing \u2014 target price blocked to avoid EPS-implied share-count error."
+      ]
+    },
+    "blend_grid": {},
+    "pe": {},
+    "ev_ebitda": {}
+  },
+  "multiples": {
+    "ticker": "DMC",
+    "latest_fy": "2025FY",
+    "current_price_vnd": 59400.0,
+    "eps_vnd": 4856.0,
+    "book_value_per_share_vnd": null,
+    "ebitda_vnd_bn": 319.48,
+    "net_debt_vnd_bn": -75.84,
+    "shares_mn": null,
+    "pe_ratio": 12.23,
+    "pb_ratio": null,
+    "target_pe": 15.0,
+    "target_pb": 2.5,
+    "target_ev_ebitda": 10.0,
+    "implied_price_pe": null,
+    "implied_price_pb": null,
+    "implied_price_ev_ebitda": null,
+    "peer_data_source": null,
+    "relative_valuation_status": "pending_peer_dataset",
+    "warnings": [
+      "Shares outstanding unavailable \u2014 BVPS, P/B, and EV/EBITDA price bridge are blocked.",
+      "BVPS unavailable \u2014 P/B cannot be computed from current price",
+      "Relative valuation is PENDING \u2014 no peer_data_source provided. Target P/E, P/B, and EV/EBITDA require a real peer group dataset. Implied prices blocked until peer data is available."
+    ]
+  },
+  "current_price_vnd": 59400.0,
+  "assumption_gate": {
+    "data_quality_passed": true,
+    "tax_policy_approved": false,
+    "wacc_approved": false,
+    "cost_of_equity_approved": false,
+    "terminal_growth_approved": false,
+    "forecast_assumptions_approved": false,
+    "debt_schedule_approved": true,
+    "dividend_schedule_approved": false,
+    "peer_multiples_approved": false,
+    "final_recommendation_approved": false,
+    "status": "draft_needs_analyst_review",
+    "blocking_reasons": [
+      "Tax policy has not been approved \u2014 tax rate source uncertain.",
+      "WACC assumptions are default/unapproved.",
+      "Cost of equity (Re) assumptions are default/unapproved.",
+      "Terminal growth rate has not been approved.",
+      "Forecast model assumptions (revenue growth, margins) not approved.",
+      "Dividend schedule not approved \u2014 retained earnings and equity forecast may be overstated.",
+      "Peer multiples not approved \u2014 relative valuation (P/E, EV/EBITDA) is pending verified peer dataset.",
+      "Final recommendation has not been explicitly approved by analyst."
+    ],
+    "recommendation_allowed": false,
+    "valuation_allowed": true
+  },
+  "valuation_confidence": {
+    "historical_financials": "high",
+    "forecast_model": "medium",
+    "tax_policy": "medium",
+    "debt_schedule": "high",
+    "dividend_schedule": "low",
+    "fcff_dcf": "low",
+    "fcfe_dcf": "low",
+    "relative_pe": "unavailable",
+    "relative_ev_ebitda": "unavailable",
+    "final_rating": "draft_only",
+    "reasons": [
+      "Forecast model: assumptions are default/unapproved.",
+      "Tax policy: historical effective rate used but not analyst-approved.",
+      "Dividend schedule: no dividend data \u2014 all earnings treated as retained.",
+      "FCFF DCF: computation warnings present (missing inputs in some years).",
+      "Relative P/E: pending \u2014 no peer group data.",
+      "Relative EV/EBITDA: pending \u2014 no peer group data."
+    ]
+  },
+  "formula_traces": [
+    {
+      "trace_id": "DMC:WACC:2025FY",
+      "formula_id": "wacc",
+      "formula_version": "valuation_v1_code_first_fcff_fcfe_blend",
+      "output_name": "wacc",
+      "output_value": 0.138,
+      "unit": "ratio",
+      "period": "2025FY",
+      "input_fact_ids": [
+        273
+      ],
+      "input_values": {
+        "risk_free_rate": 0.04,
+        "beta": 0.85,
+        "expected_market_return": 0.12,
+        "size_premium": 0.02,
+        "specific_risk_premium": 0.01,
+        "cost_of_equity": 0.138,
+        "cost_of_debt": 0.08,
+        "tax_rate": 0.20027,
+        "wacc_override": null
+      },
+      "calculation_steps": [
+        {
+          "step": "cost_of_equity",
+          "value": 0.138
+        },
+        {
+          "step": "after_tax_cost_of_debt",
+          "value": 0.0639784
+        },
+        {
+          "step": "weighted_average_cost_of_capital",
+          "value": 0.138
+        }
+      ],
+      "warnings": [
+        "Non-operating items (PBT gap) detected: ranged from -3.5% to -1.7% of revenue; median -2.6% applied to forecast.",
+        "Shares outstanding fact missing \u2014 forecast EPS/BVPS omitted to avoid EPS-implied share-count error.",
+        "[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.",
+        "Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to interest_expense/revenue ratio as proxy. Interest expense confidence: low.",
+        "[DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout \u2014 equity may be overstated. Recommend analyst review and explicit payout assumption.",
+        "FCFF: total_debt missing \u2014 net_debt may be understated; using 0",
+        "FCFF: shares_outstanding fact missing \u2014 target price blocked to avoid EPS-implied share-count error."
+      ]
+    },
+    {
+      "trace_id": "DMC:FCFF:2030F",
+      "formula_id": "fcff",
+      "formula_version": "valuation_v1_code_first_fcff_fcfe_blend",
+      "output_name": "fcff_equity_value",
+      "output_value": 3095.0,
+      "unit": "vnd_bn",
+      "period": "2030F",
+      "input_fact_ids": [
+        233
+      ],
+      "input_values": {
+        "sum_pv_fcff": 1098.1,
+        "pv_terminal_value": 1921.1,
+        "net_debt": -75.8,
+        "shares_mn": null
+      },
+      "calculation_steps": [
+        {
+          "step": "enterprise_value=sum_pv_fcff+pv_terminal_value",
+          "value": 3019.2
+        },
+        {
+          "step": "equity_value=enterprise_value-net_debt",
+          "value": 3095.0
+        },
+        {
+          "step": "target_price=equity_value/shares",
+          "value": null
+        }
+      ],
+      "warnings": [
+        "Non-operating items (PBT gap) detected: ranged from -3.5% to -1.7% of revenue; median -2.6% applied to forecast.",
+        "Shares outstanding fact missing \u2014 forecast EPS/BVPS omitted to avoid EPS-implied share-count error.",
+        "[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.",
+        "Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to interest_expense/revenue ratio as proxy. Interest expense confidence: low.",
+        "[DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout \u2014 equity may be overstated. Recommend analyst review and explicit payout assumption.",
+        "FCFF: total_debt missing \u2014 net_debt may be understated; using 0",
+        "FCFF: shares_outstanding fact missing \u2014 target price blocked to avoid EPS-implied share-count error."
+      ]
+    },
+    {
+      "trace_id": "DMC:FCFE:2030F",
+      "formula_id": "fcfe",
+      "formula_version": "valuation_v1_code_first_fcff_fcfe_blend",
+      "output_name": "fcfe_equity_value",
+      "output_value": 2501.8,
+      "unit": "vnd_bn",
+      "period": "2030F",
+      "input_fact_ids": [
+        285,
+        277,
+        221
+      ],
+      "input_values": {
+        "sum_pv_fcfe": 909.9,
+        "pv_terminal_value": 1591.9,
+        "shares_mn": null
+      },
+      "calculation_steps": [
+        {
+          "step": "equity_value=sum_pv_fcfe+pv_terminal_value",
+          "value": 2501.8
+        },
+        {
+          "step": "target_price=equity_value/shares",
+          "value": null
+        }
+      ],
+      "warnings": [
+        "Non-operating items (PBT gap) detected: ranged from -3.5% to -1.7% of revenue; median -2.6% applied to forecast.",
+        "Shares outstanding fact missing \u2014 forecast EPS/BVPS omitted to avoid EPS-implied share-count error.",
+        "[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.",
+        "Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to interest_expense/revenue ratio as proxy. Interest expense confidence: low.",
+        "[DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout \u2014 equity may be overstated. Recommend analyst review and explicit payout assumption.",
+        "FCFE: shares_outstanding fact missing \u2014 target price blocked to avoid EPS-implied share-count error."
+      ]
+    },
+    {
+      "trace_id": "DMC:TERMINAL_VALUE:FCFF",
+      "formula_id": "terminal_value",
+      "formula_version": "valuation_v1_code_first_fcff_fcfe_blend",
+      "output_name": "fcff_terminal_value",
+      "output_value": 3666.5,
+      "unit": "vnd_bn",
+      "period": "2030F",
+      "input_fact_ids": [],
+      "input_values": {
+        "terminal_growth": 0.03,
+        "wacc": 0.138,
+        "last_fcff": 384.4
+      },
+      "calculation_steps": [
+        {
+          "step": "terminal_fcff=last_fcff*(1+g)",
+          "value": null
+        },
+        {
+          "step": "terminal_value=terminal_fcff/(wacc-g)",
+          "value": 3666.5
+        }
+      ],
+      "warnings": [
+        "Non-operating items (PBT gap) detected: ranged from -3.5% to -1.7% of revenue; median -2.6% applied to forecast.",
+        "Shares outstanding fact missing \u2014 forecast EPS/BVPS omitted to avoid EPS-implied share-count error.",
+        "[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.",
+        "Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to interest_expense/revenue ratio as proxy. Interest expense confidence: low.",
+        "[DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout \u2014 equity may be overstated. Recommend analyst review and explicit payout assumption.",
+        "FCFF: total_debt missing \u2014 net_debt may be understated; using 0",
+        "FCFF: shares_outstanding fact missing \u2014 target price blocked to avoid EPS-implied share-count error."
+      ]
+    },
+    {
+      "trace_id": "DMC:BLEND_DCF",
+      "formula_id": "blend_dcf",
+      "formula_version": "valuation_v1_code_first_fcff_fcfe_blend",
+      "output_name": "target_price_dcf_vnd",
+      "output_value": null,
+      "unit": "vnd_per_share",
+      "period": "2030F",
+      "input_fact_ids": [],
+      "input_values": {
+        "price_fcff_vnd": null,
+        "price_fcfe_vnd": null,
+        "fcff_weight": 0.6,
+        "fcfe_weight": 0.4
+      },
+      "calculation_steps": [
+        {
+          "step": "target=fcff_weight*price_fcff+fcfe_weight*price_fcfe",
+          "value": null
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "trace_id": "DMC:SENSITIVITY:FCFF_WACC_G",
+      "formula_id": "sensitivity_matrix",
+      "formula_version": "valuation_v1_code_first_fcff_fcfe_blend",
+      "output_name": "fcff_wacc_g",
+      "output_value": {
+        "rows": 5,
+        "columns": 5
+      },
+      "unit": "matrix",
+      "period": null,
+      "input_fact_ids": [],
+      "input_values": {
+        "wacc_range": [
+          0.08,
+          0.09,
+          0.1,
+          0.11,
+          0.12
+        ],
+        "g_range": [
+          0.02,
+          0.025,
+          0.03,
+          0.035,
+          0.04
+        ]
+      },
+      "calculation_steps": [
+        {
+          "step": "recompute target price across WACC and terminal growth grid",
+          "value": "matrix"
+        }
+      ],
+      "warnings": []
+    }
+  ]
+}

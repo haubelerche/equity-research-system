@@ -129,7 +129,8 @@ def _derive_shares_mn(facts: dict[str, dict[str, float]], periods: list[str]) ->
         shares_fact = facts.get(key, {})
         for p in reversed(periods):
             period_key = p.replace("A", "FY") if p.endswith("A") else p
-            v = shares_fact.get(period_key) or shares_fact.get(p)
+            raw = shares_fact.get(period_key) or shares_fact.get(p)
+            v = raw.get("value") if isinstance(raw, dict) else raw
             if v and v > 0:
                 return v / 1_000_000
     return 0.0
@@ -275,8 +276,8 @@ def _period_value(
         "debt": "short_term_debt.ending",
         "eps": "eps.basic",
     }
-    if period.endswith("A"):
-        fact_period = period.replace("A", "FY")
+    if period.endswith("A") or period.endswith("FY"):
+        fact_period = period if period.endswith("FY") else period.replace("A", "FY")
         value = _fact_value(facts, actual_map.get(metric, metric), fact_period)
         if value is None:
             return None
@@ -392,11 +393,21 @@ def _ebitda_values(forecast_rows: dict[str, dict[str, Any]], facts: dict[str, di
     return [None if e is None or d is None else e + d for e, d in zip(ebit, depreciation)]
 
 
+def _is_actual(period: str) -> bool:
+    """Return True if the period label represents an actual (historical) year."""
+    return period.endswith("A") or period.endswith("FY")
+
+
+def _to_fact_period(period: str) -> str:
+    """Convert display period label to canonical FY period key used in fact dicts."""
+    return period if period.endswith("FY") else period.replace("A", "FY")
+
+
 def _fcff_values(facts: dict[str, dict[str, float]], fcff_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
-    # Actual periods: those ending in "A"; forecast: those ending in "F"
-    actual_periods = [p for p in periods if p.endswith("A")]
+    # Actual periods: those ending in "A" or "FY"; forecast: those ending in "F"
+    actual_periods = [p for p in periods if _is_actual(p)]
     forecast_periods = [p for p in periods if p.endswith("F")]
-    actual = [_fact_value(facts, "free_cash_flow.total", p.replace("A", "FY")) for p in actual_periods]
+    actual = [_fact_value(facts, "free_cash_flow.total", _to_fact_period(p)) for p in actual_periods]
     forecast = [fcff_rows.get(period, {}).get("fcff") for period in forecast_periods]
     return actual + forecast
 
@@ -408,7 +419,7 @@ def _delta_nwc_values(
     periods: list[str],
 ) -> list[float | None]:
     actual: list[float | None] = []
-    actual_periods = [p for p in periods if p.endswith("A")]
+    actual_periods = [p for p in periods if _is_actual(p)]
     forecast_periods = [p for p in periods if p.endswith("F")]
     for period in actual_periods:
         ni = _period_value(facts, forecast_rows, "net_income", period)
@@ -425,10 +436,10 @@ def _cfo_values(
     fcff_rows: dict[str, dict[str, Any]],
     periods: list[str],
 ) -> list[float | None]:
-    actual_periods = [p for p in periods if p.endswith("A")]
+    actual_periods = [p for p in periods if _is_actual(p)]
     forecast_periods = [p for p in periods if p.endswith("F")]
     actual = [
-        _fact_value(facts, "operating_cash_flow.total", p.replace("A", "FY"))
+        _fact_value(facts, "operating_cash_flow.total", _to_fact_period(p))
         for p in actual_periods
     ]
     forecast: list[float | None] = []
@@ -450,10 +461,10 @@ def _cash_values(
     shares_mn: float,
     dividend_per_share: float | None,
 ) -> list[float | None]:
-    actual_periods = [p for p in periods if p.endswith("A")]
+    actual_periods = [p for p in periods if _is_actual(p)]
     forecast_periods = [p for p in periods if p.endswith("F")]
     values: list[float | None] = [
-        _fact_value(facts, "cash_and_equivalents.ending", p.replace("A", "FY"))
+        _fact_value(facts, "cash_and_equivalents.ending", _to_fact_period(p))
         for p in actual_periods
     ]
     prior = (values[-1] if values else None) or 0.0
@@ -493,8 +504,8 @@ def _finance_income_values(
     interest = _row_values(facts, forecast_rows, "interest_expense", periods)
     result: list[float | None] = []
     for i, period in enumerate(periods):
-        if period.endswith("A"):
-            pbt = _fact_value(facts, "profit_before_tax.total", period.replace("A", "FY"))
+        if _is_actual(period):
+            pbt = _fact_value(facts, "profit_before_tax.total", _to_fact_period(period))
         else:
             pbt = forecast_rows.get(period, {}).get("profit_before_tax")
         result.append(None if None in (pbt, ebit[i], interest[i]) else pbt - ebit[i] - interest[i])
@@ -628,17 +639,17 @@ def _table_bs_cf(
     shares_mn: float,
 ) -> TableData:
     n = len(periods)
-    actual_periods = [p for p in periods if p.endswith("A")]
+    actual_periods = [p for p in periods if _is_actual(p)]
     forecast_periods = [p for p in periods if p.endswith("F")]
 
     # Historical FCF: CFO - |CAPEX| using canonical facts (consistent sign convention).
     # Forecast FCF: FCFF from the valuation engine.
     cfo_hist = [
-        _fact_value(facts, "operating_cash_flow.total", p.replace("A", "FY"))
+        _fact_value(facts, "operating_cash_flow.total", _to_fact_period(p))
         for p in actual_periods
     ]
     capex_hist = [
-        _fact_value(facts, "capex.total", p.replace("A", "FY"))
+        _fact_value(facts, "capex.total", _to_fact_period(p))
         for p in actual_periods
     ]
     fcf_hist = [

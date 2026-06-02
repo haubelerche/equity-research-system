@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Vietnam Pharma Equity Research Report — DBD">
+  <title>DBD — Báo cáo nghiên cứu cổ phiếu | 2026-06-03</title>
+  <style>
+/* Vietnam Pharma Equity Research — A4 Report Stylesheet */
+
+/*
+ * Unicode font stack — required for Vietnamese diacritics (ắ ổ ị ề ử ộ ụ ằ etc.)
+ * Priority: Noto Sans (Google Fonts, embeds all Vietnamese) → DejaVu Sans (Linux)
+ *           → Arial Unicode MS (Windows/macOS fallback) → Arial → sans-serif.
+ * If none of these embed Vietnamese glyphs, PDF export will show boxes.
+ * To guarantee correct PDF rendering: install Noto Sans or use Playwright/WeasyPrint.
+ */
+
+@page {
+    size: A4 portrait;
+    margin: 18mm 16mm 18mm 16mm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Noto Sans", "DejaVu Sans", "Arial Unicode MS", Arial, sans-serif;
+    font-size: 8.8pt;
+    line-height: 1.38;
+    color: #232323;
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Typography ─────────────────────────────────────────── */
+
+h1 {
+    font-size: 16pt;
+    font-weight: 700;
+    color: #0b4f8a;
+    margin: 0 0 7pt 0;
+    padding-bottom: 4pt;
+    border-bottom: 1.2px solid #0b4f8a;
+}
+
+h2 {
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: #0b4f8a;
+    border-bottom: 1px solid #0b4f8a;
+    padding-bottom: 3pt;
+    margin: 11pt 0 5pt 0;
+}
+
+h3 {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: #2c5282;
+    margin: 10pt 0 4pt 0;
+}
+
+h4 {
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 8pt 0 3pt 0;
+}
+
+p {
+    margin: 4pt 0 6pt 0;
+}
+
+strong {
+    font-weight: 700;
+    color: #1a202c;
+}
+
+em {
+    font-style: italic;
+    color: #4a5568;
+}
+
+/* ── Tables ─────────────────────────────────────────────── */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin: 8pt 0;
+    page-break-inside: avoid;
+}
+
+thead th {
+    background-color: #0b4f8a;
+    color: #ffffff;
+    padding: 4pt 6pt;
+    text-align: left;
+    font-weight: 600;
+    font-size: 8.5pt;
+}
+
+tbody td {
+    padding: 3pt 6pt;
+    border-bottom: 0.5px solid #d0d7de;
+    vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f6f8fa;
+}
+
+tbody tr:hover {
+    background-color: #eef2f7;
+}
+
+/* Numeric columns — right-align by convention */
+td:last-child,
+th:last-child {
+    text-align: right;
+}
+
+/* Exception: first column (labels) left-align */
+td:first-child,
+th:first-child {
+    text-align: left;
+}
+
+/* ── Images / Charts ─────────────────────────────────────── */
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 6pt auto;
+    page-break-inside: avoid;
+}
+
+/* ── Blockquotes ─────────────────────────────────────────── */
+
+blockquote {
+    border-left: 3px solid #cbd5e0;
+    margin: 6pt 0;
+    padding: 4pt 8pt;
+    color: #4a5568;
+    background: #f7fafc;
+    font-size: 9pt;
+}
+
+blockquote p {
+    margin: 0;
+}
+
+/* ── Code ─────────────────────────────────────────────────── */
+
+code {
+    font-family: "Courier New", monospace;
+    font-size: 8pt;
+    background: #f0f4f8;
+    padding: 1pt 3pt;
+    border-radius: 2px;
+    color: #2d3748;
+}
+
+pre {
+    background: #f0f4f8;
+    padding: 6pt 8pt;
+    border-radius: 3px;
+    overflow-x: auto;
+    font-size: 8pt;
+    line-height: 1.4;
+    margin: 6pt 0;
+    page-break-inside: avoid;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+}
+
+/* ── Lists ───────────────────────────────────────────────── */
+
+ul, ol {
+    margin: 4pt 0 6pt 0;
+    padding-left: 18pt;
+}
+
+li {
+    margin-bottom: 2pt;
+}
+
+/* ── Horizontal rule ─────────────────────────────────────── */
+
+hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 10pt 0;
+}
+
+/* ── Page structure ──────────────────────────────────────── */
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1.5px solid #0b4f8a;
+    padding-bottom: 4pt;
+    margin-bottom: 8pt;
+}
+
+.report-header-left {
+    font-size: 8pt;
+    color: #4a5568;
+}
+
+.report-header-ticker {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #0b4f8a;
+    letter-spacing: 1px;
+}
+
+.report-header-date {
+    font-size: 8pt;
+    color: #718096;
+    text-align: right;
+}
+
+.report-section {
+    margin-bottom: 0;
+}
+
+.acbs-page-header {
+    display: flex;
+    justify-content: space-between;
+    color: #0b4f8a;
+    font-size: 8.5pt;
+    font-weight: 700;
+    border-bottom: 1px solid #0b4f8a;
+    padding-bottom: 3pt;
+    margin-bottom: 10pt;
+}
+
+.page-break {
+    page-break-after: always;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+/* ── Disclaimer ──────────────────────────────────────────── */
+
+.disclaimer {
+    font-size: 7.5pt;
+    color: #555555;
+    border-top: 1px solid #cccccc;
+    padding-top: 6pt;
+    margin-top: 10pt;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* ── Report footer ───────────────────────────────────────── */
+
+.report-footer {
+    font-size: 7pt;
+    color: #718096;
+    text-align: center;
+    border-top: 0.5px solid #e2e8f0;
+    padding-top: 4pt;
+    margin-top: 8pt;
+}
+
+/* ── Rating badge ─────────────────────────────────────────── */
+
+.rating-badge {
+    display: inline-block;
+    padding: 2pt 8pt;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 9pt;
+    letter-spacing: 0.5px;
+}
+
+.rating-buy    { background: #c6f6d5; color: #22543d; }
+.rating-hold   { background: #fefcbf; color: #744210; }
+.rating-sell   { background: #fed7d7; color: #742a2a; }
+.rating-review { background: #e9d8fd; color: #44337a; }
+
+/* ── Snapshot table special styling ──────────────────────── */
+
+.snapshot-table td:first-child {
+    color: #2d3748;
+    font-weight: 500;
+    width: 55%;
+}
+
+.snapshot-table td:last-child {
+    font-weight: 700;
+    color: #1a3a6b;
+    text-align: right;
+}
+
+/* ── Missing-value content ────────────────────────────────── */
+
+.value-na {
+    color: #718096;
+    font-style: italic;
+}
+
+/* ── Internal notice banner ───────────────────────────────── */
+
+.draft-banner {
+    background: #fff8df;
+    border: 1px solid #d9a21b;
+    border-left: 5px solid #d9a21b;
+    color: #6f5200;
+    font-size: 8.5pt;
+    font-weight: 700;
+    padding: 8pt 12pt;
+    margin-bottom: 12pt;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    page-break-inside: avoid;
+}
+
+/* ── ACBS-style broker update layout ─────────────────────── */
+
+.acbs-page {
+    width: 100%;
+}
+
+.acbs-titlebar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1.8px solid #0b4f8a;
+    padding-bottom: 5pt;
+    margin-bottom: 10pt;
+}
+
+.acbs-report-kicker {
+    color: #0b4f8a;
+    font-size: 15pt;
+    font-weight: 800;
+    letter-spacing: 0.1pt;
+}
+
+.acbs-date {
+    color: #555;
+    font-size: 8.5pt;
+    margin-top: 2pt;
+}
+
+.acbs-brand {
+    color: #0b4f8a;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-align: right;
+}
+
+.acbs-layout {
+    display: grid;
+    grid-template-columns: 31% 1fr;
+    column-gap: 14pt;
+    align-items: start;
+}
+
+.acbs-sidebar {
+    border-right: 1px solid #c7d7e8;
+    padding-right: 10pt;
+    font-size: 8pt;
+}
+
+.analyst-card {
+    color: #333;
+    margin-bottom: 10pt;
+    line-height: 1.35;
+}
+
+.analyst-name {
+    color: #0b4f8a;
+    font-weight: 700;
+    font-size: 9pt;
+}
+
+.recommendation-card {
+    border-top: 2px solid #0b4f8a;
+    border-bottom: 1px solid #0b4f8a;
+    padding: 6pt 0;
+    margin-bottom: 8pt;
+}
+
+.recommendation-card .rec-label {
+    font-size: 8pt;
+    color: #555;
+}
+
+.recommendation-card .rec-value {
+    font-size: 17pt;
+    line-height: 1.1;
+    color: #0b4f8a;
+    font-weight: 800;
+    margin-top: 2pt;
+}
+
+.recommendation-card.buy .rec-value { color: #087f5b; }
+.recommendation-card.hold .rec-value { color: #9a6700; }
+.recommendation-card.sell .rec-value { color: #b42318; }
+.recommendation-card.review .rec-value { color: #0b4f8a; }
+
+.rec-sub,
+.rec-sector,
+.rec-raw {
+    font-size: 8pt;
+    color: #333;
+    margin-top: 3pt;
+}
+
+.rec-raw {
+    color: #667085;
+    font-size: 7.2pt;
+}
+
+.broker-side-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7.8pt;
+    margin: 6pt 0 10pt 0;
+}
+
+.broker-side-table td {
+    border-bottom: 0.4px solid #d7e0ea;
+    padding: 3pt 0;
+    vertical-align: top;
+}
+
+.broker-side-table td:first-child {
+    color: #333;
+    width: 58%;
+}
+
+.broker-side-table td:last-child {
+    color: #111;
+    font-weight: 700;
+    text-align: right;
+}
+
+.broker-side-table.compact td {
+    font-size: 7.3pt;
+}
+
+.side-section-title {
+    color: #0b4f8a;
+    font-weight: 800;
+    font-size: 8.2pt;
+    border-bottom: 1px solid #0b4f8a;
+    margin: 9pt 0 5pt;
+    padding-bottom: 2pt;
+}
+
+.mini-chart img {
+    max-height: 92pt;
+    object-fit: contain;
+}
+
+.chart-placeholder {
+    border: 1px dashed #a8b8c8;
+    color: #667085;
+    background: #f6f9fc;
+    padding: 14pt 8pt;
+    text-align: center;
+    font-size: 7.6pt;
+}
+
+.acbs-main {
+    font-size: 8.7pt;
+}
+
+.acbs-main h1 {
+    font-size: 13.5pt;
+    color: #0b4f8a;
+    border-bottom: none;
+    margin-bottom: 7pt;
+    text-transform: uppercase;
+}
+
+.acbs-main h2 {
+    color: #0b4f8a;
+    font-size: 10.5pt;
+    border-bottom: none;
+    margin: 9pt 0 4pt;
+}
+
+.lead-thesis {
+    font-size: 9pt;
+    line-height: 1.45;
+    color: #222;
+    margin-bottom: 9pt;
+}
+
+.acbs-fin-table {
+    font-size: 8pt;
+    margin-top: 4pt;
+}
+
+.acbs-fin-table th {
+    background: #0b4f8a;
+    color: #fff;
+}
+
+/* ── Client-facing IMP/ACBS financial tables ─────────────── */
+
+.client-report-page {
+    page-break-inside: avoid;
+}
+
+.model-table-block {
+    margin: 8pt 0 12pt;
+    page-break-inside: avoid;
+}
+
+.model-table-block h2 {
+    margin-bottom: 2pt;
+}
+
+.table-unit {
+    color: #475467;
+    font-size: 7.5pt;
+    margin-bottom: 3pt;
+}
+
+.financial-model-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7.2pt;
+    table-layout: fixed;
+    page-break-inside: avoid;
+}
+
+.financial-model-table thead {
+    display: table-header-group;
+}
+
+.financial-model-table th {
+    background: #ffffff;
+    color: #0b4f8a;
+    font-weight: 800;
+    border-top: 1.2pt solid #0b4f8a;
+    border-bottom: 1.2pt solid #0b4f8a;
+    padding: 2.5pt 3pt;
+}
+
+.financial-model-table td {
+    border-bottom: 0.5pt solid #b8d2e8;
+    padding: 2.2pt 3pt;
+    vertical-align: top;
+}
+
+.financial-model-table th:first-child,
+.financial-model-table td:first-child {
+    width: 32%;
+    font-weight: 600;
+}
+
+.financial-model-table .numeric {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.report-chart {
+    margin: 6pt 0 8pt;
+    page-break-inside: avoid;
+}
+
+.report-chart img {
+    width: 100%;
+    max-height: 150pt;
+    object-fit: contain;
+}
+
+.report-chart figcaption {
+    color: #667085;
+    font-size: 7.2pt;
+    margin-top: 2pt;
+}
+
+.two-chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 12pt;
+    align-items: start;
+}
+
+/* ── Print overrides ─────────────────────────────────────── */
+
+@media print {
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .page-break {
+        page-break-after: always;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+}
+
+  </style>
+  <!-- Recommendation colour classes (not in base CSS) -->
+  <style>
+.recommendation-buy        { background: #e6f4ea; border-left: 4px solid #34a853; }
+.recommendation-hold       { background: #fef7e0; border-left: 4px solid #fbbc04; }
+.recommendation-sell       { background: #fce8e6; border-left: 4px solid #ea4335; }
+.recommendation-accumulate { background: #e8f0fe; border-left: 4px solid #1a73e8; }
+.recommendation-reduce     { background: #fff3e0; border-left: 4px solid #ff9800; }
+.recommendation-review     { background: #f5f5f5; border-left: 4px solid #9e9e9e; }
+/* Override recommendation-card base when a colour modifier is present */
+.recommendation-card[class*="recommendation-buy"],
+.recommendation-card[class*="recommendation-hold"],
+.recommendation-card[class*="recommendation-sell"],
+.recommendation-card[class*="recommendation-accumulate"],
+.recommendation-card[class*="recommendation-reduce"],
+.recommendation-card[class*="recommendation-review"] {
+  border-top: none;
+  border-bottom: none;
+  padding: 10px 16px;
+  margin: 12px 0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+  </style>
+</head>
+<body>
+
+  <!-- ── Rating → CSS class mapping ───────────────────────── -->
+  
+  
+
+  <!-- ── Internal notice banner ──────────────────────────── -->
+  
+
+  <!-- ── Recommendation summary banner ───────────────────── -->
+  <div class="recommendation-card recommendation-review">
+    <strong>DBD</strong> — Công ty CP Dược Bình Định
+    &nbsp;|&nbsp;
+    <strong>ĐANG HOÀN THIỆN</strong>
+    &nbsp;|&nbsp;
+    Giá mục tiêu: <strong>—</strong>
+    &nbsp;|&nbsp;
+    Upside: <strong>—</strong>
+    &nbsp;|&nbsp;
+    2026-06-03
+  </div>
+
+  <!-- ── Report Sections ───────────────────────────────── -->
+  
+  <div class="report-section" id="section-snapshot">
+    
+    <div class="client-report-page snapshot-page">
+  <div class="acbs-titlebar">
+    <div>
+      <div class="acbs-report-kicker">Cập nhật DBD - ĐANG HOÀN THIỆN</div>
+      <div class="acbs-date">Ngày 2026-06-03</div>
+    </div>
+    <div class="acbs-brand">Vietnam Pharma Equity Research</div>
+  </div>
+  <div class="acbs-layout">
+    <aside class="acbs-sidebar">
+      <div class="analyst-card">
+        <div class="analyst-name">Nhóm phân tích</div>
+        <div>Báo cáo cập nhật</div>
+      </div>
+      <div class="recommendation-card review">
+        <div class="rec-label">Khuyến nghị</div>
+        <div class="rec-value">ĐANG HOÀN THIỆN</div>
+        <div class="rec-sub">HOSE: DBD</div>
+        <div class="rec-sector">Dược phẩm</div>
+      </div>
+      <table class="broker-side-table"><tbody><tr><td>Giá mục tiêu (VND)</td><td>—</td></tr><tr><td>Giá hiện tại (VND)</td><td>—</td></tr><tr><td>Tỷ lệ tăng/giảm</td><td>—</td></tr><tr><td>Suất sinh lời cổ tức</td><td>—</td></tr><tr><td>Tổng tỷ suất lợi nhuận</td><td>—</td></tr></tbody></table>
+      <div class="side-section-title">DIỄN BIẾN GIÁ CỔ PHIẾU</div>
+
+<div class="model-table-block">
+  <h2>DIỄN BIẾN GIÁ CỔ PHIẾU</h2>
+
+  <table class="broker-side-table compact">
+    <thead><tr><th>Chỉ tiêu</th><th>YTD</th><th>1T</th><th>3T</th><th>12T</th></tr></thead>
+    <tbody><tr><td>Tuyệt đối</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Tương đối</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr></tbody>
+  </table>
+</div>
+
+
+      <div class="side-section-title">Thống kê thị trường</div>
+      <table class="broker-side-table compact"><tbody><tr><td>Mã giao dịch</td><td>DBD VN</td></tr><tr><td>Sàn</td><td>HOSE</td></tr><tr><td>Ngành</td><td>Dược phẩm</td></tr><tr><td>Vốn hóa</td><td>—</td></tr><tr><td>Số lượng cổ phiếu</td><td>—</td></tr><tr><td>Kế hoạch doanh thu 2026</td><td>—</td></tr><tr><td>Kế hoạch LNTT 2026</td><td>—</td></tr><tr><td>Tài sản Q1/2026</td><td>—</td></tr><tr><td>Vốn chủ sở hữu Q1/2026</td><td>—</td></tr></tbody></table>
+    </aside>
+    <main class="acbs-main">
+      <h1>Công ty CP Dược Bình Định (DBD VN)</h1>
+      <div class="lead-thesis">Công ty CP Dược Bình Định có nền tảng doanh thu dược phẩm ổn định, biên lợi nhuận cao và khả năng tạo dòng tiền tốt trong giai đoạn gần đây. Bản phân tích tập trung vào động lực tăng trưởng doanh thu, kiểm soát chi phí, rủi ro đấu thầu và mức định giá so với triển vọng lợi nhuận.</div>
+      <h2>Luận điểm cập nhật</h2>
+      <p>Doanh thu và lợi nhuận được dự phóng dựa trên quỹ đạo lịch sử, biên gộp trung vị, chi phí bán hàng và quản lý theo tỷ lệ doanh thu, cùng giả định đầu tư tài sản cố định phù hợp với mô hình FCFF.</p>
+      <h2>Bối cảnh hiện tại</h2>
+      <p>Công ty CP Dược Bình Định đang trong giai đoạn kiểm soát biên lợi nhuận với biên gộp trung vị —. Áp lực đến từ chi phí API/nguyên liệu nhập khẩu, biến động tỷ giá và cạnh tranh đấu thầu ETC. Chu kỳ đầu tư capex/— doanh thu cần được theo dõi sát trong bối cảnh nâng chuẩn GMP-EU và dự án nhà máy. Tồn kho và nợ vay, hàng tồn kho được phản ánh qua CCC và delta NWC trong mô hình FCFF. Các driver biên lợi nhuận và giá vốn, chi phí bán hàng, hàng tồn kho và nợ vay tăng là các tín hiệu cần đưa trực tiếp vào driver margin, SG&amp;A và working capital của mô hình.</p>
+      <h2>Động lực tăng trưởng</h2>
+      <p>Động lực chính gồm mở rộng kênh ETC/OTC, danh mục thuốc generic có biên lợi nhuận tốt, năng lực sản xuất và nhu cầu chăm sóc sức khỏe tiếp tục tăng.</p>
+
+<div class="model-table-block">
+  <h2>TÓM TẮT TÀI CHÍNH</h2>
+  <div class="table-unit">Đơn vị: tỷ đồng, trừ khi có ghi chú khác</div>
+  <table class="financial-model-table">
+    <thead><tr><th>Chỉ tiêu</th><th>2022FY</th><th>2023FY</th><th>2024FY</th><th>2025FY</th></tr></thead>
+    <tbody><tr><td>Doanh thu thuần</td><td class="numeric">1,555</td><td class="numeric">1,652</td><td class="numeric">1,728</td><td class="numeric">1,865</td></tr><tr><td>Tăng trưởng doanh thu</td><td class="numeric">—</td><td class="numeric">6.2%</td><td class="numeric">4.6%</td><td class="numeric">8.0%</td></tr><tr><td>Lợi nhuận ròng</td><td class="numeric">244</td><td class="numeric">269</td><td class="numeric">275</td><td class="numeric">292</td></tr><tr><td>Tăng trưởng lợi nhuận</td><td class="numeric">—</td><td class="numeric">10.5%</td><td class="numeric">2.3%</td><td class="numeric">6.1%</td></tr><tr><td>EPS điều chỉnh (VND)</td><td class="numeric">2,799</td><td class="numeric">2,473</td><td class="numeric">2,530</td><td class="numeric">2,674</td></tr><tr><td>Tăng trưởng EPS</td><td class="numeric">—</td><td class="numeric">-11.6%</td><td class="numeric">2.3%</td><td class="numeric">5.7%</td></tr><tr><td>ROE</td><td class="numeric">18.0%</td><td class="numeric">18.8%</td><td class="numeric">16.6%</td><td class="numeric">16.8%</td></tr><tr><td>ROA</td><td class="numeric">12.8%</td><td class="numeric">13.5%</td><td class="numeric">12.2%</td><td class="numeric">11.2%</td></tr><tr><td>Nợ ròng / EBITDA</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>P/E</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>P/B</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Cổ tức/cp</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Suất sinh lợi cổ tức</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr></tbody>
+  </table>
+</div>
+
+    </main>
+  </div>
+</div>
+  </div>
+  
+  <div class="page-break"></div>
+  
+  
+  <div class="report-section" id="section-business_update">
+    
+    <div class="acbs-page-header">
+      <span>Cập nhật DBD - ĐANG HOÀN THIỆN</span>
+      <span>Ngày 2026-06-03</span>
+    </div>
+    
+    <div class="client-report-page">
+  <h1>Cập nhật hoạt động kinh doanh</h1>
+  <div class="two-chart-grid">
+
+
+  </div>
+  <h2>Triển vọng đầu tư</h2>
+  <p>Động lực chính gồm mở rộng kênh ETC/OTC, danh mục thuốc generic có biên lợi nhuận tốt, năng lực sản xuất và nhu cầu chăm sóc sức khỏe tiếp tục tăng.</p>
+  <h2>Động lực biên lợi nhuận</h2>
+  <p>Biên lợi nhuận phụ thuộc vào giá nguyên liệu nhập khẩu, tỷ giá, cơ cấu sản phẩm, mức độ cạnh tranh trong đấu thầu và khả năng kiểm soát chi phí bán hàng.</p>
+  <h2>Sự kiện trọng yếu</h2>
+  <p>Các sự kiện cần theo dõi gồm kết quả đấu thầu thuốc, tiến độ phê duyệt sản phẩm, đầu tư nhà máy, biến động chi phí API và thay đổi trong quy định quản lý dược.</p>
+
+<div class="model-table-block">
+  <h2>ĐỘNG LỰC DỰ PHÓNG CHÍNH</h2>
+  <div class="table-unit">Giả định driver được hiệu chỉnh từ dữ liệu lịch sử và định hướng kinh doanh hiện tại.</div>
+  <table class="financial-model-table">
+    <thead><tr><th>Chỉ tiêu</th><th>Giả định cơ sở</th><th>Liên kết tài chính</th></tr></thead>
+    <tbody><tr><td>Tăng trưởng doanh thu</td><td class="numeric">0.0%</td><td class="numeric">Doanh thu -&gt; EBIT -&gt; FCFF</td></tr><tr><td>Biên lợi nhuận gộp</td><td class="numeric">0.0%</td><td class="numeric">Giá vốn -&gt; lợi nhuận gộp</td></tr><tr><td>SG&amp;A / doanh thu</td><td class="numeric">0.0%</td><td class="numeric">Chi phí vận hành -&gt; EBIT margin</td></tr><tr><td>Khấu hao / doanh thu</td><td class="numeric">0.0%</td><td class="numeric">EBIT và lá chắn thuế</td></tr><tr><td>Capex / doanh thu</td><td class="numeric">0.0%</td><td class="numeric">FCFF và mở rộng công suất</td></tr><tr><td>Thuế suất hiệu dụng</td><td class="numeric">15.8%</td><td class="numeric">LNST và NOPAT</td></tr><tr><td>Cash conversion 2025</td><td class="numeric">210.7%</td><td class="numeric">Kỷ luật vốn lưu động</td></tr><tr><td>WACC</td><td class="numeric">13.8%</td><td class="numeric">Tỷ lệ chiết khấu DCF</td></tr><tr><td>Tăng trưởng dài hạn</td><td class="numeric">3.0%</td><td class="numeric">Terminal value DCF</td></tr></tbody>
+  </table>
+</div>
+
+</div>
+  </div>
+  
+  <div class="page-break"></div>
+  
+  
+  <div class="report-section" id="section-valuation_model">
+    
+    <div class="acbs-page-header">
+      <span>Cập nhật DBD - ĐANG HOÀN THIỆN</span>
+      <span>Ngày 2026-06-03</span>
+    </div>
+    
+    <div class="client-report-page">
+  <h1>Dự phóng và định giá</h1>
+  <p>Mô hình định giá sử dụng FCFF kết hợp kiểm tra tương quan với P/E, P/B, EV/EBITDA và EV/FCF. Forecast được nối theo driver: revenue growth phản ánh mục tiêu kinh doanh và nền lịch sử; gross margin phản ánh áp lực giá vốn/API; SG&amp;A/revenue phản ánh chi phí bán hàng; capex/revenue phản ánh chu kỳ đầu tư GMP-EU. Các bảng dưới đây giữ đầy đủ cấu trúc dự phóng và tỷ số để người đọc có thể kiểm tra luận điểm định giá thay vì chỉ nhìn vào một con số mục tiêu.</p>
+
+<div class="model-table-block">
+  <h2>ĐỘ NHẠY THEO DRIVER</h2>
+  <div class="table-unit">Minh họa độ nhạy theo kịch bản; báo cáo chính thức cần giả định được phê duyệt.</div>
+  <table class="financial-model-table">
+    <thead><tr><th>Chỉ tiêu</th><th>Bear</th><th>Base</th><th>Bull</th></tr></thead>
+    <tbody><tr><td>Target price</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Upside/downside</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Revenue growth stress</td><td class="numeric">1.0%</td><td class="numeric">4.0%</td><td class="numeric">7.0%</td></tr><tr><td>Gross margin stress</td><td class="numeric">45.0%</td><td class="numeric">47.0%</td><td class="numeric">49.0%</td></tr><tr><td>WACC stress</td><td class="numeric">14.8%</td><td class="numeric">13.8%</td><td class="numeric">12.8%</td></tr></tbody>
+  </table>
+</div>
+
+
+<div class="model-table-block">
+  <h2>MÔ HÌNH ĐỊNH GIÁ</h2>
+  <div class="table-unit">Đơn vị: tỷ đồng nếu không có ghi chú khác</div>
+  <table class="financial-model-table">
+    <thead><tr><th>Chỉ tiêu</th><th>2022FY</th><th>2023FY</th><th>2024FY</th><th>2025FY</th></tr></thead>
+    <tbody><tr><td>Doanh thu thuần</td><td class="numeric">1,555</td><td class="numeric">1,652</td><td class="numeric">1,728</td><td class="numeric">1,865</td></tr><tr><td>Tăng trưởng doanh thu</td><td class="numeric">—</td><td class="numeric">6.2%</td><td class="numeric">4.6%</td><td class="numeric">8.0%</td></tr><tr><td>GVHB trừ khấu hao</td><td class="numeric">-787</td><td class="numeric">-853</td><td class="numeric">-895</td><td class="numeric">-981</td></tr><tr><td>Chi phí bán hàng và quản lý</td><td class="numeric">-357</td><td class="numeric">-376</td><td class="numeric">-404</td><td class="numeric">-418</td></tr><tr><td>Doanh thu tài chính</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Chi phí tài chính</td><td class="numeric">-2</td><td class="numeric">-7</td><td class="numeric">-4</td><td class="numeric">-4</td></tr><tr><td>EBITDA</td><td class="numeric">452</td><td class="numeric">469</td><td class="numeric">476</td><td class="numeric">517</td></tr><tr><td>Tỷ suất EBITDA</td><td class="numeric">29.1%</td><td class="numeric">28.4%</td><td class="numeric">27.6%</td><td class="numeric">27.7%</td></tr><tr><td>Khấu hao</td><td class="numeric">42</td><td class="numeric">46</td><td class="numeric">48</td><td class="numeric">51</td></tr><tr><td>Lợi nhuận từ HĐKD / EBIT</td><td class="numeric">410</td><td class="numeric">423</td><td class="numeric">428</td><td class="numeric">466</td></tr><tr><td>Biên lợi nhuận HĐKD / EBIT margin</td><td class="numeric">26.4%</td><td class="numeric">25.6%</td><td class="numeric">24.8%</td><td class="numeric">25.0%</td></tr><tr><td>Lợi nhuận khác</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Chi phí lãi vay ròng</td><td class="numeric">-2</td><td class="numeric">-7</td><td class="numeric">-4</td><td class="numeric">-4</td></tr><tr><td>Thuế</td><td class="numeric">-55</td><td class="numeric">-51</td><td class="numeric">-50</td><td class="numeric">-54</td></tr><tr><td>Thuế suất thực tế</td><td class="numeric">18.4%</td><td class="numeric">15.9%</td><td class="numeric">15.4%</td><td class="numeric">15.6%</td></tr><tr><td>LNST sau CĐKKS / LNST CĐ mẹ</td><td class="numeric">244</td><td class="numeric">269</td><td class="numeric">275</td><td class="numeric">292</td></tr><tr><td>Tiền mặt từ hoạt động kinh doanh</td><td class="numeric">165</td><td class="numeric">282</td><td class="numeric">265</td><td class="numeric">615</td></tr><tr><td>Số lượng cổ phiếu (triệu)</td><td class="numeric">0</td><td class="numeric">0</td><td class="numeric">0</td><td class="numeric">0</td></tr><tr><td>EPS</td><td class="numeric">2,799</td><td class="numeric">2,473</td><td class="numeric">2,530</td><td class="numeric">2,674</td></tr><tr><td>EPS hiệu chỉnh</td><td class="numeric">2,799</td><td class="numeric">2,473</td><td class="numeric">2,530</td><td class="numeric">2,674</td></tr><tr><td>Tăng trưởng EPS hiệu chỉnh</td><td class="numeric">—</td><td class="numeric">-11.6%</td><td class="numeric">2.3%</td><td class="numeric">5.7%</td></tr></tbody>
+  </table>
+</div>
+
+</div>
+  </div>
+  
+  <div class="page-break"></div>
+  
+  
+  <div class="report-section" id="section-bs_cf_ratios">
+    
+    <div class="acbs-page-header">
+      <span>Cập nhật DBD - ĐANG HOÀN THIỆN</span>
+      <span>Ngày 2026-06-03</span>
+    </div>
+    
+    <div class="client-report-page">
+
+<div class="model-table-block">
+  <h2>CÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN</h2>
+  <div class="table-unit">Đơn vị: tỷ đồng nếu không có ghi chú khác</div>
+  <table class="financial-model-table">
+    <thead><tr><th>Chỉ tiêu</th><th>2022FY</th><th>2023FY</th><th>2024FY</th><th>2025FY</th></tr></thead>
+    <tbody><tr><td>Thay đổi vốn lưu động</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Capex</td><td class="numeric">83</td><td class="numeric">134</td><td class="numeric">149</td><td class="numeric">409</td></tr><tr><td>Đầu tư vào công ty liên kết/liên doanh</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Các khoản mục dòng tiền khác</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Dòng tiền tự do</td><td class="numeric">82</td><td class="numeric">149</td><td class="numeric">116</td><td class="numeric">207</td></tr><tr><td>Phát hành cổ phiếu</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Cổ tức</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Thay đổi nợ ròng</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Nợ ròng cuối năm</td><td class="numeric">-40</td><td class="numeric">-53</td><td class="numeric">-278</td><td class="numeric">-160</td></tr><tr><td>Vốn CSH</td><td class="numeric">1,355</td><td class="numeric">1,433</td><td class="numeric">1,661</td><td class="numeric">1,736</td></tr><tr><td>Giá trị sổ sách/cp (VND)</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Nợ ròng / VCSH</td><td class="numeric">-2.9%</td><td class="numeric">-3.7%</td><td class="numeric">-16.8%</td><td class="numeric">-9.2%</td></tr><tr><td>Nợ ròng / EBITDA</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Tổng tài sản</td><td class="numeric">1,896</td><td class="numeric">1,989</td><td class="numeric">2,264</td><td class="numeric">2,596</td></tr></tbody>
+  </table>
+</div>
+
+
+<div class="model-table-block">
+  <h2>CHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ</h2>
+  <div class="table-unit">Đơn vị: lần hoặc %, trừ khi có ghi chú khác</div>
+  <table class="financial-model-table">
+    <thead><tr><th>Chỉ tiêu</th><th>2022FY</th><th>2023FY</th><th>2024FY</th><th>2025FY</th></tr></thead>
+    <tbody><tr><td>ROE</td><td class="numeric">18.0%</td><td class="numeric">18.8%</td><td class="numeric">16.6%</td><td class="numeric">16.8%</td></tr><tr><td>ROA</td><td class="numeric">12.8%</td><td class="numeric">13.5%</td><td class="numeric">12.2%</td><td class="numeric">11.2%</td></tr><tr><td>ROIC</td><td class="numeric">25.5%</td><td class="numeric">24.9%</td><td class="numeric">21.7%</td><td class="numeric">22.6%</td></tr><tr><td>WACC</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>EVA</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>P/E</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>EV/EBITDA</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>EV/FCF</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>P/B</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>P/S</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>EV/Doanh thu</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>PEG</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr><tr><td>Suất sinh lợi cổ tức</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr></tbody>
+  </table>
+</div>
+
+</div>
+  </div>
+  
+  <div class="page-break"></div>
+  
+  
+  <div class="report-section" id="section-risks_disclaimer">
+    
+    <div class="acbs-page-header">
+      <span>Cập nhật DBD - ĐANG HOÀN THIỆN</span>
+      <span>Ngày 2026-06-03</span>
+    </div>
+    
+    <div class="client-report-page">
+  <h1>Rủi ro đầu tư và khuyến cáo</h1>
+  <table class="financial-model-table">
+    <thead><tr><th>Rủi ro</th><th>Mức độ</th><th>Theo dõi</th></tr></thead>
+    <tbody><tr><td>Áp lực giá thầu thuốc</td><td>Cao</td><td>Kết quả đấu thầu ETC</td></tr><tr><td>Biến động nguyên liệu và tỷ giá</td><td>Trung bình</td><td>API, USD/VND</td></tr><tr><td>Cạnh tranh generic</td><td>Trung bình</td><td>Thị phần và giá bán</td></tr></tbody>
+  </table>
+  <h2>Khuyến cáo</h2>
+  <p>Báo cáo này chỉ nhằm mục đích cung cấp thông tin và không phải là lời mời mua hoặc bán chứng khoán. Nhà đầu tư cần tự đánh giá khẩu vị rủi ro và tham khảo ý kiến chuyên gia được cấp phép trước khi ra quyết định.</p>
+  <h2>Nguồn tham khảo chính</h2>
+  <p></p>
+</div>
+  </div>
+  
+  
+
+  <!-- ── Report Footer ─────────────────────────────────── -->
+  <div class="report-footer">
+    Vietnam Pharma Equity Research | DBD | 2026-06-03 |
+    Tài liệu này chỉ dành cho mục đích nghiên cứu học thuật.
+    
+  </div>
+
+</body>
+</html>
