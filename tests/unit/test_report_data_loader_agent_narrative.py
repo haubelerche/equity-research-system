@@ -1,7 +1,6 @@
 """Unit tests: agent narrative artifact gets injected into ReportContext."""
 import json
 from pathlib import Path
-import pytest
 
 
 def test_agent_narrative_injected_into_report_context(monkeypatch):
@@ -35,6 +34,9 @@ def test_agent_narrative_injected_into_report_context(monkeypatch):
     assert "ổn định" in ctx.financial_narrative, "Vietnamese narrative not injected"
     assert "chất lượng" in ctx.investment_thesis, "Investment thesis not injected"
     assert "ETC" in ctx.risk_narrative, "Risk narrative not injected"
+
+    # Fields not in narrative dict should still have hardcoded defaults (not empty string)
+    assert ctx.forecast_narrative  # Should not be empty — has a default
 
 
 def test_missing_agent_narrative_does_not_crash(monkeypatch):
@@ -98,3 +100,44 @@ def test_load_agent_narrative_from_manifest_reads_payload(tmp_path):
     assert result.get("financial_narrative") == "Phân tích tài chính DHG."
     assert result.get("investment_thesis") == "Luận điểm đầu tư."
     assert result.get("risk_narrative") == "Rủi ro chính."
+
+
+def test_load_agent_narrative_from_manifest_reads_wrapped_payload(tmp_path):
+    """_load_agent_narrative_from_manifest handles payload wrapped under 'payload' key."""
+    from backend.reporting.report_data_loader import _load_agent_narrative_from_manifest
+
+    run_id = "RUN_TEST_002"
+    manifest_dir = tmp_path / "runs"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+
+    # Write artifact file with nested payload key
+    artifact_data = {
+        "payload": {
+            "financial_narrative": "DHG với payload lồng.",
+            "investment_thesis": "Luận điểm.",
+        }
+    }
+    artifact_path = tmp_path / "runs" / f"{run_id}_financial_analysis.json"
+    artifact_path.write_text(json.dumps(artifact_data), encoding="utf-8")
+
+    manifest_data = {
+        "schema_version": 1,
+        "run_id": run_id,
+        "ticker": "DHG",
+        "created_at": "2026-06-03T00:00:00",
+        "artifacts": {
+            "financial_analysis": {
+                "artifact_type": "agent_output_json",
+                "path": str(artifact_path),
+            }
+        }
+    }
+    # _read_manifest_or_raise uses base_dir / "artifacts" / "manifests"
+    manifests_dir = tmp_path / "artifacts" / "manifests"
+    manifests_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = manifests_dir / f"{run_id}_manifest.json"
+    manifest_path.write_text(json.dumps(manifest_data), encoding="utf-8")
+
+    result = _load_agent_narrative_from_manifest(run_id, base_dir=tmp_path)
+    assert result.get("financial_narrative") == "DHG với payload lồng."
+    assert result.get("investment_thesis") == "Luận điểm."

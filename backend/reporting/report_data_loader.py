@@ -124,6 +124,15 @@ _SECTOR_BLURB: dict[str, str] = {
 _PLACEHOLDER = "Chưa có dữ liệu — cần bổ sung trước khi export final."
 _NA = "N/A"
 
+# Module-level constant — canonical narrative fields injected from FinancialAnalystAgent
+_NARRATIVE_FIELDS = [
+    "financial_narrative",
+    "investment_thesis",
+    "risk_narrative",
+    "forecast_narrative",
+    "valuation_narrative",
+]
+
 
 # ── Internal helpers ───────────────────────────────────────────────────────────
 
@@ -198,7 +207,11 @@ def _load_agent_narrative_from_manifest(run_id: str, base_dir: "Path | None" = N
             "forecast_narrative": str(payload.get("forecast_narrative") or ""),
             "valuation_narrative": str(payload.get("valuation_narrative") or ""),
         }
-    except Exception:
+    except Exception as exc:
+        _loader_logger.debug(
+            "Agent narrative not loaded for run_id=%s: %s",
+            run_id, exc,
+        )
         return {}
 
 
@@ -1113,15 +1126,27 @@ def load_report_context(
     )
 
     # ── Agent narrative injection ──────────────────────────────────────
-    # Auto-load agent narrative from manifest if run_id is known and narrative not provided
+    # Auto-load agent narrative from already-loaded manifest, or from disk if not loaded yet
     if run_id and agent_narrative is None:
-        agent_narrative = _load_agent_narrative_from_manifest(run_id)
+        if manifest is not None:
+            # Use the already-loaded manifest to avoid a second disk read
+            try:
+                artifact = manifest.load_json("financial_analysis")
+                payload = artifact.get("payload") or artifact
+                agent_narrative = {
+                    k: str(payload.get(k) or "")
+                    for k in _NARRATIVE_FIELDS
+                }
+            except Exception as exc:
+                _loader_logger.debug(
+                    "Agent narrative not loaded from manifest for run_id=%s: %s",
+                    run_id, exc,
+                )
+                agent_narrative = {}
+        else:
+            agent_narrative = _load_agent_narrative_from_manifest(run_id)
 
     # Inject agent narrative fields into ReportContext (overrides hardcoded defaults)
-    _NARRATIVE_FIELDS = [
-        "financial_narrative", "investment_thesis", "risk_narrative",
-        "forecast_narrative", "valuation_narrative",
-    ]
     _narrative_overrides: dict = {}
     if agent_narrative:
         for _field in _NARRATIVE_FIELDS:
