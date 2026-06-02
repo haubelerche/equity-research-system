@@ -180,6 +180,28 @@ def _load_db_facts(ticker: str) -> dict[tuple[str, str], float]:
         return {}
 
 
+def _load_agent_narrative_from_manifest(run_id: str, base_dir: "Path | None" = None) -> dict:
+    """Load FinancialAnalystAgent narrative fields from the run's artifact manifest.
+
+    Returns an empty dict if no manifest or no financial_analysis artifact exists.
+    Safe to call — never raises.
+    """
+    try:
+        manifest = _read_manifest_or_raise(run_id, base_dir=base_dir)
+        artifact = manifest.load_json("financial_analysis")
+        # artifact may be the payload directly, or wrapped under a "payload" key
+        payload = artifact.get("payload") or artifact
+        return {
+            "financial_narrative": str(payload.get("financial_narrative") or ""),
+            "investment_thesis": str(payload.get("investment_thesis") or ""),
+            "risk_narrative": str(payload.get("risk_narrative") or ""),
+            "forecast_narrative": str(payload.get("forecast_narrative") or ""),
+            "valuation_narrative": str(payload.get("valuation_narrative") or ""),
+        }
+    except Exception:
+        return {}
+
+
 def _pct(v: float | None) -> Optional[float]:
     """Convert decimal ratio to percentage, rounded to 1 dp. Returns None if missing."""
     if v is None:
@@ -788,6 +810,7 @@ def load_report_context(
     ticker: str,
     run_id: str | None = None,
     allow_latest_artifacts: bool = False,
+    agent_narrative: "dict | None" = None,
 ) -> "ReportContext":
     """Load a fully-populated ReportContext for *ticker* from valuation artifacts.
 
@@ -1089,6 +1112,23 @@ def load_report_context(
         )
     )
 
+    # ── Agent narrative injection ──────────────────────────────────────
+    # Auto-load agent narrative from manifest if run_id is known and narrative not provided
+    if run_id and agent_narrative is None:
+        agent_narrative = _load_agent_narrative_from_manifest(run_id)
+
+    # Inject agent narrative fields into ReportContext (overrides hardcoded defaults)
+    _NARRATIVE_FIELDS = [
+        "financial_narrative", "investment_thesis", "risk_narrative",
+        "forecast_narrative", "valuation_narrative",
+    ]
+    _narrative_overrides: dict = {}
+    if agent_narrative:
+        for _field in _NARRATIVE_FIELDS:
+            _value = agent_narrative.get(_field)
+            if _value and isinstance(_value, str) and _value.strip():
+                _narrative_overrides[_field] = _value.strip()
+
     # ── Report status ──────────────────────────────────────────────────
     # Report is DRAFT unless all gates pass
     report_status = "DRAFT — Cần analyst review"
@@ -1125,13 +1165,13 @@ def load_report_context(
         _has_valuation=has_valuation,
         _has_sensitivity=has_sensitivity,
         _has_forecast_table=has_forecast_table,
-        # Narrative
+        # Narrative (agent overrides take precedence over hardcoded defaults)
         company_overview=company_overview,
-        investment_thesis=investment_thesis,
-        financial_narrative=financial_narrative,
-        forecast_narrative=forecast_narrative,
-        valuation_narrative=valuation_narrative,
-        risk_narrative=risk_narrative,
+        investment_thesis=_narrative_overrides.get("investment_thesis", investment_thesis),
+        financial_narrative=_narrative_overrides.get("financial_narrative", financial_narrative),
+        forecast_narrative=_narrative_overrides.get("forecast_narrative", forecast_narrative),
+        valuation_narrative=_narrative_overrides.get("valuation_narrative", valuation_narrative),
+        risk_narrative=_narrative_overrides.get("risk_narrative", risk_narrative),
         key_takeaways=key_takeaways,
         sensitivity_narrative=sensitivity_narrative,
         # Tables
