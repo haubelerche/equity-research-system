@@ -55,6 +55,41 @@ def test_model_adapter_requires_openai_key(monkeypatch) -> None:
         OpenAIModelAdapter().validate_environment()
 
 
+def test_financial_analyst_prompt_has_all_required_sections():
+    """AgentRegistry must load financial_analyst config without error — validates all 8 sections."""
+    registry = AgentRegistry()
+    configs = registry.load()
+    assert "financial_analyst" in configs
+    cfg = configs["financial_analyst"]
+    assert cfg.role == "FinancialAnalystAgent"
+    for section in REQUIRED_PROMPT_SECTIONS:
+        assert section in cfg.prompt, f"Missing required section in financial_analyst.md: {section}"
+
+
+def test_financial_analyst_prompt_has_output_schema_fields():
+    """financial_analyst.md must define the 5 narrative output fields in its Output JSON Schema."""
+    registry = AgentRegistry()
+    cfg = registry.load()["financial_analyst"]
+    required_fields = [
+        "financial_narrative",
+        "investment_thesis",
+        "risk_narrative",
+        "forecast_narrative",
+    ]
+    for field in required_fields:
+        assert field in cfg.prompt, f"Narrative field '{field}' not defined in Output JSON Schema"
+
+
+def test_financial_analyst_prompt_specifies_vietnamese_output():
+    """financial_analyst.md must explicitly request Vietnamese language output."""
+    registry = AgentRegistry()
+    cfg = registry.load()["financial_analyst"]
+    # Must mention Vietnamese output in some form
+    assert any(term in cfg.prompt for term in ["tiếng Việt", "Vietnamese", "Việt"]), (
+        "Prompt does not specify Vietnamese output language"
+    )
+
+
 def test_agent_registry_rejects_unsupported_tools(tmp_path: Path) -> None:
     prompt_dir = tmp_path / "prompts"
     prompt_dir.mkdir()
