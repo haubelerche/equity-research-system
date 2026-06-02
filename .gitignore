@@ -13,6 +13,12 @@ vnstock/
 
 # Markdown docs (generated reports, plans)
 *.md
+!/README.md
+!/GOAL_OUTPUT.md
+!/AUDIT_SUMMARY.md
+!/ARCHITECTURE.md
+!/docs/
+!/docs/**
 
 # Python
 __pycache__/
