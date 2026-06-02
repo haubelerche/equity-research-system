@@ -164,6 +164,45 @@ def _print_ev_grid(ev_sens: dict, current_price: float | None) -> None:
         print(f"  {ebitda:>10.0f}   " + "  ".join(row))
 
 
+def _formula_trace(
+    trace_id: str,
+    formula_id: str,
+    formula_version: str,
+    output_name: str,
+    output_value,
+    unit: str | None,
+    period: str | None,
+    input_values: dict,
+    calculation_steps: list[dict],
+    input_fact_ids: list | None = None,
+    warnings: list[str] | None = None,
+) -> dict:
+    return {
+        "trace_id": trace_id,
+        "formula_id": formula_id,
+        "formula_version": formula_version,
+        "output_name": output_name,
+        "output_value": output_value,
+        "unit": unit,
+        "period": period,
+        "input_fact_ids": input_fact_ids or [],
+        "input_values": input_values,
+        "calculation_steps": calculation_steps,
+        "warnings": warnings or [],
+    }
+
+
+def _fact_ids(raw_facts: list[dict], metrics: list[str], periods: list[str] | None = None) -> list:
+    wanted_periods = set(periods or [])
+    ids = []
+    for fact in raw_facts:
+        metric = fact.get("line_item_code")
+        period = f"{fact.get('fiscal_year')}FY" if fact.get("fiscal_year") else None
+        if metric in metrics and (not wanted_periods or period in wanted_periods):
+            ids.append(fact.get("id") or fact.get("fact_id") or f"{metric}:{period}")
+    return ids
+
+
 def run_valuation(
     ticker: str,
     from_year: int = MVP_FROM_YEAR,
@@ -317,11 +356,16 @@ def run_valuation(
     for w in forecast.warnings:
         print(f"  WARN (forecast): {w}")
 
-    # Derive shares from fact table for FCFF/FCFE
+    # Resolve reportable shares from explicit canonical facts. EPS-implied
+    # shares are a reconciliation diagnostic and must not drive target price.
+    from backend.analytics.shares import reportable_shares_mn
     _latest_fy = fy_periods[-1] if fy_periods else None
-    _ni  = full_table.get("net_income.parent", {}).get(_latest_fy) if _latest_fy else None
-    _eps = full_table.get("eps.basic", {}).get(_latest_fy) if _latest_fy else None
-    _shares_mn = (_ni * 1_000 / _eps) if (_ni and _eps and _eps > 0) else None
+    _shares_mn = reportable_shares_mn(full_table, _latest_fy)
+    if _shares_mn is None:
+        print(
+            f"[run_valuation] {ticker} — shares_outstanding fact missing; "
+            "FCFF/FCFE target price and market-cap bridge will be blocked."
+        )
 
     # Net borrowing schedule — sourced from forecast.debt_schedule (driver-based NB per year)
     _net_borrowing_sched = (
@@ -571,11 +615,125 @@ def run_valuation(
         "target_ev_ebitda": target_ev_ebitda,
         "note": "Assumptions are defaults — must be reviewed and approved before use in final reports.",
     }
+    formula_version = "valuation_v1_code_first_fcff_fcfe_blend"
+    forecast_terminal_period = forecast.forecast_years[-1].label if forecast.forecast_years else None
+    formula_traces = [
+        _formula_trace(
+            trace_id=f"{ticker}:WACC:{_latest_fy or 'NA'}",
+            formula_id="wacc",
+            formula_version=formula_version,
+            output_name="wacc",
+            output_value=fd.get("wacc"),
+            unit="ratio",
+            period=_latest_fy,
+            input_fact_ids=_fact_ids(raw_facts, ["total_debt.ending", "equity.parent"], [_latest_fy] if _latest_fy else None),
+            input_values=fd.get("wacc_breakdown", {}),
+            calculation_steps=[
+                {"step": "cost_of_equity", "value": fd.get("wacc_breakdown", {}).get("cost_of_equity")},
+                {"step": "after_tax_cost_of_debt", "value": None if fd.get("wacc_breakdown", {}).get("cost_of_debt") is None else fd.get("wacc_breakdown", {}).get("cost_of_debt") * (1 - (fd.get("wacc_breakdown", {}).get("tax_rate") or 0))},
+                {"step": "weighted_average_cost_of_capital", "value": fd.get("wacc")},
+            ],
+            warnings=fcff_result.warnings,
+        ),
+        _formula_trace(
+            trace_id=f"{ticker}:FCFF:{forecast_terminal_period or 'NA'}",
+            formula_id="fcff",
+            formula_version=formula_version,
+            output_name="fcff_equity_value",
+            output_value=fd.get("equity_value"),
+            unit="vnd_bn",
+            period=forecast_terminal_period,
+            input_fact_ids=_fact_ids(raw_facts, ["total_debt.ending", "cash_and_equivalents.ending", "shares_outstanding.weighted_avg"], [_latest_fy] if _latest_fy else None),
+            input_values={
+                "sum_pv_fcff": fd.get("sum_pv_fcff"),
+                "pv_terminal_value": fd.get("pv_terminal_value"),
+                "net_debt": fd.get("net_debt"),
+                "shares_mn": fd.get("shares_mn"),
+            },
+            calculation_steps=[
+                {"step": "enterprise_value=sum_pv_fcff+pv_terminal_value", "value": fd.get("enterprise_value")},
+                {"step": "equity_value=enterprise_value-net_debt", "value": fd.get("equity_value")},
+                {"step": "target_price=equity_value/shares", "value": fd.get("target_price_vnd")},
+            ],
+            warnings=fcff_result.warnings,
+        ),
+        _formula_trace(
+            trace_id=f"{ticker}:FCFE:{forecast_terminal_period or 'NA'}",
+            formula_id="fcfe",
+            formula_version=formula_version,
+            output_name="fcfe_equity_value",
+            output_value=fe.get("equity_value"),
+            unit="vnd_bn",
+            period=forecast_terminal_period,
+            input_fact_ids=_fact_ids(raw_facts, ["net_income.parent", "depreciation.total", "capex.total", "shares_outstanding.weighted_avg"], [_latest_fy] if _latest_fy else None),
+            input_values={
+                "sum_pv_fcfe": fe.get("sum_pv_fcfe"),
+                "pv_terminal_value": fe.get("pv_terminal_value"),
+                "shares_mn": fe.get("shares_mn"),
+            },
+            calculation_steps=[
+                {"step": "equity_value=sum_pv_fcfe+pv_terminal_value", "value": fe.get("equity_value")},
+                {"step": "target_price=equity_value/shares", "value": fe.get("target_price_vnd")},
+            ],
+            warnings=fcfe_result.warnings,
+        ),
+        _formula_trace(
+            trace_id=f"{ticker}:TERMINAL_VALUE:FCFF",
+            formula_id="terminal_value",
+            formula_version=formula_version,
+            output_name="fcff_terminal_value",
+            output_value=fd.get("terminal_value"),
+            unit="vnd_bn",
+            period=forecast_terminal_period,
+            input_values={
+                "terminal_growth": fd.get("terminal_growth"),
+                "wacc": fd.get("wacc"),
+                "last_fcff": (fd.get("fcff_table") or [{}])[-1].get("fcff") if fd.get("fcff_table") else None,
+            },
+            calculation_steps=[
+                {"step": "terminal_fcff=last_fcff*(1+g)", "value": None},
+                {"step": "terminal_value=terminal_fcff/(wacc-g)", "value": fd.get("terminal_value")},
+            ],
+            warnings=fcff_result.warnings,
+        ),
+        _formula_trace(
+            trace_id=f"{ticker}:BLEND_DCF",
+            formula_id="blend_dcf",
+            formula_version=formula_version,
+            output_name="target_price_dcf_vnd",
+            output_value=bd.get("target_price_dcf_vnd"),
+            unit="vnd_per_share",
+            period=forecast_terminal_period,
+            input_values={
+                "price_fcff_vnd": bd.get("price_fcff_vnd"),
+                "price_fcfe_vnd": bd.get("price_fcfe_vnd"),
+                "fcff_weight": bd.get("fcff_weight"),
+                "fcfe_weight": bd.get("fcfe_weight"),
+            },
+            calculation_steps=[
+                {"step": "target=fcff_weight*price_fcff+fcfe_weight*price_fcfe", "value": bd.get("target_price_dcf_vnd")},
+            ],
+            warnings=blend.warnings,
+        ),
+        _formula_trace(
+            trace_id=f"{ticker}:SENSITIVITY:FCFF_WACC_G",
+            formula_id="sensitivity_matrix",
+            formula_version=formula_version,
+            output_name="fcff_wacc_g",
+            output_value={"rows": len(sens_fcff.get("matrix", {})), "columns": len(sens_fcff.get("g_range", []))},
+            unit="matrix",
+            period=None,
+            input_values={"wacc_range": sens_fcff.get("wacc_range"), "g_range": sens_fcff.get("g_range")},
+            calculation_steps=[
+                {"step": "recompute target price across WACC and terminal growth grid", "value": "matrix"},
+            ],
+        ),
+    ]
 
     artifact = {
         "ticker": ticker,
         "generated_at": generated_at.isoformat(),
-        "formula_version": "valuation_v1_code_first_fcff_fcfe_blend",
+        "formula_version": formula_version,
         "assumption_version": "default_assumptions_v1",
         "unit_policy": "VND per share; financial statement values follow canonical fact units",
         "currency": "VND",
@@ -603,6 +761,7 @@ def run_valuation(
         "current_price_vnd": current_price,
         "assumption_gate": gate.to_dict(),
         "valuation_confidence": confidence.to_dict(),
+        "formula_traces": formula_traces,
     }
 
     VALUATION_DIR.mkdir(parents=True, exist_ok=True)

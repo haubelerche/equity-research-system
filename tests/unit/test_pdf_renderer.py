@@ -89,11 +89,30 @@ def test_strict_render_fails_when_no_backend(tmp_path):
             PDFRenderer().render(html, output_dir=tmp_path)
 
 
-def test_rejects_mojibake_vietnamese_markers(tmp_path):
+def test_accepts_valid_vietnamese_text(tmp_path):
+    """Valid Vietnamese diacritics (UTF-8) must NOT trigger preflight failure."""
     html = tmp_path / "DBD_report.html"
     html.write_text("<html><body>Công ty CP Dược Bình Định</body></html>", encoding="utf-8")
-    with pytest.raises(PDFPreflightError):
+
+    original_import = builtins.__import__
+
+    def mock_import(name, *args, **kwargs):
+        if name in ("weasyprint", "pdfkit", "xhtml2pdf"):
+            raise ImportError(f"mocked: {name} not available")
+        return original_import(name, *args, **kwargs)
+
+    # Should NOT raise: valid Vietnamese is fine; unavailable PDF backends use stub.
+    with mock.patch("builtins.__import__", side_effect=mock_import), \
+            mock.patch("backend.reporting.pdf_renderer._find_chromium_executable", return_value=None):
         PDFRenderer().render(html, output_dir=tmp_path, allow_stub=True)
+
+
+def test_rejects_actual_replacement_char_in_html(tmp_path):
+    """HTML containing the Unicode replacement character U+FFFD must fail strict preflight."""
+    html = tmp_path / "DBD_corrupt.html"
+    html.write_text("<html><body>B�N — corrupt encoding</body></html>", encoding="utf-8")
+    with pytest.raises(PDFPreflightError):
+        PDFRenderer().render(html, output_dir=tmp_path, allow_stub=True, strict_preflight=True)
 
 
 def test_rejects_client_facing_backend_terms():

@@ -31,6 +31,30 @@ _TEMPLATES_DIR = Path(__file__).parent / "templates"
 # Project root for resolving relative image paths
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
+_BROKEN_TEXT_MARKERS = (
+    "\ufffd",
+    "\u00ef\u00bf\u00bd",
+    "Gi\u00ef",
+    "Ch?",
+    "B->o",
+    "c->o",
+    "d? li?u",
+)
+
+
+class HTMLPreflightError(RuntimeError):
+    """Raised when generated HTML contains text corruption markers."""
+
+
+def preflight_rendered_html_text(html_content: str) -> None:
+    """Fail fast when generated HTML contains mojibake or replacement markers."""
+    found = [marker for marker in _BROKEN_TEXT_MARKERS if marker in html_content]
+    if found:
+        raise HTMLPreflightError(
+            "HTML text failed encoding preflight; broken markers found: "
+            + ", ".join(found[:20])
+        )
+
 
 class HTMLRenderer:
     """Render a list of report section dicts into a single A4 HTML file."""
@@ -155,6 +179,8 @@ class HTMLRenderer:
 
         # Embed all images as base64 data URIs → self-contained HTML
         rendered = self._embed_images(rendered)
+
+        preflight_rendered_html_text(rendered)
 
         out_path.write_text(rendered, encoding="utf-8")
         return out_path

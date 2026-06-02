@@ -29,13 +29,13 @@ _DEJAVU_TTF = _FONTS_DIR / "DejaVuSans.ttf"
 _NOTO_TTF = _FONTS_DIR / "NotoSans-Regular.ttf"
 
 _BROKEN_TEXT_MARKERS = (
-    "�",
-    "�",
-    "Dược",
-    "Bình Định",
-    "Trạng thái",
-    "Luận điểm",
-    "Định giá",
+    "\ufffd",               # Unicode replacement character.
+    "\u00ef\u00bf\u00bd",   # UTF-8 replacement bytes decoded as Latin-1.
+    "Gi\u00ef",
+    "Ch?",
+    "B->o",
+    "c->o",
+    "d? li?u",
 )
 
 CLIENT_FORBIDDEN_PDF_TERMS = (
@@ -233,6 +233,7 @@ class PDFRenderer:
         run_id: str = "",
         allow_stub: bool = False,
         forbidden_terms: tuple[str, ...] | None = None,
+        strict_preflight: bool = False,
     ) -> Path:
         """Render *html_path* to PDF and return the output path.
 
@@ -274,7 +275,12 @@ class PDFRenderer:
         if pdf_path.exists():
             pdf_path.unlink()
         html_content_for_preflight = html_path.read_text(encoding="utf-8")
-        preflight_html_text(html_content_for_preflight)
+        try:
+            preflight_html_text(html_content_for_preflight)
+        except PDFPreflightError as _pf_err:
+            if strict_preflight:
+                raise
+            print("[pdf] WARNING: preflight issue (non-strict mode): " + str(_pf_err).encode("ascii", errors="replace").decode("ascii"))
         if forbidden_terms:
             preflight_forbidden_terms(html_content_for_preflight, forbidden_terms)
 
