@@ -167,3 +167,58 @@ vnstock/          Local vnstock library (reference; wrap behind our connector)
 | Agent stubs produce fake data — reports would be hallucinated | HIGH |
 | No evaluation gate means no quality assurance | HIGH |
 | Missing human approval integration for export | MEDIUM |
+
+---
+
+## 10. Web Connector Status (2026-06-03)
+
+Live integration tests run against real Vietnamese company websites and the CafeF API.
+Test file: `tests/integration/test_connector_ir_live.py`
+Diagnostic log: `docs/diagnostics/diag_connector_live.txt`
+
+| Ticker | IR URL | HTTP Status | IRConnector Candidates | Notes |
+|--------|--------|-------------|----------------------|-------|
+| DHG | https://dhgpharma.com.vn/vi/bao-cao-tai-chinh | 200 OK | 16 | Annual reports FY2022-2025, audited FS, quarterly BCTC, disclosures |
+| DHG | https://dhgpharma.com.vn/vi/bao-cao-thuong-nien | 200 OK | (same links) | Shares document set with BCTC page |
+| IMP | https://www.imexpharm.com/quan-he-co-dong | 404 Not Found | 0 | URL stale — page not found |
+| DMC | https://www.domesco.com/co-dong | 200 OK (JS shell) | 0 | Page is a 2675-char JS redirect shell; no PDF links in static HTML |
+| TRA | https://www.traphaco.com.vn/vi/quan-he-co-dong.html | SSL failure | 0 | CERTIFICATE_VERIFY_FAILED (hostname mismatch) |
+| DBD | https://www.bidiphar.com/quan-he-co-dong | 404 Not Found | 0 | URL stale — page not found |
+
+| Ticker | CafeF Structured Data (FY2023) | Notes |
+|--------|-------------------------------|-------|
+| DHG | 0 rows | CafeF API endpoint `/Ajax/PageNew/DataHistory/FinancialInfo.ashx` returns HTTP 404 — endpoint has moved or been retired |
+| IMP | 0 rows | Same as DHG |
+
+### Findings
+
+1. **DHG IR page works correctly.** The `CompanyIRConnector` discovered 16 PDF document candidates for DHG (FY2022-2025), including annual reports, audited financial statements, quarterly BCTC, and disclosure filings. 9 were selected after deduplication/ranking.
+
+2. **IMP, DMC, TRA, DBD IR pages are stale.** All four non-DHG IR URLs either 404, fail with SSL errors, or return JS-only shells that the static HTML scraper cannot parse. This is a blocker for multi-ticker discovery.
+
+3. **CafeF Tier-2 API endpoint is defunct.** The endpoint `https://s.cafef.vn/Ajax/PageNew/DataHistory/FinancialInfo.ashx` returns HTTP 404. The cafef.vn main domain is reachable, indicating the API path has changed. This affects structured numeric data ingestion for all tickers.
+
+4. **All connectors are crash-safe.** Network failures (404, SSL, timeout) are caught silently and return empty lists — no crashes on bad IR pages.
+
+5. **Exchange connectors (HOSE/HNX/SSC) returned 0 candidates for DHG.** These may require authenticated sessions or different URL patterns than currently configured.
+
+### IR URL Remediation Plan
+
+| Ticker | Problem | Recommended Fix |
+|--------|---------|-----------------|
+| IMP | 404 on `/quan-he-co-dong` | Update to https://www.imexpharm.com/quan-he-co-dong-2/ or check current IR page |
+| DMC | JS-rendered page | Add JavaScript-rendered page support or find direct document listing URL |
+| TRA | SSL cert failure | Add SSL context bypass for traphaco.com.vn, or update to HTTPS URL that works |
+| DBD | 404 on `/quan-he-co-dong` | Update to https://www.bidiphar.com/investor-relations or check current structure |
+
+### CafeF API Remediation Plan
+
+The CafeF structured data connector needs one of:
+- Locate updated CafeF API endpoint (inspect browser network tab on cafef.vn ticker page)
+- Replace with SSC iDocs API (official source)
+- Replace with vnstock structured data connector (already in the codebase)
+- Use HOSE/HNX disclosure XML feeds
+
+### Recommendation
+
+For the one-ticker DHG pipeline: the `CompanyIRConnector` works and provides a clean set of official PDFs. The PDF extraction + OCR path (Phase 3B) should proceed using DHG IR candidates. For multi-ticker expansion, IR URLs for IMP/DMC/TRA/DBD must be manually verified and updated in `backend/documents/company_registry.py` before running discovery on those tickers.

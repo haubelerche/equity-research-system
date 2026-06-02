@@ -1,0 +1,3 @@
+[discover] DHG: 16 candidates (9 selected); per-source={'company_ir': 16, 'hose_disclosure': 0, 'hnx_disclosure': 0, 'ssc_ids': 0}
+[discover] candidates JSON: C:\Users\Admin\Desktop\multi-agent-equity-research\.worktrees\report-pipeline-hardening\data\discovered_documents\DHG\document_candidates.json
+[discover] artifact: C:\Users\Admin\Desktop\multi-agent-equity-research\.worktrees\report-pipeline-hardening\artifacts\official_sources\DHG_document_discovery.md
