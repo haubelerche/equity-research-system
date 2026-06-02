@@ -12,7 +12,7 @@ vnstock/
 
 
 # Markdown docs (generated reports, plans)
-#*.md
+*.md
 
 # Python
 __pycache__/
