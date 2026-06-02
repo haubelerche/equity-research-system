@@ -38,6 +38,7 @@ in Vietnamese (tiếng Việt), professional analyst register.
     "investment_thesis": "<100-200 từ tiếng Việt>: luận điểm đầu tư tóm gọn dựa trên điểm mạnh và điểm yếu tài chính. Không đưa ra khuyến nghị mua/bán — chỉ mô tả chất lượng tài chính.",
     "risk_narrative": "<80-150 từ tiếng Việt>: các rủi ro tài chính có thể quan sát từ dữ liệu (ví dụ: biên gộp đang thu hẹp, tỷ lệ nợ tăng, dòng tiền hoạt động âm, dữ liệu không đầy đủ).",
     "forecast_narrative": "<80-150 từ tiếng Việt>: nhận xét về xu hướng lịch sử làm cơ sở cho dự báo. Không tự đưa ra dự báo số liệu — chỉ mô tả xu hướng.",
+    "valuation_narrative": "<60-120 từ tiếng Việt>: nhận xét ngắn về bối cảnh định giá — mức P/E, P/B so với ngành nếu có trong inputs. Không tính toán target price.",
     "key_data_quality_notes": "<string>: tóm tắt ngắn các cảnh báo chất lượng dữ liệu nếu có (thiếu kỳ, giá trị bất thường, nguồn Tier 3 only).",
     "metric_refs": ["danh sách metric_name keys thực sự được tham chiếu trong narrative"]
   },

@@ -405,7 +405,7 @@ def _to_fact_period(period: str) -> str:
     Display labels may use "YYYYA" suffix for actuals. This helper converts both.
     Expected input format: "<4-digit-year>FY" or "<4-digit-year>A".
     """
-    return period if period.endswith("FY") else period.replace("A", "FY")
+    return period if period.endswith("FY") else (period[:-1] + "FY" if period.endswith("A") else period)
 
 
 def _fcff_values(facts: dict[str, dict[str, float]], fcff_rows: dict[str, dict[str, Any]], periods: list[str]) -> list[float | None]:
