@@ -1,35 +1,53 @@
-"""Provision Unicode fonts for PDF Vietnamese rendering.
+"""Provision Unicode fonts for PDF Vietnamese rendering (Windows only).
 
 Run once to set up assets/fonts/NotoSans-Regular.ttf from Windows system fonts.
-This font is required by the xhtml2pdf PDF backend for correct Vietnamese output.
+This font is the xhtml2pdf fallback for Vietnamese PDF output when Chrome is unavailable.
 
-Usage:
-    python scripts/setup_fonts.py
+Note: This script is Windows-only. On Linux, install the `fonts-noto` package instead.
+Note: The target file is named NotoSans-Regular.ttf for compatibility with pdf_renderer.py,
+      but the actual bytes may come from a Windows system font (Segoe UI, Arial, etc.).
 """
 import shutil
+import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-fonts_dir = ROOT / "assets" / "fonts"
-fonts_dir.mkdir(parents=True, exist_ok=True)
 
-# Windows fonts with Unicode/Vietnamese coverage (in preference order)
-CANDIDATES = [
-    Path(r"C:\Windows\Fonts\segoeui.ttf"),    # Segoe UI — best Unicode coverage on Win11
-    Path(r"C:\Windows\Fonts\arial.ttf"),       # Arial — broad Unicode
-    Path(r"C:\Windows\Fonts\tahoma.ttf"),      # Tahoma
-]
+def provision_fonts(root: Path | None = None) -> Path | None:
+    """Copy a Unicode TTF from Windows system fonts to assets/fonts/NotoSans-Regular.ttf.
 
-target = fonts_dir / "NotoSans-Regular.ttf"
-if target.exists():
-    print(f"Font already present: {target}")
-else:
+    Returns the target path if successful, None if no source font was found.
+    """
+    if root is None:
+        root = Path(__file__).resolve().parent.parent
+    fonts_dir = root / "assets" / "fonts"
+    fonts_dir.mkdir(parents=True, exist_ok=True)
+
+    CANDIDATES = [
+        Path(r"C:\Windows\Fonts\segoeui.ttf"),
+        Path(r"C:\Windows\Fonts\arial.ttf"),
+        Path(r"C:\Windows\Fonts\tahoma.ttf"),
+    ]
+
+    target = fonts_dir / "NotoSans-Regular.ttf"
+    if target.exists():
+        print(f"Font already present: {target} ({target.stat().st_size:,} bytes)")
+        return target
+
     for src in CANDIDATES:
         if src.exists():
             shutil.copy(src, target)
-            print(f"Copied {src} -> {target}")
-            break
-    else:
-        print("WARNING: No Unicode font found automatically.")
-        print(f"Place NotoSans-Regular.ttf at: {target}")
-        print("Download: https://fonts.google.com/specimen/Noto+Sans")
+            print(f"Copied {src} -> {target} (aliased as NotoSans-Regular.ttf for pdf_renderer.py)")
+            return target
+
+    print(
+        "WARNING: No Unicode font found automatically. "
+        "Place NotoSans-Regular.ttf at: " + str(target) + "\n"
+        "Download: https://fonts.google.com/specimen/Noto+Sans\n"
+        "Or on Linux: sudo apt-get install fonts-noto"
+    )
+    return None
+
+
+if __name__ == "__main__":
+    result = provision_fonts()
+    sys.exit(0 if result else 1)
