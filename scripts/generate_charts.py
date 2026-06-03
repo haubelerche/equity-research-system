@@ -239,6 +239,61 @@ def _build_spec(
     ), wacc_range, g_range, matrix
 
 
+def _fetch_price_vs_benchmark(
+    ticker: str, days: int = 365
+) -> tuple[list[float], list[float], list[str]]:
+    """Fetch ~1Y daily close for the ticker and VNINDEX, base-100 normalised.
+
+    Returns (price_series, benchmark_series, date_labels). Empty lists on any failure
+    so the caller simply skips C1 (no fabrication of a price chart).
+    """
+    from datetime import date, timedelta
+
+    try:
+        from vnstock.api.quote import Quote
+    except Exception:  # noqa: BLE001
+        return [], [], []
+
+    end = date.today()
+    start = end - timedelta(days=days)
+
+    def _close_series(symbol: str) -> tuple[list[str], list[float]]:
+        try:
+            df = Quote(source="VCI", symbol=symbol).history(
+                start=start.isoformat(), end=end.isoformat(), interval="1D"
+            )
+        except Exception:  # noqa: BLE001
+            return [], []
+        if df is None or len(df) == 0:
+            return [], []
+        date_col = next((c for c in ("time", "date", "datetime") if c in df.columns), None)
+        if date_col is None or "close" not in df.columns:
+            return [], []
+        labels = [str(v)[:10] for v in df[date_col].tolist()]
+        closes = [float(v) for v in df["close"].tolist()]
+        return labels, closes
+
+    t_labels, t_close = _close_series(ticker)
+    _, b_close = _close_series("VNINDEX")
+    if not t_close:
+        return [], [], []
+
+    def _base100(series: list[float]) -> list[float]:
+        if not series or not series[0]:
+            return []
+        base = series[0]
+        return [round(v / base * 100.0, 2) for v in series]
+
+    price = _base100(t_close)
+    bench = _base100(b_close)
+    # Align benchmark length to ticker series (trim/pad to same length)
+    if bench and len(bench) != len(price):
+        n = min(len(bench), len(price))
+        price, bench, t_labels = price[-n:], bench[-n:], t_labels[-n:]
+    # Downsample labels to ~12 ticks for readability
+    return price, bench, t_labels
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -269,6 +324,14 @@ def main() -> None:
         matrix: list[list[float]] = []
     else:
         spec, wacc_range, g_range, matrix = _build_spec(ticker, run_id, val, facts)
+
+    # Populate C1 price history from the market data provider (not in valuation JSON).
+    if not spec.price_series:
+        price, bench, labels = _fetch_price_vs_benchmark(ticker)
+        if price:
+            spec.price_series = price
+            spec.benchmark_series = bench
+            spec.date_labels = labels
 
     gen = ChartGenerator(output_dir=output_dir)
 
