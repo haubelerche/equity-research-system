@@ -1121,6 +1121,28 @@ def generate_report(
     for f in facts:
         fact_table.setdefault(f["line_item_code"], {})[f"{f['fiscal_year']}FY"] = float(f["value"])
 
+    # -- Phase 02: enrich fact_table with market-source shares_outstanding --------
+    # Shares outstanding is a market-source canonical fact (taxonomy source='market'),
+    # not a financial-statement line item, so it is absent from snapshot facts. Without
+    # it the FCFF/FCFE engines intentionally block the target price. We source it from
+    # the vnstock VCI overview (MarketSnapshot), which records full provenance.
+    _market_snapshot = None
+    try:
+        from backend.reporting.market_snapshot import get_market_snapshot
+        _market_snapshot = get_market_snapshot(ticker)
+    except Exception as _ms_exc:  # noqa: BLE001 - network/provider errors are non-fatal
+        print(f"[generate_report] WARNING: market snapshot unavailable ({_ms_exc})")
+    if _market_snapshot is not None:
+        _shares_fact = _market_snapshot.shares_outstanding_fact()
+        if _shares_fact and "shares_outstanding.ending" not in fact_table:
+            fact_table["shares_outstanding.ending"] = {latest_fy_str: _shares_fact}
+            print(
+                f"[generate_report] {ticker} -> injected shares_outstanding.ending="
+                f"{_shares_fact:,.0f} from {_market_snapshot.source}"
+            )
+        if current_price is None and _market_snapshot.last_price:
+            current_price = _market_snapshot.last_price
+
     def fget(metric: str, period: str) -> float | None:
         return fact_table.get(metric, {}).get(period)
 
