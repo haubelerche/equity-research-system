@@ -598,6 +598,17 @@ def _table_financial_summary(
     ]
     pe = [None if current_price is None or e in (None, 0) else current_price / e for e in eps]
     pb = [None if current_price is None or eq in (None, 0) or sh in (None, 0) else current_price / (eq * 1_000_000_000 / sh) for eq, sh in zip(equity, shares)]
+
+    # Leverage and dividend yield wherever inputs are available (else dash, no fabrication).
+    ebitda = _ebitda_values(forecast_rows, facts, periods)
+    debt = _row_values(facts, forecast_rows, "debt", periods)
+    cash = _row_values(facts, forecast_rows, "cash", periods)
+    net_debt = [None if d is None else d - (c or 0) for d, c in zip(debt, cash)]
+    net_debt_ebitda = [_safe_div(nd, e) for nd, e in zip(net_debt, ebitda)]
+    div_yield_val = (
+        dividend_per_share / current_price
+        if dividend_per_share and current_price else None
+    )
     return TableData(
         title="TÓM TẮT TÀI CHÍNH",
         periods=periods,
@@ -611,11 +622,11 @@ def _table_financial_summary(
             ("Tăng trưởng EPS", _eps_growth(facts, forecast_rows, periods)),
             ("ROE", _roe(facts, forecast_rows, periods)),
             ("ROA", _roa(facts, forecast_rows, periods)),
-            ("Nợ ròng / EBITDA", [_DASH] * n),
+            ("Nợ ròng / EBITDA", net_debt_ebitda),
             ("P/E", pe),
             ("P/B", pb),
             ("Cổ tức/cp", [dividend_per_share] * n),
-            ("Suất sinh lợi cổ tức", [_DASH] * n),
+            ("Suất sinh lợi cổ tức", [div_yield_val] * n),
         ],
     )
 
@@ -708,6 +719,17 @@ def _table_bs_cf(
         for p in forecast_periods
     ]
 
+    # Net borrowing (Δ net debt) from the debt schedule: forecast periods carry the
+    # net_borrowing field; historical net borrowing is not reconstructed here.
+    net_borrowing: list[Any] = [_DASH] * len(actual_periods) + [
+        forecast_rows.get(p, {}).get("net_borrowing")
+        for p in forecast_periods
+    ]
+
+    # Net debt / EBITDA leverage: computed wherever both inputs are available.
+    ebitda = _ebitda_values(forecast_rows, facts, periods)
+    net_debt_ebitda = [_safe_div(nd, e) for nd, e in zip(net_debt, ebitda)]
+
     return TableData(
         title="CÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN",
         periods=periods,
@@ -720,12 +742,12 @@ def _table_bs_cf(
             ("Dòng tiền tự do", fcff_vals),
             ("Phát hành cổ phiếu", [_DASH] * n),
             ("Cổ tức", dividends),
-            ("Thay đổi nợ ròng", [_DASH] * n),
+            ("Thay đổi nợ ròng", net_borrowing),
             ("Nợ ròng cuối năm", net_debt),
             ("Vốn CSH", equity),
             ("Giá trị sổ sách/cp (VND)", bvps),
             ("Nợ ròng / VCSH", [_safe_div(nd, eq) for nd, eq in zip(net_debt, equity)]),
-            ("Nợ ròng / EBITDA", [_DASH] * n),
+            ("Nợ ròng / EBITDA", net_debt_ebitda),
             ("Tổng tài sản", _row_values(facts, forecast_rows, "total_assets", periods)),
         ],
     )

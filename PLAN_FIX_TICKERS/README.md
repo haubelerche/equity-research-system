@@ -14,7 +14,7 @@ HTML là single source of truth, production path = `scripts/run_research.py` (ha
 |------|------|------|-----------|
 | 1 | [03_PHASE_forecast_periods_drivers.md](03_PHASE_forecast_periods_drivers.md) | Bug `_derive_periods` (mất cột forecast) + driver thật | ✅ DONE (commit edfd83d) |
 | 2 | [02_PHASE_market_snapshot.md](02_PHASE_market_snapshot.md) | MarketSnapshotArtifact → shares + sidebar | ✅ DONE (85015b8, 62cbc1c) |
-| 3 | [05_PHASE_valuation_blend.md](05_PHASE_valuation_blend.md) | Target price/rating qua blend 60/40 | 🟡 CORE DONE (shares unblock → target 30,409, rating BÁN end-to-end). Còn: `valuation_result.json` artifact đầy đủ bridge + is_publishable |
+| 3 | [05_PHASE_valuation_blend.md](05_PHASE_valuation_blend.md) | Target price/rating + `valuation_result.json` (GOAL §13) | ✅ DONE (44f154b) — bridge + is_publishable; client_final resolves target |
 | 4 | [01_PHASE_export_gate.md](01_PHASE_export_gate.md) | ReportExportGate: chặn xuất final khi thiếu lõi | ☐ |
 | 5 | [04_PHASE_schedules.md](04_PHASE_schedules.md) | WC/debt/dividend/cash sweep vào bảng BS/CF | ☐ |
 | 6 | [06_PHASE_sensitivity.md](06_PHASE_sensitivity.md) | Sensitivity recompute thật | ☐ |
