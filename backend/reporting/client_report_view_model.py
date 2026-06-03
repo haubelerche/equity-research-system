@@ -1018,6 +1018,13 @@ def build_client_report_view_model(
         missing.append("fcff_table")
     if "C1" not in charts:
         missing.append("price_chart")
+    # Shares-outstanding integrity (PLAN §1.9 / §4.3): EPS present but no share count is a
+    # critical inconsistency — EPS implies a share base, so a missing/zero count must block.
+    _has_eps = any(
+        _fact_value(facts, "eps.basic", _to_fact_period(p)) for p in periods if _is_actual(p)
+    )
+    if _has_eps and not shares_mn:
+        missing.append("shares_outstanding")
 
     publication_status = (
         "client_exportable"

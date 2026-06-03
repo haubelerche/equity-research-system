@@ -153,6 +153,24 @@ def test_derive_periods_includes_forecast_years(tmp_path, monkeypatch):
     )
 
 
+def test_shares_missing_with_eps_present_flags_missing_field(tmp_path, monkeypatch):
+    """EPS present but no share count must add 'shares_outstanding' to missing fields.
+
+    PLAN §1.9 / §4.3: a populated EPS row with shares=0 is a critical inconsistency that
+    must block client-final export rather than silently rendering.
+    """
+    import backend.reporting.client_report_view_model as vm_mod
+    from backend.reporting.client_report_view_model import build_client_report_view_model
+
+    run_id = _write_fy_suffix_fixture(tmp_path, monkeypatch, ticker="DHG")
+    # No market snapshot under the temp ROOT -> shares cannot be sourced; fixture facts
+    # use shares_outstanding.total only for 2024FY, EPS exists for 2023FY/2024FY.
+    monkeypatch.setattr(vm_mod, "_derive_shares_mn", lambda *a, **k: 0.0)
+
+    vm = build_client_report_view_model("DHG", "analyst_draft", run_id=run_id)
+    assert "shares_outstanding" in vm.missing_required_fields
+
+
 def test_build_vm_table_uses_fy_suffix_keys(tmp_path, monkeypatch):
     """TableData must show real values when facts are stored under 'FY'-suffix keys.
 
