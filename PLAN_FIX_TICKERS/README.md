@@ -12,15 +12,20 @@ HTML là single source of truth, production path = `scripts/run_research.py` (ha
 ## Thứ tự thực thi (ROI cao → thấp)
 | Bước | File | Việc | Trạng thái |
 |------|------|------|-----------|
-| 1 | [03_PHASE_forecast_periods_drivers.md](03_PHASE_forecast_periods_drivers.md) | Bug `_derive_periods` (mất cột forecast) + driver thật | ☐ |
-| 2 | [05_PHASE_valuation_blend.md](05_PHASE_valuation_blend.md) | Ghi `valuation_result` + blend 60/40 → target price/rating | ☐ |
-| 3 | [01_PHASE_export_gate.md](01_PHASE_export_gate.md) | ReportExportGate: chặn xuất final khi thiếu lõi | ☐ |
-| 4 | [02_PHASE_market_snapshot.md](02_PHASE_market_snapshot.md) | MarketSnapshotArtifact → sidebar | ☐ |
-| 5 | [04_PHASE_schedules.md](04_PHASE_schedules.md) | WC/debt/dividend/cash sweep | ☐ |
+| 1 | [03_PHASE_forecast_periods_drivers.md](03_PHASE_forecast_periods_drivers.md) | Bug `_derive_periods` (mất cột forecast) + driver thật | ✅ DONE (commit edfd83d) |
+| 2 | [02_PHASE_market_snapshot.md](02_PHASE_market_snapshot.md) | MarketSnapshotArtifact → shares + sidebar | ✅ DONE (85015b8, 62cbc1c) |
+| 3 | [05_PHASE_valuation_blend.md](05_PHASE_valuation_blend.md) | Target price/rating qua blend 60/40 | 🟡 CORE DONE (shares unblock → target 30,409, rating BÁN end-to-end). Còn: `valuation_result.json` artifact đầy đủ bridge + is_publishable |
+| 4 | [01_PHASE_export_gate.md](01_PHASE_export_gate.md) | ReportExportGate: chặn xuất final khi thiếu lõi | ☐ |
+| 5 | [04_PHASE_schedules.md](04_PHASE_schedules.md) | WC/debt/dividend/cash sweep vào bảng BS/CF | ☐ |
 | 6 | [06_PHASE_sensitivity.md](06_PHASE_sensitivity.md) | Sensitivity recompute thật | ☐ |
 | 7 | [07_PHASE_narrative.md](07_PHASE_narrative.md) | Narrative ≥300 chữ bám artifact | ☐ |
 | 8 | [08_PHASE_citations.md](08_PHASE_citations.md) | Citation + nguồn tham khảo | ☐ |
 | 9 | [09_PHASE_charts_layout_font.md](09_PHASE_charts_layout_font.md) | Charts + layout IMP + font QA | ☐ |
+
+### Verified end-to-end (DBD, 2026-06-03)
+Full `generate_report.py` run produces: periods `2022FY..2030F`; driver table real
+(rev growth 6.26%, gross margin 48.27%); blend `target=30,409 = 0.6×35,767 + 0.4×22,372`;
+rating **BÁN** (upside −39.4%); sidebar cap/shares/52w/volume/foreign filled.
 
 ## Definition of Done (PLAN §5)
 Rating + target price tính được · không `—` thừa · forecast 5 năm driver thật · FCFF+FCFE blend 60/40 ·
