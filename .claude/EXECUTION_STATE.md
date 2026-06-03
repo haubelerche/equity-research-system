@@ -16,13 +16,17 @@ Active workstream:   PLAN_FIX_TICKERS/ — fix client-facing report output (PLAN
                        periods 2022FY..2030F, sidebar filled, sensitivity matrix real,
                        client_final missing_required_fields = ['approval_status'] ONLY.
                        766 unit tests pass.
-                     ALSO DONE: 07 narrative (6 grounded sections, ~290–380 words each, no
-                       backend jargon), 08 key_sources ("Nguồn tham khảo chính" from real
-                       provenance, tier jargon stripped). End-to-end HTML render verified:
-                       rating BÁN, target 30,409, 2030F column, sensitivity matrix, sources
-                       list, embedded charts, no 'Tier 3', no 'ĐANG HOÀN THIỆN'. 771 tests pass.
-                     REMAINING: 09 CSS layout polish (IMP-style page template) + font embed +
-                       PDF render-to-PNG QA. Charts (C1–C7) already generate.
+                     ALL 9 PHASES COMPLETE (07 narrative, 08 key_sources, 09 charts+CSS+font).
+                     End-to-end DBD: HTML + 11-page PDF (657KB) via headless Chrome, Vietnamese
+                       diacritics intact, embedded charts C1–C7, rating BÁN, target 30,409,
+                       sensitivity matrix, sources list, no backend jargon, no 'ĐANG HOÀN THIỆN'.
+                       771 unit tests pass.
+                     TICKER-AGNOSTIC: verified on DBD. Other tickers need run_valuation.py +
+                       generate_report.py re-run to regenerate valuation/forecast/blend artifacts
+                       with the shares injection (same code path, no per-ticker logic).
+                     FOLLOW-UPS (not blockers): move shares_outstanding into DB canonical facts
+                       (ingestion) rather than valuation-time injection; tighten PDF page budget
+                       toward 8 pages; ingest official filing PDFs to upgrade citations above Tier-3.
                      KEY FILES: backend/reporting/client_report_view_model.py,
                        backend/reporting/market_snapshot.py (NEW),
                        scripts/generate_report.py + run_valuation.py (inject shares),
