@@ -54,6 +54,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REPORTS_DIR = ROOT / "reports"
 VALUATION_DIR = ROOT / "artifacts" / "valuation"
 FORECAST_DIR = ROOT / "artifacts" / "forecast"
+VALUATION_RESULTS_DIR = ROOT / "artifacts" / "valuation_results"
 
 MVP_FROM_YEAR = 2021
 MVP_TO_YEAR = 2025
@@ -1715,6 +1716,24 @@ Gi? d?nh: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, k? d? b->o = {assumptions.get
     report_path.write_text(report_md, encoding="utf-8")
     print(f"[generate_report] Report saved: {report_path}")
 
+    # -- Save valuation_result.json (GOAL_OUTPUT §13 single source for target price) --
+    valuation_result_path = _write_valuation_result(
+        ticker=ticker,
+        ts_str=ts_str,
+        snapshot_id=used_snapshot_id,
+        valuation_date=generated_at.strftime("%Y-%m-%d"),
+        base_year=latest_fy_str.replace("FY", ""),
+        current_price=current_price,
+        rating=draft_rating,
+        export_blocked=export_blocked,
+        blend_artifact=blend_artifact,
+        fcff_artifact=fcff_artifact,
+        fcfe_artifact=fcfe_artifact,
+        sensitivity=sensitivity,
+        assumptions=val.get("assumptions", {}),
+    )
+    print(f"[generate_report] valuation_result saved: {valuation_result_path}")
+
     # -- Save citation map ------------------------------------------------------
     out_dir = ROOT / "artifacts" / "reports"
     citation_artifact = build_citation_artifact(
@@ -1752,7 +1771,107 @@ Gi? d?nh: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, k? d? b->o = {assumptions.get
     if mode == "final":
         _write_final_citation_artifacts(ticker, citation_artifact, claims_used, cmap)
 
+    if isinstance(citation_artifact, dict):
+        citation_artifact["valuation_result_path"] = str(valuation_result_path)
+
     return citation_artifact
+
+
+def _write_valuation_result(
+    *,
+    ticker: str,
+    ts_str: str,
+    snapshot_id: str,
+    valuation_date: str,
+    base_year: str,
+    current_price: float | None,
+    rating: str,
+    export_blocked: bool,
+    blend_artifact: dict,
+    fcff_artifact: dict,
+    fcfe_artifact: dict,
+    sensitivity: dict,
+    assumptions: list | dict,
+) -> Path:
+    """Write the GOAL_OUTPUT §13 valuation_result.json — the single source for the
+    client-facing target price, rating and EV→equity bridge.
+
+    Filename matches the view-model glob ``*_{ticker}_valuation_result.json``.
+    ``is_publishable`` is True only when a non-draft target price exists and export
+    is not blocked; otherwise the client-final renderer keeps the report in review.
+    """
+    import hashlib
+
+    fcff = fcff_artifact or {}
+    fcfe = fcfe_artifact or {}
+    blend = blend_artifact or {}
+
+    target_price = blend.get("target_price_dcf_vnd")
+    upside = blend.get("upside_pct")
+    is_publishable = bool(
+        target_price is not None
+        and current_price
+        and not blend.get("is_draft_only", True)
+        and not export_blocked
+    )
+
+    fcff_dcf = {
+        "wacc": fcff.get("wacc"),
+        "terminal_growth": fcff.get("terminal_growth"),
+        "pv_fcff": fcff.get("sum_pv_fcff"),
+        "terminal_value": fcff.get("terminal_value"),
+        "pv_terminal_value": fcff.get("pv_terminal_value"),
+        "enterprise_value": fcff.get("enterprise_value"),
+        "net_debt": fcff.get("net_debt"),
+        "equity_value": fcff.get("equity_value"),
+        "shares_outstanding": fcff.get("shares_mn"),
+        "implied_price": fcff.get("target_price_vnd"),
+        "terminal_value_weight": blend.get("tv_weight_fcff"),
+    }
+    fcfe_dcf = {
+        "cost_of_equity": fcfe.get("cost_of_equity"),
+        "terminal_growth": fcfe.get("terminal_growth"),
+        "equity_value": fcfe.get("equity_value"),
+        "implied_price": fcfe.get("target_price_vnd"),
+    }
+    blend_block = {
+        "price_fcff": blend.get("price_fcff_vnd"),
+        "price_fcfe": blend.get("price_fcfe_vnd"),
+        "fcff_weight": blend.get("fcff_weight", 0.6),
+        "fcfe_weight": blend.get("fcfe_weight", 0.4),
+        "target_price": target_price,
+        "formula": blend.get("formula"),
+        "is_draft_only": blend.get("is_draft_only", True),
+    }
+
+    repro_basis = {"fcff_dcf": fcff_dcf, "fcfe_dcf": fcfe_dcf, "blend": blend_block}
+    repro_hash = "sha256:" + hashlib.sha256(
+        json.dumps(repro_basis, sort_keys=True, default=str).encode()
+    ).hexdigest()
+
+    doc = {
+        "run_id": ts_str,
+        "ticker": ticker,
+        "snapshot_id": snapshot_id,
+        "valuation_date": valuation_date,
+        "currency": "VND",
+        "base_year": base_year,
+        "current_price": current_price,
+        "target_price": target_price,
+        "upside_downside": upside,
+        "rating_model_output": rating,
+        "is_publishable": is_publishable,
+        "fcff_dcf": fcff_dcf,
+        "fcfe_dcf": fcfe_dcf,
+        "blend": blend_block,
+        "sensitivity": sensitivity or {},
+        "assumptions": assumptions or [],
+        "reproducibility_hash": repro_hash,
+    }
+    VALUATION_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    path = VALUATION_RESULTS_DIR / f"{ts_str}_{ticker}_valuation_result.json"
+    path.write_text(json.dumps(doc, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
+    return path
 
 
 def _write_final_citation_artifacts(ticker, citation_artifact, claims_used, cmap) -> None:

@@ -201,7 +201,13 @@ def test_analyst_draft_preserves_driver_based_calculations(tmp_path, monkeypatch
     assert '<td class="numeric">2,000</td>' not in html, "Hardcoded DHG dividend must not appear for DBD"
 
 
-def test_client_final_fails_when_required_valuation_is_missing():
+def test_client_final_fails_when_required_valuation_is_missing(tmp_path, monkeypatch):
+    # Point artifact resolution at an empty directory so NO valuation/forecast/snapshot
+    # artifacts resolve — this deterministically reproduces the "valuation missing" state
+    # regardless of what real runs have written under artifacts/.
+    import backend.reporting.client_report_view_model as vm_mod
+    monkeypatch.setattr(vm_mod, "ROOT", tmp_path)
+
     vm = build_client_report_view_model(
         "DBD",
         "client_final",
@@ -209,9 +215,8 @@ def test_client_final_fails_when_required_valuation_is_missing():
     )
     with pytest.raises(ClientReportDataMissing) as exc:
         assert_client_final_ready(vm)
-    # current_price is now sourced from the market snapshot (Phase 02), so it is no
-    # longer a missing field. The client-final export must still be blocked because the
-    # model-derived target price / upside are absent until a valuation run produces them.
+    # With no valuation artifact, the model-derived target price / upside are absent,
+    # so the client-final export must be blocked.
     assert "target_price" in exc.value.missing_fields
     assert "upside_downside" in exc.value.missing_fields
 
