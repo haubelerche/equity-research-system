@@ -258,6 +258,30 @@ def run_valuation(
 
     print(f"[run_valuation] {ticker} FY periods: {fy_periods}")
 
+    # ── Phase 02/06: inject market-source shares_outstanding ──────────────────
+    # Shares outstanding is a market-source canonical fact (not a statement line item),
+    # absent from snapshot facts. Without it FCFF/FCFE block the target price AND the
+    # WACC×g / Re×g sensitivity matrices come back all-null. Source it from the vnstock
+    # VCI overview (MarketSnapshot) with provenance.
+    if fy_periods and "shares_outstanding.ending" not in full_table:
+        try:
+            from backend.reporting.market_snapshot import get_market_snapshot
+            from backend.facts.normalizer import FactEntry
+            _snap = get_market_snapshot(ticker)
+            _shares = _snap.shares_outstanding_fact() if _snap else None
+            if _shares:
+                full_table["shares_outstanding.ending"] = {
+                    fy_periods[-1]: FactEntry(
+                        value=_shares,
+                        source_id=_snap.source,
+                        source_title="vnstock VCI overview (issue_share)",
+                        confidence=0.9,
+                    )
+                }
+                print(f"[run_valuation] {ticker} — injected shares_outstanding.ending={_shares:,.0f}")
+        except Exception as _exc:  # noqa: BLE001 - non-fatal; valuation will block target instead
+            print(f"[run_valuation] WARNING: shares injection failed ({_exc})")
+
     # ── Ratio analysis ────────────────────────────────────────────────────────
     print(f"\n[run_valuation] {ticker} — computing ratios")
     ratios = compute_ratios(full_table)

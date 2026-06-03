@@ -865,6 +865,43 @@ def _table_key_forecast_drivers(
     )
 
 
+def _table_sensitivity_matrix(sensitivity: dict[str, Any]) -> TableData | None:
+    """WACC × terminal-growth target-price matrix from the valuation sensitivity artifact.
+
+    Returns None when the matrix is absent or all-null (e.g. shares missing at compute
+    time), so the caller can fall back to the scenario view rather than render empty cells.
+    """
+    fw = (sensitivity or {}).get("fcff_wacc_g", {})
+    matrix = fw.get("matrix", {})
+    wacc_range = fw.get("wacc_range", [])
+    g_range = fw.get("g_range", [])
+    if not matrix or not wacc_range or not g_range:
+        return None
+
+    def _g_key(g: float) -> str:
+        return f"{g:.4f}".rstrip("0").rstrip(".")
+
+    has_value = any(
+        matrix.get(f"{w:.3f}", {}).get(_g_key(g)) is not None
+        for w in wacc_range
+        for g in g_range
+    )
+    if not has_value:
+        return None
+
+    periods = [f"g={g * 100:.1f}%" for g in g_range]
+    rows: list[tuple[str, list[Any]]] = []
+    for w in wacc_range:
+        wk = f"{w:.3f}"
+        rows.append((f"WACC {w * 100:.1f}%", [matrix.get(wk, {}).get(_g_key(g)) for g in g_range]))
+    return TableData(
+        title="ĐỘ NHẠY GIÁ MỤC TIÊU (WACC × tăng trưởng dài hạn)",
+        periods=periods,
+        unit="Đơn vị: VND/cp — định giá FCFF DCF.",
+        rows=rows,
+    )
+
+
 def _table_driver_sensitivity(
     fcff: dict[str, Any],
     blend: dict[str, Any],
@@ -1089,7 +1126,10 @@ def build_client_report_view_model(
     )
     current_context = _build_current_context(ticker, company_name, facts, forecast)
     key_forecast_drivers_table = _table_key_forecast_drivers(forecast, fcff, facts, forecast_rows, ticker)
-    sensitivity_table = _table_driver_sensitivity(fcff, blend, forecast)
+    sensitivity_table = (
+        _table_sensitivity_matrix(val.get("sensitivity", {}))
+        or _table_driver_sensitivity(fcff, blend, forecast)
+    )
 
     return ClientReportViewModel(
         ticker=ticker,

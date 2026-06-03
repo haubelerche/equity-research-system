@@ -198,3 +198,31 @@ def test_build_vm_table_uses_fy_suffix_keys(tmp_path, monkeypatch):
     assert any(v not in (None, 0, "—") for v in net_income_row), (
         "Net income row is all zeros/dashes — FY-suffix fact keys not being resolved"
     )
+
+
+def test_sensitivity_matrix_from_artifact():
+    """_table_sensitivity_matrix renders a WACC x g target-price grid; None when all-null."""
+    from backend.reporting.client_report_view_model import _table_sensitivity_matrix
+
+    sens = {
+        "fcff_wacc_g": {
+            "wacc_range": [0.10, 0.12],
+            "g_range": [0.02, 0.03],
+            "matrix": {
+                "0.100": {"0.02": 49323.0, "0.03": 54439.0},
+                "0.120": {"0.02": 39679.0, "0.03": 42641.0},
+            },
+        }
+    }
+    table = _table_sensitivity_matrix(sens)
+    assert table is not None
+    assert table.periods == ["g=2.0%", "g=3.0%"]
+    row_map = {r[0]: r[1] for r in table.rows}
+    assert row_map["WACC 12.0%"] == [39679.0, 42641.0]
+    # No "—" / None cells in a populated matrix
+    assert all(v is not None for _, vals in table.rows for v in vals)
+
+    # All-null matrix -> None (caller falls back to scenario view)
+    null_sens = {"fcff_wacc_g": {"wacc_range": [0.1], "g_range": [0.03], "matrix": {"0.100": {"0.03": None}}}}
+    assert _table_sensitivity_matrix(null_sens) is None
+    assert _table_sensitivity_matrix({}) is None
