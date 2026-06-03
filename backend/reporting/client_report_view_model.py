@@ -1002,6 +1002,85 @@ def _load_market_snapshot(ticker: str):
         return None
 
 
+def _driver_value(forecast: dict[str, Any], key: str) -> float | None:
+    """Extract a single driver value from forecast['drivers'], handling year-dict + {value} forms."""
+    d = (forecast.get("drivers", {}) or {}).get(key, {})
+    if isinstance(d, dict):
+        if "value" in d:
+            return d.get("value")
+        nums = [v for v in d.values() if isinstance(v, (int, float))]
+        return nums[0] if nums else None
+    return float(d) if isinstance(d, (int, float)) else None
+
+
+def _build_narratives(
+    ticker: str,
+    company_name: str,
+    facts: dict[str, dict[str, float]],
+    forecast: dict[str, Any],
+    fcff: dict[str, Any],
+    blend: dict[str, Any],
+    val: dict[str, Any],
+    periods: list[str],
+    current_price: float | None,
+    target_price: float | None,
+    upside: float | None,
+    rating: str,
+    dividend_yield: "Percent | None",
+) -> dict[str, str]:
+    """Compute artifact-grounded narrative sections (≥300 words each)."""
+    from backend.reporting.narrative_builder import NarrativeInputs, build_all
+
+    actual_periods = [p for p in periods if _is_actual(p)]
+    latest_a = actual_periods[-1] if actual_periods else None
+    prev_a = actual_periods[-2] if len(actual_periods) >= 2 else None
+
+    def _fv(metric: str, p: str | None) -> float | None:
+        return _fact_value(facts, metric, _to_fact_period(p)) if p else None
+
+    rev_latest = _fv("revenue.net", latest_a)
+    rev_prev = _fv("revenue.net", prev_a)
+    rev_growth = (rev_latest / rev_prev - 1) if rev_latest and rev_prev else None
+    ni_latest = _fv("net_income.parent", latest_a)
+    gp_latest = _fv("gross_profit.total", latest_a)
+    cfo_latest = _fv("operating_cash_flow.total", latest_a)
+
+    wb = fcff.get("wacc_breakdown", {}) if isinstance(fcff, dict) else {}
+    matrix = (val.get("sensitivity", {}) or {}).get("fcff_wacc_g", {}).get("matrix", {})
+    cells = [v for row in matrix.values() for v in row.values() if isinstance(v, (int, float))]
+
+    n = NarrativeInputs(
+        ticker=ticker,
+        company_name=company_name,
+        revenue_latest=rev_latest,
+        revenue_prev=rev_prev,
+        revenue_growth_latest=rev_growth,
+        revenue_cagr=forecast.get("revenue_cagr_historical"),
+        net_income_latest=ni_latest,
+        net_margin_latest=(ni_latest / rev_latest) if ni_latest and rev_latest else None,
+        gross_margin_latest=(gp_latest / rev_latest) if gp_latest and rev_latest else None,
+        eps_latest=_fv("eps.basic", latest_a),
+        cash_conversion=(cfo_latest / ni_latest) if cfo_latest and ni_latest else None,
+        rev_growth_driver=_driver_value(forecast, "revenue_growth"),
+        gross_margin_driver=_driver_value(forecast, "gross_margin"),
+        sga_driver=_driver_value(forecast, "sga_to_revenue"),
+        capex_driver=_driver_value(forecast, "capex_to_revenue"),
+        tax_driver=_driver_value(forecast, "effective_tax_rate") or wb.get("tax_rate"),
+        wacc=fcff.get("wacc") if isinstance(fcff, dict) else None,
+        terminal_growth=fcff.get("terminal_growth") if isinstance(fcff, dict) else None,
+        current_price=current_price,
+        target_price=target_price,
+        upside=upside,
+        rating=rating,
+        price_fcff=blend.get("price_fcff_vnd") if isinstance(blend, dict) else None,
+        price_fcfe=blend.get("price_fcfe_vnd") if isinstance(blend, dict) else None,
+        sens_low=min(cells) if cells else None,
+        sens_high=max(cells) if cells else None,
+        dividend_yield=dividend_yield.value if dividend_yield is not None else None,
+    )
+    return build_all(n)
+
+
 def _charts(ticker: str) -> dict[str, ChartArtifact]:
     charts_dir = ROOT / "artifacts/charts"
     titles = {
@@ -1093,38 +1172,17 @@ def build_client_report_view_model(
     if mode == "client_final" and (missing or publication_status != "client_exportable"):
         missing = sorted(set(missing + ["approval_status"]))
 
-    thesis = (
-        f"{company_name} có nền tảng doanh thu dược phẩm ổn định, biên lợi nhuận cao và "
-        "khả năng tạo dòng tiền tốt trong giai đoạn gần đây. Bản phân tích tập trung vào "
-        "động lực tăng trưởng doanh thu, kiểm soát chi phí, rủi ro đấu thầu và mức định giá "
-        "so với triển vọng lợi nhuận."
+    _narr = _build_narratives(
+        ticker, company_name, facts, forecast, fcff, blend, val, periods,
+        current_price, target_price, upside, recommendation, dividend_yield,
     )
-    latest_update = (
-        "Doanh thu và lợi nhuận được dự phóng dựa trên quỹ đạo lịch sử, biên gộp trung vị, "
-        "chi phí bán hàng và quản lý theo tỷ lệ doanh thu, cùng giả định đầu tư tài sản cố định "
-        "phù hợp với mô hình FCFF."
-    )
-    growth_drivers = (
-        "Động lực chính gồm mở rộng kênh ETC/OTC, danh mục thuốc generic có biên lợi nhuận tốt, "
-        "năng lực sản xuất và nhu cầu chăm sóc sức khỏe tiếp tục tăng."
-    )
-    margin_drivers = (
-        "Biên lợi nhuận phụ thuộc vào giá nguyên liệu nhập khẩu, tỷ giá, cơ cấu sản phẩm, "
-        "mức độ cạnh tranh trong đấu thầu và khả năng kiểm soát chi phí bán hàng."
-    )
-    events = (
-        "Các sự kiện cần theo dõi gồm kết quả đấu thầu thuốc, tiến độ phê duyệt sản phẩm, "
-        "đầu tư nhà máy, biến động chi phí API và thay đổi trong quy định quản lý dược."
-    )
-    forecast_text = (
-        "Mô hình định giá sử dụng FCFF kết hợp kiểm tra tương quan với P/E, P/B, EV/EBITDA và EV/FCF. "
-        "Forecast được nối theo driver: revenue growth phản ánh mục tiêu kinh doanh và nền lịch sử; "
-        "gross margin phản ánh áp lực giá vốn/API; SG&A/revenue phản ánh chi phí bán hàng; "
-        "capex/revenue phản ánh chu kỳ đầu tư GMP-EU. "
-        "Các bảng dưới đây giữ đầy đủ cấu trúc dự phóng và tỷ số để người đọc có thể kiểm tra "
-        "luận điểm định giá thay vì chỉ nhìn vào một con số mục tiêu."
-    )
-    current_context = _build_current_context(ticker, company_name, facts, forecast)
+    thesis = _narr["investment_thesis"]
+    latest_update = _narr["latest_business_update"]
+    current_context = _narr["financial_performance"]
+    growth_drivers = _narr["forecast_valuation_narrative"]
+    margin_drivers = _narr["valuation_narrative"]
+    events = _narr["risks_catalysts"]
+    forecast_text = _narr["valuation_narrative"]
     key_forecast_drivers_table = _table_key_forecast_drivers(forecast, fcff, facts, forecast_rows, ticker)
     sensitivity_table = (
         _table_sensitivity_matrix(val.get("sensitivity", {}))
