@@ -7,6 +7,23 @@
 ## Current State
 
 ```
+Active workstream:   PLAN_FIX_TICKERS/ — fix client-facing report output (PLAN_FIX_ALL_TICKERS + GOAL_OUTPUT)
+                     DONE: Phase 03 (forecast columns bug + real drivers),
+                           Phase 02 (MarketSnapshot + shares injection + sidebar),
+                           Phase 05 core (target price unblocked via shares).
+                     End-to-end DBD verified: rating BÁN, target 30,409 (60/40 blend),
+                       periods 2022FY..2030F, sidebar filled. 760 unit tests pass.
+                     NEXT: Phase 05-full (write valuation_result.json bridge + is_publishable),
+                           then 01 export gate, 04 schedules, 06 sensitivity, 07 narrative,
+                           08 citations, 09 charts/layout/font. See PLAN_FIX_TICKERS/README.md.
+                     KEY FILES TOUCHED: backend/reporting/client_report_view_model.py
+                       (_derive_periods now takes forecast; loads market snapshot),
+                       backend/reporting/market_snapshot.py (NEW),
+                       scripts/generate_report.py (injects shares_outstanding.ending).
+                     KEY FACT: shares_outstanding is market-source (vnstock VCI overview
+                       issue_share), absent from canonical facts; its absence makes FCFF/FCFE
+                       block target price by design.
+
 Current Level:       Level 10 — Render-ready
 Target Level:        Level 10 — Render-ready (charts + HTML + PDF + 5 artifact contracts per GOAL_OUTPUT.md)
 Current Phase:       Phase 16 — Database Quality & Schema Cleanup — 2026-06-02
