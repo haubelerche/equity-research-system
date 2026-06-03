@@ -209,8 +209,11 @@ def test_client_final_fails_when_required_valuation_is_missing():
     )
     with pytest.raises(ClientReportDataMissing) as exc:
         assert_client_final_ready(vm)
-    assert "current_price" in exc.value.missing_fields
+    # current_price is now sourced from the market snapshot (Phase 02), so it is no
+    # longer a missing field. The client-final export must still be blocked because the
+    # model-derived target price / upside are absent until a valuation run produces them.
     assert "target_price" in exc.value.missing_fields
+    assert "upside_downside" in exc.value.missing_fields
 
 
 def test_build_client_report_view_model_accepts_run_id():

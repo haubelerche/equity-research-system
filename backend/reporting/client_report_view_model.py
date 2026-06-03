@@ -934,6 +934,15 @@ def _build_current_context(ticker: str, company_name: str, facts: dict[str, Any]
     )
 
 
+def _load_market_snapshot(ticker: str):
+    """Load the latest cached market snapshot for the ticker (offline-safe)."""
+    try:
+        from backend.reporting.market_snapshot import load_cached_snapshot
+        return load_cached_snapshot(ticker, base_dir=ROOT / "artifacts" / "market_snapshot")
+    except Exception:  # noqa: BLE001 - rendering must not fail on snapshot absence
+        return None
+
+
 def _charts(ticker: str) -> dict[str, ChartArtifact]:
     charts_dir = ROOT / "artifacts/charts"
     titles = {
@@ -980,10 +989,22 @@ def build_client_report_view_model(
     recommendation = _recommendation(upside, mode)
     charts = _charts(ticker)
 
+    snapshot = _load_market_snapshot(ticker)
+
     periods = _derive_periods(facts, forecast)
     shares_mn = _derive_shares_mn(facts, periods)
+    if (not shares_mn) and snapshot is not None and snapshot.shares_outstanding:
+        shares_mn = snapshot.shares_outstanding / 1_000_000
+    if current_price is None and snapshot is not None and snapshot.last_price:
+        current_price = snapshot.last_price
     dividend_per_share = _derive_dividend_per_share(facts, periods)
+    if dividend_per_share is None and snapshot is not None and snapshot.dividend_per_share:
+        dividend_per_share = snapshot.dividend_per_share
     market_cap = None if current_price is None or shares_mn == 0 else current_price * shares_mn / 1000
+    dividend_yield = (
+        Percent(dividend_per_share / current_price)
+        if dividend_per_share and current_price else None
+    )
     missing: list[str] = []
     if current_price is None:
         missing.append("current_price")
@@ -1052,7 +1073,7 @@ def build_client_report_view_model(
         current_price=Money(current_price) if current_price is not None else None,
         target_price=Money(target_price) if target_price is not None else None,
         upside_downside=Percent(upside) if upside is not None else None,
-        dividend_yield=None,
+        dividend_yield=dividend_yield,
         total_return=Percent(upside) if upside is not None else None,
         market_statistics={
             "Mã giao dịch": f"{ticker} VN",
@@ -1060,9 +1081,18 @@ def build_client_report_view_model(
             "Ngành": "Dược phẩm",
             "Vốn hóa": market_cap,
             "Số lượng cổ phiếu": shares_mn if shares_mn else _DASH,
-            "Giá cao/thấp 52 tuần": _DASH,
-            "KLGD bình quân 3 tháng": _DASH,
-            "Tỷ giá VND/USD": _DASH,
+            "Giá cao/thấp 52 tuần": (
+                f"{snapshot.low_52w:,.0f} / {snapshot.high_52w:,.0f}"
+                if snapshot is not None and snapshot.high_52w and snapshot.low_52w else _DASH
+            ),
+            "KLGD bình quân 1 tháng": (
+                f"{snapshot.avg_volume_1m:,.0f}"
+                if snapshot is not None and snapshot.avg_volume_1m else _DASH
+            ),
+            "Tỷ lệ sở hữu nước ngoài": (
+                f"{snapshot.foreign_pct * 100:.1f}%"
+                if snapshot is not None and snapshot.foreign_pct is not None else _DASH
+            ),
         },
         ownership_table=TableData(
             title="CƠ CẤU SỞ HỮU",
