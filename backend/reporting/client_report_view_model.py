@@ -100,6 +100,7 @@ class ClientReportViewModel:
     mode: RenderMode
     publication_status: str
     missing_required_fields: list[str] = field(default_factory=list)
+    key_sources: list[dict[str, str]] = field(default_factory=list)
 
 
 _DASH = "—"
@@ -993,6 +994,76 @@ def _build_current_context(ticker: str, company_name: str, facts: dict[str, Any]
     )
 
 
+_STATEMENT_LABELS = {
+    "balance sheet": "Bảng cân đối kế toán (dữ liệu thị trường VCI)",
+    "income statement": "Báo cáo kết quả kinh doanh (dữ liệu thị trường VCI)",
+    "cash flow": "Báo cáo lưu chuyển tiền tệ (dữ liệu thị trường VCI)",
+}
+
+
+def _clean_source_title(raw: str) -> str | None:
+    """Map a backend source_title to a client-safe Vietnamese label (no 'Tier' jargon)."""
+    if not raw:
+        return None
+    head = raw.split("[")[0].strip().lower()
+    for key, label in _STATEMENT_LABELS.items():
+        if key in head:
+            return label
+    if "api" in head or "tổng hợp" in head:
+        return "Dữ liệu tài chính tổng hợp (VCI)"
+    return None
+
+
+def _key_sources(ticker: str, snapshot) -> list[dict[str, str]]:
+    """Build a client-facing 'Nguồn tham khảo chính' list from real data provenance.
+
+    Sources are honestly labelled by what they are (market data / financial statements via
+    VCI / internal valuation model). Backend tier jargon is stripped. No source is invented
+    and none is presented as an official filing it is not.
+    """
+    sources: list[dict[str, str]] = []
+    if snapshot is not None:
+        as_of = f" (cập nhật {snapshot.as_of_date})" if getattr(snapshot, "as_of_date", "") else ""
+        sources.append({
+            "label": f"Dữ liệu thị trường {ticker}: giá, vốn hóa, số cổ phiếu lưu hành, "
+                     f"khối lượng, sở hữu nước ngoài — vnstock VCI{as_of}"
+        })
+
+    # Distinct financial-statement sources + fiscal-year span from the citation artifact.
+    cit = _load_latest_citation(ticker)
+    spans: dict[str, set[int]] = {}
+    for entry in (cit.get("citation_map", {}) or {}).values():
+        label = _clean_source_title(entry.get("source_title", ""))
+        if not label:
+            continue
+        fy = entry.get("fiscal_year")
+        spans.setdefault(label, set())
+        if isinstance(fy, int):
+            spans[label].add(fy)
+    for label, years in spans.items():
+        yrs = sorted(years)
+        span = f" {yrs[0]}–{yrs[-1]}" if len(yrs) > 1 else (f" {yrs[0]}" if yrs else "")
+        sources.append({"label": f"{label} — {ticker}{span}"})
+
+    sources.append({
+        "label": "Mô hình định giá FCFF/FCFE và độ nhạy WACC × tăng trưởng dài hạn "
+                 "(tính toán nội bộ, có thể tái lập từ giả định công bố)"
+    })
+    return sources[:10]
+
+
+def _load_latest_citation(ticker: str) -> dict[str, Any]:
+    import glob as _glob
+    import json as _json
+    files = sorted(_glob.glob(str(ROOT / "artifacts" / "reports" / f"{ticker}_*citation*.json")))
+    if not files:
+        return {}
+    try:
+        return _json.loads(Path(files[-1]).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
 def _load_market_snapshot(ticker: str):
     """Load the latest cached market snapshot for the ticker (offline-safe)."""
     try:
@@ -1268,6 +1339,7 @@ def build_client_report_view_model(
         mode=mode,
         publication_status=publication_status,
         missing_required_fields=missing,
+        key_sources=_key_sources(ticker, snapshot),
     )
 
 

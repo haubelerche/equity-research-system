@@ -260,9 +260,16 @@ def _risks_disclaimer_page(vm: ClientReportViewModel) -> str:
   <h2>Khuyến cáo</h2>
   <p>{_e(vm.disclaimer)}</p>
   <h2>Nguồn tham khảo chính</h2>
-  <p>{_e(vm.source_captions.get("current_context", ""))}</p>
+  {_render_key_sources(vm)}
 </div>
 """
+
+
+def _render_key_sources(vm: ClientReportViewModel) -> str:
+    if not vm.key_sources:
+        return "<p>Nguồn dữ liệu sẽ được bổ sung khi tài liệu công bố chính thức được nạp.</p>"
+    items = "".join(f"<li>{_e(s.get('label', ''))}</li>" for s in vm.key_sources)
+    return f'<ol class="source-list">{items}</ol>'
 
 
 def build_client_report_sections(vm: ClientReportViewModel) -> list[dict[str, Any]]:
