@@ -587,6 +587,50 @@ hr {
     align-items: start;
 }
 
+/* ── Key sources list (Nguồn tham khảo chính) ────────────── */
+
+.source-list {
+    margin: 4pt 0 8pt 0;
+    padding-left: 16pt;
+    font-size: 7.8pt;
+    color: #333;
+    line-height: 1.45;
+}
+
+.source-list li {
+    margin-bottom: 3pt;
+    padding-left: 2pt;
+}
+
+.source-caption {
+    color: #667085;
+    font-size: 7pt;
+    font-style: italic;
+    margin-top: 2pt;
+}
+
+/* ── Sensitivity / valuation matrix: full-width is allowed ── */
+
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7.4pt;
+    page-break-inside: avoid;
+}
+
+.matrix-table th {
+    background: #0b4f8a;
+    color: #fff;
+    padding: 3pt 4pt;
+    text-align: center;
+}
+
+.matrix-table td {
+    text-align: right;
+    padding: 2.4pt 4pt;
+    border-bottom: 0.5pt solid #cdddee;
+}
+
 /* ── Print overrides ─────────────────────────────────────── */
 
 @media print {
