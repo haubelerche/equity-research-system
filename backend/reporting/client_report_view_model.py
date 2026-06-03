@@ -106,16 +106,46 @@ _DASH = "—"
 _PERIODS_FALLBACK = ["2024A", "2025A", "2026F", "2027F", "2028F"]
 
 
-def _derive_periods(facts: dict[str, dict[str, float]]) -> list[str]:
-    """Derive period labels from fact keys. Falls back to MVP default if empty."""
-    if not facts:
+def _forecast_period_labels(forecast: dict[str, Any] | None) -> list[str]:
+    """Extract forecast period labels (e.g. '2026F') from the forecast artifact, in order."""
+    if not forecast:
+        return []
+    labels: list[str] = []
+    for row in forecast.get("forecast_years", []):
+        if isinstance(row, dict) and row.get("label"):
+            labels.append(str(row["label"]))
+    return labels
+
+
+def _derive_periods(
+    facts: dict[str, dict[str, float]],
+    forecast: dict[str, Any] | None = None,
+) -> list[str]:
+    """Derive period labels: historical actuals (FY/A) followed by forecast (F) years.
+
+    Forecast years come from the forecast artifact's ``forecast_years[].label`` so that
+    the financial tables show 2026F..2030F columns. Falls back to the MVP default period
+    set only when there are no actual fact periods at all.
+    """
+    actuals: list[str] = []
+    if facts:
+        all_periods: set[str] = set()
+        for metric_dict in facts.values():
+            if isinstance(metric_dict, dict):
+                all_periods.update(metric_dict.keys())
+        actuals = sorted(p for p in all_periods if p.endswith(("FY", "A")))
+
+    forecast_labels = _forecast_period_labels(forecast)
+
+    if not actuals:
+        # No historical facts: use the default period set (already includes forecast years),
+        # but prefer real forecast labels when the artifact provides them.
+        if forecast_labels:
+            fallback_actuals = [p for p in _PERIODS_FALLBACK if not p.endswith("F")]
+            return fallback_actuals + forecast_labels
         return list(_PERIODS_FALLBACK)
-    all_periods: set[str] = set()
-    for metric_dict in facts.values():
-        if isinstance(metric_dict, dict):
-            all_periods.update(metric_dict.keys())
-    fy_periods = sorted(p for p in all_periods if p.endswith(("FY", "A")))
-    return fy_periods if fy_periods else list(_PERIODS_FALLBACK)
+
+    return actuals + forecast_labels
 
 
 def _derive_shares_mn(facts: dict[str, dict[str, float]], periods: list[str]) -> float:
@@ -950,7 +980,7 @@ def build_client_report_view_model(
     recommendation = _recommendation(upside, mode)
     charts = _charts(ticker)
 
-    periods = _derive_periods(facts)
+    periods = _derive_periods(facts, forecast)
     shares_mn = _derive_shares_mn(facts, periods)
     dividend_per_share = _derive_dividend_per_share(facts, periods)
     market_cap = None if current_price is None or shares_mn == 0 else current_price * shares_mn / 1000

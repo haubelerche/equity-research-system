@@ -128,6 +128,31 @@ def _write_fy_suffix_fixture(tmp_path, monkeypatch, ticker: str = "DHG") -> str:
     return run_id
 
 
+def test_derive_periods_includes_forecast_years(tmp_path, monkeypatch):
+    """Periods must include forecast (F) years from the forecast artifact, not only actuals.
+
+    Regression for the dropped-forecast-columns bug: _derive_periods previously kept
+    only periods ending in 'FY'/'A', silently discarding 2026F..2030F so the financial
+    tables never showed any forecast column even when the forecast engine produced them.
+    """
+    from backend.reporting.client_report_view_model import build_client_report_view_model
+
+    run_id = _write_fy_suffix_fixture(tmp_path, monkeypatch, ticker="DHG")
+    vm = build_client_report_view_model("DHG", "analyst_draft", run_id=run_id)
+
+    periods = vm.financial_summary_table.periods
+    assert any(p.endswith("F") for p in periods), (
+        f"No forecast (F) period in table headers: {periods} — forecast columns dropped"
+    )
+    assert "2025F" in periods, f"Forecast year 2025F missing from periods: {periods}"
+    # Actuals must still be present and ordered before forecasts
+    assert any(p.startswith("2024") for p in periods), f"Actual 2024 missing: {periods}"
+    f_index = next(i for i, p in enumerate(periods) if p.endswith("F"))
+    assert all(not p.endswith("F") for p in periods[:f_index]), (
+        f"Actual periods must precede forecast periods: {periods}"
+    )
+
+
 def test_build_vm_table_uses_fy_suffix_keys(tmp_path, monkeypatch):
     """TableData must show real values when facts are stored under 'FY'-suffix keys.
 
