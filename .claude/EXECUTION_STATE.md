@@ -8,21 +8,23 @@
 
 ```
 Active workstream:   PLAN_FIX_TICKERS/ — fix client-facing report output (PLAN_FIX_ALL_TICKERS + GOAL_OUTPUT)
-                     DONE: Phase 03 (forecast columns bug + real drivers),
-                           Phase 02 (MarketSnapshot + shares injection + sidebar),
-                           Phase 05 core (target price unblocked via shares).
-                     End-to-end DBD verified: rating BÁN, target 30,409 (60/40 blend),
-                       periods 2022FY..2030F, sidebar filled. 760 unit tests pass.
-                     NEXT: Phase 05-full (write valuation_result.json bridge + is_publishable),
-                           then 01 export gate, 04 schedules, 06 sensitivity, 07 narrative,
-                           08 citations, 09 charts/layout/font. See PLAN_FIX_TICKERS/README.md.
-                     KEY FILES TOUCHED: backend/reporting/client_report_view_model.py
-                       (_derive_periods now takes forecast; loads market snapshot),
+                     DONE (7 phases): 03 forecast columns+drivers, 02 MarketSnapshot+shares,
+                       05 target price + valuation_result.json (GOAL §13), 01 export gate
+                       (shares↔EPS guard), 04 debt/dividend schedules + net debt/EBITDA +
+                       dividend yield, 06 WACC×g sensitivity matrix, 09-core C1 price chart.
+                     DBD end-to-end: rating BÁN, target 30,409 (=0.6×35,767+0.4×22,372),
+                       periods 2022FY..2030F, sidebar filled, sensitivity matrix real,
+                       client_final missing_required_fields = ['approval_status'] ONLY.
+                       766 unit tests pass.
+                     REMAINING: 07 narrative (≥300 words/section, artifact-grounded),
+                       08 citation rendering + sources table, 09 CSS layout (IMP style) + font QA.
+                     KEY FILES: backend/reporting/client_report_view_model.py,
                        backend/reporting/market_snapshot.py (NEW),
-                       scripts/generate_report.py (injects shares_outstanding.ending).
+                       scripts/generate_report.py + run_valuation.py (inject shares),
+                       scripts/generate_charts.py (C1 from vnstock Quote).
                      KEY FACT: shares_outstanding is market-source (vnstock VCI overview
-                       issue_share), absent from canonical facts; its absence makes FCFF/FCFE
-                       block target price by design.
+                       issue_share), absent from canonical facts; injected at valuation time.
+                       Both generate_report.py AND run_valuation.py do the injection.
 
 Current Level:       Level 10 — Render-ready
 Target Level:        Level 10 — Render-ready (charts + HTML + PDF + 5 artifact contracts per GOAL_OUTPUT.md)

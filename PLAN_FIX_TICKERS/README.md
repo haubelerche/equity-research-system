@@ -18,9 +18,13 @@ HTML là single source of truth, production path = `scripts/run_research.py` (ha
 | 4 | [01_PHASE_export_gate.md](01_PHASE_export_gate.md) | ReportExportGate: chặn xuất final khi thiếu lõi | ✅ DONE (2305d47) — shares↔EPS guard; draft/final đã tách sẵn |
 | 5 | [04_PHASE_schedules.md](04_PHASE_schedules.md) | WC/debt/dividend/cash sweep vào bảng BS/CF | ✅ DONE (18a1794) — net borrowing, net debt/EBITDA, dividend yield |
 | 6 | [06_PHASE_sensitivity.md](06_PHASE_sensitivity.md) | Sensitivity recompute thật | ✅ DONE (7693146) — WACC×g matrix giá trị thật |
-| 7 | [07_PHASE_narrative.md](07_PHASE_narrative.md) | Narrative ≥300 chữ bám artifact | ☐ |
-| 8 | [08_PHASE_citations.md](08_PHASE_citations.md) | Citation + nguồn tham khảo | ☐ |
-| 9 | [09_PHASE_charts_layout_font.md](09_PHASE_charts_layout_font.md) | Charts + layout IMP + font QA | ☐ |
+| 7 | [07_PHASE_narrative.md](07_PHASE_narrative.md) | Narrative ≥300 chữ bám artifact | ☐ (content polish) |
+| 8 | [08_PHASE_citations.md](08_PHASE_citations.md) | Citation + nguồn tham khảo | ☐ (content polish) |
+| 9 | [09_PHASE_charts_layout_font.md](09_PHASE_charts_layout_font.md) | Charts ✅ + layout IMP + font QA | 🟡 CORE DONE (a6a1537) — C1 chart sinh được; còn CSS layout IMP + font QA |
+
+### Trạng thái client_final (DBD)
+`missing_required_fields = ['approval_status']` — mọi yêu cầu DỮ LIỆU đã đủ; blocker duy
+nhất còn lại là **human approval** (đúng HITL gate GOAL §3.6). 766 unit tests pass.
 
 ### Verified end-to-end (DBD, 2026-06-03)
 Full `generate_report.py` run produces: periods `2022FY..2030F`; driver table real
