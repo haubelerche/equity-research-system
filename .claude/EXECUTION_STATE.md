@@ -16,8 +16,13 @@ Active workstream:   PLAN_FIX_TICKERS/ — fix client-facing report output (PLAN
                        periods 2022FY..2030F, sidebar filled, sensitivity matrix real,
                        client_final missing_required_fields = ['approval_status'] ONLY.
                        766 unit tests pass.
-                     REMAINING: 07 narrative (≥300 words/section, artifact-grounded),
-                       08 citation rendering + sources table, 09 CSS layout (IMP style) + font QA.
+                     ALSO DONE: 07 narrative (6 grounded sections, ~290–380 words each, no
+                       backend jargon), 08 key_sources ("Nguồn tham khảo chính" from real
+                       provenance, tier jargon stripped). End-to-end HTML render verified:
+                       rating BÁN, target 30,409, 2030F column, sensitivity matrix, sources
+                       list, embedded charts, no 'Tier 3', no 'ĐANG HOÀN THIỆN'. 771 tests pass.
+                     REMAINING: 09 CSS layout polish (IMP-style page template) + font embed +
+                       PDF render-to-PNG QA. Charts (C1–C7) already generate.
                      KEY FILES: backend/reporting/client_report_view_model.py,
                        backend/reporting/market_snapshot.py (NEW),
                        scripts/generate_report.py + run_valuation.py (inject shares),

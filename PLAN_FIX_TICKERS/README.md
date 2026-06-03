@@ -19,7 +19,7 @@ HTML là single source of truth, production path = `scripts/run_research.py` (ha
 | 5 | [04_PHASE_schedules.md](04_PHASE_schedules.md) | WC/debt/dividend/cash sweep vào bảng BS/CF | ✅ DONE (18a1794) — net borrowing, net debt/EBITDA, dividend yield |
 | 6 | [06_PHASE_sensitivity.md](06_PHASE_sensitivity.md) | Sensitivity recompute thật | ✅ DONE (7693146) — WACC×g matrix giá trị thật |
 | 7 | [07_PHASE_narrative.md](07_PHASE_narrative.md) | Narrative ≥300 chữ bám artifact | ✅ DONE (b64bbf3) — 6 phần grounded, ~290–380 chữ/phần |
-| 8 | [08_PHASE_citations.md](08_PHASE_citations.md) | Citation + nguồn tham khảo | ☐ (content polish) |
+| 8 | [08_PHASE_citations.md](08_PHASE_citations.md) | Citation + nguồn tham khảo | ✅ DONE (8b9b034) — "Nguồn tham khảo chính" từ provenance thật, sạch jargon |
 | 9 | [09_PHASE_charts_layout_font.md](09_PHASE_charts_layout_font.md) | Charts ✅ + layout IMP + font QA | 🟡 CORE DONE (a6a1537) — C1 chart sinh được; còn CSS layout IMP + font QA |
 
 ### Trạng thái client_final (DBD)
