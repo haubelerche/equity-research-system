@@ -10,6 +10,7 @@ from __future__ import annotations
 import glob
 import json
 import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -50,6 +51,7 @@ class TableData:
     periods: list[str]
     rows: list[tuple[str, list[Any]]]
     unit: str = ""
+    format_type: str = "auto"  # auto | currency | percent | multiple | text
 
 
 @dataclass(frozen=True)
@@ -101,6 +103,7 @@ class ClientReportViewModel:
     publication_status: str
     missing_required_fields: list[str] = field(default_factory=list)
     key_sources: list[dict[str, str]] = field(default_factory=list)
+    display_blocking_reasons: list[str] = field(default_factory=list)
 
 
 _DASH = "—"
@@ -171,7 +174,12 @@ def _derive_dividend_per_share(facts: dict[str, dict[str, float]], periods: list
     """Cash dividend per share from canonical facts, or None if unavailable."""
     div_fact = facts.get("dividends_per_share.cash", {})
     for p in reversed(periods):
-        v = div_fact.get(p)
+        raw = div_fact.get(p)
+        v = raw.get("value") if isinstance(raw, dict) else raw
+        try:
+            v = float(v) if v is not None else None
+        except (TypeError, ValueError):
+            v = None
         if v and v > 0:
             return v
     return None
@@ -333,6 +341,65 @@ def _period_value(
     if value is None:
         return None
     return float(value)
+
+
+def _interest_bearing_debt(facts: dict[str, dict[str, float]], period: str) -> float | None:
+    """Interest-bearing debt for an actual period.
+
+    = short-term borrowings + current portion of LTD + long-term debt + lease liabilities.
+    Falls back to total_debt.ending when the component breakdown is unavailable.
+    (Audit NUMERIC-04: net debt must include long-term debt, not just short-term.)
+    """
+    fp = _to_fact_period(period)
+    components = [
+        v for v in (
+            _fact_value(facts, "short_term_debt.ending", fp),
+            _fact_value(facts, "current_portion_ltd.ending", fp),
+            _fact_value(facts, "long_term_debt.ending", fp),
+            _fact_value(facts, "lease_liabilities.ending", fp),
+        ) if v is not None
+    ]
+    if components:
+        return sum(components)
+    return _fact_value(facts, "total_debt.ending", fp)
+
+
+def _cash_like_assets(facts: dict[str, dict[str, float]], period: str) -> float | None:
+    """Cash-like assets for an actual period.
+
+    = cash & equivalents + short-term deposits + liquid short-term investments.
+    (Audit NUMERIC-04: short-term investments are treated as cash-like.)
+    """
+    fp = _to_fact_period(period)
+    cash = _fact_value(facts, "cash_and_equivalents.ending", fp)
+    if cash is None:
+        return None
+    sti = _fact_value(facts, "short_term_investments.ending", fp) or 0.0
+    dep = _fact_value(facts, "short_term_deposits.ending", fp) or 0.0
+    return cash + sti + dep
+
+
+def _net_debt_canonical(
+    facts: dict[str, dict[str, float]],
+    forecast_rows: dict[str, dict[str, Any]],
+    periods: list[str],
+) -> list[float | None]:
+    """Net debt = interest-bearing debt - cash-like assets (negative = net cash).
+
+    Actual periods use the full balance-sheet bridge; forecast periods use the
+    forecast total_debt vs forecast cash when both are available.
+    """
+    out: list[float | None] = []
+    for p in periods:
+        if _is_actual(p):
+            ibd = _interest_bearing_debt(facts, p)
+            cl = _cash_like_assets(facts, p)
+            out.append(None if ibd is None or cl is None else ibd - cl)
+        else:
+            d = forecast_rows.get(p, {}).get("total_debt")
+            c = forecast_rows.get(p, {}).get("cash")
+            out.append(None if d is None or c is None else d - c)
+    return out
 
 
 def _pct_change(current: float | None, previous: float | None) -> float | None:
@@ -526,9 +593,19 @@ def _net_debt_values(
     shares_mn: float,
     dividend_per_share: float | None,
 ) -> list[float | None]:
+    # Actual periods: full interest-bearing-debt vs cash-like bridge (incl. LT debt + ST investments).
+    # Forecast periods: forecast total_debt vs the cash-sweep estimate.
+    canonical = _net_debt_canonical(facts, forecast_rows, periods)
     debt = _row_values(facts, forecast_rows, "debt", periods)
     cash = _cash_values(facts, forecast_rows, fcff_rows, periods, shares_mn, dividend_per_share)
-    return [None if d is None or c is None else d - c for d, c in zip(debt, cash)]
+    out: list[float | None] = []
+    for i, p in enumerate(periods):
+        if _is_actual(p):
+            out.append(canonical[i])
+        else:
+            d, c = debt[i], cash[i]
+            out.append(None if d is None or c is None else d - c)
+    return out
 
 
 def _finance_income_values(
@@ -571,14 +648,71 @@ def _market_price_inputs(mode: RenderMode, val_result: dict[str, Any], blend: di
     return current, target, upside
 
 
-def _recommendation(upside: float | None, mode: RenderMode) -> str:
-    if upside is None:
+def _report_display_governance(
+    mode: RenderMode | str,
+    val_result: dict[str, Any],
+    blend: dict[str, Any],
+) -> dict[str, Any]:
+    """Central policy for report-facing recommendation, target and upside display."""
+    reasons: list[str] = []
+    is_publishable = str(val_result.get("is_publishable")).lower() == "true"
+    if not val_result:
+        reasons.append("valuation_result_missing")
+    elif not is_publishable:
+        reasons.append("valuation_result_not_publishable")
+    if blend.get("is_draft_only") is True:
+        reasons.append("blend_is_draft_only")
+    gap = blend.get("valuation_gap_pct")
+    try:
+        if gap is not None and float(gap) > 0.25:
+            reasons.append("valuation_gap_gt_25pct")
+    except (TypeError, ValueError):
+        reasons.append("valuation_gap_invalid")
+
+    # analyst_draft: blocking reasons are informational only; always show computed numbers.
+    # client_final: enforce all gates (is_publishable + no blockers required).
+    if mode == "analyst_draft":
+        approved_for_display = True
+        blocking_reasons: list[str] = []
+    else:
+        approved_for_display = is_publishable and not reasons
+        blocking_reasons = sorted(set(reasons))
+
+    current, target, upside = _market_price_inputs(mode, val_result, blend)
+    if not approved_for_display:
+        target = None
+        upside = None
+
+    return {
+        "approved_for_display": approved_for_display,
+        "current_price": current,
+        "target_price": target,
+        "upside": upside,
+        "recommendation": _recommendation(upside, mode, approved_for_display),
+        "blocking_reasons": blocking_reasons,
+    }
+
+
+def _recommendation(upside: float | None, mode: RenderMode | str, approved_for_display: bool = False) -> str:
+    if not approved_for_display or upside is None:
         return "ĐANG HOÀN THIỆN" if mode != "client_final" else "CHƯA XUẤT BẢN"
     if upside > 0.20:
         return "MUA"
     if upside < -0.20:
         return "BÁN"
     return "GIỮ"
+
+
+def _total_return(upside: float | None, dividend_yield: "Percent | None") -> "Percent | None":
+    """Total return = price return (upside) + 12-month expected dividend yield.
+
+    Audit DATA-03: total return must add the dividend yield, not equal the bare
+    downside. Returns None when upside is unavailable.
+    """
+    if upside is None:
+        return None
+    dy = dividend_yield.value if dividend_yield is not None else 0.0
+    return Percent(upside + dy)
 
 
 def _table_financial_summary(
@@ -602,9 +736,7 @@ def _table_financial_summary(
 
     # Leverage and dividend yield wherever inputs are available (else dash, no fabrication).
     ebitda = _ebitda_values(forecast_rows, facts, periods)
-    debt = _row_values(facts, forecast_rows, "debt", periods)
-    cash = _row_values(facts, forecast_rows, "cash", periods)
-    net_debt = [None if d is None else d - (c or 0) for d, c in zip(debt, cash)]
+    net_debt = _net_debt_canonical(facts, forecast_rows, periods)
     net_debt_ebitda = [_safe_div(nd, e) for nd, e in zip(net_debt, ebitda)]
     div_yield_val = (
         dividend_per_share / current_price
@@ -707,9 +839,7 @@ def _table_bs_cf(
 
     delta_nwc = [None] * len(actual_periods) + [fcff_rows.get(p, {}).get("delta_nwc") for p in forecast_periods]
     capex = _row_values(facts, forecast_rows, "capex", periods)
-    debt = _row_values(facts, forecast_rows, "debt", periods)
-    cash = _row_values(facts, forecast_rows, "cash", periods)
-    net_debt = [None if d is None else d - (c or 0) for d, c in zip(debt, cash)]
+    net_debt = _net_debt_canonical(facts, forecast_rows, periods)
     equity = _row_values(facts, forecast_rows, "equity", periods)
     shares_count = shares_mn * 1_000_000 if shares_mn else 0.0
     bvps = [None if eq is None or shares_count == 0 else eq * 1_000_000_000 / shares_count for eq in equity]
@@ -847,6 +977,14 @@ def _table_key_forecast_drivers(
     else:
         cash_conversion = None
 
+    # Audit NUMERIC-08: a one-year CFO/PAT outside [50%, 150%] may be driven by
+    # working-capital release/timing and must NOT be presented as a sustainable
+    # quality signal — flag it instead of stating it as a clean positive.
+    if cash_conversion is not None and (cash_conversion > 1.5 or cash_conversion < 0.5):
+        cash_conversion_note = "Bất thường — cần soi vốn lưu động (không dùng làm luận điểm bền vững)"
+    else:
+        cash_conversion_note = "Kỷ luật vốn lưu động"
+
     rows = [
         ("Tăng trưởng doanh thu", [rev_growth, "Doanh thu -> EBIT -> FCFF"]),
         ("Biên lợi nhuận gộp", [gross_margin, "Giá vốn -> lợi nhuận gộp"]),
@@ -854,7 +992,7 @@ def _table_key_forecast_drivers(
         ("Khấu hao / doanh thu", [dep, "EBIT và lá chắn thuế"]),
         ("Capex / doanh thu", [capex, "FCFF và mở rộng công suất"]),
         ("Thuế suất hiệu dụng", [tax_rate, "LNST và NOPAT"]),
-        ("Cash conversion 2025", [cash_conversion, "Kỷ luật vốn lưu động"]),
+        ("Cash conversion 2025", [cash_conversion, cash_conversion_note]),
         ("WACC", [wacc, "Tỷ lệ chiết khấu DCF"]),
         ("Tăng trưởng dài hạn", [terminal_growth, "Terminal value DCF"]),
     ]
@@ -866,12 +1004,14 @@ def _table_key_forecast_drivers(
     )
 
 
-def _table_sensitivity_matrix(sensitivity: dict[str, Any]) -> TableData | None:
+def _table_sensitivity_matrix(sensitivity: dict[str, Any], valuation_publishable: bool = True) -> TableData | None:
     """WACC × terminal-growth target-price matrix from the valuation sensitivity artifact.
 
     Returns None when the matrix is absent or all-null (e.g. shares missing at compute
     time), so the caller can fall back to the scenario view rather than render empty cells.
     """
+    if not valuation_publishable:
+        return None
     fw = (sensitivity or {}).get("fcff_wacc_g", {})
     matrix = fw.get("matrix", {})
     wacc_range = fw.get("wacc_range", [])
@@ -895,11 +1035,13 @@ def _table_sensitivity_matrix(sensitivity: dict[str, Any]) -> TableData | None:
     for w in wacc_range:
         wk = f"{w:.3f}"
         rows.append((f"WACC {w * 100:.1f}%", [matrix.get(wk, {}).get(_g_key(g)) for g in g_range]))
+    fmt = "currency"
     return TableData(
         title="ĐỘ NHẠY GIÁ MỤC TIÊU (WACC × tăng trưởng dài hạn)",
         periods=periods,
         unit="Đơn vị: VND/cp — định giá FCFF DCF.",
         rows=rows,
+        format_type=fmt,
     )
 
 
@@ -1152,6 +1294,37 @@ def _build_narratives(
     return build_all(n)
 
 
+_VALUATION_LEAK_TERMS = (
+    "target price",
+    "price_fcff",
+    "price_fcfe",
+    "fcff",
+    "fcfe",
+    "wacc",
+    "dcf",
+    "valuation",
+    "giá mục tiêu",
+    "gia muc tieu",
+    "định giá",
+    "dinh gia",
+)
+
+
+def _sanitize_non_valuation_narrative(text: str) -> str:
+    """Remove valuation sentences from business/financial section snippets."""
+    if not text:
+        return ""
+    parts = re.split(r"(?<=[.!?])\s+", text.strip())
+    kept = [
+        part
+        for part in parts
+        if part and not any(term in part.lower() for term in _VALUATION_LEAK_TERMS)
+    ]
+    if kept:
+        return " ".join(kept)
+    return "Nội dung đang được chuẩn hóa theo contract section; xem trang định giá cho các giả định mô hình."
+
+
 def _charts(ticker: str) -> dict[str, ChartArtifact]:
     charts_dir = ROOT / "artifacts/charts"
     titles = {
@@ -1194,8 +1367,11 @@ def build_client_report_view_model(
     blend = _blend(ticker, manifest, allow_latest_artifacts)
     forecast_rows = _forecast_by_label(forecast)
     fcff_rows = _fcff_by_label(fcff)
-    current_price, target_price, upside = _market_price_inputs(mode, val_result, blend)
-    recommendation = _recommendation(upside, mode)
+    display_gate = _report_display_governance(mode, val_result, blend)
+    current_price = display_gate["current_price"]
+    target_price = display_gate["target_price"]
+    upside = display_gate["upside"]
+    recommendation = display_gate["recommendation"]
     charts = _charts(ticker)
 
     snapshot = _load_market_snapshot(ticker)
@@ -1248,16 +1424,17 @@ def build_client_report_view_model(
         current_price, target_price, upside, recommendation, dividend_yield,
     )
     thesis = _narr["investment_thesis"]
-    latest_update = _narr["latest_business_update"]
-    current_context = _narr["financial_performance"]
-    growth_drivers = _narr["forecast_valuation_narrative"]
-    margin_drivers = _narr["valuation_narrative"]
+    latest_update = _sanitize_non_valuation_narrative(_narr["latest_business_update"])
+    current_context = _sanitize_non_valuation_narrative(_narr["financial_performance"])
+    # Distinct growth/margin narratives (audit NARRATIVE-01: no duplicated paragraphs).
+    growth_drivers = _sanitize_non_valuation_narrative(_narr["growth_drivers"])
+    margin_drivers = _sanitize_non_valuation_narrative(_narr["margin_drivers"])
     events = _narr["risks_catalysts"]
-    forecast_text = _narr["valuation_narrative"]
+    forecast_text = _narr["forecast_valuation_narrative"]
     key_forecast_drivers_table = _table_key_forecast_drivers(forecast, fcff, facts, forecast_rows, ticker)
     sensitivity_table = (
-        _table_sensitivity_matrix(val.get("sensitivity", {}))
-        or _table_driver_sensitivity(fcff, blend, forecast)
+        _table_sensitivity_matrix(val.get("sensitivity", {}), display_gate["approved_for_display"])
+        or _table_driver_sensitivity(fcff, blend if display_gate["approved_for_display"] else {}, forecast)
     )
 
     return ClientReportViewModel(
@@ -1272,7 +1449,7 @@ def build_client_report_view_model(
         target_price=Money(target_price) if target_price is not None else None,
         upside_downside=Percent(upside) if upside is not None else None,
         dividend_yield=dividend_yield,
-        total_return=Percent(upside) if upside is not None else None,
+        total_return=_total_return(upside, dividend_yield),
         market_statistics={
             "Mã giao dịch": f"{ticker} VN",
             "Sàn": exchange,
@@ -1340,6 +1517,7 @@ def build_client_report_view_model(
         publication_status=publication_status,
         missing_required_fields=missing,
         key_sources=_key_sources(ticker, snapshot),
+        display_blocking_reasons=display_gate["blocking_reasons"],
     )
 
 

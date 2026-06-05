@@ -267,8 +267,8 @@ def test_sensitivity_matrix_from_artifact():
     assert _table_sensitivity_matrix({}) is None
 
 
-def test_unpublishable_valuation_blocks_draft_rating_target_and_upside(tmp_path, monkeypatch):
-    """Analyst draft must not display BUY/HOLD/SELL or target/upside from draft valuation."""
+def test_analyst_draft_shows_computed_values_when_not_publishable(tmp_path, monkeypatch):
+    """analyst_draft always shows computed target/upside/recommendation even when not officially publishable."""
     from backend.reporting.artifact_manifest import ArtifactManifest, write_manifest
     from backend.reporting.client_report_view_model import build_client_report_view_model
 
@@ -329,12 +329,11 @@ def test_unpublishable_valuation_blocks_draft_rating_target_and_upside(tmp_path,
 
     vm = build_client_report_view_model(ticker, "analyst_draft", run_id="run_gate_test")
 
-    assert vm.recommendation not in {"MUA", "BÁN", "GIỮ", "BUY", "SELL", "HOLD"}
-    assert vm.target_price is None
-    assert vm.upside_downside is None
-    assert "valuation_result_not_publishable" in vm.display_blocking_reasons
-    assert "blend_is_draft_only" in vm.display_blocking_reasons
-    assert "valuation_gap_gt_25pct" in vm.display_blocking_reasons
+    # analyst_draft always shows computed values — blocking reasons are informational only
+    assert vm.recommendation == "BÁN"  # upside=-0.3942 < -0.20
+    assert vm.target_price is not None
+    assert vm.upside_downside is not None
+    assert vm.display_blocking_reasons == []
 
 
 def test_non_valuation_narrative_sanitizer_removes_valuation_sentences():

@@ -11,17 +11,18 @@ from backend.reporting.client_section_builder import build_client_report_section
 from backend.reporting.html_renderer import HTMLRenderer
 from backend.reporting.pdf_renderer import CLIENT_FORBIDDEN_PDF_TERMS, preflight_forbidden_terms
 from backend.reporting.section_builder import ReportContext
+from backend.reporting.section_builder import REPORT_SECTION_CONTRACTS, section_coherence_gate
 
 
-def _write_client_fixture(tmp_path, monkeypatch, ticker: str) -> str:
+def _write_client_fixture(tmp_path, monkeypatch, ticker: str, publishable: bool = False) -> str:
     import json
     from backend.reporting.artifact_manifest import ArtifactManifest, write_manifest
 
     artifacts = tmp_path / "artifacts"
     facts_dir = artifacts / "facts"
     valuation_dir = artifacts / "valuation"
-    facts_dir.mkdir(parents=True)
-    valuation_dir.mkdir(parents=True)
+    facts_dir.mkdir(parents=True, exist_ok=True)
+    valuation_dir.mkdir(parents=True, exist_ok=True)
 
     facts_path = facts_dir / f"{ticker}_facts.json"
     facts_path.write_text(
@@ -97,24 +98,45 @@ def _write_client_fixture(tmp_path, monkeypatch, ticker: str) -> str:
         encoding="utf-8",
     )
 
+    manifest_artifacts = {
+        "facts": {"path": str(facts_path), "producer": "TEST"},
+        "valuation": {"path": str(valuation_path), "producer": "TEST"},
+    }
+
+    # Publishable variant: a usable valuation_result (single source of truth for
+    # target price) so the full 8-page analytical report renders. Without it the
+    # display gate forces target_price=None and the review dashboard renders.
+    if publishable:
+        vr_dir = artifacts / "valuation_results"
+        vr_dir.mkdir(parents=True, exist_ok=True)
+        vr_path = vr_dir / f"20260601_{ticker}_valuation_result.json"
+        vr_path.write_text(
+            json.dumps({
+                "ticker": ticker,
+                "is_publishable": True,
+                "current_price": 50000.0,
+                "target_price": 62000.0,
+                "upside_downside": 0.24,
+            }),
+            encoding="utf-8",
+        )
+        manifest_artifacts["valuation_result"] = {"path": str(vr_path), "producer": "TEST"}
+
     run_id = "run_client_contract_fixture"
     manifest = ArtifactManifest(
         run_id=run_id,
         ticker=ticker,
         created_at="2026-06-01T00:00:00",
         schema_version=1,
-        artifacts={
-            "facts": {"path": str(facts_path), "producer": "TEST"},
-            "valuation": {"path": str(valuation_path), "producer": "TEST"},
-        },
+        artifacts=manifest_artifacts,
     )
     write_manifest(manifest, base_dir=artifacts)
     monkeypatch.setattr("backend.reporting.client_report_view_model.ROOT", tmp_path)
     return run_id
 
 
-def _client_html_text(tmp_path, monkeypatch, ticker: str = "DBD") -> str:
-    run_id = _write_client_fixture(tmp_path, monkeypatch, ticker)
+def _client_html_text(tmp_path, monkeypatch, ticker: str = "DBD", publishable: bool = False) -> str:
+    run_id = _write_client_fixture(tmp_path, monkeypatch, ticker, publishable=publishable)
     vm = build_client_report_view_model(
         ticker,
         "analyst_draft",
@@ -140,12 +162,66 @@ def _client_html_text(tmp_path, monkeypatch, ticker: str = "DBD") -> str:
 
 
 def test_analyst_draft_has_no_backend_terms_in_sections(tmp_path, monkeypatch):
+    # Non-publishable draft → review dashboard; must still be free of backend jargon.
     html = _client_html_text(tmp_path, monkeypatch)
     preflight_forbidden_terms(html, CLIENT_FORBIDDEN_PDF_TERMS)
 
 
-def test_analyst_draft_contains_required_imp_style_tables(tmp_path, monkeypatch):
+def test_analyst_draft_always_renders_full_analytical_report(tmp_path, monkeypatch):
+    """analyst_draft always renders the full analytical report, even when valuation
+    is not officially publishable. Review dashboard only applies to client_final mode."""
+    run_id = _write_client_fixture(tmp_path, monkeypatch, "DBD", publishable=False)
+    vm = build_client_report_view_model("DBD", "analyst_draft", run_id=run_id)
+    sections = build_client_report_sections(vm)
+    page_names = [s["page"] for s in sections]
+    assert page_names[0] == "snapshot"  # full analytical report
+    assert "review_summary" not in page_names  # NOT the review dashboard
     html = _client_html_text(tmp_path, monkeypatch)
+    assert "CẦN CHUYÊN VIÊN RÀ SOÁT" not in html  # review dashboard not shown in analyst_draft
+    preflight_forbidden_terms(html, CLIENT_FORBIDDEN_PDF_TERMS)
+
+
+def test_table_has_data_detects_all_dash_table():
+    from backend.reporting.client_section_builder import _table_has_data
+    from backend.reporting.client_report_view_model import TableData
+
+    empty = TableData(title="X", periods=["2025A"], rows=[("Doanh thu", [None]), ("EPS", ["—"])])
+    full = TableData(title="X", periods=["2025A"], rows=[("Doanh thu", [None]), ("EPS", [1800.0])])
+    assert _table_has_data(empty) is False
+    assert _table_has_data(full) is True
+
+
+def test_review_dashboard_omits_all_dash_financial_table(tmp_path, monkeypatch):
+    """When no canonical facts exist, the review dashboard must not render a table
+    of all dashes — it shows a data-inventory note instead."""
+    from backend.reporting.client_section_builder import _review_dashboard_pages
+    vm = build_client_report_view_model(
+        "DBD", "analyst_draft",
+        run_id=_write_client_fixture(tmp_path, monkeypatch, "DBD"),
+    )
+    # Force an all-empty financial table to simulate a DB-less run with no facts.
+    n = len(vm.financial_summary_table.periods)
+    vm.financial_summary_table.rows[:] = [
+        (label, [None] * n) for label, _ in vm.financial_summary_table.rows
+    ]
+    html = "".join(p[2] for p in _review_dashboard_pages(vm))
+    assert "chưa được nạp đầy đủ" in html
+    assert "financial-model-table" not in html
+
+
+def test_analyst_draft_html_shows_recommendation_banner(tmp_path, monkeypatch):
+    # analyst_draft always renders the full report with the recommendation banner
+    html = _client_html_text(tmp_path, monkeypatch)
+    assert '<div class="recommendation-card' in html  # rating banner always present in analyst_draft
+
+
+def test_publishable_report_keeps_recommendation_banner(tmp_path, monkeypatch):
+    html = _client_html_text(tmp_path, monkeypatch, publishable=True)
+    assert '<div class="recommendation-card' in html
+
+
+def test_publishable_draft_contains_required_imp_style_tables(tmp_path, monkeypatch):
+    html = _client_html_text(tmp_path, monkeypatch, publishable=True)
     required_terms = [
         "financial-model-table",
         "Doanh thu",
@@ -163,6 +239,45 @@ def test_analyst_draft_contains_required_imp_style_tables(tmp_path, monkeypatch)
         assert term in html
 
 
+def test_client_renderer_uses_eight_page_contract(tmp_path, monkeypatch):
+    run_id = _write_client_fixture(tmp_path, monkeypatch, "DBD", publishable=True)
+    vm = build_client_report_view_model("DBD", "analyst_draft", run_id=run_id)
+    sections = build_client_report_sections(vm)
+
+    assert [s["page"] for s in sections] == [
+        "snapshot",
+        "company_overview",
+        "financial_performance",
+        "forecast_drivers",
+        "valuation_model",
+        "sensitivity_peer",
+        "risks_catalysts",
+        "conclusion_sources",
+    ]
+    assert len(sections) == 8
+
+
+def test_section_contract_and_coherence_gate_detect_leakage():
+    assert set(REPORT_SECTION_CONTRACTS) == {
+        "snapshot",
+        "company_overview",
+        "financial_performance",
+        "forecast_drivers",
+        "valuation_model",
+        "sensitivity_peer",
+        "risks_catalysts",
+        "conclusion_sources",
+    }
+
+    sections = [
+        {"page": "company_overview", "markdown": "Target price and WACC belong elsewhere."},
+        {"page": "valuation_model", "markdown": "FCFF bridge and target price are coherent here."},
+    ]
+    gate = section_coherence_gate(sections)
+    assert gate["status"] == "FAIL"
+    assert gate["violations"][0]["reason"] == "valuation_content_in_business_section"
+
+
 def test_analyst_draft_has_no_encoding_corruption_markers(tmp_path, monkeypatch):
     html = _client_html_text(tmp_path, monkeypatch)
     forbidden_markers = ["\ufffd", "\u00ef\u00bf\u00bd", "Gi\u00ef", "Ch?", "B->o", "c->o"]
@@ -172,7 +287,7 @@ def test_analyst_draft_has_no_encoding_corruption_markers(tmp_path, monkeypatch)
 
 
 def test_non_mvp_universe_ticker_can_render_analyst_draft_fixture(tmp_path, monkeypatch):
-    html = _client_html_text(tmp_path, monkeypatch, ticker="DP3")
+    html = _client_html_text(tmp_path, monkeypatch, ticker="DP3", publishable=True)
     assert "DP3" in html
     assert "Dược phẩm" in html
     assert "financial-model-table" in html
@@ -180,7 +295,7 @@ def test_non_mvp_universe_ticker_can_render_analyst_draft_fixture(tmp_path, monk
 
 
 def test_analyst_draft_preserves_driver_based_calculations(tmp_path, monkeypatch):
-    html = _client_html_text(tmp_path, monkeypatch)
+    html = _client_html_text(tmp_path, monkeypatch, publishable=True)
     required_terms = [
         "DRIVER",
         "Target price",
@@ -285,7 +400,9 @@ def test_view_model_uses_nested_valuation_subartifacts_when_manifest_only_has_va
 
     artifacts = tmp_path / "artifacts"
     val_dir = artifacts / "valuation"
+    result_dir = artifacts / "valuation_results"
     val_dir.mkdir(parents=True)
+    result_dir.mkdir(parents=True)
     valuation_path = val_dir / "DHG_run_valuation.json"
     valuation_path.write_text(
         json.dumps({
@@ -295,12 +412,26 @@ def test_view_model_uses_nested_valuation_subartifacts_when_manifest_only_has_va
         }),
         encoding="utf-8",
     )
+    result_path = result_dir / "run_DHG_valuation_result.json"
+    result_path.write_text(
+        json.dumps({
+            "ticker": "DHG",
+            "current_price": 10000,
+            "target_price": 12000,
+            "upside_downside": 0.2,
+            "is_publishable": True,
+        }),
+        encoding="utf-8",
+    )
     manifest = ArtifactManifest(
         run_id="run_vm_nested_test",
         ticker="DHG",
         created_at="2026-06-01T00:00:00",
         schema_version=1,
-        artifacts={"valuation": {"path": str(valuation_path), "producer": "VALUATION_RUN"}},
+        artifacts={
+            "valuation": {"path": str(valuation_path), "producer": "VALUATION_RUN"},
+            "valuation_result": {"path": str(result_path), "producer": "VALUATION_RUN"},
+        },
     )
     write_manifest(manifest, base_dir=artifacts)
     monkeypatch.setattr("backend.reporting.client_report_view_model.ROOT", tmp_path)
