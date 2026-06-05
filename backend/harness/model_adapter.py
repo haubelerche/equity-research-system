@@ -9,15 +9,21 @@ from typing import Any
 from backend.harness.agent_registry import AgentConfig
 from backend.harness.state import AgentResult
 
+# Pricing per million tokens (claude-haiku-4-5-20251001 rates)
+_INPUT_COST_PER_M = {"claude-haiku-4-5-20251001": 0.80, "claude-sonnet-4-6": 3.00, "claude-opus-4-8": 15.00}
+_OUTPUT_COST_PER_M = {"claude-haiku-4-5-20251001": 4.00, "claude-sonnet-4-6": 15.00, "claude-opus-4-8": 75.00}
+_DEFAULT_INPUT_COST = 0.80
+_DEFAULT_OUTPUT_COST = 4.00
 
-class OpenAIModelAdapter:
+
+class AnthropicModelAdapter:
     def validate_environment(self) -> None:
-        if not os.getenv("OPENAI_API_KEY"):
-            raise RuntimeError("OPENAI_API_KEY is required for 5-agent harness execution")
+        if not os.getenv("ANTHROPIC_API_KEY"):
+            raise RuntimeError("ANTHROPIC_API_KEY is required for 5-agent harness execution")
         try:
-            import openai  # noqa: F401
+            import anthropic  # noqa: F401
         except Exception as exc:  # noqa: BLE001
-            raise RuntimeError("openai package is required for agent execution") from exc
+            raise RuntimeError("anthropic package is required for agent execution") from exc
 
     def run_agent(
         self,
@@ -27,18 +33,19 @@ class OpenAIModelAdapter:
         input_refs: list[str] | None = None,
     ) -> AgentResult:
         self.validate_environment()
-        # langfuse.openai is a drop-in replacement that auto-captures model, tokens, and latency.
-        # It must be imported after env vars are loaded (load_dotenv is called in the entry scripts).
-        from langfuse.openai import OpenAI
+
+        # Use langfuse.anthropic drop-in if langfuse is configured; otherwise plain anthropic.
+        try:
+            from langfuse.anthropic import Anthropic
+        except Exception:  # noqa: BLE001
+            from anthropic import Anthropic
 
         run_id: str = state.get("run_id") or ""
         ticker: str = state.get("ticker") or ""
-        # Langfuse trace_id must be a 32 lowercase hex char string.
-        # Derive it deterministically from run_id so all generations link to one trace.
-        lf_trace_id: str = hashlib.md5(run_id.encode()).hexdigest()  # always 32 hex chars
+        lf_trace_id: str = hashlib.md5(run_id.encode()).hexdigest()
 
         started = time.perf_counter()
-        client = OpenAI()
+        client = Anthropic()
         state_payload = self._compact_state(state)
         user_payload = {
             "task": task,
@@ -55,29 +62,33 @@ class OpenAIModelAdapter:
                 "next_action": None,
             },
         }
-        response = client.chat.completions.create(
-            model=agent_config.model,
-            temperature=agent_config.temperature,
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": agent_config.prompt},
+
+        kwargs: dict[str, Any] = {
+            "model": agent_config.model,
+            "max_tokens": 4096,
+            "temperature": agent_config.temperature,
+            "system": agent_config.prompt,
+            "messages": [
                 {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False, default=str)},
             ],
-            timeout=agent_config.timeout_seconds,
-            # Langfuse v4 tracing params: name, trace_id, metadata, langfuse_prompt.
-            # trace_id must be 32 lowercase hex chars — use md5(run_id) for stable linking.
-            name=agent_config.agent_id,
-            trace_id=lf_trace_id,
-            metadata={
-                "ticker": ticker,
-                "agent_id": agent_config.agent_id,
-                "task": task[:300],
-                "stage": state.get("current_stage"),
-                "run_type": state.get("run_type"),
-            },
-        )
+        }
+        # Langfuse v4 tracing params (ignored when using plain anthropic client)
+        if hasattr(client, "messages") and hasattr(client, "_langfuse"):
+            kwargs.update({
+                "name": agent_config.agent_id,
+                "trace_id": lf_trace_id,
+                "metadata": {
+                    "ticker": ticker,
+                    "agent_id": agent_config.agent_id,
+                    "task": task[:300],
+                    "stage": state.get("current_stage"),
+                    "run_type": state.get("run_type"),
+                },
+            })
+
+        response = client.messages.create(**kwargs)
         latency_ms = int((time.perf_counter() - started) * 1000)
-        content = response.choices[0].message.content or "{}"
+        content = response.content[0].text if response.content else "{}"
         try:
             raw = json.loads(content)
         except json.JSONDecodeError:
@@ -92,8 +103,8 @@ class OpenAIModelAdapter:
             }
 
         usage = getattr(response, "usage", None)
-        prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
-        completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
+        prompt_tokens = getattr(usage, "input_tokens", 0) if usage else 0
+        completion_tokens = getattr(usage, "output_tokens", 0) if usage else 0
         status = raw.get("status", "needs_review")
         if status not in {"completed", "needs_review", "failed", "skipped"}:
             status = "needs_review"
@@ -117,9 +128,10 @@ class OpenAIModelAdapter:
             warnings=raw.get("warnings", []),
             sources_used=raw.get("sources_used", []),
             latency_ms=latency_ms,
-            cost_estimate=self._estimate_cost(prompt_tokens, completion_tokens),
+            cost_estimate=self._estimate_cost(agent_config.model, prompt_tokens, completion_tokens),
             fallback_triggered=False,
         )
+
 
     @staticmethod
     def _compact_state(state: dict[str, Any]) -> dict[str, Any]:
@@ -133,5 +145,13 @@ class OpenAIModelAdapter:
         return {key: state.get(key) for key in keys}
 
     @staticmethod
-    def _estimate_cost(prompt_tokens: int, completion_tokens: int) -> float:
-        return ((prompt_tokens * 0.2) + (completion_tokens * 0.8)) / 1_000_000
+    def _estimate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> float:
+        in_rate = _INPUT_COST_PER_M.get(model, _DEFAULT_INPUT_COST)
+        out_rate = _OUTPUT_COST_PER_M.get(model, _DEFAULT_OUTPUT_COST)
+        return (prompt_tokens * in_rate + completion_tokens * out_rate) / 1_000_000
+
+
+# Backward-compatible public name used by the harness and existing integrations.
+# The adapter implementation is provider-selected here, so callers do not need
+# coordinated import changes during a provider migration.
+OpenAIModelAdapter = AnthropicModelAdapter

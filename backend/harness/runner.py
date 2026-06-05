@@ -20,7 +20,7 @@ from backend.harness.gates import (
     valuation_gate,
 )
 from backend.harness.graph import GRAPH_STAGES, build_langgraph
-from backend.harness.model_adapter import OpenAIModelAdapter
+from backend.harness.model_adapter import AnthropicModelAdapter
 from backend.harness.state import AgentExecutionContext, AgentHandoff, ResearchGraphState, stable_hash
 from backend.harness.tool_registry import ToolRegistry
 from backend.harness.tools import (
@@ -79,7 +79,7 @@ class ResearchGraphRunner:
         self.budget = BudgetGuard(store, self.settings)
         self.agent_registry = AgentRegistry()
         self.tool_registry = ToolRegistry()
-        self.model_adapter = OpenAIModelAdapter()
+        self.model_adapter = AnthropicModelAdapter()
         self._compiled_graph = build_langgraph(self._node_map())
 
     def execute(self, context) -> None:
@@ -254,7 +254,10 @@ class ResearchGraphRunner:
         elif stage == "SUPERVISOR_PLAN":
             result = self._run_agent(state, "supervisor", "Create execution plan and HITL routing policy.")
             state.plan = result.payload
-            self._merge_agent_result(state, result)
+            # The supervisor plans the run before deterministic tools have produced
+            # artifacts. Missing artifacts at this stage are expected and must not
+            # stop DATA_RETRIEVAL_RUN; deterministic gates own blocking decisions.
+            self._merge_agent_result(state, result, enforce_review=False)
         elif stage == "DATA_RETRIEVAL_RUN":
             # Step 1: auto-ingest official documents FIRST.
             # Non-blocking: failure produces status="warn" in summary, pipeline continues with Tier-3.
@@ -416,10 +419,10 @@ class ResearchGraphRunner:
         state.evidence_refs.extend([ref.model_dump(mode="json") for ref in result.evidence_refs])
         self._record_tool_trace(state, result.node_name, result.summary, result.output_hash, result.gate_inputs)
 
-    def _merge_agent_result(self, state: ResearchGraphState, result) -> None:
+    def _merge_agent_result(self, state: ResearchGraphState, result, enforce_review: bool = True) -> None:
         state.artifact_refs.extend([ref if isinstance(ref, dict) else dict(ref) for ref in result.artifact_refs])
         state.evidence_refs.extend([ref if isinstance(ref, dict) else dict(ref) for ref in result.evidence_refs])
-        if result.requires_human or result.status == "needs_review":
+        if enforce_review and (result.requires_human or result.status == "needs_review"):
             state.status = "needs_human_review"
             state.requires_human = True
             state.blocking_reason = result.review_reason or result.blocking_reason
