@@ -271,6 +271,10 @@ def _blend(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> 
     return _valuation(ticker, manifest, allow_latest_artifacts).get("blend_dcf", {})
 
 
+def _core_pe_net_cash(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
+    return _valuation(ticker, manifest, allow_latest_artifacts).get("core_pe_net_cash", {})
+
+
 
 def _fact_value(facts: dict[str, dict[str, float]], metric: str, period: str) -> float | None:
     """Return a float fact value — handles both flat (DBD) and nested-dict (DHG) formats."""
@@ -639,7 +643,14 @@ def _market_price_inputs(mode: RenderMode, val_result: dict[str, Any], blend: di
     if mode == "client_final":
         current = float(val_result.get("current_price") or 0) or None
         target = float(val_result.get("target_price") or 0) or None
-        upside = float(val_result.get("upside_downside") or 0) or None
+        upside_raw = val_result.get("upside_downside")
+        upside = float(upside_raw) if upside_raw is not None else None
+        # A missing/non-publishable valuation_result must not erase usable
+        # computed values. Client-final readiness is enforced separately.
+        current = current or (float(blend.get("current_price_vnd") or 0) or None)
+        target = target or (float(blend.get("target_price_dcf_vnd") or 0) or None)
+        if upside is None and blend.get("upside_pct") is not None:
+            upside = float(blend["upside_pct"])
         return current, target, upside
     current = float(blend.get("current_price_vnd") or 0) or None
     target = float(blend.get("target_price_dcf_vnd") or 0) or None
@@ -670,17 +681,21 @@ def _report_display_governance(
         reasons.append("valuation_gap_invalid")
 
     # analyst_draft always shows computed values — analyst needs full picture to review
-    if mode == "analyst_draft":
-        approved_for_display = True
-        blocking_reasons: list[str] = []
-    else:
-        approved_for_display = is_publishable and not reasons
-        blocking_reasons = sorted(set(reasons))
+    # Display governance is separate from publication governance. Available
+    # model outputs remain visible for analysis while client-final blockers stay
+    # available to the export workflow as internal metadata.
+    approved_for_display = True
+    blocking_reasons = sorted(set(reasons)) if mode == "client_final" else []
 
     current, target, upside = _market_price_inputs(mode, val_result, blend)
-    if not approved_for_display:
+    if target is None:
+        approved_for_display = False
         target = None
         upside = None
+
+    # client_final with blocking reasons: lock recommendation but keep values visible for review
+    if mode == "client_final" and blocking_reasons:
+        approved_for_display = False
 
     return {
         "approved_for_display": approved_for_display,
@@ -689,7 +704,26 @@ def _report_display_governance(
         "upside": upside,
         "recommendation": _recommendation(upside, mode, approved_for_display),
         "blocking_reasons": blocking_reasons,
+        "blend_target_price": target,  # keep blend for cross-check display
     }
+
+
+def _apply_core_pe_override(
+    display_gate: dict[str, Any],
+    cpnc: dict[str, Any],
+) -> dict[str, Any]:
+    """Override target price with Core P/E + Net Cash when available (Guidance §11)."""
+    cpnc_target = float(cpnc.get("target_price_vnd") or 0) or None
+    current = display_gate.get("current_price")
+    if cpnc_target is not None:
+        cpnc_upside = (cpnc_target / current - 1) if current else None
+        return {
+            **display_gate,
+            "target_price": cpnc_target,
+            "upside": cpnc_upside,
+            "recommendation": _recommendation(cpnc_upside, "analyst_draft", display_gate.get("approved_for_display", True)),
+        }
+    return display_gate
 
 
 def _recommendation(upside: float | None, mode: RenderMode | str, approved_for_display: bool = False) -> str:
@@ -1239,6 +1273,7 @@ def _build_narratives(
     upside: float | None,
     rating: str,
     dividend_yield: "Percent | None",
+    core_pe_net_cash: dict[str, Any] | None = None,
 ) -> dict[str, str]:
     """Compute artifact-grounded narrative sections (≥300 words each)."""
     from backend.reporting.narrative_builder import NarrativeInputs, build_all
@@ -1286,6 +1321,10 @@ def _build_narratives(
         rating=rating,
         price_fcff=blend.get("price_fcff_vnd") if isinstance(blend, dict) else None,
         price_pe_forward=blend.get("price_pe_forward_vnd") if isinstance(blend, dict) else None,
+        core_pe_target=(core_pe_net_cash or {}).get("target_price_vnd"),
+        net_cash_per_share=(core_pe_net_cash or {}).get("net_cash_per_share_vnd"),
+        core_eps=(core_pe_net_cash or {}).get("core_eps_vnd"),
+        target_core_pe=(core_pe_net_cash or {}).get("target_core_pe"),
         sens_low=min(cells) if cells else None,
         sens_high=max(cells) if cells else None,
         dividend_yield=dividend_yield.value if dividend_yield is not None else None,
@@ -1364,9 +1403,13 @@ def build_client_report_view_model(
     forecast = _forecast(ticker, manifest, allow_latest_artifacts)
     fcff = _fcff(ticker, manifest, allow_latest_artifacts)
     blend = _blend(ticker, manifest, allow_latest_artifacts)
+    cpnc = _core_pe_net_cash(ticker, manifest, allow_latest_artifacts)
     forecast_rows = _forecast_by_label(forecast)
     fcff_rows = _fcff_by_label(fcff)
     display_gate = _report_display_governance(mode, val_result, blend)
+    # Prefer Core P/E + Net Cash target over blend target (Guidance §11)
+    if cpnc:
+        display_gate = _apply_core_pe_override(display_gate, cpnc)
     current_price = display_gate["current_price"]
     target_price = display_gate["target_price"]
     upside = display_gate["upside"]
@@ -1421,6 +1464,7 @@ def build_client_report_view_model(
     _narr = _build_narratives(
         ticker, company_name, facts, forecast, fcff, blend, val, periods,
         current_price, target_price, upside, recommendation, dividend_yield,
+        core_pe_net_cash=cpnc if cpnc else None,
     )
     thesis = _narr["investment_thesis"]
     latest_update = _sanitize_non_valuation_narrative(_narr["latest_business_update"])

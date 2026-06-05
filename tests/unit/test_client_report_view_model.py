@@ -378,9 +378,12 @@ class TestReportDisplayGovernance:
         assert result["approved_for_display"] is True
         assert result["blocking_reasons"] == []
 
-    def test_client_final_blocks_target_price_when_not_publishable(self):
+    def test_client_final_blocks_recommendation_when_not_publishable(self):
+        """client_final with blocking reasons: target stays visible for review but approved_for_display=False."""
         from backend.reporting.client_report_view_model import _report_display_governance
         result = _report_display_governance("client_final", self._val_result_blocked, self._blend_draft)
-        assert result["target_price"] is None
+        # Target price remains visible so analyst can inspect the computed value
+        assert result["target_price"] is not None
+        # But approved_for_display is False — blocks recommendation from becoming BUY/SELL/HOLD
         assert result["approved_for_display"] is False
         assert "valuation_result_not_publishable" in result["blocking_reasons"]

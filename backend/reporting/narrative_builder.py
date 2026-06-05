@@ -44,6 +44,10 @@ class NarrativeInputs:
     rating: str = ""
     price_fcff: float | None = None                 # VND
     price_pe_forward: float | None = None           # VND — P/E Forward anchor (replaces FCFE)
+    core_pe_target: float | None = None             # VND — Core P/E + Net Cash target (Guidance §11)
+    net_cash_per_share: float | None = None         # VND
+    core_eps: float | None = None                   # VND
+    target_core_pe: float | None = None             # e.g. 19.0
     sens_low: float | None = None                   # VND (worst-case target in matrix)
     sens_high: float | None = None                  # VND (best-case target in matrix)
     dividend_yield: float | None = None             # fraction
@@ -161,31 +165,52 @@ def build_forecast_assumptions(n: NarrativeInputs) -> str:
 
 
 def build_valuation_narrative(n: NarrativeInputs) -> str:
-    blend_clause = (
-        f"Giá mục tiêu {_vnd(n.target_price)} được tổng hợp theo trọng số 60% FCFF ({_vnd(n.price_fcff)}) "
-        f"và 40% P/E Forward ({_vnd(n.price_pe_forward)}). Phương pháp P/E Forward được dùng thay cho FCFE "
-        f"vì FCFE đòi hỏi lịch trả nợ đầy đủ — khi dữ liệu thiếu, kết quả FCFE không đáng tin cậy. "
-        f"P/E Forward neo giá trị vào kỳ vọng lợi nhuận gần hạn và tâm lý thị trường, bổ sung chiều "
-        f"thông tin mà FCFF thuần túy không nắm bắt được."
-        if n.target_price else
-        f"Giá mục tiêu hợp nhất hiện {_NA}; một số đầu vào định giá chưa đủ điều kiện."
-    )
+    # Primary methodology: Core EPS x Core P/E + Net Cash (Guidance §11)
+    if n.core_pe_target is not None:
+        method_clause = (
+            f"Phương pháp định giá chính là Core EPS × P/E + Net Cash (Hướng dẫn §11) — "
+            f"tách biệt giá trị hoạt động cốt lõi và danh mục đầu tư tài chính thanh khoản. "
+            f"Core EPS {_vnd(n.core_eps)} được nhân với P/E mục tiêu "
+            f"{f'{n.target_core_pe:.0f}x' if n.target_core_pe else ''} (peer median ngành dược VN), "
+            f"cộng thêm Net Cash/CP {_vnd(n.net_cash_per_share)}, "
+            f"cho giá mục tiêu {_vnd(n.core_pe_target)}. "
+            f"FCFF ({_vnd(n.price_fcff)}) và Blend ({_vnd(n.target_price)}) dùng làm kiểm tra chéo độc lập."
+        )
+    else:
+        if n.target_price or n.core_pe_target:
+            method_clause = (
+                f"Phương pháp định giá chính là FCFF DCF, kiểm tra chéo bằng bội số P/E Forward. "
+                f"FCFF được chiết khấu bằng WACC {_pct(n.wacc)} — phản ánh cơ cấu vốn và phần bù rủi ro "
+                f"thị trường ngành dược Việt Nam — với tốc độ tăng trưởng dài hạn (terminal growth) "
+                f"{_pct(n.terminal_growth)}, tương đương tốc độ tăng trưởng danh nghĩa nền kinh tế dài hạn. "
+                f"Giá trị DCF nhạy cảm nhất với giả định WACC và terminal growth: thay đổi ±1% WACC làm "
+                f"giá trị thay đổi đáng kể, nên hai biến này phải được xác nhận bởi dữ liệu thị trường vốn. "
+                f"Giá mục tiêu {_vnd(n.target_price)} tổng hợp 60% FCFF ({_vnd(n.price_fcff)}) "
+                f"và 40% P/E Forward ({_vnd(n.price_pe_forward)}). "
+                f"Trọng số 60/40 phản ánh ưu tiên phương pháp dòng tiền trên nền kiểm tra chéo bội số, "
+                f"phù hợp với doanh nghiệp có lịch sử FCFF dương và chu kỳ vốn có thể dự báo được. "
+                f"P/E Forward dùng EPS dự phóng kỳ tới, điều chỉnh cho chu kỳ đấu thầu đặc thù ngành. "
+                f"Biên lợi nhuận gộp giả định {_pct(n.gross_margin_driver)} là đầu vào trọng yếu: "
+                f"mỗi thay đổi 100 bps biên gộp ảnh hưởng trực tiếp đến FCFF và làm dịch chuyển giá trị."
+            )
+        else:
+            method_clause = (
+                f"Giá mục tiêu hợp nhất hiện {_NA}; một số đầu vào định giá chưa đủ điều kiện. "
+                f"Khi dữ liệu đầy đủ, phương pháp chính sẽ là FCFF DCF chiết khấu bằng WACC, "
+                f"kiểm tra chéo bằng P/E Forward theo thông lệ phân tích cổ phiếu vốn."
+            )
+
+    display_target = n.core_pe_target or n.target_price
     upside_direction = (
         "tiềm năng tăng" if (n.upside or 0) > 0 else "rủi ro giảm"
         if n.upside is not None else "chênh lệch"
     )
     return (
-        f"Phương pháp định giá chính là FCFF DCF, kiểm tra chéo bằng bội số P/E Forward. "
-        f"FCFF được chiết khấu bằng WACC {_pct(n.wacc)} với tăng trưởng dài hạn {_pct(n.terminal_growth)}. "
-        f"{blend_clause} "
-        f"So với thị giá {_vnd(n.current_price)}, giá mục tiêu hàm ý {upside_direction} {_pct(n.upside)}. "
-        f"Ma trận độ nhạy cho khoảng {_vnd(n.sens_low)}–{_vnd(n.sens_high)}: khoảng này rộng hay hẹp là "
-        f"thước đo mức độ chắc chắn của kết luận — khoảng rộng hơn 30% giá hiện tại cho thấy kết quả phụ "
-        f"thuộc mạnh vào giả định dài hạn và cần thận trọng khi diễn giải điểm mục tiêu. "
-        f"Rủi ro định giá trọng yếu là tỷ trọng terminal value trong tổng EV cao: khi phần lớn giá trị nằm "
-        f"ở năm cuối kỳ dự phóng, một sai lệch nhỏ về tăng trưởng dài hạn tạo ra biến động lớn hơn nhiều "
-        f"so với sai lệch về driver vận hành gần hạn. Đây là lý do kết luận định giá chỉ có giá trị trong "
-        f"điều kiện giả định cơ sở được phê duyệt và cập nhật định kỳ."
+        f"{method_clause} "
+        f"So với thị giá {_vnd(n.current_price)}, giá mục tiêu {_vnd(display_target)} "
+        f"hàm ý {upside_direction} {_pct(n.upside)}. "
+        f"Ma trận độ nhạy cho khoảng {_vnd(n.sens_low)}–{_vnd(n.sens_high)}: khoảng rộng hàm ý kết luận "
+        f"nhạy cảm với giả định vĩ mô — cần xác nhận thêm trước khi nâng cao mức độ tự tin khuyến nghị."
     )
 
 

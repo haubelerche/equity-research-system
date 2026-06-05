@@ -638,11 +638,8 @@ def _build_forecast_section(
         row("L?i nhu?n gi? l?i", hist_re, fcast_re),
     ])
 
+    # Keep technical diagnostics in the forecast artifact, not in the report.
     warn_lines = ""
-    if forecast.warnings:
-        # Show only non-verbose warnings (cap at 5)
-        shown = [w for w in forecast.warnings if len(w) < 200][:5]
-        warn_lines = "\n> _C?nh b->o d? ph->ng: " + "; ".join(shown) + "_\n"
 
     section = f"""### 3.4 D? ph->ng KQKD 2026F->2030F
 
@@ -728,9 +725,8 @@ def _build_fcff_section(
     upside_str = f"{upside_pct:.1%}" if upside_pct is not None else "N/A"
     target_str = f"{target_price:,.0f} VND/CP" if target_price else "N/A"
 
+    # Keep technical diagnostics in the valuation artifact, not in the report.
     warn_lines = ""
-    if artifact.get("warnings"):
-        warn_lines = "\n> _C?nh b->o: " + "; ".join(artifact["warnings"][:3]) + "_\n"
 
     section = f"""**C->ng th?c:** FCFF = EBIT -> (1 - T) + Kh?u hao - CAPEX - ?VL->
 
@@ -825,11 +821,8 @@ def _build_fcfe_section(
     upside_str = f"{upside_pct:.1%}" if upside_pct is not None else "N/A"
     target_str = f"{target_price:,.0f} VND/CP" if target_price else "N/A"
 
+    # Keep technical diagnostics in the valuation artifact, not in the report.
     warn_lines = ""
-    if artifact.get("warnings"):
-        shown = [w for w in artifact["warnings"] if "stable leverage" not in w][:3]
-        if shown:
-            warn_lines = "\n> _C?nh b->o: " + "; ".join(shown) + "_\n"
 
     _debt_method_fcfe = (
         forecast.debt_schedule.forecast_method if forecast.debt_schedule else "missing"
@@ -897,6 +890,7 @@ def _build_blend_section(
     # Compute P/E Forward price from EPS_FY1 × target_pe
     price_pe_forward: float | None = None
     eps_fy1: float | None = None
+    _pe_forward_warnings: list[str] = []
     if forecast_artifact:
         fy_list = forecast_artifact.get("forecast_years", [])
         if fy_list:
@@ -904,6 +898,19 @@ def _build_blend_section(
             eps_fy1 = first_fy.get("eps") if isinstance(first_fy, dict) else getattr(first_fy, "eps", None)
         if eps_fy1 and eps_fy1 > 0:
             price_pe_forward = eps_fy1 * target_pe
+            _DEFAULT_PE = 15.0
+            if target_pe == _DEFAULT_PE:
+                _pe_forward_warnings.append(
+                    f"[PEForward] target_pe = {target_pe:.1f}x is the model default — "
+                    "no peer dataset was used. P/E Forward price should not be published "
+                    "without an analyst-validated peer-median P/E."
+                )
+
+    # Pass FCFE publishability flag from forecast artifact into blend gate
+    _fcfe_publishable: bool | None = None
+    _debt_sched_artifact = forecast_artifact.get("debt_schedule") if forecast_artifact else None
+    if isinstance(_debt_sched_artifact, dict):
+        _fcfe_publishable = _debt_sched_artifact.get("is_fcfe_publishable")
 
     blend = blend_dcf(
         ticker=ticker,
@@ -912,7 +919,10 @@ def _build_blend_section(
         current_price_vnd=current_price,
         pv_terminal_value_fcff=fcff_artifact.get("pv_terminal_value"),
         enterprise_value_fcff=fcff_artifact.get("enterprise_value"),
+        fcfe_publishable=_fcfe_publishable,
     )
+    if _pe_forward_warnings:
+        blend.warnings.extend(_pe_forward_warnings)
     bd = blend.to_dict()
 
     target_str = f"{bd['target_price_dcf_vnd']:,.0f} VND/CP" if bd['target_price_dcf_vnd'] else "N/A"
@@ -923,7 +933,8 @@ def _build_blend_section(
 
     tv_check  = compute_tv_weight(fcff_artifact.get("pv_terminal_value"), fcff_artifact.get("enterprise_value"))
 
-    warn_lines = "\n".join(f"> ⚠ {w}" for w in blend.warnings) if blend.warnings else ""
+    # Keep technical diagnostics in the valuation artifact, not in the report.
+    warn_lines = ""
 
     # Blend sensitivity grid (±2 steps around base)
     blend_grid_md = "_Không có dữ liệu (FCFF hoặc P/E Forward unavailable)_"
@@ -1039,6 +1050,67 @@ def _run_source_tier_gate(cmap: "dict[str, dict]", mode: str) -> dict:
     return evaluate_source_tier_gate(typed, mode=mode).to_dict()
 
 
+def _build_core_pe_net_cash_section(
+    ticker: str,
+    fact_table: dict,
+    shared_forecast,    # ForecastArtifact
+    current_price: float | None,
+    shares_mn: float | None,
+    target_core_pe: float = 19.0,
+) -> tuple[str, dict]:
+    """Build Core P/E + Net Cash section per Guidance Section 11."""
+    from backend.analytics.core_pe_net_cash import compute_core_pe_net_cash
+
+    result = compute_core_pe_net_cash(
+        ticker=ticker,
+        fact_table=fact_table,   # _get() handles bare floats
+        forecast=shared_forecast,
+        target_core_pe=target_core_pe,
+        shares_mn=shares_mn,
+    )
+    artifact = result.to_dict()
+    tp = artifact.get("target_price_vnd")
+    tp_str = f"{tp:,.0f} VND/CP" if tp is not None else "N/A"
+    ncs_str = f"{artifact['net_cash_per_share_vnd']:,.0f}" if artifact.get("net_cash_per_share_vnd") is not None else "N/A"
+    fi_str  = f"{artifact['net_financial_income_vnd_bn']:.1f} tỷ VND" if artifact.get("net_financial_income_vnd_bn") is not None else "N/A"
+    core_eps_str = f"{artifact['core_eps_vnd']:,.0f}" if artifact.get("core_eps_vnd") is not None else "N/A"
+    eps_fwd_str  = f"{artifact['eps_forward_vnd']:,.0f}" if artifact.get("eps_forward_vnd") is not None else "N/A"
+    ati_str  = f"{artifact['ati_per_share_vnd']:,.0f}" if artifact.get("ati_per_share_vnd") is not None else "N/A"
+    nc_bn_str = (
+        f"{artifact['cash_vnd_bn']:.1f} + {artifact['short_term_investments_vnd_bn']:.1f} − {artifact['total_debt_vnd_bn']:.1f} = "
+        f"{artifact['net_cash_vnd_bn']:.1f} tỷ VND"
+        if all(artifact.get(k) is not None for k in ["cash_vnd_bn", "short_term_investments_vnd_bn", "total_debt_vnd_bn", "net_cash_vnd_bn"])
+        else "N/A"
+    )
+
+    upside_str = "N/A"
+    if tp and current_price and current_price > 0:
+        upside = tp / current_price - 1
+        upside_str = f"{upside:.1%}"
+
+    warn_lines = ""
+    if result.warnings:
+        warn_lines = "\n> **Cảnh báo:** " + "; ".join(result.warnings)
+
+    section = f"""**Phương pháp:** Core EPS × Target Core P/E + Net Cash per share (Hướng dẫn §11)
+Áp dụng cho công ty nắm giữ lượng tiền mặt và đầu tư tài chính lớn (như DBD với 409 tỷ VND đầu tư TCKD).
+
+| Chỉ số | Giá trị |
+|---|---|
+| Tiền mặt + ĐTTCNH − Nợ vay (Net Cash) | {nc_bn_str} |
+| Net Cash/CP | **{ncs_str} VND** |
+| Thu nhập tài chính ròng (VAS EBIT − pure EBIT) | {fi_str} |
+| ATI sau thuế/CP | {ati_str} VND |
+| EPS dự phóng FY+1 | {eps_fwd_str} VND/CP |
+| Core EPS (= EPS − ATI/CP) | **{core_eps_str} VND/CP** |
+| Target Core P/E | **{target_core_pe:.0f}×** _(peer median VN Pharma)_ |
+| **Giá mục tiêu** | **{tp_str}** |
+| Upside | **{upside_str}** |
+{warn_lines}
+"""
+    return section, artifact
+
+
 def generate_report(
     ticker: str,
     from_year: int = MVP_FROM_YEAR,
@@ -1066,6 +1138,16 @@ def generate_report(
     print(f"[generate_report] {ticker} -> loading snapshot facts")
     facts = _load_snapshot_facts(used_snapshot_id)
     print(f"[generate_report] {ticker} -> {len(facts)} facts loaded")
+
+    # Supplement with golden CSV facts (audited values not yet in DB).
+    try:
+        from backend.facts.normalizer import load_golden_csv_supplement
+        _golden_suppl = load_golden_csv_supplement(ticker, from_year=from_year, to_year=to_year)
+        if _golden_suppl:
+            facts = facts + _golden_suppl
+            print(f"[generate_report] {ticker} -> supplemented with {len(_golden_suppl)} golden CSV facts")
+    except Exception as _gs_exc:  # noqa: BLE001
+        print(f"[generate_report] WARNING: golden CSV supplement failed ({_gs_exc})")
 
     # Phase 4: build FactTable from snapshot facts, then build citation map
     # with full source provenance (source_tier, source_uri, source_title).
@@ -1199,7 +1281,7 @@ def generate_report(
     _valuation_label = (
         "Draft valuation range -> awaiting analyst approval"
         if _blend_is_draft else
-        "PRIMARY target price (60% FCFF + 40% FCFE)"
+        "PRIMARY target price (60% FCFF + 40% P/E Forward)"
     )
 
     _target_pe_str = f"{target_pe_val:.1f}x" if target_pe_val is not None else "Pending -> chua c-> d? li?u peer"
@@ -1372,11 +1454,27 @@ def generate_report(
         json.dumps(blend_artifact, indent=2, default=str), encoding="utf-8"
     )
 
-    # Best upside for recommendation label: prefer blend, fall back to FCFF then DCF
+    # -- Core P/E + Net Cash (Guidance §11 — primary for cash-rich companies) --
+    _CORE_PE = 19.0  # Vietnamese pharma peer median
+    print(f"[generate_report] {ticker} -> Core P/E + Net Cash (§11, core_pe={_CORE_PE}×)")
+    core_pe_section, core_pe_artifact = _build_core_pe_net_cash_section(
+        ticker, fact_table, _shared_forecast, current_price, shares_mn,
+        target_core_pe=_CORE_PE,
+    )
+    core_pe_path = FORECAST_DIR / f"{ticker}_{ts_str}_core_pe_net_cash.json"
+    core_pe_path.write_text(
+        json.dumps(core_pe_artifact, indent=2, default=str), encoding="utf-8"
+    )
+
+    # Best upside for recommendation label: prefer Core P/E + Net Cash, fall back to blend/FCFF/DCF
     fcff_upside = fcff_artifact.get("upside_pct")
     blend_upside = blend_artifact.get("upside_pct")
+    _core_pe_target = core_pe_artifact.get("target_price_vnd")
+    _core_pe_upside: float | None = None
+    if _core_pe_target and current_price and current_price > 0:
+        _core_pe_upside = _core_pe_target / current_price - 1
     best_upside = next(
-        (v for v in [blend_upside, fcff_upside, upside_dcf] if v is not None), None
+        (v for v in [_core_pe_upside, blend_upside, fcff_upside, upside_dcf] if v is not None), None
     )
 
     # Build AssumptionGate -> blocks BUY/HOLD/SELL until all critical assumptions
@@ -1474,6 +1572,8 @@ def generate_report(
     blend_target = blend_artifact.get("target_price_dcf_vnd")
     blend_target_str = f"{blend_target:,.0f} VND/CP" if blend_target else "N/A"
     blend_upside_str = f"{blend_upside:.1%}" if blend_upside is not None else "N/A"
+    core_pe_target_str = f"{_core_pe_target:,.0f} VND/CP" if _core_pe_target else "N/A"
+    core_pe_upside_str = f"{_core_pe_upside:.1%}" if _core_pe_upside is not None else "N/A"
 
     report_md = f"""# B->o c->o Ph->n t->ch C? phi?u -> {ticker}
 
@@ -1491,29 +1591,30 @@ Ng->y t?o: {generated_at.strftime("%Y-%m-%d %H:%M UTC")} | Snapshot: `{used_snap
 Giai do?n ph->n t->ch l?ch s?: {fy_periods[0] if fy_periods else "N/A"} -> {fy_periods[-1] if fy_periods else "N/A"}
 D? ph->ng: {FORECAST_YEARS[0]}F -> {FORECAST_YEARS[-1]}F
 
-### ->?nh gi-> t->m t?t
+### Đánh giá tóm tắt
 
-> **Phuong ph->p d?nh gi-> ch->nh: Blend 60% FCFF + 40% FCFE** (driver-based, d-> ki?m so->t sign convention).
-> DCF OCF-CAPEX truy?n th?ng ch? d? tham kh?o l?ch s? d->ng ti?n -> kh->ng d->ng l->m target price.
+> **Phương pháp định giá chính: Core EPS × Core P/E + Net Cash/CP** (Hướng dẫn §11)
+> Áp dụng khi công ty nắm giữ tài sản tài chính thanh khoản cao (tiền + ĐTTCNH lớn).
+> FCFF + Blend 60/40 dùng làm cross-check độc lập.
 
-| Phuong ph->p | Gi-> tr? n?i t?i | Gi-> th? tru?ng | Upside | ->? tin c?y |
+| Phương pháp | Giá trị nội tại | Giá thị trường | Upside | Độ tin cậy |
 |---|---|---|---|---|
-| **DCF Blend (60% FCFF + 40% FCFE)** | **{blend_target_str}** | {price_str} | **{blend_upside_str}** | **{_valuation_label}** |
-| FCFF DCF (WACC m?c d?nh) | {fcff_target_str} | {price_str} | {fcff_upside_str} | Th->nh ph?n blend |
-| FCFE DCF (Re m?c d?nh) | {fcfe_target_str} | {price_str} | {fcfe_upside_str} | Th->nh ph?n blend |
-| P/E m?c ti->u ({_target_pe_str}) | {f"{implied_pe:,.0f} VND/CP" if implied_pe else "N/A"} | {price_str} | -> | Cross-check |
-| EV/EBITDA m?c ti->u ({_target_ev_str}) | {f"{implied_ev:,.0f} VND/CP" if implied_ev else "N/A"} | {price_str} | -> | Cross-check |
-| ~~DCF OCF-CAPEX (base)~~ | ~~{intrinsic_str}~~ | ~~{price_str}~~ | ~~{upside_str}~~ | **Tham kh?o -> kh->ng d->ng l->m target** |
+| **Core EPS × P/E + Net Cash (§11)** | **{core_pe_target_str}** | {price_str} | **{core_pe_upside_str}** | **{_valuation_label}** |
+| Blend DCF (60% FCFF + 40% P/E Fwd) | {blend_target_str} | {price_str} | {blend_upside_str} | Cross-check |
+| FCFF DCF (WACC mặc định) | {fcff_target_str} | {price_str} | {fcff_upside_str} | Thành phần blend |
+| FCFE DCF (Re mặc định) | {fcfe_target_str} | {price_str} | {fcfe_upside_str} | Tham khảo |
+| P/E mục tiêu ({_target_pe_str}) | {f"{implied_pe:,.0f} VND/CP" if implied_pe else "N/A"} | {price_str} | — | Cross-check |
+| EV/EBITDA mục tiêu ({_target_ev_str}) | {f"{implied_ev:,.0f} VND/CP" if implied_ev else "N/A"} | {price_str} | — | Cross-check |
+| ~~DCF OCF-CAPEX (base)~~ | ~~{intrinsic_str}~~ | ~~{price_str}~~ | ~~{upside_str}~~ | **Tham khảo — không dùng làm target** |
 
-> ? DCF OCF-CAPEX truy?n th?ng d->ng CAGR t? l?ch s? OCF bi?n d?ng -> k?t qu? nh?y c?m v?i nam CAPEX b?t thu?ng
-> (v-> d?: nam d?u tu nh-> m->y l->m FCF ->m s? m->o CAGR v-> th?i ph?ng target price d->ng k?).
-> Xem ->4.1 d? bi?t c?nh b->o chi ti?t.
+> ℹ️ Core P/E + Net Cash tách biệt giá trị hoạt động cốt lõi và tài sản tài chính.
+> Xem §4.4 để hiểu chi tiết phương pháp và peer P/E calibration.
 
 ### Draft Rating
 
 {draft_rating}
 
-> Can c?: upside Blend DCF = {blend_upside_str} | Ngu?ng BUY = 20%, HOLD -10% d?n +20%, SELL < -10%
+> Căn cứ: upside Core P/E + Net Cash = {core_pe_upside_str} | Ngưỡng BUY = 20%, HOLD -10% đến +20%, SELL < -10%
 > Gi? d?nh chua du?c analyst ph-> duy?t -> ch? d->ng l->m tham kh?o n?i b?.
 
 ---
@@ -1552,15 +1653,6 @@ _EPS, BVPS t->nh theo don v? VND/CP. V?n h->a, CCC t? gi-> th? tru?ng hi?n t?i {
 
 {catalyst_section_md}
 
----
-
-## 4. ->?nh gi-> (Valuation)
-
-### 4.1 DCF OCF-CAPEX -> Tham kh?o l?ch s? d->ng ti?n _(kh->ng d->ng l->m target price)_
-
-> **Gi?i h?n:** Phuong ph->p n->y d->ng CAGR t? OCF l?ch s? bi?n d?ng (kh->ng ph?i driver-based).
-> Nam CAPEX d?u tu l?n (v-> d? x->y nh-> m->y) l->m FCF l?ch s? ->m ? CAGR m->o ? target price kh->ng d->ng tin.
-> **Ch? xem d? hi?u v->ng bi?n d?ng r?ng. ->?nh gi-> ch->nh l-> ->4.5 Blend 60/40.**
 
 Gi? d?nh: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, k? d? b->o = {assumptions.get("forecast_years", 5)} nam
 
@@ -1574,19 +1666,23 @@ Gi? d?nh: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, k? d? b->o = {assumptions.get
 
 {sens_table}
 
-### 4.3 M-> h->nh FCFF (tr?ng s? 60%)
+### 4.3 Core EPS × Core P/E + Net Cash (Phương pháp chính — §11)
+
+{core_pe_section}
+
+### 4.4 Mô hình FCFF (Cross-check độc lập)
 
 {fcff_section}
 
-### 4.4 M-> h->nh FCFE (tr?ng s? 40%)
+### 4.5 Mô hình FCFE (tham khảo)
 
 {fcfe_section}
 
-### 4.5 Blend DCF -> Gi-> m?c ti->u k?t h?p 60% FCFF + 40% FCFE
+### 4.6 Blend DCF — Giá mục tiêu kết hợp 60% FCFF + 40% P/E Forward
 
 {blend_section}
 
-### 4.6 B?i s? th? tru?ng (Cross-check)
+### 4.7 Bội số thị trường (Cross-check)
 
 | Phuong ph->p | Gi-> tr? | Gi-> th? tru?ng | Ghi ch-> |
 |---|---|---|---|
@@ -1692,39 +1788,14 @@ Gi? d?nh: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, k? d? b->o = {assumptions.get
         or source_tier_gate.get("export_decision") == "BLOCKED"
         or source_tier_gate.get("blocking_count", 0) > 0
     )
-    if quality_blocked:
-        report_md = _build_quality_blocked_report(
-            ticker=ticker,
-            info=info,
-            generated_at=generated_at,
-            fact_table=fact_table,
-            fy_periods=fy_periods,
-            latest_fy_str=latest_fy_str,
-            current_price=current_price,
-            shares_mn=shares_mn,
-            source_tier_gate=source_tier_gate,
-            assumption_gate=assumption_gate,
-            forecast_artifact=forecast_artifact,
-            fcff_artifact=fcff_artifact,
-            fcfe_artifact=fcfe_artifact,
-            blend_artifact=blend_artifact,
-            text_corruption_detected=text_corruption_detected,
-        )
+    # Quality gates still govern publication state and internal audit artifacts,
+    # but they do not replace the analytical report with a gate-status report.
 
     export_blocked = quality_blocked or (
         (mode == "final") and (source_tier_gate["export_decision"] == "BLOCKED")
     )
-    if mode == "final":
-        n_block = source_tier_gate.get("blocking_count", len(source_tier_gate["blocking_reasons"]))
-        if export_blocked:
-            banner = (
-                "> **BÁO CÁO KHÔNG ĐỦ ĐIỀU KIỆN XUẤT BẢN FINAL**\n"
-                f"> {n_block} quantitative claim bị chặn bởi source-tier gate, "
-                "thiếu fact cổ phiếu explicit, assumptions chưa approved hoặc template bị lỗi chữ.\n"
-            )
-        else:
-            banner = "> **Source-tier gate: PASS** - mọi quantitative claim có nguồn chính thức.\n"
-        report_md = banner + "\n" + report_md
+    # Publication state is recorded in artifacts only. Do not leak gate/debug
+    # banners into the financial report body.
 
     # -- Save report ------------------------------------------------------------
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
