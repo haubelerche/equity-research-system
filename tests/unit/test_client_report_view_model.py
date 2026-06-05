@@ -5,6 +5,40 @@ import json
 
 import pytest
 
+from backend.reporting.client_report_view_model import _derive_dividend_per_share
+
+
+class TestDeriveDividendPerShare:
+    """Item 37: _derive_dividend_per_share must not crash on dict/null/scalar inputs."""
+
+    def test_scalar_value_returned(self):
+        facts = {"dividends_per_share.cash": {"2025FY": 2000.0}}
+        assert _derive_dividend_per_share(facts, ["2025FY"]) == 2000.0
+
+    def test_dict_factentry_value_extracted(self):
+        facts = {"dividends_per_share.cash": {"2025FY": {"value": 2000.0, "unit": "VND"}}}
+        assert _derive_dividend_per_share(facts, ["2025FY"]) == 2000.0
+
+    def test_none_value_returns_none(self):
+        facts = {"dividends_per_share.cash": {"2025FY": None}}
+        assert _derive_dividend_per_share(facts, ["2025FY"]) is None
+
+    def test_missing_key_returns_none(self):
+        facts: dict = {}
+        assert _derive_dividend_per_share(facts, ["2025FY"]) is None
+
+    def test_zero_value_skipped(self):
+        facts = {"dividends_per_share.cash": {"2024FY": 0.0, "2025FY": 1500.0}}
+        assert _derive_dividend_per_share(facts, ["2024FY", "2025FY"]) == 1500.0
+
+    def test_dict_with_none_value_returns_none(self):
+        facts = {"dividends_per_share.cash": {"2025FY": {"value": None}}}
+        assert _derive_dividend_per_share(facts, ["2025FY"]) is None
+
+    def test_latest_period_preferred(self):
+        facts = {"dividends_per_share.cash": {"2023FY": 1000.0, "2025FY": 2000.0}}
+        assert _derive_dividend_per_share(facts, ["2023FY", "2024FY", "2025FY"]) == 2000.0
+
 
 def test_to_fact_period_normalizes_a_suffix():
     """Period key helper must convert 'A'-suffix display labels to 'FY' canonical keys."""
@@ -219,6 +253,11 @@ def test_sensitivity_matrix_from_artifact():
     assert table.periods == ["g=2.0%", "g=3.0%"]
     row_map = {r[0]: r[1] for r in table.rows}
     assert row_map["WACC 12.0%"] == [39679.0, 42641.0]
+    assert table.format_type == "currency"
+    from backend.reporting.client_section_builder import _render_table
+    html = _render_table(table)
+    assert "39,679" in html
+    assert "3,967,900.0%" not in html
     # No "—" / None cells in a populated matrix
     assert all(v is not None for _, vals in table.rows for v in vals)
 
@@ -226,3 +265,128 @@ def test_sensitivity_matrix_from_artifact():
     null_sens = {"fcff_wacc_g": {"wacc_range": [0.1], "g_range": [0.03], "matrix": {"0.100": {"0.03": None}}}}
     assert _table_sensitivity_matrix(null_sens) is None
     assert _table_sensitivity_matrix({}) is None
+
+
+def test_unpublishable_valuation_blocks_draft_rating_target_and_upside(tmp_path, monkeypatch):
+    """Analyst draft must not display BUY/HOLD/SELL or target/upside from draft valuation."""
+    from backend.reporting.artifact_manifest import ArtifactManifest, write_manifest
+    from backend.reporting.client_report_view_model import build_client_report_view_model
+
+    ticker = "DBD"
+    artifacts = tmp_path / "artifacts"
+    facts_dir = artifacts / "facts"
+    val_dir = artifacts / "valuation"
+    result_dir = artifacts / "valuation_results"
+    facts_dir.mkdir(parents=True)
+    val_dir.mkdir(parents=True)
+    result_dir.mkdir(parents=True)
+
+    facts_path = facts_dir / f"{ticker}_facts.json"
+    facts_path.write_text(
+        json.dumps({"facts": {"revenue.net": {"2025FY": 1000.0}, "eps.basic": {"2025FY": 1000.0}}}),
+        encoding="utf-8",
+    )
+    valuation_path = val_dir / f"{ticker}_valuation.json"
+    valuation_path.write_text(
+        json.dumps({
+            "forecast": {"forecast_years": [{"label": "2026F", "revenue": 1100.0}]},
+            "fcff": {"wacc": 0.138, "terminal_growth": 0.03, "fcff_table": [{"label": "2026F", "fcff": 100.0}]},
+            "blend_dcf": {
+                "current_price_vnd": 50200.0,
+                "target_price_dcf_vnd": 30409.0,
+                "upside_pct": -0.3942,
+                "valuation_gap_pct": 0.599,
+                "is_draft_only": True,
+            },
+        }),
+        encoding="utf-8",
+    )
+    result_path = result_dir / f"run_{ticker}_valuation_result.json"
+    result_path.write_text(
+        json.dumps({
+            "ticker": ticker,
+            "current_price": 50200.0,
+            "target_price": 30409.0,
+            "upside_downside": -0.3942,
+            "rating_model_output": "BÁN",
+            "is_publishable": False,
+        }),
+        encoding="utf-8",
+    )
+    manifest = ArtifactManifest(
+        run_id="run_gate_test",
+        ticker=ticker,
+        created_at="2026-06-03T00:00:00",
+        schema_version=1,
+        artifacts={
+            "facts": {"path": str(facts_path), "producer": "TEST"},
+            "valuation": {"path": str(valuation_path), "producer": "TEST"},
+            "valuation_result": {"path": str(result_path), "producer": "TEST"},
+        },
+    )
+    write_manifest(manifest, base_dir=artifacts)
+    monkeypatch.setattr("backend.reporting.client_report_view_model.ROOT", tmp_path)
+
+    vm = build_client_report_view_model(ticker, "analyst_draft", run_id="run_gate_test")
+
+    assert vm.recommendation not in {"MUA", "BÁN", "GIỮ", "BUY", "SELL", "HOLD"}
+    assert vm.target_price is None
+    assert vm.upside_downside is None
+    assert "valuation_result_not_publishable" in vm.display_blocking_reasons
+    assert "blend_is_draft_only" in vm.display_blocking_reasons
+    assert "valuation_gap_gt_25pct" in vm.display_blocking_reasons
+
+
+def test_non_valuation_narrative_sanitizer_removes_valuation_sentences():
+    from backend.reporting.client_report_view_model import _sanitize_non_valuation_narrative
+
+    text = (
+        "Doanh nghiệp vận hành mô hình kinh doanh dược phẩm ổn định. "
+        "Về định giá, WACC và target price làm thay đổi giá mục tiêu."
+    )
+
+    cleaned = _sanitize_non_valuation_narrative(text)
+
+    assert "mô hình kinh doanh" in cleaned
+    assert "target price" not in cleaned.lower()
+    assert "wacc" not in cleaned.lower()
+    assert "định giá" not in cleaned.lower()
+
+
+def test_total_return_adds_dividend_yield():
+    from backend.reporting.client_report_view_model import _total_return, Percent
+    assert abs(_total_return(-0.394, Percent(0.0398)).value - (-0.3542)) < 1e-9
+    assert _total_return(0.12, None).value == 0.12
+    assert _total_return(None, Percent(0.04)) is None
+
+
+class TestReportDisplayGovernance:
+    """Regression guard: analyst_draft must not blank target_price when is_publishable=False."""
+
+    _val_result_blocked = {"is_publishable": False, "current_price": 50200, "target_price": 27444}
+    _blend_draft = {
+        "is_draft_only": True,
+        "current_price_vnd": 50200.0,
+        "target_price_dcf_vnd": 27444.0,
+        "upside_pct": -0.453,
+        "valuation_gap_pct": 0.45,
+    }
+
+    def test_analyst_draft_shows_target_price_when_not_publishable(self):
+        from backend.reporting.client_report_view_model import _report_display_governance
+        result = _report_display_governance("analyst_draft", self._val_result_blocked, self._blend_draft)
+        assert result["target_price"] == 27444.0, (
+            "analyst_draft must show computed target price even when is_publishable=False"
+        )
+        assert result["approved_for_display"] is True
+        assert result["recommendation"] == "BÁN"
+        assert result["blocking_reasons"] == []
+
+    def test_client_final_blocks_target_price_when_not_publishable(self):
+        from backend.reporting.client_report_view_model import _report_display_governance
+        result = _report_display_governance("client_final", self._val_result_blocked, self._blend_draft)
+        assert result["target_price"] is None, (
+            "client_final must block target_price when is_publishable=False"
+        )
+        assert result["approved_for_display"] is False
+        assert "valuation_result_not_publishable" in result["blocking_reasons"]
