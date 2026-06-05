@@ -669,8 +669,7 @@ def _report_display_governance(
     except (TypeError, ValueError):
         reasons.append("valuation_gap_invalid")
 
-    # analyst_draft: blocking reasons are informational only; always show computed numbers.
-    # client_final: enforce all gates (is_publishable + no blockers required).
+    # analyst_draft always shows computed values — analyst needs full picture to review
     if mode == "analyst_draft":
         approved_for_display = True
         blocking_reasons: list[str] = []
@@ -1286,7 +1285,7 @@ def _build_narratives(
         upside=upside,
         rating=rating,
         price_fcff=blend.get("price_fcff_vnd") if isinstance(blend, dict) else None,
-        price_fcfe=blend.get("price_fcfe_vnd") if isinstance(blend, dict) else None,
+        price_pe_forward=blend.get("price_pe_forward_vnd") if isinstance(blend, dict) else None,
         sens_low=min(cells) if cells else None,
         sens_high=max(cells) if cells else None,
         dividend_yield=dividend_yield.value if dividend_yield is not None else None,

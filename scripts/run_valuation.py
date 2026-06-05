@@ -443,26 +443,36 @@ def run_valuation(
     for w in fcfe_result.warnings:
         print(f"  WARN (FCFE): {w}")
 
-    # ── 60/40 Blend ───────────────────────────────────────────────────────────
-    print(f"\n[run_valuation] {ticker} — Blended DCF target price (60% FCFF + 40% FCFE)")
+    # ── P/E Forward price (anchor for blend) ─────────────────────────────────
+    _eps_fy1_early = forecast.forecast_years[0].eps if forecast.forecast_years else None
+    price_pe_forward: float | None = (
+        _eps_fy1_early * target_pe if (_eps_fy1_early and _eps_fy1_early > 0) else None
+    )
+    if price_pe_forward:
+        print(f"\n[run_valuation] {ticker} — P/E Forward anchor: EPS_FY1={_eps_fy1_early:,.0f} × P/E={target_pe:.1f}x = {price_pe_forward:,.0f} VND/share")
+    else:
+        print(f"\n[run_valuation] {ticker} — P/E Forward anchor unavailable (EPS_FY1 missing)")
+
+    # ── 60/40 Blend: FCFF + P/E Forward ──────────────────────────────────────
+    print(f"\n[run_valuation] {ticker} — Blended target price (60% FCFF + 40% P/E Forward)")
     blend = blend_dcf(
         ticker=ticker,
         price_fcff=fcff_result.target_price_vnd,
-        price_fcfe=fcfe_result.target_price_vnd,
+        price_pe_forward=price_pe_forward,
         current_price_vnd=current_price,
         pv_terminal_value_fcff=fcff_result.pv_terminal_value,
         enterprise_value_fcff=fcff_result.enterprise_value,
     )
     bd = blend.to_dict()
-    print(f"  Price_FCFF:       {bd['price_fcff_vnd']:,.0f} VND/share" if bd['price_fcff_vnd'] else "  Price_FCFF: N/A")
-    print(f"  Price_FCFE:       {bd['price_fcfe_vnd']:,.0f} VND/share" if bd['price_fcfe_vnd'] else "  Price_FCFE: N/A")
-    print(f"  Target Price DCF: {bd['target_price_dcf_vnd']:,.0f} VND/share" if bd['target_price_dcf_vnd'] else "  Target: N/A")
+    print(f"  Price_FCFF:           {bd['price_fcff_vnd']:,.0f} VND/share" if bd['price_fcff_vnd'] else "  Price_FCFF: N/A")
+    print(f"  Price_PE_Forward:     {bd['price_pe_forward_vnd']:,.0f} VND/share" if bd.get('price_pe_forward_vnd') else "  Price_PE_Forward: N/A")
+    print(f"  Target Price (blend): {bd['target_price_dcf_vnd']:,.0f} VND/share" if bd['target_price_dcf_vnd'] else "  Target: N/A")
     if bd['upside_pct'] is not None:
-        print(f"  Upside:           {bd['upside_pct']:.2%}")
+        print(f"  Upside:               {bd['upside_pct']:.2%}")
     if bd['margin_of_safety'] is not None:
-        print(f"  Margin of Safety: {bd['margin_of_safety']:.2%}")
+        print(f"  Margin of Safety:     {bd['margin_of_safety']:.2%}")
     if bd.get('valuation_gap_pct') is not None:
-        print(f"  FCFF/FCFE Gap:    {bd['valuation_gap_pct']:.2%}")
+        print(f"  FCFF/P/E Gap:         {bd['valuation_gap_pct']:.2%}")
     for w in blend.warnings:
         print(f"  WARN (blend): {w}")
 
@@ -522,29 +532,28 @@ def run_valuation(
     )
     _print_wacc_g_matrix(sens_fcfe["matrix"], sens_fcfe["g_range"], "Price_FCFE (VND/share)", row_label="Re")
 
-    # ── Blend sensitivity grid ────────────────────────────────────────────────
-    if fcff_result.target_price_vnd and fcfe_result.target_price_vnd:
+    # ── Blend sensitivity grid (FCFF rows × P/E Forward cols) ────────────────
+    blend_grid: dict = {}
+    if fcff_result.target_price_vnd and price_pe_forward:
         base_fcff = fcff_result.target_price_vnd
-        base_fcfe = fcfe_result.target_price_vnd
+        base_pe = price_pe_forward
         step_fcff = max(5000, round(base_fcff * 0.05 / 5000) * 5000)
-        step_fcfe = max(5000, round(base_fcfe * 0.05 / 5000) * 5000)
+        step_pe   = max(2000, round(base_pe * 0.05 / 2000) * 2000)
         p_fcff_range = [round(base_fcff + i * step_fcff) for i in range(-2, 3)]
-        p_fcfe_range = [round(base_fcfe + i * step_fcfe) for i in range(-2, 3)]
+        p_pe_range   = [round(base_pe + i * step_pe) for i in range(-2, 3)]
         blend_grid = build_blend_sensitivity_table(
             price_fcff_range=p_fcff_range,
-            price_fcfe_range=p_fcfe_range,
+            price_fcfe_range=p_pe_range,   # reuse FCFE param slot — second axis is P/E here
             current_price_vnd=current_price,
         )
-        print(f"\n[run_valuation] {ticker} — Blend sensitivity (Price_FCFF rows x Price_FCFE cols -> Target_DCF)")
+        blend_grid["label"] = "FCFF rows × P/E Forward cols → Target_DCF"
+        print(f"\n[run_valuation] {ticker} — Blend sensitivity (Price_FCFF × Price_PE_Forward -> Target_DCF)")
         _print_blend_grid(blend_grid)
     else:
-        blend_grid = {}
-        print(f"\n[run_valuation] {ticker} — Blend sensitivity skipped (FCFF or FCFE price unavailable)")
+        print(f"\n[run_valuation] {ticker} — Blend sensitivity skipped (FCFF or P/E forward unavailable)")
 
     # ── P/E sensitivity ───────────────────────────────────────────────────────
-    eps_fy1 = None
-    if forecast.forecast_years:
-        eps_fy1 = forecast.forecast_years[0].eps
+    eps_fy1 = _eps_fy1_early   # already computed above
     pe_sens: dict = {}
     if eps_fy1 and eps_fy1 > 0:
         eps_range = [round(eps_fy1 * f) for f in [0.85, 0.92, 1.00, 1.08, 1.15]]
@@ -730,12 +739,12 @@ def run_valuation(
             period=forecast_terminal_period,
             input_values={
                 "price_fcff_vnd": bd.get("price_fcff_vnd"),
-                "price_fcfe_vnd": bd.get("price_fcfe_vnd"),
+                "price_pe_forward_vnd": bd.get("price_pe_forward_vnd"),
                 "fcff_weight": bd.get("fcff_weight"),
-                "fcfe_weight": bd.get("fcfe_weight"),
+                "pe_weight": bd.get("pe_weight"),
             },
             calculation_steps=[
-                {"step": "target=fcff_weight*price_fcff+fcfe_weight*price_fcfe", "value": bd.get("target_price_dcf_vnd")},
+                {"step": "target=fcff_weight*price_fcff+pe_weight*price_pe_forward", "value": bd.get("target_price_dcf_vnd")},
             ],
             warnings=blend.warnings,
         ),
@@ -762,7 +771,7 @@ def run_valuation(
         "unit_policy": "VND per share; financial statement values follow canonical fact units",
         "currency": "VND",
         "period_scope": {"from_year": from_year, "to_year": to_year, "period_type": "FY"},
-        "valuation_methods": ["fcff", "fcfe", "blend_dcf", "multiples", "sensitivity"],
+        "valuation_methods": ["fcff", "blend_dcf_fcff_pe", "multiples", "sensitivity", "fcfe_informational"],
         "snapshot_id": snapshot_id,
         "snapshot_as_of": snap["as_of_date"],
         "fy_periods": fy_periods,

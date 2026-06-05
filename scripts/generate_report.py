@@ -882,22 +882,33 @@ def _build_blend_section(
     fcff_artifact: dict,
     fcfe_artifact: dict,
     current_price: float | None,
+    forecast_artifact: dict | None = None,
+    target_pe: float = 15.0,
 ) -> tuple[str, dict]:
-    """Build 60% FCFF + 40% FCFE blend section."""
+    """Build 60% FCFF + 40% P/E Forward blend section."""
     from backend.analytics.blend import blend_dcf
     from backend.analytics.sensitivity import (
         build_blend_sensitivity_table,
         compute_tv_weight,
-        compute_valuation_gap,
     )
 
     price_fcff = fcff_artifact.get("target_price_vnd")
-    price_fcfe = fcfe_artifact.get("target_price_vnd")
+
+    # Compute P/E Forward price from EPS_FY1 × target_pe
+    price_pe_forward: float | None = None
+    eps_fy1: float | None = None
+    if forecast_artifact:
+        fy_list = forecast_artifact.get("forecast_years", [])
+        if fy_list:
+            first_fy = fy_list[0]
+            eps_fy1 = first_fy.get("eps") if isinstance(first_fy, dict) else getattr(first_fy, "eps", None)
+        if eps_fy1 and eps_fy1 > 0:
+            price_pe_forward = eps_fy1 * target_pe
 
     blend = blend_dcf(
         ticker=ticker,
         price_fcff=price_fcff,
-        price_fcfe=price_fcfe,
+        price_pe_forward=price_pe_forward,
         current_price_vnd=current_price,
         pv_terminal_value_fcff=fcff_artifact.get("pv_terminal_value"),
         enterprise_value_fcff=fcff_artifact.get("enterprise_value"),
@@ -910,59 +921,61 @@ def _build_blend_section(
     gap_str    = f"{bd['valuation_gap_pct']:.1%}" if bd.get('valuation_gap_pct') is not None else "N/A"
     tvw_str    = f"{bd['tv_weight_fcff']:.1%}" if bd.get('tv_weight_fcff') is not None else "N/A"
 
-    gap_check = compute_valuation_gap(price_fcff, price_fcfe)
     tv_check  = compute_tv_weight(fcff_artifact.get("pv_terminal_value"), fcff_artifact.get("enterprise_value"))
 
-    warn_lines = "\n".join(f"> ? {w}" for w in blend.warnings) if blend.warnings else ""
+    warn_lines = "\n".join(f"> ⚠ {w}" for w in blend.warnings) if blend.warnings else ""
 
-    # Blend sensitivity grid (->2 steps around base)
-    blend_grid_md = "_Kh->ng c-> d? li?u (FCFF ho?c FCFE unavailable)_"
-    if price_fcff and price_fcfe:
+    # Blend sensitivity grid (±2 steps around base)
+    blend_grid_md = "_Không có dữ liệu (FCFF hoặc P/E Forward unavailable)_"
+    if price_fcff and price_pe_forward:
         step_f = max(5_000, round(price_fcff * 0.05 / 5_000) * 5_000)
-        step_e = max(5_000, round(price_fcfe * 0.05 / 5_000) * 5_000)
+        step_pe = max(5_000, round(price_pe_forward * 0.05 / 5_000) * 5_000)
         p_fcff_range = [round(price_fcff + i * step_f) for i in range(-2, 3)]
-        p_fcfe_range = [round(price_fcfe + i * step_e) for i in range(-2, 3)]
-        grid = build_blend_sensitivity_table(p_fcff_range, p_fcfe_range, current_price)
-        grid_rows = ["| FCFF \\ FCFE | " + " | ".join(f"{p:,.0f}" for p in p_fcfe_range) + " |",
-                     "|---" + "|---" * len(p_fcfe_range) + "|"]
+        p_pe_range = [round(price_pe_forward + i * step_pe) for i in range(-2, 3)]
+        grid = build_blend_sensitivity_table(p_fcff_range, p_pe_range, current_price)
+        grid_rows = ["| FCFF \\ P/E Fwd | " + " | ".join(f"{p:,.0f}" for p in p_pe_range) + " |",
+                     "|---" + "|---" * len(p_pe_range) + "|"]
         for pf in p_fcff_range:
             rk = str(int(round(pf)))
             vals = [
                 f"{grid['matrix'].get(rk, {}).get(str(int(round(pe))), 'N/A'):,.0f}"
                 if isinstance(grid['matrix'].get(rk, {}).get(str(int(round(pe)))), (int, float))
-                else "->"
-                for pe in p_fcfe_range
+                else "→"
+                for pe in p_pe_range
             ]
             grid_rows.append(f"| {pf:,.0f} | " + " | ".join(vals) + " |")
         blend_grid_md = "\n".join(grid_rows)
         if grid.get("upside_range"):
             ur = grid["upside_range"]
-            blend_grid_md += f"\n\n_V->ng upside: [{ur['min_upside']:.1%}, {ur['max_upside']:.1%}] so v?i gi-> th? tru?ng {current_price:,.0f} VND/CP_"
+            blend_grid_md += f"\n\n_Vùng upside: [{ur['min_upside']:.1%}, {ur['max_upside']:.1%}] so với giá thị trường {current_price:,.0f} VND/CP_"
 
-    section = f"""**C->ng th?c:** Target Price_DCF = 0.60 -> Price_FCFF + 0.40 -> Price_FCFE
+    eps_str = f"{eps_fy1:,.0f} VND/CP" if eps_fy1 else "N/A"
+    pe_price_str = f"{price_pe_forward:,.0f}" if price_pe_forward else "N/A"
+    section = f"""**Công thức:** Target Price_DCF = 0.60 × Price_FCFF + 0.40 × Price_PE_Forward
+(P/E Forward = EPS_FY1 × {target_pe:.0f}× = {eps_str} × {target_pe:.0f} = {pe_price_str})
 
-| Phuong ph->p | Gi-> m?c ti->u (VND/CP) | Tr?ng s? | ->->ng g->p (VND/CP) |
+| Phương pháp | Giá mục tiêu (VND/CP) | Trọng số | Đóng góp (VND/CP) |
 |---|---|---|---|
 | FCFF DCF | {f"{price_fcff:,.0f}" if price_fcff else "N/A"} | 60% | {f"{0.60*price_fcff:,.0f}" if price_fcff else "N/A"} |
-| FCFE DCF | {f"{price_fcfe:,.0f}" if price_fcfe else "N/A"} | 40% | {f"{0.40*price_fcfe:,.0f}" if price_fcfe else "N/A"} |
+| P/E Forward ({target_pe:.0f}×) | {pe_price_str} | 40% | {f"{0.40*price_pe_forward:,.0f}" if price_pe_forward else "N/A"} |
 | **Target Price DCF** | **{target_str}** | 100% | **{target_str}** |
 
-| Ch? ti->u | Gi-> tr? |
+| Chỉ tiêu | Giá trị |
 |---|---|
-| Gi-> th? tru?ng hi?n t?i | {f"{current_price:,.0f} VND/CP" if current_price else "N/A"} |
+| Giá thị trường hiện tại | {f"{current_price:,.0f} VND/CP" if current_price else "N/A"} |
 | Target Price (60/40 blend) | {target_str} |
 | Upside / Downside | {upside_str} |
 | Margin of Safety | {mos_str} |
-| FCFF vs FCFE Gap | {gap_str} [{gap_check.get("status", "unknown")}] |
+| FCFF vs P/E Forward Gap | {gap_str} |
 | TV Weight (FCFF/EV) | {tvw_str} [{tv_check.get("status", "unknown")}] |
 
-### B?ng sensitivity Blend (Price_FCFF -> Price_FCFE ? Target Price_DCF, VND/CP)
+### Bảng sensitivity Blend (Price_FCFF × Price_PE_Forward → Target_DCF, VND/CP)
 
 {blend_grid_md}
 
 {warn_lines}
-> **Luu ->:** Tr?ng s? 60% FCFF / 40% FCFE l-> quy u?c chu?n cho c? phi?u du?c v?i n? vay v?a ph?i v-> d->ng ti?n ?n d?nh.
-> N?u gap FCFF/FCFE > 25%, ph?i ki?m tra Net Borrowing, CAPEX v-> NWC tru?c khi d->ng target price.
+> **Lưu ý:** Trọng số 60% FCFF / 40% P/E Forward phù hợp với cổ phiếu dược có nợ vay vừa phải.
+> Nếu gap FCFF/P/E Forward > 40%, kiểm tra lại giả định tăng trưởng EPS và WACC trước khi dùng target price.
 """
     return section, bd
 
@@ -1104,11 +1117,14 @@ def generate_report(
     dcf: dict = val.get("dcf_simplified") or val.get("dcf", {})
     multiples: dict = val.get("multiples", {})
     _sensitivity_raw: dict = val.get("sensitivity", {})
-    # Handle both old flat format and new nested format from run_valuation.py
-    sensitivity: dict = (
-        _sensitivity_raw.get("simplified_dcf", _sensitivity_raw)
-        if isinstance(_sensitivity_raw.get("simplified_dcf"), dict)
-        else _sensitivity_raw
+    # Preserve the structured valuation sensitivity artifact for valuation_result.json.
+    # Legacy markdown sections may still consume the simplified DCF block through
+    # sensitivity_display, but client rendering must see fcff_wacc_g/fcfe_re_g.
+    sensitivity: dict = _sensitivity_raw if isinstance(_sensitivity_raw, dict) else {}
+    sensitivity_display: dict = (
+        sensitivity.get("fcff_wacc_g")
+        or sensitivity.get("simplified_dcf")
+        or sensitivity
     )
     assumptions: dict = val.get("assumptions", {})
     fy_periods: list[str] = val.get("fy_periods", [])
@@ -1344,10 +1360,12 @@ def generate_report(
         json.dumps(fcfe_artifact, indent=2, default=str), encoding="utf-8"
     )
 
-    # -- Blend section: 60% FCFF + 40% FCFE -----------------------------------
-    print(f"[generate_report] {ticker} -> building blended DCF (60% FCFF + 40% FCFE)")
+    # -- Blend section: 60% FCFF + 40% P/E Forward ----------------------------
+    print(f"[generate_report] {ticker} -> building blended DCF (60% FCFF + 40% P/E Forward)")
     blend_section, blend_artifact = _build_blend_section(
-        ticker, fcff_artifact, fcfe_artifact, current_price
+        ticker, fcff_artifact, fcfe_artifact, current_price,
+        forecast_artifact=forecast_artifact,
+        target_pe=15.0,
     )
     blend_path = FORECAST_DIR / f"{ticker}_{ts_str}_blend.json"
     blend_path.write_text(
@@ -1386,8 +1404,8 @@ def generate_report(
     )
 
     # -- Sensitivity table -----------------------------------------------------
-    g_range = sensitivity.get("g_range", [])
-    matrix  = sensitivity.get("matrix", {})
+    g_range = sensitivity_display.get("g_range", [])
+    matrix  = sensitivity_display.get("matrix", {})
     wacc_keys = sorted(matrix.keys())
     sens_lines = []
     if g_range and wacc_keys:
@@ -1773,8 +1791,130 @@ Gi? d?nh: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, k? d? b->o = {assumptions.get
 
     if isinstance(citation_artifact, dict):
         citation_artifact["valuation_result_path"] = str(valuation_result_path)
+        citation_artifact["citation_path"] = str(citation_path)
+
+    # Phase 7: ReportArtifact + ExportGateResult + LayoutRenderAudit
+    _write_phase7_artifacts(
+        ticker=ticker,
+        ts_str=ts_str,
+        report_md=report_md,
+        mode=mode,
+        export_blocked=export_blocked,
+        blend_artifact=blend_artifact,
+        fcff_artifact=fcff_artifact,
+        sensitivity=sensitivity,
+        forecast_artifact=forecast_artifact,
+        approval_status=None,  # human approval wired via approve_report.py
+    )
 
     return citation_artifact
+
+
+def _write_phase7_artifacts(
+    *,
+    ticker: str,
+    ts_str: str,
+    report_md: str,
+    mode: str,
+    export_blocked: bool,
+    blend_artifact: dict | None,
+    fcff_artifact: dict | None,
+    sensitivity: dict | None,
+    forecast_artifact: dict | None,
+    approval_status: str | None,
+) -> None:
+    """Build and save ReportArtifact + ExportGateResult + LayoutRenderAudit.
+
+    Outputs (in artifacts/reports/):
+      {ts}_{ticker}_report_artifact.json
+      {ts}_{ticker}_layout_audit.json
+      {ts}_{ticker}_export_gate.json
+    """
+    try:
+        from backend.reporting.report_artifact import ReportArtifact, make_section
+        from backend.reporting.layout_audit import run_layout_audit
+        from backend.reporting.export_gate import evaluate_export_gate
+
+        out_dir = ROOT / "artifacts" / "reports"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        # Build a lightweight ReportArtifact from the report Markdown
+        import re as _re
+        report_id = f"{ts_str}_{ticker}"
+        render_mode_init = "analyst_draft" if export_blocked else "client_final"
+
+        # Split markdown into rough sections by heading
+        section_chunks = _re.split(r"\n(?=#{1,2} )", report_md)
+        sections = []
+        for chunk in section_chunks:
+            heading_m = _re.match(r"#{1,2}\s+(.+)", chunk)
+            title = heading_m.group(1).strip() if heading_m else "intro"
+            sid = _re.sub(r"\W+", "_", title.lower())[:30]
+            sections.append(make_section(
+                section_id=sid,
+                section_title=title,
+                html_content=chunk,
+            ))
+
+        valuation_result_path = (
+            ROOT / "artifacts" / "valuation_results"
+            / f"{ts_str}_{ticker}_valuation_result.json"
+        )
+        artifact = ReportArtifact(
+            report_id=report_id,
+            ticker=ticker,
+            run_id=ts_str,
+            report_date=ts_str[:8],
+            render_mode=render_mode_init,
+            sections=sections,
+            valuation_artifact_path=str(valuation_result_path),
+        )
+
+        # Layout audit on the markdown text (HTML checks skipped — no HTML here)
+        layout_audit = run_layout_audit(artifact, html_full=None)
+
+        # Compose valuation artifact in the format export_gate expects:
+        #   valuation_artifact["fcff"]             → FCFF result (shares_mn, wacc, net_debt_bridge…)
+        #   valuation_artifact["blend_dcf"]        → blend result (is_draft_only, gap_pct…)
+        #   valuation_artifact["fcff_sensitivity"] → WACC×g matrix
+        valuation_artifact_combined: dict | None = None
+        if fcff_artifact is not None or blend_artifact is not None:
+            valuation_artifact_combined = {
+                "fcff": fcff_artifact or {},
+                "blend_dcf": blend_artifact or {},
+                "fcff_sensitivity": (sensitivity or {}).get("fcff_wacc_g", {}),
+            }
+
+        # Export gate
+        forecast_dict = forecast_artifact if isinstance(forecast_artifact, dict) else (
+            json.loads(forecast_artifact.to_json()) if hasattr(forecast_artifact, "to_json") else None
+        )
+        export_gate_result = evaluate_export_gate(
+            artifact=artifact,
+            valuation_artifact=valuation_artifact_combined,
+            forecast_artifact=forecast_dict,
+            layout_audit=layout_audit,
+            approval_status=approval_status,
+        )
+
+        # Save artifacts
+        (out_dir / f"{ts_str}_{ticker}_report_artifact.json").write_text(
+            artifact.to_json(), encoding="utf-8"
+        )
+        (out_dir / f"{ts_str}_{ticker}_layout_audit.json").write_text(
+            json.dumps(layout_audit.to_dict(), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        (out_dir / f"{ts_str}_{ticker}_export_gate.json").write_text(
+            export_gate_result.to_json(), encoding="utf-8"
+        )
+        print(
+            f"[generate_report] Phase 7 artifacts saved: "
+            f"report_artifact / layout_audit / export_gate "
+            f"(render_mode={artifact.render_mode}, exportable={artifact.is_final_exportable})"
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"[generate_report] Phase 7 artifact write failed (non-blocking): {exc}")
 
 
 def _write_valuation_result(

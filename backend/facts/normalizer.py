@@ -321,13 +321,25 @@ def compute_derived(table: FactTable) -> FactTable:
         if gm is not None:
             derived.setdefault("gross_margin", {})[period] = _derived_entry(round(gm, 6))
 
+        selling = get("selling_expense.total")
+        admin = get("admin_expense.total")
+        if selling is not None and admin is not None:
+            sga = selling + admin
+            derived.setdefault("sga.total", {})[period] = _derived_entry(round(sga, 4))
+        else:
+            sga = get("sga.total")
+
+        ebit = get("ebit.total")
+        if ebit is None and gp is not None and sga is not None:
+            ebit = gp + sga
+            derived.setdefault("ebit.total", {})[period] = _derived_entry(round(ebit, 4))
+
         # ebitda.total — derive if not directly ingested
         ebitda = get("ebitda.total")
         if ebitda is None:
             dep = get("depreciation.total")
-            sga = get("sga.total")
-            if gp is not None and sga is not None and dep is not None:
-                ebitda = gp + sga + dep
+            if ebit is not None and dep is not None:
+                ebitda = ebit + dep
                 derived.setdefault("ebitda.total", {})[period] = _derived_entry(round(ebitda, 4))
 
         # ebitda_margin = ebitda / revenue
@@ -341,8 +353,19 @@ def compute_derived(table: FactTable) -> FactTable:
         if nm is not None:
             derived.setdefault("net_margin", {})[period] = _derived_entry(round(nm, 6))
 
+        # total_debt = short_term_debt + long_term_debt (when not directly available)
+        if get("total_debt.ending") is None:
+            std = get("short_term_debt.ending")
+            ltd = get("long_term_debt.ending")
+            if std is not None or ltd is not None:
+                total_debt_derived = (std or 0.0) + (ltd or 0.0)
+                derived.setdefault("total_debt.ending", {})[period] = _derived_entry(
+                    round(total_debt_derived, 4)
+                )
+
         # debt_to_equity = total_debt / equity
-        debt = get("total_debt.ending")
+        _td_entry = derived.get("total_debt.ending", {}).get(period)
+        debt = get("total_debt.ending") or (_td_entry.value if _td_entry is not None else None)
         eq = get("equity.parent")
         de = _safe_div(debt, eq)
         if de is not None:
@@ -351,7 +374,8 @@ def compute_derived(table: FactTable) -> FactTable:
     # Merge into a new table (do not mutate input)
     merged: FactTable = {k: dict(v) for k, v in table.items()}
     for k, v in derived.items():
-        merged[k] = v
+        merged.setdefault(k, {})
+        merged[k].update(v)
     return merged
 
 

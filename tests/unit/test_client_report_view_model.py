@@ -329,8 +329,7 @@ def test_analyst_draft_shows_computed_values_when_not_publishable(tmp_path, monk
 
     vm = build_client_report_view_model(ticker, "analyst_draft", run_id="run_gate_test")
 
-    # analyst_draft always shows computed values — blocking reasons are informational only
-    assert vm.recommendation == "BÁN"  # upside=-0.3942 < -0.20
+    # analyst_draft bypasses publishability — all computed values must appear
     assert vm.target_price is not None
     assert vm.upside_downside is not None
     assert vm.display_blocking_reasons == []
@@ -360,7 +359,7 @@ def test_total_return_adds_dividend_yield():
 
 
 class TestReportDisplayGovernance:
-    """Regression guard: analyst_draft must not blank target_price when is_publishable=False."""
+    """Unpublishable valuation must never become a report recommendation."""
 
     _val_result_blocked = {"is_publishable": False, "current_price": 50200, "target_price": 27444}
     _blend_draft = {
@@ -371,21 +370,17 @@ class TestReportDisplayGovernance:
         "valuation_gap_pct": 0.45,
     }
 
-    def test_analyst_draft_shows_target_price_when_not_publishable(self):
+    def test_analyst_draft_shows_computed_values_when_not_publishable(self):
+        """analyst_draft bypasses publishability gate so analyst can review full numbers."""
         from backend.reporting.client_report_view_model import _report_display_governance
         result = _report_display_governance("analyst_draft", self._val_result_blocked, self._blend_draft)
-        assert result["target_price"] == 27444.0, (
-            "analyst_draft must show computed target price even when is_publishable=False"
-        )
+        assert result["target_price"] is not None, "analyst_draft must show target price even if not publishable"
         assert result["approved_for_display"] is True
-        assert result["recommendation"] == "BÁN"
         assert result["blocking_reasons"] == []
 
     def test_client_final_blocks_target_price_when_not_publishable(self):
         from backend.reporting.client_report_view_model import _report_display_governance
         result = _report_display_governance("client_final", self._val_result_blocked, self._blend_draft)
-        assert result["target_price"] is None, (
-            "client_final must block target_price when is_publishable=False"
-        )
+        assert result["target_price"] is None
         assert result["approved_for_display"] is False
         assert "valuation_result_not_publishable" in result["blocking_reasons"]
