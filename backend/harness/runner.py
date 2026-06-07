@@ -13,7 +13,7 @@ from backend.harness.gates import (
     citation_gate,
     data_quality_gate,
     evidence_packet_gate,
-    export_gate,
+    workflow_export_gate,
     financial_analyst_gate,
     formula_trace_gate,
     tool_permission_gate,
@@ -177,6 +177,9 @@ class ResearchGraphRunner:
             self.store.lock_artifacts(run_id, ["valuation_draft"])
             self.run_until_pause(state, start_stage="VALUATION_LOCKED")
         elif db_stage == "final_report":
+            if "report" not in state.artifacts:
+                state.artifacts["report"] = {}
+            state.artifacts["report"]["approval_status"] = "approved"
             self.run_until_pause(state, start_stage="PUBLISHED")
 
     def _node_map(self):
@@ -369,7 +372,7 @@ class ResearchGraphRunner:
             self._record_gate(state, formula_trace_gate(state.valuation_outputs or state.artifacts.get("valuation", {})))
             self._record_gate(state, evidence_packet_gate(state.model_dump(mode="json")))
             self._record_gate(state, agent_handoff_gate(state.model_dump(mode="json")))
-            gate = export_gate(state.model_dump(mode="json"), final_approval_required=False)
+            gate = workflow_export_gate(state.model_dump(mode="json"), final_approval_required=False)
             self._record_gate(state, gate)
         elif stage == "WAITING_FINAL_APPROVAL":
             state.status = "needs_human_review"
@@ -384,7 +387,7 @@ class ResearchGraphRunner:
             self._record_gate(state, evidence_packet_gate(state.model_dump(mode="json")))
             self._record_gate(state, agent_handoff_gate(state.model_dump(mode="json")))
             self._record_gate(state, approval_path_gate(state.model_dump(mode="json"), final_approval_required=True))
-            gate = export_gate(state.model_dump(mode="json"), final_approval_required=True)
+            gate = workflow_export_gate(state.model_dump(mode="json"), final_approval_required=True)
             self._record_gate(state, gate)
             if not gate["passed"]:
                 state.status = "needs_human_review"
@@ -429,6 +432,7 @@ class ResearchGraphRunner:
             self.store.update_run_state(state.run_id, "needs_human_review", state.current_stage)
         self._record_agent_trace(state, result)
         self._write_agent_handoff(state, result)
+        self._write_agent_payload_artifact(state, result)
 
     def _run_tool(self, state: ResearchGraphState, agent_id: str, tool_id: str, *args, **kwargs):
         spec = self.tool_registry.get_tool(tool_id)
@@ -585,6 +589,43 @@ class ResearchGraphRunner:
         }
         state.artifact_refs.append(ref)
         state.artifacts.setdefault("agent_handoffs", []).append(handoff.model_dump(mode="json"))
+
+    def _write_agent_payload_artifact(self, state: ResearchGraphState, result) -> None:
+        """Persist report-relevant agent payloads so manifests can resolve them."""
+        section_by_agent = {
+            "financial_analyst": "financial_analysis",
+            "report_writer_critic": "report_critic_review",
+        }
+        section_key = section_by_agent.get(result.agent_id)
+        if not section_key or not isinstance(result.payload, dict):
+            return
+
+        import json
+
+        output_dir = ROOT / "artifacts" / "agent_outputs"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        path = output_dir / f"{state.run_id}_{section_key}.json"
+        payload = {
+            "run_id": state.run_id,
+            "ticker": state.ticker,
+            "agent_id": result.agent_id,
+            "payload": result.payload,
+        }
+        path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+        state.artifact_refs = [
+            ref for ref in state.artifact_refs
+            if not (isinstance(ref, dict) and ref.get("section_key") == section_key)
+        ]
+        state.artifact_refs.append({
+            "artifact_id": f"{state.run_id}_{section_key}",
+            "artifact_type": "agent_output_json",
+            "section_key": section_key,
+            "version": 1,
+            "storage_path": str(path),
+            "checksum": stable_hash(payload),
+            "is_locked": False,
+            "producer": result.agent_id,
+        })
 
     def _record_tool_trace(
         self,

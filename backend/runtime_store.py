@@ -453,16 +453,18 @@ class RuntimeStore:
         decision: str,
         reviewer: str,
         feedback_patch: dict[str, Any],
+        approved_at: datetime | None = None,
     ) -> None:
+        ts = approved_at or datetime.now(UTC)
         with self.conn() as connection:
             with connection.cursor() as cur:
                 cur.execute(
                     """
                     INSERT INTO research.run_approvals
-                    (run_id, approval_stage, decision, reviewer, feedback_patch_json)
-                    VALUES (%s, %s, %s, %s, %s)
+                    (run_id, approval_stage, decision, reviewer, feedback_patch_json, approved_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
                     """,
-                    (run_id, stage, decision, reviewer, Json(feedback_patch)),
+                    (run_id, stage, decision, reviewer, Json(feedback_patch), ts),
                 )
 
     def add_budget_entry(

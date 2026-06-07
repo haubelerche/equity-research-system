@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from backend.harness.gates import export_gate
+from backend.harness.gates import workflow_export_gate
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -37,7 +37,7 @@ def test_harness_state_files_exist_and_are_machine_readable() -> None:
 
 
 def test_gate_output_has_issue_contract_and_blocks_false_pass_inputs() -> None:
-    result = export_gate(
+    result = workflow_export_gate(
         {
             "gate_results": {},
             "approvals": {"final_report": "approved"},

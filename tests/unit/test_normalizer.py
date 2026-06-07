@@ -87,7 +87,8 @@ class TestBuildFactTable:
     def test_entry_value_matches_fact(self):
         facts = [_make_fact("DHG", "revenue.net", 2023, "FY", 5000.0)]
         table = build_fact_table(facts)
-        assert table["revenue.net"]["2023FY"].value == pytest.approx(5000.0)
+        # unit=vnd_bn → normalized to absolute VND (5000 × 1e9)
+        assert table["revenue.net"]["2023FY"].value == pytest.approx(5_000_000_000_000.0)
 
     def test_entry_carries_source_tier(self):
         facts = [_make_fact("DHG", "revenue.net", 2023, "FY", 5000.0, source_tier=3)]
@@ -116,8 +117,8 @@ class TestBuildFactTable:
         ]
         table = build_fact_table(facts)
         assert len(table["revenue.net"]) == 3
-        assert table["revenue.net"]["2022FY"].value == pytest.approx(4000.0)
-        assert table["revenue.net"]["2024FY"].value == pytest.approx(4800.0)
+        assert table["revenue.net"]["2022FY"].value == pytest.approx(4_000_000_000_000.0)
+        assert table["revenue.net"]["2024FY"].value == pytest.approx(4_800_000_000_000.0)
 
     def test_empty_input(self):
         assert build_fact_table([]) == {}
@@ -131,7 +132,13 @@ class TestBuildFactTable:
         table = build_fact_table(facts)
         entry = table["revenue.net"]["2023FY"]
         assert entry.source_id == "audit_src", "Tier 0 source should win over Tier 3"
-        assert entry.value == pytest.approx(5050.0)
+        assert entry.value == pytest.approx(5_050_000_000_000.0)
+
+    def test_missing_unit_rejects_monetary_fact(self):
+        """Empty unit on monetary metric must be rejected — not stored in FactTable."""
+        facts = [_make_fact("DHG", "revenue.net", 2023, "FY", 5000.0, unit="")]
+        table = build_fact_table(facts)
+        assert "revenue.net" not in table or "2023FY" not in table.get("revenue.net", {})
 
     def test_higher_confidence_wins_within_same_tier(self):
         facts = [
@@ -200,6 +207,25 @@ class TestComputeDerived:
         table = compute_derived(self._base_table())
         # ebitda = gross_profit + sga + depreciation = 2500 + (-500) + 300 = 2300
         assert table["ebitda.total"]["2023FY"].value == pytest.approx(2300.0)
+
+    def test_sga_derives_from_selling_plus_admin_and_reconciles_ebitda(self):
+        """SG&A must include both selling and administrative expense when split facts exist."""
+        def e(v):
+            return FactEntry(value=v, source_id="test", source_tier=3)
+
+        table = {
+            "revenue.net": {"2025FY": e(4321.6)},
+            "gross_profit.total": {"2025FY": e(884.379)},
+            "selling_expense.total": {"2025FY": e(-418.308)},
+            "admin_expense.total": {"2025FY": e(-139.794)},
+            "depreciation.total": {"2025FY": e(51.021)},
+        }
+
+        result = compute_derived(table)
+
+        assert result["sga.total"]["2025FY"].value == pytest.approx(-558.102)
+        assert result["ebit.total"]["2025FY"].value == pytest.approx(326.277)
+        assert result["ebitda.total"]["2025FY"].value == pytest.approx(377.298)
 
     def test_original_table_not_mutated(self):
         base = self._base_table()

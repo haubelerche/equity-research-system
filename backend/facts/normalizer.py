@@ -20,9 +20,14 @@ Derived metrics (not stored in DB — computed here):
 """
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
+
+from backend.facts.metric_metadata import validate_and_normalize
+
+_log = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -121,10 +126,18 @@ def build_fact_table(raw_facts: list[dict[str, Any]]) -> FactTable:
 
     table: FactTable = {}
     for (line_item_code, period), row in best.items():
+        raw_value = float(row["value"])
+        raw_unit = row.get("unit") or row.get("raw_unit") or None
+
+        norm = validate_and_normalize(line_item_code, raw_value, raw_unit)
+        if norm.status == "reject":
+            _log.info("Rejected fact %s/%s: %s", line_item_code, period, norm.reason)
+            continue
+
         if line_item_code not in table:
             table[line_item_code] = {}
         table[line_item_code][period] = FactEntry(
-            value=float(row["value"]),
+            value=norm.value,
             fact_id=str(row.get("id") or row.get("fact_id") or ""),
             source_id=row.get("source_id"),
             source_uri=row.get("src_uri") or row.get("source_uri") or "",
@@ -385,3 +398,75 @@ def periods_sorted(table: FactTable) -> list[str]:
     for periods in table.values():
         all_p.update(periods.keys())
     return sorted(all_p)
+
+
+def load_golden_csv_supplement(ticker: str, from_year: int, to_year: int) -> list[dict]:
+    """Load accepted facts from the golden CSV on disk for supplementing a DB snapshot.
+
+    Returns a list of raw fact dicts in the same shape as load_snapshot_facts() rows,
+    so they can be merged into raw_facts before build_fact_table() is called.
+    Only rows with validation_status=accepted and period in YYYYFY range are returned.
+
+    Source tier is taken from the companion _golden_provenance.json (defaults to 1).
+    """
+    import csv as _csv
+    import json as _json
+    import os as _os
+    import re as _re
+    from datetime import UTC, datetime
+
+    _FY_RE = _re.compile(r"^(\d{4})FY$")
+    root = _os.path.normpath(_os.path.join(_os.path.dirname(__file__), "..", ".."))
+    golden_path = _os.path.join(root, "config", "dataset", "golden", "financials", f"{ticker.upper()}.csv")
+    if not _os.path.exists(golden_path):
+        return []
+
+    prov_path = golden_path.replace(".csv", "_golden_provenance.json")
+    resolved_tier = 1
+    try:
+        with open(prov_path) as _f:
+            prov = _json.load(_f)
+        resolved_tier = int(prov.get("source_tier", 1))
+    except Exception:
+        pass
+
+    facts: list[dict] = []
+    now = datetime.now(UTC)
+    with open(golden_path, encoding="utf-8", newline="") as _f:
+        reader = _csv.DictReader(_f)
+        for row in reader:
+            if row.get("validation_status", "").strip() != "accepted":
+                continue
+            period = row.get("period", "").strip()
+            m = _FY_RE.match(period)
+            if not m:
+                continue
+            fy = int(m.group(1))
+            if not (from_year <= fy <= to_year):
+                continue
+            try:
+                value = float(row["value"])
+            except (ValueError, KeyError):
+                continue
+            confidence = float(row.get("confidence") or 0.95)
+            if confidence < 0.80:
+                _log.info(
+                    "Golden CSV %s/%s: confidence %.2f < 0.80, rejected",
+                    row.get("canonical_key", "?"), period, confidence,
+                )
+                continue
+            facts.append({
+                "line_item_code": row["canonical_key"].strip(),
+                "fiscal_year": fy,
+                "fiscal_period": "FY",
+                "value": value,
+                "unit": row.get("unit", "").strip(),
+                "source_id": f"golden_csv_{ticker}_{fy}FY",
+                "source_uri": row.get("source_uri", "").strip(),
+                "source_title": row.get("source_title", "").strip(),
+                "source_tier": resolved_tier,
+                "confidence": confidence,
+                "ingested_at": now,
+                "validation_status": "accepted",
+            })
+    return facts

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from backend.harness.gates import citation_gate, data_quality_gate, export_gate, valuation_gate
+from backend.harness.gates import citation_gate, data_quality_gate, valuation_gate, workflow_export_gate
 from backend.harness.runner import PUBLIC_TO_DB_APPROVAL_DECISION, PUBLIC_TO_DB_APPROVAL_STAGE
 from backend.harness.state import AgentResult, ArtifactRef, EvidenceRef, ResearchGraphState, ServiceNodeResult
 from backend.runtime_store import to_db_status, to_db_step_status, to_public_status
@@ -69,7 +69,7 @@ def test_valuation_gate_requires_core_components() -> None:
 def test_citation_and_export_gates_block_missing_approval() -> None:
     assert not citation_gate({"claims_count": 1, "citation_count": 0})["passed"]
     assert not citation_gate({"claims_count": 1, "citation_count": 1, "tier3_only_material_count": 1})["passed"]
-    assert not export_gate({"gate_results": {}, "approvals": {}}, final_approval_required=True)["passed"]
+    assert not workflow_export_gate({"gate_results": {}, "approvals": {}}, final_approval_required=True)["passed"]
     required = {
         "TOOL_PERMISSION_GATE": {"passed": True},
         "ARTIFACT_MANIFEST_GATE": {"passed": True},
@@ -78,7 +78,7 @@ def test_citation_and_export_gates_block_missing_approval() -> None:
         "AGENT_HANDOFF_GATE": {"passed": True},
         "APPROVAL_PATH_GATE": {"passed": True},
     }
-    assert export_gate(
+    assert workflow_export_gate(
         {
             "gate_results": required,
             "approvals": {"final_report": "approved"},
@@ -86,7 +86,7 @@ def test_citation_and_export_gates_block_missing_approval() -> None:
         },
         final_approval_required=True,
     )["passed"]
-    assert not export_gate(
+    assert not workflow_export_gate(
         {
             "gate_results": required,
             "approvals": {"final_report": "approved"},

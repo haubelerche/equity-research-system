@@ -119,12 +119,121 @@ def _render_table(table: TableData, class_name: str = "financial-model-table") -
         )
         body.append(f"<tr><td>{_e(label)}</td>{cells}</tr>")
     unit = f'<div class="table-unit">{_e(table.unit)}</div>' if table.unit else ""
+    source = f'<div class="table-source-note">{_e(table.source_note)}</div>' if table.source_note else ""
     return f"""
 <div class="model-table-block">
   <h2>{_e(table.title)}</h2>
   {unit}
   <table class="{class_name}">
     <thead><tr><th>Chỉ tiêu</th>{header}</tr></thead>
+    <tbody>{''.join(body)}</tbody>
+  </table>
+  {source}
+</div>
+"""
+
+
+def _render_variance_table(table: TableData, class_name: str = "financial-model-table") -> str:
+    """Render a financial table with automatic positive/negative variance colouring.
+
+    Rows whose labels contain growth or margin keywords get CSS colour classes on
+    numeric cells: positive → variance-positive (green), negative → variance-negative (red).
+    All other rows are rendered as plain numeric cells.
+    """
+    _VARIANCE_KEYWORDS = (
+        "tăng trưởng", "growth", "biên", "margin", "roe", "roa", "roic",
+        "thay đổi", "change", "delta", "variance",
+    )
+
+    def _is_variance_row(label: str) -> bool:
+        lower = label.lower()
+        return any(kw in lower for kw in _VARIANCE_KEYWORDS)
+
+    def _cell(label: str, value: Any) -> str:
+        raw = _fmt_metric(label, value, table.format_type)
+        if raw == DASH or not _is_variance_row(label):
+            return f'<td class="numeric">{raw}</td>'
+        try:
+            num = float(str(value).replace(",", "")) if value is not None else None
+        except (ValueError, TypeError):
+            num = None
+        if num is None:
+            return f'<td class="numeric">{raw}</td>'
+        css = "variance-positive" if num >= 0 else "variance-negative"
+        return f'<td class="numeric {css}">{raw}</td>'
+
+    header = "".join(f"<th>{_e(period)}</th>" for period in table.periods)
+    body = []
+    for label, values in table.rows:
+        cells = "".join(_cell(label, v) for v in values)
+        body.append(f"<tr><td>{_e(label)}</td>{cells}</tr>")
+    unit = f'<div class="table-unit">{_e(table.unit)}</div>' if table.unit else ""
+    return f"""
+<div class="model-table-block">
+  <h2>{_e(table.title)}</h2>
+  {unit}
+  <table class="{class_name}">
+    <thead><tr><th>Chỉ tiêu</th>{header}</tr></thead>
+    <tbody>{''.join(body)}</tbody>
+  </table>
+</div>
+"""
+
+
+def _render_sensitivity_matrix_table(table: TableData) -> str:
+    """Render a WACC × growth sensitivity matrix with magnitude-based cell colouring.
+
+    Cells are coloured relative to the median value in the matrix:
+      - Top quartile (high upside) → matrix-cell-high (green)
+      - Bottom quartile (low/negative) → matrix-cell-low (red)
+      - Middle two quartiles → matrix-cell-mid (purple) or matrix-cell-neutral
+    """
+    # Collect all numeric values to compute median
+    all_vals: list[float] = []
+    for _label, values in table.rows:
+        for v in values:
+            try:
+                if v is not None:
+                    all_vals.append(float(v))
+            except (ValueError, TypeError):
+                pass
+
+    if all_vals:
+        sorted_vals = sorted(all_vals)
+        n = len(sorted_vals)
+        q1 = sorted_vals[n // 4]
+        q3 = sorted_vals[3 * n // 4]
+    else:
+        q1 = q3 = 0.0
+
+    def _cell_css(value: Any) -> str:
+        try:
+            num = float(value) if value is not None else None
+        except (ValueError, TypeError):
+            num = None
+        if num is None:
+            return "matrix-cell-neutral"
+        if num >= q3:
+            return "matrix-cell-high"
+        if num <= q1:
+            return "matrix-cell-low"
+        return "matrix-cell-neutral"
+
+    header = "".join(f"<th>{_e(period)}</th>" for period in table.periods)
+    body = []
+    for label, values in table.rows:
+        cells = "".join(
+            f'<td class="{_cell_css(v)}">{_fmt_metric(label, v, table.format_type)}</td>'
+            for v in values
+        )
+        body.append(f"<tr><th>{_e(label)}</th>{cells}</tr>")
+    unit = f'<div class="table-unit">{_e(table.unit)}</div>' if table.unit else ""
+    return f"""
+<div class="model-table-block">
+  <h2>{_e(table.title)}</h2>
+  {unit}
+  <table class="matrix-table">
+    <thead><tr><th></th>{header}</tr></thead>
     <tbody>{''.join(body)}</tbody>
   </table>
 </div>
@@ -162,6 +271,30 @@ _REC_CSS: dict[str, str] = {
 
 def _rec_css(recommendation: str) -> str:
     return _REC_CSS.get((recommendation or "").upper().strip(), "review")
+
+
+def _rec_hero(vm: ClientReportViewModel) -> str:
+    """Recommendation hero card embedded in the snapshot cover page.
+
+    Replaces the template-level standalone banner so the cover page is a
+    self-contained dashboard without a near-blank preceding page.
+    """
+    rec_css_class = "recommendation-" + _rec_css(vm.recommendation)
+    tp_display = _format_price(vm.target_price)
+    upside_display = _format_percent(vm.upside_downside)
+    return f"""
+<div class="recommendation-card {_e(rec_css_class)}">
+  <span class="rec-label">Khuyến nghị &nbsp;·&nbsp; {_e(vm.exchange)}: {_e(vm.ticker)}</span>
+  <div class="rec-value">{_e(vm.recommendation)}</div>
+  <div class="rec-sub">
+    Giá mục tiêu: <strong>{_e(tp_display)} VND</strong>
+    &nbsp;|&nbsp;
+    Upside/Downside: <strong>{_e(upside_display)}</strong>
+    &nbsp;|&nbsp;
+    {_e(vm.report_date)}
+  </div>
+</div>
+"""
 
 
 def _snapshot_page(vm: ClientReportViewModel) -> str:
@@ -211,6 +344,7 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
     </aside>
     <main class="acbs-main">
       <h1>{_e(vm.company_name)} ({_e(vm.ticker)} VN)</h1>
+      {_rec_hero(vm)}
       <div class="lead-thesis">{_e(vm.investment_thesis)}</div>
       <h2>Luận điểm cập nhật</h2>
       <p>{_e(vm.latest_business_update)}</p>
@@ -294,8 +428,8 @@ def _render_key_sources(vm: ClientReportViewModel) -> str:
 def _company_overview_page(vm: ClientReportViewModel) -> str:
     return f"""
 <div class="client-report-page">
-  <h1>Company Overview</h1>
-  <h2>Business Update</h2>
+  <h1>Tổng quan doanh nghiệp</h1>
+  <h2>Cập nhật hoạt động kinh doanh</h2>
   <p>{_e(vm.latest_business_update)}</p>
   <div class="two-chart-grid">
     {_chart(vm, "C2")}
@@ -306,24 +440,33 @@ def _company_overview_page(vm: ClientReportViewModel) -> str:
 
 
 def _financial_performance_page(vm: ClientReportViewModel) -> str:
+    # C3 (EPS & P/E history) is colocated with financial performance narrative
+    c3_block = _chart(vm, "C3")
     return f"""
 <div class="client-report-page">
-  <h1>Financial Performance</h1>
+  <h1>Kết quả hoạt động kinh doanh</h1>
   <p>{_e(vm.current_context)}</p>
-  {_render_table(vm.financial_summary_table)}
-  {_render_table(vm.balance_sheet_cashflow_table)}
-  {_render_table(vm.profitability_valuation_table)}
+  {_render_variance_table(vm.financial_summary_table)}
+  {_render_variance_table(vm.balance_sheet_cashflow_table)}
+  <div class="two-chart-grid">
+    {c3_block}
+    {_chart(vm, "C4")}
+  </div>
+  {_render_variance_table(vm.profitability_valuation_table)}
 </div>
 """
 
 
 def _forecast_drivers_page(vm: ClientReportViewModel) -> str:
+    # C5 (forecast revenue/profit) is colocated with forecast narrative
+    c5_block = _chart(vm, "C5")
     return f"""
 <div class="client-report-page">
-  <h1>Forecast Drivers</h1>
-  <h2>Growth Drivers</h2>
+  <h1>Dự phóng tài chính</h1>
+  <h2>Động lực tăng trưởng</h2>
   <p>{_e(vm.key_growth_drivers)}</p>
-  <h2>Margin Drivers</h2>
+  {c5_block}
+  <h2>Động lực biên lợi nhuận</h2>
   <p>{_e(vm.key_margin_drivers)}</p>
   {_render_table(vm.key_forecast_drivers_table)}
 </div>
@@ -331,21 +474,31 @@ def _forecast_drivers_page(vm: ClientReportViewModel) -> str:
 
 
 def _valuation_model_page(vm: ClientReportViewModel) -> str:
+    # C6 (DCF bridge waterfall) is colocated with valuation narrative
+    c6_block = _chart(vm, "C6")
     return f"""
 <div class="client-report-page">
-  <h1>Valuation Model</h1>
+  <h1>Mô hình định giá</h1>
   <p>{_e(vm.forecast_valuation_narrative)}</p>
+  {c6_block}
   {_render_table(vm.valuation_model_table)}
 </div>
 """
 
 
 def _sensitivity_peer_page(vm: ClientReportViewModel) -> str:
+    # C7 (sensitivity heatmap) + C8 (peer comparison) colocated with the tables
     peer = _render_table(vm.peer_table) if vm.peer_table is not None else ""
+    c7_block = _chart(vm, "C7")
+    c8_block = _chart(vm, "C8")
+    charts_grid = ""
+    if c7_block or c8_block:
+        charts_grid = f'<div class="two-chart-grid">{c7_block}{c8_block}</div>'
     return f"""
 <div class="client-report-page">
-  <h1>Sensitivity and Peer Check</h1>
-  {_render_table(vm.sensitivity_table)}
+  <h1>Phân tích độ nhạy và so sánh ngành</h1>
+  {_render_sensitivity_matrix_table(vm.sensitivity_table)}
+  {charts_grid}
   {peer}
 </div>
 """
@@ -358,10 +511,10 @@ def _risks_catalysts_page(vm: ClientReportViewModel) -> str:
     )
     return f"""
 <div class="client-report-page">
-  <h1>Risks and Catalysts</h1>
+  <h1>Rủi ro và sự kiện trọng yếu</h1>
   <p>{_e(vm.material_events)}</p>
   <table class="financial-model-table">
-    <thead><tr><th>Risk</th>{''.join(f'<th>{_e(p)}</th>' for p in vm.risk_table.periods)}</tr></thead>
+    <thead><tr><th>Rủi ro</th>{''.join(f'<th>{_e(p)}</th>' for p in vm.risk_table.periods)}</tr></thead>
     <tbody>{risk_body}</tbody>
   </table>
 </div>
@@ -511,18 +664,21 @@ def _review_dashboard_pages(vm: ClientReportViewModel) -> list[tuple[str, str, s
 
 
 def build_client_report_sections(vm: ClientReportViewModel) -> list[dict[str, Any]]:
-    pages = [
-        ("snapshot", "Investment Snapshot", _snapshot_page(vm), ["C1"]),
-        ("company_overview", "Company Overview", _company_overview_page(vm), ["C2", "C4"]),
-        ("financial_performance", "Financial Performance", _financial_performance_page(vm), []),
-        ("forecast_drivers", "Forecast Drivers", _forecast_drivers_page(vm), []),
-        ("valuation_model", "Valuation Model", _valuation_model_page(vm), []),
-        ("sensitivity_peer", "Sensitivity and Peer Check", _sensitivity_peer_page(vm), []),
-        ("risks_catalysts", "Risks and Catalysts", _risks_catalysts_page(vm), []),
-        ("conclusion_sources", "Conclusion and Sources", _conclusion_sources_page(vm), []),
+    # (page_id, title_vi, html, chart_ids, chapter_break)
+    # chapter_break=True → explicit page break before this section in the template.
+    # Major editorial chapters always start on a new page; flowing sub-sections do not.
+    pages: list[tuple[str, str, str, list[str], bool]] = [
+        ("snapshot",             "Tổng quan đầu tư",                    _snapshot_page(vm),             ["C1"],                True),
+        ("company_overview",     "Tổng quan doanh nghiệp",              _company_overview_page(vm),     ["C2", "C4"],          True),
+        ("financial_performance","Kết quả hoạt động kinh doanh",        _financial_performance_page(vm),["C3", "C4"],          True),
+        ("forecast_drivers",     "Dự phóng tài chính",                  _forecast_drivers_page(vm),     ["C5"],                True),
+        ("valuation_model",      "Mô hình định giá",                    _valuation_model_page(vm),      ["C6"],                True),
+        ("sensitivity_peer",     "Phân tích độ nhạy và so sánh ngành",  _sensitivity_peer_page(vm),     ["C7", "C8"],          True),
+        ("risks_catalysts",      "Rủi ro và sự kiện trọng yếu",        _risks_catalysts_page(vm),      [],                    True),
+        ("conclusion_sources",   "Kết luận và nguồn tham khảo",        _conclusion_sources_page(vm),   [],                    True),
     ]
     sections: list[dict[str, Any]] = []
-    for index, (page, title, html, chart_ids) in enumerate(pages, start=1):
+    for index, (page, title, html, chart_ids, chapter_break) in enumerate(pages, start=1):
         sections.append(
             {
                 "page": page,
@@ -531,6 +687,7 @@ def build_client_report_sections(vm: ClientReportViewModel) -> list[dict[str, An
                 "markdown": html,
                 "chart_ids": chart_ids,
                 "word_count": len(html.split()),
+                "chapter_break": chapter_break,
             }
         )
     return sections

@@ -52,6 +52,7 @@ class TableData:
     rows: list[tuple[str, list[Any]]]
     unit: str = ""
     format_type: str = "auto"  # auto | currency | percent | multiple | text
+    source_note: str = ""      # optional clean citation string, e.g. "Nguồn: BCTC kiểm toán 2025"
 
 
 @dataclass(frozen=True)
@@ -1364,11 +1365,32 @@ def _sanitize_non_valuation_narrative(text: str) -> str:
 
 
 def _charts(ticker: str) -> dict[str, ChartArtifact]:
+    """Discover all generated chart PNGs for *ticker* from the artifacts directory.
+
+    Registers C1–C8 when available.  Only C1 and C2 are marked required; the
+    others are opportunistic — their absence is acceptable but their presence
+    improves the report's evidence density.
+    """
     charts_dir = ROOT / "artifacts/charts"
     titles = {
         "C1": "Diễn biến giá cổ phiếu so với VNINDEX",
         "C2": "Doanh thu và lợi nhuận",
+        "C3": "EPS và P/E lịch sử",
         "C4": "Biên lợi nhuận và ROE",
+        "C5": "Dự phóng doanh thu và lợi nhuận",
+        "C6": "Cầu nối định giá DCF",
+        "C7": "Ma trận độ nhạy định giá",
+        "C8": "So sánh định giá với cùng ngành",
+    }
+    captions = {
+        "C1": "Nguồn: Dữ liệu thị trường; tính toán của nhóm phân tích.",
+        "C2": "Nguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.",
+        "C3": "Nguồn: Báo cáo tài chính công ty; Bloomberg; tính toán của nhóm phân tích.",
+        "C4": "Nguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.",
+        "C5": "Nguồn: Dự phóng của nhóm phân tích dựa trên giả định đã phê duyệt.",
+        "C6": "Nguồn: Mô hình DCF nội bộ; giả định đã được phê duyệt.",
+        "C7": "Nguồn: Phân tích độ nhạy — WACC × tăng trưởng dài hạn; nhóm phân tích.",
+        "C8": "Nguồn: Bloomberg; báo cáo công ty; tính toán của nhóm phân tích.",
     }
     result: dict[str, ChartArtifact] = {}
     for chart_id, title in titles.items():
@@ -1378,7 +1400,7 @@ def _charts(ticker: str) -> dict[str, ChartArtifact]:
                 chart_id=chart_id,
                 title=title,
                 path=str(path),
-                caption="Nguồn: Báo cáo tài chính công ty; dữ liệu thị trường; tính toán của nhóm phân tích.",
+                caption=captions.get(chart_id, "Nguồn: Nhóm phân tích."),
                 required=chart_id in {"C1", "C2"},
             )
     return result

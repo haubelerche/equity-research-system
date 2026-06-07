@@ -239,7 +239,7 @@ def approval_path_gate(state: dict[str, Any], final_approval_required: bool = Tr
     return pass_gate("APPROVAL_PATH_GATE", {"final_approval_required": True, "reviewer": final_decision.get("reviewer")})
 
 
-def export_gate(state: dict[str, Any], final_approval_required: bool = True) -> dict[str, Any]:
+def workflow_export_gate(state: dict[str, Any], final_approval_required: bool = True) -> dict[str, Any]:
     gate_results = state.get("gate_results") or {}
     blocking_reasons: list[str] = []
     required_gates = {

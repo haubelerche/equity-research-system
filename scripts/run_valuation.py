@@ -235,6 +235,7 @@ def run_valuation(
     )
     from backend.analytics.approval_gate import build_gate_from_artifacts
     from backend.analytics.valuation_confidence import build_valuation_confidence
+    from backend.analytics.core_pe_net_cash import compute_core_pe_net_cash
 
     ticker = ticker.strip().upper()
     generated_at = datetime.now(UTC)
@@ -251,6 +252,15 @@ def run_valuation(
     print(f"[run_valuation] {ticker} — loading facts from snapshot")
     raw_facts = load_snapshot_facts(snapshot_id)
     print(f"[run_valuation] {ticker} — {len(raw_facts)} facts loaded from snapshot")
+
+    # Supplement snapshot with golden CSV facts (audited values not yet in DB).
+    # Tier-based conflict resolution in build_fact_table() ensures golden CSV
+    # tier-0 facts override lower-tier API facts for the same key/period.
+    from backend.facts.normalizer import load_golden_csv_supplement
+    _golden_suppl = load_golden_csv_supplement(ticker, from_year=from_year, to_year=to_year)
+    if _golden_suppl:
+        raw_facts = raw_facts + _golden_suppl
+        print(f"[run_valuation] {ticker} — supplemented with {len(_golden_suppl)} golden CSV facts")
 
     base_table = build_fact_table(raw_facts)
     full_table = compute_derived(base_table)
@@ -448,10 +458,24 @@ def run_valuation(
     price_pe_forward: float | None = (
         _eps_fy1_early * target_pe if (_eps_fy1_early and _eps_fy1_early > 0) else None
     )
+    _DEFAULT_PE = 15.0
+    _pe_is_default = (target_pe == _DEFAULT_PE)
+    _peer_data_source = "analyst_default_pending_peers" if _pe_is_default else "analyst_override"
+    _pe_default_warning = (
+        "target_pe=15.0x is model default — validate with peer-median P/E before publishing"
+        if _pe_is_default else None
+    )
     if price_pe_forward:
         print(f"\n[run_valuation] {ticker} — P/E Forward anchor: EPS_FY1={_eps_fy1_early:,.0f} × P/E={target_pe:.1f}x = {price_pe_forward:,.0f} VND/share")
+        if _pe_is_default:
+            print(f"  WARN [PEForward] target_pe = {target_pe:.1f}x is the model default — no peer dataset used. Validate with peer-median P/E before publishing.")
     else:
         print(f"\n[run_valuation] {ticker} — P/E Forward anchor unavailable (EPS_FY1 missing)")
+
+    # Pass FCFE publishability flag into blend gate
+    _fcfe_publishable_flag: bool | None = None
+    if forecast.debt_schedule is not None:
+        _fcfe_publishable_flag = forecast.debt_schedule.is_fcfe_publishable
 
     # ── 60/40 Blend: FCFF + P/E Forward ──────────────────────────────────────
     print(f"\n[run_valuation] {ticker} — Blended target price (60% FCFF + 40% P/E Forward)")
@@ -462,6 +486,8 @@ def run_valuation(
         current_price_vnd=current_price,
         pv_terminal_value_fcff=fcff_result.pv_terminal_value,
         enterprise_value_fcff=fcff_result.enterprise_value,
+        price_fcfe=fcfe_result.target_price_vnd,
+        fcfe_publishable=_fcfe_publishable_flag,
     )
     bd = blend.to_dict()
     print(f"  Price_FCFF:           {bd['price_fcff_vnd']:,.0f} VND/share" if bd['price_fcff_vnd'] else "  Price_FCFF: N/A")
@@ -475,6 +501,40 @@ def run_valuation(
         print(f"  FCFF/P/E Gap:         {bd['valuation_gap_pct']:.2%}")
     for w in blend.warnings:
         print(f"  WARN (blend): {w}")
+
+    # Propagate P/E default warning into blend artifact warnings so downstream
+    # gates can detect that target_pe was not derived from peer analysis.
+    if _pe_default_warning and _pe_default_warning not in blend.warnings:
+        blend.warnings.append(_pe_default_warning)
+
+    # ── Core P/E + Net Cash (Guidance Section 11) ────────────────────────────
+    # Primary methodology for cash-rich companies: Core EPS × Target P/E + Net Cash/share
+    _DEFAULT_CORE_PE = 19.0  # Vietnamese pharma peer median (18-22× range)
+    print(f"\n[run_valuation] {ticker} — Core P/E + Net Cash (Guidance §11, core_pe={_DEFAULT_CORE_PE}×)")
+    core_pe_result = compute_core_pe_net_cash(
+        ticker=ticker,
+        fact_table=full_table,
+        forecast=forecast,
+        target_core_pe=_DEFAULT_CORE_PE,
+        shares_mn=_shares_mn,
+    )
+    cpnc = core_pe_result.to_dict()
+    print(f"  Net Cash/share:       {cpnc['net_cash_per_share_vnd']:,.0f} VND  "
+          f"(cash={cpnc['cash_vnd_bn']}, STI={cpnc['short_term_investments_vnd_bn']}, debt={cpnc['total_debt_vnd_bn']} bn)"
+          if cpnc['net_cash_per_share_vnd'] is not None else "  Net Cash/share: N/A")
+    print(f"  Net Fin. Income:      {cpnc['net_financial_income_vnd_bn']:.3f} bn  "
+          f"(VAS EBIT {cpnc['vas_ebit_vnd_bn']:.1f} − pure EBIT {cpnc['pure_ebit_vnd_bn']:.1f})"
+          if cpnc['net_financial_income_vnd_bn'] is not None else "  Net Fin. Income: N/A")
+    print(f"  After-tax FI/share:   {cpnc['ati_per_share_vnd']:,.0f} VND"
+          if cpnc['ati_per_share_vnd'] is not None else "  ATI/share: N/A")
+    print(f"  EPS Forward:          {cpnc['eps_forward_vnd']:,.0f} VND"
+          if cpnc['eps_forward_vnd'] is not None else "  EPS Forward: N/A")
+    print(f"  Core EPS:             {cpnc['core_eps_vnd']:,.0f} VND  (= EPS − ATI/share)"
+          if cpnc['core_eps_vnd'] is not None else "  Core EPS: N/A")
+    print(f"  Target ({_DEFAULT_CORE_PE:.0f}× core + cash): {cpnc['target_price_vnd']:,.0f} VND/share"
+          if cpnc['target_price_vnd'] is not None else "  Core P/E + Net Cash: N/A")
+    for w in core_pe_result.warnings:
+        print(f"  WARN (core_pe): {w}")
 
     # ── Cross-model validation: simplified DCF vs FCFF/FCFE blend ────────────
     _dcf_base_price = dcf_results["base"].intrinsic_value_per_share_vnd
@@ -771,16 +831,24 @@ def run_valuation(
         "unit_policy": "VND per share; financial statement values follow canonical fact units",
         "currency": "VND",
         "period_scope": {"from_year": from_year, "to_year": to_year, "period_type": "FY"},
-        "valuation_methods": ["fcff", "blend_dcf_fcff_pe", "multiples", "sensitivity", "fcfe_informational"],
+        "valuation_methods": ["core_pe_net_cash", "fcff", "blend_dcf_fcff_pe", "multiples", "sensitivity", "fcfe_informational"],
         "snapshot_id": snapshot_id,
         "snapshot_as_of": snap["as_of_date"],
         "fy_periods": fy_periods,
         "assumptions": assumptions_record,
         "ratios": {k: {p: v for p, v in pv.items()} for k, pv in ratios.items()},
         "dcf_simplified": {sc: r.to_dict() for sc, r in dcf_results.items()},
+        "core_pe_net_cash": core_pe_result.to_dict(),
         "fcff": fcff_result.to_dict(),
         "fcfe": fcfe_result.to_dict(),
         "blend_dcf": blend.to_dict(),
+        "pe_forward": {
+            "target_pe": target_pe,
+            "eps_fy1_vnd": _eps_fy1_early,
+            "price_pe_forward_vnd": price_pe_forward,
+            "peer_data_source": _peer_data_source,
+            "warnings": ([_pe_default_warning] if _pe_default_warning else []),
+        },
         "forecast": forecast.to_dict(),
         "sensitivity": {
             "simplified_dcf": sensitivity,

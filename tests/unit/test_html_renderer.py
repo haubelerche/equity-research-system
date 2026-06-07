@@ -116,3 +116,25 @@ def test_output_dir_created_if_missing(tmp_path):
 
     assert nested.exists()
     assert out.exists()
+
+
+def test_client_final_mode_hides_internal_status_banner(tmp_path):
+    """render(render_mode='client_final') must not render the draft/needs-review banner."""
+    ctx = _make_ctx()  # ctx.status == "NEEDS_REVIEW"
+    sections = build_report_sections(ctx)
+    content = HTMLRenderer().render(
+        sections, ctx, output_dir=tmp_path, render_mode="client_final"
+    ).read_text(encoding="utf-8")
+
+    # The status banner div must not appear (CSS class definition is OK)
+    assert '<div class="draft-banner">' not in content, (
+        "Internal draft-banner div must not appear in client_final HTML output"
+    )
+    assert "BÁO CÁO NHÁP (DRAFT)" not in content, (
+        "Internal draft notice must not appear in client_final HTML output"
+    )
+    # The raw status value "NEEDS_REVIEW" must not be placed in the status template var
+    # (it may still appear in section text from quality tables, but not from the status banner)
+    assert "NEEDS_REVIEW" not in content, (
+        "NEEDS_REVIEW must not appear in client_final HTML output"
+    )

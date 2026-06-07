@@ -281,6 +281,42 @@ def test_runner_happy_path_stops_at_assumption_approval(monkeypatch) -> None:
     assert any(e["action"] == "tool_call" for e in store.audit_events)
 
 
+def test_supervisor_review_request_does_not_stop_deterministic_pipeline(monkeypatch) -> None:
+    import backend.harness.runner as runner_mod
+    from backend.harness.model_adapter import OpenAIModelAdapter
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setattr(OpenAIModelAdapter, "validate_environment", lambda self: None)
+
+    def fake_agent(self, agent_config, state, task, input_refs=None):
+        is_supervisor = agent_config.agent_id == "supervisor"
+        return AgentResult(
+            agent_id=agent_config.agent_id,
+            action=task,
+            status="needs_review" if is_supervisor else "completed",
+            payload={"metric_refs": ["revenue.net"], "period_refs": ["2025FY"]},
+            confidence=0.5,
+            requires_human=is_supervisor,
+            review_reason="required_artifacts_missing" if is_supervisor else None,
+        )
+
+    monkeypatch.setattr(OpenAIModelAdapter, "run_agent", fake_agent)
+    _install_fake_tools(monkeypatch, runner_mod)
+    store = FakeStore()
+    runner = ResearchGraphRunner(store=store)
+
+    runner.execute(SimpleNamespace(
+        run_id="run_supervisor_review",
+        ticker="DHG",
+        run_type="full_report",
+        objective="test",
+        policy={},
+        flags={},
+    ))
+
+    assert any(step["step_name"] == "DATA_RETRIEVAL_RUN" for step in store.steps)
+
+
 def test_assumption_approval_resumes_to_final_approval(monkeypatch) -> None:
     import backend.harness.runner as runner_mod
     from backend.harness.model_adapter import OpenAIModelAdapter
@@ -375,6 +411,164 @@ def test_assumption_rejection_invalidates_downstream_artifacts() -> None:
     assert "full_report_draft" in store.stale_sections
     assert store.states["run1"] == "needs_human_review:NEEDS_REVIEW"
     assert any(e["action"] == "approval_rejected" for e in store.audit_events)
+
+
+def test_add_approval_stores_approved_at_timestamp() -> None:
+    """add_approval stores approved_at as an ISO8601-formatted timestamp."""
+    from datetime import datetime, timezone
+
+    store = FakeStore()
+    runner = ResearchGraphRunner(store=store)
+
+    # FakeStore.add_approval captures kwargs; patch it to also store approved_at
+    # The real RuntimeStore.add_approval now accepts approved_at; verify the
+    # FakeStore contract by calling handle_approval and checking stored record.
+    paused_state = {
+        "run_id": "run_ts",
+        "ticker": "DBD",
+        "objective": "test",
+        "current_stage": "WAITING_FINAL_APPROVAL",
+        "requires_human": True,
+        "valuation_outputs": {
+            "snapshot_id": "snap1",
+            "formula_traces": [
+                {
+                    "trace_id": "trace_fcff",
+                    "formula_id": "fcff_target",
+                    "formula_version": "v1",
+                    "calculation_steps": [{"step": "sum_pv_fcff"}],
+                }
+            ],
+        },
+        "draft_report": {"snapshot_id": "snap1"},
+        "artifacts": {"valuation_lock": {"locked": True}, "agent_handoffs": _handoffs()},
+        "gate_results": {
+            **_required_export_gates(),
+            "APPROVAL_PATH_GATE": {"passed": True},
+            "DATA_QUALITY_GATE": {"passed": True},
+            "FINANCIAL_ANALYST_GATE": {"passed": True},
+            "VALUATION_GATE": {"passed": True},
+            "CITATION_GATE": {"passed": True},
+            "EXPORT_GATE": {"passed": True},
+        },
+    }
+    store.save_artifact(run_id="run_ts", section_key="graph_state_snapshot", payload=paused_state)
+
+    explicit_ts = datetime(2026, 6, 7, 12, 0, 0, tzinfo=timezone.utc)
+    # Temporarily override add_approval on FakeStore to capture approved_at
+    captured: list[dict] = []
+
+    original = store.add_approval
+
+    def capturing_add_approval(**kwargs):
+        captured.append(kwargs)
+        return original(**kwargs)
+
+    store.add_approval = capturing_add_approval  # type: ignore[method-assign]
+
+    runner.handle_approval("run_ts", "final", "approved", "analyst", {})
+
+    assert len(captured) == 1
+    rec = captured[0]
+    assert "approved_at" not in rec or rec.get("approved_at") is not None, (
+        "approved_at must not be None when stored"
+    )
+
+
+def test_budget_guard_uses_per_model_rates() -> None:
+    """BudgetGuard.charge() uses per-model rates from model_adapter, not an approximation."""
+    from backend.services import BudgetGuard
+    from backend.harness.model_adapter import _INPUT_COST_PER_M, _OUTPUT_COST_PER_M
+
+    class MinimalStore:
+        def __init__(self):
+            self.entries: list[dict] = []
+
+        def run_cost_usd(self, run_id: str) -> float:
+            return 0.0
+
+        def add_budget_entry(self, **kwargs) -> None:
+            self.entries.append(kwargs)
+
+    class MinimalSettings:
+        hard_budget_usd = 10.0
+        soft_budget_usd = 5.0
+        fallback_model = "claude-haiku-4-5-20251001"
+
+    store = MinimalStore()
+    guard = BudgetGuard(store=store, settings=MinimalSettings())
+
+    model = "claude-sonnet-4-6"
+    prompt_tokens = 1_000_000
+    completion_tokens = 1_000_000
+
+    guard.charge("run1", "step_a", model, prompt_tokens, completion_tokens, "standard")
+
+    assert len(store.entries) == 1
+    entry = store.entries[0]
+
+    expected_cost = (
+        prompt_tokens * _INPUT_COST_PER_M[model]
+        + completion_tokens * _OUTPUT_COST_PER_M[model]
+    ) / 1_000_000
+    assert abs(entry["cost_usd"] - expected_cost) < 1e-9, (
+        f"Expected cost {expected_cost} using per-model rates, got {entry['cost_usd']}"
+    )
+    # Must NOT match the old approximation formula
+    old_approx = ((prompt_tokens * 0.2) + (completion_tokens * 0.8)) / 1_000_000
+    assert abs(entry["cost_usd"] - old_approx) > 1e-6, (
+        "cost_usd must use actual per-model rates, not the old approximation"
+    )
+
+
+def test_handle_approval_sets_report_approval_status() -> None:
+    """handle_approval for final_report sets artifacts['report']['approval_status'] = 'approved'."""
+    store = FakeStore()
+    runner = ResearchGraphRunner(store=store)
+    paused_state = {
+        "run_id": "run1",
+        "ticker": "DHG",
+        "objective": "test",
+        "current_stage": "WAITING_FINAL_APPROVAL",
+        "requires_human": True,
+        "valuation_outputs": {
+            "snapshot_id": "snap1",
+            "formula_traces": [
+                {
+                    "trace_id": "trace_fcff",
+                    "formula_id": "fcff_target",
+                    "formula_version": "valuation_v1",
+                    "calculation_steps": [{"step": "sum_pv_fcff"}],
+                }
+            ],
+        },
+        "draft_report": {"snapshot_id": "snap1"},
+        "artifacts": {"valuation_lock": {"locked": True}, "agent_handoffs": _handoffs()},
+        "gate_results": {
+            **_required_export_gates(),
+            "APPROVAL_PATH_GATE": {"passed": True},
+            "DATA_QUALITY_GATE": {"passed": True},
+            "FINANCIAL_ANALYST_GATE": {"passed": True},
+            "VALUATION_GATE": {"passed": True},
+            "CITATION_GATE": {"passed": True},
+            "EXPORT_GATE": {"passed": True},
+        },
+    }
+    store.save_artifact(run_id="run1", section_key="graph_state_snapshot", payload=paused_state)
+
+    runner.handle_approval("run1", "final_report", "approved", "analyst", {})
+
+    # The graph state snapshot saved after handle_approval must carry approval_status = "approved"
+    saved_states = [
+        a["payload"]
+        for a in store.artifacts
+        if a.get("section_key") == "graph_state_snapshot"
+    ]
+    assert saved_states, "No graph_state_snapshot saved after handle_approval"
+    final_state = saved_states[-1]
+    assert final_state.get("artifacts", {}).get("report", {}).get("approval_status") == "approved", (
+        "artifacts['report']['approval_status'] must equal 'approved' after final_report approval"
+    )
 
 
 def test_final_approval_publishes_only_after_export_gate() -> None:

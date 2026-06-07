@@ -125,6 +125,95 @@ class ReportContext:
     _has_forecast_table: bool = False
 
 
+@dataclass(frozen=True)
+class ReportSectionContract:
+    section_id: str
+    allowed_content_types: tuple[str, ...]
+    required_artifacts: tuple[str, ...] = ()
+    max_words: int = 650
+    chart_slots: int = 0
+    table_slots: int = 0
+
+
+REPORT_SECTION_CONTRACTS: dict[str, ReportSectionContract] = {
+    "snapshot": ReportSectionContract(
+        section_id="snapshot",
+        allowed_content_types=("investment_snapshot", "rating_status", "market_snapshot"),
+        required_artifacts=("facts", "valuation_result"),
+        chart_slots=1,
+        table_slots=1,
+    ),
+    "company_overview": ReportSectionContract(
+        section_id="company_overview",
+        allowed_content_types=("business_update", "company_profile", "ownership"),
+        required_artifacts=("facts",),
+        chart_slots=2,
+        table_slots=1,
+    ),
+    "financial_performance": ReportSectionContract(
+        section_id="financial_performance",
+        allowed_content_types=("financials", "margin_drivers", "cash_flow", "ratios"),
+        required_artifacts=("facts",),
+        table_slots=3,
+    ),
+    "forecast_drivers": ReportSectionContract(
+        section_id="forecast_drivers",
+        allowed_content_types=("forecast", "guidance", "operating_drivers"),
+        required_artifacts=("forecast",),
+        table_slots=2,
+    ),
+    "valuation_model": ReportSectionContract(
+        section_id="valuation_model",
+        allowed_content_types=("valuation", "bridge", "assumptions"),
+        required_artifacts=("valuation_result", "fcff", "fcfe"),
+        table_slots=2,
+    ),
+    "sensitivity_peer": ReportSectionContract(
+        section_id="sensitivity_peer",
+        allowed_content_types=("sensitivity", "peer_check"),
+        required_artifacts=("valuation_result",),
+        table_slots=2,
+    ),
+    "risks_catalysts": ReportSectionContract(
+        section_id="risks_catalysts",
+        allowed_content_types=("material_events", "risk", "catalyst"),
+        required_artifacts=("facts", "evidence"),
+        table_slots=2,
+    ),
+    "conclusion_sources": ReportSectionContract(
+        section_id="conclusion_sources",
+        allowed_content_types=("conclusion", "quality_status", "sources", "disclaimer"),
+        required_artifacts=("citation",),
+        table_slots=2,
+    ),
+}
+
+
+def section_coherence_gate(sections: list[dict[str, Any]]) -> dict[str, Any]:
+    """Detect obvious content-class leakage across contracted report sections."""
+    violations: list[dict[str, str]] = []
+    valuation_terms = ("target price", "price_fcff", "price_fcfe", "fcff", "fcfe", "wacc", "valuation", "dcf")
+    risk_terms = ("risk", "downside", "impairment", "litigation", "catalyst", "headwind")
+    business_only_sections = {"company_overview"}
+    driver_sections = {"financial_performance", "forecast_drivers"}
+
+    for section in sections:
+        section_id = str(section.get("page") or section.get("section_id") or "")
+        text = str(section.get("markdown") or section.get("content") or "").lower()
+        if section_id in business_only_sections and any(term in text for term in valuation_terms):
+            violations.append({"section_id": section_id, "reason": "valuation_content_in_business_section"})
+        if section_id in driver_sections and any(term in text for term in ("target price", "price_fcff", "price_fcfe")):
+            violations.append({"section_id": section_id, "reason": "target_price_content_in_driver_section"})
+        if section_id not in {"risks_catalysts", "conclusion_sources"} and any(term in text for term in risk_terms):
+            if section_id in business_only_sections:
+                violations.append({"section_id": section_id, "reason": "risk_content_in_business_section"})
+
+    return {
+        "status": "PASS" if not violations else "FAIL",
+        "violations": violations,
+    }
+
+
 # ---------------------------------------------------------------------------
 # Helper
 # ---------------------------------------------------------------------------
@@ -242,7 +331,7 @@ def _build_cover_snapshot(ctx: ReportContext) -> dict:
 
     md = f"""\
 # {ctx.ticker} — {ctx.company_name}
-**Sàn:** {ctx.exchange} | **Ngày báo cáo:** {ctx.report_date} | **Trạng thái:** {ctx.status}
+**Sàn:** {ctx.exchange} | **Ngày báo cáo:** {ctx.report_date}
 
 ---
 
@@ -555,7 +644,7 @@ def _build_conclusion(ctx: ReportContext) -> dict:
 
 ---
 
-_Báo cáo sinh ngày {ctx.report_date} | Dữ liệu đến {ctx.data_cutoff} | Trạng thái: {ctx.status}_
+_Báo cáo sinh ngày {ctx.report_date} | Dữ liệu đến {ctx.data_cutoff}_
 """
     return {
         "page": "conclusion",
@@ -597,3 +686,85 @@ def assemble_markdown(sections: list[dict]) -> str:
     each of the 8 sections).
     """
     return "\n\\pagebreak\n".join(s["markdown"] for s in sections)
+
+
+# ---------------------------------------------------------------------------
+# Citations appendix
+# ---------------------------------------------------------------------------
+
+_INTERNAL_TERMS = frozenset({
+    "tier", "confidence", "parser", "gate", "chunk_id",
+    "source_tier", "parser_version", "validation_status",
+    "ingested_at", "is_validated", "reliability_tier",
+})
+
+
+def build_citations_appendix(claim_ledger: dict) -> str:
+    """Build a clean HTML 'Nguồn & Trích dẫn' appendix from a serialised ClaimLedger dict.
+
+    Returns an HTML string safe for embedding in the report.
+    Only exposes document titles and URLs — no internal audit terms.
+    Sources are deduplicated and grouped by report section.
+    """
+    if not claim_ledger or not isinstance(claim_ledger, dict):
+        return ""
+
+    claims: list[dict] = claim_ledger.get("claims", [])
+    if not claims:
+        return ""
+
+    # Collect unique source_doc traces, keyed by (section, document_title, document_url)
+    # Preserve insertion order; deduplicate by (title, url) pair within each section.
+    from collections import defaultdict
+    by_section: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    seen: set[tuple[str, str]] = set()
+
+    for claim in claims:
+        section = str(claim.get("section") or "").strip()
+        for trace in claim.get("traces", []):
+            if trace.get("trace_type") != "source_doc":
+                continue
+            title = str(trace.get("document_title") or "").strip()
+            url = str(trace.get("document_url") or "").strip()
+            if not title:
+                continue
+            key = (title, url)
+            if key not in seen:
+                seen.add(key)
+                by_section[section].append((title, url))
+
+    if not by_section:
+        return ""
+
+    _SECTION_LABELS: dict[str, str] = {
+        "financial_performance": "Kết quả tài chính",
+        "valuation": "Định giá",
+        "forecast_drivers": "Dự phóng",
+        "sensitivity_peer": "Độ nhạy & đồng ngành",
+        "risks_catalysts": "Rủi ro & Catalyst",
+        "company_overview": "Tổng quan công ty",
+        "conclusion_sources": "Kết luận & nguồn",
+    }
+
+    items_html: list[str] = []
+    counter = 1
+    for section in sorted(by_section.keys()):
+        label = _SECTION_LABELS.get(section, section.replace("_", " ").title())
+        section_header = f'<li class="citation-section-header"><em>{escape(label)}</em></li>'
+        items_html.append(section_header)
+        for title, url in by_section[section]:
+            if url:
+                link = f'<a href="{escape(url)}" target="_blank">{escape(url)}</a>'
+                entry = f"<li>{counter}. {escape(title)} — {link}</li>"
+            else:
+                entry = f"<li>{counter}. {escape(title)}</li>"
+            items_html.append(entry)
+            counter += 1
+
+    list_html = "\n    ".join(items_html)
+    return f"""<div class="citations-appendix">
+  <h2>Nguồn &amp; Trích dẫn</h2>
+  <ol class="source-list">
+    {list_html}
+  </ol>
+</div>"""
