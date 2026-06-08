@@ -177,6 +177,58 @@ def _load_golden_fallback(
     return facts
 
 
+def _detect_golden_overrides(
+    db_facts: list[dict],
+    golden_facts: list[dict],
+) -> list[dict]:
+    """Compare overlapping (metric, period) between DB and golden CSV facts.
+
+    Returns override records: logs warning at >2% variance, marks blocking at >10%.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    db_lookup: dict[tuple[str, int], float] = {}
+    for f in db_facts:
+        key = (f.get("line_item_code", ""), f.get("fiscal_year", 0))
+        try:
+            db_lookup[key] = float(f["value"])
+        except (ValueError, KeyError, TypeError):
+            continue
+
+    overrides = []
+    for f in golden_facts:
+        key = (f.get("line_item_code", ""), f.get("fiscal_year", 0))
+        if key not in db_lookup:
+            continue
+        db_val = db_lookup[key]
+        golden_val = float(f["value"])
+        if db_val == 0 and golden_val == 0:
+            continue
+        denom = max(abs(db_val), abs(golden_val), 1e-9)
+        variance_pct = abs(golden_val - db_val) / denom * 100
+
+        is_blocking = variance_pct > 10.0
+        record = {
+            "metric": key[0],
+            "fiscal_year": key[1],
+            "db_value": db_val,
+            "golden_value": golden_val,
+            "variance_pct": round(variance_pct, 2),
+            "is_blocking": is_blocking,
+        }
+        overrides.append(record)
+
+        if variance_pct > 2.0:
+            logger.warning(
+                "GOLDEN_OVERRIDE %s %dFY: db=%.1f golden=%.1f variance=%.1f%%%s",
+                key[0], key[1], db_val, golden_val, variance_pct,
+                " [BLOCKING]" if is_blocking else "",
+            )
+
+    return overrides
+
+
 def build_facts(
     ticker: str,
     from_year: int = MVP_FROM_YEAR,
@@ -213,8 +265,16 @@ def build_facts(
         golden_periods = sorted({f"{r['fiscal_year']}FY" for r in golden_facts})
         print(f"[build_facts] {ticker} golden fallback: {len(golden_facts)} facts for periods {golden_periods}")
         raw_facts = raw_facts + golden_facts
+        # Detect golden overrides (Spec §1.2)
+        overrides = _detect_golden_overrides(
+            [f for f in raw_facts if not f.get("source_id", "").startswith("golden_csv_")],
+            golden_facts,
+        )
+        blocking_overrides = [o for o in overrides if o["is_blocking"]]
     else:
         print(f"[build_facts] {ticker} no golden fallback found at {GOLDEN_DIR / (ticker + '.csv')}")
+        overrides = []
+        blocking_overrides = []
 
     # Separate FY-only facts from forbidden periods
     fy_facts, forbidden_periods = _filter_facts(raw_facts, from_year, to_year)
@@ -284,6 +344,14 @@ def build_facts(
         validation_status_table=vstatus_table,
         source_tiers_by_period=source_tiers_by_period,
     )
+
+    # Golden override blocking (Spec §1.2)
+    if blocking_overrides:
+        for o in blocking_overrides:
+            report["blocking_reasons"].append(
+                f"golden_override_variance:{o['metric']}:{o['fiscal_year']}FY "
+                f"(db={o['db_value']:.1f}, golden={o['golden_value']:.1f}, variance={o['variance_pct']:.1f}%)"
+            )
 
     print(f"[build_facts] {ticker} annual_reports_collected: {report['annual_reports_collected']}")
     print(f"[build_facts] {ticker} coverage_gate: {report['coverage_gate']}")
