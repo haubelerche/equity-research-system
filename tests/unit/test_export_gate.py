@@ -47,3 +47,7 @@ class TestGateSkipIsFail:
             assert name in result.blocking_gates, (
                 f"SKIP gate {name!r} must appear in blocking_gates"
             )
+        # Verify gate_skipped:{name} reason format
+        assert any("gate_skipped:" in w for w in result.warnings), (
+            f"Expected gate_skipped:{{name}} in warnings, got: {result.warnings}"
+        )

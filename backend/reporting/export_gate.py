@@ -383,6 +383,17 @@ def evaluate_export_gate(
         if g.status in ("FAIL", "BLOCKED", "SKIP")
     ]
 
+    # Spec §1.1: produce gate_skipped:{name} blocking reasons
+    blocking_reasons: list[str] = []
+    for name in blocking:
+        g = gates[name]
+        if g.status == "SKIP":
+            blocking_reasons.append(f"gate_skipped:{name}")
+        elif g.status == "FAIL":
+            blocking_reasons.append(f"gate_failed:{name}")
+        elif g.status == "BLOCKED":
+            blocking_reasons.append(f"gate_blocked:{name}")
+
     is_exportable = len(blocking) == 0
     render_mode: RenderMode = "client_final" if is_exportable else "analyst_draft"
 
@@ -398,4 +409,5 @@ def evaluate_export_gate(
         render_mode=render_mode,
         is_final_exportable=is_exportable,
         blocking_gates=blocking,
+        warnings=blocking_reasons,
     )
