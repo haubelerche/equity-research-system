@@ -21,7 +21,7 @@ from backend.harness.gates import (
 )
 from backend.harness.graph import GRAPH_STAGES, build_langgraph
 from backend.harness.model_adapter import AnthropicModelAdapter
-from backend.harness.state import AgentExecutionContext, AgentHandoff, ResearchGraphState, stable_hash
+from backend.harness.state import AgentExecutionContext, ResearchGraphState, stable_hash
 from backend.harness.tool_registry import ToolRegistry
 from backend.harness.tools import (
     auto_ingest_tool,
@@ -542,10 +542,7 @@ class ResearchGraphRunner:
         )
 
     def _write_agent_handoff(self, state: ResearchGraphState, result) -> None:
-        import json
-
-        handoff_dir = ROOT / "artifacts" / "handoffs"
-        handoff_dir.mkdir(parents=True, exist_ok=True)
+        """Record agent handoff as a trace event instead of a separate JSON file."""
         agent_id = result.agent_id or self._agent_id_for_stage(state.current_stage)
         artifact_refs = [
             ref if isinstance(ref, dict) else dict(ref)
@@ -556,42 +553,26 @@ class ResearchGraphRunner:
             for ref in artifact_refs
             if ref.get("artifact_id")
         ]
-        issue_ids = []
-        if result.requires_human or result.status in {"needs_review", "failed"}:
-            reason = result.review_reason or result.blocking_reason or "agent_requires_review"
-            issue_ids.append(f"{agent_id}:{reason}")
-        handoff = AgentHandoff(
-            run_id=state.run_id,
-            agent_id=agent_id,
-            stage=state.current_stage,
-            input_refs=[
+        trace_entry = {
+            "kind": "agent_handoff",
+            "run_id": state.run_id,
+            "agent_id": agent_id,
+            "stage": state.current_stage,
+            "input_refs": [
                 ref.get("artifact_id", "")
                 for ref in state.artifact_refs
                 if isinstance(ref, dict) and ref.get("artifact_id")
-            ],
-            output_refs=output_refs,
-            review_status=result.status,
-            blocking_issue_ids=issue_ids,
-            unresolved_questions=[str(w) for w in result.warnings],
-            recommended_next_stage=result.next_action,
-        ).with_hash()
-        path = handoff_dir / f"{state.run_id}_{agent_id}_{state.current_stage}_handoff.json"
-        path.write_text(json.dumps(handoff.model_dump(mode="json"), indent=2, default=str), encoding="utf-8")
-        ref = {
-            "artifact_id": f"{state.run_id}_{agent_id}_{state.current_stage}_handoff",
-            "artifact_type": "agent_handoff_json",
-            "section_key": f"handoff_{agent_id}",
-            "version": 1,
-            "storage_path": str(path),
-            "checksum": handoff.handoff_hash,
-            "is_locked": False,
-            "producer": agent_id,
+            ][:20],
+            "output_refs": output_refs,
+            "review_status": result.status,
+            "requires_human": result.requires_human,
+            "blocking_reason": result.blocking_reason,
         }
-        state.artifact_refs.append(ref)
-        state.artifacts.setdefault("agent_handoffs", []).append(handoff.model_dump(mode="json"))
+        state.trace.append(trace_entry)
+        state.artifacts.setdefault("agent_handoffs", []).append(trace_entry)
 
     def _write_agent_payload_artifact(self, state: ResearchGraphState, result) -> None:
-        """Persist report-relevant agent payloads so manifests can resolve them."""
+        """Record agent payload as a trace event instead of a separate JSON file."""
         section_by_agent = {
             "financial_analyst": "financial_analysis",
             "report_writer_critic": "report_critic_review",
@@ -600,32 +581,18 @@ class ResearchGraphRunner:
         if not section_key or not isinstance(result.payload, dict):
             return
 
-        import json
-
-        output_dir = ROOT / "artifacts" / "agent_outputs"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        path = output_dir / f"{state.run_id}_{section_key}.json"
-        payload = {
+        trace_entry = {
+            "kind": "agent_message",
             "run_id": state.run_id,
-            "ticker": state.ticker,
             "agent_id": result.agent_id,
-            "payload": result.payload,
-        }
-        path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
-        state.artifact_refs = [
-            ref for ref in state.artifact_refs
-            if not (isinstance(ref, dict) and ref.get("section_key") == section_key)
-        ]
-        state.artifact_refs.append({
-            "artifact_id": f"{state.run_id}_{section_key}",
-            "artifact_type": "agent_output_json",
             "section_key": section_key,
-            "version": 1,
-            "storage_path": str(path),
-            "checksum": stable_hash(payload),
-            "is_locked": False,
-            "producer": result.agent_id,
-        })
+            "status": result.status,
+            "summary": {
+                "payload_keys": sorted(result.payload.keys()) if isinstance(result.payload, dict) else [],
+                "confidence": getattr(result, "confidence", None),
+            },
+        }
+        state.trace.append(trace_entry)
 
     def _record_tool_trace(
         self,
@@ -760,102 +727,8 @@ class ResearchGraphRunner:
         state.artifact_refs.append(ref)
 
     def _write_agent_effectiveness_audit(self, state: "ResearchGraphState") -> None:
-        """Write a per-run audit proving which tools and agents executed."""
-        import json
-        from datetime import UTC, datetime
-
-        audit_dir = ROOT / "artifacts" / "audits"
-        audit_dir.mkdir(parents=True, exist_ok=True)
-        audit_path = audit_dir / f"{state.run_id}_agent_effectiveness_audit.json"
-
-        tool_calls = [entry for entry in state.trace if entry.get("kind") == "tool_call"]
-        agent_messages = [entry for entry in state.trace if entry.get("kind") == "agent_message"]
-        auto_ingest = state.artifacts.get("auto_ingest") or {}
-        financial_review = state.artifacts.get("financial_analyst_review") or {}
-        report_summary = state.draft_report or state.artifacts.get("report") or {}
-        quality_summary = state.evaluation_results or state.artifacts.get("quality") or {}
-
-        payload = {
-            "schema_version": 1,
-            "run_id": state.run_id,
-            "ticker": state.ticker,
-            "generated_at": datetime.now(UTC).isoformat(),
-            "current_stage": state.current_stage,
-            "status": state.status,
-            "requires_human": state.requires_human,
-            "blocking_reason": state.blocking_reason,
-            "tool_execution": [
-                {
-                    "tool_name": entry.get("tool_name"),
-                    "agent_role": entry.get("agent_role"),
-                    "output_hash": entry.get("output_hash"),
-                    "output_summary": entry.get("output_summary", {}),
-                }
-                for entry in tool_calls
-            ],
-            "agent_execution": [
-                {
-                    "agent_id": entry.get("agent_id") or entry.get("agent_role"),
-                    "action": entry.get("action"),
-                    "status": entry.get("status"),
-                    "latency_ms": entry.get("latency_ms"),
-                    "cost_estimate": entry.get("cost_estimate"),
-                    "confidence": entry.get("confidence"),
-                    "warnings": entry.get("warnings", []),
-                    "requires_human": entry.get("requires_human", False),
-                    "output_summary": entry.get("output_summary", {}),
-                }
-                for entry in agent_messages
-            ],
-            "data_retrieval_effectiveness": {
-                "web_ingest_attempted": bool(auto_ingest.get("web_ingest_attempted")),
-                "cafef_rows": int(auto_ingest.get("cafef_rows") or 0),
-                "pdf_rows": int(auto_ingest.get("pdf_rows") or 0),
-                "ocr_candidates": int(auto_ingest.get("ocr_candidates") or 0),
-                "ocr_promoted": int(auto_ingest.get("ocr_promoted") or 0),
-                "promoted_official_facts": int(auto_ingest.get("promoted") or 0),
-                "year_statuses": auto_ingest.get("year_statuses", []),
-                "official_ready": bool(auto_ingest.get("official_ready")),
-                "continued_with_tier2_or_tier3_fallback": bool(
-                    auto_ingest.get("continued_with_tier2_or_tier3_fallback")
-                ),
-            },
-            "financial_analyst_effectiveness": {
-                "payload_keys": sorted(financial_review.keys()) if isinstance(financial_review, dict) else [],
-                "metric_reference_count": _count_metric_references(financial_review),
-                "period_reference_count": _count_period_references(financial_review),
-                "review_payload_length": len(json.dumps(financial_review, ensure_ascii=False, default=str)),
-            },
-            "report_writer_effectiveness": {
-                "claims_count": int(report_summary.get("claims_count") or 0),
-                "citation_count": int(report_summary.get("citation_count") or 0),
-                "export_blocked": bool(report_summary.get("export_blocked")),
-                "report_path": report_summary.get("report_path"),
-                "quality_status": quality_summary.get("overall_status"),
-                "blocking_reason": quality_summary.get("blocking_reason") or report_summary.get("blocking_reason"),
-            },
-        }
-        audit_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-
-        ref = {
-            "artifact_id": f"{state.run_id}_agent_effectiveness_audit",
-            "artifact_type": "agent_effectiveness_audit_json",
-            "section_key": "agent_effectiveness_audit",
-            "version": 1,
-            "storage_path": str(audit_path),
-            "checksum": stable_hash(payload),
-            "is_locked": False,
-            "producer": "ResearchGraphRunner",
-        }
-        state.artifact_refs = [
-            existing
-            for existing in state.artifact_refs
-            if not (
-                isinstance(existing, dict)
-                and existing.get("section_key") == "agent_effectiveness_audit"
-            )
-        ]
-        state.artifact_refs.append(ref)
+        """No-op: agent effectiveness data is now in state.trace (trace.jsonl)."""
+        pass
 
     @staticmethod
     def _agent_id_for_stage(stage: str) -> str:

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -95,12 +94,12 @@ def test_agent_stage_writes_handoff_artifact_and_manifest_ref(tmp_path, monkeypa
     handoffs = state.artifacts["agent_handoffs"]
     assert len(handoffs) == 1
     assert handoffs[0]["agent_id"] == "supervisor"
-    assert handoffs[0]["handoff_hash"]
-    handoff_ref = next(ref for ref in state.artifact_refs if ref.get("section_key") == "handoff_supervisor")
-    handoff_path = handoff_ref["storage_path"]
-    written = json.loads(open(handoff_path, encoding="utf-8").read())
-    assert written["run_id"] == "run_handoff"
-    assert written["recommended_next_stage"] == "DATA_RETRIEVAL_RUN"
+    assert handoffs[0]["kind"] == "agent_handoff"
+    # Handoff data is now in state.trace instead of a separate JSON file
+    trace_handoffs = [e for e in state.trace if e.get("kind") == "agent_handoff"]
+    assert len(trace_handoffs) == 1
+    assert trace_handoffs[0]["run_id"] == "run_handoff"
+    assert trace_handoffs[0]["stage"] == "SUPERVISOR_PLAN"
 
 
 def test_financial_analyst_payload_is_manifestable(tmp_path, monkeypatch) -> None:
@@ -124,6 +123,10 @@ def test_financial_analyst_payload_is_manifestable(tmp_path, monkeypatch) -> Non
 
     runner._merge_agent_result(state, result)
 
-    ref = next(ref for ref in state.artifact_refs if ref.get("section_key") == "financial_analysis")
-    artifact = json.loads(open(ref["storage_path"], encoding="utf-8").read())
-    assert artifact["payload"]["financial_narrative"] == "Traceable narrative"
+    # Payload data is now recorded in state.trace instead of a separate JSON file
+    trace_payloads = [
+        e for e in state.trace
+        if e.get("kind") == "agent_message" and e.get("section_key") == "financial_analysis"
+    ]
+    assert len(trace_payloads) == 1
+    assert "financial_narrative" in trace_payloads[0]["summary"]["payload_keys"]

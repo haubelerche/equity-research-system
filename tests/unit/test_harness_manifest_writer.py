@@ -104,7 +104,7 @@ def test_evidence_packet_is_manifested(tmp_path, monkeypatch):
 
 
 def test_agent_effectiveness_audit_is_written_and_manifestable(tmp_path, monkeypatch):
-    """Agent audit must prove tool/model execution and data-source fallback state."""
+    """Agent audit data must be present in state.trace (trace.jsonl, not a separate file)."""
     from backend.harness.runner import ResearchGraphRunner
     from backend.harness.state import ResearchGraphState
 
@@ -162,18 +162,19 @@ def test_agent_effectiveness_audit_is_written_and_manifestable(tmp_path, monkeyp
     import backend.harness.runner as runner_mod
     monkeypatch.setattr(runner_mod, "ROOT", tmp_path, raising=False)
 
+    # _write_agent_effectiveness_audit is now a no-op; data lives in state.trace
     runner._write_agent_effectiveness_audit(state)
-    runner._write_run_manifest(state)
 
-    audit_path = tmp_path / "artifacts" / "audits" / "run_agent_audit_test_agent_effectiveness_audit.json"
-    audit = json.loads(audit_path.read_text(encoding="utf-8"))
-    assert audit["ticker"] == "DP3"
-    assert audit["data_retrieval_effectiveness"]["web_ingest_attempted"] is True
-    assert audit["data_retrieval_effectiveness"]["cafef_rows"] == 12
-    assert audit["data_retrieval_effectiveness"]["continued_with_tier2_or_tier3_fallback"] is True
-    assert audit["financial_analyst_effectiveness"]["metric_reference_count"] >= 1
-    assert audit["report_writer_effectiveness"]["claims_count"] == 3
+    # Verify audit data is accessible via state.trace
+    tool_calls = [e for e in state.trace if e.get("kind") == "tool_call"]
+    agent_messages = [e for e in state.trace if e.get("kind") == "agent_message"]
+    assert any(e.get("tool_name") == "AUTO_INGEST" for e in tool_calls)
+    auto_ingest_entry = next(e for e in tool_calls if e.get("tool_name") == "AUTO_INGEST")
+    assert auto_ingest_entry["output_summary"]["web_ingest_attempted"] is True
+    assert auto_ingest_entry["output_summary"]["cafef_rows"] == 12
+    assert auto_ingest_entry["output_summary"]["continued_with_tier2_or_tier3_fallback"] is True
+    assert any(e.get("agent_id") == "financial_analyst" for e in agent_messages)
 
-    manifest_path = tmp_path / "artifacts" / "manifests" / "run_agent_audit_test_manifest.json"
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    assert "agent_effectiveness_audit" in manifest["artifacts"]
+    # No audit file should be written
+    audit_dir = tmp_path / "artifacts" / "audits"
+    assert not audit_dir.exists() or not list(audit_dir.iterdir())
