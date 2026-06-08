@@ -14,6 +14,7 @@ from typing import Any
 
 from backend.facts.normalizer import (
     FactTable, periods_sorted, build_source_tier_coverage,
+    build_source_conflict_report,
 )
 from backend.facts.reconciliation import run_reconciliation, ReconciliationReport
 
@@ -220,6 +221,19 @@ def build_fy_validation_report(
             f"reconciliation_failures: {', '.join(c.name for c in recon.critical_failures)}"
         )
 
+    # --- Core metric conflict check (Spec §1.3) ---
+    source_conflicts = build_source_conflict_report(ticker, raw_facts)
+    core_metric_conflicts = [
+        c for c in source_conflicts
+        if c.requires_review and c.metric in CORE_FY_KEYS
+    ]
+    if core_metric_conflicts:
+        for c in core_metric_conflicts:
+            blocking_reasons.append(
+                f"core_metric_conflict:{c.metric}:{c.period} "
+                f"(variance={c.variance_pct:.1f}%, sources={list(c.candidate_values.keys())})"
+            )
+
     # --- Tier source coverage check (Plan §11.2) — always runs ---
     # Auto-compute source_tiers_by_period from raw_facts if not provided by caller.
     # This removes the silent pass: the gate now always has real data to evaluate.
@@ -246,6 +260,7 @@ def build_fy_validation_report(
         and source_validation_gate == "pass"
         and not recon.valuation_blocked
         and tier_coverage["status"] != "fail"
+        and not core_metric_conflicts
     )
     valuation_gate = "pass" if all_pass else "fail"
     valuation_ready = all_pass
