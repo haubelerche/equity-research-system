@@ -2,8 +2,13 @@
 .worktrees/
 
 # Private / generated - never commit
-#.claude/
-
+.md
+reports/
+plans/
+fin_data/
+.claude/
+.claude/EXECUTION_STATE.md
+tests/
 docs/superpowers/
 
 # Large reference repos
@@ -65,3 +70,8 @@ artifacts/
 # Font binaries — provisioned locally via scripts/setup_fonts.py
 assets/fonts/*.ttf
 assets/fonts/*.otf
+
+# Run-scoped artifacts (production output — not source)
+artifacts/runs/
+artifacts/reports_pdf/.chrome-profile-*/
+artifacts/dev/
