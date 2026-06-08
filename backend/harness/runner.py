@@ -279,7 +279,7 @@ class ResearchGraphRunner:
             self._merge_result(state, result)
 
             # Step 3: build evidence index
-            index_result = self._run_tool(state, "data_retrieval", "build_index", state.ticker, state.from_year, state.to_year)
+            index_result = self._run_tool(state, "data_retrieval", "build_index", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
             state.artifacts["index"] = index_result.summary
             state.retrieval_results = index_result.summary
             self._merge_result(state, index_result)
@@ -300,7 +300,7 @@ class ResearchGraphRunner:
             if snapshot_result.blocking_reason:
                 raise RuntimeError(snapshot_result.blocking_reason)
 
-            ratio_result = self._run_tool(state, "financial_analyst", "read_ratio_artifact", state.ticker, state.snapshot_id)
+            ratio_result = self._run_tool(state, "financial_analyst", "read_ratio_artifact", state.ticker, state.snapshot_id, run_id=state.run_id)
             state.artifacts["ratios"] = ratio_result.summary
             self._merge_result(state, ratio_result)
             if ratio_result.blocking_reason:

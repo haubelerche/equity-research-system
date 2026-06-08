@@ -39,7 +39,7 @@ def test_data_retrieval_run_calls_auto_ingest_before_build_facts(monkeypatch):
         call_order.append("build_facts")
         return _make_fake_result("BUILD_FACTS")
 
-    def fake_build_index(ticker, from_year, to_year):
+    def fake_build_index(ticker, from_year, to_year, **kw):
         call_order.append("build_index")
         return _make_fake_result("BUILD_INDEX")
 

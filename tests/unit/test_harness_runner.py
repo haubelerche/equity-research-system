@@ -145,12 +145,12 @@ def _install_fake_tools(monkeypatch, runner_mod, overrides: dict | None = None) 
             "BUILD_FACTS",
             {"valuation_gate": "pass", "snapshot_id": "snap1", "blocking_reasons": []},
         ),
-        "build_index": lambda ticker, from_year, to_year: _service("BUILD_INDEX", {"chunks_inserted": 3}),
+        "build_index": lambda ticker, from_year, to_year, **kw: _service("BUILD_INDEX", {"chunks_inserted": 3}),
         "read_snapshot": lambda ticker, snapshot_id: _service(
             "READ_SNAPSHOT",
             {"snapshot_id": snapshot_id, "metric_refs": ["revenue.net"], "period_refs": ["2025FY"]},
         ),
-        "read_ratio_artifact": lambda ticker, snapshot_id: _service(
+        "read_ratio_artifact": lambda ticker, snapshot_id, **kw: _service(
             "READ_RATIO_ARTIFACT",
             {"snapshot_id": snapshot_id, "metric_refs": ["gross_margin"], "period_refs": ["2025FY"]},
         ),

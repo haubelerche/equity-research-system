@@ -146,11 +146,14 @@ def auto_ingest_tool(
     return _result("AUTO_INGEST", node_status, summary)
 
 
-def build_index_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int = MVP_TO_YEAR) -> ServiceNodeResult:
+def build_index_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int = MVP_TO_YEAR, run_id: str | None = None) -> ServiceNodeResult:
     from scripts.build_index import build_index
 
     summary = build_index(ticker=ticker, years=list(range(from_year, to_year + 1)))
-    out_dir = Path.cwd() / "artifacts" / "index"
+    if run_id:
+        out_dir = Path.cwd() / "artifacts" / "runs" / run_id
+    else:
+        out_dir = Path.cwd() / "artifacts" / "index"
     out_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
     artifact_path = out_dir / f"{ticker.upper()}_{ts}_index_summary.json"
@@ -393,7 +396,7 @@ def read_snapshot_tool(ticker: str, snapshot_id: str | None) -> ServiceNodeResul
     )
 
 
-def read_ratio_artifact_tool(ticker: str, snapshot_id: str | None) -> ServiceNodeResult:
+def read_ratio_artifact_tool(ticker: str, snapshot_id: str | None, run_id: str | None = None) -> ServiceNodeResult:
     if not snapshot_id:
         return _result(
             "READ_RATIO_ARTIFACT",
@@ -425,7 +428,10 @@ def read_ratio_artifact_tool(ticker: str, snapshot_id: str | None) -> ServiceNod
         "metric_ids": sorted(ratios.keys()),
         "unit": "ratio",
     }
-    out_dir = Path.cwd() / "artifacts" / "analysis"
+    if run_id:
+        out_dir = Path.cwd() / "artifacts" / "runs" / run_id
+    else:
+        out_dir = Path.cwd() / "artifacts" / "analysis"
     out_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
     artifact_path = out_dir / f"{ticker.upper()}_{ts}_ratio_artifact.json"
