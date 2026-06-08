@@ -1,3 +1,4 @@
+# DEV-ONLY — production runs use run_research.py
 """Phase 3 — Canonical Facts and Data Quality Gates.
 
 Reads ingested financial facts from PostgreSQL, filters to FY-only periods

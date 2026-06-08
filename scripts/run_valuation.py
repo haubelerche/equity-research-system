@@ -1,3 +1,4 @@
+# DEV-ONLY — production runs use run_research.py
 """Phase 4 — Code-First Valuation.
 
 Reads from a research snapshot (frozen accepted facts), runs deterministic

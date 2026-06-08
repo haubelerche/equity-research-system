@@ -1,3 +1,4 @@
+# DEV-ONLY — production runs use run_research.py
 """Phase 6 -> Report Generation (Enhanced).
 
 Reads from a research snapshot (frozen accepted facts) and the latest

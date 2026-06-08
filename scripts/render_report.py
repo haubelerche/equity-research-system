@@ -1,3 +1,4 @@
+# DEV-ONLY — production runs use run_research.py
 """Render a report to HTML and optionally PDF.
 
 Usage:
