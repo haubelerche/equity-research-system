@@ -46,7 +46,8 @@ def test_valuation_result_schema_keys(tmp_path):
     writer = ArtifactWriter(base_dir=tmp_path)
     writer.write_all(arts)
     p = tmp_path / "valuation_results" / f"{arts.run_id}_{arts.ticker}_valuation_result.json"
-    d = json.load(open(p))
+    with open(p, encoding="utf-8") as _f:
+        d = json.load(_f)
     for key in [
         "run_id", "ticker", "valuation_date", "current_price", "target_price",
         "upside_downside", "rating_model_output", "fcff_dcf", "sensitivity",
@@ -61,7 +62,8 @@ def test_upside_stored_as_decimal(tmp_path):
     writer = ArtifactWriter(base_dir=tmp_path)
     writer.write_all(arts)
     p = tmp_path / "valuation_results" / f"{arts.run_id}_{arts.ticker}_valuation_result.json"
-    d = json.load(open(p))
+    with open(p, encoding="utf-8") as _f:
+        d = json.load(_f)
     assert abs(d["upside_downside"] - 0.451) < 0.001
 
 
@@ -71,7 +73,8 @@ def test_claim_ledger_has_claim_id_prefix(tmp_path):
     writer = ArtifactWriter(base_dir=tmp_path)
     writer.write_all(arts)
     p = tmp_path / "claim_ledgers" / f"{arts.run_id}_{arts.ticker}_claim_ledger.json"
-    d = json.load(open(p))
+    with open(p, encoding="utf-8") as _f:
+        d = json.load(_f)
     assert d["claims"][0]["claim_id"].startswith("CLM-")
 
 
@@ -81,7 +84,8 @@ def test_eval_result_overall_status_warn(tmp_path):
     writer = ArtifactWriter(base_dir=tmp_path)
     writer.write_all(arts)
     p = tmp_path / "eval_results" / f"{arts.run_id}_{arts.ticker}_eval_result.json"
-    d = json.load(open(p))
+    with open(p, encoding="utf-8") as _f:
+        d = json.load(_f)
     assert d["overall_status"] == "WARN_NEEDS_REVIEW"
     assert d["n_warn"] == 1
 
@@ -91,7 +95,8 @@ def test_reproducibility_hash_is_sha256(tmp_path):
     writer = ArtifactWriter(base_dir=tmp_path)
     writer.write_all(arts)
     p = tmp_path / "valuation_results" / f"{arts.run_id}_{arts.ticker}_valuation_result.json"
-    d = json.load(open(p))
+    with open(p, encoding="utf-8") as _f:
+        d = json.load(_f)
     assert d["reproducibility_hash"].startswith("sha256:")
 
 
@@ -101,7 +106,8 @@ def test_source_manifest_schema(tmp_path):
     writer = ArtifactWriter(base_dir=tmp_path)
     writer.write_all(arts)
     p = tmp_path / "source_manifests" / f"{arts.run_id}_{arts.ticker}_source_manifest.json"
-    d = json.load(open(p))
+    with open(p, encoding="utf-8") as _f:
+        d = json.load(_f)
     assert d["sources"][0]["source_id"].startswith("SRC-")
     for key in ["run_id", "ticker", "generated_at", "sources"]:
         assert key in d
@@ -115,7 +121,8 @@ def test_eval_result_critical_fail(tmp_path):
     writer = ArtifactWriter(base_dir=tmp_path)
     writer.write_all(arts)
     p = tmp_path / "eval_results" / f"{arts.run_id}_{arts.ticker}_eval_result.json"
-    d = json.load(open(p))
+    with open(p, encoding="utf-8") as _f:
+        d = json.load(_f)
     assert d["overall_status"] == "CRITICAL_FAIL"
     assert d["n_fail"] == 1
 
@@ -128,7 +135,8 @@ def test_eval_result_pass(tmp_path):
     writer = ArtifactWriter(base_dir=tmp_path)
     writer.write_all(arts)
     p = tmp_path / "eval_results" / f"{arts.run_id}_{arts.ticker}_eval_result.json"
-    d = json.load(open(p))
+    with open(p, encoding="utf-8") as _f:
+        d = json.load(_f)
     assert d["overall_status"] == "PASS"
     assert d["n_pass"] == 1
 
@@ -138,7 +146,8 @@ def test_run_log_artifacts_map(tmp_path):
     writer = ArtifactWriter(base_dir=tmp_path)
     writer.write_all(arts)
     p = tmp_path / "run_logs" / f"{arts.run_id}_{arts.ticker}_run_log.json"
-    d = json.load(open(p))
+    with open(p, encoding="utf-8") as _f:
+        d = json.load(_f)
     assert "artifacts" in d
     assert "claim_ledger" in d["artifacts"]
     assert "source_manifest" in d["artifacts"]

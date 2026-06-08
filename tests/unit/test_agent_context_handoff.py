@@ -101,3 +101,29 @@ def test_agent_stage_writes_handoff_artifact_and_manifest_ref(tmp_path, monkeypa
     written = json.loads(open(handoff_path, encoding="utf-8").read())
     assert written["run_id"] == "run_handoff"
     assert written["recommended_next_stage"] == "DATA_RETRIEVAL_RUN"
+
+
+def test_financial_analyst_payload_is_manifestable(tmp_path, monkeypatch) -> None:
+    import backend.harness.runner as runner_mod
+
+    runner = ResearchGraphRunner(store=MagicMock())
+    monkeypatch.setattr(runner_mod, "ROOT", tmp_path, raising=False)
+    state = ResearchGraphState(
+        run_id="run_financial_analysis",
+        ticker="DBD",
+        objective="narrative test",
+        current_stage="FINANCIAL_ANALYST_RUN",
+    )
+    result = AgentResult(
+        agent_id="financial_analyst",
+        action="analyze",
+        status="completed",
+        payload={"financial_narrative": "Traceable narrative"},
+        confidence=0.9,
+    )
+
+    runner._merge_agent_result(state, result)
+
+    ref = next(ref for ref in state.artifact_refs if ref.get("section_key") == "financial_analysis")
+    artifact = json.loads(open(ref["storage_path"], encoding="utf-8").read())
+    assert artifact["payload"]["financial_narrative"] == "Traceable narrative"

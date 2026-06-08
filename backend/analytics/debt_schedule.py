@@ -59,11 +59,17 @@ class DebtScheduleRow:
     ending_interest_bearing_debt: float | None
 
     new_borrowing: float | None = None
-    debt_repayment: float | None = None
-    net_borrowing: float | None = None
+    mandatory_debt_repayment: float | None = None   # scheduled principal repayment
+    optional_debt_repayment: float | None = None    # discretionary prepayment
+    debt_repayment: float | None = None             # = mandatory + optional
+    net_borrowing: float | None = None              # = new_borrowing - debt_repayment
 
-    interest_expense: float | None = None
-    implied_cost_of_debt: float | None = None
+    average_debt: float | None = None               # = (beginning + ending) / 2
+    cost_of_debt: float | None = None               # rate used for interest_expense
+    interest_expense: float | None = None           # = average_debt × cost_of_debt (if available)
+    implied_cost_of_debt: float | None = None       # historical: abs(ie) / beginning_debt
+
+    identity_check_passes: bool | None = None       # ending == beginning + new_borrowing - repayment
 
     method: DebtForecastMethod = "missing"
     confidence: Literal["high", "medium", "low"] = "low"
@@ -77,12 +83,17 @@ class DebtScheduleRow:
             "year": self.year,
             "label": self.label,
             "beginning_interest_bearing_debt": self.beginning_interest_bearing_debt,
-            "ending_interest_bearing_debt": self.ending_interest_bearing_debt,
             "new_borrowing": self.new_borrowing,
+            "mandatory_debt_repayment": self.mandatory_debt_repayment,
+            "optional_debt_repayment": self.optional_debt_repayment,
             "debt_repayment": self.debt_repayment,
+            "ending_interest_bearing_debt": self.ending_interest_bearing_debt,
             "net_borrowing": self.net_borrowing,
-            "interest_expense": self.interest_expense,
+            "average_debt": round(self.average_debt, 2) if self.average_debt is not None else None,
+            "cost_of_debt": round(self.cost_of_debt, 4) if self.cost_of_debt is not None else None,
+            "interest_expense": round(self.interest_expense, 2) if self.interest_expense is not None else None,
             "implied_cost_of_debt": round(self.implied_cost_of_debt, 4) if self.implied_cost_of_debt is not None else None,
+            "identity_check_passes": self.identity_check_passes,
             "method": self.method,
             "confidence": self.confidence,
             "warning": self.warning,
@@ -101,21 +112,141 @@ class DebtSchedule:
     forecast_method: DebtForecastMethod
     warnings: list[str] = field(default_factory=list)
 
-    def net_borrowing_schedule(self) -> dict[str, float]:
-        """Return {label: net_borrowing} for forecast years (for FCFE engine)."""
+    # ── Publishability gates ───────────────────────────────────────────────
+
+    @property
+    def is_fcfe_publishable(self) -> bool:
+        """Return True only when net_borrowing can be trusted for FCFE.
+
+        Per plan invariant:
+          if net_borrowing.confidence not in ["high", "approved"]:
+              fcfe.publishable = False
+
+        Methods with guaranteed-high confidence:
+          direct_cash_flow  — sourced from CFS (high)
+          zero_debt_policy  — company carries no debt (high / N/A)
+        All other methods (target_debt_ratio, balance_sheet_delta,
+        manual_override, missing) are medium/low → block FCFE.
+        """
+        _PUBLISHABLE_METHODS: set[str] = {"direct_cash_flow", "zero_debt_policy"}
+        if self.forecast_method not in _PUBLISHABLE_METHODS:
+            return False
+        # Even within a publishable method, all rows must be high confidence
+        return all(
+            row.confidence == "high"
+            for row in self.forecast_rows
+        )
+
+    @property
+    def fcfe_block_reason(self) -> str | None:
+        """Human-readable reason why FCFE is blocked, or None if publishable."""
+        if self.is_fcfe_publishable:
+            return None
+        method_reasons = {
+            "target_debt_ratio": (
+                "Debt forecast uses historical_median_debt as proxy — "
+                "net_borrowing is NOT sourced from CFS or maturity schedule. "
+                "Analyst must provide approved debt path before publishing FCFE."
+            ),
+            "balance_sheet_delta": (
+                "Net borrowing approximated from balance-sheet delta (medium confidence). "
+                "FCFE requires high-confidence debt schedule (direct CFS data or analyst approval)."
+            ),
+            "manual_override": (
+                "Debt path is a manual analyst override — pending approval. "
+                "FCFE blocked until debt_schedule.status = approved."
+            ),
+            "missing": (
+                "No debt schedule available — FCFE cannot be computed. "
+                "Source historical borrowing/repayment data from CFS."
+            ),
+        }
+        return method_reasons.get(
+            self.forecast_method,
+            f"Debt schedule method '{self.forecast_method}' does not qualify for FCFE publication.",
+        )
+
+    def net_borrowing_schedule(self) -> dict[str, float | None]:
+        """Return {label: net_borrowing | None} for forecast years.
+
+        Returns None for rows without a valid net_borrowing value, so callers
+        can distinguish 'zero net borrowing' from 'net borrowing unknown'.
+        Use net_borrowing_schedule_safe() for a fallback-to-zero version.
+        """
+        return {
+            row.label: row.net_borrowing
+            for row in self.forecast_rows
+        }
+
+    def net_borrowing_schedule_safe(self) -> dict[str, float]:
+        """Return {label: net_borrowing} with 0.0 fallback (for diagnostics only).
+
+        WARNING: Do NOT use in FCFE computation. Use net_borrowing_schedule()
+        and check is_fcfe_publishable before trusting these values.
+        """
         return {
             row.label: (row.net_borrowing or 0.0)
             for row in self.forecast_rows
         }
 
+    @property
+    def status(self) -> Literal["approved", "high", "medium", "low", "blocked"]:
+        """Artifact-level status for pipeline gate decisions.
+
+        approved  — direct_cash_flow all-high (CFS-sourced, highest trust)
+        high      — same criteria; alias for approved in absence of analyst sign-off field
+        medium    — balance_sheet_delta or manual_override (model approximation)
+        low       — target_debt_ratio (median-anchored model)
+        blocked   — missing data; FCFE cannot proceed
+        """
+        if self.forecast_method in ("direct_cash_flow", "zero_debt_policy"):
+            if all(r.confidence == "high" for r in self.forecast_rows):
+                return "high"
+        if self.forecast_method in ("balance_sheet_delta", "manual_override"):
+            return "medium"
+        if self.forecast_method == "target_debt_ratio":
+            return "low"
+        return "blocked"
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "ticker": self.ticker,
             "forecast_method": self.forecast_method,
+            "status": self.status,
+            "is_fcfe_publishable": self.is_fcfe_publishable,
+            "fcfe_block_reason": self.fcfe_block_reason,
             "historical_rows": [r.to_dict() for r in self.historical_rows],
             "forecast_rows": [r.to_dict() for r in self.forecast_rows],
             "warnings": self.warnings,
         }
+
+
+def _check_debt_identity(
+    beginning: float | None,
+    new_borrowing: float | None,
+    debt_repayment: float | None,
+    ending: float | None,
+    tol: float = 0.1,
+) -> bool | None:
+    """Validate: ending == beginning + new_borrowing - debt_repayment.
+
+    Returns True if identity holds within tol VND bn, False if violated,
+    None if any input is missing (cannot check).
+    """
+    if any(v is None for v in [beginning, new_borrowing, debt_repayment, ending]):
+        return None
+    expected = beginning + new_borrowing - debt_repayment  # type: ignore[operator]
+    return abs(expected - ending) < tol  # type: ignore[operator]
+
+
+def _compute_average_debt(
+    beginning: float | None,
+    ending: float | None,
+) -> float | None:
+    """Average debt = (beginning + ending) / 2. Returns None if either input missing."""
+    if beginning is None or ending is None:
+        return None
+    return (beginning + ending) / 2.0
 
 
 def _get(table: FactTable, key: str, period: str) -> float | None:
@@ -205,6 +336,10 @@ def build_historical_debt_schedule(
         if ie is not None and beginning_debt and beginning_debt > 0:
             implied_cod = abs(ie) / beginning_debt
 
+        debt_repayment_val = abs(repayment) if repayment is not None else None
+        avg_debt = _compute_average_debt(beginning_debt, ending_debt)
+        identity_ok = _check_debt_identity(beginning_debt, new_borrow, debt_repayment_val, ending_debt)
+
         missing: list[MissingValueReason] = []
         if ending_debt is None:
             missing.append(MissingValueReason(
@@ -220,10 +355,13 @@ def build_historical_debt_schedule(
             beginning_interest_bearing_debt=beginning_debt,
             ending_interest_bearing_debt=ending_debt,
             new_borrowing=new_borrow,
-            debt_repayment=abs(repayment) if repayment is not None else None,
+            mandatory_debt_repayment=debt_repayment_val,
+            debt_repayment=debt_repayment_val,
             net_borrowing=net_borrow,
+            average_debt=avg_debt,
             interest_expense=abs(ie) if ie is not None else None,
             implied_cost_of_debt=implied_cod,
+            identity_check_passes=identity_ok,
             method=method,
             confidence=confidence,
             warning=warning,
@@ -268,11 +406,14 @@ def build_forecast_debt_schedule(
         for label, year in zip(forecast_labels, forecast_years):
             ending = (manual_debt_path or {}).get(label, prev_debt or 0.0)
             nb = (ending - (prev_debt or 0.0)) if prev_debt is not None else None
+            avg = _compute_average_debt(prev_debt, ending)
             rows.append(DebtScheduleRow(
                 year=year, label=label,
                 beginning_interest_bearing_debt=prev_debt,
                 ending_interest_bearing_debt=ending,
                 net_borrowing=nb,
+                average_debt=avg,
+                identity_check_passes=None,  # no new_borrowing/repayment split available
                 method="manual_override", confidence="medium",
                 warning="Debt path provided by analyst — pending approval.",
             ))
@@ -289,7 +430,12 @@ def build_forecast_debt_schedule(
                 year=year, label=label,
                 beginning_interest_bearing_debt=0.0,
                 ending_interest_bearing_debt=0.0,
+                new_borrowing=0.0,
+                mandatory_debt_repayment=0.0,
+                debt_repayment=0.0,
                 net_borrowing=0.0,
+                average_debt=0.0,
+                identity_check_passes=True,
                 method="zero_debt_policy", confidence="high",
                 warning=None,
             ))
@@ -297,6 +443,8 @@ def build_forecast_debt_schedule(
         return rows, "zero_debt_policy", warnings
 
     # Case 3: Target debt ratio — use median of historical ending debt as stable level
+    # NOTE: net_borrowing here is balance_sheet_delta (ending - beginning), NOT
+    # new_borrowing - debt_repayment. This blocks is_fcfe_publishable by design.
     if all_hist_debts:
         median_debt = statistics.median(all_hist_debts)
         rows = []
@@ -304,11 +452,14 @@ def build_forecast_debt_schedule(
         for label, year in zip(forecast_labels, forecast_years):
             ending = median_debt
             nb = ending - prev_debt
+            avg = _compute_average_debt(prev_debt, ending)
             rows.append(DebtScheduleRow(
                 year=year, label=label,
                 beginning_interest_bearing_debt=prev_debt,
                 ending_interest_bearing_debt=ending,
                 net_borrowing=nb,
+                average_debt=avg,
+                identity_check_passes=None,  # new_borrowing/repayment split unknown
                 method="target_debt_ratio", confidence="low",
                 warning=(
                     f"Forecast debt held at historical median {median_debt:.1f} VND bn. "
@@ -330,6 +481,8 @@ def build_forecast_debt_schedule(
             beginning_interest_bearing_debt=None,
             ending_interest_bearing_debt=None,
             net_borrowing=None,
+            average_debt=None,
+            identity_check_passes=None,
             method="missing", confidence="low",
             warning="Debt forecast unavailable — insufficient historical data.",
             missing_fields=[

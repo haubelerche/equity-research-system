@@ -124,6 +124,91 @@ _SECTOR_BLURB: dict[str, str] = {
 _PLACEHOLDER = "Chưa có dữ liệu — cần bổ sung trước khi export final."
 _NA = "N/A"
 
+_SEGMENT_VI: dict[str, str] = {
+    "pharma": "dược phẩm",
+    "healthcare_services": "dịch vụ y tế",
+    "medical_equipment": "thiết bị y tế",
+    "medical_distribution": "phân phối y tế",
+    "biotech": "công nghệ sinh học",
+}
+
+
+def _get_sector_blurb(ticker: str) -> str:
+    """Return a company overview blurb for *ticker*.
+
+    Uses the curated _SECTOR_BLURB entry when available; otherwise
+    auto-generates a factual stub from the universe registry so no ticker
+    ever receives the raw _PLACEHOLDER string in the company overview.
+    """
+    if ticker in _SECTOR_BLURB:
+        return _SECTOR_BLURB[ticker]
+    company_name, exchange = _COMPANIES.get(ticker, (ticker, "HOSE"))
+    universe_row = next(
+        (r for r in load_universe_rows() if r.get("ticker", "").upper() == ticker),
+        {},
+    )
+    segment = universe_row.get("segment", "pharma")
+    segment_vi = _SEGMENT_VI.get(segment, "y tế - dược phẩm")
+    return (
+        f"{company_name} ({ticker}) là doanh nghiệp trong ngành {segment_vi}, "
+        f"niêm yết {exchange}. "
+        f"Công ty hoạt động trong lĩnh vực {segment_vi} tại Việt Nam. "
+        f"Thông tin mô tả chi tiết sẽ được bổ sung từ báo cáo thường niên và "
+        f"tài liệu công bố thông tin chính thức của doanh nghiệp."
+    )
+
+
+def _build_dynamic_peer_table(
+    ticker: str,
+    mc_str: str,
+    pe_str: str,
+    pb_str: str,
+    roe_pct: "float | None",
+    net_margin_pct: "float | None",
+) -> str:
+    """Build a peer comparison table using same-segment universe tickers.
+
+    The subject ticker always appears first with computed values.
+    Peers come from the universe registry (same segment), shown as pending
+    with an explicit disclaimer. Never hardcodes specific peer tickers or values.
+    """
+    roe_s = f"{roe_pct:.1f}%" if roe_pct else _NA
+    nm_s  = f"{net_margin_pct:.1f}%" if net_margin_pct else _NA
+
+    header = (
+        "| Ticker | Vốn hóa (tỷ) | P/E | P/B | ROE | Biên ròng |\n"
+        "|---|---:|---:|---:|---:|---:|\n"
+    )
+    subject_row = f"| **{ticker}** | {mc_str} | {pe_str} | {pb_str} | {roe_s} | {nm_s} |\n"
+
+    universe_row = next(
+        (r for r in load_universe_rows() if r.get("ticker", "").upper() == ticker),
+        {},
+    )
+    subject_segment = universe_row.get("segment", "pharma")
+    peer_rows_str = ""
+    peer_count = 0
+    for row in load_universe_rows():
+        peer_t = row.get("ticker", "").upper()
+        if peer_t == ticker:
+            continue
+        if row.get("segment", "pharma") != subject_segment:
+            continue
+        peer_rows_str += f"| {peer_t} | — | — | — | — | — |\n"
+        peer_count += 1
+        if peer_count >= 4:
+            break
+
+    if peer_count == 0:
+        peer_rows_str = "| Peers cùng ngành | — | — | — | — | — |\n"
+
+    disclaimer = (
+        "\n> _Dữ liệu peer (—) sẽ được cập nhật khi artifacts tương ứng được ingest. "
+        "Không sử dụng ước tính thủ công._"
+    )
+    return header + subject_row + peer_rows_str + disclaimer
+
+
 # Module-level constant — canonical narrative fields injected from FinancialAnalystAgent
 _NARRATIVE_FIELDS = [
     "financial_narrative",
@@ -935,32 +1020,17 @@ def load_report_context(
     pe_str = f"{pe_x:.1f}x" if pe_x else _NA
     pb_str = f"{pb_x:.2f}x" if pb_x else _NA
     mc_str = f"{market_cap_bn:,.0f}" if market_cap_bn else _NA
-    peer_table = (
-        "| Ticker | Market Cap (tỷ) | P/E | P/B | ROE | Net Margin |\n"
-        "|---|---:|---:|---:|---:|---:|\n"
-        f"| **{ticker}** | {mc_str} | {pe_str} | {pb_str}"
-        f" | {f'{roe_pct:.1f}%' if roe_pct else _NA}"
-        f" | {f'{net_margin_pct:.1f}%' if net_margin_pct else _NA} |\n"
-        "| IMP | ~3,200 | ~14x | ~2.8x | ~18% | ~12% |\n"
-        "| DMC | ~2,800 | ~13x | ~2.2x | ~16% | ~10% |\n"
-        "| TRA | ~3,500 | ~18x | ~3.0x | ~22% | ~12% |\n"
-        "| Peer Median | — | ~14x | ~2.8x | ~18% | ~12% |\n"
-        "\n> _Dữ liệu peer là ước tính tham khảo — chưa được xác minh từ nguồn chính thức._"
-    ) if ticker != "DHG" else (
-        "| Ticker | Market Cap (tỷ) | P/E | P/B | ROE | Net Margin |\n"
-        "|---|---:|---:|---:|---:|---:|\n"
-        f"| **DHG** | {mc_str} | {pe_str} | {pb_str}"
-        f" | {f'{roe_pct:.1f}%' if roe_pct else _NA}"
-        f" | {f'{net_margin_pct:.1f}%' if net_margin_pct else _NA} |\n"
-        "| IMP | ~3,200 | ~14x | ~2.8x | ~18% | ~12% |\n"
-        "| DMC | ~2,800 | ~13x | ~2.2x | ~16% | ~10% |\n"
-        "| TRA | ~3,500 | ~18x | ~3.0x | ~22% | ~12% |\n"
-        "| Peer Median | — | ~14x | ~2.8x | ~18% | ~12% |\n"
-        "\n> _Dữ liệu peer là ước tính tham khảo — chưa được xác minh từ nguồn chính thức._"
+    peer_table = _build_dynamic_peer_table(
+        ticker=ticker,
+        mc_str=mc_str,
+        pe_str=pe_str,
+        pb_str=pb_str,
+        roe_pct=roe_pct,
+        net_margin_pct=net_margin_pct,
     )
 
     # ── Narrative fields ───────────────────────────────────────────────
-    company_overview = _SECTOR_BLURB.get(ticker, _PLACEHOLDER)
+    company_overview = _get_sector_blurb(ticker)
     if current_price and fiscal_year != "—":
         company_overview += f"\n\n**Giá cổ phiếu hiện tại:** {current_price:,.0f} VND/CP (nguồn: market data)."
 

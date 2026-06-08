@@ -16,6 +16,7 @@ written to the stub file.
 """
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import sys
@@ -271,9 +272,15 @@ class PDFRenderer:
         else:
             pdf_name = f"{stem}_report.pdf"
 
-        pdf_path = output_dir / pdf_name
+        final_pdf_path = output_dir / pdf_name
+        pdf_path = output_dir / f".{Path(pdf_name).stem}.tmp.pdf"
         if pdf_path.exists():
             pdf_path.unlink()
+
+        def _publish_pdf(backend: str) -> Path:
+            pdf_path.replace(final_pdf_path)
+            print(f"[pdf] saved ({backend}): {final_pdf_path}")
+            return final_pdf_path
         html_content_for_preflight = html_path.read_text(encoding="utf-8")
         try:
             preflight_html_text(html_content_for_preflight)
@@ -291,8 +298,7 @@ class PDFRenderer:
             preflight_pdf_text(pdf_path)
             if forbidden_terms:
                 preflight_forbidden_terms(extract_pdf_text(pdf_path), forbidden_terms)
-            print(f"[pdf] saved (weasyprint): {pdf_path}")
-            return pdf_path
+            return _publish_pdf("weasyprint")
         except ImportError:
             pass
         except Exception as e:
@@ -314,8 +320,7 @@ class PDFRenderer:
             preflight_pdf_text(pdf_path)
             if forbidden_terms:
                 preflight_forbidden_terms(extract_pdf_text(pdf_path), forbidden_terms)
-            print(f"[pdf] saved (pdfkit): {pdf_path}")
-            return pdf_path
+            return _publish_pdf("pdfkit")
         except ImportError:
             pass
         except Exception as e:
@@ -327,7 +332,7 @@ class PDFRenderer:
             try:
                 if pdf_path.exists():
                     pdf_path.unlink()
-                profile_dir = (output_dir / ".chrome-profile").resolve()
+                profile_dir = (output_dir / f".chrome-profile-{os.getpid()}").resolve()
                 profile_dir.mkdir(parents=True, exist_ok=True)
                 chrome_pdf_path = pdf_path.resolve()
                 cmd = [
@@ -354,8 +359,7 @@ class PDFRenderer:
                     preflight_pdf_text(pdf_path)
                     if forbidden_terms:
                         preflight_forbidden_terms(extract_pdf_text(pdf_path), forbidden_terms)
-                    print(f"[pdf] saved (chrome): {pdf_path}")
-                    return pdf_path
+                    return _publish_pdf("chrome")
                 err = (completed.stderr or completed.stdout or "").strip()
                 print(f"[pdf] chrome failed ({err[:400]}), trying xhtml2pdf...")
             except Exception as e:
@@ -388,8 +392,7 @@ class PDFRenderer:
                 preflight_pdf_text(pdf_path)
                 if forbidden_terms:
                     preflight_forbidden_terms(extract_pdf_text(pdf_path), forbidden_terms)
-                print(f"[pdf] saved (xhtml2pdf): {pdf_path}")
-                return pdf_path
+                return _publish_pdf("xhtml2pdf")
             else:
                 print(f"[pdf] xhtml2pdf produced errors: {result.err}")
         except ImportError:
@@ -405,7 +408,7 @@ class PDFRenderer:
             )
 
         font_path = _find_unicode_font()
-        stub_path = pdf_path.with_suffix(".pdf-pending")
+        stub_path = final_pdf_path.with_suffix(".pdf-pending")
         stub_msg = (
             "PDF rendering requires one of:\n"
             "  1. WeasyPrint (best): pip install weasyprint  (+ GTK on Windows via msys2)\n"

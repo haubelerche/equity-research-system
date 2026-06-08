@@ -1,18 +1,18 @@
- Thi?t k? h? th?ng d? li?u cho Vietnam Pharma Equity Research Agent
+ Thiet ke he thong du lieu cho Vietnam Pharma Equity Research Agent
 
-## 1. M?c ti�u
+## 1. Muc tieu
 
-T�i li?u n�y m� t? thi?t k? d? li?u t?i uu cho d? �n **Vietnam Pharma Equity Research Agent**. H? th?ng kh�ng du?c thi?t k? nhu m?t n?n t?ng d? li?u th?i gian th?c, m� l� m?t **research data platform chuy�n bi?t cho c? phi?u du?c/y t? Vi?t Nam**.
+Tai lieu nay mo ta thiet ke du lieu toi uu cho du an **Vietnam Pharma Equity Research Agent**. He thong khong duoc thiet ke nhu mot nen tang du lieu thoi gian thuc, ma la mot **research data platform chuyen biet cho co phieu duoc/y te Viet Nam**.
 
-M?c ti�u ch�nh:
+Muc tieu chinh:
 
-- Thu th?p d? li?u t? c�c ngu?n Vi?t Nam c� li�n quan d?n doanh nghi?p du?c/y t?.
-- Chu?n h�a d? li?u th�nh `canonical facts` d�ng du?c cho ph�n t�ch v� d?nh gi�.
-- Luu v?t ngu?n, phi�n b?n, checksum, parser version v� tr?ng th�i ki?m d?nh.
-- H? tr? sinh b�o c�o c� citation, valuation artifact, audit trail v� human approval.
-- Tr�nh thi?t k? th?a: kh�ng d�ng Kafka, kh�ng d�ng streaming ph?c t?p, kh�ng d�ng data warehouse l?n nhu Snowflake/BigQuery trong MVP.
+- Thu thap du lieu tu cac nguon Viet Nam co lien quan den doanh nghiep duoc/y te.
+- Chuan hoa du lieu thanh `canonical facts` dung duoc cho phan tich va dinh gia.
+- Luu vet nguon, phien ban, checksum, parser version va trang thai kiem dinh.
+- Ho tro sinh bao cao co citation, valuation artifact, audit trail va human approval.
+- Tranh thiet ke thua: khong dung Kafka, khong dung streaming phuc tap, khong dung data warehouse lon nhu Snowflake/BigQuery trong MVP.
 
-Nguy�n t?c c?t l�i:
+Nguyen tac cot loi:
 
 ```text
 Facts before narrative.
@@ -25,11 +25,11 @@ Object storage for raw files and generated artifacts.
 
 ---
 
-## 2. B?n ch?t b�i to�n d? li?u
+## 2. Ban chat bai toan du lieu
 
-D? li?u ng�nh du?c/y t? Vi?t Nam c� d? bi?n d?ng th?p d?n trung b�nh. Ph?n l?n d? li?u ph?c v? equity research kh�ng thay d?i theo gi�y/ph�t, m� theo ng�y, qu�, nam ho?c khi c� c�ng b?/catalyst m?i.
+Du lieu nganh duoc/y te Viet Nam co do bien dong thap den trung binh. Phan lon du lieu phuc vu equity research khong thay doi theo giay/phut, ma theo ngay, quy, nam hoac khi co cong bo/catalyst moi.
 
-V� v?y, h? th?ng n�n d�ng:
+Vi vay, he thong nen dung:
 
 ```text
 Scheduled batch ingestion
@@ -40,66 +40,66 @@ Scheduled batch ingestion
 + audit trail
 ```
 
-Kh�ng n�n d�ng:
+Khong nen dang:
 
 ```text
 Kafka-first architecture
 realtime streaming
-full recompute m?i ng�y
-LLM t? d?c d? li?u raw v� t? suy lu?n s? li?u
+full recompute moi ngay
+LLM tu doc du lieu raw va tu suy luan so lieu
 ```
 
 ---
 
-## 3. C�c nh�m d? li?u c?n qu?n l�
+## 3. Cac nhom du lieu can quan ly
 
-| Nh�m d? li?u | V� d? | �? bi?n d?ng | C�ch qu?n l� |
+| Nhom du lieu | Vi du | Do bien dong | Cach quan ly |
 |---|---|---:|---|
-| Reference data | Ticker, s�n, t�n c�ng ty, peer group, subsector | R?t th?p | YAML + b?ng c?u h�nh trong DB |
-| Market data | Gi� d�ng c?a, volume, market cap, P/E, P/B | H?ng ng�y | B?ng `market_prices` |
-| Financial statements | BCTC qu�/nam, income statement, balance sheet, cash flow | Theo qu�/nam | `canonical_facts` sau validation |
-| Annual reports | B�o c�o thu?ng ni�n, b�o c�o qu?n tr? | Theo nam | Object storage + `document_chunks` |
-| Disclosures | C�ng b? th�ng tin, ngh? quy?t, c? t?c, ph�t h�nh | Kh�ng d?u | Object storage + event table |
-| News/catalysts | Tin doanh nghi?p, d?u th?u, BHYT, regulatory notices | Kh�ng d?u | `corporate_events` + evidence chunks |
-| Derived analytics | Ratios, growth, margins, peer metrics | Khi facts thay d?i | Artifact ho?c b?ng derived |
-| Valuation artifacts | DCF, multiples, sensitivity, scenarios | Khi assumptions/facts/price thay d?i | `valuation_results` + artifact JSON |
-| Workflow/audit | Research runs, steps, approvals, eval results | Theo t?ng run | Workflow tables |
+| Reference data | Ticker, san, tan cong ty, peer group, subsector | Rat thap | YAML + bang cau hinh trong DB |
+| Market data | Gia dong cua, volume, market cap, P/E, P/B | Hang ngay | Bang `market_prices` |
+| Financial statements | BCTC quy/nam, income statement, balance sheet, cash flow | Theo quy/nam | `canonical_facts` sau validation |
+| Annual reports | Bao cao thuong nien, bao cao quon tra | Theo nam | Object storage + `document_chunks` |
+| Disclosures | Cong bo thong tin, ngha quyet, co tuc, phat hanh | Khong dau | Object storage + event table |
+| News/catalysts | Tin doanh nghiep, dau thau, BHYT, regulatory notices | Khong dau | `corporate_events` + evidence chunks |
+| Derived analytics | Ratios, growth, margins, peer metrics | Khi facts thay doi | Artifact hoac bang derived |
+| Valuation artifacts | DCF, multiples, sensitivity, scenarios | Khi assumptions/facts/price thay doi | `valuation_results` + artifact JSON |
+| Workflow/audit | Research runs, steps, approvals, eval results | Theo tung run | Workflow tables |
 
 ---
 
-## 4. Ki?n tr�c d? li?u t?ng th?
+## 4. Kien truc du lieu tong the
 
-H? th?ng n�n du?c thi?t k? nhu m?t **mini financial data lakehouse** g?m 5 l?p.
+He thong nan duoc thiet ke nhu mot **mini financial data lakehouse** gam 5 lop.
 
 ```text
 Source Registry
-    ?
+    ↓
 Raw Zone 
-    ?
+    ↓
 Parsed & Normalized Zone 
-    ?
+    ↓
 Canonical Financial Warehouse 
-    ?
+    ↓
 Research Snapshot
-    ?
+    ↓
 Analytics + Valuation + Report Artifacts
 ```
 
 ### 4.1. Source Registry
 
-Luu danh m?c ngu?n du?c ph�p d�ng.
+Luu danh muc nguon duoc phep dang.
 
-V� d? ngu?n:
+Vi du nguon:
 
-- Vnstock ho?c API d? li?u th? tru?ng h?p l?.
-- File CSV/golden dataset do nh�m ki?m to�n th? c�ng.
-- B�o c�o t�i ch�nh.
-- B�o c�o thu?ng ni�n.
-- C�ng b? th�ng tin doanh nghi?p.
-- Tin t?c doanh nghi?p/ng�nh.
-- Ngu?n d?u th?u, BHYT, regulatory n?u c� quy?n truy c?p h?p l?.
+- Vnstock hoac API du lieu thi truong hop le.
+- File CSV/golden dataset do nham kiem toan thu cong.
+- Bao cao tai chinh.
+- Bao cao thuong nien.
+- Cong bo thong tin doanh nghiep.
+- Tin tuc doanh nghiep/nganh.
+- Nguon dau thau, BHYT, regulatory neu co quyen truy cap hop le.
 
-M?i ngu?n c?n c�:
+Moi nguon can co:
 
 ```text
 source_id
@@ -114,9 +114,9 @@ enabled
 
 ### 4.2. Raw Zone
 
-Luu d? li?u g?c, kh�ng ch?nh s?a.
+Luu du lieu goc, khong chinh sua.
 
-V� d?:
+Vi du:
 
 ```text
 storage/raw/
@@ -128,108 +128,108 @@ storage/raw/
 +-- manual_uploads/
 ```
 
-Quy t?c:
+Quy tec:
 
-- Raw file l� immutable.
-- N?u ngu?n thay d?i, t?o phi�n b?n m?i.
-- Kh�ng d�ng raw data tr?c ti?p cho valuation/report.
-- M?i raw object ph?i c� checksum d? dedup v� ph�t hi?n thay d?i.
+- Raw file la immutable.
+- Neu nguon thay doi, tao phien ban moi.
+- Khong dung raw data truc tiep cho valuation/report.
+- Moi raw object phoi co checksum da dedup va phat hien thay doi.
 
 ### 4.3. Parsed & Normalized Zone 
 
-Chuy?n raw data th�nh c?u tr�c th?ng nh?t.
+Chuyen raw data thanh cau truc thong nhat.
 
-Nhi?m v?:
+Nhiem vu:
 
-- Chu?n h�a ticker.
-- Chu?n h�a k? b�o c�o.
-- Chu?n h�a don v? v� ti?n t?.
-- Map line item v? taxonomy n?i b?.
-- Parse document th�nh text/chunks.
-- Chu?n h�a news/disclosures th�nh event records.
+- Chuan hoa ticker.
+- Chuan hoa ky bao cao.
+- Chuan hoa don vi va tien te.
+- Map line item va taxonomy noi bo.
+- Parse document thanh text/chunks.
+- Chuan hoa news/disclosures thanh event records.
 
-V� d? mapping:
+Vi du mapping:
 
 ```text
-"Doanh thu thu?n" ? revenue
-"L?i nhu?n sau thu?" ? net_income
-"T?ng t�i s?n" ? total_assets
-"V?n ch? s? h?u" ? total_equity
+"Doanh thu thuon" a revenue
+"Loi nhuon sau thuo" a net_income
+"Tang tai san" a total_assets
+"Van chi so hau" a total_equity
 ```
 
-### 4.4. Canonical Financial Warehouse (quan tr?ng nh?t)
+### 4.4. Canonical Financial Warehouse (quan trong nhat)
 
-��y l� l?p s? th?t t�i ch�nh d� ki?m d?nh. Ch? d? li?u qua validation m?i du?c ghi v�o d�y.
+aay la lop sa that tai chinh da kiem dinh. Cha du lieu qua validation moi duoc ghi vao day.
 
-D�ng cho:
+Dang cho:
 
 - Ratio calculation.
 - Peer comparison.
 - DCF/multiples.
 - Numeric consistency check.
-- Citation cho claim d?nh lu?ng.
+- Citation cho claim dinh luong.
 
-Kh�ng cho ph�p:
+Khong cho phep:
 
-- LLM ghi tr?c ti?p v�o canonical facts.
-- S? li?u thi?u source/version.
-- Ghi d� fact cu m� kh�ng t?o version.
+- LLM ghi truc tiep vao canonical facts.
+- Sa lieu thieu source/version.
+- Ghi de fact cu ma khong tao version.
 
 ### 4.5. Research Snapshot
 
-M?i report ph?i sinh t? m?t snapshot d� d�ng bang.
+Moi report phoi sinh tu mot snapshot da dong bang.
 
-Snapshot ghi l?i:
+Snapshot ghi loi:
 
-- Facts n�o du?c d�ng.
-- Market price ng�y n�o du?c d�ng.
-- Document chunks n�o du?c d�ng.
-- Assumptions version n�o du?c d�ng.
-- Valuation artifact version n�o du?c d�ng.
+- Facts nao duoc dang.
+- Market price ngay nao duoc dang.
+- Document chunks nao duoc dang.
+- Assumptions version nao duoc dang.
+- Valuation artifact version nao duoc dang.
 
-Nguy�n t?c:
+Nguyan tuc:
 
 ```text
-Report kh�ng query d? li?u live tr?c ti?p.
-Report ch? d?c t? research_snapshot + artifacts d� kh�a ngu?n.
+Report khong query du lieu live truc tiep.
+Report cha dac tu research_snapshot + artifacts da khoa nguon.
 ```
 
 ---
 
-## 5. Tech stack d? xu?t
+## 5. Tech stack da xuot
 
 ### 5.1. MVP stack
 
-| Layer | C�ng ngh? | Vai tr� |
+| Layer | Cong nghe | Vai tro |
 |---|---|---|
 | Backend API | FastAPI | API cho research run, report, approval |
 | Workflow | LangGraph | Stateful multi-agent workflow |
-| Schema | Pydantic v2 | Data contract v� structured output |
-| Database | Supabase PostgreSQL ho?c PostgreSQL local | Source of truth cho metadata/facts/runs |
-| Object storage | Supabase Storage ho?c local filesystem | Raw files, PDFs, JSON, generated reports |
+| Schema | Pydantic v2 | Data contract va structured output |
+| Database | Supabase PostgreSQL hoac PostgreSQL local | Source of truth cho metadata/facts/runs |
+| Object storage | Supabase Storage hoac local filesystem | Raw files, PDFs, JSON, generated reports |
 | Retrieval | PostgreSQL full-text search + pgvector | Evidence retrieval cho documents |
-| Scheduler | APScheduler ho?c cron | Batch refresh theo l?ch |
-| Data processing | pandas, numpy | Normalize v� financial calculations |
-| Validation | Pydantic + pytest + custom checks | Schema validation v� financial sanity checks |
+| Scheduler | APScheduler hoac cron | Batch refresh theo lach |
+| Data processing | pandas, numpy | Normalize va financial calculations |
+| Validation | Pydantic + pytest + custom checks | Schema validation va financial sanity checks |
 | Reporting | Jinja2 + Markdown/HTML | Render report package |
-| HITL UI | Streamlit | Giao di?n duy?t assumptions/report |
+| HITL UI | Streamlit | Giao dien duyet assumptions/report |
 
-### 5.2. Kh�ng d�ng trong MVP
+### 5.2. Khong dung trong MVP
 
-| C�ng ngh? | L� do chua c?n |
+| Cong nghe | Ly do chua can |
 |---|---|
-| Kafka | D? li?u kh�ng realtime, volume th?p, v?n h�nh ph?c t?p |
-| Snowflake/BigQuery | Quy m� 5�23 m� chua c?n data warehouse cloud l?n |
-| Qdrant/Weaviate | pgvector d? cho MVP v� d? qu?n l� hon |
-| Celery/Redis | Ch? c?n khi batch nhi?u m� ho?c job d�i |
-| MinIO/S3 ri�ng | Supabase Storage/local filesystem d? cho giai do?n d?u |
-| Microservices | Tang d? ph?c t?p, kh�ng tang ch?t lu?ng report |
+| Kafka | Du lieu khong realtime, volume thap, van hanh phuc tap |
+| Snowflake/BigQuery | Quy mo 5a23 ma chua can data warehouse cloud lan |
+| Qdrant/Weaviate | pgvector du cho MVP va de quan ly hon |
+| Celery/Redis | Cha can khi batch nhieu ma hoac job dai |
+| MinIO/S3 riang | Supabase Storage/local filesystem du cho giai doin dau |
+| Microservices | Tang da phuc tap, khong tang chat luong report |
 
 ---
 
-## 6. Database schema t?i thi?u
+## 6. Database schema toi thieu
 
-### 6.1. Nh�m source v� ingestion
+### 6.1. Nhom source va ingestion
 
 ```text
 source_registry
@@ -240,7 +240,7 @@ ingestion_runs
 
 #### `source_registry`
 
-Luu ngu?n d? li?u du?c ph�p d�ng.
+Luu nguon du lieu duoc phep dang.
 
 ```text
 source_id
@@ -256,7 +256,7 @@ created_at
 
 #### `source_versions`
 
-Luu t?ng phi�n b?n d? li?u l?y v?.
+Luu tung phien ban du lieu lay ve.
 
 ```text
 source_version_id
@@ -273,7 +273,7 @@ created_at
 
 #### `raw_objects`
 
-Luu metadata c?a file raw, kh�ng luu file l?n tr?c ti?p trong DB.
+Luu metadata cua file raw, khong luu file lan truc tiep trong DB.
 
 ```text
 raw_object_id
@@ -286,7 +286,7 @@ created_at
 
 #### `ingestion_runs`
 
-Luu l?ch s? ingest.
+Luu lich su ingest.
 
 ```text
 ingestion_run_id
@@ -303,7 +303,7 @@ error_message
 
 ---
 
-### 6.2. Nh�m warehouse t�i ch�nh
+### 6.2. Nhom warehouse tai chinh
 
 ```text
 companies
@@ -340,7 +340,7 @@ notes
 
 #### `canonical_facts`
 
-B?ng quan tr?ng nh?t c?a h? th?ng.
+Bang quan trong nhat caa he thong.
 
 ```text
 fact_id
@@ -361,7 +361,7 @@ validation_status
 created_at
 ```
 
-R�ng bu?c dedup khuy?n ngh?:
+Rang buoc dedup khuyen nghi:
 
 ```text
 unique(ticker, metric_name, statement_type, period, source_version_id)
@@ -382,7 +382,7 @@ source_version_id
 created_at
 ```
 
-R�ng bu?c dedup:
+Rang buoc dedup:
 
 ```text
 unique(ticker, trade_date, source_version_id)
@@ -390,7 +390,7 @@ unique(ticker, trade_date, source_version_id)
 
 #### `financial_metrics`
 
-Luu ch? s? d� t�nh b?ng code.
+Luu chi so da tinh bang code.
 
 ```text
 metric_id
@@ -407,7 +407,7 @@ created_at
 
 ---
 
-### 6.3. Nh�m document/evidence retrieval
+### 6.3. Nhom document/evidence retrieval
 
 ```text
 documents
@@ -447,7 +447,7 @@ checksum
 created_at
 ```
 
-R�ng bu?c dedup:
+Rang buoc dedup:
 
 ```text
 unique(document_id, checksum)
@@ -470,7 +470,7 @@ created_at
 
 ---
 
-### 6.4. Nh�m research snapshot v� artifact
+### 6.4. Nhom research snapshot va artifact
 
 ```text
 research_snapshots
@@ -544,7 +544,7 @@ run_log
 
 ---
 
-### 6.5. Nh�m workflow, approval v� evaluation
+### 6.5. Nhom workflow, approval va evaluation
 
 ```text
 research_runs
@@ -626,29 +626,29 @@ created_at
 
 ---
 
-## 7. Data pipeline chu?n
+## 7. Data pipeline chuan
 
 ### 7.1. Batch ingestion pipeline
 
 ```text
 Scheduler / Manual Trigger
-    ?
+    ↓
 Connector
-    ?
+    ↓
 Save raw object
-    ?
+    ↓
 Compute checksum
-    ?
+    ↓
 Dedup check
-    ?
+    ↓
 Parse / normalize
-    ?
+    ↓
 Validate / reconcile
-    ?
+    ↓
 Promote to canonical store
-    ?
+    ↓
 Update document chunks / evidence index
-    ?
+    ↓
 Mark affected artifacts as stale
 ```
 
@@ -656,59 +656,59 @@ Mark affected artifacts as stale
 
 ```text
 User request
-    ?
+    ↓
 Check data inventory + freshness
-    ?
+    ↓
 Create research snapshot
-    ?
+    ↓
 Run analytics from canonical facts
-    ?
+    ↓
 Run valuation from analytics artifacts
-    ?
+    ↓
 Retrieve evidence from document chunks
-    ?
+    ↓
 Generate grounded report
-    ?
+    ↓
 Run evaluation gates
-    ?
+    ↓
 HITL approval
-    ?
+    ↓
 Export report package
 ```
 
 ---
 
-## 8. Dedup v� versioning
+## 8. Dedup va versioning
 
 ### 8.1. Dedup theo checksum
 
-M?i raw file/API response ph?i t�nh checksum.
+Moi raw file/API response phoi tinh checksum.
 
 ```text
 checksum = hash(raw_content)
 ```
 
-N?u checksum kh�ng d?i:
+Neu checksum khong doi:
 
 ```text
 status = no_change
-kh�ng parse l?i
-kh�ng embed l?i
-kh�ng t?o fact m?i
+khong parse loi
+khong embed loi
+khong tao fact moi
 ```
 
-N?u checksum thay d?i:
+Neu checksum thay doi:
 
 ```text
-luu source_version m?i
-parse l?i source d�
-validate l?i facts li�n quan
-invalidate artifacts ph? thu?c
+luu source_version moi
+parse loi source da
+validate loi facts lien quan
+invalidate artifacts pha thuoc
 ```
 
 ### 8.2. Dedup theo business key
 
-Financial facts kh�ng du?c tr�ng theo business key.
+Financial facts khong duoc trang theo business key.
 
 Business key:
 
@@ -716,54 +716,54 @@ Business key:
 ticker + metric_name + statement_type + period + source_version_id
 ```
 
-Document chunks kh�ng du?c tr�ng theo:
+Document chunks khong duoc trang theo:
 
 ```text
 document_id + chunk_checksum
 ```
 
-Market prices kh�ng du?c tr�ng theo:
+Market prices khong duoc trang theo:
 
 ```text
 ticker + trade_date + source_version_id
 ```
 
-### 8.3. Kh�ng update d� d? li?u d� d�ng trong report
+### 8.3. Khong update da du lieu da dung trong report
 
-N?u fact d� du?c d�ng trong m?t `research_snapshot`, kh�ng du?c s?a tr?c ti?p. Ph?i t?o version m?i v� d? report sau d�ng version m?i.
+Neu fact da duoc dung trong mot `research_snapshot`, khong duoc saa truc tiep. Phoi tao version moi va da report sau dung version moi.
 
 ---
 
 ## 9. Data quality gates
 
-D? li?u ch? du?c promote v�o canonical store n?u qua gate.
+Du lieu cha duoc promote vao canonical store neu qua gate.
 
 ### 9.1. Schema checks
 
-- ��ng ki?u d? li?u.
-- ��ng ticker.
-- ��ng period.
-- ��ng currency/unit.
-- Kh�ng thi?u tru?ng b?t bu?c.
+- aang kieu du lieu.
+- aang ticker.
+- aang period.
+- aang currency/unit.
+- Khong thieu truong bat buoc.
 
 ### 9.2. Financial sanity checks
 
-- Doanh thu kh�ng du?c null n?u l� BCTC ch�nh.
-- T?ng t�i s?n ph?i l?n hon 0.
-- V?n ch? s? h?u kh�ng du?c thi?u.
-- Gross profit kh�ng du?c l?n hon revenue n?u c� d? d? li?u.
-- Cash flow period ph?i kh?p fiscal period.
-- EPS kh�ng d�ng n?u shares outstanding thi?u ho?c kh�ng r�.
+- Doanh thu khong duoc null neu la BCTC chinh.
+- Tang tai san phoi lan hon 0.
+- Van chi so hau khong duoc thieu.
+- Gross profit khong duoc lan hon revenue neu co da du lieu.
+- Cash flow period phoi khap fiscal period.
+- EPS khong dung neu shares outstanding thieu hoac khong ro.
 
 ### 9.3. Reconciliation checks
 
-- Subtotal v� total ph?i kh?p trong tolerance.
-- C�ng m?t metric t? nhi?u ngu?n ph?i du?c so s�nh.
-- N?u ngu?n m�u thu?n, kh�ng t? ch?n theo LLM; ph?i d�ng rule ho?c human review.
+- Subtotal va total phoi khap trong tolerance.
+- Cang mot metric tu nhieu nguon phoi duoc so sanh.
+- Neu nguon mau thuon, khong tu chan theo LLM; phoi dung rule hoac human review.
 
 ### 9.4. Source confidence
 
-G?i � th? t? d? tin c?y:
+Goi a tha tu da tin cay:
 
 ```text
 official filings / company disclosure
@@ -778,7 +778,7 @@ official filings / company disclosure
 
 ## 10. Freshness policy
 
-D? li?u kh�ng c?n realtime, nhung ph?i c� freshness rule r� r�ng.
+Du lieu khong can realtime, nhung phoi co freshness rule ro rang.
 
 ```yaml
 freshness_policy:
@@ -809,66 +809,66 @@ freshness_policy:
 
 ---
 
-## 11. L?ch c?p nh?t d? li?u d? xu?t
+## 11. Lach cap nhat du lieu da xuot
 
-| Job | T?n su?t MVP | Ghi ch� |
+| Job | Tan suot MVP | Ghi chu |
 |---|---:|---|
-| `refresh_market_prices` | H?ng ng�y sau gi? giao d?ch | C?p nh?t gi� v� multiples |
-| `check_financial_statements` | H?ng tu?n; h?ng ng�y trong m�a b�o c�o | BCTC qu�/nam |
-| `check_annual_reports` | H?ng tu?n ho?c manual upload | BCTN theo nam |
-| `check_disclosures` | H?ng ng�y | C�ng b? th�ng tin c� th? ?nh hu?ng valuation |
-| `check_news` | H?ng ng�y ho?c 2�3 ng�y/l?n | Tin ng�nh du?c kh�ng qu� d�y |
-| `check_pharma_catalysts` | H?ng tu?n ho?c h?ng ng�y n?u ngu?n ?n d?nh | �?u th?u/BHYT/regulatory |
-| `build_document_index` | Ch? khi c� document m?i | Kh�ng embed l?i to�n b? |
-| `generate_full_report` | Khi user y�u c?u | Kh�ng cron-generate to�n b? report |
+| `refresh_market_prices` | Hang ngay sau gie giao dich | Cap nhat gia va multiples |
+| `check_financial_statements` | Hang tuon; hang ngay trong mua bao cao | BCTC quy/nam |
+| `check_annual_reports` | Hang tuon hoac manual upload | BCTN theo nam |
+| `check_disclosures` | Hang ngay | Cong bo thong tin co the anh huong valuation |
+| `check_news` | Hang ngay hoac 2-3 ngay/lan | Tin nganh duoc khong quy day |
+| `check_pharma_catalysts` | Hang tuon hoac hang ngay neu nguon an dinh | aau thau/BHYT/regulatory |
+| `build_document_index` | Cha khi co document moi | Khong embed loi toan ba |
+| `generate_full_report` | Khi user yau cau | Khong cron-generate toan ba report |
 
 ---
 
 ## 12. Incremental recompute
 
-Kh�ng ch?y l?i to�n b? pipeline n?u ch? m?t ph?n d? li?u thay d?i.
+Khong chay loi toan ba pipeline neu cha mot phan du lieu thay doi.
 
-| D? li?u m?i | C?n recompute | Kh�ng c?n recompute |
+| Du lieu moi | Can recompute | Khong can recompute |
 |---|---|---|
-| Gi� m?i | Market multiples, valuation spread, price chart | Business profile, annual report summary |
-| BCTC m?i | Ratios, growth, peer metrics, DCF | Document chunks cu |
-| B�o c�o thu?ng ni�n m?i | Business narrative, risk evidence, document index | Market price history |
-| C�ng b? c? t?c/ph�t h�nh | Share count, dividend/corporate event, valuation per share | To�n b? financial history |
-| Tin/catalyst l?n | Catalyst section, scenario assumptions, flash memo | Full report n?u materiality th?p |
+| Gia moi | Market multiples, valuation spread, price chart | Business profile, annual report summary |
+| BCTC moi | Ratios, growth, peer metrics, DCF | Document chunks cu |
+| Bao cao thuong nien moi | Business narrative, risk evidence, document index | Market price history |
+| Cong bo co tuc/phat hanh | Share count, dividend/corporate event, valuation per share | Toan bo financial history |
+| Tin/catalyst lan | Catalyst section, scenario assumptions, flash memo | Full report neu materiality thap |
 
-M?i artifact c?n c� dependency metadata d? bi?t khi n�o stale.
-
----
-
-## 13. Vai tr� c?a Data Foundation Agent
-
-`Data Foundation Agent` kh�ng du?c t? crawl ho?c t? s?a d? li?u t�y �. Agent n�y ch? di?u ph?i c�c tool d? li?u theo config.
-
-Nhi?m v?:
-
-1. Nh?n `ResearchPlan` t? Orchestrator.
-2. Ki?m tra data inventory c?a ticker.
-3. Ki?m tra freshness theo t?ng source.
-4. N?u thi?u/stale, g?i d�ng connector/job.
-5. L?y canonical facts m?i nh?t.
-6. L?y evidence chunks li�n quan.
-7. T?o `DataSnapshot` ho?c `ResearchSnapshot`.
-8. T?o `DataQualityReport`.
-9. N?u fail gate, d?ng ho?c chuy?n human review.
-
-Kh�ng du?c:
-
-- T? s?a s? li?u thi?u ngu?n.
-- T? forecast s? li?u c�n thi?u.
-- T? ch?n ngu?n ngo�i allowlist.
-- T? k?t lu?n doanh nghi?p t?t/x?u.
-- Ghi v�o canonical facts khi chua qua validation.
+Moi artifact can co dependency metadata de biet khi nao stale.
 
 ---
 
-## 14. Report package v� artifact storage
+## 13. Vai tro caa Data Foundation Agent
 
-M?i research run sinh m?t report package.
+`Data Foundation Agent` khong duoc tu crawl hoac tu saa du lieu tay a. Agent nay cha dieu phoi cac tool du lieu theo config.
+
+Nhiem vu:
+
+1. Nhan `ResearchPlan` tu Orchestrator.
+2. Kiem tra data inventory caa ticker.
+3. Kiem tra freshness theo tang source.
+4. Neu thieu/stale, goi dung connector/job.
+5. Lay canonical facts moi nhat.
+6. Lay evidence chunks lien quan.
+7. Tao `DataSnapshot` hoac `ResearchSnapshot`.
+8. Tao `DataQualityReport`.
+9. Neu fail gate, deng hoac chuyen human review.
+
+Khong duoc:
+
+- Tu saa so lieu thieu nguon.
+- Tu forecast so lieu can thieu.
+- Tu chan nguon ngoai allowlist.
+- Tu kat luon doanh nghiep tat/xau.
+- Ghi vao canonical facts khi chua qua validation.
+
+---
+
+## 14. Report package va artifact storage
+
+Moi research run sinh mot report package.
 
 ```text
 artifacts/
@@ -881,78 +881,78 @@ artifacts/
 +-- run_logs/{run_id}_{ticker}_run_log.json
 ```
 
-DB ch? luu metadata v� `storage_path`, kh�ng luu to�n b? n?i dung artifact l?n trong b?ng.
+DB cha luu metadata va `storage_path`, khong luu toan ba noi dung artifact lan trong bang.
 
 ---
 
-## 15. Th? t? tri?n khai t?i uu
+## 15. Tha tu trien khai toi uu
 
-### Phase 1 � Data foundation t?i thi?u
+### Phase 1 a Data foundation toi thieu
 
-- T?o PostgreSQL/Supabase schema.
-- T?o `source_registry`, `source_versions`, `raw_objects`, `canonical_facts`.
-- Ingest golden dataset cho 5 m� MVP ho?c �t nh?t 3 m� d?u.
+- Tao PostgreSQL/Supabase schema.
+- Tao `source_registry`, `source_versions`, `raw_objects`, `canonical_facts`.
+- Ingest golden dataset cho 5 ma MVP hoac at nhat 3 ma dau.
 - Implement checksum dedup.
-- Implement validation co b?n.
+- Implement validation co ban.
 
-### Phase 2 � Financial warehouse
+### Phase 2 a Financial warehouse
 
-- Chu?n h�a financial statements th�nh canonical facts.
-- T?o `market_prices`.
-- T?o `financial_metrics` b?ng code.
-- T?o unit tests cho ratios v� metrics.
+- Chuan hoa financial statements thanh canonical facts.
+- Tao `market_prices`.
+- Tao `financial_metrics` bang code.
+- Tao unit tests cho ratios va metrics.
 
-### Phase 3 � Evidence retrieval
+### Phase 3 a Evidence retrieval
 
-- T?o `documents` v� `document_chunks`.
+- Tao `documents` va `document_chunks`.
 - Chunk documents theo metadata.
-- D�ng PostgreSQL full-text search tru?c.
-- Th�m pgvector khi c?n semantic search.
+- Dang PostgreSQL full-text search truoc.
+- Tham pgvector khi can semantic search.
 
-### Phase 4 � Research snapshot
+### Phase 4 a Research snapshot
 
-- T?o `research_snapshots` v� `snapshot_items`.
-- Report/valuation ch? d?c t? snapshot.
-- T?o artifact versioning.
+- Tao `research_snapshots` va `snapshot_items`.
+- Report/valuation cha dac tu snapshot.
+- Tao artifact versioning.
 
-### Phase 5 � Evaluation v� HITL
+### Phase 5 a Evaluation va HITL
 
-- T?o `evaluation_results`, `approval_events`, `model_usage_logs`.
-- Ch?n export n?u fail citation/numeric/valuation gate.
+- Tao `evaluation_results`, `approval_events`, `model_usage_logs`.
+- Chan export neu fail citation/numeric/valuation gate.
 - Luu approval history theo artifact version.
 
 ---
 
-## 16. Quy?t d?nh thi?t k? cu?i c�ng
+## 16. Quyet dinh thiet ke cuoi cang
 
-### N�n l�m
+### Nan lam
 
-- D�ng PostgreSQL/Supabase l�m source of truth.
+- Dang PostgreSQL/Supabase lam source of truth.
 - Luu raw files trong object storage/local filesystem.
-- D�ng checksum d? dedup.
-- D�ng canonical facts cho m?i ph�p t�nh t�i ch�nh.
-- D�ng research snapshot tru?c khi sinh report.
-- D�ng incremental recompute.
-- D�ng pgvector ch? cho evidence retrieval, kh�ng cho s? li?u ch�nh.
-- D�ng cron/APScheduler cho batch refresh.
+- Dang checksum da dedup.
+- Dang canonical facts cho moi phap tanh tai chinh.
+- Dang research snapshot truoc khi sinh report.
+- Dang incremental recompute.
+- Dang pgvector cha cho evidence retrieval, khong cho so lieu chinh.
+- Dang cron/APScheduler cho batch refresh.
 
-### Kh�ng n�n l�m trong MVP
+### Khong nen lam trong MVP
 
-- Kh�ng d�ng Kafka.
-- Kh�ng d�ng Snowflake/BigQuery.
-- Kh�ng d�ng microservices.
-- Kh�ng cron-generate full report m?i ng�y cho m?i ticker.
-- Kh�ng d? LLM ghi ho?c s?a financial facts.
-- Kh�ng embed to�n b? financial table r?i d? LLM t�m s?.
-- Kh�ng update d� fact d� du?c d�ng trong report.
+- Khong dung Kafka.
+- Khong dung Snowflake/BigQuery.
+- Khong dung microservices.
+- Khong cron-generate full report moi ngay cho moi ticker.
+- Khong da LLM ghi hoac saa financial facts.
+- Khong embed toan ba financial table roi da LLM tam sa.
+- Khong update da fact da duoc dung trong report.
 
 ---
 
-## 17. K?t lu?n
+## 17. Kat luon
 
-H? th?ng d? li?u c?a d? �n n�n l� m?t **mini financial research lakehouse** cho ng�nh du?c/y t? Vi?t Nam, kh�ng ph?i realtime streaming platform.
+He thong du lieu caa du an nan la mot **mini financial research lakehouse** cho nganh duoc/y te Viet Nam, khong phai realtime streaming platform.
 
-Thi?t k? t?i uu l�:
+Thiet ke toi uu la:
 
 ```text
 PostgreSQL/Supabase
@@ -965,12 +965,12 @@ PostgreSQL/Supabase
 + evaluation/HITL audit
 ```
 
-Ki?n tr�c n�y d? m?nh d? d?m b?o:
+Kien truc nay da manh da dam bao:
 
-- D? li?u kh�ng b? tr�ng l?p.
-- M?i s? li?u c� ngu?n v� version.
-- B�o c�o c� th? t�i l?p.
-- Valuation kh�ng ph? thu?c v�o LLM.
-- Claim d?nh lu?ng c� citation.
-- Workflow c� th? resume/retry/review.
-- H? th?ng kh�ng b? ph?c t?p qu� m?c so v?i b?n ch?t d? li?u ng�nh du?c Vi?t Nam.
+- Du lieu khong ba trang lop.
+- Moi so lieu co nguon va version.
+- Bao cao co the tai lop.
+- Valuation khong pha thuoc vao LLM.
+- Claim dinh luong co citation.
+- Workflow co the resume/retry/review.
+- He thong khong ba phuc tap qua muc so voi ban chat du lieu nganh duoc Viet Nam.

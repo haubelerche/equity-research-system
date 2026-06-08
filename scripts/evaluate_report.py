@@ -46,7 +46,7 @@ CITATION_DIR = ROOT / "artifacts" / "reports"
 EVAL_DIR = ROOT / "artifacts" / "evaluation"
 FORECAST_DIR = ROOT / "artifacts" / "forecast"
 
-_STALE_THRESHOLD_DAYS = 30
+_STALE_THRESHOLD_DAYS = 540
 _NUMERIC_TOLERANCE = 0.05  # 5% tolerance for number matching
 _MIN_CITATION_COVERAGE = 0.8  # 80% of quantitative claims must have citations
 

@@ -72,6 +72,9 @@ class TestParseVndBn:
         assert result is not None
         assert abs(result - 123.5) < 0.001
 
+    def test_vietnamese_dot_thousands_separator(self):
+        assert _parse_vnd_bn("3.756") == pytest.approx(3756.0)
+
     def test_rounding(self):
         result = _parse_vnd_bn("1,234,567")
         assert result is not None
@@ -267,6 +270,19 @@ class TestVietnameseBCTCExtractor:
         assert len(extracted) == 2
         years = {r.fiscal_year for r in extracted}
         assert years == {2023, 2022}
+
+    def test_identical_rows_are_deduplicated(self):
+        extractor = self._make_extractor()
+        rows = [
+            ["Doanh thu thuáº§n vá» bÃ¡n hÃ ng", "4,127,400"],
+            ["Doanh thu thuáº§n vá» bÃ¡n hÃ ng", "4,127,400"],
+        ]
+        extracted = extractor.extract_from_table_rows(
+            rows,
+            statement_type="income_statement",
+            fiscal_years=[2023],
+        )
+        assert len(extracted) == 1
 
     def test_correct_statement_type_stored(self):
         extractor = self._make_extractor()

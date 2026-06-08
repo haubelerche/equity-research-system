@@ -89,6 +89,26 @@ def test_strict_render_fails_when_no_backend(tmp_path):
             PDFRenderer().render(html, output_dir=tmp_path)
 
 
+def test_failed_render_preserves_existing_pdf(tmp_path):
+    html = tmp_path / "DHG_report.html"
+    html.write_text("<html><body>DHG</body></html>", encoding="utf-8")
+    existing = tmp_path / "DHG_report.pdf"
+    existing.write_bytes(b"known-good-pdf")
+    original_import = builtins.__import__
+
+    def mock_import(name, *args, **kwargs):
+        if name in ("weasyprint", "pdfkit", "xhtml2pdf"):
+            raise ImportError(f"mocked: {name} not available")
+        return original_import(name, *args, **kwargs)
+
+    with mock.patch("builtins.__import__", side_effect=mock_import), \
+            mock.patch("backend.reporting.pdf_renderer._find_chromium_executable", return_value=None):
+        with pytest.raises(PDFRenderError):
+            PDFRenderer().render(html, output_dir=tmp_path)
+
+    assert existing.read_bytes() == b"known-good-pdf"
+
+
 def test_accepts_valid_vietnamese_text(tmp_path):
     """Valid Vietnamese diacritics (UTF-8) must NOT trigger preflight failure."""
     html = tmp_path / "DBD_report.html"

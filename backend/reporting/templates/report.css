@@ -506,13 +506,21 @@ hr {
 
 /* ── Client-facing IMP/ACBS financial tables ─────────────── */
 
+/* Phase 1: allow large sections to flow across pages naturally.
+ * page-break-inside: avoid was pushing tall sections to new pages, creating
+ * blank pages. Individual tables/charts still have their own avoid rules. */
 .client-report-page {
-    page-break-inside: avoid;
+    break-inside: auto;
+}
+
+/* Chapter-break: explicit hard page-break before a major section. */
+.chapter-break {
+    break-before: page;
+    page-break-before: always;
 }
 
 .model-table-block {
     margin: 8pt 0 12pt;
-    page-break-inside: avoid;
 }
 
 .model-table-block h2 {
@@ -631,6 +639,65 @@ hr {
     border-bottom: 0.5pt solid #cdddee;
 }
 
+/* ── Variance / growth colouring ─────────────────────────── */
+
+/* Positive value (revenue growth, margin expansion, etc.) */
+.variance-positive {
+    color: #087f5b;
+    font-weight: 600;
+}
+
+/* Negative value (decline, cost overrun, etc.) */
+.variance-negative {
+    color: #b42318;
+    font-weight: 600;
+}
+
+/* Subtotal / section-break row inside a financial table */
+tr.row-subtotal td {
+    border-top: 1px solid #0b4f8a;
+    border-bottom: 1px solid #0b4f8a;
+    font-weight: 700;
+    background: #f0f4fa;
+}
+
+/* Total / Grand-total row */
+tr.row-total td {
+    border-top: 1.5px solid #0b4f8a;
+    border-bottom: 1.5px solid #0b4f8a;
+    font-weight: 800;
+    background: #e8eef8;
+}
+
+/* Indented line item (level 1) — used in KQKD sub-rows */
+.row-indent-1 td:first-child {
+    padding-left: 12pt;
+    font-weight: 400;
+    color: #4a5568;
+}
+
+/* Indented line item (level 2) */
+.row-indent-2 td:first-child {
+    padding-left: 22pt;
+    font-weight: 400;
+    color: #718096;
+    font-size: 7pt;
+}
+
+/* Sensitivity matrix: colour cells by upside/downside magnitude */
+.matrix-cell-high    { background: #c6f6d5; color: #22543d; }
+.matrix-cell-mid     { background: #e9d8fd; color: #44337a; }
+.matrix-cell-low     { background: #fed7d7; color: #742a2a; }
+.matrix-cell-neutral { background: #f7fafc; color: #2d3748; }
+
+/* ── Running footer (Phase 6) ─────────────────────────────── */
+
+/* Hidden on screen; shown on every printed page via position:fixed.
+ * Works for Chrome headless print.  WeasyPrint uses @page margin boxes below. */
+.print-running-footer {
+    display: none;
+}
+
 /* ── Print overrides ─────────────────────────────────────── */
 
 @media print {
@@ -646,4 +713,50 @@ hr {
     thead {
         display: table-header-group;
     }
+
+    /* Risk 6: Prevent headings from being orphaned at the bottom of a page. */
+    h1, h2, h3 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    /* Running footer — fixed element visible on every printed page (Chrome). */
+    .print-running-footer {
+        display: block;
+        position: fixed;
+        bottom: 6mm;
+        left: 16mm;
+        right: 16mm;
+        font-size: 7pt;
+        color: #718096;
+        border-top: 0.5px solid #e2e8f0;
+        padding-top: 3pt;
+        text-align: center;
+        font-family: "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+    }
+}
+
+/* ── WeasyPrint page margin boxes (page number + brand) ──── */
+/* counter(page) / @page margin boxes are WeasyPrint-only;
+ * Chrome headless uses the .print-running-footer element above. */
+
+@page {
+    @bottom-left {
+        content: "Vietnam Pharma Equity Research";
+        font-family: "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+        font-size: 7pt;
+        color: #718096;
+    }
+    @bottom-right {
+        content: counter(page);
+        font-family: "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+        font-size: 7pt;
+        color: #718096;
+    }
+}
+
+/* Suppress footer on cover page (first page) */
+@page :first {
+    @bottom-left  { content: ""; }
+    @bottom-right { content: ""; }
 }

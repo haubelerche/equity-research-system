@@ -49,9 +49,9 @@ agents:
     assert cfg.model == "gpt-test-model"
 
 
-def test_model_adapter_requires_openai_key(monkeypatch) -> None:
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    with pytest.raises(RuntimeError, match="OPENAI_API_KEY"):
+def test_model_adapter_requires_provider_key(monkeypatch) -> None:
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="ANTHROPIC_API_KEY"):
         OpenAIModelAdapter().validate_environment()
 
 

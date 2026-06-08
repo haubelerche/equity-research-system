@@ -11,6 +11,20 @@ MVP_FROM_YEAR = 2021
 MVP_TO_YEAR = 2025
 
 
+def _official_facts_ready(results: list[Any]) -> bool:
+    """Require a ready status backed by at least one promoted official fact."""
+    promoted = sum(int(getattr(result, "promoted", 0) or 0) for result in results)
+    statuses = {
+        getattr(
+            getattr(result, "ingest_status", ""),
+            "value",
+            str(getattr(result, "ingest_status", "")),
+        )
+        for result in results
+    }
+    return promoted > 0 and bool(statuses & {"OFFICIAL_FACTS_READY", "OCR_PROMOTED"})
+
+
 def _result(node_name: str, status: str, summary: dict[str, Any], **kwargs) -> ServiceNodeResult:
     return ServiceNodeResult(
         node_name=node_name,
@@ -93,7 +107,7 @@ def auto_ingest_tool(
             getattr(getattr(r, "ingest_status", ""), "value", str(getattr(r, "ingest_status", "")))
             for r in results
         ]
-        official_ready = any(status in {"OFFICIAL_FACTS_READY", "OCR_PROMOTED"} for status in statuses)
+        official_ready = _official_facts_ready(results)
         summary: dict = {
             "ticker": ticker,
             "promoted": promoted,
@@ -190,20 +204,37 @@ def run_valuation_tool(ticker: str, from_year: int = MVP_FROM_YEAR, to_year: int
         "missing_formula_trace_count": 0 if formula_traces else 1,
         "formula_traces": formula_traces,
     }
+    refs = [
+        ArtifactRef(
+            artifact_id=f"{ticker}_valuation",
+            artifact_type="valuation_result_json",
+            section_key="valuation",
+            is_locked=False,
+            storage_path=artifact_path if artifact_path else None,
+            producer="VALUATION_RUN",
+        )
+    ]
+    for key in ("forecast", "fcff", "fcfe", "blend_dcf"):
+        payload = artifact.get(key)
+        if not isinstance(payload, dict):
+            continue
+        nested_path = payload.get("artifact_path")
+        if nested_path:
+            refs.append(
+                ArtifactRef(
+                    artifact_id=f"{ticker}_{key}",
+                    artifact_type="valuation_component_json",
+                    section_key="blend" if key == "blend_dcf" else key,
+                    is_locked=False,
+                    storage_path=nested_path,
+                    producer="VALUATION_RUN",
+                )
+            )
     return _result(
         "VALUATION_DRAFT",
         "completed",
         summary,
-        artifact_refs=[
-            ArtifactRef(
-                artifact_id=f"{ticker}_valuation",
-                artifact_type="valuation_result_json",
-                section_key="valuation",
-                is_locked=False,
-                storage_path=artifact_path if artifact_path else None,
-                producer="VALUATION_RUN",
-            )
-        ],
+        artifact_refs=refs,
     )
 
 
@@ -233,6 +264,7 @@ def generate_report_tool(
         "source_tier_gate": artifact.get("source_tier_gate", {}),
         "claims_count": len(artifact.get("claims", [])),
         "citation_count": len(artifact.get("citation_map", {})),
+        "valuation_result_path": artifact.get("valuation_result_path"),
     }
     return _result(
         "REPORT_GENERATION",
@@ -262,6 +294,7 @@ def generate_report_tool(
                 ("fcfe", "fcfe_path"),
                 ("blend", "blend_path"),
                 ("citation", "citation_path"),
+                ("valuation_result", "valuation_result_path"),
             )
             if artifact.get(path_key)
         ],
@@ -419,12 +452,7 @@ def evaluate_quality_tool(
     valuation_path: str | None = None,
 ) -> ServiceNodeResult:
     from scripts.evaluate_report_quality import run_quality_gate
-    from scripts.evaluate_report_quality import _latest_file, _load_json
-
-    root = Path.cwd()
-    artifacts = root / "artifacts"
-    forecast_dir = artifacts / "forecast"
-    valuation_dir = artifacts / "valuation"
+    from scripts.evaluate_report_quality import _load_json
 
     valuation_artifact = _load_json(Path(valuation_path)) if valuation_path else None
     if valuation_artifact:
@@ -435,18 +463,12 @@ def evaluate_quality_tool(
         gate = valuation_artifact.get("assumption_gate") or valuation_artifact.get("gate")
         confidence = valuation_artifact.get("valuation_confidence")
     else:
-        forecast_path = _latest_file(forecast_dir, ticker, "forecast")
-        fcff_path = _latest_file(forecast_dir, ticker, "fcff")
-        fcfe_path = _latest_file(forecast_dir, ticker, "fcfe")
-        multiples_path = _latest_file(valuation_dir, ticker, "multiples")
-        gate_path = _latest_file(valuation_dir, ticker, "gate")
-        confidence_path = _latest_file(valuation_dir, ticker, "confidence")
-        forecast = _load_json(forecast_path) if forecast_path else None
-        fcff = _load_json(fcff_path) if fcff_path else None
-        fcfe = _load_json(fcfe_path) if fcfe_path else None
-        multiples = _load_json(multiples_path) if multiples_path else None
-        gate = _load_json(gate_path) if gate_path else None
-        confidence = _load_json(confidence_path) if confidence_path else None
+        return _result(
+            "QUALITY_EVALUATION",
+            "failed",
+            {"ticker": ticker, "overall_status": "FAIL", "blocking_reason": "run_scoped_valuation_artifact_missing"},
+            blocking_reason="run_scoped_valuation_artifact_missing",
+        )
 
     report_md = None
     if report_path and Path(report_path).exists():

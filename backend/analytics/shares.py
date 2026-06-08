@@ -66,3 +66,26 @@ def eps_implied_shares_mn(fact_table: FactTable, latest_fy: str | None) -> float
 def reportable_shares_mn(fact_table: FactTable, latest_fy: str | None) -> float | None:
     """Return shares that are safe for target-price and market-cap arithmetic."""
     return explicit_shares_mn(fact_table, latest_fy)
+
+
+def eps_reconciles(
+    net_income_bn: float | None,
+    weighted_avg_shares_mn: float | None,
+    eps_vnd: float | None,
+    tol: float = 0.03,
+) -> bool:
+    """Check that reported EPS matches net income / weighted-average shares.
+
+    Audit NUMERIC-01: EPS (VND/share) must reconcile with NPATMI and the share
+    basis actually used. net_income_bn is in VND billion, shares in millions, so
+    implied EPS = net_income_bn * 1_000 / shares_mn (VND/share).
+
+    Returns True only when |reported - implied| / |reported| <= tol. Returns
+    False if any input is missing or non-positive (cannot be verified → block).
+    """
+    if not net_income_bn or not weighted_avg_shares_mn or not eps_vnd:
+        return False
+    if weighted_avg_shares_mn <= 0 or eps_vnd <= 0:
+        return False
+    implied = net_income_bn * 1_000.0 / weighted_avg_shares_mn
+    return abs(eps_vnd - implied) / abs(eps_vnd) <= tol

@@ -9,8 +9,8 @@ from pathlib import Path
 VIETNAMESE_MARKERS = [
     "Dược Hậu Giang",   # ư ậ
     "Công ty",           # ô
-    "Tài chính",         # à
-    "phân tích",         # â
+    "tài chính",         # à  (lowercase — appears in section body/titles)
+    "Phân tích",         # â  (title-case — section header)
 ]
 ROOT = Path(__file__).resolve().parents[2]
 

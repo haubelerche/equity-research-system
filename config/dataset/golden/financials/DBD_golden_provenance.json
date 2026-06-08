@@ -1,0 +1,38 @@
+{
+  "ticker": "DBD",
+  "verified_by": "haubelerche",
+  "verification_date": "2026-06-03",
+  "source_tier": 0,
+  "source_document_type": "financial_statement",
+  "fiscal_year": 2025,
+  "fiscal_period": "FY",
+  "publisher": "Bidiphar (Cong ty CP Duoc - Trang thiet bi Y te Binh Dinh)",
+  "published_at": "2026-03-25",
+  "source_documents_used": [
+    "BCTC hop nhat nam 2025 sau kiem toan (Bidiphar)",
+    "Tai lieu / tin DHDCD 2026 Bidiphar (co tuc tien mat 20%, so co phieu luu hanh)"
+  ],
+  "source_urls": [
+    "https://bidiphar.com/wp-content/uploads/2026/03/bao-cao-tai-chinh-hop-nhat-nam-2025-sau-kiem-toan-1774620839.pdf",
+    "https://bidiphar.com/bidiphar-dbd-to-chuc-thanh-cong-dhdcd-2026/",
+    "https://bidiphar.com/category/quan-he-co-dong/bao-cao-tai-chinh/"
+  ],
+  "notes": "Official audited 2025FY figures injected to fix audit items NUMERIC-02 (selling vs admin expense split: SG&A = 418.308 + 139.794 = 558.102), NUMERIC-04 (net debt bridge: long_term_debt 132.0 + short_term_investments 409.201 -> net debt approx -436.77), NUMERIC-01/DATA-03 (shares_outstanding ~94.4m and cash dividend 2,000 VND/cp). Values in VND billion unless unit states otherwise (shares in absolute count; dividend in VND/share). Only 2025FY is injected here: the audit verified the official 2025 split and balance-sheet components; 2021-2024 admin-expense / long-term-debt / short-term-investments official breakdown was NOT independently verified and remains from the provider (vnstock/VCI) pending official sourcing. equity.parent 2025 carried at provider value (confidence 0.85) pending exact audited figure. Q1/2026, 2026 management guidance (revenue 2,090 / PBT 375), private placement (23.3m) and ESOP (1.5m) are NOT canonical FY facts and are deliberately excluded per FY-only scope; they belong to ManagementGuidance / CorporateAction artifacts (follow-up).",
+  "metrics_verified": [
+    "revenue.net",
+    "cogs.total",
+    "gross_profit.total",
+    "selling_expense.total",
+    "admin_expense.total",
+    "ebit.total",
+    "profit_before_tax.total",
+    "net_income.parent",
+    "cash_and_equivalents.ending",
+    "short_term_investments.ending",
+    "short_term_debt.ending",
+    "long_term_debt.ending",
+    "shares_outstanding.ending",
+    "dividends_per_share.cash"
+  ],
+  "checksum": "sha256:pending"
+}

@@ -11,7 +11,7 @@ def test_pdf_renderer_produces_file_not_stub(tmp_path):
     """render_report --pdf must produce a real .pdf file, not a .pdf-pending stub."""
     result = subprocess.run(
         [sys.executable, "scripts/render_report.py", "--ticker", "DHG", "--pdf",
-         "--allow-latest-artifacts"],
+         "--allow-latest-artifacts", "--mode", "internal_debug"],
         cwd=str(ROOT),
         capture_output=True,
         encoding="utf-8",

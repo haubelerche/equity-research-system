@@ -132,6 +132,7 @@ def build_net_debt_bridge(
     enterprise_value: float | None = None,
     minority_interest_override: float | None = None,
     non_operating_assets_override: float | None = None,
+    ending_debt_override: float | None = None,
 ) -> NetDebtBridge:
     """Build the net debt bridge for a given period.
 
@@ -139,11 +140,18 @@ def build_net_debt_bridge(
         enterprise_value: If provided, also computes equity_value_from_ev.
         minority_interest_override: Use if fact_table doesn't carry minority interest.
         non_operating_assets_override: Use if analyst provides non-operating investments.
+        ending_debt_override: If provided, use this value as total_debt instead of
+            reading from fact_table. Useful when the debt_schedule artifact has a
+            more up-to-date or reconciled ending debt value than the raw facts.
     """
     warnings: list[str] = []
     missing: list[str] = []
 
-    total_debt, debt_sources = _interest_bearing_debt(fact_table, period)
+    if ending_debt_override is not None:
+        total_debt: float | None = ending_debt_override
+        debt_sources: list[str] = ["debt_schedule_artifact"]
+    else:
+        total_debt, debt_sources = _interest_bearing_debt(fact_table, period)
     cash       = _get(fact_table, "cash_and_equivalents.ending", period)
     st_inv     = _get(fact_table, "short_term_investments.ending", period)
     mi         = minority_interest_override or _get(fact_table, "minority_interest.ending", period)

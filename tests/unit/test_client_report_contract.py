@@ -336,6 +336,18 @@ def test_client_final_fails_when_required_valuation_is_missing(tmp_path, monkeyp
     assert "upside_downside" in exc.value.missing_fields
 
 
+def test_client_final_gate_does_not_erase_available_valuation(tmp_path, monkeypatch):
+    """Publication blockers stay internal while computed valuation remains visible."""
+    run_id = _write_client_fixture(tmp_path, monkeypatch, "DBD", publishable=False)
+    vm = build_client_report_view_model("DBD", "client_final", run_id=run_id)
+
+    assert vm.target_price is not None
+    assert vm.upside_downside is not None
+    assert vm.display_blocking_reasons
+    with pytest.raises(ClientReportDataMissing):
+        assert_client_final_ready(vm)
+
+
 def test_build_client_report_view_model_accepts_run_id():
     """build_client_report_view_model must accept run_id kwarg."""
     import inspect

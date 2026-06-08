@@ -180,6 +180,81 @@ def _write_extracted_csv(rows: list[dict], out_path: Path) -> None:
         writer.writerows(rows)
 
 
+def _validate_pdf_rows(
+    rows: list[dict],
+    requested_year: int,
+) -> tuple[list[dict], list[str]]:
+    """Return run-year PDF facts that are sufficiently complete for ingestion."""
+    errors: list[str] = []
+    accepted: dict[tuple[str, str, str], dict] = {}
+    rejected_years: set[str] = set()
+
+    for row in rows:
+        raw_year = str(row.get("fiscal_year", "")).strip()
+        if raw_year != str(requested_year):
+            if raw_year:
+                rejected_years.add(raw_year)
+            continue
+
+        metric_id = str(row.get("metric_id", "")).strip()
+        statement_type = str(row.get("statement_type", "")).strip()
+        period_type = str(row.get("period_type", "FY")).strip() or "FY"
+        if not metric_id:
+            continue
+
+        key = (period_type, statement_type, metric_id)
+        previous = accepted.get(key)
+        if previous is None:
+            accepted[key] = row
+            continue
+        if str(previous.get("value", "")) != str(row.get("value", "")):
+            errors.append(
+                f"FY{requested_year}: conflicting PDF values for {metric_id}"
+            )
+
+    if rejected_years:
+        errors.append(
+            f"FY{requested_year}: ignored rows belonging to fiscal years "
+            f"{', '.join(sorted(rejected_years))}"
+        )
+
+    valid_rows = list(accepted.values())
+    distinct_metrics = {row.get("metric_id") for row in valid_rows}
+    if len(distinct_metrics) < 2:
+        errors.append(
+            f"FY{requested_year}: PDF extraction has only {len(distinct_metrics)} "
+            "distinct run-year metric(s); minimum is 2"
+        )
+        return [], errors
+
+    return valid_rows, errors
+
+
+def _sanitize_extracted_csv_for_year(csv_path: Path, requested_year: int) -> int:
+    """Remove stale cross-year and duplicate rows before DB ingestion."""
+    if not csv_path.exists():
+        return 0
+
+    with csv_path.open(encoding="utf-8-sig", newline="") as fh:
+        rows = list(csv.DictReader(fh))
+
+    unique: dict[tuple[str, str, str, str], dict] = {}
+    for row in rows:
+        if str(row.get("fiscal_year", "")).strip() != str(requested_year):
+            continue
+        key = (
+            str(row.get("period_type", "")).strip(),
+            str(row.get("statement_type", "")).strip(),
+            str(row.get("metric_id", "")).strip(),
+            str(row.get("extraction_method", "")).strip(),
+        )
+        unique.setdefault(key, row)
+
+    sanitized = list(unique.values())
+    _write_extracted_csv(sanitized, csv_path)
+    return len(sanitized)
+
+
 # ---------------------------------------------------------------------------
 # Channel 1: CafeF
 # ---------------------------------------------------------------------------
@@ -519,10 +594,15 @@ def _fetch_pdf(
 
         pdf_csv_path = doc_dir / "extracted_facts_pdf.csv"
         extracted_rows = extract_to_csv(pdf_path, ticker, fiscal_year, best.title, pdf_csv_path)
-        csv_rows = [r.to_csv_dict() for r in extracted_rows]
+        raw_csv_rows = [r.to_csv_dict() for r in extracted_rows]
+        csv_rows, validation_errors = _validate_pdf_rows(raw_csv_rows, fiscal_year)
 
         if not csv_rows:
-            return [], IngestStatus.EXTRACTION_FAILED_NO_TABLES, {}
+            return (
+                [{"error": error} for error in validation_errors],
+                IngestStatus.LOW_CONFIDENCE if raw_csv_rows else IngestStatus.EXTRACTION_FAILED_NO_TABLES,
+                {},
+            )
 
         # PDF is Tier 0; CafeF is Tier 2. PDF rows take precedence for overlapping metrics.
         existing_csv_path = doc_dir / "extracted_facts.csv"
@@ -559,7 +639,8 @@ def _fetch_pdf(
             }
             meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
 
-        return csv_rows, IngestStatus.OFFICIAL_FACTS_READY, {}
+        result_rows = csv_rows + [{"error": error} for error in validation_errors]
+        return result_rows, IngestStatus.OFFICIAL_FACTS_READY, {}
 
     except Exception as exc:  # noqa: BLE001
         return [{"error": str(exc)}], IngestStatus.SOURCE_MISSING, {}
@@ -611,6 +692,9 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
             yr.ocr_blocked = ocr_stats.get("ocr_blocked", 0)
             good_pdf = [r for r in pdf_rows if "error" not in r and "note" not in r]
             yr.pdf_rows = len(good_pdf)
+            yr.errors.extend(
+                str(r["error"]) for r in pdf_rows if "error" in r
+            )
             # PDF status overrides CafeF when it gives a definitive verdict
             if pdf_status not in (IngestStatus.SOURCE_MISSING,):
                 yr.ingest_status = pdf_status
@@ -637,7 +721,8 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
 
         # ── Ingest into DB ──────────────────────────────────────────────────
         extracted_csv = doc_dir / "extracted_facts.csv"
-        if extracted_csv.exists():
+        sanitized_rows = _sanitize_extracted_csv_for_year(extracted_csv, year)
+        if sanitized_rows > 0:
             try:
                 from scripts.ingest_official_documents import ingest_year
                 summary = ingest_year(cfg.ticker, year, dry_run=False)
@@ -658,6 +743,11 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
                 yr.promoted = rec_sum.promoted
             except Exception as exc:  # noqa: BLE001
                 yr.errors.append(f"reconcile: {exc}")
+
+        if yr.ingest_status == IngestStatus.OFFICIAL_FACTS_READY and (
+            yr.ingested <= 0 or yr.promoted <= 0 or yr.errors
+        ):
+            yr.ingest_status = IngestStatus.LOW_CONFIDENCE
 
         yr.status = "done" if not yr.errors else "done_with_errors"
         results.append(yr)

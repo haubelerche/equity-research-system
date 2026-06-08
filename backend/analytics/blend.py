@@ -22,8 +22,9 @@ from typing import Any
 
 FCFF_WEIGHT: float = 0.60
 PE_WEIGHT: float = 0.40
-_GAP_WARN_THRESHOLD: float = 0.40   # warn if |Price_FCFF/Price_PE - 1| > 40%
-_TV_WARN_THRESHOLD: float = 0.70    # warn if PV(TV) / EV > 70%
+_GAP_WARN_THRESHOLD: float = 0.40       # warn if |Price_FCFF/Price_PE - 1| > 40%
+_FCFF_FCFE_GAP_THRESHOLD: float = 0.25  # block blend if |Price_FCFF/Price_FCFE - 1| > 25%
+_TV_WARN_THRESHOLD: float = 0.70        # warn if PV(TV) / EV > 70%
 
 
 @dataclass
@@ -48,8 +49,9 @@ class BlendResult:
     margin_of_safety: float | None
     fcff_weight: float = FCFF_WEIGHT
     pe_weight: float = PE_WEIGHT
-    valuation_gap_pct: float | None = None
-    tv_weight_fcff: float | None = None   # PV(TV_FCFF) / EV_FCFF
+    valuation_gap_pct: float | None = None      # |Price_FCFF/Price_PE - 1|
+    fcff_fcfe_gap_pct: float | None = None      # |Price_FCFF/Price_FCFE - 1|; None if FCFE unavailable
+    tv_weight_fcff: float | None = None         # PV(TV_FCFF) / EV_FCFF
     is_draft_only: bool = False
     warnings: list[str] = field(default_factory=list)
 
@@ -68,6 +70,7 @@ class BlendResult:
             "upside_pct": round(self.upside_pct, 4) if self.upside_pct is not None else None,
             "margin_of_safety": round(self.margin_of_safety, 4) if self.margin_of_safety is not None else None,
             "valuation_gap_pct": round(self.valuation_gap_pct, 4) if self.valuation_gap_pct is not None else None,
+            "fcff_fcfe_gap_pct": round(self.fcff_fcfe_gap_pct, 4) if self.fcff_fcfe_gap_pct is not None else None,
             "tv_weight_fcff": round(self.tv_weight_fcff, 4) if self.tv_weight_fcff is not None else None,
             "is_draft_only": self.is_draft_only,
             "warnings": self.warnings,
@@ -82,20 +85,44 @@ def blend_dcf(
     current_price_vnd: float | None = None,
     pv_terminal_value_fcff: float | None = None,
     enterprise_value_fcff: float | None = None,
-    # Legacy param — accepted but ignored (kept so old call-sites don't crash)
     price_fcfe: float | None = None,
+    fcfe_publishable: bool | None = None,
 ) -> BlendResult:
     """Compute blended target: 60% FCFF + 40% P/E Forward.
 
     Quality checks:
-    1. Valuation gap: |Price_FCFF / Price_PE - 1| > 40% → warning
-    2. TV weight: PV(TV_FCFF) / EV_FCFF > 70% → warning
-    3. Partial availability: if one price is None, fall back with warning.
+    1. FCFF/FCFE gap: |Price_FCFF/Price_FCFE - 1| > 25% → block blend (plan §7)
+    2. FCFE publishability: if fcfe_publishable is False → mark draft-only
+    3. FCFF vs P/E gap: |Price_FCFF/Price_PE - 1| > 40% → warning
+    4. TV weight: PV(TV_FCFF) / EV_FCFF > 70% → warning
+    5. Partial availability: if one price is None, fall back with warning.
     """
     warnings: list[str] = []
     is_draft_only: bool = False
 
-    # ── Quality check 1: FCFF vs P/E gap ──────────────────────────────────
+    # ── Quality check 1: FCFF/FCFE gap gate (plan §7 — 25% threshold) ────
+    fcff_fcfe_gap: float | None = None
+    if price_fcff is not None and price_fcfe is not None and price_fcfe != 0:
+        fcff_fcfe_gap = abs(price_fcff / price_fcfe - 1)
+        if fcff_fcfe_gap > _FCFF_FCFE_GAP_THRESHOLD:
+            is_draft_only = True
+            warnings.append(
+                f"FCFF/FCFE valuation gap = {fcff_fcfe_gap:.1%} > 25% — "
+                "blend blocked: audit net borrowing, net debt, CAPEX, NWC before publishing target price."
+            )
+
+    # ── Quality check 2: FCFE cross-check note (FCFE is supplementary only) ─
+    # FCFE is no longer a primary blend weight (replaced by P/E Forward).
+    # A missing/unreliable FCFE schedule does not block the blend; it is
+    # logged as an informational warning for the analyst to review.
+    if fcfe_publishable is False:
+        warnings.append(
+            "FCFE cross-check: debt_schedule.is_fcfe_publishable = False — "
+            "net_borrowing uses historical proxy. FCFE is supplementary only; "
+            "primary blend (FCFF + P/E Forward) is unaffected."
+        )
+
+    # ── Quality check 3: FCFF vs P/E gap ──────────────────────────────────
     gap: float | None = None
     if price_fcff is not None and price_pe_forward is not None and price_pe_forward != 0:
         gap = abs(price_fcff / price_pe_forward - 1)
@@ -156,6 +183,7 @@ def blend_dcf(
         upside_pct=upside_pct,
         margin_of_safety=margin_of_safety,
         valuation_gap_pct=gap,
+        fcff_fcfe_gap_pct=fcff_fcfe_gap,
         tv_weight_fcff=tv_weight,
         is_draft_only=is_draft_only,
         warnings=warnings,

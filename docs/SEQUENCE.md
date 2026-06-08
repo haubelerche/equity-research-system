@@ -1,1013 +1,423 @@
-# SEQUENCE — Sơ đồ kiến trúc & luồng chạy
+# Vietnam Pharma Equity Research Agent — Sơ đồ tuần tự UML
 
-> Tài liệu mô tả kiến trúc hệ thống, use-case, luồng dữ liệu, multi-agent supervisor/worker,
-> và các luồng xử lý chính của **Vietnam Pharma Equity Research Agent**.
-> Mọi sơ đồ đều là Mermaid — copy trực tiếp vào [mermaid.live](https://mermaid.live) để vẽ.
+> Tài liệu này tổng hợp 6 sơ đồ tuần tự mô tả các luồng nghiệp vụ chính của hệ thống.
+> Mọi tính toán tài chính được thực hiện bởi code-first engine xác định, không phải LLM.
 
 ---
 
-## 0. Biểu đồ tuần tự hệ thống đầy đủ (Master Sequence Diagram)
+## 01 — Luồng tạo Full Report
 
-> Sơ đồ này mô tả **toàn bộ hệ thống** từ góc độ tương tác giữa tất cả components:
-> Analyst → CLI → Supervisor → LangGraph Runner → Data Services → LLM Agents →
-> Valuation Engine → Report Engine → Evaluation → HITL → Export.
+**Tiêu đề:** `01_full_report_sequence`
+
+**Mô tả:** Mô tả toàn bộ hành trình từ khi Analyst yêu cầu báo cáo đến khi báo cáo được phê duyệt và xuất bản. Bao gồm các bước từ ingestion → canonical facts → valuation → report → evaluation gate → HITL approval → export.
+
+**Mô tả tuần tự cách hoạt động:** Hệ thống multi-agent bắt đầu khi Analyst gửi yêu cầu tạo `full_report` cho một mã cổ phiếu cụ thể. Supervisor Agent là tác tử điều phối trung tâm, tiếp nhận yêu cầu, xác định ticker, nhận diện loại báo cáo cần sinh và kiểm tra yêu cầu có nằm trong phạm vi chính sách của hệ thống hay không. Nếu yêu cầu hợp lệ, Supervisor Agent khởi động pipeline ingest và chuyển nhiệm vụ sang Data Agent; nếu yêu cầu không hợp lệ hoặc nằm ngoài phạm vi đề tài, hệ thống dừng sớm để tránh tiêu tốn tài nguyên tính toán và hạn chế rủi ro sinh báo cáo không phù hợp.
+
+Ở bước dữ liệu, Data Agent kiểm tra dữ liệu sẵn có, thu thập báo cáo tài chính, dữ liệu giá thị trường, tin tức và các tài liệu hỗ trợ từ những nguồn được phép sử dụng. Data Agent đồng thời tạo danh mục nguồn, loại bỏ dữ liệu trùng lặp và chuẩn bị payload đầu vào cho lớp xử lý dữ liệu. Sau đó, dịch vụ xử lý dữ liệu nội bộ thực hiện trích xuất, chuẩn hóa và chuyển đổi dữ liệu thô thành `canonical facts`, tức tập dữ kiện có cấu trúc thống nhất để các bước phân tích phía sau có thể sử dụng nhất quán. Các dữ kiện này phải vượt qua data quality gate, bao gồm kiểm tra tính đầy đủ, tính hợp lệ, tính nhất quán định lượng và khả năng truy xuất nguồn; nếu dữ liệu chưa đủ, hệ thống có thể đánh dấu thiếu dữ liệu thay vì tiếp tục với giả định không được kiểm chứng.
+
+Khi `canonical facts` đã sẵn sàng, Supervisor Agent giao nhiệm vụ cho Financial Analysis Agent. Tác tử này sử dụng các engine tính toán xác định để tính chỉ số tài chính, phân tích xu hướng theo thời gian và phát hiện các bất thường trong dữ liệu, chẳng hạn biến động biên lợi nhuận, đòn bẩy tài chính, dòng tiền hoặc hiệu quả sử dụng vốn. Điều kiện chuyển bước là kết quả phân tích phải nhất quán với dữ liệu nguồn và có thể đối chiếu lại với các fact đã được lưu; các phép tính trọng yếu không được sinh tự do bởi LLM mà phải dựa trên code-first engine để bảo đảm khả năng tái lập.
+
+Sau khi phân tích tài chính hoàn tất, Supervisor Agent chuyển artifact phân tích sang Valuation Agent. Valuation Agent xây dựng mô hình định giá, bao gồm DCF, P/E, EV/EBITDA và phân tích độ nhạy theo các giả định chính như WACC, tốc độ tăng trưởng dài hạn hoặc bội số so sánh. Trước khi tạo valuation artifact chính thức, hệ thống trình bày các assumption quan trọng cho Analyst phê duyệt theo cơ chế human-in-the-loop. Điều kiện chuyển bước là giả định phải được hiển thị minh bạch, kết quả định giá phải có thể tái tính, và khoảng giá trị hợp lý phải gắn với các tham số đầu vào cụ thể thay vì chỉ là nhận định định tính.
+
+Khi valuation artifact được tạo, Supervisor Agent giao nhiệm vụ tổng hợp cho Report Agent. Report Agent xây dựng context từ `canonical facts`, kết quả phân tích tài chính và valuation artifact, sau đó sử dụng LLM để sinh narrative tiếng Việt cho bản nháp báo cáo. Mỗi nhận định quan trọng, đặc biệt là nhận định định lượng, khuyến nghị đầu tư, luận điểm rủi ro và diễn giải định giá, phải được gắn citation hoặc ánh xạ về nguồn dữ liệu hỗ trợ. Trước khi trả bản nháp về Supervisor Agent, Report Agent thực hiện kiểm định logic đầu ra nhằm phát hiện mâu thuẫn nội bộ, thiếu nguồn hoặc diễn giải vượt quá bằng chứng.
+
+Cuối cùng, Supervisor Agent gửi bản nháp sang Export Gate để chạy các evaluation gates trước khi cho phép xuất bản. Export Gate không phải một agent độc lập mà là lớp kiểm định và chặn xuất bản, chịu trách nhiệm đánh giá tính nhất quán số liệu, độ phủ citation, tính hợp lệ của nguồn, độ mới của dữ liệu, khả năng tái lập định giá, tính hợp lệ của khuyến nghị và các ràng buộc kế toán cơ bản. Nếu tất cả gates đạt trạng thái PASS, báo cáo được gửi cho Analyst phê duyệt cuối; nếu Analyst approve, hệ thống xuất bản báo cáo, còn nếu Analyst reject, bản nháp được trả về để chỉnh sửa. Nếu có gate ở mức CRITICAL FAIL, Supervisor Agent chặn export và thông báo lỗi cho Analyst, bảo đảm báo cáo không được công bố khi chưa đạt chuẩn kiểm định tối thiểu.
 
 ```mermaid
 sequenceDiagram
-  autonumber
+    participant Analyst
+    participant Supervisor as Supervisor Agent
+    participant DataAgent as Data Agent
+    participant FAAgent as Financial Analysis Agent
+    participant ValAgent as Valuation Agent
+    participant ReportAgent as Report Agent
+    participant ExportGate as Export Gate
 
-  participant Analyst
-  participant CLI as CLI / API<br/>(run_research.py)
-  participant SUP as Supervisor<br/>(orchestrator.py)
-  participant RUN as ResearchGraphRunner<br/>(harness/runner.py)
-  participant STORE as RuntimeStore<br/>(runtime_store.py)
-  participant BUDGET as BudgetGuard<br/>(services.py)
-  participant INGEST as AutoIngestTool<br/>(documents/)
-  participant VNSTOCK as VnstockConnector<br/>(connectors/)
-  participant FACTS as BuildFactsTool<br/>(facts/ + reconciliation/)
-  participant INDEX as BuildIndexTool<br/>(retrieval.py)
-  participant LLM as OpenAIModelAdapter<br/>(harness/model_adapter.py)
-  participant LANGFUSE as Langfuse<br/>(tracing)
-  participant VAL as ValuationEngine<br/>(analytics/)
-  participant REPORT as ReportEngine<br/>(reporting/)
-  participant EVAL as EvaluationService<br/>(evaluation/ + harness/gates.py)
+    Analyst->>Supervisor: Yêu cầu full_report cho ticker
+    activate Supervisor
+    Supervisor->>Supervisor: Xác định ticker, loại báo cáo, kiểm tra policy
+    Supervisor->>DataAgent: Khởi động pipeline ingest
+    activate DataAgent
+    DataAgent->>DataAgent: Thu thập BCTC, giá thị trường, tin tức
+    DataAgent->>DataAgent: Chuẩn hóa → canonical facts
+    DataAgent->>DataAgent: Data quality gate
+    DataAgent-->>Supervisor: canonical facts sẵn sàng
+    deactivate DataAgent
 
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 0 — KHỞI ĐỘNG RUN
-  %% ─────────────────────────────────────────────
+    Supervisor->>FAAgent: Phân tích tài chính
+    activate FAAgent
+    FAAgent->>FAAgent: Tính ratio, xu hướng (code-first engine)
+    FAAgent->>FAAgent: Phát hiện bất thường
+    FAAgent-->>Supervisor: Kết quả phân tích tài chính
+    deactivate FAAgent
 
-  Analyst->>CLI: python run_research.py<br/>--ticker DHG --report-type full_report
-  CLI->>SUP: Supervisor.execute(RunContext)
-  SUP->>RUN: ResearchGraphRunner.execute(context)
-  RUN->>STORE: create_run(run_id, ticker, run_type,<br/>status=initialized)
-  STORE-->>RUN: run_id confirmed
+    Supervisor->>ValAgent: Định giá
+    activate ValAgent
+    ValAgent->>ValAgent: Chạy DCF, P/E, EV/EBITDA (code-first engine)
+    ValAgent->>ValAgent: Sensitivity analysis
+    ValAgent->>Analyst: Trình bày assumptions để duyệt
+    Analyst-->>ValAgent: Phê duyệt assumptions
+    ValAgent->>ValAgent: Tạo valuation artifact
+    ValAgent-->>Supervisor: valuation artifact sẵn sàng
+    deactivate ValAgent
 
-  RUN->>RUN: PREFLIGHT — validate policy,<br/>budget config, ticker whitelist
-  RUN->>STORE: update_run_state(running, PREFLIGHT)
-  RUN->>STORE: add_step(PREFLIGHT, status=completed)
+    Supervisor->>ReportAgent: Tổng hợp và viết báo cáo
+    activate ReportAgent
+    ReportAgent->>ReportAgent: Xây dựng context từ facts và artifact
+    ReportAgent->>ReportAgent: Sinh narrative tiếng Việt (LLM)
+    ReportAgent->>ReportAgent: Gắn citation cho mọi claim
+    ReportAgent->>ReportAgent: Kiểm định logic đầu ra
+    ReportAgent-->>Supervisor: Bản nháp báo cáo
+    deactivate ReportAgent
 
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 1 — LẬP KẾ HOẠCH (SUPERVISOR PLAN)
-  %% ─────────────────────────────────────────────
+    Supervisor->>ExportGate: Chạy evaluation gates (7 cổng)
+    activate ExportGate
+    ExportGate-->>Supervisor: PASS / FAIL
+    deactivate ExportGate
 
-  RUN->>STORE: add_step(SUPERVISOR_PLAN, agent=supervisor)
-  RUN->>LLM: model_adapter.run_agent(<br/>agent=supervisor,<br/>task="Create execution plan & HITL routing policy")
-  LLM->>LANGFUSE: trace(run_id, agent, model, tokens)
-  LLM->>BUDGET: charge(run_id, SUPERVISOR_PLAN,<br/>prompt_tokens, completion_tokens)
-  BUDGET-->>LLM: BudgetDecision(allow=True)
-  LLM-->>RUN: AgentResult{plan, policy, requires_human=False}
-  RUN->>STORE: save_artifact(supervisor_plan, payload=plan)
-  RUN->>STORE: close_step(SUPERVISOR_PLAN, completed)
-
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 2 — THU THẬP DỮ LIỆU (DATA_RETRIEVAL_RUN)
-  %% ─────────────────────────────────────────────
-
-  RUN->>STORE: add_step(DATA_RETRIEVAL_RUN)
-  RUN->>STORE: update_run_state(running, DATA_RETRIEVAL_RUN)
-
-  Note over INGEST: Step 2a — Ingest tài liệu chính thức
-  RUN->>INGEST: auto_ingest_tool(ticker, from_year, to_year, ocr=False)
-  INGEST->>INGEST: OfficialDocumentDiscovery<br/>discover candidate URLs<br/>(SSC / HNX / HOSE / IR)
-  INGEST->>INGEST: DocumentFetcher<br/>download PDFs → data/official_documents/
-  INGEST->>INGEST: PDFExtractor / OCR<br/>extract text + tables
-  INGEST->>INGEST: SourceMetadata<br/>save source_id, checksum, tier=1
-  INGEST-->>RUN: ServiceNodeResult{status=completed,<br/>docs_found, pages_extracted}
-  RUN->>STORE: save_artifact(auto_ingest, summary)
-
-  Note over FACTS: Step 2b — Build canonical facts
-  RUN->>FACTS: build_facts_tool(ticker, from_year, to_year)
-  FACTS->>VNSTOCK: VnstockConnector.fetch(<br/>financial_statements, FY 2021–2025)
-  VNSTOCK-->>FACTS: raw income_stmt, balance_sheet, cashflow
-  FACTS->>FACTS: FactNormalizer<br/>map raw → FactEntry<br/>{metric_name, value, unit,<br/>source_id, source_tier, confidence}
-  FACTS->>FACTS: FinancialFactReconciler<br/>cross-source conflict detection<br/>Tier-1 overrides Tier-3
-  FACTS->>FACTS: DataQualityGates<br/>coverage_gate / core_keys_gate<br/>source_validation_gate / valuation_gate
-  FACTS->>STORE: persist canonical facts → facts_db
-  FACTS-->>RUN: ServiceNodeResult{snapshot_id,<br/>periods_available, valuation_gate=pass}
-  RUN->>STORE: save_artifact(build_facts, summary)
-  RUN->>STORE: update_run_state(data_ready)
-
-  Note over INDEX: Step 2c — Build evidence index
-  RUN->>INDEX: build_index_tool(ticker, from_year, to_year)
-  INDEX->>INDEX: DocumentChunker<br/>split PDFs + API text → chunks<br/>{chunk_id, source_id, text,<br/>section, fiscal_year}
-  INDEX->>INDEX: Embedder<br/>vector embeddings → Milvus / SQLite
-  INDEX-->>RUN: ServiceNodeResult{chunks_indexed, sources_covered}
-  RUN->>STORE: save_artifact(index, summary)
-
-  Note over LLM: Step 2d — Data retrieval agent review
-  RUN->>LLM: run_agent(data_retrieval,<br/>"Review data inventory & retrieval readiness")
-  LLM->>LANGFUSE: trace(tokens, latency, cost)
-  LLM->>BUDGET: charge(DATA_RETRIEVAL_RUN)
-  BUDGET-->>LLM: allow=True
-  LLM-->>RUN: AgentResult{coverage_assessment,<br/>data_gaps, confidence}
-  RUN->>STORE: save_artifact(data_retrieval_review)
-  RUN->>STORE: close_step(DATA_RETRIEVAL_RUN, completed)
-
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 3 — QUALITY GATE: DATA
-  %% ─────────────────────────────────────────────
-
-  RUN->>EVAL: data_quality_gate(build_facts_summary)
-  EVAL->>EVAL: check valuation_gate == pass<br/>check snapshot_id present<br/>check coverage_gate / core_keys_gate
-  alt gate PASS
-    EVAL-->>RUN: {gate=data_quality, passed=True, severity=none}
-    RUN->>STORE: add_step(DATA_QUALITY_GATE, completed)
-  else gate FAIL
-    EVAL-->>RUN: {passed=False, blocking_reasons=[...]}
-    RUN->>STORE: update_run_state(failed, DATA_QUALITY_GATE)
-    RUN-->>CLI: BLOCKED — data quality insufficient
-  end
-
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 4 — PHÂN TÍCH TÀI CHÍNH (FINANCIAL_ANALYST_RUN)
-  %% ─────────────────────────────────────────────
-
-  RUN->>LLM: run_agent(financial_analyst,<br/>"Interpret ratio tables,<br/>identify traceable diagnostics")
-  LLM->>LANGFUSE: trace(tokens, latency)
-  LLM->>BUDGET: charge(FINANCIAL_ANALYST_RUN)
-  BUDGET-->>LLM: allow=True / fallback_model if soft budget hit
-  LLM-->>RUN: AgentResult{financial_tables,<br/>diagnostics, confidence}
-  RUN->>STORE: save_artifact(financial_analyst_review)
-  RUN->>EVAL: financial_analyst_gate(financial_tables)
-  EVAL-->>RUN: gate result (pass / fail)
-
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 5 — ĐỊNH GIÁ (VALUATION_RUN)
-  %% ─────────────────────────────────────────────
-
-  RUN->>VAL: run_valuation_tool(ticker, from_year, to_year)
-  Note over VAL: Deterministic Python — no LLM arithmetic
-  VAL->>VAL: FCFF DCF<br/>(EBIT × (1−tax) + D&A − CAPEX − ΔNWC)
-  VAL->>VAL: FCFE DCF<br/>(NI + D&A − CAPEX − ΔNWC + NetBorrowing)
-  VAL->>VAL: Blend DCF = 60% Price_FCFF + 40% Price_FCFE
-  VAL->>VAL: P/E Multiples (peer median × EPS_FY1)
-  VAL->>VAL: EV/EBITDA Multiples (peer median × EBITDA)
-  VAL->>VAL: Sensitivity Table (WACC × Terminal Growth grid)
-  VAL->>STORE: save ValuationArtifact JSON<br/>{assumptions, input_facts,<br/>output_values, sensitivity_table}
-  VAL-->>RUN: ServiceNodeResult{snapshot_id,<br/>dcf_price, pe_price, ev_price, blend_price}
-  RUN->>STORE: save_artifact(valuation, summary)
-
-  RUN->>LLM: run_agent(valuation,<br/>"Review outputs, assumptions, model limitations")
-  LLM->>BUDGET: charge(VALUATION_RUN)
-  LLM-->>RUN: AgentResult{review, warnings, confidence}
-  RUN->>STORE: save_artifact(valuation_review)
-
-  RUN->>EVAL: valuation_gate(valuation_outputs)
-  EVAL->>EVAL: check dcf_completeness<br/>check sensitivity_completeness<br/>check snapshot_id present
-  EVAL-->>RUN: gate result
-  RUN->>STORE: update_run_state(valuation_ready, VALUATION_GATE)
-
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 6 — HITL CHECKPOINT 1: ASSUMPTIONS APPROVAL
-  %% ─────────────────────────────────────────────
-
-  RUN->>STORE: update_run_state(needs_human_review,<br/>WAITING_ASSUMPTIONS_APPROVAL)
-  RUN->>RUN: PAUSE — set requires_human=True<br/>next_resume_stage=VALUATION_LOCKED
-  STORE-->>Analyst: 🔔 Awaiting valuation assumptions approval<br/>run_id, valuation_artifact, assumptions
-
-  Analyst->>CLI: approve_report.py --run-id X<br/>--stage assumptions --decision approve<br/>[--feedback-patch {...}]
-  CLI->>SUP: Supervisor.handle_approval(run_id, assumptions, approved)
-  SUP->>RUN: handle_approval(run_id, stage, decision, reviewer, patch)
-  RUN->>STORE: add_approval(valuation_assumptions, approved, reviewer)
-
-  alt approved
-    RUN->>STORE: lock_artifacts(run_id, [valuation_draft])<br/>is_locked=True — no further changes
-    RUN->>STORE: add_audit_event(assumptions_approved)
-    Note over RUN: Resume from VALUATION_LOCKED
-
-  else rejected
-    RUN->>STORE: mark_artifacts_stale(<br/>["valuation_draft","full_report_draft",<br/>"quality","citation_gate"])
-    RUN->>STORE: update_run_state(needs_human_review, NEEDS_REVIEW)
-    STORE-->>Analyst: ⚠ Assumptions rejected — please revise<br/>invalidated_sections listed
-  end
-
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 7 — SINH BÁO CÁO (REPORT_WRITER_CRITIC_RUN)
-  %% ─────────────────────────────────────────────
-
-  RUN->>STORE: update_run_state(running, VALUATION_LOCKED)
-  RUN->>REPORT: generate_report_tool(ticker, snapshot_id, mode=draft)
-  REPORT->>REPORT: ReportDataLoader<br/>load facts + valuation artifact + retrieval context
-  REPORT->>INDEX: Retriever.search(claim, top_k=5, tier_priority)
-  INDEX-->>REPORT: EvidencePack{chunks, source_ids, support_scores}
-  REPORT->>REPORT: SectionBuilder<br/>build 8 sections from grounded evidence<br/>(Executive Summary → Appendix)
-  REPORT->>REPORT: CitationMap<br/>map claims → source_id<br/>compute coverage_ratio
-  REPORT->>REPORT: HTMLRenderer (Jinja2 → HTML)<br/>ChartGenerator (matplotlib → 6 charts)
-  REPORT->>REPORT: PDFRenderer (HTML → PDF)
-  REPORT->>STORE: save ReportArtifact<br/>{sections, citation_map, approval_status=draft}
-  REPORT-->>RUN: ServiceNodeResult{report_path, citation_map, coverage_ratio}
-  RUN->>STORE: save_artifact(report, summary)
-
-  RUN->>LLM: run_agent(report_writer_critic,<br/>"Check citations, numeric consistency, readiness")
-  LLM->>BUDGET: charge(REPORT_WRITER_CRITIC_RUN)
-  LLM-->>RUN: AgentResult{review_notes, warnings, confidence}
-  RUN->>STORE: save_artifact(report_writer_critic_review)
-
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 8 — ĐÁNH GIÁ CHẤT LƯỢNG (QUALITY_EVALUATION)
-  %% ─────────────────────────────────────────────
-
-  RUN->>EVAL: evaluate_quality_tool(report_path, ticker)
-  EVAL->>EVAL: numeric_consistency<br/>compare report numbers vs canonical facts
-  EVAL->>EVAL: citation_coverage<br/>coverage_ratio ≥ threshold?<br/>all quantitative claims cited?
-  EVAL->>EVAL: citation_validity<br/>citation content matches claim?
-  EVAL->>EVAL: stale_data<br/>fiscal_year freshness, published_date check
-  EVAL->>EVAL: valuation_reproducibility<br/>DCF recomputable from assumptions + input_facts?
-  EVAL-->>RUN: EvalResult{gate, passed, severity, issues[]}
-  RUN->>STORE: save_artifact(quality_evaluation)
-
-  RUN->>EVAL: citation_gate(coverage_ratio, invalid_citations)
-  EVAL-->>RUN: gate result (pass / warn / fail)
-
-  RUN->>EVAL: export_gate(all_gate_results)
-  alt all critical gates pass
-    EVAL-->>RUN: {passed=True} — report publishable
-    RUN->>STORE: update_run_state(report_ready, EXPORT_GATE)
-  else critical gate fail
-    EVAL-->>RUN: {passed=False, blocking_reasons}
-    RUN->>STORE: update_run_state(needs_human_review)
-    RUN-->>CLI: BLOCKED — cannot export, fix citations/numeric errors
-  end
-
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 9 — HITL CHECKPOINT 2: FINAL APPROVAL
-  %% ─────────────────────────────────────────────
-
-  RUN->>STORE: update_run_state(needs_human_review,<br/>WAITING_FINAL_APPROVAL)
-  RUN->>RUN: PAUSE — requires_human=True
-  STORE-->>Analyst: 🔔 Awaiting final report approval<br/>report HTML + eval summary attached
-
-  Analyst->>CLI: approve_report.py --run-id X<br/>--stage final_report --decision approve
-  CLI->>SUP: handle_approval(final_report, approved)
-  SUP->>RUN: handle_approval(run_id, final_report, approved)
-  RUN->>STORE: add_approval(final_report, approved)
-
-  alt approved
-    RUN->>STORE: update_run_state(approved, PUBLISHED)
-    RUN->>STORE: save ApprovalRecord{reviewer, timestamp, decision}
-    RUN->>REPORT: publish artifacts<br/>(HTML + PDF → reports/ folder)
-    RUN->>RUN: _write_evidence_packet()<br/>_write_run_manifest()
-    RUN->>STORE: add_audit_event(final_report_published)
-    STORE-->>Analyst: ✅ Report published<br/>reports/DHG_YYYYMMDD.html<br/>reports/DHG_YYYYMMDD.pdf
-
-  else rejected
-    RUN->>STORE: mark_artifacts_stale(<br/>["full_report_draft","quality","citation_gate"])
-    RUN->>STORE: update_run_state(needs_human_review, NEEDS_REVIEW)
-    STORE-->>Analyst: ⚠ Final rejected — revise report and regenerate
-  end
-
-  %% ─────────────────────────────────────────────
-  Note over Analyst,EVAL: PHASE 10 — BUDGET GUARD (chạy song song ở mọi LLM call)
-  %% ─────────────────────────────────────────────
-
-  Note over BUDGET,LANGFUSE: BudgetGuard.charge() được gọi sau mỗi LLM response.<br/>Nếu run_total > soft_budget → dùng fallback_model cho bước tiếp theo.<br/>Nếu run_total > hard_budget → block run, escalate HITL.
+    alt Tất cả gates PASS
+        Supervisor->>Analyst: Gửi báo cáo để phê duyệt cuối (HITL)
+        Analyst-->>Supervisor: approve / reject + ghi chú
+        alt Analyst approve
+            Supervisor->>ExportGate: Xuất bản báo cáo
+            ExportGate-->>Analyst: Báo cáo đã publish
+        else Analyst reject
+            Supervisor-->>Analyst: Trả về bản nháp để chỉnh sửa
+        end
+    else Có gate CRITICAL FAIL
+        Supervisor-->>Analyst: Báo lỗi, chặn export
+    end
+    deactivate Supervisor
 ```
 
 ---
 
-## 1. System Context — Tổng quan hệ thống (C4 Level 1)
+## 02 — Luồng Data Pipeline
 
-```mermaid
-C4Context
-  title Vietnam Pharma Equity Research Agent — System Context
+**Tiêu đề:** `02_data_pipeline_sequence`
 
-  Person(analyst, "Analyst", "Kiểm duyệt báo cáo, phê duyệt định giá và xuất bản")
-  Person(admin, "System Admin", "Quản lý lịch chạy, cấu hình ticker, budget policy")
-
-  System(research_system, "Equity Research Agent", "Pipeline tự động: ingestion → facts → valuation → report → evaluation → HITL approval → export")
-
-  System_Ext(vnstock, "vnstock / SSC / HNX / HOSE", "Nguồn dữ liệu tài chính Việt Nam (API + PDF)")
-  System_Ext(cafef, "CafeF / IR websites", "Nguồn tài liệu doanh nghiệp bổ sung")
-  System_Ext(llm_api, "LLM API (OpenAI/Anthropic)", "Mô hình ngôn ngữ cho synthesis & extraction")
-  System_Ext(langfuse, "Langfuse", "Observability & tracing LLM calls")
-
-  Rel(analyst, research_system, "Xem báo cáo nháp, phê duyệt, reject, export")
-  Rel(admin, research_system, "Cấu hình cron job, budget, ticker universe")
-  Rel(research_system, vnstock, "Fetch financial statements, market data")
-  Rel(research_system, cafef, "Fetch annual reports, disclosures (PDF)")
-  Rel(research_system, llm_api, "Synthesis, narrative generation, extraction")
-  Rel(research_system, langfuse, "Trace LLM calls, cost, latency")
-```
-
----
-
-## 2. Use Case Diagram
-
-```mermaid
-%%{init: {"theme": "default"}}%%
-graph LR
-  subgraph Actors
-    A1[Analyst]
-    A2[System / Scheduler]
-  end
-
-  subgraph UseCases["Use Cases"]
-    UC1(["Chạy full research pipeline\n(run_research.py)"])
-    UC2(["Ingest dữ liệu tài chính\n(ingest_ticker.py)"])
-    UC3(["Build canonical facts\n(build_facts.py)"])
-    UC4(["Chạy định giá\n(run_valuation.py)"])
-    UC5(["Build evidence index\n(build_index.py)"])
-    UC6(["Generate báo cáo\n(generate_report.py)"])
-    UC7(["Evaluate báo cáo\n(evaluate_report.py)"])
-    UC8(["Phê duyệt / Từ chối\n(approve_report.py)"])
-    UC9(["Export final report"])
-    UC10(["Xem run status / artifacts"])
-    UC11(["Cấu hình budget policy"])
-    UC12(["Chạy batch nhiều ticker\n(batch.py)"])
-    UC13(["Cron: weekly sync / refresh"])
-  end
-
-  A1 --> UC1
-  A1 --> UC8
-  A1 --> UC10
-  A1 --> UC6
-  A1 --> UC7
-  A2 --> UC1
-  A2 --> UC2
-  A2 --> UC3
-  A2 --> UC4
-  A2 --> UC5
-  A2 --> UC12
-  A2 --> UC13
-  A2 --> UC11
-
-  UC1 -.includes.-> UC2
-  UC1 -.includes.-> UC3
-  UC1 -.includes.-> UC4
-  UC1 -.includes.-> UC5
-  UC1 -.includes.-> UC6
-  UC1 -.includes.-> UC7
-  UC8 -.extends.-> UC9
-```
-
----
-
-## 3. Pipeline Workflow — Luồng pipeline cốt lõi
-
-```mermaid
-flowchart TD
-  Start([User / Scheduler\ntrigger run]) --> PREFLIGHT
-
-  PREFLIGHT["PREFLIGHT\nValidate run_id, ticker, policy"] --> SUPERVISOR_PLAN
-
-  SUPERVISOR_PLAN["SUPERVISOR_PLAN\nAgent: supervisor\nCreate execution plan\n& HITL routing policy"] --> DATA_RETRIEVAL_RUN
-
-  subgraph DATA_LAYER["Data Layer (DATA_RETRIEVAL_RUN)"]
-    AUTO_INGEST["auto_ingest_tool\nFetch official PDFs\n(SSC/HNX/HOSE/IR)\nOCR optional\nNon-blocking"]
-    BUILD_FACTS["build_facts_tool\nNormalize canonical facts\n(Tier-1/2/3)\nFY periods 2021-2025"]
-    BUILD_INDEX["build_index_tool\nChunk documents\nVector index\nDB retrieval"]
-    DATA_AGENT["Agent: data_retrieval\nReview data inventory\n& retrieval readiness"]
-    AUTO_INGEST --> BUILD_FACTS --> BUILD_INDEX --> DATA_AGENT
-  end
-
-  DATA_RETRIEVAL_RUN --> DATA_LAYER --> DATA_QUALITY_GATE
-
-  DATA_QUALITY_GATE{{"DATA_QUALITY_GATE\ncoverage_gate\ncore_keys_gate\nsource_validation_gate\nvaluation_gate"}}
-  DATA_QUALITY_GATE -->|pass| FINANCIAL_ANALYST_RUN
-  DATA_QUALITY_GATE -->|fail| BLOCKED_DQ[/"BLOCKED\nNeeds data fix"/]
-
-  FINANCIAL_ANALYST_RUN["FINANCIAL_ANALYST_RUN\nAgent: financial_analyst\nInterpret ratio tables\nIdentify diagnostics"]
-  FINANCIAL_ANALYST_RUN --> FINANCIAL_ANALYST_GATE
-
-  FINANCIAL_ANALYST_GATE{{"FINANCIAL_ANALYST_GATE\nConfidence check\nAnalysis quality"}}
-  FINANCIAL_ANALYST_GATE -->|pass| VALUATION_RUN
-  FINANCIAL_ANALYST_GATE -->|fail| BLOCKED_FA[/"BLOCKED\nLow confidence"/]
-
-  subgraph VALUATION_LAYER["Valuation Layer (VALUATION_RUN)"]
-    VAL_CODE["run_valuation_tool\nDCF FCFF + FCFE + Blend\nP/E multiples\nEV/EBITDA multiples\nSensitivity table\n(deterministic Python)"]
-    VAL_AGENT["Agent: valuation\nReview outputs, assumptions\n& model limitations"]
-    VAL_CODE --> VAL_AGENT
-  end
-
-  VALUATION_RUN --> VALUATION_LAYER --> VALUATION_GATE
-
-  VALUATION_GATE{{"VALUATION_GATE\nDCF completeness\nSensitivity completeness\nSnapshot present"}}
-  VALUATION_GATE -->|pass| WAITING_ASSUMPTIONS_APPROVAL
-  VALUATION_GATE -->|fail| BLOCKED_VAL[/"BLOCKED\nValuation incomplete"/]
-
-  WAITING_ASSUMPTIONS_APPROVAL(["WAITING_ASSUMPTIONS_APPROVAL\n⏸ HITL Checkpoint 1\nAnalyst review valuation assumptions"])
-  WAITING_ASSUMPTIONS_APPROVAL -->|approved| VALUATION_LOCKED
-  WAITING_ASSUMPTIONS_APPROVAL -->|rejected / revision| NEEDS_REVIEW_V[/"NEEDS_REVIEW\nRevise assumptions"/]
-
-  VALUATION_LOCKED["VALUATION_LOCKED\nLock valuation artifacts\nNo further changes allowed"]
-
-  subgraph REPORT_LAYER["Report Layer (REPORT_WRITER_CRITIC_RUN)"]
-    GEN_REPORT["generate_report_tool\nBuild grounded narrative\nMap citations\nMode: draft"]
-    CRITIC_AGENT["Agent: report_writer_critic\nCheck citations\nNumeric consistency\nFinal readiness"]
-    GEN_REPORT --> CRITIC_AGENT
-  end
-
-  VALUATION_LOCKED --> REPORT_WRITER_CRITIC_RUN --> REPORT_LAYER --> QUALITY_EVALUATION
-
-  QUALITY_EVALUATION["QUALITY_EVALUATION\nevaluate_quality_tool\n5 deterministic gates:\nnumeric_consistency\ncitation_coverage\ncitation_validity\nstale_data\nvaluation_reproducibility"]
-  QUALITY_EVALUATION --> CITATION_GATE
-
-  CITATION_GATE{{"CITATION_GATE\ncoverage_ratio ≥ threshold\nno invalid citations\nclaim grounding OK"}}
-  CITATION_GATE -->|pass| EXPORT_GATE
-  CITATION_GATE -->|fail| BLOCKED_CIT[/"BLOCKED\nCitation failure"/]
-
-  EXPORT_GATE{{"EXPORT_GATE\nAll critical gates pass\nReport publishable"}}
-  EXPORT_GATE -->|pass| WAITING_FINAL_APPROVAL
-  EXPORT_GATE -->|fail| BLOCKED_EXP[/"BLOCKED\nCannot export"/]
-
-  WAITING_FINAL_APPROVAL(["WAITING_FINAL_APPROVAL\n⏸ HITL Checkpoint 2\nAnalyst final review & sign-off"])
-  WAITING_FINAL_APPROVAL -->|approved| PUBLISHED
-  WAITING_FINAL_APPROVAL -->|rejected| NEEDS_REVIEW_F[/"NEEDS_REVIEW\nRevise report"/]
-
-  PUBLISHED(["PUBLISHED\nArtifacts exported\nApproval record saved"])
-```
-
----
-
-## 4. Data Architecture — Kiến trúc dữ liệu
-
-```mermaid
-flowchart TD
-  subgraph SOURCES["External Sources (Tier)"]
-    T1["Tier-1: Official Audited PDFs\n(SSC, HNX, HOSE)"]
-    T2["Tier-2: Disclosed PDFs\n(IR, CafeF)"]
-    T3["Tier-3: vnstock API\n(live financial statements)"]
-  end
-
-  subgraph INGESTION["Ingestion Layer"]
-    DISC["OfficialDocumentDiscovery\nDiscover candidate URLs"]
-    FETCH["DocumentFetcher\nDownload & store raw PDF"]
-    OCR["PDFExtractor / OCR\nExtract text + tables"]
-    VNCONN["VnstockConnector\nFetch API data"]
-    DISC --> FETCH --> OCR
-  end
-
-  subgraph FACTS["Canonical Facts Layer"]
-    NORM["FactNormalizer\nMap → FactEntry schema\n{ticker, fiscal_year, quarter,\nmetric_name, value, source_id,\nconfidence, source_tier}"]
-    RECON["FinancialFactReconciler\nCross-source reconciliation\nConflict detection"]
-    DQ["DataQualityGates\ncoverage_gate\ncore_keys_gate\nsource_validation_gate\nvaluation_gate"]
-    FACTDB[("facts_db\n(SQLite / canonical facts)")]
-    NORM --> RECON --> DQ --> FACTDB
-  end
-
-  subgraph EVIDENCE["Evidence / Retrieval Layer"]
-    CHUNKER["DocumentChunker\nSplit text → chunks\n{chunk_id, source_id,\nticker, text, section,\nfiscal_year, metadata}"]
-    EMBEDDER["Embedder\nVector embeddings\n(Milvus / local)"]
-    RETRIEVER["Retriever\nTop-k search\nTier-priority weighting"]
-    EVIDDB[("retrieval_index\n(SQLite + Milvus)")]
-    CHUNKER --> EMBEDDER --> EVIDDB
-    RETRIEVER --> EVIDDB
-  end
-
-  subgraph VALUATION["Valuation Layer (Code-First, Deterministic)"]
-    FCFF["FCFF DCF"]
-    FCFE["FCFE DCF"]
-    BLEND["Blend DCF\n(60% FCFF + 40% FCFE)"]
-    PE["P/E Multiples"]
-    EVEBITDA["EV/EBITDA Multiples"]
-    SENSI["Sensitivity Table\n(WACC × Terminal Growth)"]
-    VART[("ValuationArtifact JSON\n{valuation_id, ticker, method,\nassumptions, input_facts,\noutput_values, sensitivity_table}")]
-    FCFF & FCFE --> BLEND
-    BLEND & PE & EVEBITDA & SENSI --> VART
-  end
-
-  subgraph REPORT["Report Generation Layer"]
-    CTXBLD["ReportDataLoader\nLoad facts + valuation\n+ retrieval context"]
-    SECTBLD["SectionBuilder\nBuild sections from\ngrounded evidence packs"]
-    CITMAP["CitationMap\nMap claims → source_id\ncoverage ratio"]
-    HTMLREND["HTML Renderer\nJinja2 → HTML"]
-    PDFREND["PDF Renderer\nHTML → PDF"]
-    RPTART[("Report Artifacts\n{report_id, ticker, type,\nsections, citation_map,\neval_summary, approval_status}")]
-    CTXBLD --> SECTBLD --> CITMAP --> HTMLREND --> PDFREND --> RPTART
-  end
-
-  subgraph EVALUATION["Evaluation Layer (Deterministic Gates)"]
-    E1["numeric_consistency"]
-    E2["citation_coverage"]
-    E3["citation_validity"]
-    E4["stale_data"]
-    E5["valuation_reproducibility"]
-    EVALRES[("EvalResult\n{gate, passed, severity,\nissue_id, blocking_reasons}")]
-    E1 & E2 & E3 & E4 & E5 --> EVALRES
-  end
-
-  T1 & T2 --> INGESTION
-  T3 --> VNCONN --> NORM
-  OCR --> NORM
-  FACTDB --> VALUATION
-  FACTDB --> CHUNKER
-  VART --> CTXBLD
-  FACTDB --> CTXBLD
-  RETRIEVER --> SECTBLD
-  RPTART --> EVALUATION
-  VART --> E5
-  FACTDB --> E1
-```
-
----
-
-## 5. Multi-Agent Architecture — Supervisor & Worker Agents
-
-```mermaid
-graph TB
-  subgraph ORCHESTRATION["Orchestration Layer"]
-    SUPERVISOR["Supervisor\n(orchestrator.py)\nFacade → ResearchGraphRunner\nHITL routing\nRecompute planning\nOffline evaluation"]
-    RUNNER["ResearchGraphRunner\n(harness/runner.py)\nLangGraph state machine\nStage execution\nBudget enforcement\nCheckpointing"]
-    BUDGET["BudgetGuard\n(services.py)\nSoft/hard budget\nFallback model trigger\nCost ledger"]
-    STORE["RuntimeStore\n(runtime_store.py)\nRun state\nArtifact registry\nApproval records\nAudit log\nStep trace"]
-    SUPERVISOR --> RUNNER
-    RUNNER --> BUDGET
-    RUNNER --> STORE
-  end
-
-  subgraph AGENTS["LLM Agent Workers (model_adapter.py)"]
-    AG_SUP["supervisor agent\nPlan execution\nHITL routing policy"]
-    AG_DATA["data_retrieval agent\nReview data inventory\nSource coverage check"]
-    AG_FA["financial_analyst agent\nInterpret ratio tables\nIdentify diagnostics\n(No arithmetic!)"]
-    AG_VAL["valuation agent\nReview DCF outputs\nCheck assumptions\nFlag model limitations"]
-    AG_REPORT["report_writer_critic agent\nCheck narrative grounding\nCitation consistency\nFinal readiness"]
-  end
-
-  subgraph SERVICES["Deterministic Service Tools"]
-    SVC_INGEST["auto_ingest_tool\nFetch official PDFs\nOCR pipeline"]
-    SVC_FACTS["build_facts_tool\nCanonical fact normalization\nDQ gate validation"]
-    SVC_INDEX["build_index_tool\nChunking + embedding\nVector index"]
-    SVC_VAL["run_valuation_tool\nDCF / P-E / EV-EBITDA\nSensitivity table"]
-    SVC_REPORT["generate_report_tool\nSection builder\nCitation mapper\nHTML + PDF render"]
-    SVC_EVAL["evaluate_quality_tool\n5 evaluation gates"]
-  end
-
-  subgraph GATES["Quality Gates (gates.py)"]
-    G_DQ["data_quality_gate"]
-    G_FA["financial_analyst_gate"]
-    G_VAL["valuation_gate"]
-    G_CIT["citation_gate"]
-    G_EXP["export_gate"]
-  end
-
-  RUNNER -- "SUPERVISOR_PLAN" --> AG_SUP
-  RUNNER -- "DATA_RETRIEVAL_RUN" --> SVC_INGEST & SVC_FACTS & SVC_INDEX
-  RUNNER -- "DATA_RETRIEVAL_RUN" --> AG_DATA
-  RUNNER -- "DATA_QUALITY_GATE" --> G_DQ
-  RUNNER -- "FINANCIAL_ANALYST_RUN" --> AG_FA
-  RUNNER -- "FINANCIAL_ANALYST_GATE" --> G_FA
-  RUNNER -- "VALUATION_RUN" --> SVC_VAL
-  RUNNER -- "VALUATION_RUN" --> AG_VAL
-  RUNNER -- "VALUATION_GATE" --> G_VAL
-  RUNNER -- "REPORT_WRITER_CRITIC_RUN" --> SVC_REPORT
-  RUNNER -- "REPORT_WRITER_CRITIC_RUN" --> AG_REPORT
-  RUNNER -- "QUALITY_EVALUATION" --> SVC_EVAL
-  RUNNER -- "CITATION_GATE" --> G_CIT
-  RUNNER -- "EXPORT_GATE" --> G_EXP
-
-  LANGFUSE["Langfuse\nTracing & cost logging"]
-  AG_SUP & AG_DATA & AG_FA & AG_VAL & AG_REPORT -.-> LANGFUSE
-```
-
----
-
-## 6. Run Lifecycle State Machine
-
-```mermaid
-stateDiagram-v2
-  [*] --> initialized : createRun()
-
-  initialized --> running : PREFLIGHT pass
-
-  running --> data_ready : DATA_RETRIEVAL_RUN + DATA_QUALITY_GATE pass
-  running --> needs_human_review : gate fail / error
-  running --> failed : unrecoverable error
-
-  data_ready --> analysis_ready : FINANCIAL_ANALYST_RUN + FINANCIAL_ANALYST_GATE pass
-  analysis_ready --> valuation_ready : VALUATION_RUN + VALUATION_GATE pass
-
-  valuation_ready --> needs_human_review : WAITING_ASSUMPTIONS_APPROVAL\n(HITL Checkpoint 1)
-  needs_human_review --> running : approved → resume VALUATION_LOCKED
-  needs_human_review --> needs_human_review : rejected → invalidate artifacts\nrevise and resubmit
-
-  running --> report_ready : VALUATION_LOCKED → REPORT_WRITER_CRITIC_RUN\n+ QUALITY_EVALUATION + CITATION_GATE + EXPORT_GATE pass
-
-  report_ready --> needs_human_review : WAITING_FINAL_APPROVAL\n(HITL Checkpoint 2)
-  needs_human_review --> approved : final approved → PUBLISHED
-  needs_human_review --> needs_human_review : final rejected → revise
-
-  approved --> [*]
-  failed --> [*]
-  cancelled --> [*]
-
-  running --> cancelled : manual cancel
-```
-
----
-
-## 7. HITL Approval Flow — Luồng phê duyệt của analyst
+**Mô tả:** Mô tả chi tiết quá trình thu thập dữ liệu từ vnstock, chuẩn hóa thành canonical facts, kiểm tra chất lượng dữ liệu, và xây dựng retrieval index cho evidence. Đây là foundation cho mọi luồng phân tích.
 
 ```mermaid
 sequenceDiagram
-  participant Analyst
-  participant API as approve_report.py / API
-  participant Runner as ResearchGraphRunner
-  participant Store as RuntimeStore
-  participant Runner2 as ResearchGraphRunner (resume)
+    participant Script as ingest_ticker.py
+    participant Connector as vnstock Connector
+    participant Registry as Source Registry
+    participant Normalizer as Fact Normalizer
+    participant DQGate as Data Quality Gate
+    participant FactStore as Fact Store (DB)
+    participant Indexer as Evidence Indexer
 
-  Note over Runner: Pipeline tự động dừng tại<br/>WAITING_ASSUMPTIONS_APPROVAL
-  Runner ->> Store: update_run_state(needs_human_review)
-  Store -->> Analyst: Notification: awaiting assumptions approval
+    Script->>Connector: Yêu cầu BCTC, giá, profile (ticker, years)
+    activate Connector
+    Connector->>Connector: Gọi vnstock API
+    Connector->>Registry: Đăng ký source version (checksum)
+    activate Registry
+    Registry-->>Connector: source_version_id (bỏ qua nếu trùng)
+    deactivate Registry
+    Connector-->>Script: Raw payload + source_version_id
+    deactivate Connector
 
-  Analyst ->> API: POST /research/{run_id}/approve<br/>{stage: "assumptions", decision: "approve",<br/>reviewer, feedback_patch}
-  API ->> Runner: handle_approval(run_id, stage, decision, reviewer, patch)
-  Runner ->> Store: add_approval(valuation_assumptions, approved)
+    Script->>Normalizer: Chuẩn hóa raw payload
+    activate Normalizer
+    Normalizer->>Normalizer: Alias matching với taxonomy
+    Normalizer->>Normalizer: Tạo FinancialFact rows
+    Normalizer-->>Script: Danh sách canonical facts
+    deactivate Normalizer
 
-  alt Decision = approved
-    Runner ->> Store: lock_artifacts(run_id, ["valuation_draft"])
-    Runner ->> Runner2: run_until_pause(start_stage=VALUATION_LOCKED)
-    Runner2 ->> Runner2: REPORT_WRITER_CRITIC_RUN\n→ QUALITY_EVALUATION\n→ CITATION_GATE\n→ EXPORT_GATE
-    Runner2 ->> Store: update_run_state(report_ready, WAITING_FINAL_APPROVAL)
-    Store -->> Analyst: Notification: awaiting final approval
+    Script->>DQGate: Kiểm tra chất lượng dữ liệu
+    activate DQGate
+    DQGate->>DQGate: Kiểm tra completeness (3 tiers)
+    DQGate->>DQGate: Kiểm tra giá trị ngoại lệ
+    DQGate->>DQGate: Kiểm tra nguồn hợp lệ
 
-    Analyst ->> API: POST /research/{run_id}/approve<br/>{stage: "final_report", decision: "approve"}
-    API ->> Runner: handle_approval(run_id, final_report, approved)
-    Runner ->> Runner2: run_until_pause(start_stage=PUBLISHED)
-    Runner2 ->> Store: publishArtifacts → approved
-    Store -->> Analyst: Report exported (HTML + PDF)
+    alt Fact hợp lệ
+        DQGate-->>Script: accepted / accepted_with_warning
+    else Fact lỗi
+        DQGate-->>Script: needs_review / rejected
+    end
+    deactivate DQGate
 
-  else Decision = rejected (assumptions)
-    Runner ->> Store: mark_artifacts_stale(["valuation_draft", "full_report_draft", "quality", "citation_gate"])
-    Runner ->> Store: update_run_state(needs_human_review, NEEDS_REVIEW)
-    Store -->> Analyst: Artifacts invalidated — please revise assumptions and rerun
-  
-  else Decision = rejected (final_report)
-    Runner ->> Store: mark_artifacts_stale(["full_report_draft", "quality", "citation_gate"])
-    Runner ->> Store: update_run_state(needs_human_review, NEEDS_REVIEW)
-    Store -->> Analyst: Report invalidated — revise and regenerate
-  end
+    Script->>FactStore: Upsert canonical facts đã qua gate
+    activate FactStore
+    FactStore-->>Script: Xác nhận lưu thành công
+    deactivate FactStore
+
+    Script->>Indexer: Xây dựng evidence index
+    activate Indexer
+    Indexer->>Indexer: Chunk tài liệu nguồn
+    Indexer->>Indexer: Tạo embedding và citation map
+    Indexer->>Indexer: Lưu vào Milvus
+    Indexer-->>Script: Index và citation map sẵn sàng
+    deactivate Indexer
 ```
 
 ---
 
-## 8. Budget Guardrails Flow
+## 03 — Luồng phối hợp Multi-Agent
 
-```mermaid
-flowchart TD
-  STEP[LLM Agent Call\n(model_adapter.py)] --> CHARGE
+**Tiêu đề:** `03_multi_agent_orchestration_sequence`
 
-  CHARGE["BudgetGuard.charge(\n  run_id, step_name,\n  model_name,\n  prompt_tokens, completion_tokens\n)"]
-
-  CHARGE --> CALC["cost_usd =\n(prompt_tokens × 0.2 +\n completion_tokens × 0.8)\n/ 1_000_000"]
-
-  CALC --> TOTAL["run_total =\nstore.run_cost_usd(run_id)\n+ cost_usd"]
-
-  TOTAL --> HARD{run_total >\nhard_budget_usd?}
-
-  HARD -->|Yes| STOP["BudgetDecision(allow=False)\nstop_reason: hard_budget_exceeded\nRunner blocks stage → escalate HITL"]
-
-  HARD -->|No| SOFT{run_total >\nsoft_budget_usd?}
-
-  SOFT -->|Yes| FALLBACK["BudgetDecision(allow=True)\nfallback_model = settings.fallback_model\nDowngrade model for next steps"]
-
-  SOFT -->|No| ALLOW["BudgetDecision(allow=True)\nContinue with primary model"]
-
-  CHARGE --> LOG["store.add_budget_entry(\n  cost_usd, fallback_model, stop_reason\n)"]
-```
-
----
-
-## 9. Partial Recompute Decision Flow
-
-```mermaid
-flowchart TD
-  TRIGGER["New Source / Catalyst /\nPrompt Change detected"] --> CLASSIFY
-
-  CLASSIFY["RecomputePlanner.decide(event_type)"]
-
-  CLASSIFY --> SM[source_metadata_only]
-  CLASSIFY --> CO[catalyst_only]
-  CLASSIFY --> FC[fact_changed]
-  CLASSIFY --> PC[prompt_or_template_changed]
-
-  SM --> NO_RECOMPUTE["No Recompute\nIndex refresh only\n(re-chunk new document)"]
-
-  CO --> IMPACT{Impacts\nValuation?}
-  IMPACT -->|Yes| RERUN_VAL
-  IMPACT -->|No| THESIS_ONLY
-
-  FC --> RERUN_VAL["Invalidate valuation artifacts\nRerun: VALUATION_RUN\n→ VALUATION_GATE\n→ WAITING_ASSUMPTIONS_APPROVAL"]
-
-  RERUN_VAL --> REFRESH_SYNTH["Refresh: REPORT_WRITER_CRITIC_RUN\n→ QUALITY_EVALUATION\n→ CITATION_GATE"]
-
-  REFRESH_SYNTH --> REFRESH_CIT["Re-validate citations\nExport gate re-check"]
-
-  PC --> THESIS_ONLY["Refresh: REPORT_WRITER_CRITIC_RUN only\n(valuation artifact unchanged)"]
-  THESIS_ONLY --> REFRESH_CIT
-
-  STORE_PLAN["Supervisor.recompute_plan()\nStore flags in RuntimeStore\nUpdate run state → NEEDS_REVIEW"] -.-> CLASSIFY
-```
-
----
-
-## 10. Evaluation Gate Flow
-
-```mermaid
-flowchart TD
-  REPORT[Report Draft\n+ Valuation Artifact\n+ Facts DB] --> EQT
-
-  EQT["evaluate_quality_tool\n(scripts/evaluate_report.py)"]
-
-  EQT --> G1["numeric_consistency\nCompare report numbers\nvs canonical facts\nvs valuation artifact"]
-  EQT --> G2["citation_coverage\ncoverage_ratio ≥ threshold\nall quantitative claims cited"]
-  EQT --> G3["citation_validity\ncitation supports claim\nno fake/mismatched citations"]
-  EQT --> G4["stale_data\nfiscal_year freshness check\nsource published_date check"]
-  EQT --> G5["valuation_reproducibility\nDCF recomputable from assumptions\n+ input_facts"]
-
-  G1 & G2 & G3 & G4 & G5 --> GATE_RESULT
-
-  GATE_RESULT{{"All critical gates\npassed?"}}
-
-  GATE_RESULT -->|Yes — all pass| CITATION_GATE
-  GATE_RESULT -->|WARN — non-critical| CITATION_GATE_W["citation_gate\n(with warnings logged)"]
-  GATE_RESULT -->|FAIL — critical| BLOCKED["BLOCKED: export_gate fails\nReport cannot be published\nAnalyst must fix root cause"]
-
-  CITATION_GATE["citation_gate\ngate_result: passed\ncoverage_ratio OK\nno invalid citations"] --> EXPORT_GATE
-
-  EXPORT_GATE["export_gate\nAll upstream gates pass\nReport artifact complete"] --> WAITING_FINAL_APPROVAL
-
-  CITATION_GATE_W --> EXPORT_GATE
-```
-
----
-
-## 11. Full Research Sequence (End-to-End)
+**Mô tả:** Thể hiện cách 5 agent tương tác và phân công nhiệm vụ qua Supervisor Agent. Phân biệt rõ vai trò agent (LLM-assisted reasoning) với service xác định (code-first). Supervisor điều phối toàn bộ workflow và quản lý checkpoint.
 
 ```mermaid
 sequenceDiagram
-  participant User
-  participant CLI as run_research.py
-  participant Supervisor
-  participant Runner as ResearchGraphRunner
-  participant DataSvc as Data Services
-  participant ValSvc as Valuation Service
-  participant LLM as LLM Agents
-  participant EvalSvc as Evaluation Service
-  participant Store as RuntimeStore
-  participant Analyst
+    participant Analyst
+    participant Supervisor as Supervisor Agent
+    participant TaskRouter as Task Router
+    participant DataAgent as Data Agent
+    participant FAAgent as Financial Analysis Agent
+    participant ValAgent as Valuation Agent
+    participant ReportAgent as Report Agent
 
-  User ->> CLI: python run_research.py --ticker DHG --report-type full_report
-  CLI ->> Supervisor: execute(RunContext)
-  Supervisor ->> Runner: execute(context)
+    Analyst->>Supervisor: Yêu cầu nghiên cứu (ticker, loại báo cáo)
+    activate Supervisor
+    Supervisor->>TaskRouter: Phân tích yêu cầu
+    activate TaskRouter
+    TaskRouter->>TaskRouter: Xác định ticker, loại báo cáo
+    TaskRouter->>TaskRouter: Kiểm tra policy
+    TaskRouter-->>Supervisor: Kế hoạch thực thi
+    deactivate TaskRouter
 
-  Runner ->> Store: create_run(run_id, ticker, status=initialized)
-  Runner ->> Runner: PREFLIGHT — validate policy
+    Supervisor->>DataAgent: Giao nhiệm vụ thu thập dữ liệu
+    activate DataAgent
+    DataAgent->>DataAgent: Data retrieval (vnstock connectors)
+    DataAgent->>DataAgent: Source ranking và dedup
+    DataAgent-->>Supervisor: canonical facts + source versions
+    deactivate DataAgent
+    Supervisor->>Supervisor: Lưu checkpoint (sau Data Agent)
 
-  Runner ->> LLM: SUPERVISOR_PLAN — plan + HITL routing
-  LLM -->> Runner: execution plan
+    Supervisor->>FAAgent: Giao nhiệm vụ phân tích tài chính
+    activate FAAgent
+    FAAgent->>FAAgent: Data cleaning, normalization (code)
+    FAAgent->>FAAgent: Ratio engine: gross margin, ROE, ROA (code)
+    FAAgent->>FAAgent: Phát hiện bất thường (code + LLM)
+    FAAgent-->>Supervisor: Kết quả phân tích
+    deactivate FAAgent
+    Supervisor->>Supervisor: Lưu checkpoint (sau FA Agent)
 
-  Runner ->> DataSvc: DATA_RETRIEVAL_RUN
-  DataSvc ->> DataSvc: auto_ingest_tool (PDF fetch + OCR)
-  DataSvc ->> DataSvc: build_facts_tool (normalize canonical facts)
-  DataSvc ->> DataSvc: build_index_tool (chunk + embed)
-  DataSvc ->> LLM: data_retrieval agent review
-  DataSvc -->> Runner: data_inventory + retrieval_results
-  Store ->> Store: update_run_state(data_ready)
+    Supervisor->>ValAgent: Giao nhiệm vụ định giá
+    activate ValAgent
+    ValAgent->>ValAgent: DCF, FCFF, FCFE (code-first engine)
+    ValAgent->>ValAgent: P/E, EV/EBITDA comparables (code)
+    ValAgent->>ValAgent: Sensitivity analysis (code)
+    ValAgent-->>Supervisor: valuation artifact
+    deactivate ValAgent
+    Supervisor->>Supervisor: Lưu checkpoint (sau Valuation Agent)
 
-  Runner ->> Runner: DATA_QUALITY_GATE
-  Runner ->> LLM: FINANCIAL_ANALYST_RUN
-  LLM -->> Runner: financial tables + diagnostics
-  Runner ->> Runner: FINANCIAL_ANALYST_GATE
+    Supervisor->>ReportAgent: Giao nhiệm vụ tổng hợp báo cáo
+    activate ReportAgent
+    ReportAgent->>ReportAgent: Report generation (LLM narrative)
+    ReportAgent->>ReportAgent: Citation check (deterministic)
+    ReportAgent->>ReportAgent: Validation checklist
+    ReportAgent-->>Supervisor: Bản nháp báo cáo + citation map
+    deactivate ReportAgent
 
-  Runner ->> ValSvc: VALUATION_RUN — run_valuation_tool
-  ValSvc ->> ValSvc: DCF FCFF + FCFE + Blend\nP/E + EV/EBITDA\nSensitivity table
-  ValSvc ->> LLM: valuation agent review
-  ValSvc -->> Runner: ValuationArtifact
-  Runner ->> Runner: VALUATION_GATE
-  Store ->> Store: update_run_state(valuation_ready)
-
-  Runner ->> Store: WAITING_ASSUMPTIONS_APPROVAL\nupdate_run_state(needs_human_review)
-  Store -->> Analyst: Awaiting assumptions approval
-
-  Analyst ->> CLI: approve_report.py --run-id X --stage assumptions --decision approve
-  CLI ->> Runner: handle_approval(approved)
-  Runner ->> Store: lock_artifacts(valuation_draft)
-
-  Runner ->> Runner: VALUATION_LOCKED
-  Runner ->> EvalSvc: REPORT_WRITER_CRITIC_RUN\ngenerate_report_tool → report_writer_critic agent
-  EvalSvc -->> Runner: report draft + citation map
-
-  Runner ->> EvalSvc: QUALITY_EVALUATION — evaluate_quality_tool
-  EvalSvc -->> Runner: 5-gate evaluation result
-  Runner ->> Runner: CITATION_GATE + EXPORT_GATE
-  Store ->> Store: update_run_state(report_ready)
-
-  Runner ->> Store: WAITING_FINAL_APPROVAL\nupdate_run_state(needs_human_review)
-  Store -->> Analyst: Awaiting final approval
-
-  Analyst ->> CLI: approve_report.py --run-id X --stage final_report --decision approve
-  CLI ->> Runner: handle_approval(approved)
-  Runner ->> Runner: PUBLISHED
-  Runner ->> Store: save approval record\npublish artifacts (HTML + PDF)
-  Store -->> User: Report exported → reports/DHG_*.html + .pdf
+    Supervisor-->>Analyst: Bản nháp sẵn sàng để review
+    deactivate Supervisor
 ```
 
 ---
 
-## 12. Agent Registry — Vai trò từng Agent
+## 04 — Luồng Định giá và HITL Approval
+
+**Tiêu đề:** `04_valuation_hitl_sequence`
+
+**Mô tả:** Mô tả chi tiết quá trình Valuation Agent chạy các mô hình định giá xác định, đề xuất assumptions, và yêu cầu Analyst phê duyệt trước khi tạo valuation artifact chính thức. Toàn bộ tính toán là code-first, không dùng LLM.
 
 ```mermaid
-classDiagram
-  class Supervisor {
-    +execute(context: RunContext)
-    +handle_approval(run_id, stage, decision, reviewer, patch)
-    +recompute_plan(run_id, event_type)
-    +run_offline_evaluation(run_id)
-    -runner: ResearchGraphRunner
-    -offline_eval: OfflineEvaluator
-  }
+sequenceDiagram
+    participant Supervisor as Supervisor Agent
+    participant ValAgent as Valuation Agent
+    participant FCFFEngine as FCFF Engine (code)
+    participant FCFEEngine as FCFE Engine (code)
+    participant BlendEngine as Blend 60/40 Engine (code)
+    participant SensEngine as Sensitivity Engine (code)
+    participant Analyst
 
-  class ResearchGraphRunner {
-    +execute(context)
-    +run_until_pause(state, start_stage)
-    +handle_approval(run_id, stage, decision, reviewer, patch)
-    -budget: BudgetGuard
-    -agent_registry: AgentRegistry
-    -model_adapter: OpenAIModelAdapter
-    -_compiled_graph: LangGraph
-    -_run_stage(state, stage)
-    -_execute_stage(state, stage)
-  }
+    Supervisor->>ValAgent: Chạy định giá cho ticker
+    activate ValAgent
+    ValAgent->>ValAgent: Tải canonical facts từ DB
+    ValAgent->>ValAgent: Tải tax policy, debt schedule
 
-  class AgentRegistry {
-    +get_agent(agent_id: str) AgentConfig
-    +list_agents() list
-  }
+    ValAgent->>Analyst: Đề xuất assumptions (WACC, g, target P/E)
+    activate Analyst
+    Analyst-->>ValAgent: Phê duyệt / điều chỉnh assumptions
+    deactivate Analyst
 
-  class OpenAIModelAdapter {
-    +call(agent_id, prompt, context) AgentResult
-    -_trace_langfuse(call_id, tokens, cost)
-  }
+    ValAgent->>FCFFEngine: Chạy FCFF DCF (WACC, terminal growth)
+    activate FCFFEngine
+    FCFFEngine->>FCFFEngine: EBIT(1-T) + D&A - CAPEX - delta_NWC
+    FCFFEngine->>FCFFEngine: Chiết khấu WACC, bridge EV -> Equity
+    FCFFEngine-->>ValAgent: FCFF target price (60% trọng số)
+    deactivate FCFFEngine
 
-  class BudgetGuard {
-    +charge(run_id, step_name, model, p_tokens, c_tokens, policy) BudgetDecision
-    -hard_budget_usd: float
-    -soft_budget_usd: float
-    -fallback_model: str
-  }
+    ValAgent->>FCFEEngine: Chạy FCFE DCF (cost of equity)
+    activate FCFEEngine
+    FCFEEngine->>FCFEEngine: NI + D&A - CAPEX - delta_NWC + Net Borrowing
+    FCFEEngine->>FCFEEngine: Chiết khấu Re, Equity Value trực tiếp
+    FCFEEngine-->>ValAgent: FCFE target price (40% trọng số)
+    deactivate FCFEEngine
 
-  class RuntimeStore {
-    +create_run(run_id, ticker, run_type)
-    +update_run_state(run_id, status, stage)
-    +save_artifact(artifact_id, run_id, type, section_key, payload)
-    +add_approval(run_id, stage, decision, reviewer, patch)
-    +lock_artifacts(run_id, section_keys)
-    +mark_artifacts_stale(run_id, section_keys, reason)
-    +add_step(run_id, step_name, agent_name)
-    +add_budget_entry(run_id, step_name, cost_usd)
-    +add_audit_event(run_id, actor, action, payload)
-    +latest_graph_state(run_id) dict
-  }
+    ValAgent->>BlendEngine: Tổng hợp Blend 60% FCFF + 40% FCFE
+    activate BlendEngine
+    BlendEngine->>BlendEngine: Kiểm tra TV weight < 70%
+    BlendEngine->>BlendEngine: Kiểm tra FCFF/FCFE gap < 25%
+    BlendEngine-->>ValAgent: Blend target price
+    deactivate BlendEngine
 
-  Supervisor --> ResearchGraphRunner
-  ResearchGraphRunner --> AgentRegistry
-  ResearchGraphRunner --> OpenAIModelAdapter
-  ResearchGraphRunner --> BudgetGuard
-  ResearchGraphRunner --> RuntimeStore
-  Supervisor --> RuntimeStore
+    ValAgent->>SensEngine: Chạy sensitivity analysis
+    activate SensEngine
+    SensEngine->>SensEngine: Grid WACC x terminal growth (FCFF)
+    SensEngine->>SensEngine: Grid Re x g (FCFE)
+    SensEngine->>SensEngine: P/E matrix, EV/EBITDA matrix
+    SensEngine-->>ValAgent: Sensitivity tables
+    deactivate SensEngine
+
+    ValAgent->>ValAgent: Đóng gói valuation artifact (JSON)
+    ValAgent->>ValAgent: Ghi valuation confidence (high/medium/low)
+
+    opt Assumption Gate chưa được duyệt
+        ValAgent->>Analyst: Yêu cầu xác nhận lại assumptions
+        Analyst-->>ValAgent: Xác nhận
+    end
+
+    ValAgent-->>Supervisor: valuation artifact hoàn chỉnh
+    deactivate ValAgent
 ```
 
 ---
 
-## 13. Data Model — Artifact Contracts
+## 05 — Luồng Sinh báo cáo, Citation và Evaluation Gate
+
+**Tiêu đề:** `05_report_citation_evaluation_sequence`
+
+**Mô tả:** Mô tả chi tiết quá trình Report Agent sinh narrative, gắn citation cho từng claim, và hệ thống chạy 7 evaluation gates xác định trước khi mở Export Gate. Phân biệt rõ bước LLM (narrative) và bước deterministic (citation, numeric check).
 
 ```mermaid
-erDiagram
-  RUN {
-    string run_id PK
-    string ticker
-    string run_type
-    string status
-    string current_stage
-    json   policy
-    json   flags
-    float  cost_usd_total
-    datetime created_at
-    datetime updated_at
-  }
+sequenceDiagram
+    participant Supervisor as Supervisor Agent
+    participant ReportAgent as Report Agent
+    participant CtxBuilder as Context Builder (service)
+    participant LLMWriter as LLM Narrative Writer
+    participant CitationSvc as Citation Service (service)
+    participant EvalGate as Evaluation Gate (service)
+    participant Analyst
 
-  CANONICAL_FACT {
-    string fact_id PK
-    string ticker
-    int    fiscal_year
-    string quarter
-    string metric_name
-    float  value
-    string unit
-    string currency
-    string source_id FK
-    int    source_tier
-    float  confidence
-    datetime created_at
-  }
+    Supervisor->>ReportAgent: Tạo full_report
+    activate ReportAgent
 
-  SOURCE_METADATA {
-    string source_id PK
-    string ticker
-    string source_type
-    string source_title
-    string source_url_or_path
-    date   published_date
-    int    fiscal_year
-    int    reliability_tier
-    string checksum
-    datetime ingested_at
-  }
+    ReportAgent->>CtxBuilder: Xây dựng context cho báo cáo
+    activate CtxBuilder
+    CtxBuilder->>CtxBuilder: Nạp canonical facts đã được duyệt
+    CtxBuilder->>CtxBuilder: Nạp valuation artifact
+    CtxBuilder->>CtxBuilder: Truy vấn evidence index (Milvus)
+    CtxBuilder-->>ReportAgent: Structured context (facts + evidence)
+    deactivate CtxBuilder
 
-  VALUATION_ARTIFACT {
-    string valuation_id PK
-    string ticker
-    string method
-    string snapshot_id
-    json   assumptions
-    json   input_facts
-    json   output_values
-    json   sensitivity_table
-    datetime created_at
-  }
+    ReportAgent->>LLMWriter: Sinh narrative tiếng Việt
+    activate LLMWriter
+    LLMWriter->>LLMWriter: Viết 8 sections (LLM, grounded context)
+    LLMWriter->>LLMWriter: Sinh tóm tắt rủi ro, luận điểm đầu tư
+    LLMWriter-->>ReportAgent: Bản nháp narrative
+    deactivate LLMWriter
 
-  DOCUMENT_CHUNK {
-    string chunk_id PK
-    string source_id FK
-    string ticker
-    text   text
-    string section
-    int    fiscal_year
-    json   metadata
-    string embedding_id
-  }
+    ReportAgent->>CitationSvc: Gắn citation cho mọi claim định lượng
+    activate CitationSvc
+    CitationSvc->>CitationSvc: Trích xuất claim theo pattern
+    CitationSvc->>CitationSvc: Map claim -> fact row / document chunk
+    CitationSvc->>CitationSvc: Đánh dấu grounding_status
+    CitationSvc-->>ReportAgent: Báo cáo + citation map đầy đủ
+    deactivate CitationSvc
 
-  REPORT_ARTIFACT {
-    string report_id PK
-    string ticker
-    string report_type
-    string run_id FK
-    json   sections
-    json   citation_map
-    json   eval_summary
-    string approval_status
-    datetime created_at
-  }
+    ReportAgent-->>Supervisor: Bản nháp báo cáo có citation
+    deactivate ReportAgent
 
-  APPROVAL_RECORD {
-    string approval_id PK
-    string run_id FK
-    string stage
-    string decision
-    string reviewer
-    json   feedback_patch
-    datetime created_at
-  }
+    Supervisor->>EvalGate: Chạy 7 evaluation gates
+    activate EvalGate
+    EvalGate->>EvalGate: Gate 1: Numeric consistency (deterministic)
+    EvalGate->>EvalGate: Gate 2: Citation coverage >= 90% (deterministic)
+    EvalGate->>EvalGate: Gate 3: Citation validity (deterministic + LLM)
+    EvalGate->>EvalGate: Gate 4: Stale data < 18 tháng (deterministic)
+    EvalGate->>EvalGate: Gate 5: Valuation reproducibility (deterministic)
+    EvalGate->>EvalGate: Gate 6: Unsupported recommendation (regex + LLM)
+    EvalGate->>EvalGate: Gate 7: Balance sheet identity (deterministic)
 
-  EVAL_RESULT {
-    string eval_id PK
-    string run_id FK
-    string gate
-    bool   passed
-    string severity
-    json   issues
-    json   summary
-    datetime created_at
-  }
-
-  RUN ||--o{ CANONICAL_FACT : "uses"
-  RUN ||--o{ VALUATION_ARTIFACT : "produces"
-  RUN ||--o{ REPORT_ARTIFACT : "produces"
-  RUN ||--o{ APPROVAL_RECORD : "has"
-  RUN ||--o{ EVAL_RESULT : "has"
-  SOURCE_METADATA ||--o{ CANONICAL_FACT : "backs"
-  SOURCE_METADATA ||--o{ DOCUMENT_CHUNK : "chunks into"
-  VALUATION_ARTIFACT ||--|| REPORT_ARTIFACT : "grounded in"
+    alt Tất cả gates PASS
+        EvalGate-->>Supervisor: PASS - cho phép tiến tới HITL
+    else Có CRITICAL FAIL
+        EvalGate-->>Supervisor: FAIL - chặn export, liệt kê lỗi
+        Supervisor-->>Analyst: Báo lỗi evaluation, yêu cầu xử lý
+    end
+    deactivate EvalGate
 ```
 
 ---
 
-## 14. Offline Evaluation Gate Flow (CI/CD)
+## 06 — Luồng Catalyst Refresh
+
+**Tiêu đề:** `06_catalyst_refresh_sequence`
+
+**Mô tả:** Mô tả luồng xử lý khi có sự kiện catalyst mới (tin tức, chính sách, kết quả đấu thầu). Hệ thống thực hiện partial recompute chỉ những phần bị ảnh hưởng thay vì chạy lại toàn bộ pipeline, sau đó sinh catalyst_refresh memo.
 
 ```mermaid
-flowchart TD
-  CHANGE["Parser / Prompt /\nModel Change (PR)"] --> BENCH
+sequenceDiagram
+    participant Scheduler as APScheduler
+    participant Supervisor as Supervisor Agent
+    participant DataAgent as Data Agent
+    participant FAAgent as Financial Analysis Agent
+    participant ValAgent as Valuation Agent
+    participant ReportAgent as Report Agent
+    participant Analyst
 
-  BENCH["RunOfflineBenchmarks\n(backend/dataset/offline_eval.py)"]
+    Scheduler->>Supervisor: Phát hiện catalyst mới (ticker, event_type)
+    activate Supervisor
+    Supervisor->>Supervisor: Đánh giá materiality_hint (high/medium/low)
+    Supervisor->>Supervisor: Xác định phạm vi recompute cần thiết
 
-  BENCH --> C1["grounding_score\n(claim → source support)"]
-  BENCH --> C2["citation_faithfulness\n(citation content matches claim)"]
-  BENCH --> C3["factual_consistency\n(numbers match canonical facts)"]
-  BENCH --> C4["stability_regression\n(output deterministic across runs)"]
-  BENCH --> C5["eval_gate_coverage\n(all 5 gates exercised)"]
+    Supervisor->>DataAgent: Ingest catalyst event mới
+    activate DataAgent
+    DataAgent->>DataAgent: Gọi connector phù hợp (HOSE/BHYT/DAV/tender)
+    DataAgent->>DataAgent: Đăng ký source version mới
+    DataAgent->>DataAgent: Cập nhật catalyst_events trong DB
+    DataAgent-->>Supervisor: Catalyst event đã được lưu
+    deactivate DataAgent
 
-  C1 & C2 & C3 & C4 & C5 --> THRESHOLD{Meets\nThresholds?}
+    alt materiality_hint = high (cần recompute tài chính)
+        Supervisor->>FAAgent: Recompute phân tích bị ảnh hưởng
+        activate FAAgent
+        FAAgent->>FAAgent: Cập nhật facts liên quan
+        FAAgent->>FAAgent: Tính lại ratio bị ảnh hưởng (code)
+        FAAgent-->>Supervisor: Facts và ratio đã cập nhật
+        deactivate FAAgent
 
-  THRESHOLD -->|Yes| PROMOTE["Promote to Production\nMerge to main"]
-  THRESHOLD -->|No| ROLLBACK["Keep Current Version\nOpen Fix Loop\nDo NOT merge"]
+        Supervisor->>ValAgent: Partial recompute định giá
+        activate ValAgent
+        ValAgent->>ValAgent: Cập nhật assumptions nếu cần
+        ValAgent->>ValAgent: Chạy lại DCF / Blend (code-first)
+        ValAgent->>ValAgent: Cập nhật valuation artifact
+        ValAgent-->>Supervisor: valuation artifact mới
+        deactivate ValAgent
+    end
+
+    Supervisor->>ReportAgent: Sinh catalyst_refresh memo
+    activate ReportAgent
+    ReportAgent->>ReportAgent: Tóm tắt catalyst và tác động (LLM)
+    ReportAgent->>ReportAgent: So sánh target price trước/sau nếu có recompute
+    ReportAgent->>ReportAgent: Gắn citation cho catalyst event
+    ReportAgent-->>Supervisor: Bản nháp catalyst_refresh
+    deactivate ReportAgent
+
+    Supervisor->>Analyst: Gửi catalyst_refresh để xem xét
+    activate Analyst
+    Analyst-->>Supervisor: approve / reject
+    deactivate Analyst
+
+    alt Analyst approve
+        Supervisor->>Supervisor: Publish catalyst_refresh memo
+        Supervisor-->>Analyst: Memo đã được xuất bản
+    else Analyst reject
+        Supervisor-->>Analyst: Trả về để chỉnh sửa
+    end
+    deactivate Supervisor
 ```
-
----
-
-## Ghi chú
-
-- Mọi sơ đồ đều dùng Mermaid — paste vào [mermaid.live](https://mermaid.live) hoặc xem trong VSCode với extension Mermaid Preview.
-- **LLM agents không được tính số liệu tài chính** — chỉ synthesis, interpretation, review.
-- **Valuation artifacts bị lock** sau khi analyst approve tại checkpoint 1 — không thể sửa sau đó.
-- **Export gate là hard block** — nếu bất kỳ critical gate nào fail, báo cáo không được publish.
-- Sơ đồ phản ánh code thực tại `backend/harness/runner.py`, `backend/harness/graph.py`, `backend/orchestrator.py`, và `backend/services.py`.

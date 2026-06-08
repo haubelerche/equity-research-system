@@ -193,7 +193,17 @@ def compute_fcfe(
             "FCFE: shares_outstanding fact missing — target price blocked to avoid EPS-implied share-count error."
         )
 
-    if net_borrowing_schedule is None:
+    # ── Debt schedule gate (plan invariant §7) ────────────────────────────
+    # FCFE requires high-confidence net borrowing sourced from CFS or zero-debt
+    # policy. target_debt_ratio / balance_sheet_delta / missing → BLOCK.
+    _debt_block_reason: str | None = None
+    if forecast.debt_schedule is not None and not forecast.debt_schedule.is_fcfe_publishable:
+        _debt_block_reason = forecast.debt_schedule.fcfe_block_reason
+        warnings.append(
+            f"FCFE BLOCKED — debt_schedule.is_fcfe_publishable = False. "
+            f"Reason: {_debt_block_reason}"
+        )
+    elif net_borrowing_schedule is None and forecast.debt_schedule is None:
         warnings.append(
             "FCFE forecast assumes stable leverage (Net Borrowing = 0 each year). "
             "Provide net_borrowing_schedule to override with actual vay/trả nợ data."
@@ -208,12 +218,17 @@ def compute_fcfe(
         dep = fy.depreciation
         capex_pos = abs(fy.capex) if fy.capex is not None else None
 
-        # ΔNWC: 2% of revenue change — consistent with fcff.py approximation
-        if prev_revenue is not None and fy.revenue is not None:
+        # ΔNWC: prefer driver-based value from ForecastArtifact (working_capital_schedule);
+        # fall back to 2% of revenue change only when not provided.
+        if fy.delta_nwc is not None:
+            delta_nwc = fy.delta_nwc
+        elif prev_revenue is not None and fy.revenue is not None:
             delta_nwc = 0.02 * (fy.revenue - prev_revenue)
+            warnings.append(f"FCFE {fy.label}: delta_nwc estimated as 2% revenue change (no WC schedule)")
         elif fy.revenue is not None and prev_revenue is None and latest_fy:
             hist_rev = _get("revenue.net", latest_fy)
             delta_nwc = 0.02 * (fy.revenue - (hist_rev or fy.revenue)) if hist_rev else 0.0
+            warnings.append(f"FCFE {fy.label}: delta_nwc estimated as 2% revenue change (no WC schedule)")
         else:
             delta_nwc = 0.0
 
@@ -266,7 +281,10 @@ def compute_fcfe(
     equity_val = sum_pv + pv_tv
 
     target_price: float | None = None
-    if not re_invalid:
+    if _debt_block_reason:
+        # Target price must not be published when debt schedule is not high-confidence
+        pass  # already warned above; target_price remains None
+    elif not re_invalid:
         if shares_mn and shares_mn > 0 and equity_val > 0:
             target_price = (equity_val / shares_mn) * 1_000  # VND bn / mn shares * 1000 = VND/share
         elif equity_val <= 0:

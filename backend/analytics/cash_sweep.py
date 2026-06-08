@@ -10,6 +10,7 @@ All monetary values in VND bn consistent with rest of codebase.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Literal
 
 
 @dataclass
@@ -364,3 +365,182 @@ def check_debt_flow_mismatch(
         "residual": residual,
         "warnings": warnings,
     }
+
+
+# ── Minimum Cash Policy ───────────────────────────────────────────────────────
+
+@dataclass
+class MinimumCashPolicy:
+    """Company-level minimum operating cash threshold.
+
+    Per plan §4: if ending_cash < minimum_cash, new borrowing is required.
+    The policy is a model assumption and must be marked as such.
+
+    Default for Vietnam pharma (if no analyst input):
+        minimum_cash = MAX(50 VND bn, 5% revenue, 45 days cash opex)
+
+    All monetary values in VND bn.
+    """
+    absolute_floor_bn: float = 50.0           # hard floor in VND bn
+    pct_of_revenue: float = 0.05              # 5% of forecast revenue
+    days_opex: float = 45.0                   # 45 days of cash operating expenses
+    source: str = "model_default_unapproved"  # "analyst_approved" when signed off
+
+    @property
+    def is_approved(self) -> bool:
+        return self.source == "analyst_approved"
+
+    def compute(
+        self,
+        revenue_bn: float | None = None,
+        cash_opex_daily_bn: float | None = None,
+    ) -> float:
+        """Return the minimum cash for one forecast year (VND bn)."""
+        candidates = [self.absolute_floor_bn]
+        if revenue_bn and revenue_bn > 0:
+            candidates.append(self.pct_of_revenue * revenue_bn)
+        if cash_opex_daily_bn and cash_opex_daily_bn > 0:
+            candidates.append(self.days_opex * cash_opex_daily_bn)
+        return max(candidates)
+
+    def to_dict(self) -> dict:
+        return {
+            "absolute_floor_bn": self.absolute_floor_bn,
+            "pct_of_revenue": self.pct_of_revenue,
+            "days_opex": self.days_opex,
+            "source": self.source,
+            "is_approved": self.is_approved,
+        }
+
+
+def check_minimum_cash(
+    year_label: str,
+    ending_cash: float,
+    minimum_cash: float,
+) -> dict:
+    """Return gate result for ending cash vs. minimum cash threshold.
+
+    If ending_cash < minimum_cash → new_borrowing_required (for debt schedule).
+    If ending_cash >= minimum_cash → no new borrowing triggered by cash floor.
+    """
+    shortfall = minimum_cash - ending_cash
+    return {
+        "year_label": year_label,
+        "ending_cash": round(ending_cash, 2),
+        "minimum_cash": round(minimum_cash, 2),
+        "shortfall": round(shortfall, 2) if shortfall > 0 else 0.0,
+        "new_borrowing_required": shortfall > 0,
+        "gate": "PASS" if ending_cash >= minimum_cash else "WARN",
+    }
+
+
+# ── CashSweepArtifact ─────────────────────────────────────────────────────────
+
+@dataclass
+class CashSweepArtifact:
+    """Multi-year cash sweep artifact for forecast periods.
+
+    Per plan §4:
+    - If the cash identity fails for any year → status = "failed"
+    - A "failed" artifact signals that debt schedule (and therefore FCFE) cannot be
+      derived from cash sweep; the pipeline must block downstream publishable artifacts.
+
+    Cash identity per year:
+        ending_cash = opening_cash + CFO - CAPEX - dividends
+                    + new_borrowing - debt_repaid
+                    + equity_issuance - delta_st_investments + other
+    """
+    ticker: str
+    year_results: list[CashSweepResult]
+    minimum_cash_policy: MinimumCashPolicy | None = None
+    status: Literal["approved", "pending", "failed"] = "pending"
+    warnings: list[str] = field(default_factory=list)
+
+    @property
+    def all_reconcile(self) -> bool:
+        return all(r.reconciles for r in self.year_results)
+
+    @property
+    def is_debt_publishable(self) -> bool:
+        """True if cash sweep succeeded and can be used to derive net borrowing."""
+        return self.status != "failed" and self.all_reconcile
+
+    def net_borrowing_schedule(self) -> dict[str, float]:
+        """Return {year_label: new_debt - debt_repaid} for each sweep year."""
+        return {
+            r.year_label: r.new_debt - r.debt_repaid
+            for r in self.year_results
+        }
+
+    def to_dict(self) -> dict:
+        return {
+            "ticker": self.ticker,
+            "status": self.status,
+            "all_reconcile": self.all_reconcile,
+            "is_debt_publishable": self.is_debt_publishable,
+            "minimum_cash_policy": self.minimum_cash_policy.to_dict() if self.minimum_cash_policy else None,
+            "year_results": [r.to_dict() for r in self.year_results],
+            "warnings": self.warnings,
+        }
+
+
+def build_cash_sweep_artifact(
+    ticker: str,
+    year_inputs: list[dict],
+    minimum_cash_policy: MinimumCashPolicy | None = None,
+    tolerance: float = 0.05,
+) -> CashSweepArtifact:
+    """Build a multi-year CashSweepArtifact from per-year cash flow inputs.
+
+    Each element of year_inputs must be a dict with keys matching compute_cash_sweep()
+    arguments (year_label, opening_cash, cfo, capex_positive, dividends_paid, etc.).
+
+    Status rules:
+        "failed"  — any year does not reconcile (when reported_ending_cash provided)
+        "pending" — no reported_ending_cash supplied (cannot verify)
+        "approved" — all years reconcile (caller must promote after analyst sign-off)
+    """
+    warnings: list[str] = []
+    results: list[CashSweepResult] = []
+
+    for inp in year_inputs:
+        result = compute_cash_sweep(
+            year_label=inp["year_label"],
+            opening_cash=inp["opening_cash"],
+            cfo=inp["cfo"],
+            capex_positive=inp["capex_positive"],
+            dividends_paid=inp.get("dividends_paid", 0.0),
+            new_debt=inp.get("new_debt", 0.0),
+            debt_repaid=inp.get("debt_repaid", 0.0),
+            equity_issuance=inp.get("equity_issuance", 0.0),
+            delta_st_investments=inp.get("delta_st_investments", 0.0),
+            other=inp.get("other", 0.0),
+            reported_ending_cash=inp.get("reported_ending_cash"),
+            tolerance=tolerance,
+        )
+        results.append(result)
+        warnings.extend(result.warnings)
+
+    has_reported = any(inp.get("reported_ending_cash") is not None for inp in year_inputs)
+    if not has_reported:
+        status: Literal["approved", "pending", "failed"] = "pending"
+        warnings.append(
+            "CashSweepArtifact: no reported_ending_cash supplied — "
+            "reconciliation not verifiable; status = pending."
+        )
+    elif all(r.reconciles for r in results):
+        status = "approved"
+    else:
+        status = "failed"
+        warnings.append(
+            "CashSweepArtifact: one or more years fail cash identity reconciliation — "
+            "net borrowing from this sweep cannot be used for publishable FCFE."
+        )
+
+    return CashSweepArtifact(
+        ticker=ticker,
+        year_results=results,
+        minimum_cash_policy=minimum_cash_policy,
+        status=status,
+        warnings=warnings,
+    )

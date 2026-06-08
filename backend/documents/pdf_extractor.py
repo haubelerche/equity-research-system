@@ -82,6 +82,12 @@ def _parse_vnd_bn(raw: str) -> Optional[float]:
         negative = True
         stripped = stripped[1:-1]
 
+    # Vietnamese reports commonly use dots as thousands separators. Keep
+    # ordinary decimal values such as 4127.4 unchanged.
+    has_vietnamese_thousands = bool(re.fullmatch(r"\d{1,3}(?:\.\d{3})+", stripped))
+    if has_vietnamese_thousands:
+        stripped = stripped.replace(".", "")
+
     # Track whether the raw number had commas (thousands-separator grouping)
     # Commas indicate the value is expressed in triệu VND and needs /1000 scaling.
     has_commas = "," in stripped
@@ -321,7 +327,19 @@ class VietnameseBCTCExtractor:
                     )
                 )
 
-        return results
+        unique: dict[tuple, ExtractedRow] = {}
+        for row in results:
+            key = (
+                row.ticker,
+                row.fiscal_year,
+                row.period_type,
+                row.statement_type,
+                row.metric_id,
+                row.value,
+                row.page_number,
+            )
+            unique.setdefault(key, row)
+        return list(unique.values())
 
     def extract_from_pdf(self, pdf_path: Path) -> list[ExtractedRow]:
         """Extract all financial facts from a Vietnamese BCTC PDF.
@@ -408,7 +426,18 @@ class VietnameseBCTCExtractor:
             # Return empty list on any file-level error
             return []
 
-        return results
+        unique: dict[tuple, ExtractedRow] = {}
+        for row in results:
+            key = (
+                row.ticker,
+                row.fiscal_year,
+                row.period_type,
+                row.statement_type,
+                row.metric_id,
+                row.value,
+            )
+            unique.setdefault(key, row)
+        return list(unique.values())
 
 
 # ---------------------------------------------------------------------------

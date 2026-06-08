@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from backend.dataset.dqf import stages_to_invalidate
+from backend.harness.model_adapter import _INPUT_COST_PER_M, _OUTPUT_COST_PER_M, _DEFAULT_INPUT_COST, _DEFAULT_OUTPUT_COST
 
 from backend.runtime_store import RuntimeStore
 from backend.settings import Settings
@@ -30,8 +31,9 @@ class BudgetGuard:
         completion_tokens: int,
         budget_policy: str,
     ) -> BudgetDecision:
-        # Conservative approximation. Replace with provider billing in production.
-        cost_usd = ((prompt_tokens * 0.2) + (completion_tokens * 0.8)) / 1_000_000
+        in_rate = _INPUT_COST_PER_M.get(model_name, _DEFAULT_INPUT_COST)
+        out_rate = _OUTPUT_COST_PER_M.get(model_name, _DEFAULT_OUTPUT_COST)
+        cost_usd = (prompt_tokens * in_rate + completion_tokens * out_rate) / 1_000_000
         run_total = self.store.run_cost_usd(run_id) + cost_usd
         fallback_model: str | None = None
         stop_reason: str | None = None

@@ -7,38 +7,29 @@
 ## Current State
 
 ```
-Active workstream:   PLAN_FIX_TICKERS/ — fix client-facing report output (PLAN_FIX_ALL_TICKERS + GOAL_OUTPUT)
-                     DONE (7 phases): 03 forecast columns+drivers, 02 MarketSnapshot+shares,
-                       05 target price + valuation_result.json (GOAL §13), 01 export gate
-                       (shares↔EPS guard), 04 debt/dividend schedules + net debt/EBITDA +
-                       dividend yield, 06 WACC×g sensitivity matrix, 09-core C1 price chart.
-                     DBD end-to-end: rating BÁN, target 30,409 (=0.6×35,767+0.4×22,372),
-                       periods 2022FY..2030F, sidebar filled, sensitivity matrix real,
-                       client_final missing_required_fields = ['approval_status'] ONLY.
-                       766 unit tests pass.
-                     ALL 9 PHASES COMPLETE (07 narrative, 08 key_sources, 09 charts+CSS+font).
-                     End-to-end DBD: HTML + 11-page PDF (657KB) via headless Chrome, Vietnamese
-                       diacritics intact, embedded charts C1–C7, rating BÁN, target 30,409,
-                       sensitivity matrix, sources list, no backend jargon, no 'ĐANG HOÀN THIỆN'.
-                       771 unit tests pass.
-                     TICKER-AGNOSTIC: verified on DBD. Other tickers need run_valuation.py +
-                       generate_report.py re-run to regenerate valuation/forecast/blend artifacts
-                       with the shares injection (same code path, no per-ticker logic).
-                     FOLLOW-UPS (not blockers): move shares_outstanding into DB canonical facts
-                       (ingestion) rather than valuation-time injection; tighten PDF page budget
-                       toward 8 pages; ingest official filing PDFs to upgrade citations above Tier-3.
-                     KEY FILES: backend/reporting/client_report_view_model.py,
-                       backend/reporting/market_snapshot.py (NEW),
-                       scripts/generate_report.py + run_valuation.py (inject shares),
-                       scripts/generate_charts.py (C1 from vnstock Quote).
-                     KEY FACT: shares_outstanding is market-source (vnstock VCI overview
-                       issue_share), absent from canonical facts; injected at valuation time.
-                       Both generate_report.py AND run_valuation.py do the injection.
+Active workstream:   ERR_MASTER_REMEDIATION_PLAN — all 8 phases COMPLETE (2026-06-04)
+                     Phase 4: WorkingCapitalSchedule, ShareRollForward — ForecastYear now has
+                       delta_nwc, net_working_capital, diluted_shares; fcff/fcfe consume from
+                       ForecastArtifact instead of estimating 2% proxy.
+                     Phase 5: NetDebtBridge (blocks FCFF target when total_debt missing),
+                       Bear/Base/Bull ScenarioRunner, operating sensitivity (rev_growth×margin).
+                     Phase 6: ClaimLedger — claim_from_fact/artifact, citation_gate, status
+                       supported/partial/unsupported, blocks final export.
+                     Debt fix (P0): DebtSchedule.is_fcfe_publishable gate — target_debt_ratio /
+                       balance_sheet_delta / missing → FCFE.target_price = None, blend blocked.
+                       MinimumCashPolicy added to cash_sweep.py.
+                     Phase 7: ReportArtifact, LayoutRenderAudit (8 checks), ExportGateResult
+                       (9 gates unified). generate_report.py auto-writes 3 Phase 7 artifacts.
+                     Phase 8: Makefile (make test/audit/generate-fixture-report/check-gates),
+                       golden fixture regression tests (DBD 2025 Tier-0 data), artifact schema
+                       snapshot tests (all 10 key dataclasses), err-report-qa SKILL.md.
+                     966 unit tests pass, 0 failures.
 
-Current Level:       Level 10 — Render-ready
+Current Level:       Level 10 — Render-ready + ERR remediation complete
 Target Level:        Level 10 — Render-ready (charts + HTML + PDF + 5 artifact contracts per GOAL_OUTPUT.md)
-Current Phase:       Phase 16 — Database Quality & Schema Cleanup — 2026-06-02
-Last Completed Task: DATABASE_QUALITY_SYSTEM_CONSISTENCY_AUDIT.md — schema cleanup.
+Current Phase:       Phase 17 — ERR Master Remediation Complete — 2026-06-04
+Last Completed Task: ERR_MASTER_REMEDIATION_PLAN Phase 8 — regression fixtures, schema snapshots,
+                     Makefile, err-report-qa skill. 966 tests pass.
                      - Migration 015: drops 7 unused research schema tables (metric_values,
                        valuation_assumption_sets, valuation_results, report_sections,
                        report_claims, claim_evidence, evaluation_results) + their trigger/
@@ -77,6 +68,12 @@ Last Completed Task: DATABASE_QUALITY_SYSTEM_CONSISTENCY_AUDIT.md — schema cle
 | 14 — Full Rendering Pipeline | `backend/reporting/`, `scripts/generate_charts.py`, `scripts/render_report.py`, `scripts/run_full_pipeline.py` | DONE | 726 tests, 0 failures; all 5 tickers: charts=6, html=yes, artifacts=5 |
 | 15 — Code Quality Audit | `CODE_QUALITY_SYSTEM_CONSISTENCY_AUDIT.md` | DONE | 779 tests, 0 failures; encoding fixed, period regex hardened, source_id coercion removed, forbidden terms corrected |
 | 16 — DB Schema Cleanup | `DATABASE_QUALITY_SYSTEM_CONSISTENCY_AUDIT.md` | DONE | 553 tests, 0 failures; migration 015, 7 dead tables dropped, company names fixed, schema_version 015 |
+| ERR-4 — ForecastArtifact expansion | `backend/analytics/{working_capital_schedule,share_rollforward}.py` | DONE | delta_nwc, diluted_shares in ForecastYear; fcff/fcfe consume from artifact |
+| ERR-5 — Valuation engine hardening | `backend/analytics/{net_debt_bridge,scenario_runner}.py`, `sensitivity.py` | DONE | NetDebtBridge blocks, Bear/Base/Bull, operating sensitivity |
+| ERR-6 — Claim ledger Phase 6 | `backend/citations/claim_ledger.py` | DONE | ClaimEntry, citation_gate, fact/artifact/formula traces |
+| ERR-Debt — Debt/FCFE gate chain | `backend/analytics/debt_schedule.py`, `fcfe.py`, `cash_sweep.py` | DONE | is_fcfe_publishable, MinimumCashPolicy, FCFE blocked on low-confidence debt |
+| ERR-7 — Report assembly Phase 7 | `backend/reporting/{report_artifact,layout_audit,export_gate}.py` | DONE | 9-gate ExportGateResult, 8-check LayoutRenderAudit, ReportArtifact; auto-written by generate_report.py |
+| ERR-8 — Harness Phase 8 | `Makefile`, `tests/unit/test_golden_fixture_regression.py`, `test_artifact_schema_snapshot.py`, `.claude/skills/err-report-qa/` | DONE | 966 tests pass; Makefile CI; golden regression; schema snapshots; err-report-qa skill |
 
 ---
 

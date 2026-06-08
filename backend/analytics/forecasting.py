@@ -30,6 +30,16 @@ from backend.analytics.tax_policy import TaxPolicy, build_tax_policy
 from backend.analytics.dividend_schedule import build_dividend_schedule
 from backend.analytics.debt_schedule import build_debt_schedule, DebtSchedule
 from backend.analytics.shares import explicit_shares_mn
+from backend.analytics.working_capital_schedule import (
+    build_working_capital_schedule,
+    WorkingCapitalSchedule,
+)
+from backend.analytics.share_rollforward import build_share_rollforward, ShareRollForward
+from backend.analytics.cash_sweep import (
+    CashSweepArtifact,
+    MinimumCashPolicy,
+    build_cash_sweep_artifact,
+)
 
 from backend.facts.normalizer import FactTable
 
@@ -67,6 +77,45 @@ def _median_ratio(
     if not ratios:
         return None
     return statistics.median(ratios)
+
+
+def reconcile_pnl(row: dict[str, float], tol: float = 0.01) -> dict[str, Any]:
+    """Closed-form P&L reconciliation (audit NUMERIC-03).
+
+    Every line item is explicit; EBIT, PBT and net income are recomputed so the
+    table is internally consistent (no large unexplained gap between EBIT,
+    interest, tax and net income).
+
+    Sign convention: revenue positive; cogs, selling, admin, financial_expense,
+    tax are negative; financial_income, other positive.
+
+        EBIT = revenue + cogs + selling + admin
+        PBT  = EBIT + financial_income + financial_expense + other
+        NI   = PBT + tax
+
+    Returns {ebit, pbt, net_income, reconciles}. ``reconciles`` is True when the
+    recomputed net income matches a supplied ``net_income`` (if any) within tol.
+    """
+    ebit = (
+        row.get("revenue", 0.0)
+        + row.get("cogs", 0.0)
+        + row.get("selling", 0.0)
+        + row.get("admin", 0.0)
+    )
+    pbt = (
+        ebit
+        + row.get("financial_income", 0.0)
+        + row.get("financial_expense", 0.0)
+        + row.get("other", 0.0)
+    )
+    net_income = pbt + row.get("tax", 0.0)
+    reported = row.get("net_income")
+    if reported is None:
+        reconciles = True
+    else:
+        denom = abs(reported) if reported else 1.0
+        reconciles = abs(net_income - reported) / denom <= tol
+    return {"ebit": ebit, "pbt": pbt, "net_income": net_income, "reconciles": reconciles}
 
 
 @dataclass
@@ -121,6 +170,11 @@ class ForecastYear:
     cash_dividend: float | None = None
     payout_ratio: float | None = None
     retained_earnings_addition: float | None = None
+    # Working capital — sourced from working_capital_schedule per forecast year
+    delta_nwc: float | None = None              # positive = cash consumed by NWC increase
+    net_working_capital: float | None = None    # AR + Inventory - AP
+    # Diluted shares — sourced from share_rollforward per forecast year
+    diluted_shares: float | None = None         # mn shares, after ESOP/placement/buyback
 
 
 @dataclass
@@ -136,6 +190,9 @@ class ForecastArtifact:
     tax_policy: TaxPolicy | None = None
     dividend_schedule: Any | None = None   # DividendSchedule (avoid circular import)
     debt_schedule: DebtSchedule | None = None
+    working_capital_schedule: WorkingCapitalSchedule | None = None
+    share_rollforward: ShareRollForward | None = None
+    cash_sweep_artifact: CashSweepArtifact | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -180,6 +237,11 @@ class ForecastArtifact:
                     "cash_dividend": round(fy.cash_dividend, 1) if fy.cash_dividend is not None else None,
                     "payout_ratio": round(fy.payout_ratio, 4) if fy.payout_ratio is not None else None,
                     "retained_earnings_addition": round(fy.retained_earnings_addition, 1) if fy.retained_earnings_addition is not None else None,
+                    # Working capital
+                    "delta_nwc": round(fy.delta_nwc, 2) if fy.delta_nwc is not None else None,
+                    "net_working_capital": round(fy.net_working_capital, 1) if fy.net_working_capital is not None else None,
+                    # Diluted shares
+                    "diluted_shares": round(fy.diluted_shares, 3) if fy.diluted_shares is not None else None,
                 }
                 for fy in self.forecast_years
             ],
@@ -187,6 +249,9 @@ class ForecastArtifact:
             "tax_policy": self.tax_policy.to_dict() if self.tax_policy else None,
             "dividend_schedule": self.dividend_schedule.to_dict() if self.dividend_schedule else None,
             "debt_schedule": self.debt_schedule.to_dict() if self.debt_schedule else None,
+            "working_capital_schedule": self.working_capital_schedule.to_dict() if self.working_capital_schedule else None,
+            "share_rollforward": self.share_rollforward.to_dict() if self.share_rollforward else None,
+            "cash_sweep_artifact": self.cash_sweep_artifact.to_dict() if self.cash_sweep_artifact else None,
         }
 
 
@@ -357,6 +422,15 @@ def run_forecast(
                 "Shares outstanding fact missing — forecast EPS/BVPS omitted to avoid EPS-implied share-count error."
             )
 
+    # ── Convergence note ──────────────────────────────────────────────────────
+    # This forecast is single-pass (no iteration). The feedback loop
+    # Debt → Interest → PBT → Tax → NI → CFO → Cash → MinCash → Debt
+    # is NOT resolved. For zero-debt or stable-debt companies this error is
+    # negligible. For companies with large net borrowing or mandatory minimum-
+    # cash triggers, the interest expense estimate may require up to N iterations
+    # to converge (plan §5 — TODO: implement convergence loop, max_iterations=10,
+    # tol=0.1 VND bn on ending_debt and interest_expense).
+
     # ── Build debt schedule (before main loop — determines interest expense) ──
     debt_sched = build_debt_schedule(
         ticker=ticker,
@@ -368,6 +442,13 @@ def run_forecast(
     debt_row_by_label = {row.label: row for row in debt_sched.forecast_rows}
     for w in debt_sched.warnings:
         warnings.append(f"[DebtSchedule] {w}")
+
+    if debt_sched.forecast_method not in ("zero_debt_policy", "direct_cash_flow"):
+        warnings.append(
+            "[ForecastWarning] Interest expense is single-pass (no convergence iteration). "
+            f"Debt method = '{debt_sched.forecast_method}' — FCFE is blocked; "
+            "analyst must supply approved debt path before publishing."
+        )
 
     # ── Derive cost of debt ────────────────────────────────────────────────
     hist_cods = [
@@ -454,6 +535,12 @@ def run_forecast(
             interest_expense = -revenue * interest_to_rev_fallback
             cod_applied = None
 
+        # Write cost_of_debt + interest_expense back to debt schedule row so
+        # the artifact is self-contained: ie = avg_debt × cost_of_debt auditable.
+        if debt_row is not None and cod_applied is not None:
+            debt_row.cost_of_debt = cod_applied
+            debt_row.interest_expense = abs(interest_expense)
+
         other_items = revenue * other_items_to_rev
         pbt = ebit + interest_expense + other_items
         tax_expense = -max(0, pbt) * tax_rate
@@ -513,6 +600,46 @@ def run_forecast(
     retained_sched = div_schedule.retained_earnings_schedule()
     div_row_by_label = {r.label: r for r in div_schedule.forecast_rows}
 
+    # ── Build working capital schedule (uses Pass 1 revenues + COGS) ─────
+    _rev_by_label  = {fy.label: fy.revenue for fy in forecast_year_objects if fy.revenue is not None}
+    _cogs_by_label = {fy.label: fy.cogs    for fy in forecast_year_objects if fy.cogs is not None}
+    wc_schedule = build_working_capital_schedule(
+        ticker=ticker,
+        fact_table=fact_table,
+        fy_periods=fy_periods,
+        forecast_labels=forecast_labels_order,
+        forecast_revenues=_rev_by_label,
+        forecast_cogs=_cogs_by_label,
+    )
+    for w in wc_schedule.warnings:
+        warnings.append(f"[WorkingCapital] {w}")
+    wc_by_label = {row.label: row for row in wc_schedule.forecast_rows}
+
+    # ── Build share roll-forward ───────────────────────────────────────────
+    sr = build_share_rollforward(
+        ticker=ticker,
+        fact_table=fact_table,
+        fy_periods=fy_periods,
+        forecast_labels=forecast_labels_order,
+        base_shares_override_mn=shares_mn,
+    )
+    for w in sr.warnings:
+        warnings.append(f"[ShareRollForward] {w}")
+    diluted_by_label = sr.diluted_shares_schedule()
+
+    # ── Update forecast objects with NWC and diluted shares ───────────────
+    for fy in forecast_year_objects:
+        wc_row = wc_by_label.get(fy.label)
+        if wc_row:
+            fy.delta_nwc = wc_row.delta_nwc
+            fy.net_working_capital = wc_row.net_working_capital
+
+        diluted = diluted_by_label.get(fy.label)
+        fy.diluted_shares = diluted
+        # Prefer diluted shares for EPS when available
+        if diluted and diluted > 0 and fy.net_income is not None:
+            fy.eps = (fy.net_income * 1_000) / diluted
+
     # ── PASS 2: Update equity, BVPS, total_assets, dividend fields ────────
     running_equity = start_equity
     for fy in forecast_year_objects:
@@ -521,13 +648,65 @@ def run_forecast(
         ending_debt = fy.ending_debt if fy.ending_debt is not None else 0.0
         fy.equity = running_equity
         fy.total_assets = running_equity + ending_debt + other_liabilities
-        fy.bvps = (running_equity / shares_mn) * 1_000 if shares_mn else None
+        bvps_shares = fy.diluted_shares if (fy.diluted_shares and fy.diluted_shares > 0) else shares_mn
+        fy.bvps = (running_equity / bvps_shares) * 1_000 if bvps_shares else None
 
         div_row = div_row_by_label.get(fy.label)
         if div_row:
             fy.cash_dividend = div_row.cash_dividend
             fy.payout_ratio = div_row.payout_ratio
             fy.retained_earnings_addition = div_row.retained_earnings_addition
+
+    # ── Build CashSweepArtifact (approximate CFO = NI + D&A - ΔNWC) ─────────
+    # CFO is approximated via the indirect method; no convergence loop is applied
+    # (single-pass). This is sufficient for gate status checks but should not be
+    # used to derive publishable net_borrowing unless all three of NI/D&A/ΔNWC
+    # are driven by confirmed data.
+    # TODO: Implement convergence loop (plan §5) — Debt→Interest→PBT→NI→CFO→Cash→Debt
+    opening_cash_hist = _get(fact_table, "cash_and_equivalents.ending", latest_fy) or 0.0
+    sweep_inputs: list[dict] = []
+    opening_cash_iter = opening_cash_hist
+    for fy in forecast_year_objects:
+        if fy.net_income is None or fy.depreciation is None:
+            break
+        cfo_approx = fy.net_income + fy.depreciation - (fy.delta_nwc or 0.0)
+        capex_pos = abs(fy.capex) if fy.capex is not None else 0.0
+        dividends = (fy.cash_dividend or 0.0)
+
+        debt_row_sweep = debt_row_by_label.get(fy.label)
+        new_debt_y = debt_row_sweep.new_borrowing if debt_row_sweep and debt_row_sweep.new_borrowing is not None else 0.0
+        debt_repaid_y = debt_row_sweep.debt_repayment if debt_row_sweep and debt_row_sweep.debt_repayment is not None else 0.0
+
+        sweep_inputs.append({
+            "year_label": fy.label,
+            "opening_cash": opening_cash_iter,
+            "cfo": cfo_approx,
+            "capex_positive": capex_pos,
+            "dividends_paid": dividends,
+            "new_debt": new_debt_y,
+            "debt_repaid": debt_repaid_y,
+            # reported_ending_cash not available for forecast years → status = pending
+        })
+        # Advance opening cash for next year using computed ending cash
+        opening_cash_iter = (
+            opening_cash_iter
+            + cfo_approx
+            - capex_pos
+            - dividends
+            + new_debt_y
+            - debt_repaid_y
+        )
+
+    min_cash_policy = MinimumCashPolicy()
+    cash_sweep = build_cash_sweep_artifact(
+        ticker=ticker,
+        year_inputs=sweep_inputs,
+        minimum_cash_policy=min_cash_policy,
+    ) if sweep_inputs else None
+
+    if cash_sweep:
+        for w in cash_sweep.warnings:
+            warnings.append(f"[CashSweep] {w}")
 
     return ForecastArtifact(
         ticker=ticker,
@@ -541,4 +720,7 @@ def run_forecast(
         tax_policy=tax_policy,
         dividend_schedule=div_schedule,
         debt_schedule=debt_sched,
+        working_capital_schedule=wc_schedule,
+        share_rollforward=sr,
+        cash_sweep_artifact=cash_sweep,
     )

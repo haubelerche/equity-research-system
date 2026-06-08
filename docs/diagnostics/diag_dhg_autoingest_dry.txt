@@ -1,4 +1,0 @@
-[auto_ingest] (dry-run) FY2024 | status=dry_run | cafef=0 | pdf=0 | ingested=0 | promoted=0 | errors=1
-[auto_ingest] (dry-run) FY2025 | status=dry_run | cafef=0 | pdf=0 | ingested=0 | promoted=0 | errors=1
-[auto_ingest] DONE DHG 2024–2025: ingested=0 promoted=0 errors=2
-[auto_ingest] artifact: C:\Users\Admin\Desktop\multi-agent-equity-research\.worktrees\report-pipeline-hardening\artifacts\official_sources\DHG_auto_ingest_report.md

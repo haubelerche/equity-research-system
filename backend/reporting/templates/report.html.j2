@@ -17,12 +17,12 @@
 .recommendation-reduce     { background: #fff3e0; border-left: 4px solid #ff9800; }
 .recommendation-review     { background: #f5f5f5; border-left: 4px solid #9e9e9e; }
 /* Override recommendation-card base when a colour modifier is present */
-.recommendation-card[class*="recommendation-buy"],
-.recommendation-card[class*="recommendation-hold"],
-.recommendation-card[class*="recommendation-sell"],
-.recommendation-card[class*="recommendation-accumulate"],
-.recommendation-card[class*="recommendation-reduce"],
-.recommendation-card[class*="recommendation-review"] {
+.recommendation-card.recommendation-buy,
+.recommendation-card.recommendation-hold,
+.recommendation-card.recommendation-sell,
+.recommendation-card.recommendation-accumulate,
+.recommendation-card.recommendation-reduce,
+.recommendation-card.recommendation-review {
   border-top: none;
   border-bottom: none;
   padding: 10px 16px;
@@ -52,7 +52,11 @@
   </div>
   {% endif %}
 
-  <!-- ── Recommendation summary banner ───────────────────── -->
+  <!-- ── Recommendation summary banner
+       Suppressed when the first section (snapshot cover page) already contains
+       an embedded recommendation hero — avoids a near-blank banner page.
+       Also suppressed in review/audit mode. -->
+  {% if not is_review and not suppress_rec_banner %}
   <div class="recommendation-card {{ rec_class }}">
     <strong>{{ ticker }}</strong> — {{ company_name | default(ticker) }}
     &nbsp;|&nbsp;
@@ -64,21 +68,22 @@
     &nbsp;|&nbsp;
     {{ report_date }}
   </div>
+  {% endif %}
 
   <!-- ── Report Sections ───────────────────────────────── -->
   {% for section in sections %}
-  <div class="report-section" id="section-{{ section.page }}">
+  {% if not loop.first %}
+  <div class="page-break"></div>
+  {% endif %}
+  <div class="report-section{% if section.chapter_break | default(false) %} chapter-break{% endif %}" id="section-{{ section.page }}">
     {% if not loop.first %}
     <div class="acbs-page-header">
-      <span>Cập nhật {{ ticker }} - {{ recommendation_label or rating }}</span>
+      <span>{% if is_review %}{{ ticker }} — Bản rà soát nội bộ{% else %}Cập nhật {{ ticker }} - {{ recommendation_label or rating }}{% endif %}</span>
       <span>Ngày {{ report_date }}</span>
     </div>
     {% endif %}
     {{ section.html | safe }}
   </div>
-  {% if not loop.last %}
-  <div class="page-break"></div>
-  {% endif %}
   {% endfor %}
 
   <!-- ── Report Footer ─────────────────────────────────── -->
@@ -86,6 +91,13 @@
     Vietnam Pharma Equity Research | {{ ticker }} | {{ report_date }} |
     Tài liệu này chỉ dành cho mục đích nghiên cứu học thuật.
     {% if status and 'DRAFT' in status %}| DRAFT — Chưa được phê duyệt{% endif %}
+  </div>
+
+  <!-- ── Running footer — every printed page (Chrome headless) ── -->
+  <!-- Hidden on screen; position:fixed makes it appear on all print pages.
+       WeasyPrint uses @page margin boxes in the CSS instead. -->
+  <div class="print-running-footer" aria-hidden="true">
+    Vietnam Pharma Equity Research &nbsp;·&nbsp; {{ ticker }} &nbsp;·&nbsp; {{ report_date }}
   </div>
 
 </body>

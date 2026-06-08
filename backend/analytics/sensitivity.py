@@ -31,6 +31,14 @@ _TV_WARN_THRESHOLD  = 0.70   # PV(TV) / EV
 _GAP_WARN_THRESHOLD = 0.25   # |Price_FCFF/Price_FCFE - 1|
 
 
+def _centered_range(base: float, step: float = 0.01, points_each_side: int = 2) -> list[float]:
+    return [
+        round(base + i * step, 4)
+        for i in range(-points_each_side, points_each_side + 1)
+        if base + i * step > 0
+    ]
+
+
 # ── Quality check helpers ──────────────────────────────────────────────────────
 
 def compute_tv_weight(
@@ -120,12 +128,13 @@ def build_fcff_sensitivity_table(
     """
     from backend.analytics.fcff import WACCAssumptions, compute_fcff
 
-    if wacc_range is None:
-        wacc_range = _DEFAULT_WACC_RANGE
     if g_range is None:
         g_range = _DEFAULT_G_RANGE
     if base_wacc_assumptions is None:
         base_wacc_assumptions = WACCAssumptions()
+    if wacc_range is None:
+        base_wacc = base_wacc_assumptions.wacc_override or base_wacc_assumptions.cost_of_equity
+        wacc_range = _centered_range(base_wacc)
 
     matrix: dict[str, dict[str, float | None]] = {}
     all_warnings: list[str] = []
@@ -158,7 +167,7 @@ def build_fcff_sensitivity_table(
         "g_range": g_range,
         "matrix": matrix,
         "unit": "VND/share (Price_FCFF)",
-        "base_wacc": round(base_wacc_assumptions.cost_of_equity, 4),
+        "base_wacc": round(base_wacc_assumptions.wacc_override or base_wacc_assumptions.cost_of_equity, 4),
         "warnings": list(dict.fromkeys(all_warnings)),
     }
 
@@ -196,12 +205,12 @@ def build_fcfe_sensitivity_table(
     """
     from backend.analytics.fcfe import CostOfEquityAssumptions, compute_fcfe
 
-    if re_range is None:
-        re_range = _DEFAULT_RE_RANGE
     if g_range is None:
         g_range = _DEFAULT_G_RANGE
     if base_coe_assumptions is None:
         base_coe_assumptions = CostOfEquityAssumptions()
+    if re_range is None:
+        re_range = _centered_range(base_coe_assumptions.cost_of_equity)
 
     matrix: dict[str, dict[str, float | None]] = {}
     all_warnings: list[str] = []
@@ -483,6 +492,112 @@ def build_sensitivity_table(
         "g_range": g_range,
         "matrix": matrix,
         "unit": "VND/share (simplified FCF = OCF − CAPEX)",
+        "warnings": list(dict.fromkeys(all_warnings)),
+    }
+
+
+# ── 7. Operating sensitivity: revenue_growth × gross_margin → target price ────
+
+def build_operating_sensitivity_table(
+    ticker: str,
+    fact_table: Any,
+    base_forecast: Any,                    # ForecastArtifact from forecasting.py
+    base_wacc_assumptions: Any | None = None,
+    revenue_growth_range: list[float] | None = None,
+    gross_margin_range: list[float] | None = None,
+    shares_mn: float | None = None,
+    current_price_vnd: float | None = None,
+    terminal_growth: float = 0.03,
+) -> dict[str, Any]:
+    """Revenue growth rate × gross margin → FCFF target price.
+
+    Varies two operating drivers independently while holding WACC and terminal
+    growth fixed. Each cell re-runs the income statement forecast and FCFF
+    valuation from scratch so EBIT, depreciation and CAPEX all update correctly.
+
+    Rows: revenue_growth values (e.g. [-0.05, 0.00, 0.05, 0.10, 0.15]).
+    Columns: gross_margin values (e.g. [0.38, 0.40, 0.43, 0.46, 0.49]).
+    Cells: Price_FCFF (VND/share) or None if WACC invalid.
+
+    Returns:
+        {
+          "revenue_growth_range": [...],
+          "gross_margin_range": [...],
+          "matrix": {"0.05": {"0.40": 55000, ...}, ...},
+          "unit": "VND/share (Price_FCFF)",
+          "base_revenue_growth": float | None,
+          "base_gross_margin": float | None,
+          "warnings": [...],
+        }
+    """
+    from backend.analytics.forecasting import run_forecast, ForecastAssumptions
+    from backend.analytics.fcff import WACCAssumptions, compute_fcff
+
+    if base_wacc_assumptions is None:
+        base_wacc_assumptions = WACCAssumptions()
+
+    # Default ranges centred on base drivers
+    base_rev_growth = base_forecast.revenue_cagr
+    base_gross_margin_val = base_forecast.drivers.get("gross_margin", {}).get("value")
+
+    if revenue_growth_range is None:
+        if base_rev_growth is not None:
+            revenue_growth_range = _centered_range(base_rev_growth, step=0.025, points_each_side=2)
+        else:
+            revenue_growth_range = [-0.05, 0.00, 0.05, 0.10, 0.15]
+
+    if gross_margin_range is None:
+        if base_gross_margin_val is not None:
+            gross_margin_range = _centered_range(base_gross_margin_val, step=0.02, points_each_side=2)
+        else:
+            gross_margin_range = [0.35, 0.38, 0.41, 0.44, 0.47]
+
+    matrix: dict[str, dict[str, float | None]] = {}
+    all_warnings: list[str] = []
+
+    for rev_g in revenue_growth_range:
+        rg_key = f"{rev_g:.4f}".rstrip("0").rstrip(".")
+        matrix[rg_key] = {}
+        for gm in gross_margin_range:
+            gm_key = f"{gm:.4f}".rstrip("0").rstrip(".")
+            assump = ForecastAssumptions(
+                revenue_growth_override=rev_g,
+                gross_margin_override=gm,
+                assumption_status="operating_sensitivity",
+            )
+            try:
+                forecast_s = run_forecast(
+                    ticker=ticker,
+                    fact_table=fact_table,
+                    assumptions=assump,
+                    shares_mn=shares_mn,
+                )
+                result = compute_fcff(
+                    ticker=ticker,
+                    forecast=forecast_s,
+                    fact_table=fact_table,
+                    current_price_vnd=current_price_vnd,
+                    terminal_growth=terminal_growth,
+                    wacc_assumptions=base_wacc_assumptions,
+                    shares_mn=shares_mn,
+                )
+                all_warnings.extend(result.warnings)
+                val = result.target_price_vnd
+                matrix[rg_key][gm_key] = round(val, 0) if val is not None else None
+            except Exception as exc:
+                all_warnings.append(
+                    f"operating_sensitivity [{rev_g:.1%} growth, {gm:.1%} margin]: {exc}"
+                )
+                matrix[rg_key][gm_key] = None
+
+    return {
+        "revenue_growth_range": revenue_growth_range,
+        "gross_margin_range": gross_margin_range,
+        "matrix": matrix,
+        "unit": "VND/share (Price_FCFF)",
+        "base_revenue_growth": round(base_rev_growth, 4) if base_rev_growth is not None else None,
+        "base_gross_margin": round(base_gross_margin_val, 4) if base_gross_margin_val is not None else None,
+        "formula": "revenue_growth × gross_margin → income statement → FCFF → Price_FCFF",
         "warnings": list(dict.fromkeys(all_warnings)),
     }
 

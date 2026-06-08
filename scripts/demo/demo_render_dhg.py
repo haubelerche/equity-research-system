@@ -7,7 +7,7 @@ from pathlib import Path
 from backend.reporting.section_builder import ReportContext, build_report_sections
 from backend.reporting.html_renderer import HTMLRenderer
 
-val = json.load(open(sorted(glob.glob("artifacts/valuation/DHG_*_valuation.json"))[-1]))
+val = json.load(open(sorted(glob.glob("artifacts/valuation/DHG_*_valuation.json"))[-1], encoding="utf-8"))
 
 blend   = val.get("blend_dcf", {})
 mult    = val.get("multiples", {})

@@ -238,6 +238,22 @@ python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025
 
 Lệnh này chạy toàn bộ pipeline từ ingestion đến evaluation, ghi run trace vào DB.
 
+### Luồng production đầy đủ và render run-scoped
+
+Không chạy riêng lẻ `run_valuation.py`, `generate_report.py`, hoặc
+`render_report.py --allow-latest-artifacts` để tạo báo cáo chính thức. Luồng
+production phải dùng một `run_id` xuyên suốt:
+
+```bash
+python scripts/run_research.py --ticker DBD --report-type full_report --from-year 2021 --to-year 2025
+python scripts/approve_report.py --run-id <run_id> --stage assumptions --decision approve --reviewer analyst --comment "Verified valuation assumptions"
+python scripts/approve_report.py --run-id <run_id> --stage final --decision approve --reviewer analyst --comment "Verified final report"
+python scripts/render_report.py --ticker DBD --run-id <run_id> --mode client_final --pdf
+```
+
+Nếu valuation hoặc artifact của run chưa đạt gate, PDF export sẽ dừng trước khi
+ghi file và giữ nguyên bản PDF tốt gần nhất.
+
 ---
 
 ## Output mẫu — DHG (2026-05-26)

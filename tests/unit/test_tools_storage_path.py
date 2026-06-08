@@ -68,6 +68,7 @@ def test_generate_report_tool_reports_forecast_and_report_paths(monkeypatch, tmp
         "fcfe_path": str(tmp_path / "DHG_fcfe.json"),
         "blend_path": str(tmp_path / "DHG_blend.json"),
         "citation_path": str(tmp_path / "DHG_citation.json"),
+        "valuation_result_path": str(tmp_path / "DHG_valuation_result.json"),
         "snapshot_id": "snap_001",
         "source_tier_gate": {},
         "claims": [],
@@ -83,6 +84,16 @@ def test_generate_report_tool_reports_forecast_and_report_paths(monkeypatch, tmp
     assert refs["fcff"] == fake["fcff_path"]
     assert refs["blend"] == fake["blend_path"]
     assert refs["citation"] == fake["citation_path"]
+    assert refs["valuation_result"] == fake["valuation_result_path"]
+
+
+def test_evaluate_quality_tool_fails_without_run_scoped_valuation_path():
+    from backend.harness.tools import evaluate_quality_tool
+
+    result = evaluate_quality_tool("DHG", valuation_path=None)
+
+    assert result.status == "failed"
+    assert result.blocking_reason == "run_scoped_valuation_artifact_missing"
 
 
 def test_artifact_ref_has_storage_path_field():

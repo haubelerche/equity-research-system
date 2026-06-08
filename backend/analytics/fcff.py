@@ -15,6 +15,7 @@ from typing import Any
 from backend.analytics.forecasting import ForecastArtifact, ForecastYear
 from backend.analytics.tax_policy import TaxPolicy
 from backend.analytics.shares import explicit_shares_mn
+from backend.analytics.net_debt_bridge import build_net_debt_bridge, NetDebtBridge
 
 from backend.facts.normalizer import FactTable
 
@@ -79,6 +80,7 @@ class FCFFResult:
     target_price_vnd: float | None
     current_price_vnd: float | None
     upside_pct: float | None
+    net_debt_bridge: NetDebtBridge | None = None
     warnings: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -133,6 +135,7 @@ class FCFFResult:
             "target_price_vnd": round(self.target_price_vnd, 0) if self.target_price_vnd is not None else None,
             "current_price_vnd": _r(self.current_price_vnd, 0),
             "upside_pct": round(self.upside_pct, 4) if self.upside_pct is not None else None,
+            "net_debt_bridge": self.net_debt_bridge.to_dict() if self.net_debt_bridge else None,
             "warnings": self.warnings,
         }
 
@@ -170,18 +173,11 @@ def compute_fcff(
             return None
         return entry.value if hasattr(entry, "value") else float(entry)
 
-    total_debt = _get("total_debt.ending", latest_fy)
-    cash = _get("cash_and_equivalents.ending", latest_fy)
-    short_inv = _get("short_term_investments.ending", latest_fy) or 0.0
-
-    if total_debt is None:
-        warnings.append("FCFF: total_debt missing — net_debt may be understated; using 0")
-        total_debt = 0.0
-    if cash is None:
-        warnings.append("FCFF: cash_and_equivalents missing — net_debt may be overstated; using 0")
-        cash = 0.0
-
-    net_debt = total_debt - cash - short_inv
+    ndb = build_net_debt_bridge(fact_table, latest_fy or "")
+    for w in ndb.warnings:
+        warnings.append(w)
+    total_debt = ndb.total_debt or 0.0
+    net_debt   = ndb.net_debt  if ndb.net_debt is not None else 0.0
 
     equity_book = _get("equity.parent", latest_fy) or 0.0
     total_capital = equity_book + total_debt
@@ -239,13 +235,17 @@ def compute_fcff(
         dep = fy.depreciation
         capex = abs(fy.capex) if fy.capex is not None else None
 
-        # ΔNWC: approx 2% of revenue change (simplified)
-        if prev_revenue is not None and fy.revenue is not None:
+        # ΔNWC: prefer driver-based value from ForecastArtifact (working_capital_schedule);
+        # fall back to 2% of revenue change only when not provided.
+        if fy.delta_nwc is not None:
+            delta_nwc = fy.delta_nwc
+        elif prev_revenue is not None and fy.revenue is not None:
             delta_nwc = 0.02 * (fy.revenue - prev_revenue)
+            warnings.append(f"FCFF {fy.label}: delta_nwc estimated as 2% revenue change (no WC schedule)")
         elif fy.revenue is not None and prev_revenue is None and fy_periods:
-            # First forecast year — use revenue vs latest historical
             hist_rev = _get("revenue.net", latest_fy)
             delta_nwc = 0.02 * (fy.revenue - (hist_rev or fy.revenue)) if hist_rev else 0.0
+            warnings.append(f"FCFF {fy.label}: delta_nwc estimated as 2% revenue change (no WC schedule)")
         else:
             delta_nwc = 0.0
 
@@ -289,10 +289,18 @@ def compute_fcff(
     ev = sum_pv + pv_tv
     equity_val = ev - net_debt
 
+    # Update bridge equity_value_from_ev now that we have EV
+    ndb.equity_value_from_ev = equity_val
+
     target_price: float | None = None
-    if not wacc_invalid:
+    if ndb.is_blocked:
+        warnings.append(
+            "FCFF: target price BLOCKED — net_debt_bridge status=blocked (total_debt missing). "
+            "Source debt facts before publishing."
+        )
+    elif not wacc_invalid:
         if shares_mn and shares_mn > 0 and equity_val > 0:
-            target_price = (equity_val / shares_mn) * 1_000  # VND bn / mn shares * 1000 = VND/share
+            target_price = (equity_val / shares_mn) * 1_000
         elif equity_val <= 0:
             warnings.append("FCFF: equity value is negative — target price not computed")
 
@@ -316,6 +324,7 @@ def compute_fcff(
         target_price_vnd=target_price,
         current_price_vnd=current_price_vnd,
         upside_pct=upside_pct,
+        net_debt_bridge=ndb,
         warnings=warnings,
     )
 
