@@ -67,7 +67,8 @@ class TestExportGateControlsRender:
         artifact = _make_artifact()
         val = {
             "blend_dcf": {},
-            "fcff": {"shares_mn": 100, "wacc": 0.12, "terminal_growth": 0.03},
+            "fcff": {"shares_mn": 100, "wacc": 0.12, "terminal_growth": 0.03, "enterprise_value": 1000, "equity_value": 800},
+            "fcfe": {"equity_value": 750, "cost_of_equity": 0.12, "terminal_growth": 0.03},
             "fcff_sensitivity": {
                 "matrix": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
                 "base_wacc": 0.12,

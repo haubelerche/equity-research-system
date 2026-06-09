@@ -43,7 +43,7 @@ class NarrativeInputs:
     upside: float | None = None                     # fraction
     rating: str = ""
     price_fcff: float | None = None                 # VND
-    price_pe_forward: float | None = None           # VND — P/E Forward anchor (replaces FCFE)
+    price_fcfe: float | None = None                 # VND — FCFE anchor (40% blend weight)
     core_pe_target: float | None = None             # VND — Core P/E + Net Cash target (Guidance §11)
     net_cash_per_share: float | None = None         # VND
     core_eps: float | None = None                   # VND
@@ -186,7 +186,7 @@ def build_valuation_narrative(n: NarrativeInputs) -> str:
                 f"Giá trị DCF nhạy cảm nhất với giả định WACC và terminal growth: thay đổi ±1% WACC làm "
                 f"giá trị thay đổi đáng kể, nên hai biến này phải được xác nhận bởi dữ liệu thị trường vốn. "
                 f"Giá mục tiêu {_vnd(n.target_price)} tổng hợp 60% FCFF ({_vnd(n.price_fcff)}) "
-                f"và 40% P/E Forward ({_vnd(n.price_pe_forward)}). "
+                f"và 40% FCFE ({_vnd(n.price_fcfe)}). "
                 f"Trọng số 60/40 phản ánh ưu tiên phương pháp dòng tiền trên nền kiểm tra chéo bội số, "
                 f"phù hợp với doanh nghiệp có lịch sử FCFF dương và chu kỳ vốn có thể dự báo được. "
                 f"P/E Forward dùng EPS dự phóng kỳ tới, điều chỉnh cho chu kỳ đấu thầu đặc thù ngành. "

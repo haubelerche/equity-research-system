@@ -121,9 +121,9 @@ class TestBlendResultSchema:
         result = blend_dcf("TST", 60_000.0, 55_000.0, 50_000.0)
         d = result.to_dict()
         required = [
-            "ticker", "price_fcff_vnd", "price_pe_forward_vnd",
+            "ticker", "price_fcff_vnd", "price_fcfe_vnd",
             "target_price_dcf_vnd", "current_price_vnd",
-            "upside_pct", "is_draft_only", "valuation_gap_pct", "warnings",
+            "upside_pct", "is_draft_only", "fcff_fcfe_gap_pct", "warnings",
         ]
         for key in required:
             assert key in d, f"Missing blend key: {key}"

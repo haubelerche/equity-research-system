@@ -12,7 +12,7 @@ def _inputs() -> NarrativeInputs:
         cash_conversion=2.1, rev_growth_driver=0.0626, gross_margin_driver=0.4827, sga_driver=0.2286,
         capex_driver=0.0835, tax_driver=0.1579, wacc=0.138, terminal_growth=0.03,
         current_price=50200.0, target_price=30409.0, upside=-0.394, rating="BÁN",
-        price_fcff=35767.0, price_pe_forward=50760.0, sens_low=39679.0, sens_high=91113.0, dividend_yield=0.02,
+        price_fcff=35767.0, price_fcfe=50760.0, sens_low=39679.0, sens_high=91113.0, dividend_yield=0.02,
     )
 
 

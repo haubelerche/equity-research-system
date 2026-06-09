@@ -636,29 +636,38 @@ def _build_val_summary(val: dict, target_price: Optional[float], current_price: 
     blend = val.get("blend_dcf", {})
     mult = _extract_multiples(val)
 
+    def _fmt(v: Optional[float]) -> str:
+        return f"{v:,.0f}" if v else "—"
+
     if blend:
-        p_fcff = blend.get("price_fcff_vnd", 0)
-        p_fcfe = blend.get("price_fcfe_vnd", 0)
+        p_fcff = blend.get("price_fcff_vnd") or None
+        p_fcfe = blend.get("price_fcfe_vnd") or None
+        w_fcff = blend.get("fcff_weight", 0.60)
+        w_fcfe = blend.get("fcfe_weight", 0.40)
+        fcff_pct = f"{w_fcff * 100:.0f}%"
+        fcfe_pct = f"{w_fcfe * 100:.0f}%"
+        fcff_wtd = f"{p_fcff * w_fcff:,.0f}" if p_fcff else "—"
+        fcfe_wtd = f"{p_fcfe * w_fcfe:,.0f}" if p_fcfe else "—"
         rows = (
-            f"| DCF - FCFF | {p_fcff:,.0f} | 60% | {p_fcff * 0.6:,.0f} | PASS |\n"
-            f"| DCF - FCFE | {p_fcfe:,.0f} | 40% | {p_fcfe * 0.4:,.0f} | PASS |\n"
+            f"| DCF - FCFF | {_fmt(p_fcff)} | {fcff_pct} | {fcff_wtd} | Đã tính |\n"
+            f"| DCF - FCFE | {_fmt(p_fcfe)} | {fcfe_pct} | {fcfe_wtd} | {'Đã tính' if p_fcfe else 'Chưa có'} |\n"
         )
     else:
         # Old format: DCF base
         dcf_base = val.get("dcf", {}).get("base", {})
-        p_dcf = dcf_base.get("intrinsic_value_per_share_vnd", 0)
-        p_pe = mult.get("implied_price_pe", 0)
+        p_dcf = dcf_base.get("intrinsic_value_per_share_vnd") or None
+        p_pe = mult.get("implied_price_pe") or None
         rows = (
-            f"| DCF (FCF-based) | {p_dcf:,.0f} | 60% | {p_dcf * 0.6:,.0f} | default_unapproved |\n"
-            f"| P/E múltiple | {p_pe:,.0f} | 40% | {p_pe * 0.4:,.0f} | default_unapproved |\n"
+            f"| DCF (FCF-based) | {_fmt(p_dcf)} | 60% | {f'{p_dcf * 0.6:,.0f}' if p_dcf else '—'} | Nháp |\n"
+            f"| P/E tương đối | {_fmt(p_pe)} | 40% | {f'{p_pe * 0.4:,.0f}' if p_pe else '—'} | Nháp |\n"
         )
 
-    tp_str = f"{target_price:,.0f}" if target_price else _NA
+    tp_str = f"{target_price:,.0f}" if target_price else "—"
     table = (
         "| Phương pháp | Giá hàm ý (VND/CP) | Trọng số | Giá có trọng số | Trạng thái |\n"
         "|---|---:|---:|---:|---|\n"
         + rows
-        + f"| **Target Price** | **{tp_str}** | 100% | **{tp_str}** | pending_review |\n"
+        + f"| **Giá mục tiêu** | **{tp_str}** | 100% | **{tp_str}** | Đang rà soát |\n"
     )
     return table
 
@@ -670,14 +679,14 @@ def _build_val_assumptions(fcff_v: dict, mult: dict, current_price: Optional[flo
     net_debt = mult.get("net_debt_vnd_bn", 0)
     cp_str = f"{current_price:,.0f}" if current_price else _NA
     return (
-        "| Parameter | Giá trị | Nguồn |\n"
+        "| Tham số | Giá trị | Ghi chú |\n"
         "|---|---:|---|\n"
-        f"| WACC | {wacc * 100:.1f}% | valuation_result |\n"
-        f"| Terminal growth | {tg * 100:.1f}% | valuation_result |\n"
-        f"| Shares outstanding | {shares:.2f} triệu CP | canonical_fact |\n"
-        f"| Net debt | {net_debt:,.1f} tỷ VND | canonical_fact |\n"
-        f"| Current price | {cp_str} VND/CP | market data |\n"
-        f"| Assumption status | default_unapproved | **Cần analyst review** |\n"
+        f"| WACC | {wacc * 100:.1f}% | Mô hình DCF |\n"
+        f"| Tăng trưởng dài hạn | {tg * 100:.1f}% | Mô hình DCF |\n"
+        f"| Số cổ phiếu lưu hành | {shares:.2f} triệu CP | Dữ liệu chuẩn hóa |\n"
+        f"| Nợ ròng | {net_debt:,.1f} tỷ VND | Dữ liệu chuẩn hóa |\n"
+        f"| Giá thị trường | {cp_str} VND/CP | Dữ liệu thị trường |\n"
+        f"| Trạng thái giả định | Đang rà soát | **Cần phê duyệt trước khi công bố** |\n"
     )
 
 

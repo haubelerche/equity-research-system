@@ -6,7 +6,7 @@ Aggregates all 8 required gates into a single ExportGateResult:
   reconciliation_gate      — official vs secondary facts do not materially conflict
   numeric_consistency_gate — formulas, shares, units, signs reconcile
   forecast_gate            — debt, dividend, working capital, tax are present and valid
-  valuation_gate           — FCFF + P/E Forward blend, WACC/Re, terminal growth, net debt, shares valid
+  valuation_gate           — FCFF + FCFE blend (60/40), WACC/Re, terminal growth, net debt, shares valid
   sensitivity_gate         — sensitivity tables present, non-empty, include base cell
   citation_gate            — material claims have claim-level citations
   layout_gate              — PDF/HTML passes layout_audit checks
@@ -174,9 +174,9 @@ def _numeric_consistency_gate(
 
     # Blend arithmetic: 0.60 × FCFF + 0.40 × FCFE
     blend = valuation_artifact.get("blend_dcf", {})
-    p_fcff = blend.get("price_fcff")
-    p_fcfe = blend.get("price_fcfe")
-    p_blend = blend.get("target_price_dcf")
+    p_fcff = blend.get("price_fcff_vnd")
+    p_fcfe = blend.get("price_fcfe_vnd")
+    p_blend = blend.get("target_price_dcf_vnd")
     if all(v is not None for v in [p_fcff, p_fcfe, p_blend]):
         expected = 0.60 * p_fcff + 0.40 * p_fcfe
         if abs(p_blend - expected) / max(abs(expected), 1) > 0.01:
@@ -185,8 +185,39 @@ def _numeric_consistency_gate(
                 f"0.6×{p_fcff:.0f}+0.4×{p_fcfe:.0f}={expected:.0f}"
             )
 
+    # Dividend yield reconciliation: DY = DPS / Current Price
+    blend = valuation_artifact.get("blend_dcf", {})
+    current_price = blend.get("current_price_vnd")
+    if current_price and current_price > 0:
+        for fy in (forecast_artifact or {}).get("forecast_years", []):
+            dps = fy.get("dps")
+            dy = fy.get("dividend_yield")
+            if dps is not None and dy is not None:
+                expected_dy = dps / current_price
+                if abs(dy - expected_dy) > 0.005:
+                    issues.append(
+                        f"{fy.get('label')}: dividend_yield {dy:.2%} != DPS {dps:.0f} / "
+                        f"price {current_price:.0f} -> implied {expected_dy:.2%}"
+                    )
+
+    # P/E reconciliation: P/E = Current Price / EPS
+    for fy in (forecast_artifact or {}).get("forecast_years", []):
+        pe = fy.get("pe")
+        eps = fy.get("eps")
+        if pe is not None and eps is not None and eps > 0 and current_price and current_price > 0:
+            expected_pe = current_price / eps
+            if abs(pe - expected_pe) / max(abs(expected_pe), 1) > 0.05:
+                issues.append(
+                    f"{fy.get('label')}: P/E {pe:.1f} != price {current_price:.0f} / "
+                    f"EPS {eps:.0f} -> implied {expected_pe:.1f}"
+                )
+
+    checks_run = [
+        "eps_reconciliation", "blend_arithmetic",
+        "dividend_yield_reconciliation", "pe_reconciliation",
+    ]
     return GateResult("numeric_consistency_gate", "FAIL" if issues else "PASS", issues,
-                      {"checks_run": ["eps_reconciliation", "blend_arithmetic"]})
+                      {"checks_run": checks_run})
 
 
 def _forecast_gate(
@@ -198,14 +229,14 @@ def _forecast_gate(
         return GateResult("forecast_gate", "BLOCKED",
                           ["forecast_artifact missing — forecast gate blocked"])
 
-    # Debt schedule: FCFE is supplementary cross-check only — not blocking.
-    # Primary blend is FCFF + P/E Forward; unreliable FCFE does not block export.
+    # Debt schedule: FCFE is primary (40% blend weight).
+    # Unpublishable FCFE blocks final export — analyst must approve debt path.
     ds = forecast_artifact.get("debt_schedule", {})
     if ds and not ds.get("is_fcfe_publishable", False):
         reason = ds.get("fcfe_block_reason", "unknown")
-        metadata["fcfe_cross_check"] = (
-            f"is_fcfe_publishable=False — {reason}. "
-            "FCFE is supplementary; primary FCFF + P/E Forward blend is unaffected."
+        issues.append(
+            f"debt_schedule.is_fcfe_publishable=False — {reason}. "
+            "FCFE carries 40% blend weight; final export blocked until debt schedule is approved."
         )
 
     # Working capital check
@@ -236,14 +267,14 @@ def _valuation_gate(
     if ndb.get("status") == "blocked":
         issues.append("net_debt_bridge.status=blocked (total_debt missing)")
 
-    # FCFF vs P/E Forward gap / blend draft flag
+    # FCFF/FCFE gap / blend draft flag
     blend = valuation_artifact.get("blend_dcf", {})
     if blend.get("is_draft_only"):
-        gap = blend.get("valuation_gap_pct")
+        gap = blend.get("fcff_fcfe_gap_pct")
         gap_str = f"{gap:.1%}" if gap else "unknown"
         issues.append(
             f"blend_dcf.is_draft_only=True "
-            f"(FCFF vs P/E Forward gap={gap_str} — review EPS growth and WACC assumptions)"
+            f"(FCFF/FCFE gap={gap_str} — audit net borrowing, net debt, CAPEX, NWC)"
         )
 
     # Shares check
@@ -256,6 +287,21 @@ def _valuation_gate(
     tg = fcff.get("terminal_growth")
     if wacc and tg and wacc <= tg:
         issues.append(f"WACC ({wacc:.1%}) ≤ terminal_growth ({tg:.1%}) — invalid")
+
+    # Re > g check (FCFE)
+    fcfe = valuation_artifact.get("fcfe", {})
+    re = fcfe.get("cost_of_equity")
+    tg_fcfe = fcfe.get("terminal_growth")
+    if re and tg_fcfe and re <= tg_fcfe:
+        issues.append(f"Re ({re:.1%}) ≤ terminal_growth ({tg_fcfe:.1%}) — FCFE invalid")
+
+    # FCFF bridge check
+    if fcff and not fcff.get("enterprise_value"):
+        issues.append("FCFF enterprise_value missing — FCFF bridge incomplete")
+
+    # FCFE bridge check
+    if fcfe and not fcfe.get("equity_value"):
+        issues.append("FCFE equity_value missing — FCFE bridge incomplete")
 
     status = "FAIL" if issues else "PASS"
     return GateResult("valuation_gate", status, issues)

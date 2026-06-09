@@ -250,7 +250,8 @@ class TestExportGate:
         # Minimal passing valuation artifact
         val = {
             "fcff": {"net_debt_bridge": {"status": "ok"}, "shares_mn": 94.45,
-                     "wacc": 0.13, "terminal_growth": 0.03},
+                     "wacc": 0.13, "terminal_growth": 0.03,
+                     "enterprise_value": 3_000_000.0},
             "blend_dcf": {"is_draft_only": False, "target_price_dcf": 30_000.0,
                           "price_fcff": 35_000.0, "price_fcfe": 22_000.0},
             "fcff_sensitivity": {
@@ -366,7 +367,8 @@ class TestExportGate:
         art = _full_artifact()
         val = {
             "fcff": {"net_debt_bridge": {"status": "ok"}, "shares_mn": 94.45,
-                     "wacc": 0.13, "terminal_growth": 0.03},
+                     "wacc": 0.13, "terminal_growth": 0.03,
+                     "enterprise_value": 3_000_000.0},
             "blend_dcf": {"is_draft_only": False, "target_price_dcf": 30_000.0,
                           "price_fcff": 35_000.0, "price_fcfe": 22_000.0},
             "fcff_sensitivity": {

@@ -674,12 +674,12 @@ def _report_display_governance(
         reasons.append("valuation_result_not_publishable")
     if blend.get("is_draft_only") is True:
         reasons.append("blend_is_draft_only")
-    gap = blend.get("valuation_gap_pct")
+    gap = blend.get("fcff_fcfe_gap_pct")
     try:
         if gap is not None and float(gap) > 0.25:
-            reasons.append("valuation_gap_gt_25pct")
+            reasons.append("fcff_fcfe_gap_gt_25pct")
     except (TypeError, ValueError):
-        reasons.append("valuation_gap_invalid")
+        reasons.append("fcff_fcfe_gap_invalid")
 
     # analyst_draft always shows computed values — analyst needs full picture to review
     # Display governance is separate from publication governance. Available
@@ -709,32 +709,27 @@ def _report_display_governance(
     }
 
 
-def _apply_core_pe_override(
-    display_gate: dict[str, Any],
-    cpnc: dict[str, Any],
-) -> dict[str, Any]:
-    """Override target price with Core P/E + Net Cash when available (Guidance §11)."""
-    cpnc_target = float(cpnc.get("target_price_vnd") or 0) or None
-    current = display_gate.get("current_price")
-    if cpnc_target is not None:
-        cpnc_upside = (cpnc_target / current - 1) if current else None
-        return {
-            **display_gate,
-            "target_price": cpnc_target,
-            "upside": cpnc_upside,
-            "recommendation": _recommendation(cpnc_upside, "analyst_draft", display_gate.get("approved_for_display", True)),
-        }
-    return display_gate
 
+def _recommendation(
+    upside: float | None,
+    mode: RenderMode | str,
+    approved_for_display: bool = False,
+    dividend_yield: float = 0.0,
+) -> str:
+    """Rating based on total expected return = upside + dividend yield.
 
-def _recommendation(upside: float | None, mode: RenderMode | str, approved_for_display: bool = False) -> str:
+    BUY  (MUA)       if total_return > 20%
+    SELL (BÁN)       if total_return < -10%
+    HOLD (NẮM GIỮ)  otherwise
+    """
     if not approved_for_display or upside is None:
         return "ĐANG HOÀN THIỆN" if mode != "client_final" else "CHƯA XUẤT BẢN"
-    if upside > 0.20:
+    total_return = upside + dividend_yield
+    if total_return > 0.20:
         return "MUA"
-    if upside < -0.20:
+    if total_return < -0.10:
         return "BÁN"
-    return "GIỮ"
+    return "NẮM GIỮ"
 
 
 def _total_return(upside: float | None, dividend_yield: "Percent | None") -> "Percent | None":
@@ -1321,7 +1316,7 @@ def _build_narratives(
         upside=upside,
         rating=rating,
         price_fcff=blend.get("price_fcff_vnd") if isinstance(blend, dict) else None,
-        price_pe_forward=blend.get("price_pe_forward_vnd") if isinstance(blend, dict) else None,
+        price_fcfe=blend.get("price_fcfe_vnd") if isinstance(blend, dict) else None,
         core_pe_target=(core_pe_net_cash or {}).get("target_price_vnd"),
         net_cash_per_share=(core_pe_net_cash or {}).get("net_cash_per_share_vnd"),
         core_eps=(core_pe_net_cash or {}).get("core_eps_vnd"),
@@ -1429,9 +1424,6 @@ def build_client_report_view_model(
     forecast_rows = _forecast_by_label(forecast)
     fcff_rows = _fcff_by_label(fcff)
     display_gate = _report_display_governance(mode, val_result, blend)
-    # Prefer Core P/E + Net Cash target over blend target (Guidance §11)
-    if cpnc:
-        display_gate = _apply_core_pe_override(display_gate, cpnc)
     current_price = display_gate["current_price"]
     target_price = display_gate["target_price"]
     upside = display_gate["upside"]
@@ -1454,6 +1446,16 @@ def build_client_report_view_model(
         Percent(dividend_per_share / current_price)
         if dividend_per_share and current_price else None
     )
+
+    # Re-compute recommendation with total_expected_return = upside + dividend_yield
+    # (initial _recommendation call at display_gate level didn't have dividend_yield)
+    dy_val = dividend_yield.value if dividend_yield is not None else 0.0
+    recommendation = _recommendation(
+        upside, mode,
+        approved_for_display=display_gate.get("approved_for_display", False),
+        dividend_yield=dy_val,
+    )
+
     missing: list[str] = []
     if current_price is None:
         missing.append("current_price")

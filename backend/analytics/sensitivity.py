@@ -1,12 +1,14 @@
 """Comprehensive sensitivity analysis for 60% FCFF + 40% FCFE DCF valuation.
 
+Official blend: Target Price = 0.60 × Price_FCFF + 0.40 × Price_FCFE
+
 Implements all sensitivity matrices required by the valuation handbook:
 
 1. build_fcff_sensitivity_table  — WACC × terminal_growth → Price_FCFF
 2. build_fcfe_sensitivity_table  — Re × terminal_growth   → Price_FCFE
 3. build_blend_sensitivity_table — Price_FCFF × Price_FCFE → Target Price_DCF (60/40)
-4. build_pe_sensitivity_table    — EPS_FY1 × Target P/E   → Target Price_PE
-5. build_ev_ebitda_sensitivity_table — EBITDA_FY1 × EV/EBITDA multiple → Price
+4. build_pe_sensitivity_table    — EPS_FY1 × Target P/E   → Target Price_PE (supplementary)
+5. build_ev_ebitda_sensitivity_table — EBITDA_FY1 × EV/EBITDA multiple → Price (supplementary)
 6. build_sensitivity_table       — backward-compatible WACC × g (simplified FCF from dcf.py)
 
 Quality check helpers:

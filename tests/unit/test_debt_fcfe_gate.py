@@ -172,15 +172,15 @@ class TestFCFEGate:
             assert not ds.is_fcfe_publishable
 
 
-class TestBlendBlockedWhenPEForwardMissing:
-    """When P/E Forward price is None, blend must be draft-only."""
+class TestBlendDraftWhenFCFEMissing:
+    """When FCFE price is None, blend must be draft-only."""
 
-    def test_blend_is_draft_when_pe_forward_none(self):
+    def test_blend_is_draft_when_fcfe_none(self):
         from backend.analytics.blend import blend_dcf
         result = blend_dcf(
             ticker="TST",
             price_fcff=60_000.0,
-            price_pe_forward=None,    # blocked (EPS unavailable)
+            price_fcfe=None,    # blocked (FCFE unavailable)
             current_price_vnd=50_000.0,
         )
         assert result.is_draft_only is True
@@ -190,11 +190,10 @@ class TestBlendBlockedWhenPEForwardMissing:
         result = blend_dcf(
             ticker="TST",
             price_fcff=60_000.0,
-            price_pe_forward=58_000.0,  # gap ≈ 3.4% → within 40%
+            price_fcfe=58_000.0,  # gap ~3.4% within 25%
             current_price_vnd=50_000.0,
         )
         assert result.is_draft_only is False
-
 
 class TestMinimumCashPolicy:
     def test_absolute_floor_used_when_no_revenue(self):
