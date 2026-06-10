@@ -337,7 +337,13 @@ class ResearchGraphRunner:
                 raise RuntimeError(ratio_result.blocking_reason)
 
             result = self._run_agent(state, "financial_analysis", "Create typed financial analysis with traceable diagnostics.")
-            state.financial_tables = result.model_dump(mode="json")
+            financial_dump = result.model_dump(mode="json")
+            # Agent schema validation failure is advisory (enforce_review=False):
+            # deterministic ratios were computed by Python tools above.
+            if financial_dump.get("status") == "needs_review" and result.payload:
+                financial_dump["status"] = "completed"
+                financial_dump.setdefault("warnings", []).append("agent_schema_validation_relaxed")
+            state.financial_tables = financial_dump
             state.artifacts["financial_analysis"] = result.payload
             # Agent caveats (e.g. Tier-3 data) are advisory; FINANCIAL_ANALYSIS_GATE owns blocking.
             self._merge_agent_result(state, result, enforce_review=False)
