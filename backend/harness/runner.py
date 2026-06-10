@@ -26,7 +26,7 @@ from backend.harness.gates import (
     senior_critic_gate,
 )
 from backend.harness.graph import GRAPH_STAGES
-from backend.harness.model_adapter import AnthropicModelAdapter
+from backend.harness.model_adapter import AnthropicModelAdapter, create_model_adapter
 from backend.harness.state import AgentExecutionContext, ResearchGraphState, stable_hash
 from backend.harness.tool_registry import ToolRegistry
 from backend.runtime_store import RuntimeStore
@@ -81,7 +81,7 @@ class ResearchGraphRunner:
         self.budget = BudgetGuard(store, self.settings)
         self.agent_registry = AgentRegistry()
         self.tool_registry = ToolRegistry()
-        self.model_adapter = AnthropicModelAdapter()
+        self.model_adapter = create_model_adapter(self.settings.default_model_name)
         self.report_publisher = report_publisher
         from backend.harness.progress import ProgressReporter
         self.progress: ProgressReporter = progress or ProgressReporter(quiet=True)
