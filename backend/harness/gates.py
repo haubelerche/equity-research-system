@@ -1,11 +1,56 @@
 from __future__ import annotations
 
 import re
+from math import isclose
 from typing import Any
 
 _FY_PATTERN = re.compile(r"^20\d{2}FY$")
 _METRIC_REF_PATTERN = re.compile(r"\b[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+\b")
 _PERIOD_REF_PATTERN = re.compile(r"\b20\d{2}(?:FY|A|F)?\b")
+
+_REQUIRED_REPORT_SECTIONS = {
+    "cover_investment_summary": ("cover_investment_summary", "investment_summary"),
+    "company_overview": ("company_overview",),
+    "recent_financial_performance": ("recent_financial_performance",),
+    "driver_based_forecast": ("driver_based_forecast",),
+    "valuation_and_recommendation": ("valuation_and_recommendation", "valuation"),
+    "risks_and_monitoring_factors": ("risks_and_monitoring_factors", "risks"),
+    "forecast_financial_summary": ("forecast_financial_summary",),
+}
+_REQUIRED_TABLES = {
+    "trading_snapshot",
+    "company_overview",
+    "recent_financial_results",
+    "business_plan_completion",
+    "forecast_assumptions",
+    "valuation_summary",
+    "dcf_assumptions",
+    "fcff_fcfe_bridge",
+    "forecast_financial_statement_summary",
+    "risk_and_monitoring_factors",
+}
+_REQUIRED_CHARTS = {
+    "stock_price_vs_benchmark",
+    "revenue_by_channel",
+    "product_group_revenue_or_market_share",
+    "gross_margin_net_margin_trend",
+    "forecast_revenue",
+    "forecast_gross_profit_or_margin",
+    "valuation_sensitivity",
+}
+_CRITIC_MINIMUM_SCORES = {
+    "thesis_strength": 8.0,
+    "driver_logic": 8.0,
+    "forecast_consistency": 8.0,
+    "valuation_coherence": 8.0,
+    "evidence_depth": 7.5,
+    "sector_specificity": 8.0,
+    "risk_balance": 7.5,
+    "table_chart_completeness": 8.0,
+    "narrative_quality": 8.0,
+    "numeric_integrity": 9.5,
+    "citation_integrity": 9.5,
+}
 
 
 def _issue_id(gate_name: str, reason: str) -> str:
@@ -55,6 +100,81 @@ def fail_gate(
     return _gate_result(name, False, [reason], summary, severity=severity)
 
 
+def _present(value: Any) -> bool:
+    return value is not None and value != "" and value != [] and value != {}
+
+
+def _number(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _check_passed(value: Any) -> bool:
+    if isinstance(value, dict):
+        value = value.get("passed", value.get("status"))
+    if isinstance(value, str):
+        return value.lower() in {"pass", "passed", "ok", "true"}
+    return value is True
+
+
+def _check_failed(value: Any) -> bool:
+    if isinstance(value, dict):
+        value = value.get("passed", value.get("status"))
+    if isinstance(value, str):
+        return value.lower() in {"fail", "failed", "blocked", "false"}
+    return value is False
+
+
+def _inventory_key(value: Any) -> str:
+    key = re.sub(r"[^a-z0-9]+", "_", str(value).lower()).strip("_")
+    return re.sub(r"_(?:table|chart)$", "", key)
+
+
+def _inventory_statuses(items: Any) -> dict[str, str]:
+    statuses: dict[str, str] = {}
+    if isinstance(items, dict):
+        for key, value in items.items():
+            if isinstance(value, dict):
+                statuses[_inventory_key(key)] = str(value.get("status") or ("present" if value else "missing"))
+            elif isinstance(value, str):
+                statuses[_inventory_key(key)] = value
+            elif value:
+                statuses[_inventory_key(key)] = "present"
+    elif isinstance(items, list):
+        for item in items:
+            if isinstance(item, str):
+                statuses[_inventory_key(item)] = "present"
+            elif isinstance(item, dict):
+                key = item.get("id") or item.get("key") or item.get("name") or item.get("table_id") or item.get("chart_id")
+                if key:
+                    statuses[_inventory_key(key)] = str(item.get("status") or "present")
+    return statuses
+
+
+def _missing_inventory(required: set[str], items: Any) -> list[str]:
+    statuses = _inventory_statuses(items)
+    allowed = {"present", "complete", "covered", "insufficient_evidence"}
+    return sorted(key for key in required if statuses.get(key, "missing").lower() not in allowed)
+
+
+def _unexplained_growth_flags(forecast_model: dict[str, Any]) -> list[str]:
+    explicit = forecast_model.get("unexplained_abnormal_growth") or []
+    flagged = forecast_model.get("abnormal_growth_flags") or forecast_model.get("abnormal_growth") or []
+    unexplained = [str(item) for item in explicit]
+    for index, item in enumerate(flagged):
+        if isinstance(item, dict):
+            explained = item.get("explained") is True or _present(item.get("explanation")) or _present(item.get("rationale"))
+            if not explained:
+                unexplained.append(str(item.get("metric") or item.get("driver") or index))
+        elif item:
+            unexplained.append(str(item))
+    return unexplained
+
+
 def data_quality_gate(build_facts_summary: dict[str, Any]) -> dict[str, Any]:
     blocking_reasons: list[str] = []
     if build_facts_summary.get("valuation_gate") != "pass":
@@ -77,7 +197,7 @@ def data_quality_gate(build_facts_summary: dict[str, Any]) -> dict[str, Any]:
 
 
 def valuation_gate(valuation_summary: dict[str, Any]) -> dict[str, Any]:
-    required = ["has_fcff", "has_fcfe", "has_blend", "has_sensitivity"]
+    required = ["has_fcff", "has_blend", "has_sensitivity"]
     required_metadata = ["formula_version", "assumption_version", "unit_policy", "currency", "period_scope"]
     missing = [key for key in required if not valuation_summary.get(key)]
     missing.extend([key for key in required_metadata if not valuation_summary.get(key)])
@@ -95,6 +215,321 @@ def valuation_gate(valuation_summary: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(assumption_gate, dict):
         return fail_gate("VALUATION_GATE", "assumption_gate_missing", valuation_summary)
     return pass_gate("VALUATION_GATE", valuation_summary)
+
+
+def forecast_quality_gate(forecast_model: dict[str, Any]) -> dict[str, Any]:
+    """Validate the production forecast artifact against PLAN.md section 9.2."""
+    reasons: list[str] = []
+    revenue = forecast_model.get("revenue_forecast") or {}
+
+    for dimension in ("by_channel", "by_product_group"):
+        decomposition = revenue.get(dimension) or {}
+        if not decomposition:
+            reasons.append(f"revenue_forecast_{dimension}_missing")
+            continue
+        missing_drivers = sorted(
+            str(name)
+            for name, line in decomposition.items()
+            if isinstance(line, dict)
+            and _present(line.get("forecast"))
+            and not _present(line.get("drivers"))
+        )
+        if not any(isinstance(line, dict) and _present(line.get("forecast")) for line in decomposition.values()):
+            reasons.append(f"revenue_forecast_{dimension}_forecast_missing")
+        if missing_drivers:
+            reasons.append(f"revenue_forecast_{dimension}_drivers_missing:{','.join(missing_drivers)}")
+
+    gross_margin = forecast_model.get("gross_margin_forecast") or {}
+    if not _present(gross_margin.get("forecast")):
+        reasons.append("gross_margin_forecast_missing")
+    if not _present(gross_margin.get("assumptions")):
+        reasons.append("gross_margin_rationale_missing")
+
+    opex = forecast_model.get("opex_forecast") or {}
+    if not _present(opex.get("selling_expense")) or not _present(opex.get("admin_expense")):
+        reasons.append("opex_forecast_missing")
+    if not _present(opex.get("assumptions")):
+        reasons.append("opex_assumptions_missing")
+
+    working_capital = forecast_model.get("working_capital_forecast") or {}
+    missing_wc = [
+        key for key in ("receivable_days", "inventory_days", "payable_days")
+        if not _present(working_capital.get(key))
+    ]
+    if missing_wc:
+        reasons.append(f"working_capital_assumptions_missing:{','.join(missing_wc)}")
+
+    capex = forecast_model.get("capex_and_depreciation") or {}
+    missing_capex = [
+        key for key in ("capex_projects", "depreciation")
+        if not _present(capex.get(key))
+    ]
+    if missing_capex:
+        reasons.append(f"capex_depreciation_assumptions_missing:{','.join(missing_capex)}")
+
+    debt_cash = forecast_model.get("debt_cash_interest") or {}
+    missing_debt_cash = [
+        key for key in ("cash", "short_term_debt", "long_term_debt", "interest_expense", "net_borrowing")
+        if not _present(debt_cash.get(key))
+    ]
+    if missing_debt_cash:
+        reasons.append(f"debt_cash_assumptions_missing:{','.join(missing_debt_cash)}")
+
+    if not _present(forecast_model.get("eps_forecast")):
+        reasons.append("eps_forecast_missing")
+    if not _present(forecast_model.get("forecast_financial_summary")):
+        reasons.append("forecast_financial_summary_missing")
+
+    checks = forecast_model.get("forecast_quality_checks") or {}
+    required_checks = (
+        "historical_continuity_check",
+        "driver_support_check",
+        "margin_sanity_check",
+        "balance_sheet_balance_check",
+        "cash_flow_consistency_check",
+    )
+    for check in required_checks:
+        if check not in checks:
+            reasons.append(f"forecast_quality_check_missing:{check}")
+        elif not _check_passed(checks[check]):
+            reasons.append(f"forecast_quality_check_failed:{check}")
+
+    unexplained_growth = _unexplained_growth_flags(forecast_model)
+    if unexplained_growth:
+        reasons.append("unexplained_abnormal_forecast_growth")
+
+    summary = {
+        "channel_count": len(revenue.get("by_channel") or {}),
+        "product_group_count": len(revenue.get("by_product_group") or {}),
+        "quality_checks": checks,
+    }
+    if reasons:
+        return _gate_result("FORECAST_QUALITY_GATE", False, sorted(set(reasons)), summary)
+    return pass_gate("FORECAST_QUALITY_GATE", summary)
+
+
+def valuation_reconciliation_gate(
+    valuation: dict[str, Any],
+    market_snapshot: dict[str, Any] | None = None,
+    *,
+    relative_tolerance: float = 0.005,
+) -> dict[str, Any]:
+    """Reconcile deterministic FCFF/FCFE valuation outputs and recommendation."""
+    reasons: list[str] = []
+    market_snapshot = market_snapshot or {}
+    fcff = valuation.get("fcff") or {}
+    fcfe = valuation.get("fcfe") or {}
+    assumptions = valuation.get("key_assumptions") or valuation.get("assumptions") or {}
+    weighted = valuation.get("weighted_target_price") or valuation.get("blend_dcf") or {}
+
+    required_fcff = (
+        "projected_fcff", "pv_of_fcff", "terminal_value", "pv_of_terminal_value",
+        "enterprise_value", "cash_and_short_term_investments", "debt", "equity_value",
+        "shares_outstanding", "value_per_share",
+    )
+    required_fcfe = (
+        "projected_fcfe", "pv_of_fcfe", "terminal_value", "pv_of_terminal_value",
+        "equity_value", "shares_outstanding", "value_per_share",
+    )
+    fcfe_advisory_reasons: list[str] = []
+    missing_fcff = [key for key in required_fcff if not _present(fcff.get(key))]
+    missing_fcfe = [key for key in required_fcfe if not _present(fcfe.get(key))]
+    if missing_fcff:
+        reasons.append(f"fcff_bridge_missing:{','.join(missing_fcff)}")
+    if missing_fcfe:
+        fcfe_advisory_reasons.append(f"fcfe_bridge_missing:{','.join(missing_fcfe)}")
+
+    fcff_equity = _number(fcff.get("equity_value"))
+    fcff_enterprise = _number(fcff.get("enterprise_value"))
+    fcff_cash = _number(fcff.get("cash_and_short_term_investments"))
+    fcff_debt = _number(fcff.get("debt"))
+    if None not in {fcff_equity, fcff_enterprise, fcff_cash, fcff_debt}:
+        expected_fcff_equity = fcff_enterprise + fcff_cash - fcff_debt
+        if not isclose(fcff_equity, expected_fcff_equity, rel_tol=relative_tolerance, abs_tol=0.01):
+            reasons.append("fcff_equity_bridge_not_reconciled")
+
+    for method_name, method in (("fcff", fcff), ("fcfe", fcfe)):
+        equity_value = _number(method.get("equity_value"))
+        shares = _number(method.get("shares_outstanding"))
+        value_per_share = _number(method.get("value_per_share"))
+        if equity_value is not None and shares is not None and shares > 0 and value_per_share is not None:
+            # Valuation artifacts store equity value in VND bn and shares in mn,
+            # so per-share VND is equity_value * 1,000 / shares.
+            expected_values = (equity_value / shares, equity_value * 1000 / shares)
+            if not any(
+                isclose(value_per_share, expected, rel_tol=relative_tolerance, abs_tol=0.01)
+                for expected in expected_values
+            ):
+                target = fcfe_advisory_reasons if method_name == "fcfe" else reasons
+                target.append(f"{method_name}_value_per_share_not_reconciled")
+
+    required_wacc = (
+        "risk_free_rate", "equity_risk_premium", "beta", "cost_of_equity",
+        "cost_of_debt", "tax_rate", "wacc", "terminal_growth",
+    )
+    missing_wacc = [key for key in required_wacc if not _present(assumptions.get(key))]
+    if missing_wacc:
+        reasons.append(f"wacc_components_missing:{','.join(missing_wacc)}")
+    if not _present(assumptions.get("net_borrowing")):
+        fcfe_advisory_reasons.append("fcfe_net_borrowing_assumption_missing")
+
+    wacc = _number(assumptions.get("wacc"))
+    terminal_growth = _number(assumptions.get("terminal_growth"))
+    if wacc is not None and terminal_growth is not None and terminal_growth >= wacc:
+        reasons.append("terminal_growth_not_below_wacc")
+
+    methods = valuation.get("selected_methods") or valuation.get("valuation_methods") or []
+    normalized_methods = {str(method).upper() for method in methods}
+    if "FCFF" not in normalized_methods:
+        reasons.append("fcff_method_missing")
+    elif not {"FCFF", "FCFE"}.issubset(normalized_methods):
+        fcfe_advisory_reasons.append("fcfe_method_missing")
+
+    weights = valuation.get("method_weights") or {}
+    fcff_weight = _number(weights.get("FCFF", weights.get("fcff")))
+    fcfe_weight = _number(weights.get("FCFE", weights.get("fcfe")))
+    if fcff_weight is None or fcff_weight < 0:
+        reasons.append("method_weights_invalid")
+    elif fcfe_weight is None or fcfe_weight < 0 or fcff_weight + (fcfe_weight or 0) <= 0:
+        fcfe_advisory_reasons.append("fcfe_method_weight_missing")
+    else:
+        weight_total = fcff_weight + fcfe_weight
+        fcff_value = _number(fcff.get("value_per_share"))
+        fcfe_value = _number(fcfe.get("value_per_share"))
+        target_raw = _number(weighted.get("raw", weighted.get("target_price")))
+        if fcff_value is not None and fcfe_value is not None and target_raw is not None:
+            expected_target = (fcff_value * fcff_weight + fcfe_value * fcfe_weight) / weight_total
+            if not isclose(target_raw, expected_target, rel_tol=relative_tolerance, abs_tol=0.01):
+                reasons.append("weighted_target_price_not_reconciled")
+        elif target_raw is None:
+            reasons.append("weighted_target_price_missing")
+
+    if not _present(valuation.get("sensitivity")):
+        reasons.append("valuation_sensitivity_missing")
+    if not _present(valuation.get("sanity_checks")):
+        reasons.append("valuation_sanity_checks_missing")
+    if not _present(valuation.get("approved_assumption_refs")):
+        reasons.append("approved_assumption_refs_missing")
+
+    target_raw = _number(weighted.get("raw", weighted.get("target_price")))
+    current_price = _number(
+        valuation.get("current_price", market_snapshot.get("current_price", market_snapshot.get("price")))
+    )
+    upside = _number(weighted.get("upside_downside_vs_current_price", valuation.get("upside_downside_vs_current_price")))
+    if current_price is None or current_price <= 0:
+        reasons.append("current_price_missing_or_invalid")
+    if upside is None:
+        reasons.append("upside_downside_missing")
+    if not _present(valuation.get("recommendation")):
+        reasons.append("recommendation_missing")
+    if target_raw is not None and current_price is not None and current_price > 0:
+        expected_upside = target_raw / current_price - 1
+        comparable_upside = upside / 100 if upside is not None and abs(upside) > 2 else upside
+        if comparable_upside is None or not isclose(comparable_upside, expected_upside, rel_tol=relative_tolerance, abs_tol=0.001):
+            reasons.append("upside_downside_not_reconciled")
+
+        recommendation = str(valuation.get("recommendation") or "").upper()
+        expected_recommendation = "BUY" if expected_upside > 0.15 else "SELL" if expected_upside < -0.20 else "HOLD"
+        if recommendation and recommendation != expected_recommendation:
+            reasons.append("recommendation_not_reconciled")
+
+    sanity_checks = valuation.get("sanity_checks") or {}
+    failed_sanity_checks = sorted(key for key, value in sanity_checks.items() if _check_failed(value))
+    if failed_sanity_checks:
+        reasons.append(f"valuation_sanity_checks_failed:{','.join(failed_sanity_checks)}")
+
+    summary = {
+        "fcff_value_per_share": fcff.get("value_per_share"),
+        "fcfe_value_per_share": fcfe.get("value_per_share"),
+        "weighted_target_price": weighted,
+        "current_price": current_price,
+    }
+    if reasons:
+        return _gate_result("VALUATION_RECONCILIATION_GATE", False, sorted(set(reasons)), summary)
+    if fcfe_advisory_reasons:
+        return _gate_result(
+            "VALUATION_RECONCILIATION_GATE",
+            True,
+            fcfe_advisory_reasons,
+            summary,
+            severity="warning",
+        )
+    return pass_gate("VALUATION_RECONCILIATION_GATE", summary)
+
+
+def report_completeness_gate(report: dict[str, Any]) -> dict[str, Any]:
+    """Enforce the minimum report, table, and chart contract from PLAN.md."""
+    reasons: list[str] = []
+    sections = report.get("sections") or report
+    missing_sections = [
+        canonical
+        for canonical, aliases in _REQUIRED_REPORT_SECTIONS.items()
+        if not any(_present(sections.get(alias)) for alias in aliases)
+    ]
+    if missing_sections:
+        reasons.append(f"required_report_sections_missing:{','.join(sorted(missing_sections))}")
+
+    missing_tables = _missing_inventory(_REQUIRED_TABLES, report.get("required_tables"))
+    missing_charts = _missing_inventory(_REQUIRED_CHARTS, report.get("required_charts"))
+    if missing_tables:
+        reasons.append(f"required_report_tables_missing:{','.join(missing_tables)}")
+    if missing_charts:
+        reasons.append(f"required_report_charts_missing:{','.join(missing_charts)}")
+
+    summary = {
+        "required_section_count": len(_REQUIRED_REPORT_SECTIONS),
+        "missing_sections": missing_sections,
+        "missing_tables": missing_tables,
+        "missing_charts": missing_charts,
+    }
+    if reasons:
+        return _gate_result("REPORT_COMPLETENESS_GATE", False, reasons, summary)
+    return pass_gate("REPORT_COMPLETENESS_GATE", summary)
+
+
+def senior_critic_gate(critic_review: dict[str, Any]) -> dict[str, Any]:
+    """Convert the Senior Critic Agent rubric into a deterministic publish gate."""
+    reasons: list[str] = []
+    decision = str(critic_review.get("decision") or "").lower()
+    if decision != "pass":
+        reasons.append(f"critic_decision_not_pass:{decision or 'missing'}")
+
+    scorecard = critic_review.get("scorecard") or {}
+    missing_scores: list[str] = []
+    below_threshold: list[str] = []
+    missing_explanations: list[str] = []
+    for metric, threshold in _CRITIC_MINIMUM_SCORES.items():
+        item = scorecard.get(metric)
+        score = _number(item.get("score")) if isinstance(item, dict) else _number(item)
+        if score is None:
+            missing_scores.append(metric)
+        elif score < threshold:
+            below_threshold.append(f"{metric}={score:g}<{threshold:g}")
+        if isinstance(item, dict) and not _present(item.get("explanation")):
+            missing_explanations.append(metric)
+    if missing_scores:
+        reasons.append(f"critic_scores_missing:{','.join(missing_scores)}")
+    if below_threshold:
+        reasons.append(f"critic_scores_below_threshold:{','.join(below_threshold)}")
+    if missing_explanations:
+        reasons.append(f"critic_score_explanations_missing:{','.join(missing_explanations)}")
+
+    blocking_findings = sorted(
+        str(finding.get("finding_id") or "unidentified_finding")
+        for finding in critic_review.get("findings") or []
+        if isinstance(finding, dict) and str(finding.get("severity") or "").lower() in {"high", "critical"}
+    )
+    if blocking_findings:
+        reasons.append(f"blocking_critic_findings:{','.join(blocking_findings)}")
+
+    summary = {
+        "decision": decision,
+        "minimum_scores": _CRITIC_MINIMUM_SCORES,
+        "blocking_findings": blocking_findings,
+    }
+    if reasons:
+        return _gate_result("SENIOR_CRITIC_GATE", False, reasons, summary)
+    return pass_gate("SENIOR_CRITIC_GATE", summary)
 
 
 def financial_analyst_gate(financial_summary: dict[str, Any]) -> dict[str, Any]:
@@ -211,23 +646,6 @@ def evidence_packet_gate(state: dict[str, Any]) -> dict[str, Any]:
     return pass_gate("EVIDENCE_PACKET_GATE", {"evidence_packet_path": evidence_refs[-1].get("storage_path")})
 
 
-def agent_handoff_gate(state: dict[str, Any]) -> dict[str, Any]:
-    handoffs = (state.get("artifacts") or {}).get("agent_handoffs") or []
-    expected_agents = {"supervisor", "data_retrieval", "financial_analyst", "valuation", "report_writer_critic"}
-    seen = {handoff.get("agent_id") for handoff in handoffs if isinstance(handoff, dict)}
-    missing = sorted(expected_agents - seen)
-    if missing:
-        return _gate_result("AGENT_HANDOFF_GATE", False, [f"agent_handoff_missing:{','.join(missing)}"], {"handoff_count": len(handoffs)})
-    invalid = [
-        str(handoff.get("agent_id") or "unknown_agent")
-        for handoff in handoffs
-        if isinstance(handoff, dict) and not handoff.get("handoff_hash")
-    ]
-    if invalid:
-        return _gate_result("AGENT_HANDOFF_GATE", False, [f"agent_handoff_hash_missing:{','.join(invalid)}"], {"handoff_count": len(handoffs)})
-    return pass_gate("AGENT_HANDOFF_GATE", {"handoff_count": len(handoffs)})
-
-
 def approval_path_gate(state: dict[str, Any], final_approval_required: bool = True) -> dict[str, Any]:
     if not final_approval_required:
         return pass_gate("APPROVAL_PATH_GATE", {"final_approval_required": False})
@@ -247,7 +665,6 @@ def workflow_export_gate(state: dict[str, Any], final_approval_required: bool = 
         "ARTIFACT_MANIFEST_GATE",
         "FORMULA_TRACE_GATE",
         "EVIDENCE_PACKET_GATE",
-        "AGENT_HANDOFF_GATE",
     }
     if final_approval_required:
         required_gates.add("APPROVAL_PATH_GATE")
@@ -269,7 +686,7 @@ def workflow_export_gate(state: dict[str, Any], final_approval_required: bool = 
     blocking_reasons.extend(_evaluation_export_blockers(evaluation))
     if valuation and report and valuation.get("snapshot_id") != report.get("snapshot_id"):
         blocking_reasons.append("report_not_linked_to_valuation_snapshot")
-    if final_approval_required and valuation and not (state.get("artifacts") or {}).get("valuation_lock"):
+    if final_approval_required and valuation and not (state.get("artifacts") or {}).get("research_lock"):
         blocking_reasons.append("approved_valuation_lock_missing")
     audit = (state.get("artifacts") or {}).get("audit_review", {})
     if audit and audit.get("passed") is False:

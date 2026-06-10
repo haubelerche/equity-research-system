@@ -79,6 +79,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=False,
         help="Development/test mode: auto-approve final export when the run reaches the approval checkpoint.",
     )
+    parser.add_argument(
+        "--draft",
+        action="store_true",
+        default=False,
+        help="Draft mode: auto-approve assumptions+final, continue past advisory gate warnings.",
+    )
     return parser.parse_args(argv)
 
 
@@ -106,6 +112,10 @@ def submit_harness_run(args: argparse.Namespace) -> str:
         "auto_approve_assumptions": bool(args.auto_approve_assumptions),
         "auto_approve_final": bool(args.auto_approve_final),
     }
+    if getattr(args, "draft", False):
+        policy["auto_approve_assumptions"] = True
+        policy["auto_approve_final"] = True
+        policy["draft_mode"] = True
 
     store = RuntimeStore(dsn=settings.database_url)
     store.check_schema_version()
