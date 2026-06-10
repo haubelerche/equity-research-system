@@ -562,8 +562,11 @@ class ResearchGraphRunner:
         }
 
     def _render_and_publish_final_report(self, state: ResearchGraphState) -> bool:
-        from backend.reporting.final_report_renderer import FinalReportPublisher
-        from backend.reporting.pdf_renderer import PDFRenderError
+        from backend.reporting.final_report_renderer import (
+            FinalReportPublisher,
+            render_final_report_model_html,
+        )
+        from backend.reporting.pdf_renderer import PDFRenderError, PDFRenderer
 
         final_model = state.artifacts.get("final_report_model")
         if not isinstance(final_model, dict):
@@ -573,37 +576,64 @@ class ResearchGraphRunner:
             self.store.update_run_state(state.run_id, "needs_human_review", "NEEDS_REVIEW")
             return False
 
-        publisher = self.report_publisher or FinalReportPublisher()
+        # --- Local-first render ---
+        local_html_dir = ROOT / "output" / "html"
+        local_pdf_dir = ROOT / "output" / "pdf"
+        local_html_dir.mkdir(parents=True, exist_ok=True)
+        local_pdf_dir.mkdir(parents=True, exist_ok=True)
+
+        local_html_path = local_html_dir / f"{state.ticker}_{state.run_id}_report.html"
+        local_pdf_path = local_pdf_dir / f"{state.ticker}_{state.run_id}_report.pdf"
+
+        # Write HTML locally
+        html_content = render_final_report_model_html(final_model)
+        local_html_path.write_text(html_content, encoding="utf-8")
+        self.progress.tool_end("render_html", "ok")
+
+        # Attempt PDF render locally
+        pdf_ok = False
         try:
+            renderer = PDFRenderer()
+            pdf_result = renderer.render(
+                local_html_path,
+                output_dir=local_pdf_dir,
+                run_id=state.run_id,
+                allow_stub=True,
+                strict_preflight=False,
+            )
+            if pdf_result.exists():
+                if pdf_result != local_pdf_path:
+                    import shutil
+
+                    shutil.copy2(pdf_result, local_pdf_path)
+                pdf_ok = True
+                self.progress.tool_end("render_pdf", "ok")
+            else:
+                self.progress.tool_end("render_pdf", "stub_only")
+        except (PDFRenderError, Exception) as exc:  # noqa: BLE001
+            state.errors.append(f"pdf_render_warning:{exc}")
+            self.progress.error("RENDER_AND_PUBLISH", f"PDF render failed: {exc}")
+
+        state.artifacts["rendered_report"] = {
+            "local_html_path": str(local_html_path),
+            "local_pdf_path": str(local_pdf_path) if pdf_ok and local_pdf_path.exists() else None,
+        }
+
+        # Best-effort Supabase upload
+        try:
+            publisher = self.report_publisher or FinalReportPublisher()
             published = publisher.publish(
                 run_id=state.run_id,
                 ticker=state.ticker,
                 final_report_model=final_model,
             )
-        except PDFRenderError as exc:
-            state.status = "needs_human_review"
-            state.requires_human = True
-            state.blocking_reason = f"pdf_render_blocked:{exc}"
-            self.store.update_run_state(state.run_id, "needs_human_review", "NEEDS_REVIEW")
-            return False
-
-        state.artifacts["rendered_report"] = published.to_dict()
-        try:
-            from backend.storage import RUNS_BUCKET, SupabaseStorageAdapter
-
-            local_pdf_dir = ROOT / "output" / "pdf"
-            local_pdf_dir.mkdir(parents=True, exist_ok=True)
-            local_pdf_path = local_pdf_dir / f"{state.ticker}_{state.run_id}_report.pdf"
-            SupabaseStorageAdapter().download_file(
-                RUNS_BUCKET,
-                published.pdf.storage_path,
-                local_pdf_path,
-            )
-            state.artifacts["rendered_report"]["local_pdf_path"] = str(local_pdf_path)
+            state.artifacts["rendered_report"].update(published.to_dict())
+            for ref in published.artifact_refs():
+                self._persist_published_artifact_ref(state, ref)
         except Exception as exc:  # noqa: BLE001
-            state.errors.append(f"local_pdf_export_failed:{exc}")
-        for ref in published.artifact_refs():
-            self._persist_published_artifact_ref(state, ref)
+            state.errors.append(f"supabase_upload_skipped:{exc}")
+            self.progress.error("RENDER_AND_PUBLISH", f"Supabase upload skipped: {exc}")
+
         return True
 
     def _persist_published_artifact_ref(
