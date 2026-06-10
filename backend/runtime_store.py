@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import os
 from contextlib import contextmanager
@@ -8,8 +8,9 @@ from typing import Any
 import psycopg2
 from psycopg2.extras import Json
 
+from backend.database.config import connect_with_retry, require_database_url
 
-REQUIRED_SCHEMA_VERSION = "015_cleanup_redundant_schema"
+REQUIRED_SCHEMA_VERSION = "030_supabase_storage_contract"
 
 DB_TO_PUBLIC_STATUS = {
     "initialized": "INIT",
@@ -65,19 +66,34 @@ class RuntimeStore:
     """Persistence layer for orchestration/runtime metadata (research.* schema)."""
 
     def __init__(self, dsn: str | None = None) -> None:
-        self.dsn = dsn or os.getenv("DATABASE_URL", "postgresql://maer:maer_local@localhost:5432/maer_dev")
+        self.dsn = require_database_url(dsn)
 
     @contextmanager
     def conn(self):
-        connection = psycopg2.connect(self.dsn)
+        connection = connect_with_retry(self.dsn)
         try:
+            # Verify the connection is alive (Supabase pooler may close idle ones)
+            try:
+                connection.cursor().execute("SELECT 1")
+            except Exception:
+                try:
+                    connection.close()
+                except Exception:
+                    pass
+                connection = connect_with_retry(self.dsn)
             yield connection
             connection.commit()
         except Exception:
-            connection.rollback()
+            try:
+                connection.rollback()
+            except Exception:
+                pass
             raise
         finally:
-            connection.close()
+            try:
+                connection.close()
+            except Exception:
+                pass
 
     def check_schema_version(self) -> None:
         """Verify the database schema is at the required version.
@@ -112,10 +128,8 @@ class RuntimeStore:
         exchange: str | None,
         sector: str,
         subsector: str | None,
-        universe_id: str,
-        universe_name: str,
-        peer_group: str,
-        enabled_methods: list[str],
+        peer_group_id: str,
+        peer_group_name: str,
     ) -> None:
         """Register a company and universe membership before run creation.
 
@@ -142,28 +156,20 @@ class RuntimeStore:
                 )
                 cur.execute(
                     """
-                    INSERT INTO ref.universes (universe_id, universe_name, description)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (universe_id) DO UPDATE
-                    SET universe_name = EXCLUDED.universe_name,
-                        description   = EXCLUDED.description
+                    INSERT INTO ref.peer_groups (peer_group_id, peer_group_name)
+                    VALUES (%s, %s)
+                    ON CONFLICT (peer_group_id) DO UPDATE
+                    SET peer_group_name = EXCLUDED.peer_group_name
                     """,
-                    (
-                        universe_id,
-                        universe_name,
-                        "Configured universe from config/dataset/universe/pharma_vn_universe.csv",
-                    ),
+                    (peer_group_id, peer_group_name),
                 )
                 cur.execute(
                     """
-                    INSERT INTO ref.universe_members (universe_id, ticker, peer_group, enabled_methods)
-                    VALUES (%s, %s, %s, %s)
-                    ON CONFLICT (universe_id, ticker) DO UPDATE
-                    SET peer_group      = EXCLUDED.peer_group,
-                        enabled_methods = EXCLUDED.enabled_methods,
-                        is_enabled      = TRUE
+                    INSERT INTO ref.peer_group_members (peer_group_id, ticker)
+                    VALUES (%s, %s)
+                    ON CONFLICT (peer_group_id, ticker) DO NOTHING
                     """,
-                    (universe_id, ticker, peer_group, enabled_methods),
+                    (peer_group_id, ticker),
                 )
 
     def create_run(
@@ -325,25 +331,43 @@ class RuntimeStore:
         created_by_agent: str | None = None,
         version: int = 1,
         storage_path: str | None = None,
+        storage_bucket: str | None = None,
         checksum: str | None = None,
+        content_type: str | None = None,
+        file_size_bytes: int | None = None,
         is_locked: bool = False,
     ) -> None:
         with self.conn() as connection:
             with connection.cursor() as cur:
                 cur.execute(
                     """
+                    SELECT artifact_id
+                    FROM research.run_artifacts
+                    WHERE run_id = %s AND artifact_type = %s AND version = %s
+                    LIMIT 1
+                    """,
+                    (run_id, artifact_type, version),
+                )
+                existing = cur.fetchone()
+                if existing:
+                    artifact_id = existing[0]
+                cur.execute(
+                    """
                     INSERT INTO research.run_artifacts
                     (artifact_id, run_id, artifact_type, section_key, version,
                      payload_json, evidence_refs_json, confidence, created_by_agent,
-                     storage_path, checksum, is_locked)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                     storage_bucket, storage_path, checksum, content_type, file_size_bytes, is_locked)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (artifact_id) DO UPDATE
                     SET payload_json       = EXCLUDED.payload_json,
                         evidence_refs_json = EXCLUDED.evidence_refs_json,
                         confidence         = EXCLUDED.confidence,
                         created_by_agent   = EXCLUDED.created_by_agent,
                         storage_path       = EXCLUDED.storage_path,
-                        checksum           = EXCLUDED.checksum
+                        storage_bucket     = EXCLUDED.storage_bucket,
+                        checksum           = EXCLUDED.checksum,
+                        content_type       = EXCLUDED.content_type,
+                        file_size_bytes    = EXCLUDED.file_size_bytes
                     """,
                     (
                         artifact_id,
@@ -355,8 +379,11 @@ class RuntimeStore:
                         Json(evidence_refs or []),
                         confidence,
                         created_by_agent,
+                        storage_bucket,
                         storage_path,
                         checksum,
+                        content_type,
+                        file_size_bytes,
                         is_locked,
                     ),
                 )
@@ -367,7 +394,8 @@ class RuntimeStore:
                 cur.execute(
                     """
                     SELECT artifact_id, artifact_type, section_key, version,
-                           payload_json, confidence, created_by_agent, storage_path, is_locked, created_at
+                           payload_json, confidence, created_by_agent, storage_bucket,
+                           storage_path, checksum, content_type, file_size_bytes, is_locked, created_at
                     FROM research.run_artifacts
                     WHERE run_id = %s
                     ORDER BY created_at
@@ -384,9 +412,13 @@ class RuntimeStore:
                 "payload":         row[4] or {},
                 "confidence":      float(row[5]) if row[5] is not None else None,
                 "created_by_agent":row[6],
-                "storage_path":    row[7],
-                "is_locked":       row[8],
-                "created_at":      row[9].isoformat(),
+                "storage_bucket":  row[7],
+                "storage_path":    row[8],
+                "checksum":        row[9],
+                "content_type":    row[10],
+                "file_size_bytes": row[11],
+                "is_locked":       row[12],
+                "created_at":      row[13].isoformat(),
             }
             for row in rows
         ]
@@ -483,7 +515,7 @@ class RuntimeStore:
             with connection.cursor() as cur:
                 cur.execute(
                     """
-                    INSERT INTO research.run_budget_ledger
+                    INSERT INTO audit.cost_ledger
                     (run_id, step_name, model_name, prompt_tokens, completion_tokens,
                      cost_usd, budget_policy, fallback_model, stop_reason)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -505,7 +537,7 @@ class RuntimeStore:
         with self.conn() as connection:
             with connection.cursor() as cur:
                 cur.execute(
-                    "SELECT COALESCE(SUM(cost_usd), 0) FROM research.run_budget_ledger WHERE run_id = %s",
+                    "SELECT COALESCE(SUM(cost_usd), 0) FROM audit.cost_ledger WHERE run_id = %s",
                     (run_id,),
                 )
                 value = cur.fetchone()[0]

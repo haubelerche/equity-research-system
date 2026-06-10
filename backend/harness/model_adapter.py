@@ -23,6 +23,7 @@ _DEFAULT_INPUT_COST = 0.80
 _DEFAULT_OUTPUT_COST = 4.00
 
 _OPENAI_MODELS = {"gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini", "gpt-4-turbo", "gpt-3.5-turbo", "o3-mini"}
+_OPENAI_MAX_TOKENS = {"gpt-4o": 16384, "gpt-4o-mini": 16384, "gpt-4.1": 32768, "gpt-4.1-mini": 32768, "gpt-4-turbo": 4096}
 
 
 def is_openai_model(model: str) -> bool:
@@ -496,11 +497,12 @@ class OpenAIModelAdapter:
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False, default=str)},
         ]
 
+        max_tokens = _OPENAI_MAX_TOKENS.get(agent_config.model, 16384)
         try:
             response = client.chat.completions.create(
                 model=agent_config.model,
                 messages=messages,
-                max_tokens=32000,
+                max_tokens=max_tokens,
                 temperature=agent_config.temperature,
                 response_format={"type": "json_object"},
             )
