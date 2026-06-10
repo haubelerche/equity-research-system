@@ -4,7 +4,7 @@ Production usage:
     python scripts/run_research.py --ticker DHG
     python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025 --ocr
 
-This script submits work to `backend.harness.runner.ResearchGraphRunner`.
+This script submits work through `backend.orchestrator.FullReportOrchestrator`.
 Render-only and pre-harness flows must stay outside this production path.
 """
 from __future__ import annotations
@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-MVP_FROM_YEAR = 2021
-MVP_TO_YEAR = 2025
+from backend.period_scope import DEFAULT_FROM_YEAR as MVP_FROM_YEAR
+from backend.period_scope import DEFAULT_TO_YEAR as MVP_TO_YEAR
 
 
 def _load_dotenv() -> None:
@@ -61,26 +61,37 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--ticker", required=True)
     parser.add_argument("--from-year", type=int, default=MVP_FROM_YEAR, dest="from_year")
     parser.add_argument("--to-year", type=int, default=MVP_TO_YEAR, dest="to_year")
-    parser.add_argument("--report-type", default="full_report", dest="run_type")
     parser.add_argument(
         "--ocr",
         action="store_true",
         default=False,
         help="Enable OCR for scanned official PDFs when the ingest stage runs.",
     )
+    parser.add_argument(
+        "--auto-approve-assumptions",
+        action="store_true",
+        default=False,
+        help="Development/test mode: auto-approve valuation assumptions when the run reaches the approval checkpoint.",
+    )
+    parser.add_argument(
+        "--auto-approve-final",
+        action="store_true",
+        default=False,
+        help="Development/test mode: auto-approve final export when the run reaches the approval checkpoint.",
+    )
     return parser.parse_args(argv)
 
 
 def submit_harness_run(args: argparse.Namespace) -> str:
-    from backend.harness.runner import ResearchGraphRunner
-    from backend.orchestrator import RunContext
+    from backend.orchestrator import FullReportOrchestrator, RunContext
     from backend.runtime_store import RuntimeStore
     from backend.settings import settings
     from backend.universe_registration import ensure_ticker_registered_from_universe
 
     ticker = args.ticker.strip().upper()
     run_id = _run_id(ticker)
-    objective = f"full_pipeline_{args.run_type}_{ticker}"
+    run_type = "full_report"
+    objective = f"full_pipeline_{run_type}_{ticker}"
     policy = {
         "budget_policy": settings.default_budget_policy,
         "soft_budget_usd": settings.soft_budget_usd,
@@ -92,6 +103,8 @@ def submit_harness_run(args: argparse.Namespace) -> str:
             "to_year": args.to_year,
         },
         "export_gate_policy": "config/harness/export_gate_policy.yml",
+        "auto_approve_assumptions": bool(args.auto_approve_assumptions),
+        "auto_approve_final": bool(args.auto_approve_final),
     }
 
     store = RuntimeStore(dsn=settings.database_url)
@@ -100,19 +113,21 @@ def submit_harness_run(args: argparse.Namespace) -> str:
     store.create_run(
         run_id=run_id,
         ticker=ticker,
-        run_type=args.run_type,
+        run_type=run_type,
         objective=objective,
         flags=_default_flags(),
         config_snapshot_json=policy,
         requested_by="run_research_cli",
     )
 
-    runner = ResearchGraphRunner(store=store)
-    runner.execute(
+    from backend.harness.progress import ProgressReporter
+    progress = ProgressReporter(quiet=False)
+    orchestrator = FullReportOrchestrator(store=store, progress=progress)
+    state = orchestrator.execute(
         RunContext(
             run_id=run_id,
             ticker=ticker,
-            run_type=args.run_type,
+            run_type=run_type,
             objective=objective,
             policy=policy,
             flags=_default_flags(),
@@ -121,15 +136,25 @@ def submit_harness_run(args: argparse.Namespace) -> str:
             ocr=args.ocr,
         )
     )
+    if state is not None and getattr(state, "status", None) == "failed":
+        raise RuntimeError(
+            f"full_report run failed: run_id={run_id} "
+            f"stage={getattr(state, 'current_stage', None)} "
+            f"blocking_reason={getattr(state, 'blocking_reason', None)}"
+        )
     return run_id
 
 
 def main(argv: list[str] | None = None) -> None:
     _load_dotenv()
     args = parse_args(argv)
-    run_id = submit_harness_run(args)
+    try:
+        run_id = submit_harness_run(args)
+    except RuntimeError as exc:
+        print(f"[run_research] FAILED: {exc}", file=sys.stderr)
+        raise SystemExit(1) from exc
     print(f"[run_research] harness run_id={run_id}")
-    print("[run_research] graph pauses for deterministic gates and required HITL approvals")
+    print("[run_research] submitted through FullReportOrchestrator")
 
 
 if __name__ == "__main__":
