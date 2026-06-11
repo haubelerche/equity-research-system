@@ -32,8 +32,6 @@ PUBLIC_TO_DB_STATUS = {
     "VALUATING": "valuation_ready",
     "SYNTHESIZING": "report_ready",
     "AUDITING": "analysis_ready",
-    "WAITING_ASSUMPTIONS_APPROVAL": "needs_human_review",
-    "WAITING_FINAL_APPROVAL": "needs_human_review",
     "PUBLISHED": "approved",
     "NEEDS_REVIEW": "needs_human_review",
     "FAILED": "failed",

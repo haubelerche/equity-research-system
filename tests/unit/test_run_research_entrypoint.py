@@ -131,7 +131,7 @@ def test_run_research_cli_raises_when_orchestrator_reports_failed_state(monkeypa
         def execute(self, context):
             return SimpleNamespace(
                 status="failed",
-                current_stage="RESEARCH_MANAGER_PLAN",
+                current_stage="PLAN",
                 blocking_reason="agent_llm_call_failed",
             )
 

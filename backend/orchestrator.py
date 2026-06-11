@@ -35,12 +35,3 @@ class FullReportOrchestrator:
             raise ValueError("v1 supports only run_type='full_report'")
         return self.runner.execute(context)
 
-    def handle_approval(
-        self,
-        run_id: str,
-        stage: str,
-        decision: str,
-        reviewer: str,
-        feedback_patch: dict[str, Any],
-    ) -> None:
-        self.runner.handle_approval(run_id, stage, decision, reviewer, feedback_patch)

@@ -8,8 +8,6 @@ from pydantic import BaseModel, Field
 
 class RunType(StrEnum):
     FULL_REPORT = "full_report"
-    FLASH_MEMO = "flash_memo"
-    CATALYST_REFRESH = "catalyst_refresh"
 
 
 class RunStatus(StrEnum):
@@ -19,8 +17,6 @@ class RunStatus(StrEnum):
     VALUATING = "VALUATING"
     SYNTHESIZING = "SYNTHESIZING"
     AUDITING = "AUDITING"
-    WAITING_ASSUMPTIONS_APPROVAL = "WAITING_ASSUMPTIONS_APPROVAL"
-    WAITING_FINAL_APPROVAL = "WAITING_FINAL_APPROVAL"
     PUBLISHED = "PUBLISHED"
     NEEDS_REVIEW = "NEEDS_REVIEW"
     FAILED = "FAILED"

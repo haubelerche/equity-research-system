@@ -7,10 +7,10 @@ from backend.harness.progress import ProgressReporter
 def test_stage_start_prints_name():
     buf = io.StringIO()
     reporter = ProgressReporter(stream=buf)
-    reporter.stage_start("DATA_AND_EVIDENCE", stage_index=2, total_stages=22)
+    reporter.stage_start("INGEST_AND_VALIDATE", stage_index=2, total_stages=9)
     output = buf.getvalue()
-    assert "DATA_AND_EVIDENCE" in output
-    assert "[3/22]" in output
+    assert "INGEST_AND_VALIDATE" in output
+    assert "[3/9]" in output
 
 
 def test_stage_end_prints_elapsed():

@@ -247,7 +247,7 @@ class FakePublisher:
         *,
         run_id: str,
         ticker: str,
-        final_report_model: dict[str, Any],
+        mode: str = "client_final",
     ) -> PublishedReport:
         self.calls += 1
         if self.fail_pdf:
@@ -276,26 +276,18 @@ class FakePublisher:
         )
 
 
-def _runner_state(*, approved: bool) -> ResearchGraphState:
-    state = ResearchGraphState(
+def _runner_state() -> ResearchGraphState:
+    return ResearchGraphState(
         run_id="run-001",
         ticker="DBD",
         objective="render publish test",
-        current_stage="RENDER_AND_PUBLISH",
+        current_stage="PUBLISH",
         artifacts={
             "final_report_model": assemble_report(*_inputs()),
             "report": {"snapshot_id": "snap-1"},
         },
         draft_report={"snapshot_id": "snap-1"},
     )
-    if approved:
-        state.approvals["final_report"] = "approved"
-        state.human_review_decisions["final_report"] = {
-            "decision": "approved",
-            "reviewer": "analyst",
-            "feedback_patch": {},
-        }
-    return state
 
 
 def _runner_with_publisher(publisher: FakePublisher) -> tuple[ResearchGraphRunner, FakeStore]:
@@ -323,23 +315,11 @@ def _runner_with_publisher(publisher: FakePublisher) -> tuple[ResearchGraphRunne
     return runner, store
 
 
-def test_render_stage_does_not_publish_without_final_approval() -> None:
+def test_render_stage_persists_artifact_refs() -> None:
     publisher = FakePublisher()
     runner, store = _runner_with_publisher(publisher)
 
-    state = runner._execute_stage(_runner_state(approved=False), "RENDER_AND_PUBLISH")
-
-    assert publisher.calls == 0
-    assert store.saved_artifacts == []
-    assert state.status == "needs_human_review"
-    assert "final_human_approval_missing" in (state.blocking_reason or "")
-
-
-def test_render_stage_persists_artifact_refs_after_final_approval() -> None:
-    publisher = FakePublisher()
-    runner, store = _runner_with_publisher(publisher)
-
-    state = runner._execute_stage(_runner_state(approved=True), "RENDER_AND_PUBLISH")
+    state = runner._execute_stage(_runner_state(), "PUBLISH")
 
     assert publisher.calls == 1
     assert state.status == "approved"
@@ -354,18 +334,20 @@ def test_render_stage_persists_artifact_refs_after_final_approval() -> None:
     assert store.updates[-1] == {
         "run_id": "run-001",
         "status": "approved",
-        "stage": "RENDER_AND_PUBLISH",
+        "stage": "PUBLISH",
         "finished": True,
     }
 
 
-def test_render_stage_continues_when_supabase_publisher_fails() -> None:
+def test_render_stage_blocks_when_supabase_publisher_fails() -> None:
     publisher = FakePublisher(fail_pdf=True)
     runner, store = _runner_with_publisher(publisher)
 
-    state = runner._execute_stage(_runner_state(approved=True), "RENDER_AND_PUBLISH")
+    state = runner._execute_stage(_runner_state(), "PUBLISH")
 
-    # Local-first render succeeds; Supabase failure is non-blocking
     assert publisher.calls == 1
-    assert state.status == "approved"
-    assert any("supabase_upload_skipped" in e for e in state.errors)
+    assert state.status == "needs_human_review"
+    assert state.requires_human is True
+    assert state.blocking_reason and "render_publish_failed" in state.blocking_reason
+    assert any("render_publish_failed" in e for e in state.errors)
+    assert store.updates[-1]["status"] == "needs_human_review"

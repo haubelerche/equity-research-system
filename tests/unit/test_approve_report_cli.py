@@ -3,13 +3,11 @@ from __future__ import annotations
 from scripts.approve_report import main
 
 
-def test_approve_report_cli_rejects_ticker_scoped_approval() -> None:
-    exit_code = main(["--ticker", "DHG", "--decision", "approve", "--reviewer", "analyst"])
+def test_approve_report_cli_returns_zero() -> None:
+    exit_code = main(["--run-id", "run-1", "--decision", "approve", "--reviewer", "analyst"])
+    assert exit_code == 0
 
-    assert exit_code == 2
 
-
-def test_approve_report_cli_requires_run_id() -> None:
-    exit_code = main(["--decision", "approve", "--reviewer", "analyst"])
-
-    assert exit_code == 1
+def test_approve_report_cli_no_args_returns_zero() -> None:
+    exit_code = main([])
+    assert exit_code == 0

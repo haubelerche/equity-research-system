@@ -6,12 +6,10 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 
 from backend.executor import RunExecutor
-from backend.orchestrator import RunContext, Supervisor
+from backend.orchestrator import FullReportOrchestrator, RunContext
 from backend.runtime_store import RuntimeStore
 from backend.schemas import (
-    ApprovalRequest,
     ArtifactsResponse,
-    RecomputeRequest,
     RunStatusResponse,
     RunStatus,
     StartRunRequest,
@@ -39,20 +37,26 @@ def _to_status_response(run: dict[str, Any]) -> RunStatusResponse:
 
 def create_app(
     runtime_store: RuntimeStore | None = None,
-    run_supervisor: Supervisor | None = None,
+    run_orchestrator: FullReportOrchestrator | None = None,
     run_executor: RunExecutor | None = None,
     check_schema_on_startup: bool = True,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        if app.state.store is None:
+            app.state.store = RuntimeStore(dsn=settings.database_url)
+        if app.state.orchestrator is None:
+            app.state.orchestrator = FullReportOrchestrator(store=app.state.store)
+        if app.state.executor is None:
+            app.state.executor = RunExecutor(store=app.state.store, orchestrator=app.state.orchestrator)
         if check_schema_on_startup:
             app.state.store.check_schema_version()
         yield
 
     app = FastAPI(title="Vietnam Pharma Multi-Agent Backend", version="0.1.0", lifespan=lifespan)
-    app.state.store = runtime_store or RuntimeStore(dsn=settings.database_url)
-    app.state.supervisor = run_supervisor or Supervisor(store=app.state.store)
-    app.state.executor = run_executor or RunExecutor(store=app.state.store, supervisor=app.state.supervisor)
+    app.state.store = runtime_store
+    app.state.orchestrator = run_orchestrator
+    app.state.executor = run_executor
 
     @app.get("/health")
     def health() -> dict[str, str]:
@@ -137,43 +141,15 @@ def create_app(
         return ArtifactsResponse(run_id=run_id, artifacts=artifacts)
 
     @app.post("/research/{run_id}/approve", response_model=RunStatusResponse)
-    def approve_run(run_id: str, request: ApprovalRequest) -> RunStatusResponse:
+    def approve_run(run_id: str) -> RunStatusResponse:
         store = app.state.store
-        supervisor = app.state.supervisor
         run = store.get_run(run_id)
         if run is None:
             raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
-        supervisor.handle_approval(
-            run_id=run_id,
-            stage=request.stage,
-            decision=request.decision,
-            reviewer=request.reviewer,
-            feedback_patch=request.feedback_patch,
-        )
-        updated = store.get_run(run_id)
-        if updated is None:
-            raise HTTPException(status_code=500, detail="Run disappeared after approval handling")
-        return _to_status_response(updated)
-
-    @app.post("/research/{run_id}/recompute")
-    def recompute_run(run_id: str, request: RecomputeRequest) -> dict[str, Any]:
-        run = app.state.store.get_run(run_id)
-        if run is None:
-            raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
-        return app.state.supervisor.recompute_plan(run_id=run_id, event_type=request.event_type)
-
-    @app.post("/research/{run_id}/evaluate")
-    def evaluate_run(run_id: str) -> dict[str, float]:
-        run = app.state.store.get_run(run_id)
-        if run is None:
-            raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
-        return app.state.supervisor.run_offline_evaluation(run_id)
+        return _to_status_response(run)
 
     return app
 
 
-store = RuntimeStore(dsn=settings.database_url)
-supervisor = Supervisor(store=store)
-executor = RunExecutor(store=store, supervisor=supervisor)
-app = create_app(store, supervisor, executor)
+app = create_app(check_schema_on_startup=False)
 

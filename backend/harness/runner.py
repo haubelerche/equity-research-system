@@ -8,7 +8,6 @@ ROOT = Path(__file__).resolve().parents[2]
 
 from backend.harness.agent_registry import AgentRegistry
 from backend.harness.gates import (
-    approval_path_gate,
     artifact_manifest_gate,
     citation_gate,
     data_quality_gate,
@@ -26,7 +25,7 @@ from backend.harness.gates import (
     senior_critic_gate,
 )
 from backend.harness.graph import GRAPH_STAGES
-from backend.harness.model_adapter import AnthropicModelAdapter, create_model_adapter
+from backend.harness.model_adapter import create_model_adapter
 from backend.harness.state import AgentExecutionContext, ResearchGraphState, stable_hash
 from backend.harness.tool_registry import ToolRegistry
 from backend.runtime_store import RuntimeStore
@@ -36,20 +35,6 @@ from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
 from backend.utils import compact_json, deterministic_id
 
 
-PUBLIC_TO_DB_APPROVAL_STAGE = {
-    "assumptions": "valuation_assumptions",
-    "valuation_assumptions": "valuation_assumptions",
-    "report_draft": "report_draft",
-    "final": "final_report",
-    "final_report": "final_report",
-}
-PUBLIC_TO_DB_APPROVAL_DECISION = {
-    "approve": "approved",
-    "approved": "approved",
-    "reject": "rejected",
-    "rejected": "rejected",
-    "needs_revision": "needs_revision",
-}
 
 
 def _count_metric_references(payload: Any) -> int:
@@ -126,10 +111,7 @@ class ResearchGraphRunner:
                 if current.blocking_reason:
                     self.progress.blocking(stage, current.blocking_reason)
                 break
-            if stage == "RENDER_AND_PUBLISH" or (
-                stage in {"WAITING_ASSUMPTION_APPROVAL", "WAITING_FINAL_APPROVAL"}
-                and current.requires_human
-            ):
+            if stage == "PUBLISH":
                 break
 
         total_elapsed = time.monotonic() - run_start_time
@@ -159,96 +141,6 @@ class ResearchGraphRunner:
             )
 
         return current
-
-    def handle_approval(self, run_id: str, stage: str, decision: str, reviewer: str, feedback_patch: dict[str, Any]) -> None:
-        db_stage = PUBLIC_TO_DB_APPROVAL_STAGE.get(stage)
-        db_decision = PUBLIC_TO_DB_APPROVAL_DECISION.get(decision)
-        if db_stage is None or db_decision is None:
-            raise ValueError(f"Unsupported approval transition: stage={stage!r}, decision={decision!r}")
-
-        self.store.add_approval(
-            run_id=run_id,
-            stage=db_stage,
-            decision=db_decision,
-            reviewer=reviewer,
-            feedback_patch=feedback_patch,
-        )
-
-        run = self.store.get_run(run_id)
-        if run is None:
-            raise ValueError(f"Run not found: {run_id}")
-
-        if db_decision != "approved":
-            self._invalidate_after_rejection(run_id, db_stage, reviewer, feedback_patch)
-            self.store.update_run_state(run_id=run_id, status="needs_human_review", stage="NEEDS_REVIEW")
-            self.store.add_audit_event(
-                run_id=run_id,
-                actor="ResearchGraphRunner",
-                action="approval_rejected",
-                payload={"stage": db_stage, "reviewer": reviewer, "feedback_patch": feedback_patch},
-            )
-            return
-
-        latest = self.store.latest_graph_state(run_id)
-        state = ResearchGraphState(**latest) if latest else ResearchGraphState(
-            run_id=run_id,
-            ticker=run["ticker"],
-            run_type=run["run_type"],
-            objective=(run.get("request_json") or {}).get("objective", "Resume approved research run."),
-            policy=run.get("config_snapshot_json") or {},
-            flags=run.get("flags_json") or {},
-        )
-        state.requires_human = False
-        state.blocking_reason = None
-        state.approvals[db_stage] = "approved"
-        state.human_review_decisions[db_stage] = {
-            "decision": "approved",
-            "reviewer": reviewer,
-            "feedback_patch": feedback_patch,
-        }
-
-        if db_stage == "valuation_assumptions":
-            self.store.lock_artifacts(run_id, ["valuation_draft"])
-            self.run_until_pause(state, start_stage="VALUATION_EXECUTION")
-        elif db_stage == "final_report":
-            if "report" not in state.artifacts:
-                state.artifacts["report"] = {}
-            state.artifacts["report"]["approval_status"] = "approved"
-            self.run_until_pause(state, start_stage="RENDER_AND_PUBLISH")
-
-    def _invalidate_after_rejection(
-        self,
-        run_id: str,
-        db_stage: str,
-        reviewer: str,
-        feedback_patch: dict[str, Any],
-    ) -> None:
-        invalidation_map = {
-            "valuation_assumptions": ["valuation_draft", "full_report_draft", "quality", "citation_gate"],
-            "report_draft": ["full_report_draft", "quality", "citation_gate"],
-            "final_report": ["full_report_draft", "quality", "citation_gate"],
-        }
-        section_keys = invalidation_map.get(db_stage, [])
-        stale_count = self.store.mark_artifacts_stale(
-            run_id=run_id,
-            section_keys=section_keys,
-            reason=f"{db_stage}_rejected",
-        )
-        latest = self.store.latest_graph_state(run_id)
-        if latest:
-            state = ResearchGraphState(**latest)
-            state.status = "needs_human_review"
-            state.requires_human = True
-            state.current_stage = "NEEDS_REVIEW"
-            state.blocking_reason = f"{db_stage}_rejected"
-            state.human_review_decisions[db_stage] = {
-                "decision": "rejected",
-                "reviewer": reviewer,
-                "feedback_patch": feedback_patch,
-                "invalidated_sections": section_keys,
-                "stale_artifacts_count": stale_count,
-            }
-            self._checkpoint(state)
 
     def _run_stage(self, state: ResearchGraphState, stage: str) -> ResearchGraphState:
         input_hash = state.stable_hash()
@@ -285,15 +177,14 @@ class ResearchGraphRunner:
 
         if stage == "PREFLIGHT":
             self._preflight(state)
-        elif stage == "RESEARCH_MANAGER_PLAN":
-            result = self._run_agent(state, "research_manager", "Create the typed research plan and HITL routing policy.")
+
+        elif stage == "PLAN":
+            result = self._run_agent(state, "research_manager", "Create the typed research plan.")
             state.plan = result.payload
-            # Missing artifacts are expected during initial planning; gates own
-            # blocking decisions after deterministic acquisition.
             self._merge_agent_result(state, result, enforce_review=False)
-        elif stage == "DATA_AND_EVIDENCE":
-            # Step 1: auto-ingest official documents FIRST.
-            # Non-blocking: failure produces status="warn" in summary, pipeline continues with Tier-3.
+
+        elif stage == "INGEST_AND_VALIDATE":
+            # Auto-ingest official documents (non-blocking).
             auto_result = self._run_tool(
                 state, "data_evidence", "auto_ingest",
                 state.ticker, state.from_year, state.to_year, ocr=state.ocr
@@ -301,14 +192,14 @@ class ResearchGraphRunner:
             state.artifacts["auto_ingest"] = auto_result.summary
             self._merge_result(state, auto_result)
 
-            # Step 2: build canonical facts (reads from DB — needs ingest to have run)
+            # Build canonical facts.
             result = self._run_tool(state, "data_evidence", "build_facts", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
             state.artifacts["build_facts"] = result.summary
             state.data_inventory = result.summary
             state.snapshot_id = result.summary.get("snapshot_id")
             self._merge_result(state, result)
 
-            # Step 3: build evidence index
+            # Build evidence index.
             index_result = self._run_tool(state, "data_evidence", "build_index", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
             state.artifacts["index"] = index_result.summary
             state.retrieval_results = index_result.summary
@@ -320,10 +211,12 @@ class ResearchGraphRunner:
             )
             state.artifacts["evidence_pack"] = agent_result.payload
             self._merge_agent_result(state, agent_result, enforce_review=False)
-        elif stage == "DATA_QUALITY_GATE":
+
+            # Data quality gate.
             gate = data_quality_gate(state.data_inventory or state.artifacts.get("build_facts", {}))
             self._record_gate(state, gate)
-        elif stage == "FINANCIAL_ANALYSIS":
+
+        elif stage == "ANALYZE":
             snapshot_result = self._run_tool(state, "financial_analysis", "read_snapshot", state.ticker, state.snapshot_id)
             state.artifacts["snapshot"] = snapshot_result.summary
             self._merge_result(state, snapshot_result)
@@ -338,28 +231,23 @@ class ResearchGraphRunner:
 
             result = self._run_agent(state, "financial_analysis", "Create typed financial analysis with traceable diagnostics.")
             financial_dump = result.model_dump(mode="json")
-            # Agent schema validation failure is advisory (enforce_review=False):
-            # deterministic ratios were computed by Python tools above.
             if financial_dump.get("status") == "needs_review" and result.payload:
                 financial_dump["status"] = "completed"
                 financial_dump.setdefault("warnings", []).append("agent_schema_validation_relaxed")
             state.financial_tables = financial_dump
             state.artifacts["financial_analysis"] = result.payload
-            # Agent caveats (e.g. Tier-3 data) are advisory; FINANCIAL_ANALYSIS_GATE owns blocking.
             self._merge_agent_result(state, result, enforce_review=False)
             self._handle_evidence_request(state, "financial_analysis", result.payload)
-        elif stage == "FINANCIAL_ANALYSIS_GATE":
+
+            # Financial analysis gate.
             gate = financial_analyst_gate(state.financial_tables)
             self._record_gate(state, gate)
-        elif stage == "DRIVER_BASED_FORECAST":
+
+        elif stage == "FORECAST_AND_VALUE":
+            # Driver-based forecast.
             forecast_result = self._run_tool(
-                state,
-                "forecast_valuation",
-                "run_forecast",
-                state.ticker,
-                state.snapshot_id,
-                state.from_year,
-                state.to_year,
+                state, "forecast_valuation", "run_forecast",
+                state.ticker, state.snapshot_id, state.from_year, state.to_year,
                 run_id=state.run_id,
             )
             state.artifacts["forecast_model"] = forecast_result.summary
@@ -369,42 +257,40 @@ class ResearchGraphRunner:
 
             result = self._run_agent(state, "forecast_valuation", "Create the typed driver-based forecast model.")
             state.artifacts["forecast_narrative"] = result.payload
-            # Advisory; FORECAST_QUALITY_GATE owns blocking.
             self._merge_agent_result(state, result, enforce_review=False)
             self._handle_evidence_request(state, "forecast_valuation", result.payload)
-        elif stage == "FORECAST_QUALITY_GATE":
+
+            # Forecast quality gate.
             forecast = state.artifacts.get("forecast_model") or {}
             self._record_gate(state, forecast_quality_gate(forecast))
-        elif stage == "VALUATION_PROPOSAL":
-            result = self._run_agent(state, "forecast_valuation", "Create the typed FCFF/FCFE valuation proposal for human approval.")
-            state.artifacts["valuation_proposal"] = result.payload
-            # Advisory; assumptions are gated at WAITING_ASSUMPTION_APPROVAL and VALUATION_GATE.
-            self._merge_agent_result(state, result, enforce_review=False)
-        elif stage == "VALUATION_EXECUTION":
-            result = self._run_tool(
-                state,
-                "forecast_valuation",
-                "run_valuation",
-                state.ticker,
-                state.from_year,
-                state.to_year,
-                run_id=state.run_id,
-                auto_approve_assumptions=state.policy.get("auto_approve_assumptions") is True,
-            )
-            state.valuation_outputs = result.summary
-            state.artifacts["valuation"] = result.summary
-            state.snapshot_id = result.summary.get("snapshot_id") or state.snapshot_id
-            self._merge_result(state, result)
+            if state.requires_human:
+                return state
 
-            valuation_read = self._run_tool(state, "forecast_valuation", "read_valuation_artifact", result.summary.get("storage_path"))
+            # Valuation proposal (agent).
+            proposal = self._run_agent(state, "forecast_valuation", "Create the typed FCFF/FCFE valuation proposal.")
+            state.artifacts["valuation_proposal"] = proposal.payload
+            self._merge_agent_result(state, proposal, enforce_review=False)
+
+            # Valuation execution (deterministic).
+            val_result = self._run_tool(
+                state, "forecast_valuation", "run_valuation",
+                state.ticker, state.from_year, state.to_year,
+                run_id=state.run_id, auto_approve_assumptions=True,
+            )
+            state.valuation_outputs = val_result.summary
+            state.artifacts["valuation"] = val_result.summary
+            state.snapshot_id = val_result.summary.get("snapshot_id") or state.snapshot_id
+            self._merge_result(state, val_result)
+
+            valuation_read = self._run_tool(state, "forecast_valuation", "read_valuation_artifact", val_result.summary.get("storage_path"))
             state.artifacts["valuation_read"] = valuation_read.summary
             self._merge_result(state, valuation_read)
 
             agent_result = self._run_agent(state, "forecast_valuation", "Review deterministic valuation outputs, assumptions, and model limitations.")
             state.artifacts["valuation_review"] = agent_result.payload
-            # Advisory; VALUATION_GATE owns blocking.
             self._merge_agent_result(state, agent_result, enforce_review=False)
-        elif stage == "VALUATION_GATE":
+
+            # Valuation gate.
             gate = valuation_gate(state.valuation_outputs or state.artifacts.get("valuation", {}))
             self._record_gate(state, gate)
             self._record_gate(
@@ -414,41 +300,27 @@ class ResearchGraphRunner:
                     state.artifacts.get("market_snapshot", {}),
                 ),
             )
-        elif stage == "WAITING_ASSUMPTION_APPROVAL":
-            if state.policy.get("auto_approve_assumptions") is True:
-                self._record_auto_approval(
-                    state,
-                    db_stage="valuation_assumptions",
-                    reviewer="auto_approve_assumptions",
-                )
-                state.status = "running"
-                state.requires_human = False
-                state.next_resume_stage = None
-                return state
-            state.status = "needs_human_review"
-            state.requires_human = True
-            state.next_resume_stage = "VALUATION_EXECUTION"
-            self.store.update_run_state(state.run_id, "needs_human_review", stage)
-        elif stage == "LOCK_RESEARCH_ARTIFACTS":
+
+            # Lock research artifacts.
             state.artifacts["research_lock"] = {
                 "locked": True,
-                "approval": state.approvals.get("valuation_assumptions"),
                 "artifact_keys": sorted(state.artifacts),
             }
-            state.status = "running"
-        elif stage == "RESEARCH_MANAGER_READINESS":
+
+        elif stage == "WRITE_REPORT":
+            # Readiness review.
             result = self._run_agent(state, "research_manager", "Perform the typed readiness review before report writing.")
             state.artifacts["readiness_review"] = result.payload
-            # Advisory; downstream content/citation/export gates own blocking.
             self._merge_agent_result(state, result, enforce_review=False)
-        elif stage == "THESIS_AND_REPORT":
+
+            # Thesis & report draft.
             agent_result = self._run_agent(state, "thesis_report", "Create the typed grounded report draft from approved artifacts.")
             state.artifacts["report_draft"] = agent_result.payload
             state.draft_report = agent_result.payload
-            # Advisory; REPORT_ASSEMBLY, CITATION_GATE and report_completeness_gate own blocking.
             self._merge_agent_result(state, agent_result, enforce_review=False)
             self._handle_evidence_request(state, "thesis_report", agent_result.payload)
-        elif stage == "REPORT_ASSEMBLY":
+
+            # Report assembly.
             from backend.reporting.report_assembler import ReportAssembler
 
             artifacts = {
@@ -470,9 +342,12 @@ class ResearchGraphRunner:
                 state.artifacts["final_report_model"] = ReportAssembler().assemble(state.draft_report, artifacts, specs)
                 self._persist_payload_artifact(state, "final_report_model", state.artifacts["final_report_model"], "report_assembler")
                 self._record_gate(state, pass_gate("REPORT_ASSEMBLY_GATE"))
-        elif stage == "DETERMINISTIC_CONTENT_GATES":
+
+        elif stage == "REVIEW":
+            # Deterministic content gates.
             self._record_gate(state, report_completeness_gate(state.draft_report or {}))
-        elif stage == "SENIOR_CRITIC_REVIEW":
+
+            # Senior critic review.
             report_path = (state.draft_report or state.artifacts.get("report") or {}).get("storage_path")
             valuation_path = (state.valuation_outputs or state.artifacts.get("valuation") or {}).get("storage_path")
             result = self._run_tool(
@@ -488,21 +363,21 @@ class ResearchGraphRunner:
             state.artifacts["critic_review"] = critic.payload
             self._merge_agent_result(state, critic)
             self._record_gate(state, senior_critic_gate(critic.payload))
-        elif stage == "OPTIONAL_SINGLE_REPORT_REVISION":
-            critic = state.artifacts.get("critic_review") or {}
-            if critic.get("decision") == "revision_required" and state.report_revision_count == 0:
+
+            # Optional single revision.
+            critic_data = state.artifacts.get("critic_review") or {}
+            if critic_data.get("decision") == "revision_required" and state.report_revision_count == 0:
                 revision = self._run_agent(state, "thesis_report", "Revise the report once using the senior critic instructions.")
                 state.report_revision_count = 1
                 state.draft_report = revision.payload
                 state.artifacts["revised_report_draft"] = revision.payload
                 self._merge_agent_result(state, revision)
-            elif critic.get("decision") in {"revision_required", "human_review_required"}:
-                state.requires_human = True
-                state.blocking_reason = "critic_requires_human_review"
-        elif stage == "CITATION_GATE":
+
+            # Citation gate.
             gate = citation_gate(state.draft_report or state.artifacts.get("report", {}))
             self._record_gate(state, gate)
-        elif stage == "FINAL_EXPORT_GATE":
+
+        elif stage == "EXPORT_GATES":
             self._write_evidence_packet(state)
             self._record_gate(state, tool_permission_gate(state.trace))
             self._record_gate(state, artifact_manifest_gate(state.model_dump(mode="json")))
@@ -511,69 +386,19 @@ class ResearchGraphRunner:
             gate = workflow_export_gate(state.model_dump(mode="json"), final_approval_required=False)
             self._record_gate(state, gate)
             self._persist_payload_artifact(state, "quality_gate", state.gate_results, "deterministic_gates")
-        elif stage == "WAITING_FINAL_APPROVAL":
-            if state.policy.get("auto_approve_final") is True:
-                self._record_auto_approval(
-                    state,
-                    db_stage="final_report",
-                    reviewer="auto_approve_final",
-                )
-                state.artifacts.setdefault("report", {})["approval_status"] = "approved"
-                state.status = "running"
-                state.requires_human = False
-                state.next_resume_stage = None
+
+        elif stage == "PUBLISH":
+            if not self._render_and_publish_final_report(state):
                 return state
-            state.status = "needs_human_review"
-            state.requires_human = True
-            state.next_resume_stage = "RENDER_AND_PUBLISH"
-            self.store.update_run_state(state.run_id, "needs_human_review", stage)
-        elif stage == "RENDER_AND_PUBLISH":
-            self._write_evidence_packet(state)
-            self._record_gate(state, tool_permission_gate(state.trace))
-            self._record_gate(state, artifact_manifest_gate(state.model_dump(mode="json")))
-            self._record_gate(state, formula_trace_gate(state.valuation_outputs or state.artifacts.get("valuation", {})))
-            self._record_gate(state, evidence_packet_gate(state.model_dump(mode="json")))
-            self._record_gate(state, approval_path_gate(state.model_dump(mode="json"), final_approval_required=True))
-            gate = workflow_export_gate(state.model_dump(mode="json"), final_approval_required=True)
-            self._record_gate(state, gate)
-            if not gate["passed"]:
-                state.status = "needs_human_review"
-                state.requires_human = True
-                state.blocking_reason = "; ".join(gate["blocking_reasons"])
-                self.store.update_run_state(state.run_id, "needs_human_review", "NEEDS_REVIEW")
-            else:
-                if not self._render_and_publish_final_report(state):
-                    return state
-                state.status = "approved"
-                self.store.update_run_state(state.run_id, "approved", "RENDER_AND_PUBLISH", finished=True)
+            state.status = "approved"
+            self.store.update_run_state(state.run_id, "approved", "PUBLISH", finished=True)
+
         return state
 
-    def _record_auto_approval(self, state: ResearchGraphState, db_stage: str, reviewer: str) -> None:
-        feedback_patch = {"source": "run_policy", "auto_approved": True}
-        try:
-            self.store.add_approval(
-                run_id=state.run_id,
-                stage=db_stage,
-                decision="approved",
-                reviewer=reviewer,
-                feedback_patch=feedback_patch,
-            )
-        except Exception as exc:  # noqa: BLE001
-            state.errors.append(f"auto_approval_record_failed:{db_stage}:{exc}")
-        state.approvals[db_stage] = "approved"
-        state.human_review_decisions[db_stage] = {
-            "decision": "approved",
-            "reviewer": reviewer,
-            "feedback_patch": feedback_patch,
-        }
-
     def _render_and_publish_final_report(self, state: ResearchGraphState) -> bool:
-        from backend.reporting.final_report_renderer import (
-            FinalReportPublisher,
-            render_final_report_model_html,
-        )
-        from backend.reporting.pdf_renderer import PDFRenderError, PDFRenderer
+        from backend.reporting.final_report_renderer import ClientReportPublisher
 
+        # final_report_model presence is the signal that REPORT_ASSEMBLY passed.
         final_model = state.artifacts.get("final_report_model")
         if not isinstance(final_model, dict):
             state.status = "needs_human_review"
@@ -582,63 +407,37 @@ class ResearchGraphRunner:
             self.store.update_run_state(state.run_id, "needs_human_review", "NEEDS_REVIEW")
             return False
 
-        # --- Local-first render ---
-        local_html_dir = ROOT / "output" / "html"
-        local_pdf_dir = ROOT / "output" / "pdf"
-        local_html_dir.mkdir(parents=True, exist_ok=True)
-        local_pdf_dir.mkdir(parents=True, exist_ok=True)
-
-        local_html_path = local_html_dir / f"{state.ticker}_{state.run_id}_report.html"
-        local_pdf_path = local_pdf_dir / f"{state.ticker}_{state.run_id}_report.pdf"
-
-        # Write HTML locally
-        html_content = render_final_report_model_html(final_model)
-        local_html_path.write_text(html_content, encoding="utf-8")
-        self.progress.tool_end("render_html", "ok")
-
-        # Attempt PDF render locally
-        pdf_ok = False
         try:
-            renderer = PDFRenderer()
-            pdf_result = renderer.render(
-                local_html_path,
-                output_dir=local_pdf_dir,
-                run_id=state.run_id,
-                allow_stub=True,
-                strict_preflight=False,
-            )
-            if pdf_result.exists():
-                if pdf_result != local_pdf_path:
-                    import shutil
-
-                    shutil.copy2(pdf_result, local_pdf_path)
-                pdf_ok = True
-                self.progress.tool_end("render_pdf", "ok")
-            else:
-                self.progress.tool_end("render_pdf", "stub_only")
-        except (PDFRenderError, Exception) as exc:  # noqa: BLE001
-            state.errors.append(f"pdf_render_warning:{exc}")
-            self.progress.error("RENDER_AND_PUBLISH", f"PDF render failed: {exc}")
-
-        state.artifacts["rendered_report"] = {
-            "local_html_path": str(local_html_path),
-            "local_pdf_path": str(local_pdf_path) if pdf_ok and local_pdf_path.exists() else None,
-        }
-
-        # Best-effort Supabase upload
-        try:
-            publisher = self.report_publisher or FinalReportPublisher()
+            # The broker-quality renderer reads locked artifacts through the
+            # Supabase-backed run manifest, so the manifest must exist before render.
+            # Best-effort: a manifest pre-write failure must not crash the render
+            # path — the publisher surfaces a clear error if artifacts are
+            # genuinely unresolvable.
+            try:
+                self._write_run_manifest(state)
+            except Exception as manifest_exc:  # noqa: BLE001
+                import logging
+                logging.getLogger(__name__).warning(
+                    "Manifest pre-write before render failed for run=%s: %s",
+                    state.run_id, manifest_exc,
+                )
+            publisher = self.report_publisher or ClientReportPublisher()
             published = publisher.publish(
                 run_id=state.run_id,
                 ticker=state.ticker,
-                final_report_model=final_model,
+                mode="client_final",
             )
-            state.artifacts["rendered_report"].update(published.to_dict())
+            state.artifacts["rendered_report"] = published.to_dict()
             for ref in published.artifact_refs():
                 self._persist_published_artifact_ref(state, ref)
         except Exception as exc:  # noqa: BLE001
-            state.errors.append(f"supabase_upload_skipped:{exc}")
-            self.progress.error("RENDER_AND_PUBLISH", f"Supabase upload skipped: {exc}")
+            state.status = "needs_human_review"
+            state.requires_human = True
+            state.blocking_reason = f"render_publish_failed:{exc}"
+            state.errors.append(state.blocking_reason)
+            self.store.update_run_state(state.run_id, "needs_human_review", "NEEDS_REVIEW")
+            self.progress.error("PUBLISH", state.blocking_reason)
+            return False
 
         return True
 
@@ -765,12 +564,43 @@ class ResearchGraphRunner:
         self._charge_agent_step(state, config.agent_id, config.model)
         context = self._build_agent_context(state, config.agent_id, task)
         self.progress.agent_start(agent_id, task)
-        result = self.model_adapter.run_agent(
-            agent_config=config,
-            state=context.model_dump(mode="json"),
-            task=task,
-            input_refs=[ref.get("artifact_id", "") for ref in context.input_artifact_refs if isinstance(ref, dict)],
-        )
+        agent_state = context.model_dump(mode="json")
+        input_refs = [ref.get("artifact_id", "") for ref in context.input_artifact_refs if isinstance(ref, dict)]
+        try:
+            result = self.model_adapter.run_agent(
+                agent_config=config,
+                state=agent_state,
+                task=task,
+                input_refs=input_refs,
+            )
+        except Exception as primary_exc:  # noqa: BLE001
+            fallback_model = (self.settings.fallback_model or "").strip()
+            if (
+                not fallback_model
+                or fallback_model == config.model
+                or "agent_llm_call_failed" not in str(primary_exc)
+            ):
+                raise
+            fallback_config = config.model_copy(update={"model": fallback_model})
+            self._charge_agent_step(state, f"{config.agent_id}:fallback", fallback_model)
+            self.progress.error(
+                state.current_stage,
+                f"Primary model {config.model} failed; retrying {agent_id} with fallback {fallback_model}.",
+            )
+            try:
+                result = create_model_adapter(fallback_model).run_agent(
+                    agent_config=fallback_config,
+                    state=agent_state,
+                    task=task,
+                    input_refs=input_refs,
+                )
+            except Exception as fallback_exc:  # noqa: BLE001
+                raise RuntimeError(
+                    f"agent_llm_call_failed_with_fallback: primary={primary_exc}; fallback={fallback_exc}"
+                ) from fallback_exc
+            result.fallback_triggered = True
+            result.warnings.append(f"primary_model_failed:{config.model}")
+            result.warnings.append(f"fallback_model_used:{fallback_model}")
         self.progress.agent_end(agent_id, result.status, getattr(result, 'confidence', None))
         self._inject_artifact_lineage(state, result.payload)
         self._repair_agent_payload(result.payload)
@@ -1071,15 +901,12 @@ class ResearchGraphRunner:
     def _write_agent_payload_artifact(self, state: ResearchGraphState, result) -> None:
         """Persist every validated specialist output as a versioned run artifact."""
         section_by_stage = {
-            "RESEARCH_MANAGER_PLAN": "research_plan",
-            "DATA_AND_EVIDENCE": "evidence_pack",
-            "FINANCIAL_ANALYSIS": "financial_analysis",
-            "DRIVER_BASED_FORECAST": "forecast_model",
-            "VALUATION_PROPOSAL": "valuation_proposal",
-            "RESEARCH_MANAGER_READINESS": "readiness_review",
-            "THESIS_AND_REPORT": "report_draft",
-            "SENIOR_CRITIC_REVIEW": "critic_review",
-            "OPTIONAL_SINGLE_REPORT_REVISION": "revised_report_draft",
+            "PLAN": "research_plan",
+            "INGEST_AND_VALIDATE": "evidence_pack",
+            "ANALYZE": "financial_analysis",
+            "FORECAST_AND_VALUE": "forecast_model",
+            "WRITE_REPORT": "report_draft",
+            "REVIEW": "critic_review",
         }
         section_key = section_by_stage.get(state.current_stage)
         if not section_key or not isinstance(result.payload, dict):
@@ -1278,19 +1105,15 @@ class ResearchGraphRunner:
 
     @staticmethod
     def _agent_id_for_stage(stage: str) -> str:
-        if stage in {"RESEARCH_MANAGER_PLAN", "RESEARCH_MANAGER_READINESS"}:
-            return "research_manager"
-        if stage in {"DATA_AND_EVIDENCE", "DATA_QUALITY_GATE"}:
-            return "data_evidence"
-        if stage in {"FINANCIAL_ANALYSIS", "FINANCIAL_ANALYSIS_GATE"}:
-            return "financial_analysis"
-        if stage in {"DRIVER_BASED_FORECAST", "FORECAST_QUALITY_GATE", "VALUATION_PROPOSAL", "VALUATION_EXECUTION", "VALUATION_GATE", "WAITING_ASSUMPTION_APPROVAL"}:
-            return "forecast_valuation"
-        if stage in {"THESIS_AND_REPORT", "REPORT_ASSEMBLY", "OPTIONAL_SINGLE_REPORT_REVISION"}:
-            return "thesis_report"
-        if stage == "SENIOR_CRITIC_REVIEW":
-            return "senior_critic"
-        return "service_node"
+        mapping = {
+            "PLAN": "research_manager",
+            "INGEST_AND_VALIDATE": "data_evidence",
+            "ANALYZE": "financial_analysis",
+            "FORECAST_AND_VALUE": "forecast_valuation",
+            "WRITE_REPORT": "thesis_report",
+            "REVIEW": "senior_critic",
+        }
+        return mapping.get(stage, "service_node")
 
     @staticmethod
     def _agent_name(stage: str) -> str:
@@ -1313,16 +1136,15 @@ class ResearchGraphRunner:
 
     @staticmethod
     def _db_status_for_stage(stage: str) -> str:
-        if stage in {"DATA_AND_EVIDENCE", "DATA_QUALITY_GATE"}:
-            return "running"
-        if stage in {"RESEARCH_MANAGER_PLAN", "FINANCIAL_ANALYSIS", "FINANCIAL_ANALYSIS_GATE", "DRIVER_BASED_FORECAST", "FORECAST_QUALITY_GATE"}:
-            return "analysis_ready"
-        if stage in {"VALUATION_PROPOSAL", "VALUATION_EXECUTION", "VALUATION_GATE", "LOCK_RESEARCH_ARTIFACTS"}:
-            return "valuation_ready"
-        if stage in {"RESEARCH_MANAGER_READINESS", "THESIS_AND_REPORT", "REPORT_ASSEMBLY", "DETERMINISTIC_CONTENT_GATES", "SENIOR_CRITIC_REVIEW", "OPTIONAL_SINGLE_REPORT_REVISION", "FINAL_EXPORT_GATE", "CITATION_GATE"}:
-            return "report_ready"
-        if stage in {"WAITING_ASSUMPTION_APPROVAL", "WAITING_FINAL_APPROVAL"}:
-            return "needs_human_review"
-        if stage == "RENDER_AND_PUBLISH":
-            return "approved"
-        return "running"
+        mapping = {
+            "PREFLIGHT": "running",
+            "PLAN": "running",
+            "INGEST_AND_VALIDATE": "running",
+            "ANALYZE": "analysis_ready",
+            "FORECAST_AND_VALUE": "valuation_ready",
+            "WRITE_REPORT": "report_ready",
+            "REVIEW": "report_ready",
+            "EXPORT_GATES": "report_ready",
+            "PUBLISH": "approved",
+        }
+        return mapping.get(stage, "running")
