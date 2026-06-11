@@ -19,7 +19,7 @@ DB_TO_PUBLIC_STATUS = {
     "analysis_ready": "ANALYZING",
     "valuation_ready": "VALUATING",
     "report_ready": "SYNTHESIZING",
-    "needs_human_review": "NEEDS_REVIEW",
+    "blocked": "BLOCKED",
     "approved": "PUBLISHED",
     "failed": "FAILED",
     "cancelled": "FAILED",
@@ -33,7 +33,7 @@ PUBLIC_TO_DB_STATUS = {
     "SYNTHESIZING": "report_ready",
     "AUDITING": "analysis_ready",
     "PUBLISHED": "approved",
-    "NEEDS_REVIEW": "needs_human_review",
+    "BLOCKED": "blocked",
     "FAILED": "failed",
 }
 

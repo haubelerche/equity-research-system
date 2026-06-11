@@ -346,8 +346,7 @@ def test_render_stage_blocks_when_supabase_publisher_fails() -> None:
     state = runner._execute_stage(_runner_state(), "PUBLISH")
 
     assert publisher.calls == 1
-    assert state.status == "needs_human_review"
-    assert state.requires_human is True
+    assert state.status == "failed"
     assert state.blocking_reason and "render_publish_failed" in state.blocking_reason
     assert any("render_publish_failed" in e for e in state.errors)
-    assert store.updates[-1]["status"] == "needs_human_review"
+    assert store.updates[-1]["status"] == "failed"

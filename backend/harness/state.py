@@ -7,8 +7,10 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
 
-NodeStatus = Literal["completed", "needs_review", "failed", "skipped"]
+
+NodeStatus = Literal["completed", "failed", "skipped"]
 RunDbStatus = Literal[
     "initialized",
     "running",
@@ -16,7 +18,7 @@ RunDbStatus = Literal[
     "analysis_ready",
     "valuation_ready",
     "report_ready",
-    "needs_human_review",
+    "blocked",
     "approved",
     "failed",
     "cancelled",
@@ -28,7 +30,8 @@ class ArtifactRef(BaseModel):
     artifact_type: str = "run_log_json"
     section_key: str | None = None
     version: int = 1
-    storage_path: str | None = None  # actual file path written by the tool; None = tool didn't report one
+    storage_bucket: str | None = None
+    storage_path: str | None = None
     checksum: str | None = None
     is_locked: bool = False
     producer: str = ""  # stage name that produced this artifact
@@ -64,41 +67,10 @@ class AgentExecutionContext(BaseModel):
     task: str
     allowed_tools: list[str] = Field(default_factory=list)
     input_artifact_refs: list[dict[str, Any]] = Field(default_factory=list)
+    input_artifacts: dict[str, Any] = Field(default_factory=dict)
     evidence_packet_path: str | None = None
     relevant_gate_results: dict[str, Any] = Field(default_factory=dict)
     known_limitations: list[str] = Field(default_factory=list)
-    required_handoff_fields: list[str] = Field(default_factory=lambda: [
-        "run_id",
-        "agent_id",
-        "stage",
-        "input_refs",
-        "output_refs",
-        "review_status",
-        "blocking_issue_ids",
-        "unresolved_questions",
-        "recommended_next_stage",
-        "handoff_hash",
-    ])
-
-
-class AgentHandoff(BaseModel):
-    run_id: str
-    agent_id: str
-    stage: str
-    input_refs: list[str] = Field(default_factory=list)
-    output_refs: list[str] = Field(default_factory=list)
-    review_status: str
-    blocking_issue_ids: list[str] = Field(default_factory=list)
-    unresolved_questions: list[str] = Field(default_factory=list)
-    recommended_next_stage: str | None = None
-    created_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
-    handoff_hash: str | None = None
-
-    def with_hash(self) -> "AgentHandoff":
-        payload = self.model_dump(mode="json")
-        payload.pop("handoff_hash", None)
-        self.handoff_hash = stable_hash(payload)
-        return self
 
 
 class ServiceNodeResult(BaseModel):
@@ -109,7 +81,6 @@ class ServiceNodeResult(BaseModel):
     evidence_refs: list[EvidenceRef] = Field(default_factory=list)
     gate_inputs: dict[str, Any] = Field(default_factory=dict)
     formula_traces: list[FormulaTrace] = Field(default_factory=list)
-    handoff_refs: list[ArtifactRef] = Field(default_factory=list)
     blocking_reason: str | None = None
     warnings: list[str] = Field(default_factory=list)
     input_hash: str | None = None
@@ -129,8 +100,6 @@ class AgentResult(BaseModel):
     confidence: float = Field(ge=0, le=1)
     confidence_breakdown: dict[str, float] = Field(default_factory=dict)
     next_action: str | None = None
-    requires_human: bool = False
-    review_reason: str | None = None
     blocking_reason: str | None = None
     warnings: list[str] = Field(default_factory=list)
     sources_used: list[str] = Field(default_factory=list)
@@ -149,13 +118,12 @@ class ResearchGraphState(BaseModel):
     current_stage: str = "INIT"
     status: RunDbStatus = "initialized"
     snapshot_id: str | None = None
-    from_year: int = 2021
-    to_year: int = 2025
+    from_year: int = DEFAULT_FROM_YEAR
+    to_year: int = DEFAULT_TO_YEAR
     artifacts: dict[str, Any] = Field(default_factory=dict)
     artifact_refs: list[dict[str, Any]] = Field(default_factory=list)
     evidence_refs: list[dict[str, Any]] = Field(default_factory=list)
     gate_results: dict[str, dict[str, Any]] = Field(default_factory=dict)
-    approvals: dict[str, str] = Field(default_factory=dict)
     plan: dict[str, Any] = Field(default_factory=dict)
     data_inventory: dict[str, Any] = Field(default_factory=dict)
     retrieval_results: dict[str, Any] = Field(default_factory=dict)
@@ -163,12 +131,11 @@ class ResearchGraphState(BaseModel):
     valuation_outputs: dict[str, Any] = Field(default_factory=dict)
     draft_report: dict[str, Any] = Field(default_factory=dict)
     evaluation_results: dict[str, Any] = Field(default_factory=dict)
-    human_review_decisions: dict[str, Any] = Field(default_factory=dict)
     trace: list[dict[str, Any]] = Field(default_factory=list)
-    requires_human: bool = False
     blocking_reason: str | None = None
     errors: list[str] = Field(default_factory=list)
-    next_resume_stage: str | None = None
+    evidence_followups: dict[str, int] = Field(default_factory=dict)
+    report_revision_count: int = 0
     checkpoint_version: int = 0
     ocr: bool = False
     manifest_path: str | None = None

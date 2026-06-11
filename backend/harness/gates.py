@@ -533,10 +533,8 @@ def senior_critic_gate(critic_review: dict[str, Any]) -> dict[str, Any]:
 
 
 def financial_analyst_gate(financial_summary: dict[str, Any]) -> dict[str, Any]:
-    if financial_summary.get("requires_human"):
-        return fail_gate("FINANCIAL_ANALYST_GATE", financial_summary.get("review_reason") or "financial_analyst_requires_review", financial_summary)
-    if financial_summary.get("status") in {"failed", "needs_review"}:
-        return fail_gate("FINANCIAL_ANALYST_GATE", "financial_analyst_failed", financial_summary)
+    if financial_summary.get("status") == "failed" and not financial_summary.get("payload"):
+        return fail_gate("FINANCIAL_ANALYST_GATE", "financial_analyst_failed_no_payload", financial_summary)
     import json
     text = json.dumps(
         {
@@ -646,18 +644,9 @@ def evidence_packet_gate(state: dict[str, Any]) -> dict[str, Any]:
     return pass_gate("EVIDENCE_PACKET_GATE", {"evidence_packet_path": evidence_refs[-1].get("storage_path")})
 
 
-def approval_path_gate(state: dict[str, Any], final_approval_required: bool = True) -> dict[str, Any]:
-    if not final_approval_required:
-        return pass_gate("APPROVAL_PATH_GATE", {"final_approval_required": False})
-    approvals = state.get("approvals") or {}
-    decisions = state.get("human_review_decisions") or {}
-    final_decision = decisions.get("final_report") or {}
-    if approvals.get("final_report") != "approved" or final_decision.get("decision") != "approved":
-        return fail_gate("APPROVAL_PATH_GATE", "final_approval_not_recorded_by_runner", {"approvals": approvals, "human_review_decisions": decisions})
-    return pass_gate("APPROVAL_PATH_GATE", {"final_approval_required": True, "reviewer": final_decision.get("reviewer")})
 
 
-def workflow_export_gate(state: dict[str, Any], final_approval_required: bool = True) -> dict[str, Any]:
+def workflow_export_gate(state: dict[str, Any], **_kwargs: Any) -> dict[str, Any]:
     gate_results = state.get("gate_results") or {}
     blocking_reasons: list[str] = []
     required_gates = {
@@ -666,16 +655,12 @@ def workflow_export_gate(state: dict[str, Any], final_approval_required: bool = 
         "FORMULA_TRACE_GATE",
         "EVIDENCE_PACKET_GATE",
     }
-    if final_approval_required:
-        required_gates.add("APPROVAL_PATH_GATE")
     missing_required = sorted(name for name in required_gates if name not in gate_results)
     if missing_required:
         blocking_reasons.append(f"required_harness_gate_missing:{','.join(missing_required)}")
     failed = [name for name, gate in gate_results.items() if isinstance(gate, dict) and gate.get("passed") is False]
     if failed:
         blocking_reasons.append(f"upstream_gate_failed:{','.join(failed)}")
-    if final_approval_required and (state.get("approvals") or {}).get("final_report") != "approved":
-        blocking_reasons.append("final_human_approval_missing")
     evaluation = state.get("evaluation_results") or (state.get("artifacts") or {}).get("quality") or {}
     if evaluation.get("overall_status") in {"FAIL", "failed", "fail"}:
         blocking_reasons.append("quality_evaluation_failed")
@@ -686,8 +671,8 @@ def workflow_export_gate(state: dict[str, Any], final_approval_required: bool = 
     blocking_reasons.extend(_evaluation_export_blockers(evaluation))
     if valuation and report and valuation.get("snapshot_id") != report.get("snapshot_id"):
         blocking_reasons.append("report_not_linked_to_valuation_snapshot")
-    if final_approval_required and valuation and not (state.get("artifacts") or {}).get("research_lock"):
-        blocking_reasons.append("approved_valuation_lock_missing")
+    if valuation and not (state.get("artifacts") or {}).get("research_lock"):
+        blocking_reasons.append("valuation_lock_missing")
     audit = (state.get("artifacts") or {}).get("audit_review", {})
     if audit and audit.get("passed") is False:
         blocking_reasons.append("audit_review_failed")

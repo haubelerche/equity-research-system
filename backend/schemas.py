@@ -18,7 +18,7 @@ class RunStatus(StrEnum):
     SYNTHESIZING = "SYNTHESIZING"
     AUDITING = "AUDITING"
     PUBLISHED = "PUBLISHED"
-    NEEDS_REVIEW = "NEEDS_REVIEW"
+    BLOCKED = "BLOCKED"
     FAILED = "FAILED"
 
 
@@ -47,13 +47,6 @@ class RunStatusResponse(BaseModel):
     created_at: str
     updated_at: str
     finished_at: str | None = None
-
-
-class ApprovalRequest(BaseModel):
-    stage: str = Field(pattern="^(assumptions|valuation_assumptions|report_draft|final|final_report)$")
-    decision: str = Field(pattern="^(approve|approved|reject|rejected|needs_revision)$")
-    reviewer: str
-    feedback_patch: dict[str, Any] = Field(default_factory=dict)
 
 
 class ArtifactItem(BaseModel):
