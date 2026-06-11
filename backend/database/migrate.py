@@ -1,4 +1,4 @@
-"""Migration runner for the VN pharma equity research DB.
+﻿"""Migration runner for the VN pharma equity research DB.
 
 Usage:
     python -m backend.database.migrate                  # apply all pending migrations
@@ -16,8 +16,18 @@ from pathlib import Path
 
 import psycopg2
 
+from backend.database.config import connect_with_retry, require_database_url
+
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
-CURRENT_SCHEMA_VERSION = "015_cleanup_redundant_schema"
+CURRENT_SCHEMA_VERSION = "034_runs_status_add_blocked"
+
+_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+if _ENV_FILE.exists():
+    for _line in _ENV_FILE.read_text(encoding="utf-8").splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith("#") and "=" in _line:
+            _key, _value = _line.split("=", 1)
+            os.environ.setdefault(_key.strip(), _value.strip().strip("\"'"))
 
 
 def _bootstrap_migrations_table(conn) -> None:
@@ -57,7 +67,7 @@ def _version_from_filename(filename: str) -> str:
 def _apply_migration(conn, path: Path, version: str) -> None:
     """Apply one migration file and record it in schema_migrations atomically.
 
-    Migration files must not contain BEGIN/COMMIT — the runner owns the transaction.
+    Migration files must not contain BEGIN/COMMIT â€” the runner owns the transaction.
     Strip them robustly with multiline flag in case any file accidentally contains them.
     """
     sql = path.read_text(encoding="utf-8")
@@ -73,7 +83,7 @@ def _apply_migration(conn, path: Path, version: str) -> None:
 
 @contextmanager
 def _connect(dsn: str):
-    conn = psycopg2.connect(dsn)
+    conn = connect_with_retry(dsn)
     conn.autocommit = False
     try:
         yield conn
@@ -136,9 +146,10 @@ def main() -> None:
     parser.add_argument("--version", action="store_true", help="Print highest applied version and exit")
     args = parser.parse_args()
 
-    dsn = os.environ.get("DATABASE_URL")
-    if not dsn:
-        print("ERROR: DATABASE_URL env var is not set.", file=sys.stderr)
+    try:
+        dsn = require_database_url()
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
 
     if args.version:
