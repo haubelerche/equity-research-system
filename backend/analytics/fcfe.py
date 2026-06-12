@@ -22,6 +22,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from backend.analytics._entry import entry_value
 from backend.analytics.shares import explicit_shares_mn
 from backend.analytics.forecasting import ForecastArtifact, ForecastYear  # noqa: F401
 
@@ -182,7 +183,7 @@ def compute_fcfe(
         entry = fact_table.get(key, {}).get(period)
         if entry is None:
             return None
-        return entry.value if hasattr(entry, "value") else float(entry)
+        return entry_value(entry)
 
     # Target price requires explicit share-count facts; EPS-implied shares are a
     # reconciliation diagnostic and must not drive report-facing valuation.

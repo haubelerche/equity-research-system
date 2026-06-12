@@ -15,6 +15,7 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from backend.analytics._entry import entry_value
 from backend.facts.normalizer import FactTable
 
 NAStatus = Literal[
@@ -111,6 +112,7 @@ class DebtSchedule:
     forecast_rows: list[DebtScheduleRow]
     forecast_method: DebtForecastMethod
     warnings: list[str] = field(default_factory=list)
+    analyst_approved: bool = False
 
     # ── Publishability gates ───────────────────────────────────────────────
 
@@ -129,6 +131,8 @@ class DebtSchedule:
         manual_override, missing) are medium/low → block FCFE.
         """
         _PUBLISHABLE_METHODS: set[str] = {"direct_cash_flow", "zero_debt_policy"}
+        if self.forecast_method == "manual_override" and self.analyst_approved:
+            _PUBLISHABLE_METHODS.add("manual_override")
         if self.forecast_method not in _PUBLISHABLE_METHODS:
             return False
         # Even within a publishable method, all rows must be high confidence
@@ -202,6 +206,9 @@ class DebtSchedule:
         if self.forecast_method in ("direct_cash_flow", "zero_debt_policy"):
             if all(r.confidence == "high" for r in self.forecast_rows):
                 return "high"
+        if self.forecast_method == "manual_override" and self.analyst_approved:
+            if all(r.confidence == "high" for r in self.forecast_rows):
+                return "approved"
         if self.forecast_method in ("balance_sheet_delta", "manual_override"):
             return "medium"
         if self.forecast_method == "target_debt_ratio":
@@ -212,6 +219,7 @@ class DebtSchedule:
         return {
             "ticker": self.ticker,
             "forecast_method": self.forecast_method,
+            "analyst_approved": self.analyst_approved,
             "status": self.status,
             "is_fcfe_publishable": self.is_fcfe_publishable,
             "fcfe_block_reason": self.fcfe_block_reason,
@@ -253,7 +261,7 @@ def _get(table: FactTable, key: str, period: str) -> float | None:
     entry = table.get(key, {}).get(period)
     if entry is None:
         return None
-    return entry.value if hasattr(entry, "value") else float(entry)
+    return entry_value(entry)
 
 
 def interest_bearing_debt(fact_table: FactTable, period: str) -> float | None:
@@ -379,6 +387,7 @@ def build_forecast_debt_schedule(
     forecast_years: list[int],
     method_override: DebtForecastMethod | None = None,
     manual_debt_path: dict[str, float] | None = None,
+    manual_debt_path_approved: bool = False,
 ) -> tuple[list[DebtScheduleRow], DebtForecastMethod, list[str]]:
     """Build forecast debt schedule.
 
@@ -403,6 +412,12 @@ def build_forecast_debt_schedule(
     if manual_debt_path is not None or method_override == "manual_override":
         rows: list[DebtScheduleRow] = []
         prev_debt = last_ending
+        confidence: Literal["high", "medium", "low"] = "high" if manual_debt_path_approved else "medium"
+        warning = (
+            "Debt path provided by analyst and approved for FCFE publication."
+            if manual_debt_path_approved
+            else "Debt path provided by analyst - pending approval."
+        )
         for label, year in zip(forecast_labels, forecast_years):
             ending = (manual_debt_path or {}).get(label, prev_debt or 0.0)
             nb = (ending - (prev_debt or 0.0)) if prev_debt is not None else None
@@ -414,11 +429,14 @@ def build_forecast_debt_schedule(
                 net_borrowing=nb,
                 average_debt=avg,
                 identity_check_passes=None,  # no new_borrowing/repayment split available
-                method="manual_override", confidence="medium",
-                warning="Debt path provided by analyst — pending approval.",
+                method="manual_override", confidence=confidence,
+                warning=warning,
             ))
             prev_debt = ending
-        warnings.append("Debt forecast uses manual_override path — must be approved before publishing.")
+        if manual_debt_path_approved:
+            warnings.append("Debt forecast uses analyst-approved manual_override path for FCFE publication.")
+        else:
+            warnings.append("Debt forecast uses manual_override path - must be approved before publishing.")
         return rows, "manual_override", warnings
 
     # Case 2: Zero-debt policy (historical debt is zero or trivially small)
@@ -508,6 +526,7 @@ def build_debt_schedule(
     forecast_labels: list[str],
     forecast_years: list[int],
     manual_debt_path: dict[str, float] | None = None,
+    manual_debt_path_approved: bool = False,
 ) -> DebtSchedule:
     """Main entry point: build full historical + forecast debt schedule."""
     historical_rows = build_historical_debt_schedule(ticker, fact_table, fy_periods)
@@ -518,6 +537,7 @@ def build_debt_schedule(
         forecast_labels=forecast_labels,
         forecast_years=forecast_years,
         manual_debt_path=manual_debt_path,
+        manual_debt_path_approved=manual_debt_path_approved,
     )
     return DebtSchedule(
         ticker=ticker,
@@ -525,4 +545,5 @@ def build_debt_schedule(
         forecast_rows=forecast_rows,
         forecast_method=method,
         warnings=warnings,
+        analyst_approved=manual_debt_path_approved and method == "manual_override",
     )

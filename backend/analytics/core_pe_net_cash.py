@@ -24,6 +24,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from backend.analytics._entry import entry_value
 from backend.analytics.forecasting import ForecastArtifact
 from backend.facts.normalizer import FactTable
 
@@ -34,7 +35,7 @@ def _get(table: FactTable, key: str, period: str) -> float | None:
     entry = table.get(key, {}).get(period)
     if entry is None:
         return None
-    return entry.value if hasattr(entry, "value") else float(entry)
+    return entry_value(entry)
 
 
 @dataclass
@@ -164,7 +165,7 @@ def compute_core_pe_net_cash(
     if shares_mn is None:
         _entry = fact_table.get("shares_outstanding.ending", {}).get(latest_fy)
         if _entry is not None:
-            raw = _entry.value if hasattr(_entry, "value") else float(_entry)
+            raw = entry_value(_entry)
             shares_mn = raw / 1_000_000.0 if raw > 1_000_000 else raw
     if shares_mn is None:
         warnings.append("shares_outstanding missing — per-share calculations blocked.")

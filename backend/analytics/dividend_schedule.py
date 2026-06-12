@@ -12,6 +12,7 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from backend.analytics._entry import entry_value
 from backend.facts.normalizer import FactTable
 
 
@@ -19,7 +20,7 @@ def _get(table: FactTable, key: str, period: str) -> float | None:
     entry = table.get(key, {}).get(period)
     if entry is None:
         return None
-    return entry.value if hasattr(entry, "value") else float(entry)
+    return entry_value(entry)
 
 
 DividendMethod = Literal[

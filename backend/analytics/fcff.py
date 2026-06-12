@@ -15,6 +15,7 @@ from typing import Any
 from backend.analytics.forecasting import ForecastArtifact, ForecastYear
 from backend.analytics.tax_policy import TaxPolicy
 from backend.analytics.shares import explicit_shares_mn
+from backend.analytics._entry import entry_value
 from backend.analytics.net_debt_bridge import build_net_debt_bridge, NetDebtBridge
 
 from backend.facts.normalizer import FactTable
@@ -171,7 +172,7 @@ def compute_fcff(
         entry = fact_table.get(key, {}).get(period)
         if entry is None:
             return None
-        return entry.value if hasattr(entry, "value") else float(entry)
+        return entry_value(entry)
 
     ndb = build_net_debt_bridge(fact_table, latest_fy or "")
     for w in ndb.warnings:

@@ -41,6 +41,7 @@ from backend.analytics.cash_sweep import (
     build_cash_sweep_artifact,
 )
 
+from backend.analytics._entry import entry_value
 from backend.facts.normalizer import FactTable
 
 _FORECAST_YEARS = [2026, 2027, 2028, 2029, 2030]
@@ -52,7 +53,7 @@ def _get(table: FactTable, key: str, period: str) -> float | None:
     entry = table.get(key, {}).get(period)
     if entry is None:
         return None
-    return entry.value if hasattr(entry, "value") else float(entry)
+    return entry_value(entry)
 
 
 def _cagr(start: float, end: float, years: int) -> float | None:
@@ -129,6 +130,8 @@ class ForecastAssumptions:
     depreciation_to_revenue_override: float | None = None
     dividend_payout_ratio_override: float | None = None  # None → use historical median payout
     cost_of_debt_override: float | None = None      # None → use historical implied CoD median
+    manual_debt_path: dict[str, float] | None = None
+    debt_schedule_approved: bool = False
     assumption_status: str = "default_unapproved"   # or "analyst_approved"
 
 
@@ -438,12 +441,33 @@ def run_forecast(
         fy_periods=fy_periods,
         forecast_labels=forecast_labels_order,
         forecast_years=forecast_years,
+        manual_debt_path=assumptions.manual_debt_path,
+        manual_debt_path_approved=assumptions.debt_schedule_approved,
     )
+    if (
+        assumptions.debt_schedule_approved
+        and assumptions.manual_debt_path is None
+        and debt_sched.forecast_method not in ("zero_debt_policy", "direct_cash_flow")
+        and all(row.ending_interest_bearing_debt is not None for row in debt_sched.forecast_rows)
+    ):
+        approved_path = {
+            row.label: float(row.ending_interest_bearing_debt)  # type: ignore[arg-type]
+            for row in debt_sched.forecast_rows
+        }
+        debt_sched = build_debt_schedule(
+            ticker=ticker,
+            fact_table=fact_table,
+            fy_periods=fy_periods,
+            forecast_labels=forecast_labels_order,
+            forecast_years=forecast_years,
+            manual_debt_path=approved_path,
+            manual_debt_path_approved=True,
+        )
     debt_row_by_label = {row.label: row for row in debt_sched.forecast_rows}
     for w in debt_sched.warnings:
         warnings.append(f"[DebtSchedule] {w}")
 
-    if debt_sched.forecast_method not in ("zero_debt_policy", "direct_cash_flow"):
+    if not debt_sched.is_fcfe_publishable:
         warnings.append(
             "[ForecastWarning] Interest expense is single-pass (no convergence iteration). "
             f"Debt method = '{debt_sched.forecast_method}' — FCFE is blocked; "
