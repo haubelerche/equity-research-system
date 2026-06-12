@@ -283,15 +283,38 @@ def _core_pe_net_cash(ticker: str, manifest=None, allow_latest_artifacts: bool =
 
 
 
+# Canonical facts are stored in raw VND đồng. Monetary statement/balance/cash-flow
+# metrics must be shown in tỷ đồng (bn) to match the forecast columns (already bn) and
+# the "Đơn vị: tỷ đồng" table labels. Per-share (eps), share counts and ratios stay native.
+_VND_TO_BN = 1_000_000_000
+_MONETARY_FACT_METRICS = frozenset({
+    "revenue.net", "cogs.total", "gross_profit.total", "depreciation.total",
+    "sga.total", "interest_expense.total", "tax_expense.total",
+    "net_income.parent", "profit_before_tax.total",
+    "operating_cash_flow.total", "capex.total", "free_cash_flow.total",
+    "equity.parent", "equity.ending",
+    "total_assets.ending",
+    "cash_and_equivalents.ending", "short_term_investments.ending", "short_term_deposits.ending",
+    "short_term_debt.ending", "current_portion_ltd.ending", "long_term_debt.ending",
+    "lease_liabilities.ending", "total_debt.ending",
+})
+
+
 def _fact_value(facts: dict[str, dict[str, float]], metric: str, period: str) -> float | None:
-    """Return a float fact value — handles both flat (DBD) and nested-dict (DHG) formats."""
+    """Return a float fact value in tỷ đồng for monetary metrics — handles flat (DBD) and nested-dict (DHG) formats."""
     raw = facts.get(metric, {}).get(period)
     if raw is None:
         return None
     if isinstance(raw, dict):
         v = raw.get("value")
-        return float(v) if v is not None else None
-    return float(raw)
+        if v is None:
+            return None
+        value = float(v)
+    else:
+        value = float(raw)
+    if metric in _MONETARY_FACT_METRICS:
+        return value / _VND_TO_BN
+    return value
 
 
 def _forecast_by_label(forecast: dict[str, Any]) -> dict[str, dict[str, Any]]:
