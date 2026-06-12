@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import http.client
 import json
 import logging
 import os
@@ -27,6 +28,17 @@ _OUTPUT_COST_PER_M = {MAIN_MODEL: 4.50, CHEAP_MODEL: 1.25}
 
 _OPENAI_MAX_COMPLETION_TOKENS = {MAIN_MODEL: 32768, CHEAP_MODEL: 16384}
 _TEMPERATURE_NOT_SUPPORTED = frozenset({MAIN_MODEL, CHEAP_MODEL})
+
+
+def _transient_exc_types() -> tuple[type[BaseException], ...]:
+    """Return the exception types that indicate a transient network error worth retrying."""
+    import openai
+    types_: list[type[BaseException]] = [http.client.IncompleteRead, ConnectionError]
+    for _attr in ("APIConnectionError", "APITimeoutError"):
+        _cls = getattr(openai, _attr, None)
+        if _cls is not None:
+            types_.append(_cls)
+    return tuple(types_)
 
 
 def select_model_for_task(task_type: str) -> str:
@@ -135,20 +147,40 @@ class OpenAIModelAdapter:
         }
         if agent_config.model not in _TEMPERATURE_NOT_SUPPORTED:
             create_kwargs["temperature"] = agent_config.temperature
-        try:
-            response = client.chat.completions.create(**create_kwargs)
-        except Exception as exc:
+        _transient = _transient_exc_types()
+        _fatal_exc: BaseException | None = None  # non-transient or exhausted-transient
+        _response = None
+        for _attempt in range(3):
+            try:
+                _response = self._create_completion(client, create_kwargs)
+                break  # success — exit retry loop
+            except _transient as exc:
+                _log.warning(
+                    "[%s] transient LLM read error (attempt %d/3): %s: %s",
+                    stage, _attempt + 1, type(exc).__name__, exc,
+                )
+                if _attempt == 2:
+                    # All retries exhausted — record and fall to diagnostic path.
+                    _fatal_exc = exc
+                else:
+                    time.sleep(2 * (_attempt + 1))
+            except Exception as exc:
+                # Non-transient error — record and stop immediately.
+                _fatal_exc = exc
+                break
+
+        if _fatal_exc is not None:
             call_ms = int((time.perf_counter() - started) * 1000)
             _log.error(
                 "[%s] LLM_FAIL agent=%s after %dms: %s: %s",
                 stage, agent_config.agent_id, call_ms,
-                type(exc).__name__, exc,
+                type(_fatal_exc).__name__, _fatal_exc,
             )
             diagnostic = {
                 "provider": self.provider,
                 "model": agent_config.model,
-                "exception_type": type(exc).__name__,
-                "exception_message": str(exc),
+                "exception_type": type(_fatal_exc).__name__,
+                "exception_message": str(_fatal_exc),
                 "failure_stage": "chat_completions_create",
                 "agent_id": agent_config.agent_id,
                 "task": task,
@@ -157,7 +189,9 @@ class OpenAIModelAdapter:
             raise RuntimeError(
                 "agent_llm_call_failed: "
                 + json.dumps(diagnostic, ensure_ascii=False, sort_keys=True, default=str)
-            ) from exc
+            ) from _fatal_exc
+
+        response = _response  # type: ignore[assignment]  # guaranteed non-None on success path
 
         # ── 4. Parse response ──────────────────────────────────────────
         latency_ms = int((time.perf_counter() - started) * 1000)
@@ -224,6 +258,10 @@ class OpenAIModelAdapter:
             cost_estimate=self._estimate_cost(agent_config.model, prompt_tokens, completion_tokens),
             fallback_triggered=False,
         )
+
+    def _create_completion(self, client, create_kwargs: dict[str, Any]):
+        """Single (non-retrying) call to the chat completion API — the retry seam."""
+        return client.chat.completions.create(**create_kwargs)
 
     @staticmethod
     def _parse_response_json(content: str) -> dict[str, Any] | None:
