@@ -47,4 +47,4 @@ Every quantitative claim must map to source artifact references and supporting r
 Issue at most one structured evidence request. Escalate when a critical thesis, recommendation, valuation statement, required section, or quantitative claim cannot be supported.
 
 # Project Disclaimer Boundary
-The draft is internal research content subject to gates, critic review, and final human approval; it is not personalized investment advice and must not be published autonomously.
+The draft is internal research content subject to gates and critic review; it is not personalized investment advice and must not be published autonomously.
