@@ -290,6 +290,14 @@ def _rec_hero(vm: ClientReportViewModel) -> str:
     rec_css_class = "recommendation-" + _rec_css(vm.recommendation)
     tp_display = _format_price(vm.target_price)
     upside_display = _format_percent(vm.upside_downside)
+    # Cover must agree with the running header and the status page: when the report
+    # is not yet publication-ready, mark the recommendation as preliminary instead of
+    # presenting unapproved figures as a final published call.
+    draft_note = (
+        '\n  <div class="rec-draft-note">Dự thảo — khuyến nghị và giá mục tiêu chưa được công bố chính thức</div>'
+        if vm.publication_status != "client_exportable"
+        else ""
+    )
     return f"""
 <div class="recommendation-card {_e(rec_css_class)}">
   <span class="rec-label">Khuyến nghị &nbsp;·&nbsp; {_e(vm.exchange)}: {_e(vm.ticker)}</span>
@@ -300,7 +308,7 @@ def _rec_hero(vm: ClientReportViewModel) -> str:
     Upside/Downside: <strong>{_e(upside_display)}</strong>
     &nbsp;|&nbsp;
     {_e(vm.report_date)}
-  </div>
+  </div>{draft_note}
 </div>
 """
 
