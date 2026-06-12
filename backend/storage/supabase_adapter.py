@@ -5,13 +5,20 @@ import hashlib
 import json
 import mimetypes
 import os
+import time
 from pathlib import Path
 from typing import Any
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 from backend.storage.layout import REQUIRED_BUCKETS, validate_bucket_path
+
+# Supabase Storage HTTP calls over a long run intermittently hit transient TCP
+# resets (e.g. WinError 10054 "connection forcibly closed"). These succeed on a
+# retry, so transient network errors are retried with exponential backoff.
+_STORAGE_MAX_ATTEMPTS = 4
+_STORAGE_BASE_DELAY = 0.5
 
 
 class SupabaseStorageError(RuntimeError):
@@ -48,15 +55,29 @@ class SupabaseStorageAdapter:
         }
         headers.update(extra_headers or {})
         request = Request(f"{self.url}/storage/v1/{endpoint}", data=body, headers=headers, method=method)
-        try:
-            with urlopen(request, timeout=120) as response:
-                payload = response.read()
-                if response.status not in expected:
-                    raise SupabaseStorageError(f"Unexpected Supabase Storage status {response.status}")
-                return payload
-        except HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")
-            raise SupabaseStorageError(f"Supabase Storage {method} {endpoint} failed: {exc.code} {detail}") from exc
+        last_exc: Exception | None = None
+        for attempt in range(_STORAGE_MAX_ATTEMPTS):
+            try:
+                with urlopen(request, timeout=120) as response:
+                    payload = response.read()
+                    if response.status not in expected:
+                        raise SupabaseStorageError(f"Unexpected Supabase Storage status {response.status}")
+                    return payload
+            except HTTPError as exc:
+                # Real HTTP error response (4xx/5xx) — not a transient reset; do not retry.
+                detail = exc.read().decode("utf-8", errors="replace")
+                raise SupabaseStorageError(f"Supabase Storage {method} {endpoint} failed: {exc.code} {detail}") from exc
+            except (URLError, ConnectionError, TimeoutError, OSError) as exc:
+                # Transient network reset (e.g. WinError 10054, dropped TLS) — retry with backoff.
+                last_exc = exc
+                if attempt == _STORAGE_MAX_ATTEMPTS - 1:
+                    raise SupabaseStorageError(
+                        f"Supabase Storage {method} {endpoint} failed after {_STORAGE_MAX_ATTEMPTS} attempts: {exc}"
+                    ) from exc
+                time.sleep(_STORAGE_BASE_DELAY * (2 ** attempt))
+        raise SupabaseStorageError(  # pragma: no cover - loop returns or raises above
+            f"Supabase Storage {method} {endpoint} failed: {last_exc}"
+        )
 
     @staticmethod
     def checksum_file(local_path: str | Path) -> str:
