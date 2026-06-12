@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from backend.analytics._entry import entry_value
 from backend.facts.normalizer import FactTable
 
 _SHARE_FACT_KEYS = (
@@ -18,12 +19,9 @@ _SHARE_FACT_KEYS = (
 
 
 def _entry_value(entry: Any) -> float | None:
-    if entry is None:
-        return None
-    value = entry.value if hasattr(entry, "value") else entry
     try:
-        return float(value)
-    except (TypeError, ValueError):
+        return entry_value(entry)
+    except TypeError:
         return None
 
 

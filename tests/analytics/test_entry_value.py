@@ -24,3 +24,29 @@ def test_unconvertible_dict_raises_clear_error():
     with pytest.raises(TypeError) as exc:
         entry_value({"unit": "VND bn"})
     assert "entry_value" in str(exc.value)
+
+
+def test_comma_string_is_parsed():
+    assert entry_value("1,234.56") == 1234.56
+
+
+def test_bool_is_refused():
+    with pytest.raises(TypeError):
+        entry_value(True)
+
+
+def test_dict_amount_and_val_keys():
+    assert entry_value({"amount": 5}) == 5.0
+    assert entry_value({"val": 6}) == 6.0
+
+
+def test_dict_value_none_returns_none():
+    assert entry_value({"value": None, "unit": "VND bn"}) is None
+
+
+def test_deep_recursion_is_bounded():
+    class _Loop:
+        @property
+        def value(self): return self
+    with pytest.raises(TypeError):
+        entry_value(_Loop())

@@ -12,11 +12,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from backend.analytics.forecasting import ForecastArtifact, ForecastYear
-from backend.analytics.tax_policy import TaxPolicy
-from backend.analytics.shares import explicit_shares_mn
 from backend.analytics._entry import entry_value
+from backend.analytics.forecasting import ForecastArtifact, ForecastYear
 from backend.analytics.net_debt_bridge import build_net_debt_bridge, NetDebtBridge
+from backend.analytics.shares import explicit_shares_mn
+from backend.analytics.tax_policy import TaxPolicy
 
 from backend.facts.normalizer import FactTable
 
