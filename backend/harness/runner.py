@@ -196,37 +196,70 @@ class ResearchGraphRunner:
             self._merge_agent_result(state, result)
 
         elif stage == "INGEST_AND_VALIDATE":
-            # Auto-ingest official documents (must complete before indexing).
-            auto_result = self._run_tool(
-                state, "data_evidence", "auto_ingest",
-                state.ticker, state.from_year, state.to_year, ocr=state.ocr
-            )
-            state.artifacts["auto_ingest"] = auto_result.summary
-            self._merge_result(state, auto_result)
+            from backend.dataops.snapshot_freshness import latest_ready_snapshot
 
-            # Build facts and evidence index in parallel (independent DB reads).
-            from concurrent.futures import ThreadPoolExecutor, as_completed
+            reuse_snapshot = None
+            if not (state.policy or {}).get("force_ingest"):
+                try:
+                    reuse_snapshot = latest_ready_snapshot(state.ticker)
+                except Exception as exc:  # noqa: BLE001 — never let snapshot lookup break ingest
+                    _log.warning("[INGEST] snapshot freshness lookup failed (%s); running full ingest", exc)
 
-            def _run_build_facts():
-                return self._run_tool(state, "data_evidence", "build_facts", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
+            if reuse_snapshot:
+                _log.info(
+                    "[INGEST] reusing fresh snapshot %s for %s — skipping auto_ingest + build_index",
+                    reuse_snapshot.get("snapshot_id"), state.ticker,
+                )
+                # Load facts from the existing snapshot (reliable, no long-held connection).
+                result = self._run_tool(
+                    state, "data_evidence", "build_facts",
+                    state.ticker, state.from_year, state.to_year, run_id=state.run_id,
+                )
+                state.artifacts["build_facts"] = result.summary
+                state.data_inventory = result.summary
+                state.snapshot_id = result.summary.get("snapshot_id") or reuse_snapshot.get("snapshot_id")
+                self._merge_result(state, result)
 
-            def _run_build_index():
-                return self._run_tool(state, "data_evidence", "build_index", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
+                # Evidence index is reused from previously persisted document_chunks.
+                reuse_index = {
+                    "reused": True,
+                    "snapshot_id": reuse_snapshot.get("snapshot_id"),
+                    "note": "evidence index reused from persisted document_chunks; build_index skipped",
+                }
+                state.artifacts["index"] = reuse_index
+                state.retrieval_results = reuse_index
+            else:
+                # Auto-ingest official documents (must complete before indexing).
+                auto_result = self._run_tool(
+                    state, "data_evidence", "auto_ingest",
+                    state.ticker, state.from_year, state.to_year, ocr=state.ocr
+                )
+                state.artifacts["auto_ingest"] = auto_result.summary
+                self._merge_result(state, auto_result)
 
-            with ThreadPoolExecutor(max_workers=2) as pool:
-                facts_future = pool.submit(_run_build_facts)
-                index_future = pool.submit(_run_build_index)
+                # Build facts and evidence index in parallel (independent DB reads).
+                from concurrent.futures import ThreadPoolExecutor
 
-            result = facts_future.result()
-            state.artifacts["build_facts"] = result.summary
-            state.data_inventory = result.summary
-            state.snapshot_id = result.summary.get("snapshot_id")
-            self._merge_result(state, result)
+                def _run_build_facts():
+                    return self._run_tool(state, "data_evidence", "build_facts", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
 
-            index_result = index_future.result()
-            state.artifacts["index"] = index_result.summary
-            state.retrieval_results = index_result.summary
-            self._merge_result(state, index_result)
+                def _run_build_index():
+                    return self._run_tool(state, "data_evidence", "build_index", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
+
+                with ThreadPoolExecutor(max_workers=2) as pool:
+                    facts_future = pool.submit(_run_build_facts)
+                    index_future = pool.submit(_run_build_index)
+
+                result = facts_future.result()
+                state.artifacts["build_facts"] = result.summary
+                state.data_inventory = result.summary
+                state.snapshot_id = result.summary.get("snapshot_id")
+                self._merge_result(state, result)
+
+                index_result = index_future.result()
+                state.artifacts["index"] = index_result.summary
+                state.retrieval_results = index_result.summary
+                self._merge_result(state, index_result)
 
             # Data quality gate (deterministic — no LLM review needed).
             gate = data_quality_gate(state.data_inventory or state.artifacts.get("build_facts", {}))
