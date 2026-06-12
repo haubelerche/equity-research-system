@@ -36,6 +36,7 @@ def _slug_label(text: str) -> str:
     # but đ is a special case: NFD of đ is still đ because it's a base letter)
     # Handle đ/Đ explicitly:
     ascii_only = ascii_only.replace("đ", "d").replace("Đ", "D")
+    ascii_only = ascii_only.replace("\u0111", "d").replace("\u0110", "D")
     ascii_only = ascii_only.encode("ascii", errors="ignore").decode("ascii")
     lowered = ascii_only.lower()
     stripped = lowered.strip()
@@ -488,6 +489,7 @@ def extract_from_pdf_ocr(
     fiscal_year: int,
     document_title: str,
     lang: str = "vie+eng",
+    page_text_callback=None,
 ) -> list[ExtractedRow]:
     """Attempt OCR-based extraction on a scanned PDF.
 
@@ -534,6 +536,8 @@ def extract_from_pdf_ocr(
     for page_num, image in enumerate(images, start=1):
         try:
             ocr_text = pytesseract.image_to_string(image, lang=lang)
+            if page_text_callback is not None:
+                page_text_callback(page_num, ocr_text)
             slug_text = _slug_label(ocr_text)
             statement_type = _detect_statement_type(slug_text)
             if statement_type is None:

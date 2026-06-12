@@ -62,8 +62,110 @@ def test_financial_analysis_context_omits_non_financial_artifacts() -> None:
     compact = OpenAIModelAdapter._compact_state(state)
     artifacts = compact["input_artifacts"]
 
-    assert set(artifacts) == {"build_facts", "ratios", "snapshot"}
+    # Whitelisted artifacts are kept; non-whitelisted are omitted.
+    assert {"build_facts", "ratios", "snapshot"} <= set(artifacts)
+    assert "evidence_pack" not in artifacts
+    assert "index" not in artifacts
+    # Omitted keys summary included for LLM awareness.
+    assert "_omitted_artifact_keys" in artifacts
+    assert sorted(artifacts["_omitted_artifact_keys"]) == ["evidence_pack", "index"]
+
     fact = artifacts["snapshot"]["sample_facts"][0]
     assert fact["line_item_code"] == "revenue.net"
     assert "raw_page_text" not in fact
     assert "ingested_at" not in fact
+
+
+# ---------------------------------------------------------------------------
+# Stage-specific compaction tests
+# ---------------------------------------------------------------------------
+
+_FULL_ARTIFACTS = {
+    "auto_ingest": {"status": "ok"},
+    "build_facts": {"snapshot_id": "snap1", "facts": 100},
+    "index": {"chunks_indexed": 500},
+    "evidence_pack": {"large": "x" * 2000},
+    "snapshot": {"sample_facts": [], "snapshot_id": "snap1"},
+    "ratios": {"net_margin": 0.16},
+    "financial_analysis": {"revenue_trend": "growing"},
+    "forecast_model": {"revenue_forecast": {}},
+    "forecast_narrative": {"narrative": "text"},
+    "valuation": {"has_fcff": True, "has_blend": True},
+    "valuation_read": {"storage_path": "/some/path"},
+    "valuation_proposal": {"method": "FCFF"},
+    "valuation_review": {"approved": True},
+    "market_snapshot": {"price": 120000},
+    "readiness_review": {"ready": True},
+    "research_lock": {"locked": True},
+    "report_draft": {"sections": {}},
+    "quality": {"overall_score": 0.85},
+    "critic_review": {"decision": "pass"},
+}
+
+
+def _compact_for_stage(stage: str) -> dict:
+    state = {"current_stage": stage, "artifacts": dict(_FULL_ARTIFACTS)}
+    return OpenAIModelAdapter._compact_state(state)["artifacts"]
+
+
+def test_plan_stage_gets_no_artifacts() -> None:
+    arts = _compact_for_stage("PLAN")
+    assert "_omitted_artifact_keys" in arts or len(arts) == 0
+    for key in _FULL_ARTIFACTS:
+        assert key not in arts
+
+
+def test_ingest_stage_gets_only_ingest_artifacts() -> None:
+    arts = _compact_for_stage("INGEST_AND_VALIDATE")
+    assert "auto_ingest" in arts
+    assert "build_facts" in arts
+    assert "index" in arts
+    assert "financial_analysis" not in arts
+    assert "valuation" not in arts
+
+
+def test_forecast_stage_gets_analysis_not_ingest() -> None:
+    arts = _compact_for_stage("FORECAST_AND_VALUE")
+    assert "financial_analysis" in arts
+    assert "snapshot" in arts
+    assert "forecast_model" in arts
+    assert "valuation" in arts
+    # Ingest-only artifacts excluded.
+    assert "auto_ingest" not in arts
+    assert "build_facts" not in arts
+    assert "evidence_pack" not in arts
+
+
+def test_write_report_stage_gets_analysis_and_valuation() -> None:
+    arts = _compact_for_stage("WRITE_REPORT")
+    assert "financial_analysis" in arts
+    assert "forecast_model" in arts
+    assert "valuation" in arts
+    assert "market_snapshot" in arts
+    # Raw ingest excluded.
+    assert "auto_ingest" not in arts
+    assert "snapshot" not in arts
+
+
+def test_review_stage_gets_report_and_quality() -> None:
+    arts = _compact_for_stage("REVIEW")
+    assert "report_draft" in arts
+    assert "valuation" in arts
+    assert "quality" in arts
+    assert "critic_review" in arts
+    # Upstream raw data excluded.
+    assert "snapshot" not in arts
+    assert "forecast_model" not in arts
+    assert "auto_ingest" not in arts
+
+
+def test_truncate_large_dict_below_limit() -> None:
+    small = {"a": 1, "b": "hello"}
+    assert OpenAIModelAdapter._truncate_large_dict(small) == small
+
+
+def test_truncate_large_dict_above_limit() -> None:
+    big = {"small_key": 42, "big_key": list(range(5000))}
+    result = OpenAIModelAdapter._truncate_large_dict(big, max_chars=1000)
+    assert result["small_key"] == 42
+    assert "truncated" in str(result["big_key"]).lower()

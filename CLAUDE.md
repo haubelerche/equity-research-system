@@ -42,7 +42,7 @@ Always:
 ```text
 User/Analyst
 → API/BFF
-→ Orchestrator / LangGraph state machine
+→ FullReportOrchestrator / fixed full_report harness
 → Connectors + tools
 → Document/OCR processing
 → Canonical fact store
@@ -65,7 +65,7 @@ INIT → INGESTING → ANALYZING → VALUATING → SYNTHESIZING → AUDITING
 Architecture boundaries:
 - Agent = stateful reasoning/coordination.
 - Module/service = deterministic computation or I/O.
-- Workflow node = LangGraph stage.
+- Workflow stage = fixed harness stage in `backend/harness/graph.py`.
 - Artifact = persisted structured output.
 
 Do not turn deterministic computation into an agent.
@@ -73,7 +73,7 @@ Do not turn deterministic computation into an agent.
 ## 4. Workflow
 
 1. Analyst starts run: ticker, run type, scenarios.
-2. Supervisor validates scope and creates `run_id`.
+2. Research Manager validates scope and the orchestrator creates `run_id`.
 3. Data/Retrieval collects filings, disclosures, market data, source metadata.
 4. Parser/OCR extracts raw rows.
 5. `fact_promotion.py` normalizes canonical facts.
@@ -87,23 +87,24 @@ Do not turn deterministic computation into an agent.
 13. Analyst approves final report.
 14. Export renders clean PDF/HTML.
 
-Run types: `full_report`, `flash_memo`, `catalyst_refresh`.
+Production run type: `full_report`. `flash_memo` and `catalyst_refresh` are not active v1 production paths.
 
 ## 5. Agents
 
-- **Supervisor:** orchestration, state transitions, policy, routing. No domain computation.
-- **Data & Retrieval:** sources, raw artifacts, canonical facts, evidence packs. No invention or silent conflict dropping.
+- **Research Manager:** scope validation, research plan, readiness review. No domain computation or report writing.
+- **Data & Evidence:** sources, raw artifacts, canonical facts, evidence packs. No invention or silent conflict dropping.
 - **Financial Analysis:** ratios, trends, anomalies from locked facts. No LLM numeric computation.
-- **Valuation:** FCFF + P/E Forward blend, supplementary FCFE cross-check, scenarios, sensitivity. Block on missing required inputs.
-- **Report Writer:** Vietnamese grounded prose using `section_builder.py`. No new numbers, no backend terms.
-- **Critic/Gates:** non-conversational blockers for citation, numeric consistency, stale data, hallucination, recommendation validity, reproducibility, and internal leakage.
+- **Forecast & Valuation:** driver-based forecast, FCFF + FCFE blend (60/40), supplementary P/E Forward cross-check, scenarios, sensitivity. Block on missing required inputs.
+- **Thesis & Report:** Vietnamese grounded prose from locked artifacts and evidence. No new numbers, no backend terms.
+- **Senior Critic:** senior-analyst review for thesis quality, driver logic, citation integrity, numeric consistency, valuation coherence, and publication readiness.
 
 ## 6. Financial Modeling
 
-### Primary valuation model: FCFF + P/E Forward blend
+### Primary valuation model: FCFF + FCFE blend
 
-Default blend: **FCFF 60% + P/E Forward 40%** via `analytics/blend.py`.
-FCFE is a supplementary cross-check only — not a primary weight in the blend.
+Default blend: **FCFF 60% + FCFE 40%** via `analytics/blend.py`.
+Formula: `Target Price = 0.60 × Price_FCFF + 0.40 × Price_FCFE`
+P/E Forward is a supplementary cross-check only — not a primary weight in the blend.
 `analytics/dcf.py` is a simplified reference model for sanity-check only.
 
 ### FCFF rules
@@ -112,7 +113,7 @@ FCFE is a supplementary cross-check only — not a primary weight in the blend.
 - WACC, terminal growth, forecast margins, and CAPEX must be in the assumptions table.
 - Must produce: `assumptions_table`, `sensitivity_table`, `valuation_range`, `warnings[]`.
 
-### P/E Forward rules
+### P/E Forward rules (supplementary cross-check)
 
 Workflow:
 
@@ -219,10 +220,10 @@ Ratings use Vietnamese labels: `MUA`, `NẮM GIỮ`, `BÁN`.
 ## 9. Gates
 
 Blocking gates:
-`data_quality_gate`, `financial_analyst_gate`, `valuation_gate`, `citation_gate`,
-`evidence_packet_gate`, `export_gate`, `approval_path_gate`,
-`artifact_manifest_gate`, `formula_trace_gate`, `tool_permission_gate`,
-`agent_handoff_gate`.
+`data_quality_gate`, `financial_analysis_gate`, `forecast_quality_gate`,
+`valuation_gate`, `citation_gate`, `evidence_packet_gate`, `export_gate`,
+`approval_path_gate`, `artifact_manifest_gate`, `formula_trace_gate`,
+`tool_permission_gate`, `report_completeness_gate`, `senior_critic_gate`.
 
 Acceptance:
 - 100% quantitative citation coverage.

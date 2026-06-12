@@ -52,6 +52,12 @@ class TestIsfcfePublishable:
         ds = _make_schedule("manual_override", "medium")
         assert ds.is_fcfe_publishable is False
 
+    def test_manual_override_high_with_approval_is_publishable(self):
+        ds = _make_schedule("manual_override", "high")
+        ds.analyst_approved = True
+        assert ds.is_fcfe_publishable is True
+        assert ds.status == "approved"
+
     def test_missing_low_is_blocked(self):
         ds = _make_schedule("missing", "low")
         assert ds.is_fcfe_publishable is False
@@ -170,6 +176,36 @@ class TestFCFEGate:
                 assert row.method == "target_debt_ratio"
                 assert row.confidence == "low"
             assert not ds.is_fcfe_publishable
+
+    def test_auto_approved_debt_path_allows_fcfe_target_price(self):
+        """Auto-approved assumptions convert deterministic debt path into an approved manual path."""
+        from backend.analytics.forecasting import ForecastAssumptions
+
+        ft = self._minimal_ft()
+        forecast = run_forecast(
+            "TST",
+            ft,
+            shares_mn=94.45,
+            assumptions=ForecastAssumptions(
+                assumption_status="analyst_approved",
+                debt_schedule_approved=True,
+            ),
+        )
+        ds = forecast.debt_schedule
+        assert ds is not None
+        assert ds.forecast_method == "manual_override"
+        assert ds.analyst_approved is True
+        assert ds.is_fcfe_publishable is True
+
+        result = compute_fcfe(
+            ticker="TST",
+            forecast=forecast,
+            fact_table=ft,
+            shares_mn=94.45,
+            cost_of_equity_assumptions=CostOfEquityAssumptions(re_override=0.14),
+        )
+        assert result.target_price_vnd is not None
+        assert result.target_price_vnd > 0
 
 
 class TestBlendDraftWhenFCFEMissing:

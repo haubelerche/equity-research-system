@@ -72,9 +72,6 @@
 
   <!-- ── Report Sections ───────────────────────────────── -->
   {% for section in sections %}
-  {% if not loop.first %}
-  <div class="page-break"></div>
-  {% endif %}
   <div class="report-section{% if section.chapter_break | default(false) %} chapter-break{% endif %}" id="section-{{ section.page }}">
     {% if not loop.first %}
     <div class="acbs-page-header">

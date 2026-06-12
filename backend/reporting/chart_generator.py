@@ -76,6 +76,9 @@ class ChartSpec:
     # C1 — Price vs VNINDEX
     price_series: list[float] = field(default_factory=list)
     benchmark_series: list[float] = field(default_factory=list)
+    secondary_benchmark_series: list[float] = field(default_factory=list)
+    benchmark_label: str = "VNINDEX"
+    secondary_benchmark_label: str = ""
     date_labels: list[str] = field(default_factory=list)
 
     # C6 — DCF Bridge: list of (label, value_billion_vnd) tuples
@@ -164,9 +167,15 @@ class ChartGenerator:
         spec.chart_id = "C1"
         path = self._out_path(spec)
 
-        n = max(len(spec.price_series), len(spec.benchmark_series), 1)
+        n = max(
+            len(spec.price_series),
+            len(spec.benchmark_series),
+            len(spec.secondary_benchmark_series),
+            1,
+        )
         prices = self._safe(spec.price_series, n)
         bench = self._safe(spec.benchmark_series, n)
+        secondary = self._safe(spec.secondary_benchmark_series, n)
         labels = spec.date_labels if spec.date_labels else [str(i) for i in range(n)]
 
         # Normalise to 100
@@ -181,12 +190,18 @@ class ChartGenerator:
         ax.plot(labels, prices_norm, color=_BLUE, linewidth=2, marker="o", markersize=3,
                 label=spec.ticker)
         ax.plot(labels, bench_norm, color=_GREY, linewidth=1.5, linestyle="--",
-                marker="s", markersize=3, label="VNINDEX")
+                label=spec.benchmark_label or "Benchmark")
+        if spec.secondary_benchmark_series:
+            secondary_norm = _base100(secondary)
+            ax.plot(labels, secondary_norm, color=_TEAL, linewidth=1.2, linestyle=":",
+                    label=spec.secondary_benchmark_label or "VNINDEX")
         ax.axhline(100, color=_GREY, linewidth=0.8, linestyle=":")
         ax.legend(fontsize=9)
-        self._style_ax(ax,
-                       title=f"{spec.ticker} — Stock Price vs VNINDEX (base 100)",
-                       ylabel="Indexed (base = 100)")
+        self._style_ax(
+            ax,
+            title=f"Biến động giá {spec.ticker} và chỉ số tham chiếu",
+            ylabel="Chỉ số hóa (điểm đầu = 100)",
+        )
         plt.xticks(rotation=45, ha="right")
         self._source_caption(ax, spec.ticker)
         return self._save_close(fig, path)

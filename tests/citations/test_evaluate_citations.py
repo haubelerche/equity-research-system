@@ -1,4 +1,4 @@
-"""Unit tests for scripts/evaluate_citations.py � citation coverage gates.
+"""Unit tests for scripts/evaluate_citations.py  citation coverage gates.
 
 All tests are purely deterministic (no DB required). DB-dependent gate 2
 (source_id_exists) is patched to always return True.
@@ -64,7 +64,7 @@ class TestFindCitationRefs:
         assert "r2" in keys
 
     def test_no_refs(self):
-        assert _find_citation_refs("Kh�ng c� tr�ch d?n n�o.") == []
+        assert _find_citation_refs("Khng c trch d?n no.") == []
 
 
 # -- _find_quantitative_claims -------------------------------------------------
@@ -77,7 +77,7 @@ class TestFindQuantitativeClaims:
         assert "2,450" in claims[0][1]
 
     def test_percentage(self):
-        text = "Bi�n l?i nhu?n g?p tang 32.5%."
+        text = "Bin l?i nhu?n g?p tang 32.5%."
         claims = _find_quantitative_claims(text)
         assert len(claims) == 1
         assert "32.5%" in claims[0][1]
@@ -169,7 +169,7 @@ class TestEvaluateCitations:
         citation_map = {
             "dhg/2023fy/revenue.net": {
                 "source_id": "src_dhg_2023",
-                "source_title": "B�o c�o ki?m to�n DHG 2023",
+                "source_title": "Bo co ki?m ton DHG 2023",
             }
         }
         _write_citation_map(tmp_path, "DHG", citation_map)
@@ -178,7 +178,7 @@ class TestEvaluateCitations:
         path = _write_report(tmp_path, report)
 
         result = evaluate_citations("DHG", path)
-        # Any uncited quantitative claim is critical � blocks final export
+        # Any uncited quantitative claim is critical  blocks final export
         assert result["gates"]["quantitative_citation_coverage"]["pass"] is False
         assert result["gates"]["quantitative_citation_coverage"]["critical"] is True
         assert result["export_allowed"] is False
@@ -218,7 +218,7 @@ class TestEvaluateCitations:
 
     def test_empty_report_no_claims_passes(self, tmp_path, patch_source_exists, patch_load_citation_map):
         _write_citation_map(tmp_path, "DHG", {})
-        path = _write_report(tmp_path, "��y l� b�o c�o kh�ng c� s? li?u t�i ch�nh c? th?.\n")
+        path = _write_report(tmp_path, "y l bo co khng c s? li?u ti chnh c? th?.\n")
         result = evaluate_citations("DHG", path)
         # No quantitative claims means 100% coverage
         assert result["quantitative_claims"] == 0

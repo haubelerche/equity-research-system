@@ -11,7 +11,7 @@ Usage:
     python scripts/run_valuation.py --ticker DHG --target-pe 18 --target-ev-ebitda 12
 
 Outputs:
-    artifacts/valuation/{ticker}_{timestamp}_valuation.json
+    storage/runs/{run_id}/valuation.json
     stdout: ratio table + valuation summary
 """
 from __future__ import annotations
@@ -33,6 +33,8 @@ if _PROJECT_ROOT not in sys.path:
 if "" in sys.path:
     sys.path = [p for p in sys.path if p != ""] + [""]
 
+from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
+
 _env_file = Path(__file__).resolve().parents[1] / ".env"
 if _env_file.exists():
     for _line in _env_file.read_text(encoding="utf-8").splitlines():
@@ -42,11 +44,7 @@ if _env_file.exists():
             os.environ.setdefault(_k.strip(), _v.strip().strip(chr(34)).strip(chr(39)))
 
 ROOT = Path(__file__).resolve().parents[1]
-VALUATION_DIR = ROOT / "artifacts" / "valuation"
-
-MVP_FROM_YEAR = 2021
-MVP_TO_YEAR = 2025
-
+VALUATION_DIR = ROOT / "storage" / "runs" / os.environ.get("RUN_ID", "missing_run_id")
 
 def _get_current_price(ticker: str) -> float | None:
     """Fetch latest close price from fact.price_history."""
@@ -206,17 +204,23 @@ def _fact_ids(raw_facts: list[dict], metrics: list[str], periods: list[str] | No
 
 def run_valuation(
     ticker: str,
-    from_year: int = MVP_FROM_YEAR,
-    to_year: int = MVP_TO_YEAR,
+    from_year: int = DEFAULT_FROM_YEAR,
+    to_year: int = DEFAULT_TO_YEAR,
     wacc: float = 0.10,
     terminal_growth: float = 0.03,
     forecast_years: int = 5,
     target_pe: float = 15.0,
     target_pb: float = 2.5,
     target_ev_ebitda: float = 10.0,
+    auto_approve_assumptions: bool = False,
 ) -> dict:
     from backend.dataops.snapshot import create_snapshot, load_snapshot_facts
-    from backend.facts.normalizer import build_fact_table, compute_derived, periods_sorted
+    from backend.facts.normalizer import (
+        build_fact_table,
+        compute_derived,
+        periods_sorted,
+        to_analytics_vnd_bn,
+    )
     from backend.analytics.ratios import compute_ratios, ratio_table_for_display
     from backend.analytics.dcf import DCFAssumptions, run_three_scenarios
     from backend.analytics.multiples import compute_multiples
@@ -240,6 +244,7 @@ def run_valuation(
 
     ticker = ticker.strip().upper()
     generated_at = datetime.now(UTC)
+    assumption_status = "analyst_approved" if auto_approve_assumptions else "default_unapproved"
 
     print(f"[run_valuation] {ticker} — creating/loading research snapshot")
     snap = create_snapshot(ticker=ticker, from_year=from_year, to_year=to_year, created_by="run_valuation")
@@ -263,7 +268,7 @@ def run_valuation(
         raw_facts = raw_facts + _golden_suppl
         print(f"[run_valuation] {ticker} — supplemented with {len(_golden_suppl)} golden CSV facts")
 
-    base_table = build_fact_table(raw_facts)
+    base_table = to_analytics_vnd_bn(build_fact_table(raw_facts))
     full_table = compute_derived(base_table)
     fy_periods = sorted(p for p in periods_sorted(full_table) if p.endswith("FY"))
 
@@ -386,7 +391,10 @@ def run_valuation(
     forecast = run_forecast(
         ticker=ticker,
         fact_table=full_table,
-        assumptions=ForecastAssumptions(assumption_status="default_unapproved"),
+        assumptions=ForecastAssumptions(
+            assumption_status=assumption_status,
+            debt_schedule_approved=auto_approve_assumptions,
+        ),
     )
     for w in forecast.warnings:
         print(f"  WARN (forecast): {w}")
@@ -417,7 +425,7 @@ def run_valuation(
     # Wire forecast.tax_policy → WACCAssumptions so FCFF EBIT(1-T) uses the same
     # effective tax rate as the forecast P&L (avoids silent rate mismatch).
     wacc_assumptions = WACCAssumptions(
-        assumption_status="default_unapproved",
+        assumption_status=assumption_status,
         tax_policy=forecast.tax_policy,
     )
     fcff_result = compute_fcff(
@@ -437,7 +445,7 @@ def run_valuation(
 
     # ── FCFE valuation (Net Income+D&A-CAPEX-DeltaNWC+NetBorrowing, discounted at Re) ──
     print(f"\n[run_valuation] {ticker} — FCFE valuation (NI+D&A-CAPEX-DeltaNWC+NetBorr, discounted at Re)")
-    coe_assumptions = CostOfEquityAssumptions(assumption_status="default_unapproved")
+    coe_assumptions = CostOfEquityAssumptions(assumption_status=assumption_status)
     fcfe_result = compute_fcfe(
         ticker=ticker,
         forecast=forecast,
@@ -492,7 +500,7 @@ def run_valuation(
     if bd['margin_of_safety'] is not None:
         print(f"  Margin of Safety:     {bd['margin_of_safety']:.2%}")
     if bd.get('fcff_fcfe_gap_pct') is not None:
-        print(f"  FCFF/P/E Gap:         {bd['valuation_gap_pct']:.2%}")
+        print(f"  FCFF/FCFE Gap:        {bd['fcff_fcfe_gap_pct']:.2%}")
     for w in blend.warnings:
         print(f"  WARN (blend): {w}")
 
@@ -660,7 +668,7 @@ def run_valuation(
         tax_policy_approved=_tax_approved,
         dividend_schedule_approved=(_div_method != "missing"),
         peer_multiples_approved=(_mult_status not in ("pending_peer_dataset", "no_peer_data")),
-        terminal_growth_approved=False,    # always requires analyst sign-off
+        terminal_growth_approved=auto_approve_assumptions,
         final_recommendation_approved=False,
     )
     print(f"\n[run_valuation] {ticker} — Assumption gate: {gate.status}")
@@ -696,6 +704,7 @@ def run_valuation(
         "target_pe": target_pe,
         "target_pb": target_pb,
         "target_ev_ebitda": target_ev_ebitda,
+        "auto_approve_assumptions": auto_approve_assumptions,
         "note": "Assumptions are defaults — must be reviewed and approved before use in final reports.",
     }
     formula_version = "valuation_v1_code_first_fcff_fcfe_blend"
@@ -857,7 +866,7 @@ def run_valuation(
 
     VALUATION_DIR.mkdir(parents=True, exist_ok=True)
     ts = generated_at.strftime("%Y%m%dT%H%M%S")
-    out_path = VALUATION_DIR / f"{ticker}_{ts}_valuation.json"
+    out_path = VALUATION_DIR / "valuation.json"
     out_path.write_text(json.dumps(artifact, indent=2, default=str), encoding="utf-8")
     print(f"\n[run_valuation] Artifact saved: {out_path}")
 
@@ -872,14 +881,15 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--ticker", required=True)
-    parser.add_argument("--from-year", type=int, default=MVP_FROM_YEAR, dest="from_year")
-    parser.add_argument("--to-year", type=int, default=MVP_TO_YEAR, dest="to_year")
+    parser.add_argument("--from-year", type=int, default=DEFAULT_FROM_YEAR, dest="from_year")
+    parser.add_argument("--to-year", type=int, default=DEFAULT_TO_YEAR, dest="to_year")
     parser.add_argument("--wacc", type=float, default=0.10)
     parser.add_argument("--terminal-growth", type=float, default=0.03, dest="terminal_growth")
     parser.add_argument("--forecast-years", type=int, default=5, dest="forecast_years")
     parser.add_argument("--target-pe", type=float, default=15.0, dest="target_pe")
     parser.add_argument("--target-pb", type=float, default=2.5, dest="target_pb")
     parser.add_argument("--target-ev-ebitda", type=float, default=10.0, dest="target_ev_ebitda")
+    parser.add_argument("--auto-approve-assumptions", action="store_true", dest="auto_approve_assumptions")
     return parser.parse_args()
 
 
@@ -895,6 +905,7 @@ def main() -> None:
         target_pe=args.target_pe,
         target_pb=args.target_pb,
         target_ev_ebitda=args.target_ev_ebitda,
+        auto_approve_assumptions=args.auto_approve_assumptions,
     )
     print("\n[run_valuation] done")
 

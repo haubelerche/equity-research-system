@@ -159,13 +159,13 @@ def link_events_to_periods(
 def _load_from_db(ticker: str) -> list[dict[str, Any]]:
     """Load catalyst events for a ticker from the database."""
     import os
-    import psycopg2
     import psycopg2.extras
+    from backend.database.config import connect_with_retry
     dsn = os.getenv("DATABASE_URL", "")
     if not dsn:
         return []
     try:
-        conn = psycopg2.connect(dsn)
+        conn = connect_with_retry(dsn)
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(
                 """

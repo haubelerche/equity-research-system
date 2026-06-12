@@ -177,6 +177,8 @@
   cafef_fields: [LaiCoSoBanToanBo, LaiBinhQuanTrenCoPhieu]
   patterns:
     - "lai co ban tren co phieu"
+    - "lai co ban tren c. phieu"
+    - "eps"
     - "eps co ban"
     - "lai co ban moi co phieu"
     - "lai suy giam tren co phieu"

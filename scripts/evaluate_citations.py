@@ -1,4 +1,4 @@
-"""Citation coverage evaluation gate � Phase 5 citation pipeline.
+"""Citation coverage evaluation gate  Phase 5 citation pipeline.
 
 Validates that every quantitative claim in a report has a valid citation that
 resolves to a real source_id in ingest.sources (or the citation map artifact).
@@ -11,9 +11,9 @@ Rules (all deterministic, no LLM):
   4. No citation may point to a forbidden generic source label.
 
 Exit codes:
-  0 � all gates pass (EXPORT ALLOWED)
-  1 � one or more critical gates fail (EXPORT BLOCKED)
-  2 � non-critical warnings only (EXPORT ALLOWED WITH WARNINGS)
+  0  all gates pass (EXPORT ALLOWED)
+  1  one or more critical gates fail (EXPORT BLOCKED)
+  2  non-critical warnings only (EXPORT ALLOWED WITH WARNINGS)
 
 Usage:
     python scripts/evaluate_citations.py --ticker DHG --report reports/latest.md
@@ -41,8 +41,9 @@ if _env_file.exists():
             os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
 
 ROOT = Path(_PROJECT_ROOT)
-REPORTS_DIR = ROOT / "reports"
-ARTIFACTS_DIR = ROOT / "artifacts" / "reports"
+RUN_DIR = ROOT / "storage" / "runs" / os.environ.get("RUN_ID", "missing_run_id")
+REPORTS_DIR = RUN_DIR
+ARTIFACTS_DIR = RUN_DIR
 
 # Window (in characters) in which a [^key] must appear near a quantitative claim
 _CITATION_WINDOW = 150
@@ -89,12 +90,12 @@ _FORBIDDEN_LABELS = {
 
 
 def _load_citation_map(ticker: str) -> dict:
-    """Load the most recent citation map JSON for the ticker."""
-    candidates = sorted(ARTIFACTS_DIR.glob(f"{ticker.upper()}_*_citation.json"), reverse=True)
-    if not candidates:
+    """Load the run-scoped evidence pack."""
+    path = ARTIFACTS_DIR / "evidence_pack.json"
+    if not path.exists():
         return {}
     try:
-        data = json.loads(candidates[0].read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8"))
         return data.get("citation_map", {})
     except Exception:
         return {}
@@ -107,7 +108,7 @@ def _source_id_exists(source_id: str) -> bool:
         svc = RetrievalService()
         return svc.source_exists(source_id)
     except Exception:
-        return True  # DB unavailable � don't block on this check
+        return True  # DB unavailable  don't block on this check
 
 
 def _find_quantitative_claims(text: str) -> list[tuple[int, str]]:
@@ -283,7 +284,7 @@ def _print_report(result: dict) -> None:
     report = result.get("report", "")
 
     print(f"\n{'='*65}")
-    print(f"  CITATION EVALUATION � {ticker}")
+    print(f"  CITATION EVALUATION  {ticker}")
     print(f"  Report: {Path(report).name}")
     print(f"{'='*65}")
     print(f"  Citation map entries : {result.get('citation_map_entries', 0)}")
@@ -311,11 +312,11 @@ def _print_report(result: dict) -> None:
 
     print()
     if status == "FAIL":
-        print(f"  EXPORT BLOCKED � critical gate(s) failed: {result['critical_fails']}")
+        print(f"  EXPORT BLOCKED  critical gate(s) failed: {result['critical_fails']}")
     elif status == "WARN":
         print("  EXPORT ALLOWED WITH WARNINGS")
     else:
-        print("  EXPORT ALLOWED � all citation gates pass")
+        print("  EXPORT ALLOWED  all citation gates pass")
 
     print(f"{'='*65}\n")
 
@@ -346,8 +347,8 @@ def parse_args() -> argparse.Namespace:
 
 
 def _find_latest_report(ticker: str) -> Path | None:
-    candidates = sorted(REPORTS_DIR.glob(f"{ticker.upper()}_*.md"), reverse=True)
-    return candidates[0] if candidates else None
+    path = REPORTS_DIR / "report.md"
+    return path if path.exists() else None
 
 
 def main() -> None:

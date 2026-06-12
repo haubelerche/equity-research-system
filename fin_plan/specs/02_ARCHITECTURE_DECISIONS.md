@@ -44,28 +44,28 @@ source_versions
 ```
 
 **Consequences:**
-- Local development requires PostgreSQL. Default DSN: `postgresql://maer:maer_local@localhost:5432/maer_dev`.
-- `DATABASE_URL` environment variable overrides the default.
+- All environments use Supabase PostgreSQL. `DATABASE_URL` is required; local PostgreSQL fallbacks are prohibited.
 - If PostgreSQL is unavailable, connectors fail loudly — no silent degradation.
 
 **Outstanding:** The SQL migration/init script is not yet committed to this repository. This is a blocker for new contributors. Add a `db/migrations/` or `backend/database/init_schema.sql` in Phase 2.
 
 ---
 
-## ADR-003 — Milvus for Vector Search (Evidence Retrieval)
+## ADR-003 — PostgreSQL/pgvector for Vector Search (Evidence Retrieval)
 
 **Date:** 2026-05-22
 **Status:** Deferred (Phase 5)
 
 **Context:**
-`backend/database/milvus_store.py` and `backend/retrieval.py` reference Milvus as the vector store for document chunk retrieval.
+`backend/retrieval.py` and the chunk embedding pipeline now use PostgreSQL with `pgvector` for document chunk retrieval.
 
 **Decision:**
-Do not activate Milvus until Phase 5. The retrieval service is a stub. Phase 2 and 3 work entirely from PostgreSQL facts.
+Keep embeddings in `ingest.document_chunks` and use PostgreSQL as the single retrieval backend. Do not introduce a separate vector database unless scale or isolation requirements materially exceed the MVP envelope.
 
 **Consequences:**
-- Phases 2–4 have no vector search dependency.
-- Phase 5 must provision Milvus (local Docker or managed) before the citation pipeline can function.
+- Phases 2–4 have no additional vector service dependency.
+- Retrieval, metadata filters, and embeddings stay in one operational store.
+- The citation pipeline can run on Supabase/Postgres without Milvus.
 
 ---
 

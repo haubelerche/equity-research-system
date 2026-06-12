@@ -369,7 +369,7 @@ def _run_ocr_pipeline(
     """
     from backend.documents.pdf_extractor import extract_from_pdf_ocr
     from backend.documents.ocr_artifacts import (
-        compute_file_checksum, init_ocr_run, save_candidate_rows, finalize_ocr_run,
+        compute_file_checksum, init_ocr_run, save_candidate_rows, save_page_text, finalize_ocr_run,
     )
     from backend.documents.ocr_candidate_facts import from_extracted_rows, save_candidate_facts
     from backend.documents.ocr_validation import validate_candidate_facts, load_known_metric_ids
@@ -389,7 +389,7 @@ def _run_ocr_pipeline(
     try:
         checksum = compute_file_checksum(pdf_path)
         document_id = f"{ticker}_{fiscal_year}_{checksum[:12]}"
-        ocr_artifacts_dir = ROOT / "data" / "ocr_artifacts"
+        ocr_artifacts_dir = ROOT / "storage" / "sources" / "ocr_artifacts"
         meta, run_dir = init_ocr_run(
             ticker=ticker,
             fiscal_year=fiscal_year,
@@ -414,6 +414,7 @@ def _run_ocr_pipeline(
             fiscal_year=fiscal_year,
             document_title=document_title,
             lang="vie+eng",
+            page_text_callback=lambda page_number, text: save_page_text(run_dir, page_number, text),
         )
     except Exception as exc:  # noqa: BLE001
         print(f"[auto_ingest] OCR extraction error: {exc}")

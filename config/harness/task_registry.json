@@ -37,8 +37,8 @@
     {
       "phase_id": "phase_7_report_artifact_writer_decomposition",
       "status": "completed",
-      "commitment": "Extract low-risk citation artifact I/O from scripts/generate_report.py without changing the returned citation artifact contract.",
-      "acceptance_check": "Citation artifact writer tests and report/harness targeted tests pass."
+      "commitment": "Keep legacy report helpers outside production and require the six-agent harness to assemble report artifacts from explicit run-scoped artifact refs.",
+      "acceptance_check": "Report assembler, citation artifact writer, render/publish, and harness targeted tests pass without production imports from DEV-ONLY scripts."
     }
   ]
 }

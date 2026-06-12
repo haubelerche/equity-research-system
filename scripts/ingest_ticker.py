@@ -5,7 +5,7 @@ Usage:
     python scripts/ingest_ticker.py --ticker IMP --years 3 --skip-catalysts
 
 Requires:
-    DATABASE_URL env var (default: postgresql://maer:maer_local@localhost:5432/maer_dev)
+    DATABASE_URL env var pointing to Supabase PostgreSQL
     vnstock installed (pip install vnstock)
 """
 from __future__ import annotations
@@ -28,6 +28,8 @@ from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
+
 # Auto-load .env if present (allows running without exporting DATABASE_URL manually)
 _env_file = Path(__file__).resolve().parents[1] / ".env"
 if _env_file.exists():
@@ -39,10 +41,6 @@ if _env_file.exists():
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS_DIR = ROOT / "artifacts" / "runs"
-
-MVP_FROM_YEAR = 2021
-MVP_TO_YEAR = 2025
-
 
 def _load_universe_segment(ticker: str) -> str:
     from backend.dataset.config_io import load_universe_rows
@@ -58,8 +56,8 @@ def _ingest_financials(
     store: Any,
     registry: Any,
     period: str = "year",
-    from_year: int = MVP_FROM_YEAR,
-    to_year: int = MVP_TO_YEAR,
+    from_year: int = DEFAULT_FROM_YEAR,
+    to_year: int = DEFAULT_TO_YEAR,
     provider: str = "auto",
 ) -> dict[str, Any]:
     from scripts.connectors.vnstock_finance_connector import sync_financial_for_ticker
@@ -144,8 +142,8 @@ def ingest_ticker(
     years: int,
     skip_catalysts: bool = False,
     period: str = "year",
-    from_year: int = MVP_FROM_YEAR,
-    to_year: int = MVP_TO_YEAR,
+    from_year: int = DEFAULT_FROM_YEAR,
+    to_year: int = DEFAULT_TO_YEAR,
     provider: str = "auto",
     debug_coverage: bool = False,
     strict_completeness: bool = False,
@@ -257,16 +255,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--from-year",
         type=int,
-        default=MVP_FROM_YEAR,
+        default=DEFAULT_FROM_YEAR,
         dest="from_year",
-        help=f"First fiscal year to target (default: {MVP_FROM_YEAR}).",
+        help=f"First fiscal year to target (default: {DEFAULT_FROM_YEAR}).",
     )
     parser.add_argument(
         "--to-year",
         type=int,
-        default=MVP_TO_YEAR,
+        default=DEFAULT_TO_YEAR,
         dest="to_year",
-        help=f"Last fiscal year to target (default: {MVP_TO_YEAR}).",
+        help=f"Last fiscal year to target (default: {DEFAULT_TO_YEAR}).",
     )
     parser.add_argument(
         "--provider",

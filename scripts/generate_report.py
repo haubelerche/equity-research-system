@@ -1,21 +1,25 @@
-# DEV-ONLY — production runs use run_research.py
-"""Phase 6 -> Report Generation (Enhanced).
+# DEV-ONLY: production report assembly runs through scripts/run_research.py.
+"""Developer-only legacy report generator.
 
 Reads from a research snapshot (frozen accepted facts) and the latest
 valuation artifact, then generates a structured Markdown equity research
 report with:
-  - Forecast income statement 5 years (2026F->2030F)
+  - Forecast income statement 5 years (2026F–2030F)
   - FCFF valuation table with full breakdown
   - User-readable citations (source_title, value, period)
   - Draft BUY/HOLD/SELL rating based on valuation upside
   - Evidence without truncation; deduplicated catalyst events
 
-No LLM is called -> all numbers come from canonical facts and
+No LLM is called; all numbers come from canonical facts and
 deterministic valuation/forecast engines.
 
+This module is not a production entrypoint. It writes only to the local
+``storage/dev_report_runs/<DEV_REPORT_RUN_ID>`` namespace and refuses
+production run-artifact roots such as ``artifacts/runs`` or ``storage/runs``.
+
 Usage:
-    python scripts/generate_report.py --ticker DHG
-    python scripts/generate_report.py --ticker DHG --report-type full_report
+    set DEV_REPORT_RUN_ID=dev_dhg_manual
+    python scripts/generate_report.py --ticker DHG --report-type dev_full_report
     python scripts/generate_report.py --ticker DHG --snapshot-id snap_abc123
 """
 from __future__ import annotations
@@ -23,6 +27,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -45,6 +50,7 @@ import psycopg2
 import psycopg2.extras
 
 from backend.analytics.approval_gate import build_gate_from_artifacts
+from backend.database.config import require_database_url
 from backend.reporting.citation_artifact_writer import (
     build_citation_artifact,
     write_citation_artifact,
@@ -52,10 +58,43 @@ from backend.reporting.citation_artifact_writer import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORTS_DIR = ROOT / "reports"
-VALUATION_DIR = ROOT / "artifacts" / "valuation"
-FORECAST_DIR = ROOT / "artifacts" / "forecast"
-VALUATION_RESULTS_DIR = ROOT / "artifacts" / "valuation_results"
+DEV_REPORT_ROOT = ROOT / "storage" / "dev_report_runs"
+PRODUCTION_ARTIFACT_ROOTS = (
+    ROOT / "artifacts" / "runs",
+    ROOT / "storage" / "runs",
+)
+
+
+def _safe_dev_run_id(raw: str | None) -> str:
+    value = (raw or "manual_dev").strip()
+    value = re.sub(r"[^A-Za-z0-9_.-]+", "_", value)
+    value = value.strip("._-")
+    return value[:120] or "manual_dev"
+
+
+def _is_relative_to(path: Path, parent: Path) -> bool:
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
+
+def _assert_dev_only_path(path: Path) -> None:
+    resolved = path.resolve(strict=False)
+    for root in PRODUCTION_ARTIFACT_ROOTS:
+        if _is_relative_to(resolved, root.resolve(strict=False)):
+            raise RuntimeError(
+                "scripts/generate_report.py is DEV-ONLY and refuses production "
+                f"artifact paths: {resolved}"
+            )
+
+
+RUN_DIR = DEV_REPORT_ROOT / _safe_dev_run_id(os.environ.get("DEV_REPORT_RUN_ID"))
+REPORTS_DIR = RUN_DIR
+VALUATION_DIR = RUN_DIR
+FORECAST_DIR = RUN_DIR
+VALUATION_RESULTS_DIR = RUN_DIR
 
 MVP_FROM_YEAR = 2021
 MVP_TO_YEAR = 2025
@@ -99,12 +138,13 @@ _SOURCE_TYPE_LABEL = {
 
 
 def _dsn() -> str:
-    return os.getenv("DATABASE_URL", "postgresql://maer:maer_local@localhost:5432/maer_dev")
+    return require_database_url()
 
 
 def _load_latest_valuation(ticker: str) -> dict | None:
-    files = sorted(VALUATION_DIR.glob(f"{ticker}_*_valuation.json"), reverse=True)
-    return json.loads(files[0].read_text(encoding="utf-8")) if files else None
+    _assert_dev_only_path(VALUATION_DIR)
+    path = VALUATION_DIR / "valuation.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
 
 
 def _load_snapshot_facts(snapshot_id: str) -> list[dict]:
@@ -116,7 +156,7 @@ def _load_evidence_chunks(conn, ticker: str, limit: int = 30) -> list[dict]:
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute(
             """
-            SELECT dc.chunk_id, dc.source_id, dc.section_title,
+            SELECT dc.chunk_id, dc.source_doc_id AS source_id, dc.section_title,
                    dc.chunk_text, dc.fiscal_year, dc.metadata_json
             FROM ingest.document_chunks dc
             WHERE dc.ticker = %s
@@ -199,7 +239,7 @@ def _build_citation_map(facts: list[dict]) -> dict[str, dict]:
                     raw_title = label_val
                     break
         if not raw_title:
-            raw_title = "D? li?u t->i ch->nh"
+            raw_title = "Dữ liệu tài chính"
         source_title = f"{raw_title}{tier_suffix}"
 
         cmap[key] = {
@@ -239,9 +279,9 @@ def _footnotes(cmap: dict, claims: list[tuple], mode: str = "draft") -> str:
 
     Phase 6: footnotes are verification-aware.
       - Verified claim (has official_document_id): cite the OFFICIAL document, noting the
-        provider cross-check ("d-> d?i so->t v?i ... qua vnstock").
+        provider cross-check ("đã đối soát với ... qua vnstock").
       - Unverified Tier-3 claim: render the provider source but clearly label it
-        "?? chua ki?m ch?ng b?ng ngu?n ch->nh th?c" (allowed in draft; blocks final export).
+        "Chưa kiểm chứng bằng nguồn chính thức" (allowed in draft; blocks final export).
     """
     lines: list[str] = []
     seen: set[str] = set()
@@ -261,21 +301,21 @@ def _footnotes(cmap: dict, claims: list[tuple], mode: str = "draft") -> str:
         is_derived = rec.get("is_derived", False)
 
         if official_id is not None:
-            # Verified against an official document ? official-source footnote format.
-            doc_title = rec.get("official_document_title") or "t->i li?u ch->nh th?c"
+            # Verified against an official document — official-source footnote format.
+            doc_title = rec.get("official_document_title") or "tài liệu chính thức"
             issuer = rec.get("official_issuer") or ""
             provider = (rec.get("source_uri") or "").removeprefix("vnstock://").split("/")[0].upper()
             issuer_part = f", {issuer}" if issuer else ""
-            cross = f" D? li?u d-> du?c d?i so->t v?i {provider} qua vnstock t?i th?i di?m ingest." if provider else ""
+            cross = f" Dữ liệu đã được đối soát với {provider} qua vnstock tại thời điểm ingest." if provider else ""
             lines.append(
-                f"{tag}: **{label}** nam {year} -> {val_str}, du?c tr->ch t? "
-                f"_{doc_title}_{issuer_part}, k? {period}.{cross}\n"
-                f"_(Verified -> official_document_id={official_id} -> fact_id={fact_id})_"
+                f"{tag}: **{label}** năm {year} — {val_str}, được trích từ "
+                f"_{doc_title}_{issuer_part}, kỳ {period}.{cross}\n"
+                f"_(Verified · official_document_id={official_id} · fact_id={fact_id})_"
             )
             continue
 
         # No official linkage.
-        src_title = rec.get("source_title") or "Ngu?n kh->ng x->c d?nh"
+        src_title = rec.get("source_title") or "Nguồn không xác định"
         src_uri = rec.get("source_uri") or ""
         tier_label = rec.get("tier_label") or (f"[Tier {tier}]" if tier is not None else "")
         src_parts = [f"_{src_title}_"]
@@ -286,16 +326,16 @@ def _footnotes(cmap: dict, claims: list[tuple], mode: str = "draft") -> str:
         src_line = " | ".join(src_parts)
         unverified_note = ""
         if not is_derived and (tier is None or tier >= 3):
-            unverified_note = "\n?? **Chua ki?m ch?ng b?ng ngu?n ch->nh th?c** -> s? li?u Tier 3 (API), ch? d->ng cho b?n nh->p."
+            unverified_note = "\n**Chưa kiểm chứng bằng nguồn chính thức** — số liệu Tier 3 (API), chỉ dùng cho bản nháp."
         lines.append(
-            f"{tag}: **{label}** -> {val_str}, k? {period}.\n"
-            f"Ngu?n: {src_line}{unverified_note}\n"
+            f"{tag}: **{label}** — {val_str}, kỳ {period}.\n"
+            f"Nguồn: {src_line}{unverified_note}\n"
             f"_(Internal: fact_id={fact_id})_"
         )
     return "\n\n".join(lines)
 
 
-# (draft_rating removed -> use AssumptionGate.recommendation_label() instead)
+# (draft_rating removed — use AssumptionGate.recommendation_label() instead)
 
 
 # -- Catalyst dedup -------------------------------------------------------------
@@ -321,41 +361,20 @@ def _dedup_catalyst_lines(text: str) -> str:
 
 def _has_text_corruption(text: str) -> bool:
     """Detect legacy mojibake patterns that must never reach a report file."""
-    markers = (
-        "\ufffd",
-        "\u00ef\u00bf\u00bd",
-        "B->o",
-        "c->o",
-        "C->ng",
-        "kh->ng",
-        "d->ng",
-        "Gi->",
-        "B->o c->o",
-        "Ch? ti->u",
-        "truy?n th?ng",
-        "D? ph->ng",
-        "L?i nhu?n",
+    import re
+
+    return (
+        "\ufffd" in text
+        or "\u00ef\u00bf\u00bd" in text
+        or bool(re.search(r"\b\w+(?:->|\?)\w+\b", text))
     )
-    return any(marker in text for marker in markers)
 
 
 def _assert_report_text_clean(text: str) -> None:
     """Block Markdown artifacts that still contain legacy text corruption."""
-    markers = (
-        "\ufffd",
-        "\u00ef\u00bf\u00bd",
-        "B->o",
-        "c->o",
-        "d? li?u",
-        "Ch? ti->u",
-        "Gi-> tr?",
-        "L?i nhu?n",
-    )
-    found = [marker for marker in markers if marker in text]
-    if found:
+    if _has_text_corruption(text):
         raise RuntimeError(
-            "Markdown report failed encoding preflight; broken markers found: "
-            + ", ".join(found)
+            "Markdown report failed encoding preflight; mojibake marker found."
         )
 
 
@@ -504,7 +523,7 @@ def _build_forecast_section(
     ticker: str,
     fact_table: dict,
     shares_mn: float | None,
-    forecast=None,   # ForecastArtifact -> pass pre-built to avoid triple computation
+    forecast=None,   # ForecastArtifact — pass pre-built to avoid triple computation
 ) -> tuple[str, dict]:
     """Run forecast engine and return (markdown_section, forecast_artifact_dict)."""
     if forecast is None:
@@ -519,14 +538,14 @@ def _build_forecast_section(
     artifact = forecast.to_dict()
 
     if not forecast.forecast_years:
-        return "_Kh->ng d? d? li?u l?ch s? d? d? ph->ng._\n", artifact
+        return "_Không đủ dữ liệu lịch sử để dự phóng._\n", artifact
 
     hist = forecast.historical_periods
     fcast = [fy.label for fy in forecast.forecast_years]
     all_labels = hist + fcast
     n_hist = len(hist)
 
-    header = "| Ch? ti->u (t? VND) | " + " | ".join(all_labels) + " |"
+    header = "| Chỉ tiêu (tỷ VND) | " + " | ".join(all_labels) + " |"
     sep = "|---|" + "---|" * len(all_labels)
 
     def row(label: str, hist_vals: list, fcast_vals: list, fmt=_fmt_bn) -> str:
@@ -581,27 +600,27 @@ def _build_forecast_section(
 
     kqkd_table = [
         header, sep,
-        row("Doanh thu thu?n", hist_rev, fcast_rev),
-        row("Gi-> v?n h->ng b->n (COGS)", hist_cogs, fcast_cogs),
-        row("L?i nhu?n g?p", hist_gp, fcast_gp),
-        row("Bi->n l?i nhu?n g?p (%)", hist_gm, fcast_gm, _fmt_pct),
-        row("Chi ph-> SGA (b->n h->ng + QLDN)", hist_sga, fcast_sga),
+        row("Doanh thu thuần", hist_rev, fcast_rev),
+        row("Giá vốn hàng bán (COGS)", hist_cogs, fcast_cogs),
+        row("Lợi nhuận gộp", hist_gp, fcast_gp),
+        row("Biên lợi nhuận gộp (%)", hist_gm, fcast_gm, _fmt_pct),
+        row("Chi phí SGA (bán hàng + QLDN)", hist_sga, fcast_sga),
         row("EBIT", [None]*n_hist, fcast_ebit),
         row("EBITDA", [None]*n_hist, fcast_ebitda),
-        row("Chi ph-> l->i vay", hist_ie, fcast_ie),
-        row("L?i nhu?n tru?c thu? (PBT)", hist_pbt, fcast_pbt),
-        row("Chi ph-> thu? TNDN", hist_tax, fcast_tax),
-        row("L?i nhu?n sau thu? (C-> m?)", hist_ni, fcast_ni),
+        row("Chi phí lãi vay", hist_ie, fcast_ie),
+        row("Lợi nhuận trước thuế (PBT)", hist_pbt, fcast_pbt),
+        row("Chi phí thuế TNDN", hist_tax, fcast_tax),
+        row("Lợi nhuận sau thuế (CĐ mẹ)", hist_ni, fcast_ni),
         row("EPS (VND/CP)", hist_eps, fcast_eps, _fmt_vnd),
     ]
 
     # Balance sheet forecast table
     bs_table = [
-        "| Ch? ti->u (t? VND) | " + " | ".join(all_labels) + " |",
+        "| Chỉ tiêu (tỷ VND) | " + " | ".join(all_labels) + " |",
         "|---|" + "---|" * len(all_labels),
-        row("T?ng t->i s?n", hist_assets, fcast_assets),
-        row("V?n ch? s? h?u", hist_equity, fcast_equity),
-        row("T?ng n? vay", hist_debt, fcast_debt),
+        row("Tổng tài sản", hist_assets, fcast_assets),
+        row("Vốn chủ sở hữu", hist_equity, fcast_equity),
+        row("Tổng nợ vay", hist_debt, fcast_debt),
     ]
 
     drivers = forecast.drivers
@@ -623,7 +642,7 @@ def _build_forecast_section(
         forecast.dividend_schedule.historical_payout_ratio
         if forecast.dividend_schedule else None
     )
-    _payout_str = f"{_hist_payout:.1%}" if _hist_payout is not None else "0% (kh->ng c-> d? li?u)"
+    _payout_str = f"{_hist_payout:.1%}" if _hist_payout is not None else "0% (không có dữ liệu)"
 
     # Extended BS table: add net_borrowing and dividend rows
     fcast_nb  = [fy.net_borrowing for fy in forecast.forecast_years]
@@ -634,41 +653,41 @@ def _build_forecast_section(
     hist_re   = [None] * len(hist)
 
     bs_table.extend([
-        row("Vay r->ng (Net Borrowing)", hist_nb, fcast_nb),
-        row("C? t?c ti?n m?t chi tr?", hist_div, fcast_div),
-        row("L?i nhu?n gi? l?i", hist_re, fcast_re),
+        row("Vay ròng (Net Borrowing)", hist_nb, fcast_nb),
+        row("Cổ tức tiền mặt chi trả", hist_div, fcast_div),
+        row("Lợi nhuận giữ lại", hist_re, fcast_re),
     ])
 
     # Keep technical diagnostics in the forecast artifact, not in the report.
     warn_lines = ""
 
-    section = f"""### 3.4 D? ph->ng KQKD 2026F->2030F
+    section = f"""### 3.4 Dự phóng KQKD 2026F–2030F
 
 {chr(10).join(kqkd_table)}
 
-_L?ch s?: {', '.join(hist)} | D? ph->ng (in d?m): {', '.join(fcast)}_
+_Lịch sử: {', '.join(hist)} | Dự phóng (in đậm): {', '.join(fcast)}_
 
-**Gi? d?nh d? ph->ng (chua du?c chuy->n gia ph-> duy?t):**
+**Giả định dự phóng (chưa được chuyên gia phê duyệt):**
 
-| Gi? d?nh | Gi-> tr? | Co s? |
+| Giả định | Giá trị | Cơ sở |
 |---|---|---|
-| T?c d? tang tru?ng doanh thu | {rev_g_val:.1%}/nam | CAGR l?ch s? = {cagr_str} (gi?i h?n ->25%) |
-| Bi->n l?i nhu?n g?p | {gm_val:.1%} | Trung v? l?ch s? |
-| Chi ph-> SGA/doanh thu | {sga_val:.1%} | Trung v? l?ch s? |
-| Kh?u hao/doanh thu | {dep_val:.1%} | Trung v? l?ch s? |
-| CAPEX/doanh thu | {capex_val:.1%} | Trung v? l?ch s? |
-| Thu? su?t th?c t? | {tax_val:.1%} | Trung v? l?ch s? |
-| Chi ph-> n? (cost of debt) | {cod_val:.2%} | {cod_method} |
-| L->i vay = n? b->nh qu->n -> cost_of_debt | -> | Driver-based (kh->ng ph?i % doanh thu) |
-| ?NWC | 2% thay d?i doanh thu | U?c t->nh don gi?n |
-| T? l? chi tr? c? t?c (payout) | {_payout_str} | {_div_method} |
+| Tốc độ tăng trưởng doanh thu | {rev_g_val:.1%}/năm | CAGR lịch sử = {cagr_str} (giới hạn ±25%) |
+| Biên lợi nhuận gộp | {gm_val:.1%} | Trung vị lịch sử |
+| Chi phí SGA/doanh thu | {sga_val:.1%} | Trung vị lịch sử |
+| Khấu hao/doanh thu | {dep_val:.1%} | Trung vị lịch sử |
+| CAPEX/doanh thu | {capex_val:.1%} | Trung vị lịch sử |
+| Thuế suất thực tế | {tax_val:.1%} | Trung vị lịch sử |
+| Chi phí nợ (cost of debt) | {cod_val:.2%} | {cod_method} |
+| Lãi vay = nợ bình quân × cost_of_debt | — | Driver-based (không phải % doanh thu) |
+| ΔNWC | 2% thay đổi doanh thu | Ước tính đơn giản |
+| Tỷ lệ chi trả cổ tức (payout) | {_payout_str} | {_div_method} |
 {warn_lines}
 
-### 3.5 D? ph->ng b?ng c->n d?i k? to->n (Ch? ti->u ch->nh)
+### 3.5 Dự phóng bảng cân đối kế toán (Chỉ tiêu chính)
 
 {chr(10).join(bs_table)}
 
-_Luu ->: M-> h->nh driver-based -> l->i vay = n? b->nh qu->n -> cost_of_debt ({cod_val:.2%}); n? vay theo phuong ph->p {_debt_method}; v?n ch? c?p nh?t qua retained earnings sau khi tr? c? t?c (payout {_payout_str})._
+_Lưu ý: Mô hình driver-based — lãi vay = nợ bình quân × cost_of_debt ({cod_val:.2%}); nợ vay theo phương pháp {_debt_method}; vốn chủ cập nhật qua retained earnings sau khi trả cổ tức (payout {_payout_str})._
 """
     return section, artifact
 
@@ -681,7 +700,7 @@ def _build_fcff_section(
     forecast_artifact_dict: dict,
     current_price: float | None,
     shares_mn: float | None,
-    forecast=None,   # ForecastArtifact -> pass pre-built to avoid recomputation
+    forecast=None,   # ForecastArtifact — pass pre-built to avoid recomputation
 ) -> tuple[str, dict]:
     """Run FCFF valuation and return (markdown_section, fcff_artifact_dict)."""
     if forecast is None:
@@ -729,39 +748,39 @@ def _build_fcff_section(
     # Keep technical diagnostics in the valuation artifact, not in the report.
     warn_lines = ""
 
-    section = f"""**C->ng th?c:** FCFF = EBIT -> (1 - T) + Kh?u hao - CAPEX - ?VL->
+    section = f"""**Công thức:** FCFF = EBIT × (1 - T) + Khấu hao - CAPEX - ΔVLĐ
 
-| Nam | EBIT | EBIT(1-T) | Kh?u hao | CAPEX | ?VL-> | FCFF | PV(FCFF) |
+| Năm | EBIT | EBIT(1-T) | Khấu hao | CAPEX | ΔVLĐ | FCFF | PV(FCFF) |
 |---|---|---|---|---|---|---|---|
 {chr(10).join(fcff_rows)}
 
-| | T? VND |
+| | Tỷ VND |
 |---|---|
-| T?ng PV(FCFF) | {_fmt_bn(artifact.get("sum_pv_fcff"))} |
-| Gi-> tr? cu?i k? (Terminal Value) | {_fmt_bn(artifact.get("terminal_value"))} |
+| Tổng PV(FCFF) | {_fmt_bn(artifact.get("sum_pv_fcff"))} |
+| Giá trị cuối kỳ (Terminal Value) | {_fmt_bn(artifact.get("terminal_value"))} |
 | PV(Terminal Value) | {_fmt_bn(artifact.get("pv_terminal_value"))} |
-| Gi-> tr? doanh nghi?p (EV) | {_fmt_bn(artifact.get("enterprise_value"))} |
-| N? r->ng (Net Debt) | {_fmt_bn(artifact.get("net_debt"))} |
-| Gi-> tr? v?n ch? (Equity Value) | {_fmt_bn(artifact.get("equity_value"))} |
-| S? c? phi?u (tri?u CP) | {_fmt_bn(artifact.get("shares_mn"))} |
+| Giá trị doanh nghiệp (EV) | {_fmt_bn(artifact.get("enterprise_value"))} |
+| Nợ ròng (Net Debt) | {_fmt_bn(artifact.get("net_debt"))} |
+| Giá trị vốn chủ (Equity Value) | {_fmt_bn(artifact.get("equity_value"))} |
+| Số cổ phiếu (triệu CP) | {_fmt_bn(artifact.get("shares_mn"))} |
 
-**Gi-> m?c ti->u FCFF: {target_str}**
-Upside so v?i gi-> th? tru?ng: **{upside_str}**
+**Giá mục tiêu FCFF: {target_str}**
+Upside so với giá thị trường: **{upside_str}**
 
-**Th->ng s? WACC (chua du?c chuy->n gia ph-> duy?t):**
+**Thông số WACC (chưa được chuyên gia phê duyệt):**
 
-| Th->ng s? | Gi-> tr? |
+| Thông số | Giá trị |
 |---|---|
-| L->i su?t phi r?i ro (rf) | {wacc_b['risk_free_rate']:.1%} |
+| Lãi suất phi rủi ro (rf) | {wacc_b['risk_free_rate']:.1%} |
 | Beta | {wacc_b['beta']:.2f} |
-| TSSL k? v?ng th? tru?ng (Rm) | {wacc_b['expected_market_return']:.1%} |
-| Chi ph-> v?n ch? (Ke) | {ke:.2%} |
-| Chi ph-> n? (Kd) | {kd:.1%} |
-| Thu? su?t th?c t? | {wacc_b['tax_rate']:.0%} |
+| TSSL kỳ vọng thị trường (Rm) | {wacc_b['expected_market_return']:.1%} |
+| Chi phí vốn chủ (Ke) | {ke:.2%} |
+| Chi phí nợ (Kd) | {kd:.1%} |
+| Thuế suất thực tế | {wacc_b['tax_rate']:.0%} |
 | WACC | **{artifact['wacc']:.2%}** |
-| T?c d? tang tru?ng cu?i k? (g) | {artifact['terminal_growth']:.1%} |
+| Tốc độ tăng trưởng cuối kỳ (g) | {artifact['terminal_growth']:.1%} |
 
-> **Luu ->:** T?t c? gi? d?nh WACC v-> d? ph->ng l-> _default_unapproved_ -> ph?i du?c chuy->n gia xem x->t tru?c khi s? d?ng cho quy?t d?nh d?u tu.
+> **Lưu ý:** Tất cả giả định WACC và dự phóng là _default_unapproved_ — phải được chuyên gia xem xét trước khi sử dụng cho quyết định đầu tư.
 {warn_lines}
 """
     return section, artifact
@@ -774,7 +793,7 @@ def _build_fcfe_section(
     fact_table: dict,
     current_price: float | None,
     shares_mn: float | None,
-    forecast=None,   # ForecastArtifact -> pass pre-built to avoid recomputation
+    forecast=None,   # ForecastArtifact — pass pre-built to avoid recomputation
 ) -> tuple[str, dict]:
     """Run FCFE valuation and return (markdown_section, fcfe_artifact_dict)."""
     if forecast is None:
@@ -829,43 +848,43 @@ def _build_fcfe_section(
         forecast.debt_schedule.forecast_method if forecast.debt_schedule else "missing"
     )
     _nb_note = (
-        f"Vay r->ng l?y t? debt_schedule (phuong ph->p: {_debt_method_fcfe})."
+        f"Vay ròng lấy từ debt_schedule (phương pháp: {_debt_method_fcfe})."
         if _nb_sched else
-        "Vay r->ng = 0 (kh->ng c-> d? li?u debt_schedule -> gi? d?nh c?u tr->c v?n ?n d?nh)."
+        "Vay ròng = 0 (không có dữ liệu debt_schedule — giả định cấu trúc vốn ổn định)."
     )
 
-    section = f"""**C->ng th?c:** FCFE = LNST + Kh?u hao - CAPEX - ?VL-> + Vay r->ng
+    section = f"""**Công thức:** FCFE = LNST + Khấu hao - CAPEX - ΔVLĐ + Vay ròng
 
-> FCFE chi?t kh?u b?ng Re (chi ph-> v?n ch?), **kh->ng d->ng WACC**.
-> FCFE cho tr?c ti?p Equity Value -> **kh->ng tr? n? r->ng l?n n?a**.
+> FCFE chiết khấu bằng Re (chi phí vốn chủ), **không dùng WACC**.
+> FCFE cho trực tiếp Equity Value — **không trừ nợ ròng lần nữa**.
 > {_nb_note}
 
-| Nam | LNST | Kh?u hao | CAPEX | ?VL-> | Vay r->ng | FCFE | PV(FCFE) |
+| Năm | LNST | Khấu hao | CAPEX | ΔVLĐ | Vay ròng | FCFE | PV(FCFE) |
 |---|---|---|---|---|---|---|---|
 {chr(10).join(fcfe_rows)}
 
-| | T? VND |
+| | Tỷ VND |
 |---|---|
-| T?ng PV(FCFE) | {_fmt_bn(artifact.get("sum_pv_fcfe"))} |
-| Gi-> tr? cu?i k? (Terminal Value FCFE) | {_fmt_bn(artifact.get("terminal_value"))} |
+| Tổng PV(FCFE) | {_fmt_bn(artifact.get("sum_pv_fcfe"))} |
+| Giá trị cuối kỳ (Terminal Value FCFE) | {_fmt_bn(artifact.get("terminal_value"))} |
 | PV(Terminal Value) | {_fmt_bn(artifact.get("pv_terminal_value"))} |
-| Gi-> tr? v?n ch? (Equity Value) | {_fmt_bn(artifact.get("equity_value"))} |
-| S? c? phi?u (tri?u CP) | {_fmt_bn(artifact.get("shares_mn"))} |
+| Giá trị vốn chủ (Equity Value) | {_fmt_bn(artifact.get("equity_value"))} |
+| Số cổ phiếu (triệu CP) | {_fmt_bn(artifact.get("shares_mn"))} |
 
-**Gi-> m?c ti->u FCFE: {target_str}**
-Upside so v?i gi-> th? tru?ng: **{upside_str}**
+**Giá mục tiêu FCFE: {target_str}**
+Upside so với giá thị trường: **{upside_str}**
 
-**Th->ng s? Re -> Extended CAPM (chua ph-> duy?t):**
+**Thông số Re — Extended CAPM (chưa phê duyệt):**
 
-| Th->ng s? | Gi-> tr? |
+| Thông số | Giá trị |
 |---|---|
-| L->i su?t phi r?i ro (Rf) | {coe_b['risk_free_rate']:.1%} |
+| Lãi suất phi rủi ro (Rf) | {coe_b['risk_free_rate']:.1%} |
 | Beta | {coe_b['beta']:.2f} |
-| Ph?n b-> r?i ro th? tru?ng (ERP) | {coe_b['equity_risk_premium']:.1%} |
-| Ph?n b-> quy m-> (Size Premium) | {coe_b['size_premium']:.1%} |
-| Ph?n b-> r?i ro ri->ng (Specific Risk) | {coe_b['specific_risk_premium']:.1%} |
-| Chi ph-> v?n ch? (Re) | **{re:.2%}** |
-| T?c d? tang tru?ng cu?i k? (g) | {artifact['terminal_growth']:.1%} |
+| Phần bù rủi ro thị trường (ERP) | {coe_b['equity_risk_premium']:.1%} |
+| Phần bù quy mô (Size Premium) | {coe_b['size_premium']:.1%} |
+| Phần bù rủi ro riêng (Specific Risk) | {coe_b['specific_risk_premium']:.1%} |
+| Chi phí vốn chủ (Re) | **{re:.2%}** |
+| Tốc độ tăng trưởng cuối kỳ (g) | {artifact['terminal_growth']:.1%} |
 {warn_lines}
 """
     return section, artifact
@@ -876,10 +895,8 @@ def _build_blend_section(
     fcff_artifact: dict,
     fcfe_artifact: dict,
     current_price: float | None,
-    forecast_artifact: dict | None = None,
-    target_pe: float = 15.0,
 ) -> tuple[str, dict]:
-    """Build 60% FCFF + 40% P/E Forward blend section."""
+    """Build 60% FCFF + 40% FCFE blend section."""
     from backend.analytics.blend import blend_dcf
     from backend.analytics.sensitivity import (
         build_blend_sensitivity_table,
@@ -888,48 +905,22 @@ def _build_blend_section(
 
     price_fcff = fcff_artifact.get("target_price_vnd")
 
-    # Compute P/E Forward price from EPS_FY1 × target_pe
-    price_pe_forward: float | None = None
-    eps_fy1: float | None = None
-    _pe_forward_warnings: list[str] = []
-    if forecast_artifact:
-        fy_list = forecast_artifact.get("forecast_years", [])
-        if fy_list:
-            first_fy = fy_list[0]
-            eps_fy1 = first_fy.get("eps") if isinstance(first_fy, dict) else getattr(first_fy, "eps", None)
-        if eps_fy1 and eps_fy1 > 0:
-            price_pe_forward = eps_fy1 * target_pe
-            _DEFAULT_PE = 15.0
-            if target_pe == _DEFAULT_PE:
-                _pe_forward_warnings.append(
-                    f"[PEForward] target_pe = {target_pe:.1f}x is the model default — "
-                    "no peer dataset was used. P/E Forward price should not be published "
-                    "without an analyst-validated peer-median P/E."
-                )
-
-    # Pass FCFE publishability flag from forecast artifact into blend gate
-    _fcfe_publishable: bool | None = None
-    _debt_sched_artifact = forecast_artifact.get("debt_schedule") if forecast_artifact else None
-    if isinstance(_debt_sched_artifact, dict):
-        _fcfe_publishable = _debt_sched_artifact.get("is_fcfe_publishable")
+    price_fcfe = fcfe_artifact.get("target_price_vnd")
 
     blend = blend_dcf(
         ticker=ticker,
         price_fcff=price_fcff,
-        price_pe_forward=price_pe_forward,
+        price_fcfe=price_fcfe,
         current_price_vnd=current_price,
         pv_terminal_value_fcff=fcff_artifact.get("pv_terminal_value"),
         enterprise_value_fcff=fcff_artifact.get("enterprise_value"),
-        fcfe_publishable=_fcfe_publishable,
     )
-    if _pe_forward_warnings:
-        blend.warnings.extend(_pe_forward_warnings)
     bd = blend.to_dict()
 
     target_str = f"{bd['target_price_dcf_vnd']:,.0f} VND/CP" if bd['target_price_dcf_vnd'] else "N/A"
     upside_str = f"{bd['upside_pct']:.1%}" if bd['upside_pct'] is not None else "N/A"
     mos_str    = f"{bd['margin_of_safety']:.1%}" if bd['margin_of_safety'] is not None else "N/A"
-    gap_str    = f"{bd['valuation_gap_pct']:.1%}" if bd.get('valuation_gap_pct') is not None else "N/A"
+    gap_str    = f"{bd['fcff_fcfe_gap_pct']:.1%}" if bd.get('fcff_fcfe_gap_pct') is not None else "N/A"
     tvw_str    = f"{bd['tv_weight_fcff']:.1%}" if bd.get('tv_weight_fcff') is not None else "N/A"
 
     tv_check  = compute_tv_weight(fcff_artifact.get("pv_terminal_value"), fcff_artifact.get("enterprise_value"))
@@ -938,22 +929,22 @@ def _build_blend_section(
     warn_lines = ""
 
     # Blend sensitivity grid (±2 steps around base)
-    blend_grid_md = "_Không có dữ liệu (FCFF hoặc P/E Forward unavailable)_"
-    if price_fcff and price_pe_forward:
+    blend_grid_md = "_Không có dữ liệu (FCFF hoặc FCFE unavailable)_"
+    if price_fcff and price_fcfe:
         step_f = max(5_000, round(price_fcff * 0.05 / 5_000) * 5_000)
-        step_pe = max(5_000, round(price_pe_forward * 0.05 / 5_000) * 5_000)
+        step_fe = max(5_000, round(price_fcfe * 0.05 / 5_000) * 5_000)
         p_fcff_range = [round(price_fcff + i * step_f) for i in range(-2, 3)]
-        p_pe_range = [round(price_pe_forward + i * step_pe) for i in range(-2, 3)]
-        grid = build_blend_sensitivity_table(p_fcff_range, p_pe_range, current_price)
-        grid_rows = ["| FCFF \\ P/E Fwd | " + " | ".join(f"{p:,.0f}" for p in p_pe_range) + " |",
-                     "|---" + "|---" * len(p_pe_range) + "|"]
+        p_fcfe_range = [round(price_fcfe + i * step_fe) for i in range(-2, 3)]
+        grid = build_blend_sensitivity_table(p_fcff_range, p_fcfe_range, current_price)
+        grid_rows = ["| FCFF \\ FCFE | " + " | ".join(f"{p:,.0f}" for p in p_fcfe_range) + " |",
+                     "|---" + "|---" * len(p_fcfe_range) + "|"]
         for pf in p_fcff_range:
             rk = str(int(round(pf)))
             vals = [
-                f"{grid['matrix'].get(rk, {}).get(str(int(round(pe))), 'N/A'):,.0f}"
-                if isinstance(grid['matrix'].get(rk, {}).get(str(int(round(pe)))), (int, float))
+                f"{grid['matrix'].get(rk, {}).get(str(int(round(fe))), 'N/A'):,.0f}"
+                if isinstance(grid['matrix'].get(rk, {}).get(str(int(round(fe)))), (int, float))
                 else "→"
-                for pe in p_pe_range
+                for fe in p_fcfe_range
             ]
             grid_rows.append(f"| {pf:,.0f} | " + " | ".join(vals) + " |")
         blend_grid_md = "\n".join(grid_rows)
@@ -961,15 +952,13 @@ def _build_blend_section(
             ur = grid["upside_range"]
             blend_grid_md += f"\n\n_Vùng upside: [{ur['min_upside']:.1%}, {ur['max_upside']:.1%}] so với giá thị trường {current_price:,.0f} VND/CP_"
 
-    eps_str = f"{eps_fy1:,.0f} VND/CP" if eps_fy1 else "N/A"
-    pe_price_str = f"{price_pe_forward:,.0f}" if price_pe_forward else "N/A"
-    section = f"""**Công thức:** Target Price_DCF = 0.60 × Price_FCFF + 0.40 × Price_PE_Forward
-(P/E Forward = EPS_FY1 × {target_pe:.0f}× = {eps_str} × {target_pe:.0f} = {pe_price_str})
+    fcfe_price_str = f"{price_fcfe:,.0f}" if price_fcfe else "N/A"
+    section = f"""**Công thức:** Target Price_DCF = 0.60 × Price_FCFF + 0.40 × Price_FCFE
 
 | Phương pháp | Giá mục tiêu (VND/CP) | Trọng số | Đóng góp (VND/CP) |
 |---|---|---|---|
 | FCFF DCF | {f"{price_fcff:,.0f}" if price_fcff else "N/A"} | 60% | {f"{0.60*price_fcff:,.0f}" if price_fcff else "N/A"} |
-| P/E Forward ({target_pe:.0f}×) | {pe_price_str} | 40% | {f"{0.40*price_pe_forward:,.0f}" if price_pe_forward else "N/A"} |
+| FCFE DCF | {fcfe_price_str} | 40% | {f"{0.40*price_fcfe:,.0f}" if price_fcfe else "N/A"} |
 | **Target Price DCF** | **{target_str}** | 100% | **{target_str}** |
 
 | Chỉ tiêu | Giá trị |
@@ -978,16 +967,16 @@ def _build_blend_section(
 | Target Price (60/40 blend) | {target_str} |
 | Upside / Downside | {upside_str} |
 | Margin of Safety | {mos_str} |
-| FCFF vs P/E Forward Gap | {gap_str} |
+| FCFF vs FCFE Gap | {gap_str} |
 | TV Weight (FCFF/EV) | {tvw_str} [{tv_check.get("status", "unknown")}] |
 
-### Bảng sensitivity Blend (Price_FCFF × Price_PE_Forward → Target_DCF, VND/CP)
+### Bảng sensitivity Blend (Price_FCFF × Price_FCFE → Target_DCF, VND/CP)
 
 {blend_grid_md}
 
 {warn_lines}
-> **Lưu ý:** Trọng số 60% FCFF / 40% P/E Forward phù hợp với cổ phiếu dược có nợ vay vừa phải.
-> Nếu gap FCFF/P/E Forward > 40%, kiểm tra lại giả định tăng trưởng EPS và WACC trước khi dùng target price.
+> **Lưu ý:** Trọng số 60% FCFF / 40% FCFE phù hợp với cổ phiếu dược có nợ vay vừa phải.
+> Nếu gap FCFF/FCFE > 25%, kiểm tra lại giả định WACC, Re, net borrowing và CAPEX trước khi dùng target price.
 """
     return section, bd
 
@@ -1012,11 +1001,11 @@ def _enrich_citations_with_verification(cmap: "dict[str, dict]", ticker: str) ->
                 """
                 SELECT cf.period, cf.metric, cf.source_tier,
                        cf.official_document_id, cf.reconciliation_status,
-                       od.title AS official_title, od.issuer AS official_issuer,
-                       od.source_type AS official_source_type
+                       sd.source_title AS official_title, sd.issuer AS official_issuer,
+                       sd.source_type AS official_source_type
                 FROM fact.canonical_facts cf
-                LEFT JOIN ingest.official_documents od
-                       ON od.official_document_id = cf.official_document_id
+                LEFT JOIN ingest.source_documents sd
+                       ON sd.source_doc_id = cf.official_document_id
                 WHERE cf.ticker = %s
                 """,
                 (ticker,),
@@ -1116,29 +1105,34 @@ def generate_report(
     ticker: str,
     from_year: int = MVP_FROM_YEAR,
     to_year: int = MVP_TO_YEAR,
-    report_type: str = "full_report",
+    report_type: str = "dev_full_report",
     snapshot_id: str | None = None,
     mode: str = "draft",
 ) -> dict:
     ticker = ticker.strip().upper()
+    if report_type == "full_report":
+        raise ValueError(
+            "scripts/generate_report.py is DEV-ONLY and cannot produce report_type='full_report'. "
+            "Use scripts/run_research.py for production full_report runs."
+        )
     mode = (mode or "draft").strip().lower()
     if mode not in ("draft", "final"):
         raise ValueError(f"mode must be 'draft' or 'final', got {mode!r}")
     generated_at = datetime.now(UTC)
-    info = _COMPANY_INFO.get(ticker, {"name": ticker, "exchange": "N/A", "sector": "Du?c ph?m"})
+    info = _COMPANY_INFO.get(ticker, {"name": ticker, "exchange": "N/A", "sector": "Dược phẩm"})
 
-    print(f"[generate_report] {ticker} -> loading valuation artifact")
+    print(f"[generate_report] {ticker} — loading valuation artifact")
     val = _load_latest_valuation(ticker)
     if val is None:
         print("[generate_report] ERROR: No valuation artifact. Run scripts/run_valuation.py first.")
         sys.exit(1)
 
     used_snapshot_id = snapshot_id or val.get("snapshot_id", "")
-    print(f"[generate_report] {ticker} -> snapshot: {used_snapshot_id}")
+    print(f"[generate_report] {ticker} — snapshot: {used_snapshot_id}")
 
-    print(f"[generate_report] {ticker} -> loading snapshot facts")
+    print(f"[generate_report] {ticker} — loading snapshot facts")
     facts = _load_snapshot_facts(used_snapshot_id)
-    print(f"[generate_report] {ticker} -> {len(facts)} facts loaded")
+    print(f"[generate_report] {ticker} — {len(facts)} facts loaded")
 
     # Supplement with golden CSV facts (audited values not yet in DB).
     try:
@@ -1154,9 +1148,9 @@ def generate_report(
     # with full source provenance (source_tier, source_uri, source_title).
     _context_events: dict = {}  # hoisted so Phase 5 catalyst section can read it
     try:
-        from backend.facts.normalizer import build_fact_table, compute_derived
+        from backend.facts.normalizer import build_fact_table, compute_derived, to_analytics_vnd_bn
         from backend.citations.event_linker import link_events_to_periods
-        _fact_table = compute_derived(build_fact_table(facts))
+        _fact_table = compute_derived(to_analytics_vnd_bn(build_fact_table(facts)))
         _fy_periods_for_events = list({
             f"{f['fiscal_year']}FY"
             for f in facts
@@ -1171,7 +1165,7 @@ def generate_report(
             fact_table=_fact_table,
             context_events=_context_events,
         )
-        print(f"[generate_report] {ticker} -> citation map built (Phase 4): "
+        print(f"[generate_report] {ticker} — citation map built (Phase 4): "
               f"{len(cmap)} entries, {len(_context_events)} periods with events")
     except Exception as _cmap_exc:  # noqa: BLE001
         print(f"[generate_report] WARNING: Phase 4 citation map failed ({_cmap_exc}), "
@@ -1183,7 +1177,7 @@ def generate_report(
     # then run the mode-aware source-tier export gate.
     _enrich_citations_with_verification(cmap, ticker)
     source_tier_gate = _run_source_tier_gate(cmap, mode)
-    print(f"[generate_report] {ticker} -> source-tier gate ({mode}): "
+    print(f"[generate_report] {ticker} — source-tier gate ({mode}): "
           f"{source_tier_gate['export_decision']} "
           f"({len(source_tier_gate['blocking_reasons'])} blocking, "
           f"{len(source_tier_gate['warnings'])} warnings)")
@@ -1191,7 +1185,7 @@ def generate_report(
     conn = psycopg2.connect(_dsn())
     try:
         evidence_chunks = _load_evidence_chunks(conn, ticker)
-        print(f"[generate_report] {ticker} -> {len(evidence_chunks)} evidence chunks")
+        print(f"[generate_report] {ticker} — {len(evidence_chunks)} evidence chunks")
     finally:
         conn.close()
 
@@ -1280,20 +1274,20 @@ def generate_report(
     _blend_artifact = val.get("blend_dcf", {})
     _blend_is_draft = _blend_artifact.get("is_draft_only", True)  # default True = safe
     _valuation_label = (
-        "Draft valuation range -> awaiting analyst approval"
+        "Draft valuation range — awaiting analyst approval"
         if _blend_is_draft else
-        "PRIMARY target price (60% FCFF + 40% P/E Forward)"
+        "PRIMARY target price (60% FCFF + 40% FCFE)"
     )
 
-    _target_pe_str = f"{target_pe_val:.1f}x" if target_pe_val is not None else "Pending -> chua c-> d? li?u peer"
-    _target_ev_str = f"{target_ev_val:.1f}x" if target_ev_val is not None else "Pending -> chua c-> d? li?u peer"
+    _target_pe_str = f"{target_pe_val:.1f}x" if target_pe_val is not None else "Pending — chưa có dữ liệu peer"
+    _target_ev_str = f"{target_ev_val:.1f}x" if target_ev_val is not None else "Pending — chưa có dữ liệu peer"
 
-    price_str    = f"{current_price:,.0f} VND" if current_price else "Chua c->"
+    price_str    = f"{current_price:,.0f} VND" if current_price else "Chưa có"
     intrinsic_str = f"{dcf_intrinsic:,.0f} VND/CP" if dcf_intrinsic else "N/A"
     upside_dcf: float | None = None
     if dcf_intrinsic and current_price and current_price > 0:
         upside_dcf = (dcf_intrinsic / current_price - 1)
-    upside_str = f"upside: {upside_dcf:.1%}" if upside_dcf is not None else "->"
+    upside_str = f"upside: {upside_dcf:.1%}" if upside_dcf is not None else "—"
 
     # Claims registry
     claims_used: list[tuple] = []
@@ -1320,15 +1314,15 @@ def generate_report(
         vals = [fmt_fn(ratios.get(metric, {}).get(p)) for p in fy_periods]
         return f"| {label} | " + " | ".join(vals) + " |"
 
-    fin_table = f"""| Ch? ti->u | {period_header} |
+    fin_table = f"""| Chỉ tiêu | {period_header} |
 |---|{period_sep}|
-{metric_row("Doanh thu thu?n (t? VND)", "revenue.net")}
-{metric_row("L?i nhu?n g?p (t? VND)", "gross_profit.total")}
-{metric_row("L?i nhu?n sau thu? (t? VND)", "net_income.parent")}
-{metric_row("EPS co b?n (VND/CP)", "eps.basic", _fmt_vnd)}
-{metric_row("D->ng ti?n ho?t d?ng (t? VND)", "operating_cash_flow.total")}
-{metric_row("T?ng t->i s?n (t? VND)", "total_assets.ending")}
-{metric_row("V?n ch? s? h?u (t? VND)", "equity.parent")}"""
+{metric_row("Doanh thu thuần (tỷ VND)", "revenue.net")}
+{metric_row("Lợi nhuận gộp (tỷ VND)", "gross_profit.total")}
+{metric_row("Lợi nhuận sau thuế (tỷ VND)", "net_income.parent")}
+{metric_row("EPS cơ bản (VND/CP)", "eps.basic", _fmt_vnd)}
+{metric_row("Dòng tiền hoạt động (tỷ VND)", "operating_cash_flow.total")}
+{metric_row("Tổng tài sản (tỷ VND)", "total_assets.ending")}
+{metric_row("Vốn chủ sở hữu (tỷ VND)", "equity.parent")}"""
 
     # -- Market ratios computation ----------------------------------------------
     from backend.analytics.ratios import compute_market_ratios, detect_abnormal_movements
@@ -1346,7 +1340,7 @@ def generate_report(
                  or ratios.get(key, {}).get(p)
                  or fget(key, p))
             if v is None:
-                vals.append("->")
+                vals.append("—")
             elif fmt_fn:
                 vals.append(fmt_fn(v))
             elif key in _PCT_MR:
@@ -1358,49 +1352,49 @@ def generate_report(
         return f"| {label} | " + " | ".join(vals) + " |"
 
     def _fmt_bn_trunc(v: float | None) -> str:
-        return f"{v:,.1f}" if v is not None else "->"
+        return f"{v:,.1f}" if v is not None else "—"
 
-    ratio_table = f"""| T? l? | {period_header} |
+    ratio_table = f"""| Tỷ lệ | {period_header} |
 |---|{period_sep}|
-{ratio_row("Bi->n l?i nhu?n g?p", "gross_margin")}
-{ratio_row("Bi->n l?i nhu?n r->ng", "net_margin")}
-{ratio_row("Bi->n EBITDA", "ebitda_margin")}
-{ratio_row("Bi->n OCF", "ocf_margin")}
+{ratio_row("Biên lợi nhuận gộp", "gross_margin")}
+{ratio_row("Biên lợi nhuận ròng", "net_margin")}
+{ratio_row("Biên EBITDA", "ebitda_margin")}
+{ratio_row("Biên OCF", "ocf_margin")}
 {ratio_row("ROE", "roe")}
 {ratio_row("ROA", "roa")}
-{ratio_row("Tang tru?ng doanh thu", "revenue_growth")}
-{ratio_row("Tang tru?ng l?i nhu?n r->ng", "net_income_growth")}
-{mratio_row("N?/VCSH", "debt_to_equity")}
-{mratio_row("V?n h->a th? tru?ng (t? VND)", "market_cap_bn", _fmt_bn_trunc)}
-{metric_row("EPS co b?n (VND/CP)", "eps.basic", _fmt_vnd)}
+{ratio_row("Tăng trưởng doanh thu", "revenue_growth")}
+{ratio_row("Tăng trưởng lợi nhuận ròng", "net_income_growth")}
+{mratio_row("Nợ/VCSH", "debt_to_equity")}
+{mratio_row("Vốn hóa thị trường (tỷ VND)", "market_cap_bn", _fmt_bn_trunc)}
+{metric_row("EPS cơ bản (VND/CP)", "eps.basic", _fmt_vnd)}
 {mratio_row("BVPS (VND/CP)", "bvps", _fmt_vnd)}
 {mratio_row("P/E", "pe")}
 {mratio_row("P/B", "pb")}
 {mratio_row("P/S", "ps")}
 {mratio_row("EV/EBITDA", "ev_ebitda")}
-{mratio_row("Chu k? ti?n (ng->y -> CCC)", "ccc", lambda v: f"{v:.1f} ng->y" if v is not None else "->")}"""
+{mratio_row("Chu kỳ tiền (ngày — CCC)", "ccc", lambda v: f"{v:.1f} ngày" if v is not None else "—")}"""
 
     # -- Abnormal movement detection --------------------------------------------
     abnormal_flags = detect_abnormal_movements(ratios, market_ratios, fy_periods)
     if abnormal_flags:
         abnormal_rows = "\n".join(
-            f"| {f['metric']} | {f['prev_period']}?{f['period']} | "
-            f"{f['prev']:.3g} ? {f['curr']:.3g} | {f['flag_reason']} |"
+            f"| {f['metric']} | {f['prev_period']}→{f['period']} | "
+            f"{f['prev']:.3g} → {f['curr']:.3g} | {f['flag_reason']} |"
             for f in abnormal_flags
         )
-        abnormal_section = f"""### 3.3 C?nh b->o bi?n d?ng b?t thu?ng
+        abnormal_section = f"""### 3.3 Cảnh báo biến động bất thường
 
-| Ch? s? | K? | Gi-> tr? | L-> do c?nh b->o |
+| Chỉ số | Kỳ | Giá trị | Lý do cảnh báo |
 |---|---|---|---|
 {abnormal_rows}
 
-> _C->c bi?n d?ng tr->n vu?t ngu?ng c?nh b->o (>25% tuong d?i ho?c >5pp bi->n l?i nhu?n) -> c?n gi?i th->ch th->m._
+> _Các biến động trên vượt ngưỡng cảnh báo (>25% tương đối hoặc >5pp biên lợi nhuận) — cần giải thích thêm._
 """
     else:
-        abnormal_section = "### 3.3 Bi?n d?ng ch? s?\n\nKh->ng c-> ch? s? n->o bi?n d?ng b?t thu?ng vu?t ngu?ng c?nh b->o.\n"
+        abnormal_section = "### 3.3 Biến động chỉ số\n\nKhông có chỉ số nào biến động bất thường vượt ngưỡng cảnh báo.\n"
 
-    # -- Forecast -> run ONCE; pass to all section builders for consistency ----
-    print(f"[generate_report] {ticker} -> running forecast engine (single pass)")
+    # -- Forecast: run ONCE; pass to all section builders for consistency ------
+    print(f"[generate_report] {ticker} — running forecast engine (single pass)")
     from backend.analytics.forecasting import ForecastAssumptions, run_forecast
     _shared_forecast = run_forecast(
         ticker=ticker,
@@ -1414,6 +1408,7 @@ def generate_report(
     forecast_section, forecast_artifact = _build_forecast_section(
         ticker, fact_table, shares_mn, forecast=_shared_forecast
     )
+    _assert_dev_only_path(FORECAST_DIR)
     FORECAST_DIR.mkdir(parents=True, exist_ok=True)
     ts_str = generated_at.strftime("%Y%m%dT%H%M%S")
     forecast_path = FORECAST_DIR / f"{ticker}_{ts_str}_forecast.json"
@@ -1422,7 +1417,7 @@ def generate_report(
     )
 
     # -- FCFF section ---------------------------------------------------------
-    print(f"[generate_report] {ticker} -> running FCFF valuation engine")
+    print(f"[generate_report] {ticker} — running FCFF valuation engine")
     fcff_section, fcff_artifact = _build_fcff_section(
         ticker, fact_table, forecast_artifact, current_price, shares_mn,
         forecast=_shared_forecast,
@@ -1433,7 +1428,7 @@ def generate_report(
     )
 
     # -- FCFE section ---------------------------------------------------------
-    print(f"[generate_report] {ticker} -> running FCFE valuation engine")
+    print(f"[generate_report] {ticker} — running FCFE valuation engine")
     fcfe_section, fcfe_artifact = _build_fcfe_section(
         ticker, fact_table, current_price, shares_mn,
         forecast=_shared_forecast,
@@ -1443,12 +1438,10 @@ def generate_report(
         json.dumps(fcfe_artifact, indent=2, default=str), encoding="utf-8"
     )
 
-    # -- Blend section: 60% FCFF + 40% P/E Forward ----------------------------
-    print(f"[generate_report] {ticker} -> building blended DCF (60% FCFF + 40% P/E Forward)")
+    # -- Blend section: 60% FCFF + 40% FCFE -----------------------------------
+    print(f"[generate_report] {ticker} — building blended DCF (60% FCFF + 40% FCFE)")
     blend_section, blend_artifact = _build_blend_section(
         ticker, fcff_artifact, fcfe_artifact, current_price,
-        forecast_artifact=forecast_artifact,
-        target_pe=15.0,
     )
     blend_path = FORECAST_DIR / f"{ticker}_{ts_str}_blend.json"
     blend_path.write_text(
@@ -1478,7 +1471,7 @@ def generate_report(
         (v for v in [_core_pe_upside, blend_upside, fcff_upside, upside_dcf] if v is not None), None
     )
 
-    # Build AssumptionGate -> blocks BUY/HOLD/SELL until all critical assumptions
+    # Build AssumptionGate — blocks BUY/HOLD/SELL until all critical assumptions
     # are analyst-approved. "assumption_status" is the key in each artifact dict.
     _wacc_status = fcff_artifact.get("assumption_status", "default_unapproved")
     _coe_status = fcfe_artifact.get("assumption_status", "default_unapproved")
@@ -1496,6 +1489,7 @@ def generate_report(
     draft_rating = assumption_gate.recommendation_label(model_upside_pct=best_upside)
 
     # Save gate artifact so the quality gate script can find it
+    _assert_dev_only_path(VALUATION_DIR)
     VALUATION_DIR.mkdir(parents=True, exist_ok=True)
     gate_artifact = {**assumption_gate.to_dict(), "ticker": ticker, "generated_at": ts_str}
     (VALUATION_DIR / f"{ticker}_{ts_str}_gate.json").write_text(
@@ -1515,9 +1509,9 @@ def generate_report(
             for g in g_range:
                 gk = f"{g:.4f}".rstrip("0").rstrip(".")
                 v = matrix[wk].get(gk)
-                row_vals.append(f"{v:,.0f}" if v is not None else "->")
+                row_vals.append(f"{v:,.0f}" if v is not None else "—")
             sens_lines.append(f"| {float(wk):.1%} | " + " | ".join(row_vals) + " |")
-    sens_table = "\n".join(sens_lines) if sens_lines else "_Kh->ng c-> d? li?u sensitivity_"
+    sens_table = "\n".join(sens_lines) if sens_lines else "_Không có dữ liệu sensitivity_"
 
     # -- Evidence section (no truncation; dedup catalyst) ---------------------
     def _demote_headers(text: str, levels: int = 2) -> str:
@@ -1533,7 +1527,7 @@ def generate_report(
 
     evidence_section_md = ""
     if evidence_chunks:
-        evidence_section_md = "\n#### T->i li?u b?ng ch?ng d-> s? d?ng\n\n"
+        evidence_section_md = "\n#### Tài liệu bằng chứng đã sử dụng\n\n"
         seen_fiscal: set[int] = set()
         for ch in evidence_chunks:
             fy = ch.get("fiscal_year")
@@ -1556,7 +1550,7 @@ def generate_report(
     try:
         from backend.citations.driver_evidence import render_catalyst_section
         catalyst_section_md = render_catalyst_section(ticker, _context_events)
-        print(f"[generate_report] {ticker} -> catalyst section built "
+        print(f"[generate_report] {ticker} — catalyst section built "
               f"({sum(len(v) for v in _context_events.values())} events across "
               f"{len(_context_events)} periods)")
     except Exception as _cat_exc:  # noqa: BLE001
@@ -1576,21 +1570,21 @@ def generate_report(
     core_pe_target_str = f"{_core_pe_target:,.0f} VND/CP" if _core_pe_target else "N/A"
     core_pe_upside_str = f"{_core_pe_upside:.1%}" if _core_pe_upside is not None else "N/A"
 
-    report_md = f"""# B->o c->o Ph->n t->ch C? phi?u -> {ticker}
+    report_md = f"""# Báo cáo Phân tích Cổ phiếu — {ticker}
 
-> **C?NH B->O QUAN TR?NG:** B->o c->o n->y du?c t?o b?i h? th?ng nghi->n c?u t? d?ng.
-> S? li?u tr->ch xu?t t? d? li?u canonical ki?m to->n. D? ph->ng v-> d?nh gi-> d->ng gi? d?nh m?c d?nh **chua du?c chuy->n gia ph-> duy?t**.
-> KH->NG d->ng d? ra quy?t d?nh d?u tu d?c l?p.
+> **CẢNH BÁO QUAN TRỌNG:** Báo cáo này được tạo bởi hệ thống nghiên cứu tự động.
+> Số liệu trích xuất từ dữ liệu canonical kiểm toán. Dự phóng và định giá dùng giả định mặc định **chưa được chuyên gia phê duyệt**.
+> KHÔNG dùng để ra quyết định đầu tư độc lập.
 
 ---
 
-## 1. T->m t?t di?u h->nh v-> khuy?n ngh? Draft
+## 1. Tóm tắt điều hành và khuyến nghị Draft
 
-**{info["name"]}** ({ticker} -> {info["exchange"]}) -> Ng->nh {info["sector"]}
+**{info["name"]}** ({ticker} — {info["exchange"]}) — Ngành {info["sector"]}
 
-Ng->y t?o: {generated_at.strftime("%Y-%m-%d %H:%M UTC")} | Snapshot: `{used_snapshot_id}`
-Giai do?n ph->n t->ch l?ch s?: {fy_periods[0] if fy_periods else "N/A"} -> {fy_periods[-1] if fy_periods else "N/A"}
-D? ph->ng: {FORECAST_YEARS[0]}F -> {FORECAST_YEARS[-1]}F
+Ngày tạo: {generated_at.strftime("%Y-%m-%d %H:%M UTC")} | Snapshot: `{used_snapshot_id}`
+Giai đoạn phân tích lịch sử: {fy_periods[0] if fy_periods else "N/A"} → {fy_periods[-1] if fy_periods else "N/A"}
+Dự phóng: {FORECAST_YEARS[0]}F – {FORECAST_YEARS[-1]}F
 
 ### Đánh giá tóm tắt
 
@@ -1601,7 +1595,7 @@ D? ph->ng: {FORECAST_YEARS[0]}F -> {FORECAST_YEARS[-1]}F
 | Phương pháp | Giá trị nội tại | Giá thị trường | Upside | Độ tin cậy |
 |---|---|---|---|---|
 | **Core EPS × P/E + Net Cash (§11)** | **{core_pe_target_str}** | {price_str} | **{core_pe_upside_str}** | **{_valuation_label}** |
-| Blend DCF (60% FCFF + 40% P/E Fwd) | {blend_target_str} | {price_str} | {blend_upside_str} | Cross-check |
+| Blend DCF (60% FCFF + 40% FCFE) | {blend_target_str} | {price_str} | {blend_upside_str} | Cross-check |
 | FCFF DCF (WACC mặc định) | {fcff_target_str} | {price_str} | {fcff_upside_str} | Thành phần blend |
 | FCFE DCF (Re mặc định) | {fcfe_target_str} | {price_str} | {fcfe_upside_str} | Tham khảo |
 | P/E mục tiêu ({_target_pe_str}) | {f"{implied_pe:,.0f} VND/CP" if implied_pe else "N/A"} | {price_str} | — | Cross-check |
@@ -1616,35 +1610,35 @@ D? ph->ng: {FORECAST_YEARS[0]}F -> {FORECAST_YEARS[-1]}F
 {draft_rating}
 
 > Căn cứ: upside Core P/E + Net Cash = {core_pe_upside_str} | Ngưỡng BUY = 20%, HOLD -10% đến +20%, SELL < -10%
-> Gi? d?nh chua du?c analyst ph-> duy?t -> ch? d->ng l->m tham kh?o n?i b?.
+> Giả định chưa được analyst phê duyệt — chỉ dùng làm tham khảo nội bộ.
 
 ---
 
-## 2. Gi?i thi?u doanh nghi?p
+## 2. Giới thiệu doanh nghiệp
 
-**{info["name"]}** ni->m y?t t?i s->n {info["exchange"]} v?i m-> c? phi?u **{ticker}**.
-Ho?t d?ng trong ng->nh {info["sector"]} Vi?t Nam.
+**{info["name"]}** niêm yết tại sàn {info["exchange"]} với mã cổ phiếu **{ticker}**.
+Hoạt động trong ngành {info["sector"]} Việt Nam.
 
-- S? c? phi?u luu h->nh u?c t->nh: **{f"{shares_mn:,.1f} tri?u CP" if shares_mn else "N/A"}**
-- Gi-> th? tru?ng: **{price_str}**
+- Số cổ phiếu lưu hành ước tính: **{f"{shares_mn:,.1f} triệu CP" if shares_mn else "N/A"}**
+- Giá thị trường: **{price_str}**
 - EPS (FY{latest_year}): **{f"{eps_latest:,.0f} VND/CP" if eps_latest else "N/A"}** {cref("eps.basic")}
-- P/E quan s->t: **{_fmt_x(pe_obs)}**
+- P/E quan sát: **{_fmt_x(pe_obs)}**
 
 ---
 
-## 3. K?t qu? t->i ch->nh l?ch s?
+## 3. Kết quả tài chính lịch sử
 
-### 3.1 B?ng t?ng h?p ({fy_periods[0] if fy_periods else ""}->{latest_fy_str})
+### 3.1 Bảng tổng hợp ({fy_periods[0] if fy_periods else ""}–{latest_fy_str})
 
 {fin_table}
 
-_->on v?: t? VND tr? EPS. Ngu?n: d? li?u canonical d-> ki?m d?nh._
+_Đơn vị: tỷ VND trừ EPS. Nguồn: dữ liệu canonical đã kiểm định._
 
-### 3.2 B?ng ch? s? t->i ch->nh
+### 3.2 Bảng chỉ số tài chính
 
 {ratio_table}
 
-_EPS, BVPS t->nh theo don v? VND/CP. V?n h->a, CCC t? gi-> th? tru?ng hi?n t?i {price_str}._
+_EPS, BVPS tính theo đơn vị VND/CP. Vốn hóa, CCC từ giá thị trường hiện tại {price_str}._
 
 {abnormal_section}
 
@@ -1655,15 +1649,15 @@ _EPS, BVPS t->nh theo don v? VND/CP. V?n h->a, CCC t? gi-> th? tru?ng hi?n t?i {
 {catalyst_section_md}
 
 
-Gi? d?nh: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, k? d? b->o = {assumptions.get("forecast_years", 5)} nam
+Giả định: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, kỳ dự báo = {assumptions.get("forecast_years", 5)} năm
 
-| K?ch b?n | Gi-> tr? n?i t?i (VND/CP) | WACC | g | C?nh b->o |
+| Kịch bản | Giá trị nội tại (VND/CP) | WACC | g | Cảnh báo |
 |---|---|---|---|---|
-| Bear case | {f"{dcf_bear.get('intrinsic_value_per_share_vnd'):,.0f}" if dcf_bear.get("intrinsic_value_per_share_vnd") else "N/A"} | {dcf_bear.get("assumptions", {}).get("wacc", 0):.1%} | {dcf_bear.get("assumptions", {}).get("terminal_growth", 0):.1%} | Ch? tham kh?o |
-| Base case | {f"{dcf_base.get('intrinsic_value_per_share_vnd'):,.0f}" if dcf_base.get("intrinsic_value_per_share_vnd") else "N/A"} | {dcf_base.get("assumptions", {}).get("wacc", 0):.1%} | {dcf_base.get("assumptions", {}).get("terminal_growth", 0):.1%} | Ch? tham kh?o |
-| Bull case | {f"{dcf_bull.get('intrinsic_value_per_share_vnd'):,.0f}" if dcf_bull.get("intrinsic_value_per_share_vnd") else "N/A"} | {dcf_bull.get("assumptions", {}).get("wacc", 0):.1%} | {dcf_bull.get("assumptions", {}).get("terminal_growth", 0):.1%} | Ch? tham kh?o |
+| Bear case | {f"{dcf_bear.get('intrinsic_value_per_share_vnd'):,.0f}" if dcf_bear.get("intrinsic_value_per_share_vnd") else "N/A"} | {dcf_bear.get("assumptions", {}).get("wacc", 0):.1%} | {dcf_bear.get("assumptions", {}).get("terminal_growth", 0):.1%} | Chỉ tham khảo |
+| Base case | {f"{dcf_base.get('intrinsic_value_per_share_vnd'):,.0f}" if dcf_base.get("intrinsic_value_per_share_vnd") else "N/A"} | {dcf_base.get("assumptions", {}).get("wacc", 0):.1%} | {dcf_base.get("assumptions", {}).get("terminal_growth", 0):.1%} | Chỉ tham khảo |
+| Bull case | {f"{dcf_bull.get('intrinsic_value_per_share_vnd'):,.0f}" if dcf_bull.get("intrinsic_value_per_share_vnd") else "N/A"} | {dcf_bull.get("assumptions", {}).get("wacc", 0):.1%} | {dcf_bull.get("assumptions", {}).get("terminal_growth", 0):.1%} | Chỉ tham khảo |
 
-### 4.2 Sensitivity -> Gi-> tr? n?i t?i DCF (VND/CP)
+### 4.2 Sensitivity — Giá trị nội tại DCF (VND/CP)
 
 {sens_table}
 
@@ -1679,104 +1673,104 @@ Gi? d?nh: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, k? d? b->o = {assumptions.get
 
 {fcfe_section}
 
-### 4.6 Blend DCF — Giá mục tiêu kết hợp 60% FCFF + 40% P/E Forward
+### 4.6 Blend DCF — Giá mục tiêu kết hợp 60% FCFF + 40% FCFE
 
 {blend_section}
 
 ### 4.7 Bội số thị trường (Cross-check)
 
-| Phuong ph->p | Gi-> tr? | Gi-> th? tru?ng | Ghi ch-> |
+| Phương pháp | Giá trị | Giá thị trường | Ghi chú |
 |---|---|---|---|
-| P/E quan s->t | {_fmt_x(pe_obs)} | {price_str} | EPS = {f"{eps_vnd:,.0f} VND/CP" if eps_vnd else "N/A"} |
-| Implied @ P/E {_target_pe_str} | {f"{implied_pe:,.0f} VND/CP" if implied_pe else "N/A"} | {price_str} | B?i s? m?c ti->u ng->nh |
-| Implied @ EV/EBITDA {_target_ev_str} | {f"{implied_ev:,.0f} VND/CP" if implied_ev else "N/A"} | {price_str} | B?i s? m?c ti->u ng->nh |
+| P/E quan sát | {_fmt_x(pe_obs)} | {price_str} | EPS = {f"{eps_vnd:,.0f} VND/CP" if eps_vnd else "N/A"} |
+| Implied @ P/E {_target_pe_str} | {f"{implied_pe:,.0f} VND/CP" if implied_pe else "N/A"} | {price_str} | Bội số mục tiêu ngành |
+| Implied @ EV/EBITDA {_target_ev_str} | {f"{implied_ev:,.0f} VND/CP" if implied_ev else "N/A"} | {price_str} | Bội số mục tiêu ngành |
 
-> B?i s? m?c ti->u theo u?c t->nh ng->nh -> c?n c?p nh?t b?ng d? li?u peer group th?c t? tru?c publish.
+> Bội số mục tiêu theo ước tính ngành — cần cập nhật bằng dữ liệu peer group thực tế trước publish.
 
 ---
 
-## 5. R?i ro d?u tu
+## 5. Rủi ro đầu tư
 
-| Lo?i r?i ro | Driver t->i ch->nh | M-> t? | M?c d? | Kh? nang | Co s? / Gi->m s->t |
+| Loại rủi ro | Driver tài chính | Mô tả | Mức độ | Khả năng | Cơ sở / Giám sát |
 |---|---|---|---|---|---|
-| Ch->nh s->ch BHYT/d?u th?u | Bi->n l?i nhu?n g?p, Doanh thu | Thay d?i quy d?nh d?u th?u, gi-> tr?n thu?c ?nh hu?ng bi->n l?i nhu?n g?p ({_fmt_pct(gross_margin_latest)}) | Cao | Trung b->nh | Generic -> c?n ki?m ch?ng; Theo d->i k?t qu? d?u th?u h->ng nam |
-| T? gi-> / Nguy->n li?u | COGS, Bi->n g?p | L?m ph->t v-> bi?n d?ng t? gi-> l->m tang gi-> v?n nguy->n li?u nh?p kh?u | Trung b->nh | Trung b->nh | Generic -> theo d->i t? l? COGS/doanh thu |
-| C?nh tranh generic/nh?p kh?u | Doanh thu, th? ph?n | Thu?c generic v-> nh?p kh?u gi-> r? t?o ->p l?c gi-> b->n v-> th? ph?n | Trung b->nh | Cao | Generic sector risk |
-| T?p trung nh-> cung c?p | COGS, ho?t d?ng | Ph? thu?c v->o s? ->t nh-> cung c?p nguy->n li?u ch->nh | Trung b->nh | Th?p | Generic -> xem b->o c->o thu?ng ni->n |
-| Gi? d?nh m-> h->nh | Target price, Rating | Gi? d?nh WACC/g chua du?c analyst duy?t -> target price nh?y c?m v?i WACC | Th?p -> Trung b->nh | Cao | C?n ph-> duy?t assumptions tru?c publish |
+| Chính sách BHYT/đấu thầu | Biên lợi nhuận gộp, Doanh thu | Thay đổi quy định đấu thầu, giá trần thuốc ảnh hưởng biên lợi nhuận gộp ({_fmt_pct(gross_margin_latest)}) | Cao | Trung bình | Generic — cần kiểm chứng; Theo dõi kết quả đấu thầu hằng năm |
+| Tỷ giá / Nguyên liệu | COGS, Biên gộp | Lạm phát và biến động tỷ giá làm tăng giá vốn nguyên liệu nhập khẩu | Trung bình | Trung bình | Generic — theo dõi tỷ lệ COGS/doanh thu |
+| Cạnh tranh generic/nhập khẩu | Doanh thu, thị phần | Thuốc generic và nhập khẩu giá rẻ tạo áp lực giá bán và thị phần | Trung bình | Cao | Generic sector risk |
+| Tập trung nhà cung cấp | COGS, hoạt động | Phụ thuộc vào số ít nhà cung cấp nguyên liệu chính | Trung bình | Thấp | Generic — xem báo cáo thường niên |
+| Giả định mô hình | Target price, Rating | Giả định WACC/g chưa được analyst duyệt — target price nhạy cảm với WACC | Thấp → Trung bình | Cao | Cần phê duyệt assumptions trước publish |
 
-> _R?i ro d->nh d?u "Generic" l-> r?i ro ng->nh chung chua c-> evidence tr?c ti?p t? ngu?n doanh nghi?p -> c?n ki?m ch?ng b?ng c->ng b? th->ng tin ho?c ngu?n ng->nh tru?c khi xu?t b?n b->o c->o final._
+> _Rủi ro đánh dấu "Generic" là rủi ro ngành chung chưa có evidence trực tiếp từ nguồn doanh nghiệp — cần kiểm chứng bằng công bố thông tin hoặc nguồn ngành trước khi xuất bản báo cáo final._
 
 ---
 
-## 6. K?t lu?n v-> Ki?m to->n ch?t lu?ng
+## 6. Kết luận và Kiểm toán chất lượng
 
-### 6.1 ->i?m k?t lu?n ch->nh
+### 6.1 Điểm kết luận chính
 
-- **T->i ch->nh:** {ticker} ghi nh?n doanh thu {f"{rev_latest:,.1f} t? VND" if rev_latest else "N/A"} ({latest_fy_str}), bi->n l?i nhu?n g?p {_fmt_pct(gross_margin_latest)}, ROE {_fmt_pct(roe_latest)} -> n?n t?ng l?i nhu?n t?t.
-- **D? ph->ng:** CAGR doanh thu {f"{forecast_artifact.get('revenue_cagr_historical', 0):.1%}" if forecast_artifact else "N/A"} l?ch s?; d? ph->ng 2026F->2030F d?a tr->n t? l? median l?ch s? chua du?c analyst ph-> duy?t.
-- **->?nh gi-> FCFF:** {fcff_target_str} (upside {fcff_upside_str}) | **FCFE:** {fcfe_target_str} (upside {fcfe_upside_str}) | **Blend 60/40:** {blend_target_str} (upside {blend_upside_str}) -> chua du?c ph-> duy?t.
-- **Rating Draft:** {draft_rating} -> ch? c-> hi?u l?c sau khi assumptions du?c analyst ph-> duy?t.
-- **R?i ro ch->nh:** Thay d?i ch->nh s->ch BHYT v-> ->p l?c c?nh tranh generic l-> r?i ro tr?ng y?u nh?t v?i bi->n l?i nhu?n.
+- **Tài chính:** {ticker} ghi nhận doanh thu {f"{rev_latest:,.1f} tỷ VND" if rev_latest else "N/A"} ({latest_fy_str}), biên lợi nhuận gộp {_fmt_pct(gross_margin_latest)}, ROE {_fmt_pct(roe_latest)} — nền tảng lợi nhuận tốt.
+- **Dự phóng:** CAGR doanh thu {f"{forecast_artifact.get('revenue_cagr_historical', 0):.1%}" if forecast_artifact else "N/A"} lịch sử; dự phóng 2026F–2030F dựa trên tỷ lệ median lịch sử chưa được analyst phê duyệt.
+- **Định giá FCFF:** {fcff_target_str} (upside {fcff_upside_str}) | **FCFE:** {fcfe_target_str} (upside {fcfe_upside_str}) | **Blend 60/40:** {blend_target_str} (upside {blend_upside_str}) — chưa được phê duyệt.
+- **Rating Draft:** {draft_rating} — chỉ có hiệu lực sau khi assumptions được analyst phê duyệt.
+- **Rủi ro chính:** Thay đổi chính sách BHYT và áp lực cạnh tranh generic là rủi ro trọng yếu nhất với biên lợi nhuận.
 
-### 6.2 T->m t?t d?nh gi->
+### 6.2 Tóm tắt định giá
 
-| Ch? ti->u | Gi-> tr? |
+| Chỉ tiêu | Giá trị |
 |---|---|
-| Doanh thu thu?n (FY{latest_year}) | {f"{rev_latest:,.1f} t? VND" if rev_latest else "N/A"} |
-| L?i nhu?n sau thu? (FY{latest_year}) | {f"{ni_latest:,.1f} t? VND" if ni_latest else "N/A"} |
-| Bi->n l?i nhu?n g?p | {_fmt_pct(gross_margin_latest)} |
-| Bi->n l?i nhu?n r->ng | {_fmt_pct(net_margin_latest)} |
+| Doanh thu thuần (FY{latest_year}) | {f"{rev_latest:,.1f} tỷ VND" if rev_latest else "N/A"} |
+| Lợi nhuận sau thuế (FY{latest_year}) | {f"{ni_latest:,.1f} tỷ VND" if ni_latest else "N/A"} |
+| Biên lợi nhuận gộp | {_fmt_pct(gross_margin_latest)} |
+| Biên lợi nhuận ròng | {_fmt_pct(net_margin_latest)} |
 | ROE | {_fmt_pct(roe_latest)} |
-| N?/V?n ch? | {_fmt_x(debt_eq_latest)} |
-| Gi-> Blend DCF (60% FCFF + 40% FCFE) | {blend_target_str} |
-| Gi-> FCFF m?c ti->u | {fcff_target_str} |
-| Gi-> FCFE m?c ti->u | {fcfe_target_str} |
-| Gi-> DCF base | {intrinsic_str} |
+| Nợ/Vốn chủ | {_fmt_x(debt_eq_latest)} |
+| Giá Blend DCF (60% FCFF + 40% FCFE) | {blend_target_str} |
+| Giá FCFF mục tiêu | {fcff_target_str} |
+| Giá FCFE mục tiêu | {fcfe_target_str} |
+| Giá DCF base | {intrinsic_str} |
 | Draft Rating | {draft_rating} |
 
-### 6.3 Ki?m to->n ch?t lu?ng
+### 6.3 Kiểm toán chất lượng
 
-| Gate | Tr?ng th->i | Ghi ch-> |
+| Gate | Trạng thái | Ghi chú |
 |---|---|---|
-| Ngu?n d? li?u | PASS | {len(facts)} facts t? snapshot canonical |
-| Nh?t qu->n s? li?u | Xem evaluate_report.py | Ch?y scripts/evaluate_report.py --ticker {ticker} |
-| T->i l?p valuation | PASS | FCFF recomputable t? artifact |
-| Citation coverage | PASS | {len(cmap)} citations du?c t?o |
-| ->? tuoi d? li?u | PASS | D? li?u d?n FY{latest_year} |
-| Ph-> duy?t gi? d?nh | PENDING | Assumptions chua du?c analyst ph-> duy?t |
-| Ph-> duy?t final | PENDING | Chua qua HITL approval |
+| Nguồn dữ liệu | PASS | {len(facts)} facts từ snapshot canonical |
+| Nhất quán số liệu | Xem evaluate_report.py | Chạy scripts/evaluate_report.py --ticker {ticker} |
+| Tái lập valuation | PASS | FCFF recomputable từ artifact |
+| Citation coverage | PASS | {len(cmap)} citations được tạo |
+| Độ tuổi dữ liệu | PASS | Dữ liệu đến FY{latest_year} |
+| Phê duyệt giả định | PENDING | Assumptions chưa được analyst phê duyệt |
+| Phê duyệt final | PENDING | Chưa qua HITL approval |
 
 ### 6.4 Disclaimer
 
-> **Tuy->n b? quan tr?ng:** B->o c->o n->y ch? nh?m m?c d->ch nghi->n c?u v-> tham kh?o h?c thu?t/s?n ph?m. N?i dung kh->ng ph?i l-> khuy?n ngh? d?u tu c-> nh->n h->a, kh->ng ph?i l?i m?i mua/b->n ch?ng kho->n, v-> kh->ng thay th? tu v?n t? chuy->n gia du?c c?p ph->p. K?t qu? d?nh gi-> ph? thu?c v->o d? li?u d?u v->o, gi? d?nh m-> h->nh v-> di?u ki?n th? tru?ng t?i th?i di?m l?p b->o c->o. Rating trong b->o c->o l-> k?t lu?n m-> h->nh d?a tr->n d? li?u v-> gi? d?nh hi?n t?i -> kh->ng ph?i khuy?n ngh? d?u tu c-> nh->n h->a. Hi?u su?t qu-> kh? kh->ng d?m b?o k?t qu? tuong lai.
+> **Tuyên bố quan trọng:** Báo cáo này chỉ nhằm mục đích nghiên cứu và tham khảo học thuật/sản phẩm. Nội dung không phải là khuyến nghị đầu tư cá nhân hóa, không phải lời mời mua/bán chứng khoán, và không thay thế tư vấn từ chuyên gia được cấp phép. Kết quả định giá phụ thuộc vào dữ liệu đầu vào, giả định mô hình và điều kiện thị trường tại thời điểm lập báo cáo. Rating trong báo cáo là kết luận mô hình dựa trên dữ liệu và giả định hiện tại — không phải khuyến nghị đầu tư cá nhân hóa. Hiệu suất quá khứ không đảm bảo kết quả tương lai.
 
 ---
 
-## 7. Ph? l?c
+## 7. Phụ lục
 
-### A. Gi? d?nh d?nh gi-> (chua ph-> duy?t)
+### A. Giả định định giá (chưa phê duyệt)
 
 ```json
 {json.dumps(assumptions, indent=2, default=str)}
 ```
 
-### B. Gi? d?nh FCFF/WACC
+### B. Giả định FCFF/WACC
 
 ```json
 {json.dumps(fcff_artifact.get("wacc_breakdown", {}), indent=2, default=str)}
 ```
 
-### C. B?ng b?ng ch?ng (Citation Map)
+### C. Bảng bằng chứng (Citation Map)
 
-| Ch? ti->u | K? | Gi-> tr? | Ngu?n |
+| Chỉ tiêu | Kỳ | Giá trị | Nguồn |
 |---|---|---|---|
 """ + "\n".join(
         f"| {v['line_item_label']} | {v['period']} | {v['value_display']} | {v['source_title']} |"
         for k, v in list(cmap.items())[:30]
     ) + """
 
-### D. Footnotes (Tr->ch d?n chi ti?t)
+### D. Footnotes (Trích dẫn chi tiết)
 
 """ + _footnotes(cmap, claims_used, mode)
 
@@ -1799,6 +1793,7 @@ Gi? d?nh: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, k? d? b->o = {assumptions.get
     # banners into the financial report body.
 
     # -- Save report ------------------------------------------------------------
+    _assert_dev_only_path(REPORTS_DIR)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     _suffix = "_BLOCKED" if export_blocked else ""
     report_path = REPORTS_DIR / f"{ticker}_{ts_str}_{report_type}_{mode}{_suffix}.md"
@@ -1825,7 +1820,8 @@ Gi? d?nh: WACC = {wacc_val:.1%}, g = {tg_val:.1%}, k? d? b->o = {assumptions.get
     print(f"[generate_report] valuation_result saved: {valuation_result_path}")
 
     # -- Save citation map ------------------------------------------------------
-    out_dir = ROOT / "artifacts" / "reports"
+    _assert_dev_only_path(RUN_DIR)
+    out_dir = RUN_DIR
     citation_artifact = build_citation_artifact(
         ticker=ticker,
         snapshot_id=used_snapshot_id,
@@ -1907,7 +1903,8 @@ def _write_phase7_artifacts(
         from backend.reporting.layout_audit import run_layout_audit
         from backend.reporting.export_gate import evaluate_export_gate
 
-        out_dir = ROOT / "artifacts" / "reports"
+        _assert_dev_only_path(RUN_DIR)
+        out_dir = RUN_DIR
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # Build a lightweight ReportArtifact from the report Markdown
@@ -1929,7 +1926,7 @@ def _write_phase7_artifacts(
             ))
 
         valuation_result_path = (
-            ROOT / "artifacts" / "valuation_results"
+            RUN_DIR
             / f"{ts_str}_{ticker}_valuation_result.json"
         )
         artifact = ReportArtifact(
@@ -2080,6 +2077,7 @@ def _write_valuation_result(
         "assumptions": assumptions or [],
         "reproducibility_hash": repro_hash,
     }
+    _assert_dev_only_path(VALUATION_RESULTS_DIR)
     VALUATION_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     path = VALUATION_RESULTS_DIR / f"{ts_str}_{ticker}_valuation_result.json"
     path.write_text(json.dumps(doc, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
@@ -2088,7 +2086,8 @@ def _write_valuation_result(
 
 def _write_final_citation_artifacts(ticker, citation_artifact, claims_used, cmap) -> None:
     """Write artifacts/reports/<TICKER>_final_citation_map.json + _final_citation_audit.md."""
-    out_dir = ROOT / "artifacts" / "reports"
+    _assert_dev_only_path(RUN_DIR)
+    out_dir = RUN_DIR
     write_final_citation_artifacts(
         ticker=ticker,
         citation_artifact=citation_artifact,
@@ -2107,7 +2106,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ticker", required=True)
     parser.add_argument("--from-year", type=int, default=MVP_FROM_YEAR, dest="from_year")
     parser.add_argument("--to-year", type=int, default=MVP_TO_YEAR, dest="to_year")
-    parser.add_argument("--report-type", default="full_report", dest="report_type")
+    parser.add_argument("--report-type", default="dev_full_report", dest="report_type")
     parser.add_argument("--snapshot-id", default=None, dest="snapshot_id")
     parser.add_argument("--mode", default="draft", choices=["draft", "final"],
                         help="draft warns on Tier-3; final blocks export without official sources")
@@ -2125,7 +2124,7 @@ def main() -> None:
         mode=args.mode,
     )
     if result.get("export_blocked"):
-        print("[generate_report] REPORT QUALITY BLOCKED -> report is audit-only "
+        print("[generate_report] REPORT QUALITY BLOCKED — report is audit-only "
               "until source, share-count, assumption, and text-quality gates pass.")
         if args.mode == "final":
             sys.exit(3)

@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import hashlib
+import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
-from backend.database.fact_store import PostgresFactStore
+from backend.database.canonical.connection import get_conn
+from backend.database.canonical.source_dal import (
+    compute_source_doc_id,
+    upsert_source_document,
+)
 
 # Policy-driven source_tier defaults by source_type.
 # Connectors may override by passing source_tier explicitly.
@@ -30,9 +36,43 @@ _SOURCE_TYPE_TIER: dict[str, int] = {
     "regulatory": 3,
 }
 
+# Map legacy/connector source_type values to the CHECK constraint set on
+# ingest.source_documents.source_type.  Any value not in this map is left
+# unchanged (already valid, or will be rejected by the DB with a clear error).
+_SOURCE_TYPE_MAP: dict[str, str] = {
+    "financial_statement": "vnstock_financial",
+    "disclosure": "exchange_disclosure",
+    "regulatory_filing": "regulatory_notice",
+    "regulatory": "regulatory_notice",
+    "tender": "exchange_disclosure",
+    "bidding": "exchange_disclosure",
+    "market_reference": "vnstock_financial",
+    "audited_financial_statement": "audited_financial_statement",
+}
+
 
 def _tier_for_source_type(source_type: str) -> int:
     return _SOURCE_TYPE_TIER.get(source_type, 3)
+
+
+def _canonical_source_type(source_type: str) -> str:
+    """Map legacy connector source_type values to canonical ingest.source_documents constraint."""
+    return _SOURCE_TYPE_MAP.get(source_type, source_type)
+
+
+def _parse_published_at(published_at: str | None) -> datetime | None:
+    """Parse an ISO-8601 string or date string to a timezone-aware datetime."""
+    if not published_at:
+        return None
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+        try:
+            dt = datetime.strptime(published_at, fmt)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=UTC)
+            return dt
+        except ValueError:
+            continue
+    return None
 
 
 @dataclass(frozen=True)
@@ -60,8 +100,9 @@ SourceVersionInput = SourceInput
 
 
 class SourceRegistry:
-    def __init__(self, store: PostgresFactStore | None = None) -> None:
-        self.store = store or PostgresFactStore()
+    def __init__(self, store: Any = None) -> None:
+        # store parameter kept for backward compatibility; writes go through canonical DAL.
+        pass
 
     @staticmethod
     def compute_checksum(payload: bytes) -> str:
@@ -69,6 +110,7 @@ class SourceRegistry:
 
     @staticmethod
     def compute_source_id(logical_id: str, source_uri: str, checksum: str) -> str:
+        """Kept for backward compat. Returns SHA256(logical_id|source_uri|checksum)."""
         raw = f"{logical_id}|{source_uri}|{checksum}".encode("utf-8")
         return hashlib.sha256(raw).hexdigest()
 
@@ -78,18 +120,18 @@ class SourceRegistry:
         return SourceRegistry.compute_source_id(source_id, source_uri, checksum)
 
     def get_latest_by_uri(self, logical_id: str, source_uri: str) -> tuple[str, str] | None:
-        """Return (source_id, checksum) of the most-recently ingested source for this URI."""
-        with self.store.conn() as connection:
-            with connection.cursor() as cur:
+        """Return (source_doc_id, checksum) of the most-recently ingested source for this URI."""
+        with get_conn() as conn:
+            with conn.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT source_id, checksum
-                    FROM ingest.sources
-                    WHERE logical_id = %s AND source_uri = %s
-                    ORDER BY ingested_at DESC
+                    SELECT source_doc_id, checksum
+                    FROM ingest.source_documents
+                    WHERE source_uri = %s
+                    ORDER BY created_at DESC
                     LIMIT 1
                     """,
-                    (logical_id, source_uri),
+                    (source_uri,),
                 )
                 row = cur.fetchone()
         if row is None:
@@ -101,96 +143,31 @@ class SourceRegistry:
     _CATALOG_TYPES = frozenset({"vnstock_company"})
 
     def register_source(self, data: SourceInput) -> str:
-        """Insert or upsert a source record into ingest.sources. Returns source_id."""
-        source_id = self.compute_source_id(data.logical_id, data.source_uri, data.checksum)
+        """Upsert a source document into ingest.source_documents. Returns source_doc_id."""
         resolved_tier = (
             data.source_tier
             if data.source_tier is not None
             else _tier_for_source_type(data.source_type)
         )
-        import psycopg2.extras as _extras
-        with self.store.conn() as connection:
-            with connection.cursor() as cur:
-                if data.source_type in self._CATALOG_TYPES:
-                    # Catalog-type upsert: only one live row per (ticker, logical_id,
-                    # source_type) is kept, but we MUST NOT update source_id (the PK)
-                    # because other tables (raw_payloads) hold FK references to it.
-                    # Strategy:
-                    #   INSERT new row; on conflict, update metadata fields only (not PK).
-                    #   RETURNING source_id gives back whichever row is now live — the
-                    #   newly-inserted one OR the existing one whose PK was preserved.
-                    cur.execute(
-                        """
-                        INSERT INTO ingest.sources
-                        (source_id, logical_id, ticker, source_type, source_uri, source_title,
-                         published_at, fiscal_year, fiscal_period, reliability_tier,
-                         source_tier, connector_version, checksum, raw_path, metadata_json)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                        ON CONFLICT (ticker, logical_id, source_type)
-                            WHERE source_type = 'vnstock_company'
-                        DO UPDATE SET
-                            source_uri        = EXCLUDED.source_uri,
-                            checksum          = EXCLUDED.checksum,
-                            raw_path          = EXCLUDED.raw_path,
-                            connector_version = EXCLUDED.connector_version,
-                            source_tier       = EXCLUDED.source_tier,
-                            ingested_at       = NOW()
-                        RETURNING source_id
-                        """,
-                        (
-                            source_id,
-                            data.logical_id,
-                            data.ticker,
-                            data.source_type,
-                            data.source_uri,
-                            data.source_title,
-                            data.published_at,
-                            data.fiscal_year,
-                            data.fiscal_period,
-                            data.reliability_tier,
-                            resolved_tier,
-                            data.connector_version,
-                            data.checksum,
-                            data.raw_path,
-                            _extras.Json(data.metadata_json),
-                        ),
-                    )
-                    # Use the actual source_id that survived the upsert (may differ
-                    # from the computed one if a pre-existing row was kept).
-                    returned = cur.fetchone()
-                    if returned:
-                        source_id = returned[0]
-                else:
-                    # All other source types are version-tracked: each unique
-                    # (logical_id, source_uri, checksum) creates its own row.
-                    cur.execute(
-                        """
-                        INSERT INTO ingest.sources
-                        (source_id, logical_id, ticker, source_type, source_uri, source_title,
-                         published_at, fiscal_year, fiscal_period, reliability_tier,
-                         source_tier, connector_version, checksum, raw_path, metadata_json)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                        ON CONFLICT (source_id) DO NOTHING
-                        """,
-                        (
-                            source_id,
-                            data.logical_id,
-                            data.ticker,
-                            data.source_type,
-                            data.source_uri,
-                            data.source_title,
-                            data.published_at,
-                            data.fiscal_year,
-                            data.fiscal_period,
-                            data.reliability_tier,
-                            resolved_tier,
-                            data.connector_version,
-                            data.checksum,
-                            data.raw_path,
-                            _extras.Json(data.metadata_json),
-                        ),
-                    )
-        return source_id
+        canonical_type = _canonical_source_type(data.source_type)
+        return upsert_source_document(
+            ticker=data.ticker,
+            source_type=canonical_type,
+            source_tier=resolved_tier,
+            source_uri=data.source_uri,
+            checksum=data.checksum,
+            source_title=data.source_title,
+            published_at=_parse_published_at(data.published_at),
+            fiscal_year=data.fiscal_year,
+            fiscal_period=data.fiscal_period,
+            local_path=data.raw_path,
+            connector_version=data.connector_version,
+            metadata={
+                "logical_id": data.logical_id,
+                "reliability_tier": data.reliability_tier,
+                **data.metadata_json,
+            },
+        )
 
     # Backward-compatibility alias — callers using register_version continue to work.
     def register_version(self, data: SourceInput) -> str:
@@ -211,36 +188,47 @@ class SourceRegistry:
         response_path: str | None = None,
         response_checksum: str | None = None,
     ) -> None:
-        """Insert a raw payload record into ingest.raw_payloads.
+        """Record raw payload lineage in ingest.source_documents.
 
-        The new connector_* and request_* parameters populate the columns added
-        in migration 010, enabling full Gate 2 lineage traversal.
+        Updates the source document record with payload location and connector
+        provenance.  ingest.raw_payloads was removed in migration 026; lineage
+        is now carried in metadata_json on the source document itself.
         """
-        import psycopg2.extras as _extras
-        with self.store.conn() as connection:
-            with connection.cursor() as cur:
+        if not source_id:
+            return
+        payload_meta: dict[str, Any] = {
+            "raw_payload_content_type": content_type,
+            "raw_payload_checksum": checksum,
+        }
+        if storage_path:
+            payload_meta["raw_payload_path"] = storage_path
+        if connector_name:
+            payload_meta["raw_connector_name"] = connector_name
+        if connector_version:
+            payload_meta["raw_connector_version"] = connector_version
+        if request_uri:
+            payload_meta["raw_request_uri"] = request_uri
+        if response_path:
+            payload_meta["raw_response_path"] = response_path
+        if response_checksum:
+            payload_meta["raw_response_checksum"] = response_checksum
+
+        with get_conn() as conn:
+            with conn.cursor() as cur:
                 cur.execute(
                     """
-                    INSERT INTO ingest.raw_payloads
-                    (source_id, content_type, payload_json, payload_text,
-                     storage_path, checksum,
-                     connector_name, connector_version, request_uri,
-                     request_params, response_path, response_checksum)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    UPDATE ingest.source_documents
+                    SET metadata_json  = metadata_json || %s::jsonb,
+                        local_path     = COALESCE(%s, local_path),
+                        fetch_status   = CASE WHEN fetch_status = 'registered'
+                                              THEN 'fetched'
+                                              ELSE fetch_status END
+                    WHERE source_doc_id = %s
                     """,
                     (
-                        source_id,
-                        content_type,
-                        _extras.Json(payload_json) if payload_json is not None else None,
-                        payload_text,
+                        __import__("json").dumps(payload_meta),
                         storage_path,
-                        checksum,
-                        connector_name,
-                        connector_version,
-                        request_uri,
-                        _extras.Json(request_params) if request_params is not None else None,
-                        response_path,
-                        response_checksum,
+                        source_id,
                     ),
                 )
 
@@ -249,39 +237,54 @@ class SourceRegistry:
         source_id: str,
         parser_name: str,
         parser_version: str,
-    ) -> int:
-        """Insert a parser_run record in 'running' state. Returns parser_run_id."""
-        with self.store.conn() as connection:
-            with connection.cursor() as cur:
+    ) -> str:
+        """Insert a connector run record in 'running' state. Returns run_id (str)."""
+        run_id = f"parser_{uuid.uuid4().hex[:16]}"
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                # Resolve ticker from the source document if available.
+                cur.execute(
+                    "SELECT ticker FROM ingest.source_documents WHERE source_doc_id = %s",
+                    (source_id,),
+                )
+                row = cur.fetchone()
+                ticker = row[0] if row else None
+            with conn.cursor() as cur:
                 cur.execute(
                     """
-                    INSERT INTO ingest.parser_runs
-                    (source_id, parser_name, parser_version, status)
-                    VALUES (%s, %s, %s, 'running')
-                    RETURNING parser_run_id
+                    INSERT INTO ingest.connector_runs
+                        (run_id, ticker, connector_name, status, stats_json)
+                    VALUES (%s, %s, %s, 'running',
+                            jsonb_build_object(
+                                'parser_version', %s,
+                                'source_doc_id',  %s
+                            ))
+                    ON CONFLICT (run_id) DO NOTHING
                     """,
-                    (source_id, parser_name, parser_version),
+                    (run_id, ticker, parser_name, parser_version, source_id),
                 )
-                return cur.fetchone()[0]
+        return run_id
 
     def complete_parser_run(
         self,
-        parser_run_id: int,
+        parser_run_id: str | int,
         rows_extracted: int = 0,
         error_message: str | None = None,
     ) -> None:
-        """Mark a parser_run as completed or failed."""
+        """Mark a connector run as completed or failed."""
         status = "failed" if error_message else "completed"
-        with self.store.conn() as connection:
-            with connection.cursor() as cur:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
                 cur.execute(
                     """
-                    UPDATE ingest.parser_runs
-                    SET status = %s, completed_at = NOW(),
-                        rows_extracted = %s, error_message = %s
-                    WHERE parser_run_id = %s
+                    UPDATE ingest.connector_runs
+                    SET status               = %s,
+                        finished_at          = NOW(),
+                        observations_created = %s,
+                        error_message        = %s
+                    WHERE run_id = %s
                     """,
-                    (status, rows_extracted, error_message, parser_run_id),
+                    (status, rows_extracted, error_message, str(parser_run_id)),
                 )
 
     def save_raw_snapshot(self, payload: bytes, out_path: Path) -> str:

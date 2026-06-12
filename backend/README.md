@@ -1,35 +1,49 @@
-This package implements a phased backend skeleton aligned to `specs/BACKEND-PLAN.md` and `specs/SEQUENCE.md` with the agent set:
+This package implements the v1 fixed `full_report` backend.
 
-- `Supervisor`
-- `DataAgent`
-- `QuantAgent`
-- `ResearcherAgent`
-- `AuditorAgent`
+## Production Path
 
-## Run
+The only production workflow is:
 
-```bash
-python -m backend.main
+```text
+FullReportOrchestrator
+-> ResearchGraphRunner
+-> six specialist agents
+-> deterministic tools and gates
+-> human approval checkpoints
+-> render/publish after approval
 ```
 
-Server starts on `:8010`.
+Supported agents are configured in `config/agents/agents.yml`:
 
-## Main Endpoints
+- `research_manager`
+- `data_evidence`
+- `financial_analysis`
+- `forecast_valuation`
+- `thesis_report`
+- `senior_critic`
+
+The runner uses `backend/harness/graph.py` as a fixed stage list. It does not use a compiled dynamic graph, a Supervisor facade, or partial recompute routes.
+
+## Main Runtime Files
+
+- `backend/orchestrator.py`: lifecycle wrapper for `full_report` only.
+- `backend/harness/runner.py`: pause-aware execution, artifact persistence, tool calls, gates, and approvals.
+- `backend/harness/contracts.py`: typed agent artifact validation.
+- `backend/harness/tool_registry.py`: deterministic tool ownership and permissions.
+- `backend/reporting/report_assembler.py`: deterministic final report model assembly from the Thesis & Report Agent artifact.
+
+## API Endpoints
 
 - `POST /research/start`
 - `GET /research/{run_id}/status`
 - `GET /research/{run_id}/artifacts`
 - `GET /reports/{run_id}`
 - `POST /research/{run_id}/approve`
-- `POST /research/{run_id}/recompute`
-- `POST /research/{run_id}/evaluate`
 
-## Phase Mapping
+## CLI
 
-- Phase 1: contracts + runtime schema + API skeleton
-- Phase 2: `DataAgent` ingestion + DQF + `QuantAgent` valuation
-- Phase 3: retrieval indexing + grounding evidence refs
-- Phase 4: stateful orchestration + HITL approvals
-- Phase 5: offline evaluation + budget guardrails + ops playbook
-- Phase 6: debate/critique loop + scale hooks
-
+```bash
+python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025
+python scripts/approve_report.py --run-id <run_id> --stage assumptions --decision approve --reviewer analyst
+python scripts/approve_report.py --run-id <run_id> --stage final --decision approve --reviewer analyst
+```

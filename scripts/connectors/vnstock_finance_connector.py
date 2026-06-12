@@ -21,12 +21,11 @@ from backend.dataset.config_io import ROOT, load_financial_taxonomy, load_univer
 from backend.dataset.dqf import validate_financial_fact
 from backend.database.fact_store import FinancialFact, PostgresFactStore
 from backend.database.source_registry import SourceInput, SourceRegistry
+from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
 
 
 CONNECTOR_VERSION = "vn_finance_v2"
 
-MVP_FROM_YEAR = 2021
-MVP_TO_YEAR = 2025
 # Regex for an accepted annual period key e.g. "2024FY"
 _FY_PERIOD_RE = re.compile(r"^(\d{4})FY$")
 
@@ -312,8 +311,8 @@ def sync_financial_for_ticker(
     store: PostgresFactStore,
     registry: SourceRegistry,
     period: str = "year",
-    from_year: int = MVP_FROM_YEAR,
-    to_year: int = MVP_TO_YEAR,
+    from_year: int = DEFAULT_FROM_YEAR,
+    to_year: int = DEFAULT_TO_YEAR,
     provider: str = "auto",
 ) -> int:
     """Ingest annual financial statements for one ticker.
@@ -327,7 +326,7 @@ def sync_financial_for_ticker(
         store: Fact store instance.
         registry: Source registry instance.
         period: Must be 'year' for MVP — 'quarter' is rejected.
-        from_year: First fiscal year to keep (default 2021).
+        from_year: First fiscal year to keep (default 2022).
         to_year: Last fiscal year to keep (default 2025).
         provider: 'auto' tries VCI then KBS; or specify 'VCI' / 'KBS' directly.
     """
@@ -434,8 +433,8 @@ def sync_financial_for_ticker(
 def sync_financial_for_universe(
     tickers: Iterable[str] | None = None,
     period: str = "year",
-    from_year: int = MVP_FROM_YEAR,
-    to_year: int = MVP_TO_YEAR,
+    from_year: int = DEFAULT_FROM_YEAR,
+    to_year: int = DEFAULT_TO_YEAR,
     provider: str = "auto",
 ) -> dict[str, int]:
     selected = list(tickers or load_universe_tickers())

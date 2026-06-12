@@ -7,7 +7,7 @@ to financial_facts — it is purely a raw-output store.
 
 Artifact layout on disk::
 
-    data/ocr_artifacts/{ticker}/{fiscal_year}/{document_id}/
+    temporary_workdir/{ticker}/{fiscal_year}/{document_id}/
         metadata.json          — OCR run metadata
         pages/
             page_001.txt       — raw OCR text per page
@@ -121,12 +121,14 @@ def init_ocr_run(
     pdf_type: str,
     ocr_lang: str,
     dpi: int,
-    base_dir: Path = Path("data/ocr_artifacts"),
+    base_dir: Path | None = None,
 ) -> tuple[OcrRunMetadata, Path]:
     """Initialize an OCR run directory and write initial metadata.json.
 
     Returns (metadata, run_dir).
     """
+    if base_dir is None:
+        raise ValueError("base_dir must be an explicit temporary OCR working directory")
     run_dir = base_dir / ticker / str(fiscal_year) / document_id
     (run_dir / _PAGES_DIR).mkdir(parents=True, exist_ok=True)
 

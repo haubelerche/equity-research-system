@@ -9,6 +9,7 @@ sufficiently-confident candidate is fetched). Fetching uses TLS-verified HTTP.
 from __future__ import annotations
 
 import hashlib
+import tempfile
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -33,9 +34,6 @@ DEFAULT_CONNECTORS = [
     SscDisclosureConnector(),
 ]
 
-_RAW_ROOT = Path(__file__).resolve().parents[2] / "data" / "raw" / "official_documents"
-
-
 @dataclass
 class FetchedDocumentRecord:
     ticker: str
@@ -43,7 +41,8 @@ class FetchedDocumentRecord:
     document_type: str
     source_name: str
     source_url: str
-    local_path: str
+    storage_bucket: str
+    storage_path: str
     file_hash: str
     content_type: str
     fetched_at: str
@@ -111,24 +110,33 @@ def fetch_candidate(
     candidate: DocumentCandidate,
     *,
     fetch_bytes=None,
-    raw_root: Path | None = None,
+    storage_adapter=None,
 ) -> FetchedDocumentRecord:
-    """Phase 3B: download an approved candidate, store raw file + sha256 hash."""
+    """Phase 3B: download and persist an immutable official PDF to Supabase."""
+    from backend.storage import SOURCES_BUCKET, SupabaseStorageAdapter, source_document_key
+
     fetch = fetch_bytes or _default_fetch_bytes
-    root = raw_root or _RAW_ROOT
     content, content_type = fetch(candidate.source_url)
     if not content:
         raise RuntimeError(f"empty content for {candidate.source_url}")
     file_hash = hashlib.sha256(content).hexdigest()
-    ext = ".pdf" if candidate.source_url.lower().endswith(".pdf") else Path(candidate.source_url).suffix or ".bin"
-    dest_dir = root / candidate.ticker / str(candidate.fiscal_year or "unknown")
-    dest_dir.mkdir(parents=True, exist_ok=True)
-    dest = dest_dir / f"{candidate.document_type}{ext}"
-    dest.write_bytes(content)
-    dest.with_suffix(dest.suffix + ".sha256").write_text(file_hash, encoding="utf-8")
+    if candidate.fiscal_year is None:
+        raise ValueError("Official document fiscal_year is required for canonical storage")
+    if "pdf" not in content_type.lower() and not candidate.source_url.lower().endswith(".pdf"):
+        raise ValueError("Only immutable PDF official documents may be stored in sources")
+    key = source_document_key(candidate.ticker, candidate.fiscal_year, file_hash)
+    adapter = storage_adapter or SupabaseStorageAdapter()
+    with tempfile.NamedTemporaryFile(suffix=".pdf") as temporary:
+        temporary.write(content)
+        temporary.flush()
+        if adapter.exists(SOURCES_BUCKET, key):
+            if not adapter.validate_checksum(SOURCES_BUCKET, key, file_hash):
+                raise FileExistsError(f"Checksum conflict: {SOURCES_BUCKET}/{key}")
+        else:
+            adapter.upload_file(SOURCES_BUCKET, key, temporary.name, "application/pdf")
     return FetchedDocumentRecord(
         ticker=candidate.ticker, fiscal_year=candidate.fiscal_year,
         document_type=candidate.document_type, source_name=candidate.source_name,
-        source_url=candidate.source_url, local_path=str(dest), file_hash=file_hash,
+        source_url=candidate.source_url, storage_bucket=SOURCES_BUCKET, storage_path=key, file_hash=file_hash,
         content_type=content_type, fetched_at=datetime.now(UTC).isoformat(),
     )

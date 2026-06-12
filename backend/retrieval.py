@@ -1,8 +1,9 @@
-"""Evidence retrieval service — Phase 5 citation pipeline.
+"""Evidence retrieval service — evidence pipeline for document chunks.
 
-Queries ingest.document_chunks with full-text search, metadata filters,
-and source-tier prioritisation. Used by report generation and citation
-validation; replaces the legacy file-based keyword stub.
+Queries ingest.document_chunks with vector similarity when embeddings are
+available, and falls back to full-text search when embeddings or an
+embedding provider are unavailable. Metadata filters and source-tier
+prioritisation remain in PostgreSQL.
 
 Retrieval priority:
   Tier 1 (reliability_tier=1) — official PDFs (text or OCR) > Tier 2 > Tier 3
@@ -21,6 +22,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from backend.database.config import connect_with_retry, require_database_url
+
 _PROJECT_ROOT = str(Path(__file__).resolve().parents[1])
 
 _env_file = Path(_PROJECT_ROOT) / ".env"
@@ -33,7 +36,30 @@ if _env_file.exists():
 
 
 def _dsn() -> str:
-    return os.getenv("DATABASE_URL", "postgresql://maer:maer_local@localhost:5432/maer_dev")
+    return require_database_url()
+
+
+DEFAULT_EMBED_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+VECTOR_DIM = 1536
+
+try:
+    from openai import OpenAI
+except ImportError:  # pragma: no cover - optional dependency at runtime
+    OpenAI = None
+
+
+def _vector_literal(values: list[float]) -> str:
+    return "[" + ",".join(repr(float(v)) for v in values) + "]"
+
+
+def _embed_query(query: str) -> list[float] | None:
+    if OpenAI is None or not os.getenv("OPENAI_API_KEY"):
+        return None
+    if not query.strip():
+        return None
+    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    response = client.embeddings.create(model=DEFAULT_EMBED_MODEL, input=[query])
+    return response.data[0].embedding
 
 
 @dataclass
@@ -112,79 +138,96 @@ class RetrievalService:
             return []
 
         ticker = ticker.strip().upper()
+        query_embedding = _embed_query(query)
 
         try:
-            conn = psycopg2.connect(_dsn())
+            conn = connect_with_retry(_dsn())
         except Exception:
             return []
 
         try:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                params: list[Any] = [ticker, max_tier]
+            def _run_search(use_vector: bool) -> list[dict[str, Any]]:
+                with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                    params: list[Any] = [ticker, max_tier]
 
-                # Build FTS condition — gracefully degrade to ILIKE if query is empty
-                if query and query.strip():
-                    # Use simple dictionary for cross-language Vietnamese + number support
-                    fts_clause = (
-                        "AND to_tsvector('simple', dc.chunk_text) "
-                        "@@ plainto_tsquery('simple', %s)"
-                    )
-                    rank_expr = (
-                        "ts_rank(to_tsvector('simple', dc.chunk_text), "
-                        "plainto_tsquery('simple', %s))"
-                    )
-                    params.extend([query, query])
-                else:
-                    fts_clause = ""
-                    rank_expr = "0.0"
+                    if use_vector and query_embedding is not None:
+                        vector_param = _vector_literal(query_embedding)
+                        rank_expr = "(1 - (dc.embedding <=> %s::vector))"
+                        order_expr = "dc.embedding <=> %s::vector ASC"
+                        params.extend([vector_param, vector_param])
+                        extra_where = "AND dc.embedding IS NOT NULL"
+                        fts_clause = ""
+                    elif query and query.strip():
+                        # Use simple dictionary for cross-language Vietnamese + number support.
+                        fts_clause = (
+                            "AND to_tsvector('simple', dc.chunk_text) "
+                            "@@ plainto_tsquery('simple', %s)"
+                        )
+                        rank_expr = (
+                            "ts_rank(to_tsvector('simple', dc.chunk_text), "
+                            "plainto_tsquery('simple', %s))"
+                        )
+                        order_expr = "fts_rank DESC"
+                        params.extend([query, query])
+                        extra_where = ""
+                    else:
+                        rank_expr = "0.0"
+                        order_expr = "fts_rank DESC"
+                        extra_where = ""
+                        fts_clause = ""
 
-                # Fiscal year filter
-                if fiscal_year is not None:
-                    fy_clause = "AND (dc.fiscal_year = %s OR dc.fiscal_year IS NULL)"
-                    params.append(fiscal_year)
-                else:
-                    fy_clause = ""
+                    # Fiscal year filter
+                    if fiscal_year is not None:
+                        fy_clause = "AND (dc.fiscal_year = %s OR dc.fiscal_year IS NULL)"
+                        params.append(fiscal_year)
+                    else:
+                        fy_clause = ""
 
-                # Extraction method filter
-                if extraction_methods:
-                    method_placeholders = ",".join(["%s"] * len(extraction_methods))
-                    method_clause = (
-                        f"AND (dc.metadata_json->>'extraction_method' IN ({method_placeholders})"
-                        f" OR dc.metadata_json->>'extraction_method' IS NULL)"
-                    )
-                    params.extend(extraction_methods)
-                else:
-                    method_clause = ""
+                    # Extraction method filter
+                    if extraction_methods:
+                        method_placeholders = ",".join(["%s"] * len(extraction_methods))
+                        method_clause = (
+                            f"AND (dc.metadata_json->>'extraction_method' IN ({method_placeholders})"
+                            f" OR dc.metadata_json->>'extraction_method' IS NULL)"
+                        )
+                        params.extend(extraction_methods)
+                    else:
+                        method_clause = ""
 
-                params.append(top_k)
+                    params.append(top_k)
 
-                sql = f"""
-                    SELECT
-                        dc.chunk_id,
-                        dc.source_id,
-                        dc.ticker,
-                        dc.chunk_index,
-                        dc.section_title,
-                        dc.chunk_text,
-                        dc.fiscal_year,
-                        dc.metadata_json,
-                        s.reliability_tier,
-                        COALESCE(s.source_title, '') AS source_title,
-                        COALESCE(s.source_uri, '') AS source_uri,
-                        {rank_expr} AS fts_rank
-                    FROM ingest.document_chunks dc
-                    JOIN ingest.sources s ON s.source_id = dc.source_id
-                    WHERE dc.ticker = %s
-                      AND s.reliability_tier <= %s
-                      {fts_clause}
-                      {fy_clause}
-                      {method_clause}
-                    ORDER BY s.reliability_tier ASC, fts_rank DESC
-                    LIMIT %s
-                """
+                    sql = f"""
+                        SELECT
+                            dc.chunk_id,
+                            dc.source_doc_id AS source_id,
+                            dc.ticker,
+                            dc.chunk_index,
+                            dc.section_title,
+                            dc.chunk_text,
+                            dc.fiscal_year,
+                            dc.metadata_json,
+                            s.source_tier AS reliability_tier,
+                            COALESCE(s.source_title, '') AS source_title,
+                            COALESCE(s.source_uri, '') AS source_uri,
+                            {rank_expr} AS fts_rank
+                        FROM ingest.document_chunks dc
+                        JOIN ingest.source_documents s ON s.source_doc_id = dc.source_doc_id
+                        WHERE dc.ticker = %s
+                          AND s.source_tier <= %s
+                          {extra_where}
+                          {fts_clause}
+                          {fy_clause}
+                          {method_clause}
+                        ORDER BY s.source_tier ASC, {order_expr}
+                        LIMIT %s
+                    """
 
-                cur.execute(sql, params)
-                rows = cur.fetchall()
+                    cur.execute(sql, params)
+                    return cur.fetchall()
+
+            rows = _run_search(query_embedding is not None)
+            if not rows and query and query.strip() and query_embedding is not None:
+                rows = _run_search(False)
 
         except Exception:
             conn.close()
@@ -273,7 +316,7 @@ class RetrievalService:
         try:
             import psycopg2
             import psycopg2.extras
-            conn = psycopg2.connect(_dsn())
+            conn = connect_with_retry(_dsn())
         except Exception:
             return None
 
@@ -281,11 +324,14 @@ class RetrievalService:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 cur.execute(
                     """
-                    SELECT dc.*, s.reliability_tier,
+                    SELECT dc.chunk_id, dc.source_doc_id AS source_id, dc.ticker,
+                           dc.chunk_index, dc.section_title, dc.chunk_text,
+                           dc.fiscal_year, dc.metadata_json,
+                           s.source_tier AS reliability_tier,
                            COALESCE(s.source_title, '') AS source_title,
                            COALESCE(s.source_uri, '') AS source_uri
                     FROM ingest.document_chunks dc
-                    JOIN ingest.sources s ON s.source_id = dc.source_id
+                    JOIN ingest.source_documents s ON s.source_doc_id = dc.source_doc_id
                     WHERE dc.chunk_id = %s
                     """,
                     (chunk_id,),
@@ -316,17 +362,17 @@ class RetrievalService:
         )
 
     def source_exists(self, source_id: str) -> bool:
-        """Check whether a source_id is present in ingest.sources."""
+        """Check whether a source_doc_id is present in ingest.source_documents."""
         try:
             import psycopg2
-            conn = psycopg2.connect(_dsn())
+            conn = connect_with_retry(_dsn())
         except Exception:
             return False
 
         try:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT 1 FROM ingest.sources WHERE source_id = %s LIMIT 1",
+                    "SELECT 1 FROM ingest.source_documents WHERE source_doc_id = %s LIMIT 1",
                     (source_id,),
                 )
                 return cur.fetchone() is not None

@@ -78,6 +78,13 @@ def test_get_snapshot_falls_back_to_cache(tmp_path, monkeypatch):
     assert any("served from cache" in w for w in snap.warnings)
 
 
+def test_get_snapshot_without_base_dir_does_not_turn_fetch_into_failure(monkeypatch):
+    monkeypatch.setattr(ms, "_fetch_overview_row", lambda ticker: dict(_DBD_OVERVIEW))
+    snap = ms.get_market_snapshot("DBD", persist=True, base_dir=None)
+    assert snap is not None
+    assert snap.shares_outstanding == 94_489_262.0
+
+
 def test_get_snapshot_returns_none_when_no_data(tmp_path, monkeypatch):
     def _boom(ticker):
         raise RuntimeError("network down")

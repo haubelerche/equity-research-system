@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
+import sys
 import time
 from typing import Any
 
 from backend.harness.agent_registry import AgentConfig
 from backend.harness.state import AgentResult
+
+_log = logging.getLogger("harness.model_adapter")
 
 # ── Production model constants ───────────────────────────────────────────────
 MAIN_MODEL = "gpt-5-mini"
@@ -76,8 +80,13 @@ class OpenAIModelAdapter:
     ) -> AgentResult:
         validate_production_model(agent_config.model)
         started = time.perf_counter()
+        stage = state.get("current_stage") or "?"
 
+        # ── 1. Compact state ────────────────────────────────────────────
+        t0 = time.perf_counter()
         state_payload = self._compact_state(state)
+        compact_ms = int((time.perf_counter() - t0) * 1000)
+
         user_payload = {
             "task": task,
             "input_refs": input_refs or [],
@@ -97,12 +106,27 @@ class OpenAIModelAdapter:
         import openai
         client = openai.OpenAI(timeout=agent_config.timeout_seconds)
 
+        # ── 2. Build messages + estimate input size ─────────────────────
+        system_msg = agent_config.prompt
+        user_msg = json.dumps(user_payload, ensure_ascii=False, default=str)
         messages = [
-            {"role": "system", "content": agent_config.prompt},
-            {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False, default=str)},
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": user_msg},
         ]
+        input_chars = len(system_msg) + len(user_msg)
+        est_input_tokens = input_chars // 4  # rough estimate
 
         max_completion_tokens = _OPENAI_MAX_COMPLETION_TOKENS.get(agent_config.model, 16384)
+        _log.info(
+            "[%s] LLM_CALL agent=%s model=%s est_input_tokens=%d max_output_tokens=%d "
+            "timeout=%ds compact_ms=%d",
+            stage, agent_config.agent_id, agent_config.model,
+            est_input_tokens, max_completion_tokens,
+            agent_config.timeout_seconds, compact_ms,
+        )
+        sys.stderr.flush()
+
+        # ── 3. Fire the LLM call ───────────────────────────────────────
         create_kwargs: dict[str, Any] = {
             "model": agent_config.model,
             "messages": messages,
@@ -114,6 +138,12 @@ class OpenAIModelAdapter:
         try:
             response = client.chat.completions.create(**create_kwargs)
         except Exception as exc:
+            call_ms = int((time.perf_counter() - started) * 1000)
+            _log.error(
+                "[%s] LLM_FAIL agent=%s after %dms: %s: %s",
+                stage, agent_config.agent_id, call_ms,
+                type(exc).__name__, exc,
+            )
             diagnostic = {
                 "provider": self.provider,
                 "model": agent_config.model,
@@ -122,14 +152,26 @@ class OpenAIModelAdapter:
                 "failure_stage": "chat_completions_create",
                 "agent_id": agent_config.agent_id,
                 "task": task,
-                "stage": state.get("current_stage"),
+                "stage": stage,
             }
             raise RuntimeError(
                 "agent_llm_call_failed: "
                 + json.dumps(diagnostic, ensure_ascii=False, sort_keys=True, default=str)
             ) from exc
 
+        # ── 4. Parse response ──────────────────────────────────────────
         latency_ms = int((time.perf_counter() - started) * 1000)
+        usage = response.usage
+        prompt_tokens = usage.prompt_tokens if usage else 0
+        completion_tokens = usage.completion_tokens if usage else 0
+        _log.info(
+            "[%s] LLM_OK agent=%s latency=%dms prompt_tokens=%d completion_tokens=%d "
+            "finish_reason=%s",
+            stage, agent_config.agent_id, latency_ms,
+            prompt_tokens, completion_tokens,
+            response.choices[0].finish_reason if response.choices else "?",
+        )
+
         content = response.choices[0].message.content or "{}"
         raw = self._parse_response_json(content)
         if raw is None:
@@ -151,14 +193,17 @@ class OpenAIModelAdapter:
                 "warnings": artifact_payload.get("warnings", []),
             }
 
-        usage = response.usage
-        prompt_tokens = usage.prompt_tokens if usage else 0
-        completion_tokens = usage.completion_tokens if usage else 0
         # Normalize LLM-returned status to machine states only.
         status = raw.get("status", "completed")
         if status not in {"completed", "failed", "skipped"}:
             status = "completed" if raw.get("payload") else "failed"
-        confidence = float(raw.get("confidence", 0.0) or 0.0)
+        raw_conf = raw.get("confidence", 0.0)
+        if isinstance(raw_conf, dict):
+            raw_conf = raw_conf.get("overall", raw_conf.get("score", 0.0))
+        try:
+            confidence = float(raw_conf or 0.0)
+        except (TypeError, ValueError):
+            confidence = 0.0
         confidence = max(0.0, min(1.0, confidence))
         return AgentResult(
             agent_id=agent_config.agent_id,
@@ -219,16 +264,43 @@ class OpenAIModelAdapter:
             )
         return compacted
 
+    # ── Stage-specific artifact whitelists ──────────────────────────────────
+    # Each stage's agent only receives the upstream artifacts it actually needs.
+    # Unlisted stages pass artifacts through unfiltered (e.g. PREFLIGHT has none).
+    _STAGE_ARTIFACT_WHITELIST: dict[str, set[str]] = {
+        "PLAN": set(),  # research_manager needs only ticker/objective, no artifacts
+        "INGEST_AND_VALIDATE": {"auto_ingest", "build_facts", "index"},
+        "FINANCIAL_ANALYSIS": {"build_facts", "snapshot", "ratios"},
+        "ANALYZE": {"build_facts", "snapshot", "ratios"},
+        "FORECAST_AND_VALUE": {
+            "snapshot", "ratios", "financial_analysis",
+            "forecast_model", "valuation", "valuation_read",
+        },
+        "WRITE_REPORT": {
+            "financial_analysis", "forecast_model", "valuation",
+            "valuation_read", "market_snapshot", "readiness_review",
+        },
+        "REVIEW": {
+            "report_draft", "final_report_model", "report_assembly_validation",
+            "financial_analysis", "valuation", "quality", "critic_review",
+        },
+    }
+
     @staticmethod
     def _compact_artifacts_for_stage(stage: str, artifacts: dict[str, Any]) -> dict[str, Any]:
-        if stage == "FINANCIAL_ANALYSIS":
-            allowed = {"build_facts", "snapshot", "ratios"}
-            return {
-                key: OpenAIModelAdapter._compact_artifact_value(key, value)
-                for key, value in artifacts.items()
-                if key in allowed
-            }
-        return artifacts
+        whitelist = OpenAIModelAdapter._STAGE_ARTIFACT_WHITELIST.get(stage)
+        if whitelist is None:
+            return artifacts
+        filtered = {
+            key: OpenAIModelAdapter._compact_artifact_value(key, value)
+            for key, value in artifacts.items()
+            if key in whitelist
+        }
+        # Always include a summary of what was omitted so the LLM knows context exists.
+        omitted = sorted(set(artifacts) - whitelist)
+        if omitted:
+            filtered["_omitted_artifact_keys"] = omitted
+        return filtered
 
     @staticmethod
     def _compact_artifact_value(key: str, value: Any) -> Any:
@@ -240,7 +312,35 @@ class OpenAIModelAdapter:
                 if isinstance(row, dict)
             ]
             return compacted
+        # Truncate large nested dicts to keep payload bounded.
+        if isinstance(value, dict):
+            return OpenAIModelAdapter._truncate_large_dict(value, max_chars=30_000)
         return value
+
+    @staticmethod
+    def _truncate_large_dict(d: dict[str, Any], max_chars: int = 30_000) -> dict[str, Any]:
+        """If a dict's JSON repr exceeds *max_chars*, keep top-level keys but
+        replace oversized leaf values with a size summary."""
+        raw = json.dumps(d, ensure_ascii=False, default=str)
+        if len(raw) <= max_chars:
+            return d
+        compacted: dict[str, Any] = {}
+        for k, v in d.items():
+            v_raw = json.dumps(v, ensure_ascii=False, default=str)
+            if len(v_raw) > 8_000:
+                if isinstance(v, list):
+                    compacted[k] = f"[list: {len(v)} items, {len(v_raw)} chars — truncated]"
+                elif isinstance(v, dict):
+                    compacted[k] = {
+                        "_truncated": True,
+                        "_keys": sorted(v.keys())[:20],
+                        "_chars": len(v_raw),
+                    }
+                else:
+                    compacted[k] = f"[{type(v).__name__}: {len(v_raw)} chars — truncated]"
+            else:
+                compacted[k] = v
+        return compacted
 
     @staticmethod
     def _compact_fact(row: dict[str, Any]) -> dict[str, Any]:

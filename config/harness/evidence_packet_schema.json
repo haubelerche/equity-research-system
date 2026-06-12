@@ -12,7 +12,7 @@
     "gate_results",
     "quality_gate_results",
     "known_limitations",
-    "agent_handoffs",
+    "trace_summary",
     "tool_execution_summary",
     "packet_hash"
   ],
@@ -33,7 +33,6 @@
     "gate_results": {"type": "object"},
     "quality_gate_results": {"type": "object"},
     "known_limitations": {"type": "array", "items": {"type": "string"}},
-    "agent_handoffs": {"type": "array"},
     "tool_execution_summary": {"type": "array"},
     "trace_summary": {"type": "array"},
     "created_at": {"type": "string"},

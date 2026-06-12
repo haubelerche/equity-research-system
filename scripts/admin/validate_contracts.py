@@ -14,8 +14,6 @@ JSON_SCHEMAS = [
     "config/dataset/contracts/catalyst_event.schema.json",
     "config/dataset/contracts/document_chunk.schema.json",
     "config/dataset/contracts/citation.schema.json",
-    "config/dataset/contracts/agent_message.schema.json",
-    "config/dataset/contracts/tool_call.schema.json",
 ]
 
 YAML_FILES = [

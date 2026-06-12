@@ -74,7 +74,7 @@ python scripts/ingest_ticker.py --ticker DHG --years 5
 - `backend/database/source_registry.py` ✅
 
 **Pre-requisites:**
-- PostgreSQL running at `DATABASE_URL` (default: `postgresql://maer:maer_local@localhost:5432/maer_dev`)
+- Supabase PostgreSQL reachable through the required `DATABASE_URL`
 - vnstock installed (`pip install vnstock`)
 
 ---

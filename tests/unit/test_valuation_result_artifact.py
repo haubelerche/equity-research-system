@@ -88,3 +88,51 @@ def test_is_publishable_false_when_export_blocked(tmp_path, monkeypatch):
 def test_is_publishable_true_when_approved_and_unblocked(tmp_path, monkeypatch):
     doc = _write(monkeypatch, tmp_path, is_draft=False, export_blocked=False)
     assert doc["is_publishable"] is True
+
+
+def test_generate_report_refuses_production_run_roots(monkeypatch):
+    import scripts.generate_report as gr
+
+    monkeypatch.setattr(gr, "VALUATION_RESULTS_DIR", gr.ROOT / "storage" / "runs" / "run_bad")
+
+    with pytest.raises(RuntimeError, match="DEV-ONLY"):
+        _write_valuation_result(
+            ticker="DBD",
+            ts_str="20260603T000000",
+            snapshot_id="snap_test",
+            valuation_date="2026-06-03",
+            base_year="2025",
+            current_price=50200.0,
+            rating="BAN",
+            export_blocked=True,
+            blend_artifact=_blend(True),
+            fcff_artifact=_FCFF,
+            fcfe_artifact=_FCFE,
+            sensitivity={},
+            assumptions=[],
+        )
+
+
+def test_render_report_writes_only_dev_namespace(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    import scripts.render_report as rr
+
+    dev_root = tmp_path / "dev_report_runs"
+    monkeypatch.setattr(rr, "DEV_REPORT_ROOT", dev_root)
+
+    source = tmp_path / "draft.md"
+    source.write_text("# Local Draft\n\n| A | B |\n|---|---|\n| 1 | 2 |\n", encoding="utf-8")
+
+    result = rr.render_dev_markdown(source, "dev/manual", pdf=False)
+
+    html_path = Path(result["html"])
+    assert html_path.exists()
+    assert html_path.is_relative_to(dev_root)
+
+
+def test_render_report_refuses_production_input_path():
+    import scripts.render_report as rr
+
+    with pytest.raises(RuntimeError, match="DEV-ONLY"):
+        rr.render_dev_markdown(rr.ROOT / "artifacts" / "runs" / "run_bad" / "draft.md", "dev", pdf=False)

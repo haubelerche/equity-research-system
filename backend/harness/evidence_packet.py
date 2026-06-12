@@ -31,7 +31,6 @@ def build_evidence_packet(state: ResearchGraphState) -> dict[str, Any]:
         "gate_results": state.gate_results,
         "quality_gate_results": state.evaluation_results or artifacts.get("quality", {}),
         "known_limitations": _known_limitations(state),
-        "agent_handoffs": artifacts.get("agent_handoffs", []),
         "tool_execution_summary": _tool_execution_summary(state.trace),
         "trace_summary": _trace_summary(state.trace),
         "created_at": datetime.now(UTC).isoformat(),

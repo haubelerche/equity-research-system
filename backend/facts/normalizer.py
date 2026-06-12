@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
-from backend.facts.metric_metadata import validate_and_normalize
+from backend.facts.metric_metadata import SemanticType, get_semantic_type, validate_and_normalize
 
 _log = logging.getLogger(__name__)
 
@@ -54,6 +54,33 @@ class FactEntry:
 
 # FactTable carries FactEntry objects — never bare floats.
 FactTable = dict[str, dict[str, FactEntry]]
+
+
+def to_analytics_vnd_bn(table: FactTable) -> FactTable:
+    """Adapt canonical facts to the analytics engines' VND bn contract."""
+    adapted: FactTable = {}
+    for metric, periods in table.items():
+        is_monetary = get_semantic_type(metric) is SemanticType.MONETARY
+        adapted[metric] = {
+            period: (
+                FactEntry(
+                    value=entry.value / 1_000_000_000.0,
+                    fact_id=entry.fact_id,
+                    source_id=entry.source_id,
+                    source_uri=entry.source_uri,
+                    source_title=entry.source_title,
+                    source_tier=entry.source_tier,
+                    reliability_tier=entry.reliability_tier,
+                    confidence=entry.confidence,
+                    connector_version=entry.connector_version,
+                    ingested_at=entry.ingested_at,
+                )
+                if is_monetary
+                else entry
+            )
+            for period, entry in periods.items()
+        }
+    return adapted
 
 
 def _period_key(fiscal_year: int, fiscal_period: str) -> str:

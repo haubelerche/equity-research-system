@@ -27,8 +27,19 @@ from typing import Any
 _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 from backend.reporting.chart_generator import ChartGenerator, ChartSpec
+from backend.reporting.market_data_artifact import (
+    fetch_market_data_artifact,
+    load_cached_market_data,
+    write_market_data_artifact,
+)
+from backend.reporting.report_data_loader import _COMPANIES
+from backend.database.config import require_database_url
 
 
 # ---------------------------------------------------------------------------
@@ -36,18 +47,16 @@ from backend.reporting.chart_generator import ChartGenerator, ChartSpec
 # ---------------------------------------------------------------------------
 
 def _load_latest_valuation(ticker: str) -> dict[str, Any]:
-    """Return parsed JSON from the newest valuation artifact for ticker."""
-    valuation_dir = _ROOT / "artifacts" / "valuation"
-    pattern = f"{ticker}_*.json"
-    candidates = sorted(valuation_dir.glob(pattern))
-    # Filter out gate files (e.g. *_gate.json)
-    candidates = [p for p in candidates if "gate" not in p.name]
-    if not candidates:
-        print(f"[WARN] No valuation artifacts found for {ticker} in {valuation_dir}")
+    """Return parsed JSON from the explicit run valuation artifact."""
+    run_id = os.environ.get("RUN_ID")
+    if not run_id:
+        raise ValueError("RUN_ID is required")
+    path = _ROOT / "storage" / "runs" / run_id / "valuation.json"
+    if not path.exists():
+        print(f"[WARN] No valuation artifact found for {ticker} at {path}")
         return {}
-    latest = candidates[-1]
-    print(f"[INFO] Loading valuation: {latest.name}")
-    with open(latest, encoding="utf-8") as f:
+    print(f"[INFO] Loading valuation: {path.name}")
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -56,7 +65,7 @@ def _load_facts_from_db(ticker: str) -> dict[tuple[str, str], float]:
 
     Falls back gracefully to empty dict if DB is unavailable.
     """
-    dsn = os.getenv("DATABASE_URL", "postgresql://localhost/equity_research")
+    dsn = require_database_url()
     try:
         import psycopg2  # type: ignore
         conn = psycopg2.connect(dsn)
@@ -239,59 +248,29 @@ def _build_spec(
     ), wacc_range, g_range, matrix
 
 
-def _fetch_price_vs_benchmark(
-    ticker: str, days: int = 365
-) -> tuple[list[float], list[float], list[str]]:
-    """Fetch ~1Y daily close for the ticker and VNINDEX, base-100 normalised.
-
-    Returns (price_series, benchmark_series, date_labels). Empty lists on any failure
-    so the caller simply skips C1 (no fabrication of a price chart).
-    """
-    from datetime import date, timedelta
-
-    try:
-        from vnstock.api.quote import Quote
-    except Exception:  # noqa: BLE001
-        return [], [], []
-
-    end = date.today()
-    start = end - timedelta(days=days)
-
-    def _close_series(symbol: str) -> tuple[list[str], list[float]]:
-        try:
-            df = Quote(source="VCI", symbol=symbol).history(
-                start=start.isoformat(), end=end.isoformat(), interval="1D"
-            )
-        except Exception:  # noqa: BLE001
-            return [], []
-        if df is None or len(df) == 0:
-            return [], []
-        date_col = next((c for c in ("time", "date", "datetime") if c in df.columns), None)
-        if date_col is None or "close" not in df.columns:
-            return [], []
-        labels = [str(v)[:10] for v in df[date_col].tolist()]
-        closes = [float(v) for v in df["close"].tolist()]
-        return labels, closes
-
-    t_labels, t_close = _close_series(ticker)
-    _, b_close = _close_series("VNINDEX")
-    if not t_close:
-        return [], [], []
-
-    def _base100(series: list[float]) -> list[float]:
-        if not series or not series[0]:
-            return []
-        base = series[0]
-        return [round(v / base * 100.0, 2) for v in series]
-
-    price = _base100(t_close)
-    bench = _base100(b_close)
-    # Align benchmark length to ticker series (trim/pad to same length)
-    if bench and len(bench) != len(price):
-        n = min(len(bench), len(price))
-        price, bench, t_labels = price[-n:], bench[-n:], t_labels[-n:]
-    # Downsample labels to ~12 ticks for readability
-    return price, bench, t_labels
+def _chart_series(artifact) -> tuple[list[float], list[float], list[float], list[str]]:
+    """Return ticker/benchmark series aligned on the same trade dates."""
+    stock = {row["trade_date"]: row.get("adjusted_close") or row.get("close") for row in artifact.price_history}
+    primary = {
+        row["trade_date"]: row.get("adjusted_close") or row.get("close")
+        for row in artifact.primary_benchmark_history
+    }
+    secondary = (
+        {
+            row["trade_date"]: row.get("adjusted_close") or row.get("close")
+            for row in artifact.secondary_benchmark_history
+        }
+        if artifact.secondary_benchmark != artifact.primary_benchmark else {}
+    )
+    dates = sorted(d for d in stock if stock.get(d) and primary.get(d))
+    if not dates:
+        return [], [], [], []
+    return (
+        [float(stock[d]) for d in dates],
+        [float(primary[d]) for d in dates],
+        [float(secondary[d]) if secondary.get(d) else float("nan") for d in dates] if secondary else [],
+        dates,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -325,12 +304,27 @@ def main() -> None:
     else:
         spec, wacc_range, g_range, matrix = _build_spec(ticker, run_id, val, facts)
 
-    # Populate C1 price history from the market data provider (not in valuation JSON).
+    # Populate C1 and the report's trading-performance table from one run-scoped
+    # market-data artifact. Provider failure falls back to the latest cached artifact.
     if not spec.price_series:
-        price, bench, labels = _fetch_price_vs_benchmark(ticker)
+        exchange = _COMPANIES.get(ticker, (ticker, "HOSE"))[1]
+        try:
+            market_data = fetch_market_data_artifact(ticker, exchange)
+            market_path = write_market_data_artifact(market_data, run_id=run_id)
+            print(f"  [MARKET] {market_path}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"[WARN] Market data fetch failed ({exc}); using cache when available.")
+            market_data = load_cached_market_data(ticker, run_id=run_id) or load_cached_market_data(ticker)
+        price, bench, secondary, labels = _chart_series(market_data) if market_data else ([], [], [], [])
         if price:
             spec.price_series = price
             spec.benchmark_series = bench
+            spec.secondary_benchmark_series = secondary
+            spec.benchmark_label = market_data.primary_benchmark
+            spec.secondary_benchmark_label = (
+                market_data.secondary_benchmark
+                if market_data.secondary_benchmark != market_data.primary_benchmark else ""
+            )
             spec.date_labels = labels
 
     gen = ChartGenerator(output_dir=output_dir)

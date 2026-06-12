@@ -23,16 +23,17 @@ Dữ liệu thị trường (vnstock)
 [Valuation] run_valuation.py
   → Ratios, DCF 3 kịch bản, FCFF (60%), FCFE (40%),
     Blend 60/40, Multiples, Sensitivity tables
-  → Artifact JSON → artifacts/valuation/
+  → Artifact JSON → Supabase Storage `runs/{run_id}/valuation.json`
         │
         ▼
 [Evidence Index] build_index.py
   → Chunking tài liệu, citation map
         │
         ▼
-[Report Generation] generate_report.py
-  → Báo cáo Markdown + citation JSON
-  → reports/{TICKER}_{timestamp}_full_report.md
+[Six-Agent Report Assembly] run_research.py
+  -> ResearchManager, DataEvidence, FinancialAnalysis,
+     ForecastValuation, ThesisReport, SeniorCritic
+  -> run-scoped report artifacts through the harness manifest
         │
         ▼
 [Evaluation Gates] evaluate_report.py
@@ -43,8 +44,9 @@ Dữ liệu thị trường (vnstock)
         │
         ▼
 [Human Approval] approve_report.py
-  → Reviewer xem xét + approve/reject
-  → ResearchGraphRunner.handle_approval → EXPORT_GATE → published run state
+  -> Reviewer xem xét + approve/reject
+  -> FullReportOrchestrator.handle_approval -> RENDER_AND_PUBLISH
+  -> report.html/report.pdf sau final approval
 ```
 
 ---
@@ -108,9 +110,11 @@ python scripts/check_ocr_runtime.py
 Tạo file `.env` ở root:
 
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/maer_dev
-OPENAI_API_KEY=sk-...
-DEFAULT_MODEL=gpt-4o-mini
+DATABASE_URL=postgresql://postgres.your-project:your-password@aws-0-your-region.pooler.supabase.com:6543/postgres
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...  # optional for embeddings/OpenAI adapter
+DEFAULT_MODEL_NAME=claude-sonnet-4-6
+FALLBACK_MODEL=gpt-4.1
 LOG_LEVEL=INFO
 ```
 
@@ -136,7 +140,7 @@ python scripts/ingest_ticker.py --ticker DHG --years 5
 ```
 
 Kết quả:
-- Raw financial data lưu DB + `artifacts/raw/`
+- Raw financial data lưu DB; runtime artifacts must be uploaded to Supabase Storage, not loose repo folders
 - Source metadata ghi vào `ref.source_versions`
 - Log ingestion run
 
@@ -164,7 +168,7 @@ python scripts/run_valuation.py --ticker DHG --wacc 0.10 --terminal-growth 0.03
 python scripts/run_valuation.py --ticker DHG --target-pe 18 --target-ev-ebitda 12
 ```
 
-Kết quả tại `artifacts/valuation/DHG_{timestamp}_valuation.json`:
+Kết quả production tại Supabase Storage `runs/{run_id}/valuation.json` và metadata trong `research.run_artifacts`:
 - Bảng ratio (revenue growth, gross margin, ROE, ROA, ...)
 - DCF 3 kịch bản (bear / base / bull)
 - **FCFF** — EBIT(1−T) + D&A − CAPEX − ΔNWC; chiết khấu WACC; bridge EV → Equity
@@ -179,15 +183,17 @@ python scripts/build_index.py --ticker DHG
 ```
 
 Kết quả:
-- Document chunks + citation map tại `artifacts/index/`
+- Document chunks lưu trong DB; run summaries and evidence packets are uploaded to Supabase Storage `runs/{run_id}/`
 
-### Bước 5 — Sinh báo cáo
+### Bước 5 — Sinh báo cáo qua harness
 
 ```bash
-python scripts/generate_report.py --ticker DHG --report-type full_report
+python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025 --auto-approve-assumptions --auto-approve-final
 ```
 
-Kết quả tại `reports/DHG_{timestamp}_full_report.md`:
+`scripts/generate_report.py` là legacy DEV-ONLY helper, chỉ được ghi vào
+`storage/dev_report_runs/<DEV_REPORT_RUN_ID>` và không được dùng để tạo artifact
+production. Kết quả production phải đi qua run manifest của harness:
 - §1 Tóm tắt điều hành + Draft rating
 - §2 Giới thiệu doanh nghiệp
 - §3 Kết quả tài chính lịch sử + dự phóng 5 năm
@@ -225,15 +231,15 @@ python scripts/approve_report.py --run-id <run_id> --decision reject --reviewer 
 ```
 
 Kết quả:
-- Quyết định phê duyệt được ghi qua `ResearchGraphRunner.handle_approval`.
-- Runner resume từ checkpoint và chỉ publish khi `EXPORT_GATE` final pass.
+- Quyết định phê duyệt được ghi qua `FullReportOrchestrator.handle_approval`.
+- Runner nội bộ resume từ checkpoint và chỉ render/publish khi final export gate pass.
 
 ---
 
 ## Chạy end-to-end một lệnh (Phase 8)
 
 ```bash
-python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025
+python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025 --auto-approve-assumptions --auto-approve-final
 ```
 
 Lệnh này chạy toàn bộ pipeline từ ingestion đến evaluation, ghi run trace vào DB.
@@ -241,18 +247,17 @@ Lệnh này chạy toàn bộ pipeline từ ingestion đến evaluation, ghi run
 ### Luồng production đầy đủ và render run-scoped
 
 Không chạy riêng lẻ `run_valuation.py`, `generate_report.py`, hoặc
-`render_report.py --allow-latest-artifacts` để tạo báo cáo chính thức. Luồng
+`render_report.py` để tạo báo cáo chính thức. Luồng
 production phải dùng một `run_id` xuyên suốt:
 
 ```bash
-python scripts/run_research.py --ticker DBD --report-type full_report --from-year 2021 --to-year 2025
+python scripts/run_research.py --ticker DBD --from-year 2021 --to-year 2025
 python scripts/approve_report.py --run-id <run_id> --stage assumptions --decision approve --reviewer analyst --comment "Verified valuation assumptions"
 python scripts/approve_report.py --run-id <run_id> --stage final --decision approve --reviewer analyst --comment "Verified final report"
-python scripts/render_report.py --ticker DBD --run-id <run_id> --mode client_final --pdf
 ```
 
-Nếu valuation hoặc artifact của run chưa đạt gate, PDF export sẽ dừng trước khi
-ghi file và giữ nguyên bản PDF tốt gần nhất.
+`scripts/render_report.py` là DEV-ONLY local Markdown renderer. Nó từ chối
+`--run-id`, không đọc production manifest, và chỉ ghi `storage/dev_report_runs`.
 
 ---
 
@@ -298,14 +303,14 @@ Draft rating: BAN (SELL) — chưa được analyst phê duyệt
 │   ├── facts/              # Fact normalization, taxonomy
 │   ├── database/           # DB repositories and SQL migrations
 │   ├── dataset/            # Dataset contract/taxonomy helper code
-│   ├── harness/            # LangGraph 5-agent harness, gates, checkpoints
+│   ├── harness/            # Fixed six-agent full_report harness, gates, checkpoints
 │
 ├── scripts/
 │   ├── ingest_ticker.py    # Phase 2: Data ingestion
 │   ├── build_facts.py      # Phase 3: Canonical facts
 │   ├── run_valuation.py    # Phase 4: Valuation
 │   ├── build_index.py      # Phase 5: Evidence index
-│   ├── generate_report.py  # Phase 6: Report generation
+│   ├── generate_report.py  # DEV-ONLY legacy Markdown/citation helper
 │   ├── evaluate_report.py  # Phase 7: Evaluation gates
 │   ├── run_research.py     # Phase 8: End-to-end pipeline
 │   ├── approve_report.py   # Phase 9: run-scoped harness approval
@@ -315,14 +320,13 @@ Draft rating: BAN (SELL) — chưa được analyst phê duyệt
 │   ├── *.md                # Draft reports
 │   └── approved/           # Approved & exported reports
 │
-├── artifacts/
-│   ├── valuation/          # Valuation JSON artifacts
-│   ├── evaluation/         # Evaluation JSON artifacts
-│   ├── runs/               # Run trace logs
-│   └── index/              # Citation maps & chunks
+├── storage/
+│   ├── runs/               # Local cache/temp only; production artifacts live in Supabase Storage `runs`
+│   ├── exports/            # Local cache/temp only; approved exports live in Supabase Storage `exports`
+│   └── archive/            # Local staging for archived debug outputs
 │
 ├── config/
-│   ├── agents/             # 5 product-agent YAML config and prompt library
+│   ├── agents/             # Six-agent YAML config and prompt library
 │   ├── dataset/            # Dataset contracts, taxonomy, universe, and golden fixtures
 │   └── harness/            # Harness policies, schemas, registries, and contracts
 │

@@ -1,4 +1,4 @@
-"""Phase 7 � catalyst evidence gate (no DB)."""
+"""Phase 7  catalyst evidence gate (no DB)."""
 from __future__ import annotations
 
 from backend.evaluation.source_provenance_gates import gate_catalyst_evidence
@@ -6,11 +6,11 @@ from backend.evaluation.source_provenance_gates import gate_catalyst_evidence
 
 def _event(**over) -> dict:
     base = dict(
-        event_title="DHG kh�nh th�nh nh� m�y Betalactam",
+        event_title="DHG khnh thnh nh my Betalactam",
         event_type="capacity_expansion",
         source_document_id=11,
         published_date="2025-06-01",
-        evidence_quote="DHG c�ng b? ho�n th�nh d�y chuy?n ...",
+        evidence_quote="DHG cng b? hon thnh dy chuy?n ...",
         ticker="DHG",
         ticker_mapping_level="explicit",
         causality_level="management_disclosed_driver",

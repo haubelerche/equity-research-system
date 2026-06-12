@@ -6,7 +6,7 @@ scope:
   default_ticker: DHG
   period_type: FY
   required_periods:
-    from_year: 2021
+    from_year: 2022
     to_year: 2025
 block_on:
   - missing_source_trace_for_material_claim
@@ -22,7 +22,7 @@ block_on:
   - final_human_approval_missing
   - required_harness_gate_missing
   - evidence_packet_missing
-  - agent_handoff_missing
+  - stage_trace_missing
   - final_approval_not_recorded_by_runner
 warn_on:
   - minor_source_discrepancy

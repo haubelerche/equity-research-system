@@ -1,22 +1,22 @@
-"""Phase 5 � Evidence Index Builder.
+"""Phase 5  Evidence Index Builder.
 
 Synthesizes grounded text evidence chunks from accepted canonical financial
 facts and catalyst events, then stores them in ingest.document_chunks so the
 report generator can cite them.
 
 Sources indexed (in priority order):
-  1. Official PDF pages � text extracted by pdfplumber, page by page
-  2. OCR page artifacts � data/ocr_artifacts/{ticker}/{year}/{doc_id}/pages/
-  3. External .txt documents � data/documents/{ticker}/
-  4. Synthetic fact chunks � built from accepted canonical facts in DB
+  1. Official PDF pages  text extracted by pdfplumber, page by page
+  2. OCR page artifacts  data/ocr_artifacts/{ticker}/{year}/{doc_id}/pages/
+  3. External .txt documents  data/documents/{ticker}/
+  4. Synthetic fact chunks  built from accepted canonical facts in DB
 
 All chunks include metadata_json with extraction_method, page_number (where
 applicable), source_tier, and document_id for downstream citation resolution.
 
 Usage:
     python scripts/build_index.py --ticker DHG
-    python scripts/build_index.py --ticker DHG --from-year 2021 --to-year 2025
-    python scripts/build_index.py --ticker DHG --years 2021 2022 2023
+    python scripts/build_index.py --ticker DHG --from-year 2022 --to-year 2025
+    python scripts/build_index.py --ticker DHG --years 2022 2023 2024 2025
     python scripts/build_index.py --ticker DHG --doc-dir data/documents/DHG
 """
 from __future__ import annotations
@@ -45,43 +45,48 @@ if _env_file.exists():
 import psycopg2
 import psycopg2.extras
 
+from backend.database.canonical.source_dal import upsert_source_document
+from backend.database.config import connect_with_retry, require_database_url
+from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
+
 ROOT = Path(__file__).resolve().parents[1]
-DOC_DIR = ROOT / "data" / "documents"
-OCR_ARTIFACTS_DIR = ROOT / "data" / "ocr_artifacts"
-OFFICIAL_DOCS_DIR = ROOT / "data" / "official_documents"
+DOC_DIR = ROOT / "storage" / "sources" / "documents"
+OCR_ARTIFACTS_DIR = ROOT / "storage" / "sources" / "ocr_artifacts"
+OFFICIAL_DOCS_DIR = ROOT / "storage" / "sources" / "official_documents"
+
 
 _FACT_LABEL = {
     "revenue.net": "Doanh thu thu?n",
     "gross_profit.total": "L?i nhu?n g?p",
-    "net_income.parent": "L?i nhu?n sau thu? (c? d�ng c�ng ty m?)",
-    "operating_cash_flow.total": "D�ng ti?n t? ho?t d?ng kinh doanh",
-    "free_cash_flow.total": "D�ng ti?n t? do",
-    "total_assets.ending": "T?ng t�i s?n",
-    "equity.parent": "V?n ch? s? h?u (c? d�ng c�ng ty m?)",
+    "net_income.parent": "L?i nhu?n sau thu? (c? dng cng ty m?)",
+    "operating_cash_flow.total": "Dng ti?n t? ho?t d?ng kinh doanh",
+    "free_cash_flow.total": "Dng ti?n t? do",
+    "total_assets.ending": "T?ng ti s?n",
+    "equity.parent": "V?n ch? s? h?u (c? dng cng ty m?)",
     "eps.basic": "EPS co b?n",
     "ebitda.total": "EBITDA",
-    "capex.total": "Chi d?u tu TSC� (CAPEX)",
+    "capex.total": "Chi d?u tu TSC (CAPEX)",
     "total_liabilities.ending": "T?ng n? ph?i tr?",
-    "cash_and_equivalents.ending": "Ti?n v� tuong duong ti?n",
+    "cash_and_equivalents.ending": "Ti?n v tuong duong ti?n",
     "short_term_debt.ending": "Vay ng?n h?n",
-    "interest_expense.total": "Chi ph� l�i vay",
+    "interest_expense.total": "Chi ph li vay",
     "depreciation.total": "Kh?u hao",
     "profit_before_tax.total": "L?i nhu?n tru?c thu?",
-    "cogs.total": "Gi� v?n h�ng b�n",
-    "sga.total": "Chi ph� b�n h�ng v� qu?n l�",
-    "inventory.ending": "H�ng t?n kho",
-    "accounts_receivable.ending": "Ph?i thu kh�ch h�ng",
+    "cogs.total": "Gi v?n hng bn",
+    "sga.total": "Chi ph bn hng v qu?n l",
+    "inventory.ending": "Hng t?n kho",
+    "accounts_receivable.ending": "Ph?i thu khch hng",
 }
 
 _STATEMENT_CONTEXT = {
-    "income_statement": "B�o c�o k?t qu? kinh doanh",
-    "balance_sheet": "B?ng c�n d?i k? to�n",
-    "cash_flow": "B�o c�o luu chuy?n ti?n t?",
+    "income_statement": "Bo co k?t qu? kinh doanh",
+    "balance_sheet": "B?ng cn d?i k? ton",
+    "cash_flow": "Bo co luu chuy?n ti?n t?",
 }
 
 
 def _dsn() -> str:
-    return os.getenv("DATABASE_URL", "postgresql://maer:maer_local@localhost:5432/maer_dev")
+    return require_database_url()
 
 
 def _sha(text: str) -> str:
@@ -92,16 +97,28 @@ def _get_accepted_facts(conn, ticker: str, years: list[int]) -> list[dict]:
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute(
             """
-            SELECT ff.id, ff.ticker, ff.fiscal_year, ff.fiscal_period,
-                   ff.line_item_code, ff.value, ff.unit, ff.currency,
+            WITH ranked_facts AS (
+                SELECT ff.*,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY ff.ticker, ff.period, ff.metric
+                           ORDER BY ff.source_tier ASC NULLS LAST,
+                                    ff.confidence DESC NULLS LAST,
+                                    ff.updated_at DESC,
+                                    ff.fact_id DESC
+                       ) AS winner_rank
+                FROM fact.production_facts ff
+                WHERE ff.ticker = %s
+                  AND CAST(SUBSTRING(ff.period, 1, 4) AS SMALLINT) = ANY(%s)
+            )
+            SELECT ff.fact_id AS id, ff.ticker,
+                   CAST(SUBSTRING(ff.period, 1, 4) AS SMALLINT) AS fiscal_year,
+                   'FY' AS fiscal_period,
+                   ff.metric AS line_item_code, ff.value, ff.unit, ff.currency,
                    li.statement_type
-            FROM fact.financial_facts ff
-            LEFT JOIN ref.line_items li ON li.line_item_code = ff.line_item_code
-            WHERE ff.ticker = %s
-              AND ff.fiscal_year = ANY(%s)
-              AND ff.validation_status = 'accepted'
-              AND ff.fiscal_period = 'FY'
-            ORDER BY ff.fiscal_year, ff.line_item_code
+            FROM ranked_facts ff
+            LEFT JOIN ref.line_items li ON li.line_item_code = ff.metric
+            WHERE ff.winner_rank = 1
+            ORDER BY ff.period, ff.metric
             """,
             (ticker, years),
         )
@@ -125,53 +142,32 @@ def _get_catalyst_events(conn, ticker: str) -> list[dict]:
 
 
 def _ensure_synthetic_source(conn, ticker: str) -> str:
-    source_id = f"syn_facts_{ticker.lower()}"
-    checksum = _sha(source_id)
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            INSERT INTO ingest.sources
-                (source_id, logical_id, ticker, source_type, source_uri, source_title,
-                 connector_version, reliability_tier, checksum, raw_path, published_at)
-            VALUES (%s, %s, %s, 'financial_statement', %s, %s, '1.0', 2, %s, %s, NOW())
-            ON CONFLICT (source_id) DO NOTHING
-            """,
-            (
-                source_id,
-                f"synthetic_facts_{ticker.lower()}",
-                ticker,
-                f"internal://canonical_facts/{ticker}",
-                f"Synthetic evidence from canonical financial facts � {ticker}",
-                checksum,
-                f"internal://canonical_facts/{ticker}",
-            ),
-        )
-    return source_id
+    source_uri = f"internal://canonical_facts/{ticker}"
+    checksum = _sha(source_uri)
+    return upsert_source_document(
+        ticker=ticker,
+        source_type="vnstock_financial",
+        source_tier=3,
+        source_uri=source_uri,
+        checksum=checksum,
+        source_title=f"Synthetic evidence from canonical financial facts - {ticker}",
+        connector_version="1.0",
+        metadata={"synthetic": True},
+    )
 
 
 def _ensure_doc_source(conn, ticker: str, doc_path: Path) -> str:
-    source_id = f"doc_{_sha(str(doc_path))}"
     checksum = _sha(str(doc_path))
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            INSERT INTO ingest.sources
-                (source_id, logical_id, ticker, source_type, source_uri, source_title,
-                 connector_version, reliability_tier, checksum, raw_path, published_at)
-            VALUES (%s, %s, %s, 'annual_report', %s, %s, '1.0', 1, %s, %s, NOW())
-            ON CONFLICT (source_id) DO NOTHING
-            """,
-            (
-                source_id,
-                f"doc_{ticker.lower()}_{doc_path.stem}",
-                ticker,
-                str(doc_path),
-                doc_path.stem,
-                checksum,
-                str(doc_path),
-            ),
-        )
-    return source_id
+    return upsert_source_document(
+        ticker=ticker,
+        source_type="annual_report",
+        source_tier=1,
+        source_uri=str(doc_path),
+        checksum=checksum,
+        source_title=doc_path.stem,
+        connector_version="1.0",
+        metadata={"local_path": str(doc_path)},
+    )
 
 
 def _build_fact_chunks(facts: list[dict]) -> list[tuple[str, str, int | None]]:
@@ -183,7 +179,7 @@ def _build_fact_chunks(facts: list[dict]) -> list[tuple[str, str, int | None]]:
     chunks: list[tuple[str, str, int | None]] = []  # (section_title, chunk_text, fiscal_year)
     for year in sorted(by_year):
         year_facts = by_year[year]
-        lines = [f"## T�m t?t t�i ch�nh {ticker_placeholder} nam {year} (FY)\n"]
+        lines = [f"## Tm t?t ti chnh {ticker_placeholder} nam {year} (FY)\n"]
         for f in sorted(year_facts, key=lambda x: x["line_item_code"]):
             label = _FACT_LABEL.get(f["line_item_code"], f["line_item_code"])
             unit = f.get("unit", "")
@@ -201,7 +197,7 @@ def _build_fact_chunks(facts: list[dict]) -> list[tuple[str, str, int | None]]:
             currency = f.get("currency", "VND")
             stmt = _STATEMENT_CONTEXT.get(f.get("statement_type") or "", "")
             lines.append(f"- {label} ({stmt}): {formatted} ({currency})")
-        lines.append(f"\nD? li?u t? b�o c�o t�i ch�nh ki?m to�n nam {year}.")
+        lines.append(f"\nD? li?u t? bo co ti chnh ki?m ton nam {year}.")
         chunks.append((f"Financial Data {year}FY", "\n".join(lines), year))
     return chunks
 
@@ -209,7 +205,7 @@ def _build_fact_chunks(facts: list[dict]) -> list[tuple[str, str, int | None]]:
 def _build_catalyst_chunk(events: list[dict]) -> tuple[str, str, int | None] | None:
     if not events:
         return None
-    lines = ["## S? ki?n doanh nghi?p v� m�i tru?ng kinh doanh\n"]
+    lines = ["## S? ki?n doanh nghi?p v mi tru?ng kinh doanh\n"]
     for ev in events[:20]:
         date_str = str(ev.get("event_date", ""))[:10]
         event_type = ev.get("event_type", "")
@@ -220,68 +216,44 @@ def _build_catalyst_chunk(events: list[dict]) -> tuple[str, str, int | None] | N
 
 
 def _ensure_ocr_source(conn, ticker: str, fiscal_year: int, document_id: str, meta: dict) -> str:
-    """Register an OCR document as an ingest.sources entry. Returns source_id.
-
-    reliability_tier=1: official document (highest tier available for OCR extractions).
-    """
-    source_id = f"ocr_{ticker.lower()}_{fiscal_year}_{document_id[:16]}"
+    """Register an OCR document in ingest.source_documents. Returns source_doc_id."""
     source_uri = meta.get("source_uri", f"ocr://{ticker}/{fiscal_year}/{document_id}")
-    source_title = f"BCTC {ticker} {fiscal_year}FY � OCR ({document_id[:8]})"
     raw_checksum = meta.get("source_checksum", "")
-    # Ensure 64-char SHA-256 hex; pad with zeros if shorter (e.g. from _sha())
     checksum = (raw_checksum if len(raw_checksum) == 64
-                else hashlib.sha256(source_id.encode()).hexdigest())
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            INSERT INTO ingest.sources
-                (source_id, logical_id, ticker, source_type, source_uri, source_title,
-                 connector_version, reliability_tier, checksum, raw_path, published_at,
-                 fiscal_year, fiscal_period)
-            VALUES (%s, %s, %s, 'annual_report', %s, %s, '1.0', 1, %s, %s, NOW(), %s, 'FY')
-            ON CONFLICT (source_id) DO NOTHING
-            """,
-            (
-                source_id,
-                f"ocr_{ticker.lower()}_{fiscal_year}_{document_id}",
-                ticker,
-                source_uri,
-                source_title,
-                checksum,
-                source_uri,
-                fiscal_year,
-            ),
-        )
-    return source_id
+                else hashlib.sha256(f"ocr_{ticker}_{fiscal_year}_{document_id}".encode()).hexdigest())
+    return upsert_source_document(
+        ticker=ticker,
+        source_type="annual_report",
+        source_tier=1,
+        source_uri=source_uri,
+        checksum=checksum,
+        source_title=f"BCTC {ticker} {fiscal_year}FY - OCR ({document_id[:8]})",
+        fiscal_year=fiscal_year,
+        fiscal_period="FY",
+        connector_version="1.0",
+        metadata={
+            "ocr_run_id": meta.get("ocr_run_id", ""),
+            "document_id": document_id,
+            "local_path": source_uri,
+        },
+    )
 
 
 def _ensure_pdf_source(conn, ticker: str, fiscal_year: int, pdf_path: Path) -> str:
-    """Register a text-based official PDF as an ingest.sources entry. Returns source_id."""
+    """Register a text-based official PDF in ingest.source_documents. Returns source_doc_id."""
     checksum = hashlib.sha256(str(pdf_path).encode()).hexdigest()
-    source_id = f"pdf_{ticker.lower()}_{fiscal_year}_{checksum[:16]}"
-    source_title = f"BCTC {ticker} {fiscal_year}FY � PDF ({pdf_path.name[:30]})"
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            INSERT INTO ingest.sources
-                (source_id, logical_id, ticker, source_type, source_uri, source_title,
-                 connector_version, reliability_tier, checksum, raw_path, published_at,
-                 fiscal_year, fiscal_period)
-            VALUES (%s, %s, %s, 'annual_report', %s, %s, '1.0', 1, %s, %s, NOW(), %s, 'FY')
-            ON CONFLICT (source_id) DO NOTHING
-            """,
-            (
-                source_id,
-                f"pdf_{ticker.lower()}_{fiscal_year}_{pdf_path.name}",
-                ticker,
-                str(pdf_path),
-                source_title,
-                checksum,
-                str(pdf_path),
-                fiscal_year,
-            ),
-        )
-    return source_id
+    return upsert_source_document(
+        ticker=ticker,
+        source_type="annual_report",
+        source_tier=1,
+        source_uri=str(pdf_path),
+        checksum=checksum,
+        source_title=f"BCTC {ticker} {fiscal_year}FY - PDF ({pdf_path.name[:30]})",
+        fiscal_year=fiscal_year,
+        fiscal_period="FY",
+        connector_version="1.0",
+        metadata={"local_path": str(pdf_path)},
+    )
 
 
 def _upsert_chunks(conn, source_id: str, ticker: str, chunks: list[tuple[str, str, int | None]]) -> int:
@@ -291,7 +263,7 @@ def _upsert_chunks(conn, source_id: str, ticker: str, chunks: list[tuple[str, st
             checksum = _sha(chunk_text)
             # Check existing
             cur.execute(
-                "SELECT chunk_id FROM ingest.document_chunks WHERE source_id=%s AND chunk_index=%s",
+                "SELECT chunk_id FROM ingest.document_chunks WHERE source_doc_id=%s AND chunk_index=%s",
                 (source_id, idx),
             )
             existing = cur.fetchone()
@@ -303,16 +275,16 @@ def _upsert_chunks(conn, source_id: str, ticker: str, chunks: list[tuple[str, st
                     """UPDATE ingest.document_chunks
                        SET chunk_text=%s, section_title=%s, fiscal_year=%s,
                            metadata_json=%s::jsonb
-                       WHERE source_id=%s AND chunk_index=%s""",
+                       WHERE source_doc_id=%s AND chunk_index=%s""",
                     (chunk_text, section_title, fiscal_year, json.dumps(meta), source_id, idx),
                 )
             else:
                 cur.execute(
                     """INSERT INTO ingest.document_chunks
-                           (source_id, ticker, chunk_index, section_title, chunk_text,
+                           (source_doc_id, ticker, chunk_index, section_title, chunk_text,
                             fiscal_year, language, metadata_json)
                        VALUES (%s,%s,%s,%s,%s,%s,'vi',%s::jsonb)
-                       ON CONFLICT (source_id, chunk_index) DO UPDATE
+                       ON CONFLICT (source_doc_id, chunk_index) DO UPDATE
                        SET chunk_text=EXCLUDED.chunk_text,
                            section_title=EXCLUDED.section_title,
                            fiscal_year=EXCLUDED.fiscal_year,
@@ -348,7 +320,7 @@ def _upsert_page_chunks(
                 **extra_meta,
             }
             cur.execute(
-                "SELECT chunk_id FROM ingest.document_chunks WHERE source_id=%s AND chunk_index=%s",
+                "SELECT chunk_id FROM ingest.document_chunks WHERE source_doc_id=%s AND chunk_index=%s",
                 (source_id, chunk_index),
             )
             existing = cur.fetchone()
@@ -357,17 +329,17 @@ def _upsert_page_chunks(
                     """UPDATE ingest.document_chunks
                        SET chunk_text=%s, section_title=%s, fiscal_year=%s,
                            metadata_json=%s::jsonb
-                       WHERE source_id=%s AND chunk_index=%s""",
+                       WHERE source_doc_id=%s AND chunk_index=%s""",
                     (chunk_text, section_title, fiscal_year, json.dumps(meta, ensure_ascii=False),
                      source_id, chunk_index),
                 )
             else:
                 cur.execute(
                     """INSERT INTO ingest.document_chunks
-                           (source_id, ticker, chunk_index, section_title, chunk_text,
+                           (source_doc_id, ticker, chunk_index, section_title, chunk_text,
                             fiscal_year, language, metadata_json)
                        VALUES (%s,%s,%s,%s,%s,%s,'vi',%s::jsonb)
-                       ON CONFLICT (source_id, chunk_index) DO UPDATE
+                       ON CONFLICT (source_doc_id, chunk_index) DO UPDATE
                        SET chunk_text=EXCLUDED.chunk_text,
                            section_title=EXCLUDED.section_title,
                            fiscal_year=EXCLUDED.fiscal_year,
@@ -471,7 +443,7 @@ def _index_ocr_artifacts(conn, ticker: str, years: list[int]) -> list[dict]:
     return sources_indexed
 
 
-def _index_official_pdf_text(conn, ticker: str, years: list[int]) -> list[dict]:
+def _index_official_pdf_text(ticker: str, years: list[int]) -> list[dict]:
     """Extract and index text-based official PDFs from data/official_documents/{ticker}/{year}/.
 
     Uses pdfplumber for text extraction. One chunk per page. Skips scanned PDFs
@@ -480,7 +452,7 @@ def _index_official_pdf_text(conn, ticker: str, years: list[int]) -> list[dict]:
     try:
         import pdfplumber  # type: ignore[import-untyped]
     except ImportError:
-        print("[build_index] pdfplumber not available � skipping official PDF text indexing")
+        print("[build_index] pdfplumber not available  skipping official PDF text indexing")
         return []
 
     official_dir = OFFICIAL_DOCS_DIR / ticker
@@ -493,14 +465,18 @@ def _index_official_pdf_text(conn, ticker: str, years: list[int]) -> list[dict]:
         if not year_dir.exists():
             continue
 
-        pdf_files = list(year_dir.glob("*.pdf")) + list(year_dir.glob("*.PDF"))
+        pdf_files = sorted({
+            path.resolve()
+            for pattern in ("*.pdf", "*.PDF")
+            for path in year_dir.glob(pattern)
+        })
         if not pdf_files:
             continue
 
-        for pdf_path in sorted(pdf_files):
+        for pdf_path in pdf_files:
             try:
                 with pdfplumber.open(str(pdf_path)) as pdf:
-                    # Skip scanned PDFs � they have no text layer
+                    # Skip scanned PDFs  they have no text layer
                     sample_text = "".join(
                         p.extract_text() or "" for p in pdf.pages[:5]
                     )
@@ -508,7 +484,6 @@ def _index_official_pdf_text(conn, ticker: str, years: list[int]) -> list[dict]:
                         print(f"[build_index] {ticker} {year}: skipping scanned PDF {pdf_path.name} (use --ocr)")
                         continue
 
-                    source_id = _ensure_pdf_source(conn, ticker, year, pdf_path)
                     page_chunks: list[tuple[str, str, int, int, dict]] = []
 
                     for page in pdf.pages:
@@ -527,8 +502,10 @@ def _index_official_pdf_text(conn, ticker: str, years: list[int]) -> list[dict]:
                     if not page_chunks:
                         continue
 
-                    _upsert_page_chunks(conn, source_id, ticker, page_chunks)
-                    conn.commit()
+                    with connect_with_retry(_dsn()) as write_conn:
+                        source_id = _ensure_pdf_source(write_conn, ticker, year, pdf_path)
+                        _upsert_page_chunks(write_conn, source_id, ticker, page_chunks)
+                        write_conn.commit()
                     sources_indexed.append({
                         "source_id": source_id,
                         "type": "pdf_text",
@@ -553,22 +530,25 @@ def build_index(ticker: str, years: list[int], doc_dir: Path | None = None) -> d
     ticker_placeholder = ticker.upper()
     ticker = ticker.strip().upper()
 
-    conn = psycopg2.connect(_dsn())
+    conn = None
     total_chunks = 0
     summary: dict = {"ticker": ticker, "years": years, "sources": []}
 
     try:
         # -- 1. Official PDF text pages (tier 1, extraction_method=pdf_text) ---
-        pdf_sources = _index_official_pdf_text(conn, ticker, years)
+        pdf_sources = _index_official_pdf_text(ticker, years)
         for s in pdf_sources:
             total_chunks += s["chunks"]
             summary["sources"].append(s)
 
         # -- 2. OCR page artifacts (tier 1, extraction_method=ocr) -------------
+        conn = connect_with_retry(_dsn())
         ocr_sources = _index_ocr_artifacts(conn, ticker, years)
         for s in ocr_sources:
             total_chunks += s["chunks"]
             summary["sources"].append(s)
+        conn.close()
+        conn = connect_with_retry(_dsn())
 
         # -- 3. Synthetic fact-based chunks (from accepted DB facts) ------------
         facts = _get_accepted_facts(conn, ticker, years)
@@ -626,16 +606,18 @@ def build_index(ticker: str, years: list[int], doc_dir: Path | None = None) -> d
                 except Exception as exc:
                     print(f"[build_index] WARNING: failed to index {doc_path}: {exc}")
         else:
-            print(f"[build_index] {ticker}: no external docs at {search_dir} � skipping")
+            print(f"[build_index] {ticker}: no external docs at {search_dir}  skipping")
 
         summary["total_chunks"] = total_chunks
         print(f"[build_index] {ticker}: total {total_chunks} chunks indexed")
 
     except Exception:
-        conn.rollback()
+        if conn is not None and not conn.closed:
+            conn.rollback()
         raise
     finally:
-        conn.close()
+        if conn is not None and not conn.closed:
+            conn.close()
 
     return summary
 
@@ -648,9 +630,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ticker", required=True)
     parser.add_argument("--years", nargs="+", type=int, default=None,
                         help="Explicit list of fiscal years (alternative to --from-year/--to-year).")
-    parser.add_argument("--from-year", type=int, default=2021, dest="from_year",
+    parser.add_argument("--from-year", type=int, default=DEFAULT_FROM_YEAR, dest="from_year",
                         help="Start of fiscal year range (inclusive).")
-    parser.add_argument("--to-year", type=int, default=2025, dest="to_year",
+    parser.add_argument("--to-year", type=int, default=DEFAULT_TO_YEAR, dest="to_year",
                         help="End of fiscal year range (inclusive).")
     parser.add_argument("--doc-dir", type=Path, default=None, dest="doc_dir",
                         help="Optional directory of .txt documents to also index.")
@@ -661,7 +643,8 @@ def main() -> None:
     args = parse_args()
     years = args.years or list(range(args.from_year, args.to_year + 1))
     result = build_index(ticker=args.ticker, years=years, doc_dir=args.doc_dir)
-    out_dir = ROOT / "artifacts" / "index"
+    run_id = os.environ.get("RUN_ID", "")
+    out_dir = ROOT / "storage" / "runs" / run_id if run_id else ROOT / "storage" / "runs" / "_index"
     out_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
     out_path = out_dir / f"{args.ticker.upper()}_{ts}_index_summary.json"

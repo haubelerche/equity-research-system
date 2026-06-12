@@ -227,17 +227,18 @@ checksum:
 
 ### 10.1. Recommended Pattern
 
-Sa deng **SupervisoraWorker**, khong dung agod agenta. Day 9 cha ra single-agent da quy tei va context bottleneck, specialization trade-off, parallelism han cha va reliability yeu; supervisor-worker pha hap khi task can route dung vai tra, trace ro va da mo rong.
+Sa deng **fixed six-agent harness**, khong dung mot agent don le. Day 9 cha ra single-agent da quy tei va context bottleneck, specialization trade-off, parallelism han cha va reliability yeu; fixed stage harness phu hop khi task can route dung vai tro, trace ro va da mo rong.
 
-### 10.2. 5-Agent Design
+### 10.2. Six-Agent Design
 
 | Agent | Responsibility | Input | Output | Hard Constraints |
 |---|---|---|---|---|
-| Supervisor Agent | Phan tach task, route worker, quan ly state, quyet dinh fallback/HITL | User request, ticker, report type | Execution plan, trace | Khong tu viet report dai |
-| Data & Retrieval Agent | Lay source, retrieve evidence, rerank, kiem tra freshness | Ticker, section query, metadata filters | Evidence packs | Khong tu tao claim |
-| Financial Analyst Agent | Tanh ratios, trend, peer comparison | Structured financial data | Tables, financial diagnostics | Khong dung LLM da tinh toan sa hac chinh |
-| Valuation Agent | DCF/multiples/sensitivity | Financial tables, assumptions | Valuation range, assumptions | Phoi expose assumption |
-| Report Writer + Critic Gate | Viet report va kiem dinh factuality/citations/numeric consistency | Evidence, tables, valuation | Draft report + eval report | Khong export neu fail eval |
+| ResearchManagerAgent | Validate scope, policy, and execution plan | User request, ticker, report type | Execution plan, trace | Khong bypass gates |
+| DataEvidenceAgent | Lay source, build facts, build evidence index, kiem tra freshness | Ticker, period scope, metadata filters | Evidence packs and artifact refs | Khong tu tao claim |
+| FinancialAnalysisAgent | Dien giai ratios, trend, peer comparison | Structured financial data | Tables, financial diagnostics | Khong dung LLM de tinh toan so lieu chinh |
+| ForecastValuationAgent | Forecast, DCF, multiples, sensitivity | Financial tables, assumptions | Valuation artifact and formula traces | Phai expose assumption |
+| ThesisReportAgent | Viet thesis va report draft tu explicit refs | Evidence, tables, valuation | Draft report and citation map | Khong invent unsupported claim |
+| SeniorCriticAgent | Kiem dinh factuality, citations, numeric consistency, export readiness | Draft report, gates, artifacts | Critic review and eval result | Khong export neu fail eval |
 
 ### 10.3. Shared State Schema
 
@@ -459,7 +460,7 @@ AI product co COGS cao hon SaaS truyen thang va inference/API cost tang theo usa
 | Week 2 | Data ingestion + metadata | Data inventory, cleaned documents, structured financial DB |
 | Week 3 | RAG baseline | Retrieval pipeline, evidence table, single-ticker QA |
 | Week 4 | Financial + valuation engine | Ratio calculator, DCF/multiples template, sensitivity teble |
-| Week 5 | Multi-agent + evaluation | Supervisor-worker flow, trace, critic/eval gate, red team |
+| Week 5 | Multi-agent + evaluation | Fixed six-agent flow, trace, critic/eval gate, red team |
 | Week 6 | UX + final report package | Report workspace, export, demo, final README/spec/eval report |
 
 ### Now / Next / Later
@@ -499,7 +500,7 @@ Du an duoc coi la dat chuan neu demo cuoi co the chang minh:
 | Data | Co data inventory cho ticker demo, source metadata, freshness |
 | RAG | Claim trong report truy va duoc evidence |
 | Financial Logic | Ratio/valuation tanh bang code, khong tanh bang LLM text generation |
-| Multi-Agent | Co supervisor-worker trace ro agent nao lam ga |
+| Multi-Agent | Co six-agent harness trace ro agent nao lam gi |
 | Guardrails | Prompt injection, fake citation, unsupported recommendation ba chan |
 | Evaluation | Co eval report: faithfulness, citation coverage, numeric consistency |
 | UX | User xem, saa, approve, export report |

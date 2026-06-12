@@ -1,10 +1,21 @@
 from __future__ import annotations
 
+import json
+import logging
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
+
+# Ensure harness logs are visible on stderr even when stdout is piped/buffered.
+_log = logging.getLogger("harness")
+if not _log.handlers:
+    _h = logging.StreamHandler(sys.stderr)
+    _h.setFormatter(logging.Formatter("%(asctime)s %(name)s %(message)s", datefmt="%H:%M:%S"))
+    _log.addHandler(_h)
+    _log.setLevel(logging.INFO)
 
 from backend.harness.agent_registry import AgentRegistry
 from backend.harness.gates import (
@@ -150,8 +161,16 @@ class ResearchGraphRunner:
             policy_reason=self._policy_reason(stage),
             input_hash=input_hash,
         )
+        artifacts_before = set(state.artifacts)
         try:
             state = self._execute_stage(state, stage)
+            artifacts_after = set(state.artifacts)
+            new_keys = sorted(artifacts_after - artifacts_before)
+            _log.info(
+                "[%s] STAGE_DONE artifacts_added=%s total=%d gates=%s",
+                stage, new_keys, len(artifacts_after),
+                sorted(k for k, v in state.gate_results.items() if isinstance(v, dict) and v.get("passed") is False),
+            )
             output_hash = state.stable_hash()
             self.store.close_step(step_id, "completed", output_hash=output_hash)
             self._checkpoint(state)
@@ -177,7 +196,7 @@ class ResearchGraphRunner:
             self._merge_agent_result(state, result)
 
         elif stage == "INGEST_AND_VALIDATE":
-            # Auto-ingest official documents (non-blocking).
+            # Auto-ingest official documents (must complete before indexing).
             auto_result = self._run_tool(
                 state, "data_evidence", "auto_ingest",
                 state.ticker, state.from_year, state.to_year, ocr=state.ocr
@@ -185,27 +204,31 @@ class ResearchGraphRunner:
             state.artifacts["auto_ingest"] = auto_result.summary
             self._merge_result(state, auto_result)
 
-            # Build canonical facts.
-            result = self._run_tool(state, "data_evidence", "build_facts", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
+            # Build facts and evidence index in parallel (independent DB reads).
+            from concurrent.futures import ThreadPoolExecutor, as_completed
+
+            def _run_build_facts():
+                return self._run_tool(state, "data_evidence", "build_facts", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
+
+            def _run_build_index():
+                return self._run_tool(state, "data_evidence", "build_index", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                facts_future = pool.submit(_run_build_facts)
+                index_future = pool.submit(_run_build_index)
+
+            result = facts_future.result()
             state.artifacts["build_facts"] = result.summary
             state.data_inventory = result.summary
             state.snapshot_id = result.summary.get("snapshot_id")
             self._merge_result(state, result)
 
-            # Build evidence index.
-            index_result = self._run_tool(state, "data_evidence", "build_index", state.ticker, state.from_year, state.to_year, run_id=state.run_id)
+            index_result = index_future.result()
             state.artifacts["index"] = index_result.summary
             state.retrieval_results = index_result.summary
             self._merge_result(state, index_result)
 
-            agent_result = self._run_agent(
-                state, "data_evidence",
-                "Review data inventory, source coverage, and retrieval readiness.",
-            )
-            state.artifacts["evidence_pack"] = agent_result.payload
-            self._merge_agent_result(state, agent_result)
-
-            # Data quality gate.
+            # Data quality gate (deterministic — no LLM review needed).
             gate = data_quality_gate(state.data_inventory or state.artifacts.get("build_facts", {}))
             self._record_gate(state, gate)
 
@@ -245,21 +268,19 @@ class ResearchGraphRunner:
             if forecast_result.blocking_reason:
                 raise RuntimeError(forecast_result.blocking_reason)
 
-            result = self._run_agent(state, "forecast_valuation", "Create the typed driver-based forecast model.")
-            state.artifacts["forecast_narrative"] = result.payload
-            self._merge_agent_result(state, result)
-            self._handle_evidence_request(state, "forecast_valuation", result.payload)
+            if self._uses_fast_draft_path(state):
+                state.artifacts["forecast_narrative"] = self._deterministic_forecast_narrative(state)
+            else:
+                result = self._run_agent(state, "forecast_valuation", "Create the typed driver-based forecast model.")
+                state.artifacts["forecast_narrative"] = result.payload
+                self._merge_agent_result(state, result)
+                self._handle_evidence_request(state, "forecast_valuation", result.payload)
 
             # Forecast quality gate.
             forecast = state.artifacts.get("forecast_model") or {}
             self._record_gate(state, forecast_quality_gate(forecast))
             if state.blocking_reason:
                 return state
-
-            # Valuation proposal (agent).
-            proposal = self._run_agent(state, "forecast_valuation", "Create the typed FCFF/FCFE valuation proposal.")
-            state.artifacts["valuation_proposal"] = proposal.payload
-            self._merge_agent_result(state, proposal)
 
             # Valuation execution (deterministic).
             val_result = self._run_tool(
@@ -276,11 +297,7 @@ class ResearchGraphRunner:
             state.artifacts["valuation_read"] = valuation_read.summary
             self._merge_result(state, valuation_read)
 
-            agent_result = self._run_agent(state, "forecast_valuation", "Review deterministic valuation outputs, assumptions, and model limitations.")
-            state.artifacts["valuation_review"] = agent_result.payload
-            self._merge_agent_result(state, agent_result)
-
-            # Valuation gate.
+            # Valuation gate (deterministic — no LLM review needed).
             gate = valuation_gate(state.valuation_outputs or state.artifacts.get("valuation", {}))
             self._record_gate(state, gate)
             self._record_gate(
@@ -298,12 +315,7 @@ class ResearchGraphRunner:
             }
 
         elif stage == "WRITE_REPORT":
-            # Readiness review.
-            result = self._run_agent(state, "research_manager", "Perform the typed readiness review before report writing.")
-            state.artifacts["readiness_review"] = result.payload
-            self._merge_agent_result(state, result)
-
-            # Thesis & report draft.
+            # Thesis & report draft (gates already enforce readiness).
             agent_result = self._run_agent(state, "thesis_report", "Create the typed grounded report draft from approved artifacts.")
             state.artifacts["report_draft"] = agent_result.payload
             state.draft_report = agent_result.payload
@@ -499,8 +511,26 @@ class ResearchGraphRunner:
         self._record_tool_trace(state, result.node_name, result.summary, result.output_hash, result.gate_inputs)
 
     def _merge_agent_result(self, state: ResearchGraphState, result) -> None:
-        state.artifact_refs.extend([ref if isinstance(ref, dict) else dict(ref) for ref in result.artifact_refs])
-        state.evidence_refs.extend([ref if isinstance(ref, dict) else dict(ref) for ref in result.evidence_refs])
+        for ref in result.artifact_refs:
+            if isinstance(ref, dict):
+                state.artifact_refs.append(ref)
+            elif hasattr(ref, "__iter__") and not isinstance(ref, str):
+                try:
+                    state.artifact_refs.append(dict(ref))
+                except (TypeError, ValueError):
+                    _log.warning("Skipping malformed artifact_ref: %s", type(ref).__name__)
+            else:
+                _log.warning("Skipping non-dict artifact_ref: %r", ref)
+        for ref in result.evidence_refs:
+            if isinstance(ref, dict):
+                state.evidence_refs.append(ref)
+            elif hasattr(ref, "__iter__") and not isinstance(ref, str):
+                try:
+                    state.evidence_refs.append(dict(ref))
+                except (TypeError, ValueError):
+                    _log.warning("Skipping malformed evidence_ref: %s", type(ref).__name__)
+            else:
+                _log.warning("Skipping non-dict evidence_ref: %r", ref)
         self._record_agent_trace(state, result)
         self._write_agent_payload_artifact(state, result)
 
@@ -531,17 +561,59 @@ class ResearchGraphRunner:
         )
         return result
 
+    @staticmethod
+    def _uses_fast_draft_path(state: ResearchGraphState) -> bool:
+        policy = state.policy or {}
+        return bool(policy.get("draft_mode") or policy.get("fast_export"))
+
+    @staticmethod
+    def _deterministic_forecast_narrative(state: ResearchGraphState) -> dict[str, Any]:
+        forecast = state.artifacts.get("forecast_model") or {}
+        checks = forecast.get("forecast_quality_checks") or {}
+        horizon = forecast.get("forecast_horizon") or {}
+        return {
+            "schema_version": "1.0",
+            "run_id": state.run_id,
+            "ticker": state.ticker,
+            "producer": "deterministic_forecast_engine",
+            "mode": "draft_fast_path",
+            "summary": {
+                "forecast_horizon": horizon,
+                "quality_checks": checks,
+                "limitations": forecast.get("limitations") or [],
+            },
+            "warnings": [
+                "draft_fast_path_skipped_forecast_valuation_llm",
+                "deterministic_forecast_model_used_as_authoritative_source",
+            ],
+        }
+
     def _run_agent(self, state: ResearchGraphState, agent_id: str, task: str):
+        import time as _time
         from pydantic import ValidationError
 
         from backend.harness.contracts import validate_agent_artifact
 
+        t_start = _time.perf_counter()
         config = self.agent_registry.get_agent_config(agent_id)
         self._charge_agent_step(state, config.agent_id, config.model)
+
+        t0 = _time.perf_counter()
         context = self._build_agent_context(state, config.agent_id, task)
+        ctx_ms = int((_time.perf_counter() - t0) * 1000)
+
         self.progress.agent_start(agent_id, task)
+
+        t0 = _time.perf_counter()
         agent_state = context.model_dump(mode="json")
+        serialize_ms = int((_time.perf_counter() - t0) * 1000)
+
         input_refs = [ref.get("artifact_id", "") for ref in context.input_artifact_refs if isinstance(ref, dict)]
+        state_size = len(json.dumps(agent_state, ensure_ascii=False, default=str))
+        _log.info(
+            "[%s] _run_agent agent=%s context_ms=%d serialize_ms=%d state_chars=%d input_refs=%d",
+            state.current_stage, agent_id, ctx_ms, serialize_ms, state_size, len(input_refs),
+        )
         try:
             result = self.model_adapter.run_agent(
                 agent_config=config,
@@ -578,22 +650,35 @@ class ResearchGraphRunner:
             result.warnings.append(f"primary_model_failed:{config.model}")
             result.warnings.append(f"fallback_model_used:{fallback_model}")
         self.progress.agent_end(agent_id, result.status, getattr(result, 'confidence', None))
+
+        t0 = _time.perf_counter()
         self._inject_artifact_lineage(state, result.payload)
         self._repair_agent_payload(result.payload)
+        postproc_ms = int((_time.perf_counter() - t0) * 1000)
+
+        t0 = _time.perf_counter()
         try:
             validate_agent_artifact(config.output_schema, result.payload)
         except ValidationError as exc:
             if result.payload:
-                # Payload exists but doesn't match typed schema exactly.
-                # Recoverable intermediate issue — normalize, warn, continue.
                 result.status = "completed"
                 result.warnings.append(f"schema_validation_relaxed:{config.output_schema}")
                 result.warnings.append(str(exc))
             else:
-                # No usable payload — hard fail.
                 result.status = "failed"
                 result.blocking_reason = f"schema_validation_failed_unusable_payload:{config.output_schema}"
                 result.warnings.append(str(exc))
+        validate_ms = int((_time.perf_counter() - t0) * 1000)
+
+        total_ms = int((_time.perf_counter() - t_start) * 1000)
+        _log.info(
+            "[%s] _run_agent DONE agent=%s total=%dms postproc=%dms validate=%dms "
+            "status=%s payload_keys=%d warnings=%d",
+            state.current_stage, agent_id, total_ms, postproc_ms, validate_ms,
+            result.status,
+            len(result.payload) if isinstance(result.payload, dict) else 0,
+            len(result.warnings),
+        )
         return result
 
     @staticmethod

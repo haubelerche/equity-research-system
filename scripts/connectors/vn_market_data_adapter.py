@@ -17,10 +17,11 @@ def _facts_for_ticker(ticker: str) -> pd.DataFrame:
     with STORE.conn() as connection:
         frame = pd.read_sql_query(
             """
-            SELECT ticker, fiscal_year, fiscal_period, line_item_code, value
-            FROM fact.financial_facts
+            SELECT ticker, CAST(SUBSTRING(period, 1, 4) AS SMALLINT) AS fiscal_year,
+                   'FY' AS fiscal_period, metric AS line_item_code, value
+            FROM fact.production_facts
             WHERE ticker = %s
-            ORDER BY fiscal_year DESC, fiscal_period DESC
+            ORDER BY period DESC
             """,
             connection,
             params=(ticker,),

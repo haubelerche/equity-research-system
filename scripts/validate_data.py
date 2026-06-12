@@ -36,6 +36,8 @@ import json
 import os
 from datetime import UTC, datetime
 
+from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
+
 _env_file = Path(__file__).resolve().parents[1] / ".env"
 if _env_file.exists():
     for _line in _env_file.read_text(encoding="utf-8").splitlines():
@@ -49,8 +51,6 @@ FACTS_DIR = ROOT / "artifacts" / "facts"
 GOLDEN_DIR = ROOT / "config" / "dataset" / "golden" / "financials"
 REPORTS_DIR = ROOT / "reports"
 
-MVP_FROM_YEAR = 2021
-MVP_TO_YEAR = 2025
 _ALLOWED_FY_RE = re.compile(r"^(20\d{2})FY$")
 
 
@@ -66,43 +66,6 @@ def _filter_fy_facts(raw_facts: list[dict], from_year: int, to_year: int) -> lis
         row for row in raw_facts
         if _is_allowed_fy(f"{row['fiscal_year']}{row['fiscal_period']}", from_year, to_year)
     ]
-
-
-def _load_golden_fallback(ticker: str, from_year: int, to_year: int) -> list[dict]:
-    import csv
-    golden_path = GOLDEN_DIR / f"{ticker.upper()}.csv"
-    if not golden_path.exists():
-        return []
-    facts: list[dict] = []
-    now = datetime.now(UTC)
-    with golden_path.open(encoding="utf-8", newline="") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            period = row.get("period", "").strip()
-            m = _ALLOWED_FY_RE.match(period)
-            if not m:
-                continue
-            fy = int(m.group(1))
-            if not (from_year <= fy <= to_year):
-                continue
-            try:
-                value = float(row["value"])
-            except (ValueError, KeyError):
-                continue
-            facts.append({
-                "line_item_code": row["canonical_key"].strip(),
-                "fiscal_year": fy,
-                "fiscal_period": "FY",
-                "value": value,
-                "unit": row.get("unit", "vnd_bn").strip(),
-                "currency": row.get("currency", "VND").strip(),
-                "source_id": f"golden_csv_{ticker}_{fy}FY",
-                "connector_version": "golden_csv_v1",
-                "validation_status": row.get("validation_status", "needs_review").strip(),
-                "confidence": float(row.get("confidence") or 0.75),
-                "ingested_at": now,
-            })
-    return facts
 
 
 def _snapshot_id(ticker: str, periods: list[str]) -> str:
@@ -123,8 +86,8 @@ def _load_source_coverage(store, ticker: str) -> dict[str, dict]:
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT fiscal_year, fiscal_period, source_type, reliability_tier, source_id
-                    FROM ingest.sources
+                    SELECT fiscal_year, fiscal_period, source_type, source_tier, source_doc_id
+                    FROM ingest.source_documents
                     WHERE ticker = %s
                       AND fiscal_year IS NOT NULL
                     ORDER BY fiscal_year, fiscal_period
@@ -148,8 +111,8 @@ def _load_source_coverage(store, ticker: str) -> dict[str, dict]:
 
 def run_validation(
     ticker: str,
-    from_year: int = MVP_FROM_YEAR,
-    to_year: int = MVP_TO_YEAR,
+    from_year: int = DEFAULT_FROM_YEAR,
+    to_year: int = DEFAULT_TO_YEAR,
     output_json: bool = False,
 ) -> dict:
     """Run the complete data validation stack and return a summary dict.
@@ -200,11 +163,6 @@ def run_validation(
     if not raw_facts:
         print(f"[validate_data] ERROR: No facts found for {ticker}.", file=sys.stderr)
         sys.exit(2)
-
-    golden = _load_golden_fallback(ticker, from_year, to_year)
-    if golden and not output_json:
-        print(f"[validate_data] {ticker} golden fallback: {len(golden)} facts merged")
-    raw_facts = raw_facts + golden
 
     fy_facts = _filter_fy_facts(raw_facts, from_year, to_year)
     if not fy_facts:
@@ -349,8 +307,8 @@ def _print_summary(summary: dict) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Validate financial data for a ticker.")
     parser.add_argument("--ticker", required=True, help="Ticker symbol, e.g. DHG")
-    parser.add_argument("--from-year", type=int, default=MVP_FROM_YEAR)
-    parser.add_argument("--to-year", type=int, default=MVP_TO_YEAR)
+    parser.add_argument("--from-year", type=int, default=DEFAULT_FROM_YEAR)
+    parser.add_argument("--to-year", type=int, default=DEFAULT_TO_YEAR)
     parser.add_argument(
         "--json", action="store_true", dest="output_json",
         help="Output machine-readable JSON to stdout instead of a human-readable summary",

@@ -8,7 +8,7 @@ Usage::
 
     ctx = ReportContext(ticker="DHG", ...)
     sections = build_report_sections(ctx)
-    out_path = HTMLRenderer().render(sections, ctx, output_dir=Path("artifacts/reports_html"))
+    out_path = HTMLRenderer().render(sections, ctx, output_dir=temporary_output_dir)
     print("Generated:", out_path)
 """
 from __future__ import annotations
@@ -124,7 +124,7 @@ class HTMLRenderer:
         self,
         sections: list[dict],
         ctx: ReportContext,
-        output_dir: "Path | str" = "artifacts/reports_html",
+        output_dir: "Path | str | None" = None,
         run_id: str = "",
         render_mode: str = "",
     ) -> Path:
@@ -148,6 +148,8 @@ class HTMLRenderer:
         Path
             Absolute path to the generated HTML file.
         """
+        if output_dir is None:
+            raise ValueError("output_dir must be an explicit temporary rendering directory")
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 

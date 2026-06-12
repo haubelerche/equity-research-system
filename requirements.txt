@@ -6,7 +6,6 @@ pandas
 numpy
 pdfplumber
 pyyaml
-langgraph
 anthropic>=0.40
 openai  # still needed for chunk_pipeline.py embeddings (text-embedding-3-small)
 langfuse>=4.0

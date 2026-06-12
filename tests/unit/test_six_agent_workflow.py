@@ -4,8 +4,9 @@ from unittest.mock import MagicMock
 
 from backend.harness.agent_registry import AgentRegistry
 from backend.harness.graph import GRAPH_STAGES
+from backend.harness.gates import pass_gate
 from backend.harness.runner import ResearchGraphRunner
-from backend.harness.state import ResearchGraphState
+from backend.harness.state import ResearchGraphState, ServiceNodeResult
 
 
 def test_registry_contains_exactly_six_typed_agents() -> None:
@@ -147,3 +148,76 @@ def test_render_publish_creates_html_pdf_artifact_refs() -> None:
     assert state.artifacts["rendered_report"]["pdf"]["storage_path"] == "runs/run_render/report.pdf"
     assert {ref["section_key"] for ref in state.artifact_refs} >= {"report_html", "report_pdf"}
     assert store.save_artifact.call_count == 2
+
+
+def test_draft_forecast_stage_uses_deterministic_fast_path(monkeypatch) -> None:
+    runner = ResearchGraphRunner(store=MagicMock())
+    state = ResearchGraphState(
+        run_id="run_fast_draft",
+        ticker="DHG",
+        objective="draft export",
+        policy={"draft_mode": True},
+        snapshot_id="snap-001",
+    )
+    state.current_stage = "FORECAST_AND_VALUE"
+
+    tool_calls: list[str] = []
+
+    def fake_run_tool(current, agent_id, tool_id, *args, **kwargs):
+        tool_calls.append(tool_id)
+        if tool_id == "run_forecast":
+            return ServiceNodeResult(
+                node_name="FORECAST_MODEL",
+                status="completed",
+                summary={
+                    "ticker": "DHG",
+                    "snapshot_id": "snap-001",
+                    "forecast_horizon": {"start_year": 2026, "end_year": 2030},
+                    "forecast_quality_checks": {"driver_support_check": True},
+                    "limitations": [],
+                },
+            )
+        if tool_id == "run_valuation":
+            return ServiceNodeResult(
+                node_name="VALUATION_DRAFT",
+                status="completed",
+                summary={
+                    "ticker": "DHG",
+                    "snapshot_id": "snap-001",
+                    "storage_path": "run_fast_draft/valuation.json",
+                    "formula_traces": [{"formula_id": "fcff", "formula_version": "1", "calculation_steps": [{"step": "ok"}]}],
+                },
+            )
+        if tool_id == "read_valuation_artifact":
+            return ServiceNodeResult(
+                node_name="READ_VALUATION_ARTIFACT",
+                status="completed",
+                summary={
+                    "ticker": "DHG",
+                    "snapshot_id": "snap-001",
+                    "storage_path": "run_fast_draft/valuation.json",
+                    "formula_trace_status": "present",
+                    "formula_traces": [{"formula_id": "fcff", "formula_version": "1", "calculation_steps": [{"step": "ok"}]}],
+                },
+            )
+        raise AssertionError(f"unexpected tool: {tool_id}")
+
+    monkeypatch.setattr(runner, "_run_tool", fake_run_tool)
+    monkeypatch.setattr(
+        runner,
+        "_run_agent",
+        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("forecast LLM should be skipped in draft mode")),
+    )
+    monkeypatch.setattr("backend.harness.runner.forecast_quality_gate", lambda forecast: pass_gate("FORECAST_QUALITY_GATE"))
+    monkeypatch.setattr("backend.harness.runner.valuation_gate", lambda valuation: pass_gate("VALUATION_GATE"))
+    monkeypatch.setattr(
+        "backend.harness.runner.valuation_reconciliation_gate",
+        lambda valuation, market_snapshot: pass_gate("VALUATION_RECONCILIATION_GATE"),
+    )
+
+    result = runner._execute_stage(state, "FORECAST_AND_VALUE")
+
+    assert tool_calls == ["run_forecast", "run_valuation", "read_valuation_artifact"]
+    assert result.artifacts["forecast_narrative"]["mode"] == "draft_fast_path"
+    assert "valuation_proposal" not in result.artifacts
+    assert result.artifacts["research_lock"]["locked"] is True

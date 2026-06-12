@@ -12,15 +12,12 @@ fields that do NOT come from the financial statements:
 Design goals:
 - **Code-first / sourced**: every field records its provider in ``provenance``;
   we never fabricate. Missing fields stay ``None``.
-- **Reproducible**: each successful fetch is written to
-  ``artifacts/market_snapshot/{ticker}_{ts}.json`` and can be reloaded offline,
-  so report rendering does not depend on live network access.
+- **Reproducible**: snapshots are persisted through the run storage contract.
 - **Ticker-agnostic**: no per-ticker branching. The only ticker-specific input is
   the symbol passed to the provider.
 """
 from __future__ import annotations
 
-import glob
 import json
 import logging
 from dataclasses import asdict, dataclass, field
@@ -31,7 +28,6 @@ from typing import Any
 _logger = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parents[2]
-SNAPSHOT_DIR = ROOT / "artifacts" / "market_snapshot"
 
 SOURCE_VCI_OVERVIEW = "vnstock_overview_vci"
 
@@ -142,24 +138,26 @@ def _check_consistency(snap: MarketSnapshot) -> None:
 
 
 def write_snapshot_artifact(snap: MarketSnapshot, base_dir: Path | str | None = None) -> Path:
-    """Persist a snapshot to artifacts/market_snapshot/{ticker}_{ts}.json."""
-    out_dir = Path(base_dir) if base_dir else SNAPSHOT_DIR
+    """Persist a snapshot inside an explicitly supplied run directory."""
+    if base_dir is None:
+        raise ValueError("base_dir must be an explicit temporary working directory")
+    out_dir = Path(base_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    ts = snap.retrieved_at.replace(":", "").replace("-", "").replace(".", "")[:15]
-    path = out_dir / f"{snap.ticker}_{ts}_market_snapshot.json"
+    path = out_dir / "market_snapshot.json"
     path.write_text(json.dumps(snap.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
     return path
 
 
 def load_cached_snapshot(ticker: str, base_dir: Path | str | None = None) -> MarketSnapshot | None:
-    """Load the most recent cached snapshot for a ticker, or None if none exists."""
+    """Load the run-scoped market snapshot, or None if none exists."""
     ticker = ticker.strip().upper()
-    out_dir = Path(base_dir) if base_dir else SNAPSHOT_DIR
-    files = sorted(glob.glob(str(out_dir / f"{ticker}_*_market_snapshot.json")))
-    if not files:
+    if base_dir is None:
+        return None
+    path = Path(base_dir) / "market_snapshot.json"
+    if not path.exists():
         return None
     try:
-        data = json.loads(Path(files[-1]).read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return None
     known = MarketSnapshot.__dataclass_fields__.keys()
@@ -180,7 +178,7 @@ def get_market_snapshot(
     ticker = ticker.strip().upper()
     try:
         snap = fetch_market_snapshot(ticker)
-        if persist:
+        if persist and base_dir is not None:
             try:
                 write_snapshot_artifact(snap, base_dir)
             except OSError as exc:  # pragma: no cover - disk failure is non-fatal

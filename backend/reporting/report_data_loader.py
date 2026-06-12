@@ -12,7 +12,6 @@ Usage::
 """
 from __future__ import annotations
 
-import glob
 import json
 import logging as _logging
 import os
@@ -27,6 +26,7 @@ except ImportError:
     _HAS_DB = False
 
 from backend.dataset.config_io import load_universe_rows
+from backend.database.config import connect_with_retry, require_database_url
 from backend.reporting.section_builder import ReportContext
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -48,23 +48,13 @@ def _resolve_artifact(
     if manifest is not None:
         return manifest.load_json(key)  # load_json already logs on failure, returns {}
 
-    if not allow_latest_artifacts:
-        raise ValueError(
-            f"run_id is required to resolve artifact '{key}'. "
-            "Pass allow_latest_artifacts=True only for internal debug rendering."
-        )
-    files = sorted(glob.glob(str(ROOT / glob_pattern)))
-    if files:
-        with open(files[-1], encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+    raise ValueError(f"run_id is required to resolve artifact '{key}'")
 
 
 def _read_manifest_or_raise(run_id: str, base_dir: "Path | None" = None):
     from backend.reporting.artifact_manifest import read_manifest
 
-    resolved = (base_dir if base_dir is not None else ROOT) / "artifacts"
-    manifest = read_manifest(run_id, base_dir=resolved)
+    manifest = read_manifest(run_id)
     if manifest is None:
         raise FileNotFoundError(
             f"No artifact manifest found for run_id={run_id!r}. "
@@ -221,38 +211,13 @@ _NARRATIVE_FIELDS = [
 
 # ── Internal helpers ───────────────────────────────────────────────────────────
 
-def _latest_valuation(ticker: str) -> dict:
-    """Return the most recent valuation JSON for *ticker*, or empty dict."""
-    pattern = str(ROOT / f"artifacts/valuation/{ticker}_*_valuation.json")
-    files = sorted(glob.glob(pattern))
-    if files:
-        with open(files[-1], encoding="utf-8") as f:
-            return json.load(f)
-    return {}
-
-
-def _latest_valuation_result(ticker: str) -> dict:
-    """Return the newest public valuation-result artifact for *ticker*, if any.
-
-    These artifacts represent the report-facing governance output. When present,
-    they override older exploratory valuation JSONs for recommendation, target
-    price, upside, and publishability.
-    """
-    pattern = str(ROOT / f"artifacts/valuation_results/*_{ticker}_valuation_result.json")
-    files = sorted(glob.glob(pattern))
-    if files:
-        with open(files[-1], encoding="utf-8") as f:
-            return json.load(f)
-    return {}
-
-
 def _load_db_facts(ticker: str) -> dict[tuple[str, str], float]:
     """Load canonical_facts from DB as {(metric_name, period): value}."""
     if not _HAS_DB:
         return {}
-    dsn = os.getenv("DATABASE_URL", "postgresql://localhost/equity_research")
+    dsn = require_database_url()
     try:
-        conn = psycopg2.connect(dsn)
+        conn = connect_with_retry(dsn)
         cur = conn.cursor()
         cur.execute(
             "SELECT metric_name, period, value FROM canonical_facts "
@@ -335,14 +300,7 @@ def _rating_from_upside(upside_pct: float) -> str:
 
 def _load_chart_paths(ticker: str) -> dict[str, str]:
     """Return chart_id → absolute path for existing chart PNGs."""
-    charts_dir = ROOT / "artifacts/charts"
-    result: dict[str, str] = {}
-    for n in range(1, 8):
-        key = f"C{n}"
-        candidate = charts_dir / f"{ticker}_{key}.png"
-        if candidate.exists():
-            result[key] = str(candidate)
-    return result
+    return {}
 
 
 def _has_valid_data(lst: list, min_nonzero: int = 1) -> bool:
@@ -941,13 +899,13 @@ def load_report_context(
     # ── Load valuation artifact ────────────────────────────────────────
     val = _resolve_artifact(
         "valuation",
-        f"artifacts/valuation/{ticker}_*_valuation.json",
+        "valuation.json",
         manifest,
         allow_latest_artifacts,
     )
     valuation_result = _resolve_artifact(
         "valuation_result",
-        f"artifacts/valuation_results/*_{ticker}_valuation_result.json",
+        "valuation.json",
         manifest,
         allow_latest_artifacts,
     )

@@ -5,7 +5,7 @@ import argparse
 from backend.dataset.config_io import load_universe_tickers
 
 from backend.executor import RunExecutor
-from backend.orchestrator import RunContext, Supervisor
+from backend.orchestrator import FullReportOrchestrator, RunContext
 from backend.runtime_store import RuntimeStore
 from backend.settings import settings
 from backend.universe_registration import ensure_ticker_registered_from_universe
@@ -15,8 +15,8 @@ from backend.utils import deterministic_id
 def submit_universe_runs(limit: int | None = None) -> list[str]:
     store = RuntimeStore(dsn=settings.database_url)
     store.check_schema_version()
-    supervisor = Supervisor(store=store)
-    executor = RunExecutor(store=store, supervisor=supervisor)
+    orchestrator = FullReportOrchestrator(store=store)
+    executor = RunExecutor(store=store, orchestrator=orchestrator)
 
     tickers = load_universe_tickers()
     if limit is not None:

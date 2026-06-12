@@ -83,5 +83,4 @@ CMD ["sh", "-c", \
      --ticker ${TICKER} \
      --from-year ${FROM_YEAR} \
      --to-year ${TO_YEAR} \
-     --legacy-pipeline \
      $([ \"${ENABLE_OCR}\" = \"true\" ] && echo --ocr || echo '')"]

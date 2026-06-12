@@ -57,7 +57,7 @@ vnstock/          Local vnstock library (reference; wrap behind our connector)
 |---|---|
 | `fact_store.py` | `PostgresFactStore` — upserts financial_facts, price_history, company_profiles, catalyst_events |
 | `source_registry.py` | `SourceRegistry` — registers and deduplicates source versions; saves raw snapshots |
-| `milvus_store.py` | Vector store client for document chunks |
+| `vector_store.py` | PostgreSQL/pgvector chunk embedding store for document chunks |
 
 ### 3.3 Dataset Pipeline (`backend/dataset/`)
 

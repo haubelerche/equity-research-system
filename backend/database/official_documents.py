@@ -48,7 +48,10 @@ class OfficialDocumentInput:
     company_name: str | None = None
     issuer: str | None = None
     url: str | None = None
-    local_path: str | None = None
+    storage_bucket: str | None = None
+    storage_path: str | None = None
+    content_type: str | None = None
+    file_size_bytes: int | None = None
     published_date: str | None = None
     fiscal_year: int | None = None
     language: str = "vi"
@@ -66,46 +69,38 @@ class OfficialDocumentRegistry:
     def compute_file_hash(payload: bytes) -> str:
         return hashlib.sha256(payload).hexdigest()
 
-    def register_official_document(self, data: OfficialDocumentInput) -> int:
-        """Insert (idempotent) an official document. Returns official_document_id."""
+    def register_official_document(self, data: OfficialDocumentInput) -> str:
+        """Register an official document in the canonical source-document table."""
         tier = data.source_tier if data.source_tier is not None else tier_for_official_type(data.source_type)
-        with self.store.conn() as connection:
-            with connection.cursor() as cur:
-                cur.execute(
-                    """
-                    INSERT INTO ingest.official_documents
-                    (ticker, company_name, source_type, source_tier, issuer, title, url,
-                     local_path, published_date, fiscal_year, language, file_hash,
-                     fetched_at, status)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                            CASE WHEN %s IS NOT NULL THEN NOW() ELSE NULL END, %s)
-                    ON CONFLICT (ticker, source_type, fiscal_year, title)
-                    DO UPDATE SET
-                        url            = EXCLUDED.url,
-                        local_path     = EXCLUDED.local_path,
-                        published_date = EXCLUDED.published_date,
-                        file_hash      = EXCLUDED.file_hash,
-                        issuer         = EXCLUDED.issuer,
-                        company_name   = EXCLUDED.company_name,
-                        source_tier    = EXCLUDED.source_tier,
-                        status         = EXCLUDED.status
-                    RETURNING official_document_id
-                    """,
-                    (
-                        data.ticker, data.company_name, data.source_type, tier,
-                        data.issuer, data.title, data.url, data.local_path,
-                        data.published_date, data.fiscal_year, data.language,
-                        data.file_hash, data.file_hash, data.status,
-                    ),
-                )
-                return cur.fetchone()[0]
+        from backend.database.canonical.source_dal import upsert_source_document
+        return upsert_source_document(
+            ticker=data.ticker,
+            source_type=data.source_type,
+            source_tier=tier,
+            source_uri=data.url or (
+                f"supabase://{data.storage_bucket}/{data.storage_path}"
+                if data.storage_bucket and data.storage_path
+                else f"manual:{data.ticker}:{data.title}"
+            ),
+            checksum=data.file_hash or hashlib.sha256(data.title.encode()).hexdigest(),
+            source_title=data.title,
+            issuer=data.issuer,
+            fiscal_year=data.fiscal_year,
+            storage_bucket=data.storage_bucket,
+            storage_path=data.storage_path,
+            content_type=data.content_type,
+            file_size_bytes=data.file_size_bytes,
+            language=data.language,
+            fetch_status=data.status,
+            metadata={"company_name": data.company_name, **data.metadata},
+        )
 
-    def get_official_document(self, official_document_id: int) -> dict | None:
+    def get_official_document(self, official_document_id: str) -> dict | None:
         import psycopg2.extras as _extras
         with self.store.conn() as connection:
             with connection.cursor(cursor_factory=_extras.DictCursor) as cur:
                 cur.execute(
-                    "SELECT * FROM ingest.official_documents WHERE official_document_id=%s",
+                    "SELECT * FROM ingest.source_documents WHERE source_doc_id=%s",
                     (official_document_id,),
                 )
                 row = cur.fetchone()
@@ -116,7 +111,7 @@ class OfficialDocumentRegistry:
         with self.store.conn() as connection:
             with connection.cursor(cursor_factory=_extras.DictCursor) as cur:
                 cur.execute(
-                    "SELECT * FROM ingest.official_documents WHERE ticker=%s ORDER BY fiscal_year, source_type",
+                    "SELECT * FROM ingest.source_documents WHERE ticker=%s ORDER BY fiscal_year, source_type",
                     (ticker,),
                 )
                 return [dict(r) for r in cur.fetchall()]
@@ -128,7 +123,7 @@ class OfficialDocumentRegistry:
         metric: str,
         value: float,
         unit: str,
-        official_document_id: int,
+        official_document_id: str,
         *,
         page_number: int | None = None,
         table_name: str | None = None,
@@ -141,40 +136,25 @@ class OfficialDocumentRegistry:
 
         source_tier is taken from the linked official document (0/1/2).
         """
+        from backend.database.canonical.observation_dal import insert_observations
         with self.store.conn() as connection:
             with connection.cursor() as cur:
-                cur.execute(
-                    "SELECT source_tier FROM ingest.official_documents WHERE official_document_id=%s",
-                    (official_document_id,),
-                )
+                cur.execute("SELECT source_tier FROM ingest.source_documents WHERE source_doc_id=%s", (official_document_id,))
                 row = cur.fetchone()
-                if row is None:
-                    raise ValueError(f"official_document_id {official_document_id} not found")
-                src_tier = row[0]
-                period_type = "FY" if period.endswith("FY") else "Q"
-                cur.execute(
-                    """
-                    INSERT INTO fact.fact_observations
-                    (ticker, period, period_type, metric, value, unit, currency,
-                     official_document_id, page_number, table_name, extracted_text,
-                     extraction_method, confidence, source_tier)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (ticker, period, metric, source_id) DO NOTHING
-                    RETURNING observation_id
-                    """,
-                    (
-                        ticker, period, period_type, metric, value, unit, currency,
-                        official_document_id, page_number, table_name, extracted_text,
-                        extraction_method, confidence, src_tier,
-                    ),
-                )
-                got = cur.fetchone()
-                return got[0] if got else -1
+        if row is None:
+            raise ValueError(f"source_doc_id {official_document_id} not found")
+        return insert_observations([{
+            "ticker": ticker, "period": period, "metric": metric, "value": value,
+            "unit": unit, "currency": currency, "source_doc_id": official_document_id,
+            "source_tier": row[0], "page_number": page_number, "table_name": table_name,
+            "extracted_text": extracted_text, "extraction_method": extraction_method,
+            "confidence": confidence,
+        }])
 
     def mark_fact_verified(
         self,
         fact_id: str,
-        official_document_id: int,
+        official_document_id: str,
         reconciliation_status: str = "matched_official",
         verified_by: str = "reconciler",
     ) -> None:
@@ -209,7 +189,7 @@ class OfficialDocumentRegistry:
         period: str,
         metric: str,
         value: float,
-        official_document_id: int,
+        official_document_id: str,
         unit: str = "vnd_bn",
         currency: str = "V",
         source_tier: int = 0,
@@ -257,20 +237,21 @@ class OfficialDocumentRegistry:
         return fact_id
 
     def get_verified_facts(self, ticker: str, canonical_version: str | None = None) -> list[dict]:
-        """Return final-report-safe facts from fact.verified_financial_facts."""
+        """Return final-report-safe canonical facts."""
         import psycopg2.extras as _extras
         with self.store.conn() as connection:
             with connection.cursor(cursor_factory=_extras.DictCursor) as cur:
                 if canonical_version:
                     cur.execute(
-                        "SELECT * FROM fact.verified_financial_facts "
-                        "WHERE ticker=%s AND canonical_version=%s ORDER BY period, metric",
+                        "SELECT * FROM fact.canonical_facts "
+                        "WHERE ticker=%s AND canonical_version=%s "
+                        "AND reconciliation_status IN ('matched_official','manual_reviewed') ORDER BY period, metric",
                         (ticker, canonical_version),
                     )
                 else:
                     cur.execute(
-                        "SELECT * FROM fact.verified_financial_facts "
-                        "WHERE ticker=%s ORDER BY period, metric",
+                        "SELECT * FROM fact.canonical_facts WHERE ticker=%s "
+                        "AND reconciliation_status IN ('matched_official','manual_reviewed') ORDER BY period, metric",
                         (ticker,),
                     )
                 return [dict(r) for r in cur.fetchall()]

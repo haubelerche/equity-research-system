@@ -17,6 +17,12 @@ from pathlib import Path
 from typing import Any, Literal
 
 from backend.reporting.report_data_loader import _COMPANIES, ROOT, _read_manifest_or_raise
+from backend.reporting.market_data_artifact import (
+    MarketDataArtifact,
+    benchmark_for_exchange,
+    load_cached_market_data,
+    market_data_from_dict,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -105,9 +111,12 @@ class ClientReportViewModel:
     missing_required_fields: list[str] = field(default_factory=list)
     key_sources: list[dict[str, str]] = field(default_factory=list)
     display_blocking_reasons: list[str] = field(default_factory=list)
+    metric_availability: dict[str, Any] = field(default_factory=dict)
+    company_profile: dict[str, Any] = field(default_factory=dict)
 
 
 _DASH = "—"
+_NA = "N/A"
 _PERIODS_FALLBACK = ["2024A", "2025A", "2026F", "2027F", "2028F"]
 
 
@@ -192,26 +201,17 @@ def _resolve_json(
     key: str = "",
     allow_latest_artifacts: bool = False,
 ) -> dict[str, Any]:
-    """Manifest-first artifact resolution; falls back to glob with DeprecationWarning."""
+    """Resolve an artifact only through the run manifest."""
     if manifest is not None and key:
         if manifest.resolve(key):
             return manifest.load_json(key)
         return {}
-    if not allow_latest_artifacts:
-        raise ValueError(
-            f"run_id is required to resolve artifact '{key or pattern}'. "
-            "Pass allow_latest_artifacts=True only for internal debug rendering."
-        )
-    files = sorted(glob.glob(str(ROOT / pattern)))
-    if not files:
-        return {}
-    with open(files[-1], encoding="utf-8") as f:
-        return json.load(f)
+    raise ValueError(f"run_id and manifest entry are required for artifact '{key or pattern}'")
 
 
 def _facts(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, dict[str, float]]:
     return _resolve_json(
-        f"artifacts/facts/{ticker}_*_fact_report.json",
+        "facts_snapshot.json",
         manifest,
         "facts",
         allow_latest_artifacts,
@@ -220,7 +220,7 @@ def _facts(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> 
 
 def _valuation(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
     return _resolve_json(
-        f"artifacts/valuation/{ticker}_*_valuation.json",
+        "valuation.json",
         manifest,
         "valuation",
         allow_latest_artifacts,
@@ -228,17 +228,23 @@ def _valuation(ticker: str, manifest=None, allow_latest_artifacts: bool = False)
 
 
 def _valuation_result(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
-    return _resolve_json(
-        f"artifacts/valuation_results/*_{ticker}_valuation_result.json",
+    data = _resolve_json(
+        "valuation.json",
         manifest,
         "valuation_result",
         allow_latest_artifacts,
     )
+    # The harness manifest registers a single "valuation" artifact (valuation.json)
+    # and no separate "valuation_result" key. Fall back to the full valuation
+    # artifact so publishability/price signals survive.
+    if data or manifest is None:
+        return data
+    return _valuation(ticker, manifest, allow_latest_artifacts)
 
 
 def _forecast(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
     data = _resolve_json(
-        f"artifacts/forecast/{ticker}_*_forecast.json",
+        "valuation.json",
         manifest,
         "forecast",
         allow_latest_artifacts,
@@ -250,7 +256,7 @@ def _forecast(ticker: str, manifest=None, allow_latest_artifacts: bool = False) 
 
 def _fcff(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
     data = _resolve_json(
-        f"artifacts/forecast/{ticker}_*_fcff.json",
+        "valuation.json",
         manifest,
         "fcff",
         allow_latest_artifacts,
@@ -262,7 +268,7 @@ def _fcff(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> d
 
 def _blend(ticker: str, manifest=None, allow_latest_artifacts: bool = False) -> dict[str, Any]:
     data = _resolve_json(
-        f"artifacts/forecast/{ticker}_*_blend.json",
+        "valuation.json",
         manifest,
         "blend",
         allow_latest_artifacts,
@@ -694,9 +700,8 @@ def _report_display_governance(
         target = None
         upside = None
 
-    # client_final with blocking reasons: lock recommendation but keep values visible for review
-    if mode == "client_final" and blocking_reasons:
-        approved_for_display = False
+    # Publication QA stays in metadata/review artifacts. It must not replace
+    # usable client-facing values or inject internal workflow states into PDF.
 
     return {
         "approved_for_display": approved_for_display,
@@ -1224,24 +1229,13 @@ def _key_sources(ticker: str, snapshot) -> list[dict[str, str]]:
 
 
 def _load_latest_citation(ticker: str) -> dict[str, Any]:
-    import glob as _glob
-    import json as _json
-    files = sorted(_glob.glob(str(ROOT / "artifacts" / "reports" / f"{ticker}_*citation*.json")))
-    if not files:
-        return {}
-    try:
-        return _json.loads(Path(files[-1]).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return {}
+    """Citation data must be supplied through the run manifest."""
+    return {}
 
 
 def _load_market_snapshot(ticker: str):
-    """Load the latest cached market snapshot for the ticker (offline-safe)."""
-    try:
-        from backend.reporting.market_snapshot import load_cached_snapshot
-        return load_cached_snapshot(ticker, base_dir=ROOT / "artifacts" / "market_snapshot")
-    except Exception:  # noqa: BLE001 - rendering must not fail on snapshot absence
-        return None
+    """Market snapshot data must be supplied through the run contract."""
+    return None
 
 
 def _driver_value(forecast: dict[str, Any], key: str) -> float | None:
@@ -1359,14 +1353,13 @@ def _sanitize_non_valuation_narrative(text: str) -> str:
     return "Nội dung đang được chuẩn hóa theo contract section; xem trang định giá cho các giả định mô hình."
 
 
-def _charts(ticker: str) -> dict[str, ChartArtifact]:
+def _charts(ticker: str, run_id: str | None = None) -> dict[str, ChartArtifact]:
     """Discover all generated chart PNGs for *ticker* from the artifacts directory.
 
     Registers C1–C8 when available.  Only C1 and C2 are marked required; the
     others are opportunistic — their absence is acceptable but their presence
     improves the report's evidence density.
     """
-    charts_dir = ROOT / "artifacts/charts"
     titles = {
         "C1": "Diễn biến giá cổ phiếu so với VNINDEX",
         "C2": "Doanh thu và lợi nhuận",
@@ -1387,17 +1380,51 @@ def _charts(ticker: str) -> dict[str, ChartArtifact]:
         "C7": "Nguồn: Phân tích độ nhạy — WACC × tăng trưởng dài hạn; nhóm phân tích.",
         "C8": "Nguồn: Bloomberg; báo cáo công ty; tính toán của nhóm phân tích.",
     }
-    result: dict[str, ChartArtifact] = {}
-    for chart_id, title in titles.items():
-        path = charts_dir / f"{ticker}_{chart_id}.png"
-        if path.exists():
-            result[chart_id] = ChartArtifact(
-                chart_id=chart_id,
-                title=title,
-                path=str(path),
-                caption=captions.get(chart_id, "Nguồn: Nhóm phân tích."),
-                required=chart_id in {"C1", "C2"},
-            )
+    return {}
+
+
+def _market_data(
+    ticker: str,
+    manifest=None,
+    *,
+    run_id: str | None = None,
+    allow_latest_artifacts: bool = False,
+) -> MarketDataArtifact | None:
+    """Resolve run-scoped market data without introducing live I/O in rendering."""
+    if manifest is not None and manifest.resolve("market_data"):
+        return market_data_from_dict(manifest.load_json("market_data"))
+    return None
+
+
+def _approved_agent_narrative(manifest) -> dict[str, str]:
+    """Load agent-authored prose while keeping QA state out of client content.
+
+    A claim ledger with unsupported claims disables the override. When no ledger
+    is present, the deterministic narrative remains the fallback for any field
+    the agent did not provide.
+    """
+    if manifest is None or not manifest.resolve("financial_analysis"):
+        return {}
+    artifact = manifest.load_json("financial_analysis")
+    payload = artifact.get("payload") or artifact
+    ledger = manifest.load_json("claim_ledger") if manifest.resolve("claim_ledger") else {}
+    if ledger.get("summary", {}).get("unsupported", 0):
+        return {}
+    forbidden = re.compile(
+        r"\b(pending_review|default_unapproved|backend|artifact|gate|blocked)\b",
+        re.IGNORECASE,
+    )
+    result: dict[str, str] = {}
+    for key in (
+        "investment_thesis",
+        "financial_narrative",
+        "risk_narrative",
+        "forecast_narrative",
+        "valuation_narrative",
+    ):
+        value = str(payload.get(key) or "").strip()
+        if value and not forbidden.search(value):
+            result[key] = value
     return result
 
 
@@ -1428,9 +1455,15 @@ def build_client_report_view_model(
     target_price = display_gate["target_price"]
     upside = display_gate["upside"]
     recommendation = display_gate["recommendation"]
-    charts = _charts(ticker)
+    charts = _charts(ticker, run_id)
 
     snapshot = _load_market_snapshot(ticker)
+    market_data = _market_data(
+        ticker,
+        manifest,
+        run_id=run_id,
+        allow_latest_artifacts=allow_latest_artifacts,
+    )
 
     periods = _derive_periods(facts, forecast)
     shares_mn = _derive_shares_mn(facts, periods)
@@ -1442,6 +1475,8 @@ def build_client_report_view_model(
     if dividend_per_share is None and snapshot is not None and snapshot.dividend_per_share:
         dividend_per_share = snapshot.dividend_per_share
     market_cap = None if current_price is None or shares_mn == 0 else current_price * shares_mn / 1000
+    market_stats = market_data.trading_statistics if market_data is not None else None
+    trading_perf = market_data.trading_performance if market_data is not None else None
     dividend_yield = (
         Percent(dividend_per_share / current_price)
         if dividend_per_share and current_price else None
@@ -1498,6 +1533,13 @@ def build_client_report_view_model(
     margin_drivers = _sanitize_non_valuation_narrative(_narr["margin_drivers"])
     events = _narr["risks_catalysts"]
     forecast_text = _narr["forecast_valuation_narrative"]
+    agent_narrative = _approved_agent_narrative(manifest)
+    thesis = agent_narrative.get("investment_thesis", thesis)
+    current_context = agent_narrative.get("financial_narrative", current_context)
+    events = agent_narrative.get("risk_narrative", events)
+    forecast_text = agent_narrative.get("forecast_narrative", forecast_text)
+    if agent_narrative.get("valuation_narrative"):
+        forecast_text = f"{forecast_text} {agent_narrative['valuation_narrative']}".strip()
     key_forecast_drivers_table = _table_key_forecast_drivers(forecast, fcff, facts, forecast_rows, ticker)
     sensitivity_table = (
         _table_sensitivity_matrix(val.get("sensitivity", {}), display_gate["approved_for_display"])
@@ -1523,28 +1565,51 @@ def build_client_report_view_model(
             "Ngành": "Dược phẩm",
             "Vốn hóa": market_cap,
             "Số lượng cổ phiếu": shares_mn if shares_mn else _DASH,
-            "Giá cao/thấp 52 tuần": (
-                f"{snapshot.low_52w:,.0f} / {snapshot.high_52w:,.0f}"
-                if snapshot is not None and snapshot.high_52w and snapshot.low_52w else _DASH
+            "Giá đóng cửa": (
+                market_stats.last_close if market_stats is not None and market_stats.last_close is not None
+                else current_price if current_price is not None else _NA
             ),
-            "KLGD bình quân 1 tháng": (
-                f"{snapshot.avg_volume_1m:,.0f}"
-                if snapshot is not None and snapshot.avg_volume_1m else _DASH
+            "Giá cao/thấp 52 tuần": (
+                f"{market_stats.low_52w:,.0f} / {market_stats.high_52w:,.0f}"
+                if market_stats is not None and market_stats.high_52w is not None and market_stats.low_52w is not None
+                else f"{snapshot.low_52w:,.0f} / {snapshot.high_52w:,.0f}"
+                if snapshot is not None and snapshot.high_52w and snapshot.low_52w else _NA
+            ),
+            "KLGD bình quân 30 phiên": (
+                f"{market_stats.avg_volume_30d:,.0f}"
+                if market_stats is not None and market_stats.avg_volume_30d is not None
+                else f"{snapshot.avg_volume_1m:,.0f}"
+                if snapshot is not None and snapshot.avg_volume_1m else _NA
             ),
             "Tỷ lệ sở hữu nước ngoài": (
                 f"{snapshot.foreign_pct * 100:.1f}%"
-                if snapshot is not None and snapshot.foreign_pct is not None else _DASH
+                if snapshot is not None and snapshot.foreign_pct is not None else _NA
             ),
         },
         ownership_table=TableData(
             title="CƠ CẤU SỞ HỮU",
             periods=["Tỷ lệ"],
-            rows=[("Cổ đông lớn và nhà đầu tư tổ chức", [_DASH]), ("Cổ đông khác", [_DASH])],
+            rows=[("Cổ đông lớn và nhà đầu tư tổ chức", [_NA]), ("Cổ đông khác", [_NA])],
+            source_note="N/A khi chưa có dữ liệu cơ cấu sở hữu đã kiểm chứng.",
         ),
         trading_performance_table=TableData(
             title="DIỄN BIẾN GIÁ CỔ PHIẾU",
             periods=["YTD", "1T", "3T", "12T"],
-            rows=[("Tuyệt đối", [_DASH] * 4), ("Tương đối", [_DASH] * 4)],
+            rows=[
+                (
+                    "Tuyệt đối",
+                    [trading_perf.absolute_returns.get(p) if trading_perf else _NA for p in ("YTD", "1T", "3T", "12T")],
+                ),
+                (
+                    f"Tương đối với {trading_perf.benchmark_symbol if trading_perf else benchmark_for_exchange(exchange)}",
+                    [trading_perf.relative_returns.get(p) if trading_perf else _NA for p in ("YTD", "1T", "3T", "12T")],
+                ),
+            ],
+            format_type="percent",
+            source_note=(
+                f"Nguồn: {market_data.source}; cập nhật {market_data.as_of_date}."
+                if market_data is not None else "Nguồn dữ liệu thị trường chưa khả dụng."
+            ),
         ),
         financial_summary_table=_table_financial_summary(facts, forecast_rows, current_price, periods, dividend_per_share),
         valuation_model_table=_table_valuation_model(facts, forecast_rows, fcff_rows, periods, shares_mn),
@@ -1585,6 +1650,17 @@ def build_client_report_view_model(
         missing_required_fields=missing,
         key_sources=_key_sources(ticker, snapshot),
         display_blocking_reasons=display_gate["blocking_reasons"],
+        metric_availability=(
+            {key: value.__dict__ for key, value in market_data.availability.items()}
+            if market_data is not None else {}
+        ),
+        company_profile={
+            "Tên": company_name,
+            "Mã giao dịch": ticker,
+            "Sàn": exchange,
+            "Ngành": "Dược phẩm",
+            "Hoạt động chính": "Sản xuất và phân phối dược phẩm",
+        },
     )
 
 

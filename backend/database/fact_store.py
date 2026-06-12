@@ -10,6 +10,7 @@ import pandas as pd
 import psycopg2
 from psycopg2.extras import Json, execute_values
 
+from backend.database.config import connect_with_retry, require_database_url
 
 @dataclass(frozen=True)
 class FinancialFact:
@@ -48,11 +49,11 @@ class PostgresFactStore:
     """Storage layer for the VN pharma dataset. All SQL targets the 4-schema design."""
 
     def __init__(self, dsn: str | None = None) -> None:
-        self.dsn = dsn or os.getenv("DATABASE_URL", "postgresql://maer:maer_local@localhost:5432/maer_dev")
+        self.dsn = require_database_url(dsn)
 
     @contextmanager
     def conn(self):
-        connection = psycopg2.connect(self.dsn)
+        connection = connect_with_retry(self.dsn)
         try:
             yield connection
             connection.commit()
@@ -63,6 +64,10 @@ class PostgresFactStore:
             connection.close()
 
     def upsert_price_rows(self, rows: Iterable[PriceRow]) -> int:
+        # Dual-write shim: writes to fact.price_history (new) only.
+        # fact.price_history will be dropped in migration 023.
+        import os as _os
+        from psycopg2.extras import execute_values as _execute_values
         payload = [
             (
                 r.ticker,
@@ -75,21 +80,21 @@ class PostgresFactStore:
                 r.volume,
                 r.traded_value,
                 r.market_cap,
-                r.source_id,
                 r.ingested_at,
             )
             for r in rows
         ]
         if not payload:
             return 0
-        with self.conn() as connection:
-            with connection.cursor() as cur:
-                execute_values(
+        dsn = _os.getenv("DATABASE_URL", self.dsn)
+        with connect_with_retry(dsn) as conn:
+            with conn.cursor() as cur:
+                _execute_values(
                     cur,
                     """
                     INSERT INTO fact.price_history
                     (ticker, trade_date, open, high, low, close, adjusted_close,
-                     volume, traded_value, market_cap, source_id, ingested_at)
+                     volume, traded_value, market_cap, ingested_at)
                     VALUES %s
                     ON CONFLICT (ticker, trade_date) DO UPDATE
                     SET open           = EXCLUDED.open,
@@ -100,56 +105,21 @@ class PostgresFactStore:
                         volume         = EXCLUDED.volume,
                         traded_value   = EXCLUDED.traded_value,
                         market_cap     = EXCLUDED.market_cap,
-                        source_id      = EXCLUDED.source_id,
                         ingested_at    = EXCLUDED.ingested_at
                     """,
                     payload,
                 )
+            conn.commit()
         return len(payload)
 
     def upsert_financial_facts(self, rows: Iterable[FinancialFact]) -> int:
-        payload = [
-            (
-                r.ticker,
-                r.fiscal_year,
-                r.fiscal_period,
-                r.line_item_code,
-                r.value,
-                r.unit,
-                r.currency,
-                r.source_id,
-                r.connector_version,
-                r.validation_status,
-                r.confidence,
-                r.effective_date,
-                r.ingested_at,
-            )
-            for r in rows
-        ]
-        if not payload:
-            return 0
-        with self.conn() as connection:
-            with connection.cursor() as cur:
-                execute_values(
-                    cur,
-                    """
-                    INSERT INTO fact.financial_facts
-                    (ticker, fiscal_year, fiscal_period, line_item_code, value, unit, currency,
-                     source_id, connector_version, validation_status, confidence, effective_date, ingested_at)
-                    VALUES %s
-                    ON CONFLICT (ticker, fiscal_year, fiscal_period, line_item_code, source_id) DO UPDATE
-                    SET value             = EXCLUDED.value,
-                        unit              = EXCLUDED.unit,
-                        currency          = EXCLUDED.currency,
-                        connector_version = EXCLUDED.connector_version,
-                        validation_status = EXCLUDED.validation_status,
-                        confidence        = EXCLUDED.confidence,
-                        effective_date    = EXCLUDED.effective_date,
-                        ingested_at       = EXCLUDED.ingested_at
-                    """,
-                    payload,
-                )
-        return len(payload)
+        # FROZEN: removed legacy fact table is no longer the production write target.
+        # Use backend.database.canonical.observation_dal.insert_observations() instead.
+        raise DeprecationWarning(
+            "removed legacy fact table is frozen. "
+            "Write to ingest.observations via backend.database.canonical.observation_dal.insert_observations(). "
+            "See docs/data_warehouse/final_schema_decision.md for the migration guide."
+        )
 
     def upsert_company_snapshot(
         self,
@@ -163,10 +133,9 @@ class PostgresFactStore:
         shareholders_json: Any = None,
         officers_json: Any = None,
     ) -> None:
-        """Update ref.companies and write a snapshot row to ingest.company_snapshots."""
+        """Update ref.companies with the latest company profile data."""
         with self.conn() as connection:
             with connection.cursor() as cur:
-                # Keep the canonical company record fresh.
                 cur.execute(
                     """
                     INSERT INTO ref.companies
@@ -181,17 +150,6 @@ class PostgresFactStore:
                         updated_at      = NOW()
                     """,
                     (ticker, company_name_vi, company_name_en, exchange, sector, subsector),
-                )
-                # Append a point-in-time snapshot for audit.
-                cur.execute(
-                    """
-                    INSERT INTO ingest.company_snapshots
-                    (ticker, overview_json, shareholders_json, officers_json)
-                    VALUES (%s, %s, %s, %s)
-                    """,
-                    (ticker, Json(overview_json) if overview_json is not None else None,
-                     Json(shareholders_json) if shareholders_json is not None else None,
-                     Json(officers_json) if officers_json is not None else None),
                 )
 
     # Backward-compatibility alias.
@@ -276,16 +234,20 @@ class PostgresFactStore:
             with connection.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT f.id, f.line_item_code, f.fiscal_year, f.fiscal_period,
+                    SELECT f.fact_id AS id, f.metric AS line_item_code,
+                           CAST(SUBSTRING(f.period, 1, 4) AS SMALLINT) AS fiscal_year,
+                           'FY' AS fiscal_period,
                            f.value, f.unit, f.currency,
-                           f.source_id, f.connector_version, f.validation_status,
-                           f.confidence, f.ingested_at,
+                           s.source_doc_id AS source_id, s.connector_version,
+                           f.quality_status AS validation_status,
+                           f.confidence, f.updated_at AS ingested_at,
                            s.source_tier, s.source_uri, s.source_title,
-                           s.reliability_tier AS src_reliability_tier
-                    FROM fact.financial_facts f
-                    LEFT JOIN ingest.sources s ON f.source_id = s.source_id
+                           s.source_tier AS src_reliability_tier
+                    FROM fact.canonical_facts f
+                    LEFT JOIN ingest.observations o ON o.observation_id = f.selected_observation_id
+                    LEFT JOIN ingest.source_documents s ON s.source_doc_id = o.source_doc_id
                     WHERE f.ticker = %s
-                    ORDER BY f.fiscal_year ASC, f.fiscal_period ASC, f.line_item_code ASC
+                    ORDER BY f.period ASC, f.metric ASC
                     """,
                     (ticker,),
                 )
@@ -293,64 +255,12 @@ class PostgresFactStore:
                 return [dict(zip(cols, row)) for row in cur.fetchall()]
 
     def get_accepted_financial_facts(self, ticker: str) -> list[dict[str, Any]]:
-        """Return accepted FY facts with source provenance for FactEntry construction."""
-        with self.conn() as connection:
-            with connection.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT f.id, f.line_item_code, f.fiscal_year, f.fiscal_period,
-                           f.value, f.unit, f.currency,
-                           f.source_id, f.connector_version, f.confidence,
-                           f.effective_date, f.ingested_at,
-                           s.source_tier, s.source_uri, s.source_title,
-                           s.reliability_tier AS src_reliability_tier
-                    FROM fact.accepted_financial_facts f
-                    LEFT JOIN ingest.sources s ON f.source_id = s.source_id
-                    WHERE f.ticker = %s
-                    ORDER BY f.fiscal_year ASC, f.line_item_code ASC
-                    """,
-                    (ticker,),
-                )
-                cols = [d.name for d in cur.description]
-                return [dict(zip(cols, row)) for row in cur.fetchall()]
+        """Deprecated: use get_financial_facts_for_ticker() which reads fact.canonical_facts."""
+        return self.get_financial_facts_for_ticker(ticker)
 
     def get_accepted_canonical_facts(self, ticker: str, canonical_version: str = "v_legacy") -> list[dict[str, Any]]:
-        """Return canonical facts from fact.canonical_facts for FactEntry construction.
-
-        Falls back to get_accepted_financial_facts if canonical_facts is not yet
-        populated for this ticker/version (Phase 2 migration in progress).
-        """
-        with self.conn() as connection:
-            with connection.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT cf.fact_id, cf.metric AS line_item_code,
-                           CAST(SPLIT_PART(cf.period, 'FY', 1) AS SMALLINT) AS fiscal_year,
-                           'FY' AS fiscal_period,
-                           cf.value, cf.unit, cf.currency,
-                           cf.source_tier,
-                           cf.confidence, cf.quality_status AS validation_status,
-                           cf.created_at AS ingested_at,
-                           s.source_id, s.source_uri, s.source_title,
-                           s.reliability_tier AS src_reliability_tier,
-                           s.connector_version
-                    FROM fact.canonical_facts cf
-                    LEFT JOIN fact.fact_observations obs
-                        ON cf.selected_observation_id = obs.observation_id
-                    LEFT JOIN ingest.sources s
-                        ON obs.source_id = s.source_id
-                    WHERE cf.ticker = %s
-                      AND cf.canonical_version = %s
-                      AND cf.period_type = 'FY'
-                    ORDER BY cf.period ASC, cf.metric ASC
-                    """,
-                    (ticker, canonical_version),
-                )
-                cols = [d.name for d in cur.description]
-                rows = [dict(zip(cols, row)) for row in cur.fetchall()]
-        if not rows:
-            return self.get_accepted_financial_facts(ticker)
-        return rows
+        """Return canonical facts from fact.canonical_facts for FactEntry construction."""
+        return self.get_financial_facts_for_ticker(ticker)
 
     def get_price_history(self, ticker: str, start: str, end: str) -> pd.DataFrame:
         with self.conn() as connection:
@@ -386,10 +296,11 @@ class PostgresFactStore:
         ]
 
     def query_financial_facts_wide(self, ticker: str) -> pd.DataFrame:
-        """Return a wide pivot of all financial facts for a ticker (line_item_code × period)."""
+        """Return a wide pivot of all financial facts for a ticker (line_item_code Ã— period)."""
         with self.conn() as connection:
             frame = pd.read_sql_query(
-                "SELECT line_item_code, fiscal_year, fiscal_period, value FROM fact.financial_facts WHERE ticker=%s",
+                "SELECT metric AS line_item_code, CAST(SUBSTRING(period, 1, 4) AS SMALLINT) AS fiscal_year, "
+                "'FY' AS fiscal_period, value FROM fact.production_facts WHERE ticker=%s",
                 connection,
                 params=(ticker,),
             )

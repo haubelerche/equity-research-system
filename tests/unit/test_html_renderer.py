@@ -64,13 +64,13 @@ def test_html_has_8_sections(tmp_path):
 
 
 def test_html_has_page_breaks(tmp_path):
-    """There must be exactly 7 page-break divs (between each of 8 sections)."""
+    """Logical sections must not receive unconditional physical page breaks."""
     ctx = _make_ctx()
     sections = build_report_sections(ctx)
     content = HTMLRenderer().render(sections, ctx, output_dir=tmp_path).read_text(encoding="utf-8")
 
     count = content.count('class="page-break"')
-    assert count == 7, f"Expected 7 page-break divs, found {count}"
+    assert count == 0, f"Expected no unconditional page-break divs, found {count}"
 
 
 def test_output_filename_with_run_id(tmp_path):

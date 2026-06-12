@@ -261,7 +261,7 @@ class PDFRenderer:
         output_dir = Path(output_dir or html_path.parent)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Compute stem � strip trailing "_report" if present
+        # Compute stem  strip trailing "_report" if present
         stem = html_path.stem
         if stem.endswith("_report"):
             stem = stem[: -len("_report")]
@@ -302,7 +302,7 @@ class PDFRenderer:
         except ImportError:
             pass
         except Exception as e:
-            # GTK/OS error on Windows � fall through to pdfkit
+            # GTK/OS error on Windows  fall through to pdfkit
             print(f"[pdf] weasyprint failed ({e}), trying pdfkit...")
 
         # --- Try pdfkit with UTF-8 encoding flag ---
@@ -415,8 +415,8 @@ class PDFRenderer:
             "  2. pdfkit: pip install pdfkit  (+ wkhtmltopdf binary with Vietnamese fonts)\n"
             "  3. xhtml2pdf: pip install xhtml2pdf  (+ place NotoSans-Regular.ttf in assets/fonts/)\n\n"
             f"HTML report is at: {html_path}\n"
-            f"Unicode font found: {font_path or 'None � install Noto Sans'}\n"
+            f"Unicode font found: {font_path or 'None  install Noto Sans'}\n"
         )
         stub_path.write_text(stub_msg, encoding="utf-8")
-        print(f"[pdf] WARNING: no PDF backend � stub saved: {stub_path}")
+        print(f"[pdf] WARNING: no PDF backend  stub saved: {stub_path}")
         return stub_path

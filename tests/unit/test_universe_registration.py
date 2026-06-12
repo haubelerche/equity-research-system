@@ -21,7 +21,7 @@ def test_registers_dp3_from_configured_universe() -> None:
     assert result["ticker"] == "DP3"
     assert result["exchange"] == "UPCOM"
     assert store.registered["DP3"]["company_name_vi"] == "Cong ty Co phan Duoc pham Trung uong 3"
-    assert store.registered["DP3"]["peer_group"] == "pharma"
+    assert store.registered["DP3"]["peer_group_id"] == "vn_pharma_listed"
 
 
 def test_unknown_ticker_fails_before_database_fk_violation() -> None:

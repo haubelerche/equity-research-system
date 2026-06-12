@@ -51,17 +51,18 @@ Thumbs.db
 node_modules/
 frontend/dist/
 
-# Data / artifacts (runtime files, not source)
-data/
-
-# Generated artifacts - all subdirs ignored (large files, reproducible)
-artifacts/
+# Canonical runtime/object storage. Keep directory contract, ignore payloads.
+storage/sources/
+storage/runs/
+storage/exports/
+storage/archive/
 
 # Browser automation profile — not source data (explicit reference)
 # artifacts/chrome-profile/
 # artifacts/.chrome-profile/
 
 # Generated report outputs — reproducible, not for git (explicit reference)
+output/
 # artifacts/reports_html/
 # artifacts/reports_pdf/
 # artifacts/charts/
@@ -75,3 +76,6 @@ assets/fonts/*.otf
 artifacts/runs/
 artifacts/reports_pdf/.chrome-profile-*/
 artifacts/dev/
+
+# Runtime storage-migration dumps — reproducible audit output, not source
+audits/storage_migrations/

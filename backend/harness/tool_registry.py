@@ -21,17 +21,19 @@ class ToolSpec:
     timeout_seconds: int
     blocking_semantics: str
     artifact_producer_key: str
+    retry_policy: str = "no_retry"
+    required_source_refs: bool = False
+    cost_policy: str = "metered"
 
 
 class ToolRegistry:
     def __init__(self) -> None:
         from backend.harness import tools
-
         self._tools: dict[str, ToolSpec] = {
             "auto_ingest": ToolSpec(
                 tool_id="auto_ingest",
                 implementation=tools.auto_ingest_tool,
-                owner_agent_ids=("data_retrieval",),
+                owner_agent_ids=("data_evidence",),
                 input_schema={"ticker": "str", "from_year": "int", "to_year": "int", "ocr": "bool"},
                 output_schema="ServiceNodeResult",
                 permission_level="read_write_artifact",
@@ -42,8 +44,13 @@ class ToolRegistry:
             "build_facts": ToolSpec(
                 tool_id="build_facts",
                 implementation=tools.build_facts_tool,
-                owner_agent_ids=("data_retrieval",),
-                input_schema={"ticker": "str", "from_year": "int", "to_year": "int"},
+                owner_agent_ids=("data_evidence",),
+                input_schema={
+                    "ticker": "str",
+                    "from_year": "int",
+                    "to_year": "int",
+                    "auto_approve_assumptions": "bool",
+                },
                 output_schema="ServiceNodeResult",
                 permission_level="read_write_artifact",
                 timeout_seconds=300,
@@ -53,7 +60,7 @@ class ToolRegistry:
             "build_index": ToolSpec(
                 tool_id="build_index",
                 implementation=tools.build_index_tool,
-                owner_agent_ids=("data_retrieval",),
+                owner_agent_ids=("data_evidence",),
                 input_schema={"ticker": "str", "from_year": "int", "to_year": "int"},
                 output_schema="ServiceNodeResult",
                 permission_level="read_write_artifact",
@@ -64,7 +71,7 @@ class ToolRegistry:
             "read_snapshot": ToolSpec(
                 tool_id="read_snapshot",
                 implementation=tools.read_snapshot_tool,
-                owner_agent_ids=("financial_analyst",),
+                owner_agent_ids=("financial_analysis",),
                 input_schema={"ticker": "str", "snapshot_id": "str"},
                 output_schema="ServiceNodeResult",
                 permission_level="read_only",
@@ -75,7 +82,7 @@ class ToolRegistry:
             "read_ratio_artifact": ToolSpec(
                 tool_id="read_ratio_artifact",
                 implementation=tools.read_ratio_artifact_tool,
-                owner_agent_ids=("financial_analyst",),
+                owner_agent_ids=("financial_analysis",),
                 input_schema={"ticker": "str", "snapshot_id": "str"},
                 output_schema="ServiceNodeResult",
                 permission_level="read_only",
@@ -86,7 +93,7 @@ class ToolRegistry:
             "run_valuation": ToolSpec(
                 tool_id="run_valuation",
                 implementation=tools.run_valuation_tool,
-                owner_agent_ids=("valuation",),
+                owner_agent_ids=("forecast_valuation",),
                 input_schema={"ticker": "str", "from_year": "int", "to_year": "int"},
                 output_schema="ServiceNodeResult",
                 permission_level="read_write_artifact",
@@ -94,10 +101,21 @@ class ToolRegistry:
                 blocking_semantics="blocks VALUATION_GATE on missing valuation components",
                 artifact_producer_key="VALUATION_RUN",
             ),
+            "run_forecast": ToolSpec(
+                tool_id="run_forecast",
+                implementation=tools.run_forecast_tool,
+                owner_agent_ids=("forecast_valuation",),
+                input_schema={"ticker": "str", "snapshot_id": "str", "from_year": "int", "to_year": "int"},
+                output_schema="ServiceNodeResult",
+                permission_level="read_write_artifact",
+                timeout_seconds=300,
+                blocking_semantics="blocks FORECAST_QUALITY_GATE on missing deterministic forecast components",
+                artifact_producer_key="FORECAST_RUN",
+            ),
             "read_valuation_artifact": ToolSpec(
                 tool_id="read_valuation_artifact",
                 implementation=tools.read_valuation_artifact_tool,
-                owner_agent_ids=("valuation",),
+                owner_agent_ids=("forecast_valuation",),
                 input_schema={"artifact_path": "str"},
                 output_schema="ServiceNodeResult",
                 permission_level="read_only",
@@ -105,21 +123,10 @@ class ToolRegistry:
                 blocking_semantics="blocks valuation review when artifact cannot be read",
                 artifact_producer_key="READ_VALUATION_ARTIFACT",
             ),
-            "generate_report": ToolSpec(
-                tool_id="generate_report",
-                implementation=tools.generate_report_tool,
-                owner_agent_ids=("report_writer_critic",),
-                input_schema={"ticker": "str", "snapshot_id": "str", "from_year": "int", "to_year": "int", "mode": "str"},
-                output_schema="ServiceNodeResult",
-                permission_level="read_write_artifact",
-                timeout_seconds=300,
-                blocking_semantics="blocks final export when citation/source gates fail",
-                artifact_producer_key="REPORT_GENERATION",
-            ),
             "evaluate_report_quality": ToolSpec(
                 tool_id="evaluate_report_quality",
                 implementation=tools.evaluate_quality_tool,
-                owner_agent_ids=("report_writer_critic",),
+                owner_agent_ids=("senior_critic",),
                 input_schema={"ticker": "str", "report_path": "str", "valuation_path": "str"},
                 output_schema="ServiceNodeResult",
                 permission_level="read_only",

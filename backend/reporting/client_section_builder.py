@@ -17,6 +17,14 @@ def _e(value: Any) -> str:
     return escape(str(value))
 
 
+def _excerpt(value: Any, limit: int) -> str:
+    text = str(value or "").strip()
+    if len(text) <= limit:
+        return text
+    shortened = text[:limit].rsplit(" ", 1)[0].rstrip(" ,;:")
+    return shortened + "."
+
+
 def _is_missing(value: Any) -> bool:
     return value is None or value == "" or value == DASH
 
@@ -309,12 +317,18 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
         ("Mã giao dịch", vm.market_statistics.get("Mã giao dịch", DASH)),
         ("Sàn", vm.exchange),
         ("Ngành", vm.sector),
+        ("Giá đóng cửa", vm.market_statistics.get("Giá đóng cửa", "N/A")),
+        ("Giá cao/thấp 52 tuần", vm.market_statistics.get("Giá cao/thấp 52 tuần", "N/A")),
         ("Vốn hóa", vm.market_statistics.get("Vốn hóa")),
         ("Số lượng cổ phiếu", vm.market_statistics.get("Số lượng cổ phiếu")),
-        ("Kế hoạch doanh thu 2026", vm.market_statistics.get("Kế hoạch doanh thu 2026", DASH)),
-        ("Kế hoạch LNTT 2026", vm.market_statistics.get("Kế hoạch LNTT 2026", DASH)),
-        ("Tài sản Q1/2026", vm.market_statistics.get("Tài sản Q1/2026", DASH)),
-        ("Vốn chủ sở hữu Q1/2026", vm.market_statistics.get("Vốn chủ sở hữu Q1/2026", DASH)),
+        ("KLGD bình quân 30 phiên", vm.market_statistics.get("KLGD bình quân 30 phiên", "N/A")),
+        ("Tỷ lệ sở hữu nước ngoài", vm.market_statistics.get("Tỷ lệ sở hữu nước ngoài", "N/A")),
+    ]
+    profile_rows = list(vm.company_profile.items()) if vm.company_profile else [
+        ("Tên", vm.company_name),
+        ("Mã giao dịch", vm.ticker),
+        ("Sàn", vm.exchange),
+        ("Ngành", vm.sector),
     ]
     return f"""
 <div class="client-report-page snapshot-page">
@@ -336,23 +350,21 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
         <div class="rec-sector">{_e(vm.sector)}</div>
       </div>
       {_render_key_value_table(sidebar_rows)}
-      <div class="side-section-title">{_e(vm.trading_performance_table.title)}</div>
-      {_render_table(vm.trading_performance_table, "broker-side-table compact")}
       {_chart(vm, "C1")}
-      <div class="side-section-title">Thống kê thị trường</div>
+      {_render_table(vm.trading_performance_table, "broker-side-table compact trading-performance-table")}
+      <div class="side-section-title">Thông tin giao dịch</div>
       {_render_key_value_table(stats_rows, "broker-side-table compact")}
+      <div class="side-section-title">Tổng quan doanh nghiệp</div>
+      {_render_key_value_table(profile_rows, "broker-side-table compact")}
     </aside>
     <main class="acbs-main">
       <h1>{_e(vm.company_name)} ({_e(vm.ticker)} VN)</h1>
       {_rec_hero(vm)}
-      <div class="lead-thesis">{_e(vm.investment_thesis)}</div>
+      <div class="lead-thesis">{_e(_excerpt(vm.investment_thesis, 1050))}</div>
       <h2>Luận điểm cập nhật</h2>
-      <p>{_e(vm.latest_business_update)}</p>
-      <h2>Bối cảnh hiện tại</h2>
-      <p>{_e(vm.current_context)}</p>
+      <p>{_e(_excerpt(vm.latest_business_update, 900))}</p>
       <h2>Động lực tăng trưởng</h2>
-      <p>{_e(vm.key_growth_drivers)}</p>
-      {_render_table(vm.financial_summary_table)}
+      <p>{_e(_excerpt(vm.key_growth_drivers, 700))}</p>
     </main>
   </div>
 </div>

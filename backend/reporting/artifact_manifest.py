@@ -1,21 +1,15 @@
-"""Per-run artifact manifest — locks artifact paths to the run that produced them.
-
-Eliminates 'latest artifact wins' by requiring tools to report the paths they
-actually wrote, then storing those paths keyed by run_id.
-"""
+"""Run manifest backed exclusively by the private ``runs`` Supabase bucket."""
 from __future__ import annotations
 
-import json
-import logging
-import re as _re
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-_logger = logging.getLogger(__name__)
+from backend.storage import RUNS_BUCKET, SupabaseStorageAdapter, run_artifact_key
 
 CURRENT_SCHEMA_VERSION = 1
-_SAFE_RUN_ID_RE = _re.compile(r'^[a-zA-Z0-9_\-\.]{1,200}$')
+_SAFE_RUN_ID_RE = re.compile(r"^[a-zA-Z0-9_.-]{1,200}$")
 
 
 @dataclass
@@ -24,81 +18,67 @@ class ArtifactManifest:
     ticker: str
     created_at: str
     schema_version: int
-    # artifacts: key → {"path": str, "producer": str}
-    artifacts: dict[str, dict[str, str]] = field(default_factory=dict)
+    artifacts: dict[str, dict[str, Any]] = field(default_factory=dict)
+    adapter: SupabaseStorageAdapter | None = field(default=None, repr=False)
 
     def resolve(self, key: str) -> Optional[str]:
-        """Return file path for *key*, or None if not registered."""
         entry = self.artifacts.get(key)
         return entry["path"] if entry else None
 
     def load_json(self, key: str) -> dict[str, Any]:
-        """Load and return the JSON file for *key*.
-
-        Returns {} on any failure and logs a warning — never silently swallows errors.
-        """
-        path_str = self.resolve(key)
-        if not path_str:
-            _logger.warning(
-                "ArtifactManifest: key '%s' not registered in run %s", key, self.run_id
-            )
+        path = self.resolve(key)
+        if not path:
             return {}
-        path = Path(path_str)
-        try:
-            return json.loads(path.read_text(encoding="utf-8"))
-        except FileNotFoundError:
-            _logger.warning(
-                "ArtifactManifest: artifact file missing — key=%s path=%s run=%s",
-                key, path_str, self.run_id,
-            )
-        except json.JSONDecodeError as exc:
-            _logger.warning(
-                "ArtifactManifest: artifact JSON invalid — key=%s path=%s run=%s error=%s",
-                key, path_str, self.run_id, exc,
-            )
-        return {}
+        payload = (self.adapter or SupabaseStorageAdapter()).download_json(RUNS_BUCKET, path)
+        return payload if isinstance(payload, dict) else {}
 
 
-def write_manifest(manifest: ArtifactManifest, base_dir: Path) -> Path:
-    """Write manifest to ``<base_dir>/manifests/<run_id>_manifest.json``."""
+def _payload(manifest: ArtifactManifest) -> dict[str, Any]:
+    return {
+        "schema_version": manifest.schema_version,
+        "run_id": manifest.run_id,
+        "ticker": manifest.ticker,
+        "created_at": manifest.created_at,
+        "artifacts": manifest.artifacts,
+    }
+
+
+def write_manifest(
+    manifest: ArtifactManifest,
+    base_dir: Path | None = None,
+    adapter: SupabaseStorageAdapter | None = None,
+) -> str:
     if not _SAFE_RUN_ID_RE.match(manifest.run_id):
-        raise ValueError(
-            f"Unsafe run_id={manifest.run_id!r}: must match [a-zA-Z0-9_\\-.] (max 200 chars)"
-        )
-    target_dir = Path(base_dir) / "manifests"
-    target_dir.mkdir(parents=True, exist_ok=True)
-    path = target_dir / f"{manifest.run_id}_manifest.json"
-    path.write_text(
-        json.dumps(
-            {
-                "schema_version": manifest.schema_version,
-                "run_id": manifest.run_id,
-                "ticker": manifest.ticker,
-                "created_at": manifest.created_at,
-                "artifacts": manifest.artifacts,
-            },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-    return path
+        raise ValueError(f"Unsafe run_id={manifest.run_id!r}")
+    client = adapter or SupabaseStorageAdapter()
+    key = run_artifact_key(manifest.run_id, "manifest.json")
+    if client.exists(RUNS_BUCKET, key):
+        if client.download_json(RUNS_BUCKET, key) != _payload(manifest):
+            raise FileExistsError(f"Refusing overwrite with different manifest: {RUNS_BUCKET}/{key}")
+    else:
+        client.upload_json(RUNS_BUCKET, key, _payload(manifest))
+    return key
 
 
-def read_manifest(run_id: str, base_dir: Path) -> Optional[ArtifactManifest]:
-    """Load manifest by run_id. Returns None if not found."""
+def read_manifest(
+    run_id: str,
+    base_dir: Path | None = None,
+    adapter: SupabaseStorageAdapter | None = None,
+) -> Optional[ArtifactManifest]:
     if not _SAFE_RUN_ID_RE.match(run_id):
-        _logger.warning("read_manifest: rejected unsafe run_id=%r", run_id)
         return None
-    path = Path(base_dir) / "manifests" / f"{run_id}_manifest.json"
-    if not path.exists():
+    client = adapter or SupabaseStorageAdapter()
+    key = run_artifact_key(run_id, "manifest.json")
+    if not client.exists(RUNS_BUCKET, key):
         return None
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data = client.download_json(RUNS_BUCKET, key)
     return ArtifactManifest(
         run_id=data["run_id"],
         ticker=data["ticker"],
         created_at=data["created_at"],
         schema_version=data.get("schema_version", 0),
         artifacts=data.get("artifacts", {}),
+        adapter=client,
     )
 
 
@@ -106,23 +86,18 @@ def build_manifest_from_artifact_refs(
     run_id: str,
     ticker: str,
     created_at: str,
-    artifact_refs: list[dict[str, str]],
+    artifact_refs: list[dict[str, Any]],
 ) -> ArtifactManifest:
-    """Build a manifest from a list of {key, path, producer} dicts.
-
-    Entries with empty key or empty path are skipped. This is the canonical
-    way to build a manifest — from paths tools actually reported, not glob.
-    """
-    artifacts: dict[str, dict[str, str]] = {}
-    for ref in artifact_refs:
-        key = ref.get("key", "")
-        path = ref.get("path", "")
-        if key and path:
-            artifacts[key] = {"path": path, "producer": ref.get("producer", "unknown")}
-    return ArtifactManifest(
-        run_id=run_id,
-        ticker=ticker,
-        created_at=created_at,
-        schema_version=CURRENT_SCHEMA_VERSION,
-        artifacts=artifacts,
-    )
+    artifacts = {
+        ref["key"]: {
+            "path": ref["path"],
+            "producer": ref.get("producer", "unknown"),
+            "artifact_type": ref.get("artifact_type", "other"),
+            "version": ref.get("version", 1),
+            "checksum": ref.get("checksum"),
+            "input_refs": ref.get("input_refs", []),
+        }
+        for ref in artifact_refs
+        if ref.get("key") and ref.get("path")
+    }
+    return ArtifactManifest(run_id, ticker, created_at, CURRENT_SCHEMA_VERSION, artifacts)

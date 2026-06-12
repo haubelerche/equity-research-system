@@ -32,6 +32,8 @@ if _env_file.exists():
 import psycopg2
 import psycopg2.extras
 
+from backend.database.config import require_database_url
+
 ROOT = Path(__file__).resolve().parents[1]
 CITATION_DIR = ROOT / "artifacts" / "reports"
 
@@ -46,7 +48,7 @@ _CORE_METRICS = [
 
 
 def _dsn() -> str:
-    return os.getenv("DATABASE_URL", "postgresql://maer:maer_local@localhost:5432/maer_dev")
+    return require_database_url()
 
 
 def _check_chunks(conn, ticker: str, year: int | None, verbose: bool) -> dict:
@@ -253,7 +255,7 @@ def test_retrieval(ticker: str, year: int | None = None, verbose: bool = False) 
         print("[Gate 4] Citation map artifact...")
         g4 = _check_citation_map(ticker, year, verbose)
         results["gates"]["citation_map"] = g4
-        print(f"  -> {'PASS' if g4['pass'] else 'FAIL (no citation map yet — run generate_report.py first)'}\n")
+        print(f"  -> {'PASS' if g4['pass'] else 'FAIL (no citation map yet; run the six-agent harness first)'}\n")
 
     finally:
         conn.close()
@@ -273,7 +275,7 @@ def test_retrieval(ticker: str, year: int | None = None, verbose: bool = False) 
 
     if all_critical_pass:
         print(f"\n  Evidence retrieval pipeline: READY for {ticker}")
-        print(f"  Next: python scripts/generate_report.py --ticker {ticker}")
+        print(f"  Next: python scripts/run_research.py --ticker {ticker}")
     else:
         print(f"\n  Evidence retrieval pipeline: NOT READY")
         print(f"  Fix: ensure build_index.py has run for {ticker}")

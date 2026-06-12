@@ -21,11 +21,13 @@ REQUIRED_PROMPT_SECTIONS = [
 ]
 
 VALID_AGENT_ROLES = {
-    "SupervisorAgent",
-    "DataRetrievalAgent",
-    "FinancialAnalystAgent",
-    "ValuationAgent",
-    "ReportWriterCriticAgent",
+    "ResearchManagerAgent",
+    "DataEvidenceAgent",
+    "FinancialAnalysisAgent",
+    "ForecastValuationAgent",
+    "ThesisReportAgent",
+    # Whitelisted news-research subsystem (NEWS_CRAWLER_EDITOR_AGENT_PLAN §7).
+    "SeniorCriticAgent",
 }
 
 VALID_AGENT_TOOLS = {
@@ -35,8 +37,8 @@ VALID_AGENT_TOOLS = {
     "read_snapshot",
     "read_ratio_artifact",
     "run_valuation",
+    "run_forecast",
     "read_valuation_artifact",
-    "generate_report",
     "evaluate_report_quality",
 }
 
@@ -51,7 +53,7 @@ class AgentConfig(BaseModel):
     prompt_path: str
     prompt: str
     allowed_tools: list[str] = Field(default_factory=list)
-    output_schema: str = "AgentResult"
+    output_schema: str
     budget_class: str = "reasoning"
     timeout_seconds: int = 60
     retry_policy: str = "no_retry"
@@ -104,13 +106,18 @@ class AgentRegistry:
 
     @staticmethod
     def _resolve_model(model: str) -> str:
+        from backend.harness.model_adapter import validate_production_model
+
         if model in {"default", "${DEFAULT_MODEL_NAME}", "${DEFAULT_MODEL}"}:
-            return settings.default_model_name
-        match = MODEL_ENV_PATTERN.match(model)
-        if not match:
-            return model
-        env_name, fallback = match.groups()
-        resolved = os.getenv(env_name) or fallback
-        if not resolved:
-            raise ValueError(f"Model environment variable is not set: {env_name}")
+            resolved = settings.default_model_name
+        else:
+            match = MODEL_ENV_PATTERN.match(model)
+            if match:
+                env_name, fallback = match.groups()
+                resolved = os.getenv(env_name) or fallback
+                if not resolved:
+                    raise ValueError(f"Model environment variable is not set: {env_name}")
+            else:
+                resolved = model
+        validate_production_model(resolved)
         return resolved

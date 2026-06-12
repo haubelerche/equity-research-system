@@ -40,11 +40,12 @@ if _env_file.exists():
             os.environ.setdefault(_k.strip(), _v.strip().strip(chr(34)).strip(chr(39)))
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORTS_DIR = ROOT / "reports"
-VALUATION_DIR = ROOT / "artifacts" / "valuation"
-CITATION_DIR = ROOT / "artifacts" / "reports"
-EVAL_DIR = ROOT / "artifacts" / "evaluation"
-FORECAST_DIR = ROOT / "artifacts" / "forecast"
+RUN_DIR = ROOT / "storage" / "runs" / os.environ.get("RUN_ID", "missing_run_id")
+REPORTS_DIR = RUN_DIR
+VALUATION_DIR = RUN_DIR
+CITATION_DIR = RUN_DIR
+EVAL_DIR = RUN_DIR
+FORECAST_DIR = RUN_DIR
 
 _STALE_THRESHOLD_DAYS = 540
 _NUMERIC_TOLERANCE = 0.05  # 5% tolerance for number matching
@@ -63,25 +64,24 @@ _FORBIDDEN_PHRASES = [
 
 
 def _load_latest_report(ticker: str) -> tuple[Path, str] | None:
-    files = sorted(REPORTS_DIR.glob(f"{ticker}_*.md"), reverse=True)
-    if not files:
+    p = REPORTS_DIR / "report.md"
+    if not p.exists():
         return None
-    p = files[0]
     return p, p.read_text(encoding="utf-8")
 
 
 def _load_latest_citation_map(ticker: str) -> dict | None:
-    files = sorted(CITATION_DIR.glob(f"{ticker}_*_citation.json"), reverse=True)
-    if not files:
+    path = CITATION_DIR / "evidence_pack.json"
+    if not path.exists():
         return None
-    return json.loads(files[0].read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _load_latest_valuation(ticker: str) -> dict | None:
-    files = sorted(VALUATION_DIR.glob(f"{ticker}_*_valuation.json"), reverse=True)
-    if not files:
+    path = VALUATION_DIR / "valuation.json"
+    if not path.exists():
         return None
-    return json.loads(files[0].read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _load_snapshot_header(snapshot_id: str) -> dict | None:
@@ -387,10 +387,10 @@ def _check_user_facing_citation_quality(citation_data: dict) -> dict:
 
 
 def _load_latest_forecast(ticker: str) -> dict | None:
-    files = sorted(FORECAST_DIR.glob(f"{ticker}_*_forecast.json"), reverse=True)
-    if not files:
+    path = FORECAST_DIR / "valuation.json"
+    if not path.exists():
         return None
-    return json.loads(files[0].read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8")).get("forecast")
 
 
 def _check_balance_sheet_identity(ticker: str) -> dict:

@@ -1,0 +1,128 @@
+
+======================================================================
+  RESEARCH RUN: DHG | full_report
+  Run ID: run_dhg_20260611T142508_f4f986a762
+======================================================================
+
+  [1/9] PREFLIGHT ...
+        OK PREFLIGHT done in 7.3s [completed]
+  [2/9] PLAN ...
+        AGENT [research_manager] Create the typed research plan.
+21:25:22 harness [PLAN] _run_agent agent=research_manager context_ms=0 serialize_ms=0 state_chars=280 input_refs=0
+21:25:22 harness.model_adapter [?] LLM_CALL agent=research_manager model=gpt-5-mini est_input_tokens=602 max_output_tokens=32768 timeout=600s compact_ms=0
+21:26:06 harness.model_adapter [?] LLM_OK agent=research_manager latency=43335ms prompt_tokens=524 completion_tokens=3843 finish_reason=stop
+        AGENT [research_manager] -> completed | confidence=0.62
+21:26:06 harness [PLAN] _run_agent DONE agent=research_manager total=45314ms postproc=0ms validate=0ms status=completed payload_keys=23 warnings=4
+        OK PLAN done in 52.8s [completed]
+  [3/9] INGEST_AND_VALIDATE ...
+        TOOL  [data_evidence/auto_ingest] running...
+[auto_ingest] FY2022 | status=SOURCE_MISSING | cafef=0 | pdf=0 | ingested=0 | promoted=0 | errors=2
+[auto_ingest] FY2023 | status=SOURCE_MISSING | cafef=0 | pdf=0 | ingested=0 | promoted=0 | errors=2
+[auto_ingest] FY2024 | status=SOURCE_MISSING | cafef=0 | pdf=0 | ingested=0 | promoted=0 | errors=2
+[auto_ingest] FY2025 | status=SOURCE_MISSING | cafef=0 | pdf=0 | ingested=0 | promoted=0 | errors=2
+        TOOL  [auto_ingest] -> ok
+        TOOL  [data_evidence/build_facts] running...
+[build_facts] DHG — v2 data path (fact.production_facts)
+[build_facts] DHG required periods: 2022FY, 2023FY, 2024FY, 2025FY
+[build_facts] DHG — 96 canonical facts loaded from fact.production_facts
+[build_facts] DHG — 96 facts remain after FY-only filter
+[build_facts] DHG no source conflicts detected
+[build_facts] DHG periods available: 2022FY, 2023FY, 2024FY, 2025FY
+[build_facts] DHG latest fiscal year: 2025
+[build_facts] DHG 2022FY: Tier 0/1 ✓
+[build_facts] DHG 2023FY: Tier 0/1 ✓
+[build_facts] DHG 2024FY: Tier 0/1 ✓
+[build_facts] DHG 2025FY: Tier 0/1 ✓
+[build_facts] DHG annual_reports_collected: 4
+[build_facts] DHG coverage_gate: pass
+[build_facts] DHG core_keys_gate: pass
+[build_facts] DHG source_tier_coverage_status: pass
+[build_facts] DHG valuation_gate: pass
+[build_facts] DHG valuation_ready: True
+[build_facts] DHG run_status: ok
+
+[build_facts] Fact table (v2 canonical facts):
+  capex.total                         2022FY=-233,991,633,058.0[T3]  2023FY=-486,342,533,930.0[T3]  2024FY=-88,704,714,502.0[T3]  2025FY=-31,136,402,852.0[T3]
+  cash_and_equivalents.ending         2022FY=34,017,813,791.0[T3]  2023FY=94,134,026,358.0[T3]  2024FY=62,857,547,612.0[T3]  2025FY=129,895,664,996.0[T3]
+  cogs.total                          2022FY=-2,418,521,064,699.0[T3]  2023FY=-2,671,849,997,386.0[T3]  2024FY=-2,747,101,521,942.0[T3]  2025FY=-2,760,593,928,931.0[T3]
+  depreciation.total                  2022FY=81,001,086,959.0[T3]  2023FY=88,703,980,639.0[T3]  2024FY=169,695,469,422.0[T3]  2025FY=119,007,964,694.0[T3]
+  eps.basic                           2022FY=7,318.0[T1]  2023FY=7,780.0[T1]  2024FY=5,763.0[T1]  2025FY=6,308.0[T1]
+  equity.parent                       2022FY=4,291,536,903,457.0[T3]  2023FY=4,852,934,674,270.0[T3]  2024FY=4,094,755,097,969.0[T3]  2025FY=4,137,265,175,952.0[T3]
+  gross_profit.total                  2022FY=2,257,494,943,128.0[T3]  2023FY=2,343,545,043,335.0[T3]  2024FY=2,137,766,133,150.0[T3]  2025FY=2,506,368,755,119.0[T3]
+  interest_expense.total              2022FY=-12,558,694,966.0[T3]  2023FY=-29,529,505,062.0[T3]  2024FY=-24,810,529,888.0[T3]  2025FY=-25,635,277,644.0[T3]
+  net_income.parent                   2022FY=988,454,646,072.0[T3]  2023FY=1,050,662,658,695.0[T3]  2024FY=775,985,500,216.0[T3]  2025FY=852,354,107,582.0[T3]
+  operating_cash_flow.total           2022FY=901,284,606,303.0[T3]  2023FY=240,171,214,767.0[T3]  2024FY=1,317,583,405,328.0[T3]  2025FY=1,212,967,705,385.0[T3]
+  profit_before_tax.total             2022FY=1,099,613,318,936.0[T3]  2023FY=1,159,174,385,084.0[T3]  2024FY=904,484,566,816.0[T3]  2025FY=986,599,267,177.0[T3]
+  revenue.net                         2022FY=4,676,016,007,827.0[T3]  2023FY=5,015,395,040,721.0[T3]  2024FY=4,884,867,655,092.0[T3]  2025FY=5,266,962,684,050.0[T3]
+  short_term_debt.ending              2022FY=114,723,409,074.0[T3]  2023FY=572,164,547,560.0[T3]  2024FY=649,913,916,414.0[T3]  2025FY=0.0[T3]
+  short_term_investments.ending       2022FY=0.0[T3]  2023FY=0.0[T3]  2024FY=0.0[T3]  2025FY=0.0[T3]
+  tax_expense.total                   2022FY=-111,158,672,864.0[T3]  2023FY=-108,511,726,389.0[T3]  2024FY=-128,499,066,600.0[T3]  2025FY=-134,245,159,595.0[T3]
+  total_assets.ending                 2022FY=5,168,186,502,845.0[T3]  2023FY=6,110,474,220,572.0[T3]  2024FY=5,959,243,276,265.0[T3]  2025FY=5,173,881,628,997.0[T3]
+
+[build_facts] Derived metrics:
+  debt_to_equity                      2022FY=0.0267  2023FY=0.1179  2024FY=0.1587  2025FY=0.0000
+  free_cash_flow.total                2022FY=667292973245.0000  2023FY=-246171319163.0000  2024FY=1228878690826.0000  2025FY=1181831302533.0000
+  gross_margin                        2022FY=0.4828  2023FY=0.4673  2024FY=0.4376  2025FY=0.4759
+  net_margin                          2022FY=0.2114  2023FY=0.2095  2024FY=0.1589  2025FY=0.1618
+  total_debt.ending                   2022FY=114723409074.0000  2023FY=572164547560.0000  2024FY=649913916414.0000  2025FY=0.0000
+
+[build_facts] Artifact saved: C:\Users\Admin\Desktop\multi-agent-equity-research\storage\runs\run_dhg_20260611T142508_f4f986a762\facts_snapshot.json
+[build_facts] v2 snapshot created: v2snap_512e2b6a1e854e42fd86 (96 facts, periods=['2022FY', '2023FY', '2024FY', '2025FY'])
+        TOOL  [build_facts] -> ok
+        TOOL  [data_evidence/build_index] running...
+[build_index] DHG 2022: 32 PDF text chunks indexed (9e3c863dfcc7d651bd73681e862774e91a0550aa4998bb549fab65af15ddb725.pdf)
+[build_index] DHG 2023: 112 PDF text chunks indexed (64599e1aa741ac286a5e0dbd35edbf4c300da94f44843473d7e58d8a5196b95f.pdf)
+[build_index] DHG 2024: 98 PDF text chunks indexed (1888e5da702672c221010234772f286147ada9c8b1363df45985270c81ce10f7.pdf)
+[build_index] DHG 2025: skipping scanned PDF 00c16423bad04feaab36f8cb998ef22511550cabeaddb12a6fe152450aad5b5e.pdf (use --ocr)
+[build_index] DHG 2025: 40 OCR page chunks indexed (source=50fd3d508baf62a0c7d0d14c2135632fc73751c2360a90c86e0b43d8bdf6886e)
+[build_index] DHG: 96 accepted facts found across [2022, 2023, 2024, 2025]
+[build_index] DHG: 7 catalyst events added as chunk
+[build_index] DHG: 5 fact-based chunks indexed (source=6d6d7faca13051c0c6acfa9b98ffd8c9a7626c115f9adbc0fd028dd8fbe70ab1)
+[build_index] DHG: no external docs at C:\Users\Admin\Desktop\multi-agent-equity-research\storage\sources\documents\DHG  skipping
+[build_index] DHG: total 287 chunks indexed
+        TOOL  [build_index] -> ok
+        AGENT [data_evidence] Review data inventory, source coverage, and retrieval readiness.
+21:29:38 harness [INGEST_AND_VALIDATE] _run_agent agent=data_evidence context_ms=0 serialize_ms=0 state_chars=3001 input_refs=2
+21:29:38 harness.model_adapter [?] LLM_CALL agent=data_evidence model=gpt-5-mini est_input_tokens=1315 max_output_tokens=32768 timeout=600s compact_ms=0
+21:30:52 harness.model_adapter [?] LLM_OK agent=data_evidence latency=73893ms prompt_tokens=1647 completion_tokens=6084 finish_reason=stop
+        AGENT [data_evidence] -> completed | confidence=0.75
+21:30:52 harness [INGEST_AND_VALIDATE] _run_agent DONE agent=data_evidence total=75781ms postproc=0ms validate=0ms status=completed payload_keys=14 warnings=5
+        GATE DATA_QUALITY_GATE: PASS
+        OK INGEST_AND_VALIDATE done in 286.7s [completed]
+  [4/9] ANALYZE ...
+        TOOL  [financial_analysis/read_snapshot] running...
+        TOOL  [read_snapshot] -> ok
+        TOOL  [financial_analysis/read_ratio_artifact] running...
+        TOOL  [read_ratio_artifact] -> ok
+        AGENT [financial_analysis] Create typed financial analysis with traceable diagnostics.
+21:31:06 harness [ANALYZE] _run_agent agent=financial_analysis context_ms=0 serialize_ms=0 state_chars=30525 input_refs=5
+21:31:06 harness.model_adapter [?] LLM_CALL agent=financial_analysis model=gpt-5-mini est_input_tokens=8209 max_output_tokens=32768 timeout=600s compact_ms=0
+21:32:51 harness.model_adapter [?] LLM_OK agent=financial_analysis latency=105553ms prompt_tokens=11420 completion_tokens=9910 finish_reason=stop
+        AGENT [financial_analysis] -> completed | confidence=0.00
+21:32:51 harness [ANALYZE] _run_agent DONE agent=financial_analysis total=107507ms postproc=0ms validate=0ms status=completed payload_keys=16 warnings=0
+        GATE FINANCIAL_ANALYST_GATE: PASS
+        OK ANALYZE done in 119.6s [completed]
+  [5/9] FORECAST_AND_VALUE ...
+        TOOL  [forecast_valuation/run_forecast] running...
+        TOOL  [run_forecast] -> ok
+        AGENT [forecast_valuation] Create the typed driver-based forecast model.
+21:33:06 harness [FORECAST_AND_VALUE] _run_agent agent=forecast_valuation context_ms=0 serialize_ms=0 state_chars=139147 input_refs=7
+21:33:06 harness.model_adapter [?] LLM_CALL agent=forecast_valuation model=gpt-5-mini est_input_tokens=35633 max_output_tokens=32768 timeout=600s compact_ms=0
+21:34:56 harness.model_adapter [?] LLM_OK agent=forecast_valuation latency=110113ms prompt_tokens=47745 completion_tokens=7411 finish_reason=stop
+        AGENT [forecast_valuation] -> completed | confidence=0.00
+21:34:56 harness [FORECAST_AND_VALUE] _run_agent DONE agent=forecast_valuation total=112039ms postproc=0ms validate=0ms status=completed payload_keys=3 warnings=0
+        !! FORECAST_AND_VALUE done in 123.1s [failed]
+
+  *** BLOCKED at FORECAST_AND_VALUE: FORECAST_AND_VALUE: dictionary update sequence element #0 has length 1; 2 is required
+
+
+======================================================================
+  RUN COMPLETE: DHG | failed | 589.4s
+  Stages: 5/9
+  Gates: 2 passed, 0 failed
+  Errors (1):
+    - dictionary update sequence element #0 has length 1; 2 is required
+  Output: NO PDF GENERATED
+======================================================================
+
+[run_research] FAILED: full_report run failed: run_id=run_dhg_20260611T142508_f4f986a762 stage=FORECAST_AND_VALUE blocking_reason=FORECAST_AND_VALUE: dictionary update sequence element #0 has length 1; 2 is required

@@ -7,7 +7,8 @@ from backend.dataset.config_io import UNIVERSE_FILE, load_universe_rows
 
 DEFAULT_UNIVERSE_ID = "vietnam_pharma_full"
 DEFAULT_UNIVERSE_NAME = "Vietnam Pharma Full Universe"
-DEFAULT_ENABLED_METHODS = ["dcf", "pe", "pb", "ev_ebitda"]
+DEFAULT_PEER_GROUP_ID = "vn_pharma_listed"
+DEFAULT_PEER_GROUP_NAME = "Vietnam Listed Pharmaceutical Companies"
 
 
 def universe_row_for_ticker(ticker: str) -> dict[str, str] | None:
@@ -38,10 +39,8 @@ def ensure_ticker_registered_from_universe(store: Any, ticker: str) -> dict[str,
         exchange=exchange,
         sector=segment,
         subsector=segment,
-        universe_id=DEFAULT_UNIVERSE_ID,
-        universe_name=DEFAULT_UNIVERSE_NAME,
-        peer_group=segment,
-        enabled_methods=DEFAULT_ENABLED_METHODS,
+        peer_group_id=DEFAULT_PEER_GROUP_ID,
+        peer_group_name=DEFAULT_PEER_GROUP_NAME,
     )
     return {
         "ticker": normalized,

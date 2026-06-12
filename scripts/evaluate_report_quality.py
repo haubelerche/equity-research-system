@@ -370,30 +370,16 @@ def _load_json(path: Path) -> dict | None:
 
 
 def _latest_file(directory: Path, ticker: str, artifact_type: str) -> Path | None:
-    """Find the most recent artifact file regardless of naming convention.
-
-    Handles both:
-      {ticker}_{artifact_type}_{ts}.json  (type-first)
-      {ticker}_{ts}_{artifact_type}.json  (timestamp-first, used by generate_report)
-    """
-    if not directory.exists():
-        return None
-    patterns = [
-        f"{ticker}_{artifact_type}*.json",
-        f"{ticker}_*_{artifact_type}*.json",
-    ]
-    matches: list[Path] = []
-    for pat in patterns:
-        matches.extend(directory.glob(pat))
-    if not matches:
-        return None
-    return sorted(set(matches), reverse=True)[0]
+    """Resolve a deterministic run-scoped artifact name."""
+    name = "quality_gate.json" if artifact_type in {"gate", "confidence"} else "valuation.json"
+    path = directory / name
+    return path if path.exists() else None
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate report quality gate")
     parser.add_argument("--ticker", required=True)
-    parser.add_argument("--artifacts-dir", default="artifacts")
+    parser.add_argument("--artifacts-dir", default="storage/runs")
     parser.add_argument("--report-file", default=None)
     args = parser.parse_args()
 

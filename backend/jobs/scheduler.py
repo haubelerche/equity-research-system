@@ -29,6 +29,8 @@ _PROJECT_ROOT = str(Path(__file__).resolve().parents[2])
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
+from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
+
 _env_file = Path(__file__).resolve().parents[2] / ".env"
 if _env_file.exists():
     for _line in _env_file.read_text(encoding="utf-8").splitlines():
@@ -48,8 +50,6 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 MVP_TICKERS = ["DHG", "IMP", "DMC", "TRA", "DBD"]
-MVP_FROM_YEAR = 2021
-MVP_TO_YEAR = 2025
 
 
 # ---------------------------------------------------------------------------
@@ -68,14 +68,14 @@ def job_weekly_sync(ticker: str | None = None) -> dict:
         try:
             logger.info("[weekly_sync] Starting ingest for %s", t)
             from scripts.ingest_ticker import ingest_ticker
-            ingest_ticker(ticker=t, years=list(range(MVP_FROM_YEAR, MVP_TO_YEAR + 1)))
+            ingest_ticker(ticker=t, years=list(range(DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR + 1)))
         except Exception as exc:
             logger.warning("[weekly_sync] ingest_ticker failed for %s: %s", t, exc)
 
         try:
             logger.info("[weekly_sync] Building facts for %s", t)
             from scripts.build_facts import build_facts
-            report, _ = build_facts(ticker=t, from_year=MVP_FROM_YEAR, to_year=MVP_TO_YEAR)
+            report, _ = build_facts(ticker=t, from_year=DEFAULT_FROM_YEAR, to_year=DEFAULT_TO_YEAR)
             gate = report.get("valuation_gate", "fail")
             results[t] = f"valuation_gate={gate}"
             logger.info("[weekly_sync] %s done: %s", t, results[t])
@@ -121,7 +121,7 @@ def job_monthly_valuation(ticker: str | None = None) -> dict:
         try:
             logger.info("[monthly_valuation] Running valuation for %s", t)
             from scripts.run_valuation import run_valuation
-            artifact = run_valuation(ticker=t, from_year=MVP_FROM_YEAR, to_year=MVP_TO_YEAR)
+            artifact = run_valuation(ticker=t, from_year=DEFAULT_FROM_YEAR, to_year=DEFAULT_TO_YEAR)
             dcf_base = artifact.get("dcf", {}).get("base", {})
             iv = dcf_base.get("intrinsic_value_per_share_vnd")
             results[t] = f"intrinsic={iv:.0f} VND" if iv else "intrinsic=N/A"

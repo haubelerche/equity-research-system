@@ -1,10 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
-
-from backend.dataset.dqf import stages_to_invalidate
-from backend.harness.model_adapter import _INPUT_COST_PER_M, _OUTPUT_COST_PER_M, _DEFAULT_INPUT_COST, _DEFAULT_OUTPUT_COST
+from backend.harness.model_adapter import _INPUT_COST_PER_M, _OUTPUT_COST_PER_M
 
 from backend.runtime_store import RuntimeStore
 from backend.settings import Settings
@@ -31,8 +28,8 @@ class BudgetGuard:
         completion_tokens: int,
         budget_policy: str,
     ) -> BudgetDecision:
-        in_rate = _INPUT_COST_PER_M.get(model_name, _DEFAULT_INPUT_COST)
-        out_rate = _OUTPUT_COST_PER_M.get(model_name, _DEFAULT_OUTPUT_COST)
+        in_rate = _INPUT_COST_PER_M.get(model_name, 0.75)
+        out_rate = _OUTPUT_COST_PER_M.get(model_name, 4.50)
         cost_usd = (prompt_tokens * in_rate + completion_tokens * out_rate) / 1_000_000
         run_total = self.store.run_cost_usd(run_id) + cost_usd
         fallback_model: str | None = None
@@ -58,44 +55,4 @@ class BudgetGuard:
         if stop_reason:
             return BudgetDecision(allow=False, stop_reason=stop_reason, fallback_model=fallback_model)
         return BudgetDecision(allow=True, fallback_model=fallback_model)
-
-
-class RecomputePlanner:
-    @staticmethod
-    def decide(event_type: str) -> dict[str, Any]:
-        invalidates = stages_to_invalidate(event_type)
-        flags = {
-            "factsChanged": "VALUATING" in invalidates or "NORMALIZING" in invalidates,
-            "catalystChanged": True,
-            "valuationChanged": "VALUATING" in invalidates,
-            "thesisNeedsRefresh": True,
-            "citationsNeedRefresh": "SYNTHESIZING" in invalidates or "ANALYZING" in invalidates,
-        }
-        return {"invalidates_stages": invalidates, "flags": flags}
-
-
-class OfflineEvaluator:
-    """Minimal offline gate scaffolding for phase-5."""
-
-    def evaluate(self, artifacts: list[dict[str, Any]]) -> dict[str, float]:
-        if not artifacts:
-            return {
-                "grounding": 0.0,
-                "accuracy": 0.0,
-                "logicality": 0.0,
-                "storytelling": 0.0,
-            }
-
-        citation_artifacts = [
-            a for a in artifacts
-            if a["artifact_type"] == "eval_result_json"
-            or a.get("section_key") in {"audit_review", "quality", "citation_gate"}
-        ]
-        coverage = 1.0 if citation_artifacts else 0.5
-        return {
-            "grounding": coverage,
-            "accuracy": 0.9 if coverage >= 1 else 0.7,
-            "logicality": 0.85,
-            "storytelling": 0.8,
-        }
 
