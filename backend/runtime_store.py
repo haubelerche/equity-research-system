@@ -1,6 +1,7 @@
 ﻿from __future__ import annotations
 
 import os
+import time
 from contextlib import contextmanager
 from datetime import datetime, UTC
 from typing import Any
@@ -92,6 +93,20 @@ class RuntimeStore:
                 connection.close()
             except Exception:
                 pass
+
+    def _write(self, fn, *, retries: int = 2):
+        """Run fn(connection) in a fresh connection, retrying transient pooler disconnects."""
+        last_exc = None
+        for attempt in range(retries + 1):
+            try:
+                with self.conn() as connection:
+                    return fn(connection)
+            except psycopg2.OperationalError as exc:
+                last_exc = exc
+                if attempt == retries:
+                    raise
+                time.sleep(0.5 * (2 ** attempt))
+        raise last_exc  # pragma: no cover
 
     def check_schema_version(self) -> None:
         """Verify the database schema is at the required version.
@@ -216,7 +231,7 @@ class RuntimeStore:
         flags: dict[str, Any] | None = None,
         finished: bool = False,
     ) -> None:
-        with self.conn() as connection:
+        def _work(connection):
             with connection.cursor() as cur:
                 cur.execute(
                     """
@@ -230,6 +245,7 @@ class RuntimeStore:
                     """,
                     (to_db_status(status), stage, Json(flags) if flags is not None else None, finished, run_id),
                 )
+        return self._write(_work)
 
     def get_run(self, run_id: str) -> dict[str, Any] | None:
         with self.conn() as connection:
@@ -271,7 +287,7 @@ class RuntimeStore:
         input_hash: str | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> int:
-        with self.conn() as connection:
+        def _work(connection):
             with connection.cursor() as cur:
                 cur.execute(
                     """
@@ -282,8 +298,8 @@ class RuntimeStore:
                     """,
                     (run_id, step_name, agent_name, to_db_step_status(status), policy_reason, input_hash, Json(metadata or {})),
                 )
-                step_id = cur.fetchone()[0]
-        return int(step_id)
+                return int(cur.fetchone()[0])
+        return self._write(_work)
 
     def close_step(
         self,
@@ -293,7 +309,7 @@ class RuntimeStore:
         error_message: str | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        with self.conn() as connection:
+        def _work(connection):
             with connection.cursor() as cur:
                 cur.execute(
                     """
@@ -308,6 +324,7 @@ class RuntimeStore:
                     """,
                     (to_db_step_status(status), output_hash, error_message, Json(metadata or {}), step_id),
                 )
+        return self._write(_work)
 
     def increment_step_retry(self, step_id: int) -> None:
         with self.conn() as connection:
@@ -335,7 +352,8 @@ class RuntimeStore:
         file_size_bytes: int | None = None,
         is_locked: bool = False,
     ) -> None:
-        with self.conn() as connection:
+        def _work(connection):
+            nonlocal artifact_id
             with connection.cursor() as cur:
                 cur.execute(
                     """
@@ -385,6 +403,7 @@ class RuntimeStore:
                         is_locked,
                     ),
                 )
+        return self._write(_work)
 
     def list_artifacts(self, run_id: str) -> list[dict[str, Any]]:
         with self.conn() as connection:
@@ -509,7 +528,7 @@ class RuntimeStore:
         fallback_model: str | None = None,
         stop_reason: str | None = None,
     ) -> None:
-        with self.conn() as connection:
+        def _work(connection):
             with connection.cursor() as cur:
                 cur.execute(
                     """
@@ -530,6 +549,7 @@ class RuntimeStore:
                         stop_reason,
                     ),
                 )
+        return self._write(_work)
 
     def run_cost_usd(self, run_id: str) -> float:
         with self.conn() as connection:
@@ -550,7 +570,7 @@ class RuntimeStore:
         rule_reason: str | None = None,
         policy_reason: str | None = None,
     ) -> None:
-        with self.conn() as connection:
+        def _work(connection):
             with connection.cursor() as cur:
                 cur.execute(
                     """
@@ -560,3 +580,4 @@ class RuntimeStore:
                     """,
                     (run_id, actor, action, rule_reason, policy_reason, Json(payload or {})),
                 )
+        return self._write(_work)

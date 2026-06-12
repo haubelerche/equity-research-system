@@ -42,7 +42,14 @@ def connect_with_retry(
     last_exc: psycopg2.OperationalError | None = None
     for attempt in range(attempts):
         try:
-            return psycopg2.connect(dsn)
+            return psycopg2.connect(
+                dsn,
+                connect_timeout=10,
+                keepalives=1,
+                keepalives_idle=30,
+                keepalives_interval=10,
+                keepalives_count=5,
+            )
         except psycopg2.OperationalError as exc:
             last_exc = exc
             if attempt == attempts - 1:
