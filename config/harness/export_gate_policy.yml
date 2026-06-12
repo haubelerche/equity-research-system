@@ -19,11 +19,9 @@ block_on:
   - generic_citation_only
   - llm_only_evaluation_pass
   - report_not_linked_to_valuation_snapshot
-  - final_human_approval_missing
   - required_harness_gate_missing
   - evidence_packet_missing
   - stage_trace_missing
-  - final_approval_not_recorded_by_runner
 warn_on:
   - minor_source_discrepancy
   - low_confidence_ocr_fact

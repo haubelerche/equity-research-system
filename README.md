@@ -191,9 +191,8 @@ Kết quả:
 python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025 --auto-approve-assumptions --auto-approve-final
 ```
 
-`scripts/generate_report.py` là legacy DEV-ONLY helper, chỉ được ghi vào
-`storage/dev_report_runs/<DEV_REPORT_RUN_ID>` và không được dùng để tạo artifact
-production. Kết quả production phải đi qua run manifest của harness:
+Báo cáo production được render trong stage `PUBLISH` của harness
+(`ClientReportPublisher`) và upload vào bucket `runs/{run_id}/`. Cấu trúc:
 - §1 Tóm tắt điều hành + Draft rating
 - §2 Giới thiệu doanh nghiệp
 - §3 Kết quả tài chính lịch sử + dự phóng 5 năm
@@ -204,9 +203,8 @@ production. Kết quả production phải đi qua run manifest của harness:
 
 ### Bước 6 — Đánh giá chất lượng (7 cổng kiểm tra)
 
-```bash
-python scripts/evaluate_report.py --report reports/DHG_{timestamp}_full_report.md
-```
+Quality gate chạy tự động trong stage `REVIEW` của harness
+(`evaluate_report_quality.run_quality_gate`). Các cổng kiểm tra:
 
 | Cổng | Mô tả |
 |------|-------|
@@ -218,21 +216,14 @@ python scripts/evaluate_report.py --report reports/DHG_{timestamp}_full_report.m
 | user_facing_citation_quality | Citations hợp lệ |
 | balance_sheet_identity_check | Assets = Liabilities + Equity trong forecast |
 
-Kết quả `PASS` mới được phép export. `CRITICAL FAIL` chặn export tự động.
+Kết quả `PASS` mới được phép export. `CRITICAL FAIL` chuyển run sang `blocked`.
 
-### Bước 7 — Phê duyệt và export
+### Bước 7 — Export tự động
 
-```bash
-# Phê duyệt (sau khi tất cả evaluation gates PASS)
-python scripts/approve_report.py --run-id <run_id> --decision approve --reviewer analyst --comment "Verified"
-
-# Từ chối
-python scripts/approve_report.py --run-id <run_id> --decision reject --reviewer analyst --comment "WACC assumption cần review lại"
-```
-
-Kết quả:
-- Quyết định phê duyệt được ghi qua `FullReportOrchestrator.handle_approval`.
-- Runner nội bộ resume từ checkpoint và chỉ render/publish khi final export gate pass.
+Khi toàn bộ deterministic gate đạt, stage `PUBLISH` tự render HTML/PDF và chuyển
+run sang trạng thái `approved`/`PUBLISHED`. Không có bước phê duyệt thủ công trong
+pipeline; chuyên gia đánh giá báo cáo đã xuất như một hoạt động hậu kiểm
+(xem `docs/SEQUENCE.md`).
 
 ---
 
@@ -246,18 +237,16 @@ Lệnh này chạy toàn bộ pipeline từ ingestion đến evaluation, ghi run
 
 ### Luồng production đầy đủ và render run-scoped
 
-Không chạy riêng lẻ `run_valuation.py`, `generate_report.py`, hoặc
-`render_report.py` để tạo báo cáo chính thức. Luồng
+Không chạy riêng lẻ `run_valuation.py` để tạo báo cáo chính thức. Luồng
 production phải dùng một `run_id` xuyên suốt:
 
 ```bash
 python scripts/run_research.py --ticker DBD --from-year 2021 --to-year 2025
-python scripts/approve_report.py --run-id <run_id> --stage assumptions --decision approve --reviewer analyst --comment "Verified valuation assumptions"
-python scripts/approve_report.py --run-id <run_id> --stage final --decision approve --reviewer analyst --comment "Verified final report"
 ```
 
-`scripts/render_report.py` là DEV-ONLY local Markdown renderer. Nó từ chối
-`--run-id`, không đọc production manifest, và chỉ ghi `storage/dev_report_runs`.
+Pipeline tự render và publish ở stage `PUBLISH` khi mọi gate đạt. Để render nhanh
+từ artifact của một run đã có (không chạy lại pipeline), dùng
+`scripts/generate_fast_report.py --ticker <TICKER>`.
 
 ---
 

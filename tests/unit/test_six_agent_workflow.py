@@ -76,7 +76,6 @@ def test_run_until_pause_keeps_the_actual_failed_stage(monkeypatch) -> None:
 
     monkeypatch.setattr(runner, "_run_stage", fake_run_stage)
     monkeypatch.setattr(runner, "_write_evidence_packet", lambda current: None)
-    monkeypatch.setattr(runner, "_write_agent_effectiveness_audit", lambda current: None)
     monkeypatch.setattr(runner, "_write_run_manifest", lambda current: None)
 
     result = runner.run_until_pause(state)

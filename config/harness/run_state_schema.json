@@ -11,7 +11,7 @@
     "current_stage": {"type": "string"},
     "status": {
       "type": "string",
-      "enum": ["initialized", "running", "data_ready", "analysis_ready", "valuation_ready", "report_ready", "needs_human_review", "approved", "failed", "cancelled"]
+      "enum": ["initialized", "running", "data_ready", "analysis_ready", "valuation_ready", "report_ready", "blocked", "approved", "failed", "cancelled"]
     },
     "from_year": {"type": "integer", "minimum": 2021},
     "to_year": {"type": "integer", "minimum": 2021},
@@ -20,9 +20,7 @@
     "artifact_refs": {"type": "array"},
     "evidence_refs": {"type": "array"},
     "gate_results": {"type": "object"},
-    "approvals": {"type": "object"},
     "trace": {"type": "array"},
-    "requires_human": {"type": "boolean"},
     "blocking_reason": {"type": ["string", "null"]},
     "manifest_path": {"type": ["string", "null"]}
   },

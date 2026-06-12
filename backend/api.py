@@ -140,14 +140,6 @@ def create_app(
         ]
         return ArtifactsResponse(run_id=run_id, artifacts=artifacts)
 
-    @app.post("/research/{run_id}/approve", response_model=RunStatusResponse)
-    def approve_run(run_id: str) -> RunStatusResponse:
-        store = app.state.store
-        run = store.get_run(run_id)
-        if run is None:
-            raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
-        return _to_status_response(run)
-
     return app
 
 

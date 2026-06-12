@@ -38,12 +38,13 @@ The runner uses `backend/harness/graph.py` as a fixed stage list. It does not us
 - `GET /research/{run_id}/status`
 - `GET /research/{run_id}/artifacts`
 - `GET /reports/{run_id}`
-- `POST /research/{run_id}/approve`
 
 ## CLI
 
 ```bash
 python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025
-python scripts/approve_report.py --run-id <run_id> --stage assumptions --decision approve --reviewer analyst
-python scripts/approve_report.py --run-id <run_id> --stage final --decision approve --reviewer analyst
 ```
+
+The pipeline auto-publishes at the `PUBLISH` stage once all deterministic gates
+pass; there is no human approval step inside the run. Expert review of the
+published report happens after output (see `docs/SEQUENCE.md`).

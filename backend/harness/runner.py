@@ -36,7 +36,7 @@ from backend.harness.gates import (
     senior_critic_gate,
 )
 from backend.harness.graph import GRAPH_STAGES
-from backend.harness.model_adapter import create_model_adapter
+from backend.harness.model_adapter import create_model_adapter, flush_traces
 from backend.harness.state import AgentExecutionContext, ResearchGraphState, stable_hash
 from backend.harness.tool_registry import ToolRegistry
 from backend.runtime_store import RuntimeStore
@@ -46,22 +46,6 @@ from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
 from backend.utils import compact_json, deterministic_id
 
 
-
-
-def _count_metric_references(payload: Any) -> int:
-    import json
-    import re
-
-    text = json.dumps(payload or {}, ensure_ascii=False, default=str)
-    return len(set(re.findall(r"\b[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+\b", text)))
-
-
-def _count_period_references(payload: Any) -> int:
-    import json
-    import re
-
-    text = json.dumps(payload or {}, ensure_ascii=False, default=str)
-    return len(set(re.findall(r"\b20\d{2}(?:FY|A|F)?\b", text)))
 
 
 class ResearchGraphRunner:
@@ -141,13 +125,15 @@ class ResearchGraphRunner:
 
         try:
             self._write_evidence_packet(current)
-            self._write_agent_effectiveness_audit(current)
             self._write_run_manifest(current)
         except Exception as _exc:  # noqa: BLE001
             import logging
             logging.getLogger(__name__).warning(
                 "Failed to write run manifest for run=%s: %s", current.run_id, _exc
             )
+
+        # Short-lived runs must flush queued Langfuse events before the process exits.
+        flush_traces()
 
         return current
 
@@ -1177,9 +1163,6 @@ class ResearchGraphRunner:
             )
         ]
         state.artifact_refs.append(ref)
-
-    def _write_agent_effectiveness_audit(self, state: "ResearchGraphState") -> None:
-        pass
 
     @staticmethod
     def _agent_id_for_stage(stage: str) -> str:
