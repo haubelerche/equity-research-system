@@ -22,6 +22,7 @@ DB_TO_PUBLIC_STATUS = {
     "report_ready": "SYNTHESIZING",
     "blocked": "BLOCKED",
     "approved": "PUBLISHED",
+    "auto_exported": "PUBLISHED_DRAFT",
     "failed": "FAILED",
     "cancelled": "FAILED",
 }
@@ -34,6 +35,7 @@ PUBLIC_TO_DB_STATUS = {
     "SYNTHESIZING": "report_ready",
     "AUDITING": "analysis_ready",
     "PUBLISHED": "approved",
+    "PUBLISHED_DRAFT": "auto_exported",
     "BLOCKED": "blocked",
     "FAILED": "failed",
 }
