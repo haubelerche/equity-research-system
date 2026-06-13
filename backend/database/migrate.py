@@ -19,7 +19,7 @@ import psycopg2
 from backend.database.config import connect_with_retry, require_database_url
 
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
-CURRENT_SCHEMA_VERSION = "038_news_evidence_idempotent"
+CURRENT_SCHEMA_VERSION = "039_news_ticker_sources"
 
 _ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 if _ENV_FILE.exists():

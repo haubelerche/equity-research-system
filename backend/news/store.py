@@ -178,6 +178,62 @@ def save_evidence(conn, article_id: int, items: list[EvidenceItem]) -> list[int]
     return ids
 
 
+def upsert_ticker_source(
+    conn,
+    ticker: str,
+    *,
+    source_name: str,
+    source_domain: str,
+    source_type: str,
+    source_url: str,
+    priority: int,
+    is_cron_enabled: bool = True,
+) -> None:
+    """Insert/update a per-ticker news source (news.ticker_news_sources)."""
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO news.ticker_news_sources
+                (ticker, source_name, source_domain, source_type, source_url, priority, is_cron_enabled)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (ticker, source_url) DO UPDATE SET
+                source_name = EXCLUDED.source_name,
+                source_domain = EXCLUDED.source_domain,
+                source_type = EXCLUDED.source_type,
+                priority = EXCLUDED.priority,
+                is_cron_enabled = EXCLUDED.is_cron_enabled,
+                updated_at = NOW()
+            """,
+            (ticker.upper(), source_name, source_domain, source_type, source_url, priority, is_cron_enabled),
+        )
+
+
+def get_cron_source_urls(conn, ticker: str) -> list[str]:
+    """Enabled news-source URLs for a ticker, highest priority first."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT source_url FROM news.ticker_news_sources "
+            "WHERE ticker = %s AND is_cron_enabled ORDER BY priority DESC, id",
+            (ticker.upper(),),
+        )
+        return [row[0] for row in cur.fetchall()]
+
+
+def touch_ticker_sources(conn, ticker: str, *, success: bool) -> None:
+    """Record a collection attempt: bump last_checked_at (+ last_success_at / failure_count)."""
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE news.ticker_news_sources SET
+                last_checked_at = NOW(),
+                last_success_at = CASE WHEN %s THEN NOW() ELSE last_success_at END,
+                failure_count = CASE WHEN %s THEN 0 ELSE failure_count + 1 END
+            WHERE ticker = %s AND is_cron_enabled
+            """,
+            (success, success, ticker.upper()),
+        )
+
+
 def evidenced_source_urls(conn, ticker: str) -> set[str]:
     """Source URLs that already have >=1 extracted evidence row for this ticker.
 

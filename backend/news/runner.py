@@ -23,10 +23,13 @@ from backend.news.relevance import build_ticker_keywords, filter_relevant
 from backend.news.store import (
     create_research_run,
     evidenced_source_urls,
+    get_cron_source_urls,
     link_run_article,
     mark_run_status,
     save_evidence,
     save_raw_article,
+    touch_ticker_sources,
+    upsert_ticker_source,
 )
 from backend.news.types import (
     ALLOWED_DOMAINS,
@@ -82,6 +85,24 @@ def ticker_listing_urls(ticker: str, exchange_slug: str = "hose") -> tuple[str, 
         )
         for template in _TICKER_LISTING_TEMPLATES
     )
+
+
+# Registry metadata per template, aligned 1:1 with _TICKER_LISTING_TEMPLATES order.
+# CafeF event index is the proven static source → highest priority.
+_TICKER_SOURCE_META: tuple[dict[str, object], ...] = (
+    {"source_name": "CafeF", "source_domain": "cafef.vn", "source_type": "media", "priority": 95},
+    {"source_name": "CafeF", "source_domain": "cafef.vn", "source_type": "media", "priority": 94},
+    {"source_name": "Vietstock", "source_domain": "vietstock.vn", "source_type": "media", "priority": 90},
+)
+
+
+def build_ticker_sources(ticker: str, exchange_slug: str = "hose") -> list[dict[str, object]]:
+    """Registry rows for a ticker's news channels (URLs == ticker_listing_urls)."""
+    urls = ticker_listing_urls(ticker, exchange_slug)
+    return [
+        {**meta, "source_url": url, "is_cron_enabled": True}
+        for url, meta in zip(urls, _TICKER_SOURCE_META)
+    ]
 
 
 def default_keywords(ticker: str, company_name: str | None) -> tuple[str, ...]:
@@ -283,7 +304,22 @@ def run_ticker_news_collection(
     """
     ticker = ticker.upper()
     if listings is None:
-        listings = ticker_listing_urls(ticker, exchange_slug)
+        # Prefer the per-ticker source registry; seed it from templates on first run.
+        registry_urls = get_cron_source_urls(conn, ticker)
+        if not registry_urls:
+            for source in build_ticker_sources(ticker, exchange_slug):
+                upsert_ticker_source(
+                    conn,
+                    ticker,
+                    source_name=str(source["source_name"]),
+                    source_domain=str(source["source_domain"]),
+                    source_type=str(source["source_type"]),
+                    source_url=str(source["source_url"]),
+                    priority=int(source["priority"]),
+                    is_cron_enabled=bool(source["is_cron_enabled"]),
+                )
+            registry_urls = get_cron_source_urls(conn, ticker)
+        listings = registry_urls
     topic = f"Tin tức {ticker}" + (f" — {company_name}" if company_name else "")
     keywords = tuple(keywords) if keywords else default_keywords(ticker, company_name)
     plan = ResearchPlan(
@@ -318,6 +354,9 @@ def run_ticker_news_collection(
         articles=articles,
         evidence_by_url=evidence_by_url,
     )
+    # The run completed without error — that is source-health success. "No new articles"
+    # (idempotent skip) is not a failure, so it must not inflate failure_count.
+    touch_ticker_sources(conn, ticker, success=True)
     conn.commit()
     return {
         "research_run_id": research_run_id,

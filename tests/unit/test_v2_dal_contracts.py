@@ -302,8 +302,8 @@ class TestMigrateVersion:
 
     def test_current_schema_version_is_latest_migration(self):
         from backend.database.migrate import CURRENT_SCHEMA_VERSION
-        assert CURRENT_SCHEMA_VERSION == "038_news_evidence_idempotent", (
-            f"Expected '038_news_evidence_idempotent', got '{CURRENT_SCHEMA_VERSION}'. "
+        assert CURRENT_SCHEMA_VERSION == "039_news_ticker_sources", (
+            f"Expected '039_news_ticker_sources', got '{CURRENT_SCHEMA_VERSION}'. "
             "Update migrate.py after adding a migration."
         )
 
