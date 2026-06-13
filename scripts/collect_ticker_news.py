@@ -40,7 +40,7 @@ def _company_lookup(ticker: str) -> tuple[str, str]:
     return _COMPANIES.get(ticker, (ticker, "HOSE"))
 
 
-def main(argv: list[str] | None = None) -> None:
+def main(argv: list[str] | None = None) -> int:
     _load_dotenv()
     from backend.database.config import connect_with_retry, require_database_url
     from backend.news.runner import MVP_TICKERS, collect_for_tickers
@@ -82,15 +82,18 @@ def main(argv: list[str] | None = None) -> None:
             conn, tickers, company_lookup=_company_lookup, max_articles=args.limit
         )
 
+    failed = False
     for result in results:
         if "error" in result:
+            failed = True
             print(f"[collect_ticker_news] {result['ticker']} FAILED: {result['error']}", file=sys.stderr)
         else:
             print(
                 f"[collect_ticker_news] {result['ticker']}: "
                 f"articles={result.get('articles', 0)} evidence={result.get('evidence', 0)}"
             )
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

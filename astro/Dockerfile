@@ -16,8 +16,12 @@ USER root
 COPY requirements.txt /tmp/app-requirements.txt
 RUN pip install --no-cache-dir -r /tmp/app-requirements.txt
 
-# Ship the project code so the DAG can import it.
+# Ship the project code so the DAGs can import/run it.
+# backend/ : imported by the DAGs; scripts/ : subprocessed by the batch pipeline DAG.
+# config/  : required by scripts/run_research.py and the harness export-gate policy.
 COPY backend/ /usr/local/airflow/backend/
+COPY scripts/ /usr/local/airflow/scripts/
+COPY config/ /usr/local/airflow/config/
 COPY dags/ /usr/local/airflow/dags/
 ENV PYTHONPATH=/usr/local/airflow:${PYTHONPATH}
 

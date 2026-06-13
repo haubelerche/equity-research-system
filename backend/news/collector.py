@@ -58,6 +58,8 @@ def rendered_html_fetch(url: str, timeout: int = 40) -> str:
             ],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=timeout,
         )
     except Exception:  # noqa: BLE001 — a render failure yields no candidates, never a crash

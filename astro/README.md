@@ -1,7 +1,7 @@
-# Astro deploy kit — news collection DAG
+# Astro deploy kit — scheduler DAGs
 
-Runs `dags/collect_ticker_news_dag.py` (ticker-scoped CafeF/VietStock news collection for
-the MVP pharma tickers, every 3h on weekdays, idempotent) on Apache Airflow via Astronomer.
+Runs the idempotent ticker-news collector and provides a manual-only full-research batch
+DAG on Apache Airflow via Astronomer.
 
 > Status: **deploy kit, not runtime-validated here** — the Astro CLI is not installed in this
 > workspace, so the image build / `astro dev start` has not been executed. The DAG itself is
@@ -17,13 +17,13 @@ the MVP pharma tickers, every 3h on weekdays, idempotent) on Apache Airflow via 
 Astro expects its files at the **repo root**, but the root already has the application's
 `Dockerfile` (`python:3.11-slim`) and `requirements.txt`. To avoid clobbering the app
 container, this kit keeps Astro config in `astro/` and builds an image that bundles
-`backend/` + `dags/` so the DAG can import the project.
+`backend/` + `scripts/` + `config/` + `dags/` so the DAGs can run the project.
 
 ## Run locally (two options)
 
 ### A. Plain Docker (no repo restructure)
 ```bash
-# from repo ROOT (context must include backend/ and dags/)
+# from repo ROOT (context must include backend/, scripts/, config/, and dags/)
 docker build -f astro/Dockerfile -t maer-airflow .
 # then run an Airflow standalone from the image, or push to your Airflow/Astro deployment
 ```
@@ -48,7 +48,7 @@ The DAG `collect_ticker_news` appears in the UI; trigger it or let the 3h schedu
 The backend stays a plain Python 3.11 app; Airflow is only a separate scheduler runtime.
 Nothing in the app imports Airflow, and `apache-airflow` is not in the app's requirements.
 
-1. Build the scheduler image from the **repo root** (so `backend/` + `dags/` are included):
+1. Build the scheduler image from the **repo root** (so project code and config are included):
    ```bash
    docker build -f astro/Dockerfile -t maer-airflow .
    ```
@@ -58,7 +58,10 @@ Nothing in the app imports Airflow, and `apache-airflow` is not in the app's req
    as Deployment env vars (prod) or via `astro/airflow_settings.yaml` (local dev only).
 3. The DAG `collect_ticker_news` runs `backend.news.runner.collect_for_tickers` for the MVP
    tickers every 3h on weekdays; idempotent, so re-runs are safe.
-4. `astro deploy` (or `astro deploy --dags` for DAG-only iterations) to ship updates.
+4. The DAG `run_research_batch` is intentionally manual-only. It maps the full universe
+   with concurrency capped at two; do not schedule it until staged runs establish runtime,
+   failure rate, and cost per ticker.
+5. `astro deploy` (or `astro deploy --dags` for DAG-only iterations) to ship updates.
 
 The app and the scheduler are decoupled: local backend development never needs Airflow.
 
@@ -71,6 +74,12 @@ python -m compileall dags/ backend/
 
 # 2. Exercise the collector entrypoint the DAG calls (live; small batch)
 python scripts/collect_ticker_news.py --tickers DHG TRA --limit 5
+
+# 3. Validate full-pipeline batch selection without launching paid work
+python scripts/run_research_batch.py --all --resume --draft --dry-run
+
+# First live stage after review: cap the invocation; do not launch all 53 initially
+python scripts/run_research_batch.py --all --resume --draft --max-tickers 5
 ```
 
 > **Full DAG validation** (parse/import errors, schedule, task wiring, a real run) requires an

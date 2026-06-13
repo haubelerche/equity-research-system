@@ -19,6 +19,8 @@ from backend.news.whitelist import is_allowed_url
 LlmExtract = Callable[[str], object]
 
 _VALID_CONFIDENCE = {"low", "medium", "high"}
+_DEFAULT_LLM_TIMEOUT_SECONDS = 60
+_DEFAULT_LLM_MAX_RETRIES = 2
 
 _PROMPT_TEMPLATE = """You are an information extraction tool.
 
@@ -113,7 +115,12 @@ def default_llm_extract(prompt: str, *, model: str | None = None) -> object:
 
     from backend.harness.model_adapter import CHEAP_MODEL
 
-    client = openai.OpenAI()
+    # A sequential universe run must not stall indefinitely on one provider request.
+    # Failed/timed-out extraction already degrades safely to no evidence in build_evidence.
+    client = openai.OpenAI(
+        timeout=_DEFAULT_LLM_TIMEOUT_SECONDS,
+        max_retries=_DEFAULT_LLM_MAX_RETRIES,
+    )
     # gpt-5.x reasoning models: (1) only the default temperature is allowed, and (2)
     # max_completion_tokens is shared with reasoning tokens — too small a budget plus the
     # default reasoning effort exhausts the budget on reasoning and returns empty content.
