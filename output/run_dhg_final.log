@@ -1,0 +1,351 @@
+
+======================================================================
+  RESEARCH RUN: DHG | full_report
+  Run ID: run_dhg_20260612T172607_fab53e395f
+======================================================================
+
+  [1/9] PREFLIGHT ...
+00:26:15 harness [PREFLIGHT] STAGE_DONE artifacts_added=[] total=0 gates=[]
+        OK PREFLIGHT done in 7.5s [completed]
+  [2/9] PLAN ...
+        AGENT [research_manager] Create the typed research plan.
+00:26:22 harness [PLAN] _run_agent agent=research_manager context_ms=0 serialize_ms=0 state_chars=280 input_refs=0
+00:26:23 harness.model_adapter [?] LLM_CALL agent=research_manager model=gpt-5-mini est_input_tokens=602 max_output_tokens=32768 timeout=200s compact_ms=0
+00:27:09 harness.model_adapter [?] LLM_OK agent=research_manager latency=46519ms prompt_tokens=524 completion_tokens=4166 finish_reason=stop
+        AGENT [research_manager] -> completed | confidence=0.62
+00:27:09 harness [PLAN] _run_agent DONE agent=research_manager total=48512ms postproc=0ms validate=23ms status=completed payload_keys=25 warnings=4
+00:27:12 harness [PLAN] STAGE_DONE artifacts_added=[] total=0 gates=[]
+        OK PLAN done in 57.2s [completed]
+  [3/9] INGEST_AND_VALIDATE ...
+00:27:18 harness [INGEST] reusing fresh snapshot v2snap_2f4cb01f491cd5d3f532 for DHG — skipping auto_ingest + build_index
+        TOOL  [data_evidence/build_facts] running...
+        TOOL  [build_facts] -> ok
+        GATE DATA_QUALITY_GATE: PASS
+00:27:25 harness [INGEST_AND_VALIDATE] STAGE_DONE artifacts_added=['build_facts', 'index'] total=2 gates=[]
+        OK INGEST_AND_VALIDATE done in 12.9s [completed]
+  [4/9] ANALYZE ...
+        TOOL  [financial_analysis/read_snapshot] running...
+        TOOL  [read_snapshot] -> ok
+        TOOL  [financial_analysis/read_ratio_artifact] running...
+        TOOL  [read_ratio_artifact] -> ok
+        AGENT [financial_analysis] Create typed financial analysis with traceable diagnostics.
+00:27:36 harness [ANALYZE] _run_agent agent=financial_analysis context_ms=0 serialize_ms=0 state_chars=18365 input_refs=4
+00:27:37 harness.model_adapter [?] LLM_CALL agent=financial_analysis model=gpt-5-mini est_input_tokens=3805 max_output_tokens=32768 timeout=200s compact_ms=0
+00:29:01 harness.model_adapter [?] LLM_OK agent=financial_analysis latency=84763ms prompt_tokens=4956 completion_tokens=8207 finish_reason=stop
+        AGENT [financial_analysis] -> completed | confidence=0.67
+00:29:01 harness [ANALYZE] _run_agent DONE agent=financial_analysis total=87034ms postproc=0ms validate=0ms status=completed payload_keys=17 warnings=0
+        GATE FINANCIAL_ANALYST_GATE: PASS
+00:29:04 harness [ANALYZE] STAGE_DONE artifacts_added=['financial_analysis', 'ratios', 'snapshot', 'structured_evidence_requests'] total=6 gates=[]
+        OK ANALYZE done in 99.1s [completed]
+  [5/9] FORECAST_AND_VALUE ...
+        TOOL  [forecast_valuation/run_forecast] running...
+        TOOL  [run_forecast] -> ok
+        GATE FORECAST_QUALITY_GATE: PASS
+        TOOL  [forecast_valuation/run_valuation] running...
+[build_facts] DHG â€” v2 data path (fact.production_facts)
+[build_facts] DHG required periods: 2022FY, 2023FY, 2024FY, 2025FY
+[build_facts] DHG â€” 96 canonical facts loaded from fact.production_facts
+[build_facts] DHG â€” 96 facts remain after FY-only filter
+[build_facts] DHG no source conflicts detected
+[build_facts] DHG periods available: 2022FY, 2023FY, 2024FY, 2025FY
+[build_facts] DHG latest fiscal year: 2025
+[build_facts] DHG 2022FY: Tier 0/1 âœ“
+[build_facts] DHG 2023FY: Tier 0/1 âœ“
+[build_facts] DHG 2024FY: Tier 0/1 âœ“
+[build_facts] DHG 2025FY: Tier 0/1 âœ“
+[build_facts] DHG annual_reports_collected: 4
+[build_facts] DHG coverage_gate: pass
+[build_facts] DHG core_keys_gate: pass
+[build_facts] DHG source_tier_coverage_status: pass
+[build_facts] DHG valuation_gate: pass
+[build_facts] DHG valuation_ready: True
+[build_facts] DHG run_status: ok
+
+[build_facts] Fact table (v2 canonical facts):
+  capex.total                         2022FY=-233,991,633,058.0[T3]  2023FY=-486,342,533,930.0[T3]  2024FY=-88,704,714,502.0[T3]  2025FY=-31,136,402,852.0[T3]
+  cash_and_equivalents.ending         2022FY=34,017,813,791.0[T3]  2023FY=94,134,026,358.0[T3]  2024FY=62,857,547,612.0[T3]  2025FY=129,895,664,996.0[T3]
+  cogs.total                          2022FY=-2,418,521,064,699.0[T3]  2023FY=-2,671,849,997,386.0[T3]  2024FY=-2,747,101,521,942.0[T3]  2025FY=-2,760,593,928,931.0[T3]
+  current_liabilities.ending          2022FY=811,536,702,268.0[T3]  2023FY=1,189,241,981,081.0[T3]  2024FY=1,790,292,694,239.0[T3]  2025FY=965,949,656,404.0[T3]
+  depreciation.total                  2022FY=81,001,086,959.0[T3]  2023FY=88,703,980,639.0[T3]  2024FY=169,695,469,422.0[T3]  2025FY=119,007,964,694.0[T3]
+  eps.basic                           2022FY=7,318.0[T1]  2023FY=7,780.0[T1]  2024FY=5,763.0[T1]  2025FY=6,308.0[T1]
+  equity.parent                       2022FY=4,291,536,903,457.0[T3]  2023FY=4,852,934,674,270.0[T3]  2024FY=4,094,755,097,969.0[T3]  2025FY=4,137,265,175,952.0[T3]
+  gross_profit.total                  2022FY=2,257,494,943,128.0[T3]  2023FY=2,343,545,043,335.0[T3]  2024FY=2,137,766,133,150.0[T3]  2025FY=2,506,368,755,119.0[T3]
+  interest_expense.total              2022FY=-12,558,694,966.0[T3]  2023FY=-29,529,505,062.0[T3]  2024FY=-24,810,529,888.0[T3]  2025FY=-25,635,277,644.0[T3]
+  net_income.parent                   2022FY=988,454,646,072.0[T3]  2023FY=1,050,662,658,695.0[T3]  2024FY=775,985,500,216.0[T3]  2025FY=852,354,107,582.0[T3]
+  operating_cash_flow.total           2022FY=901,284,606,303.0[T3]  2023FY=240,171,214,767.0[T3]  2024FY=1,317,583,405,328.0[T3]  2025FY=1,212,967,705,385.0[T3]
+  profit_before_tax.total             2022FY=1,099,613,318,936.0[T3]  2023FY=1,159,174,385,084.0[T3]  2024FY=904,484,566,816.0[T3]  2025FY=986,599,267,177.0[T3]
+  revenue.net                         2022FY=4,676,016,007,827.0[T3]  2023FY=5,015,395,040,721.0[T3]  2024FY=4,884,867,655,092.0[T3]  2025FY=5,266,962,684,050.0[T3]
+  short_term_debt.ending              2022FY=114,723,409,074.0[T3]  2023FY=572,164,547,560.0[T3]  2024FY=649,913,916,414.0[T3]  2025FY=0.0[T3]
+  short_term_investments.ending       2022FY=0.0[T3]  2023FY=0.0[T3]  2024FY=0.0[T3]  2025FY=0.0[T3]
+  tax_expense.total                   2022FY=-111,158,672,864.0[T3]  2023FY=-108,511,726,389.0[T3]  2024FY=-128,499,066,600.0[T3]  2025FY=-134,245,159,595.0[T3]
+  total_assets.ending                 2022FY=5,168,186,502,845.0[T3]  2023FY=6,110,474,220,572.0[T3]  2024FY=5,959,243,276,265.0[T3]  2025FY=5,173,881,628,997.0[T3]
+  total_liabilities.ending            2022FY=876,649,599,388.0[T3]  2023FY=1,257,539,546,302.0[T3]  2024FY=1,864,488,178,296.0[T3]  2025FY=1,036,616,453,045.0[T3]
+
+[build_facts] Derived metrics:
+  debt_to_equity                      2022FY=0.0267  2023FY=0.1179  2024FY=0.1587  2025FY=0.0000
+  free_cash_flow.total                2022FY=667292973245.0000  2023FY=-246171319163.0000  2024FY=1228878690826.0000  2025FY=1181831302533.0000
+  gross_margin                        2022FY=0.4828  2023FY=0.4673  2024FY=0.4376  2025FY=0.4759
+  net_margin                          2022FY=0.2114  2023FY=0.2095  2024FY=0.1589  2025FY=0.1618
+  total_debt.ending                   2022FY=114723409074.0000  2023FY=572164547560.0000  2024FY=649913916414.0000  2025FY=0.0000
+
+[build_facts] Artifact saved: C:\Users\Admin\Desktop\multi-agent-equity-research\storage\runs\run_dhg_20260612T172607_fab53e395f\facts_snapshot.json
+[build_facts] v2 snapshot created: v2snap_2f4cb01f491cd5d3f532 (96 facts, periods=['2022FY', '2023FY', '2024FY', '2025FY'])
+pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+        TOOL  [run_valuation] -> ok
+        TOOL  [forecast_valuation/read_valuation_artifact] running...
+        TOOL  [read_valuation_artifact] -> ok
+        GATE VALUATION_GATE: PASS
+        GATE VALUATION_RECONCILIATION_GATE: PASS
+00:29:30 harness [FORECAST_AND_VALUE] STAGE_DONE artifacts_added=['forecast_model', 'forecast_narrative', 'research_lock', 'valuation', 'valuation_read'] total=11 gates=[]
+        OK FORECAST_AND_VALUE done in 26.9s [completed]
+  [6/9] WRITE_REPORT ...
+        AGENT [thesis_report] Create the typed grounded report draft from approved artifacts.
+00:29:38 harness [WRITE_REPORT] _run_agent agent=thesis_report context_ms=0 serialize_ms=2 state_chars=282107 input_refs=8
+00:29:38 harness.model_adapter [?] LLM_CALL agent=thesis_report model=gpt-5-mini est_input_tokens=43702 max_output_tokens=32768 timeout=200s compact_ms=7
+00:31:22 harness.model_adapter [?] LLM_OK agent=thesis_report latency=104604ms prompt_tokens=57501 completion_tokens=9069 finish_reason=stop
+        AGENT [thesis_report] -> completed | confidence=0.00
+00:31:22 harness [WRITE_REPORT] _run_agent DONE agent=thesis_report total=106546ms postproc=0ms validate=0ms status=completed payload_keys=9 warnings=2
+        GATE REPORT_ASSEMBLY_GATE: PASS
+00:31:27 harness [WRITE_REPORT] STAGE_DONE artifacts_added=['final_report_model', 'report_assembly_validation', 'report_draft'] total=14 gates=[]
+        OK WRITE_REPORT done in 116.8s [completed]
+  [7/9] REVIEW ...
+        GATE REPORT_COMPLETENESS_GATE: PASS
+        TOOL  [senior_critic/evaluate_report_quality] running...
+        TOOL  [evaluate_report_quality] -> ok
+        AGENT [senior_critic] Create the typed senior critic scorecard and findings.
+00:31:38 harness [REVIEW] _run_agent agent=senior_critic context_ms=0 serialize_ms=4 state_chars=482986 input_refs=11
+00:31:38 harness.model_adapter [?] LLM_CALL agent=senior_critic model=gpt-5-mini est_input_tokens=44477 max_output_tokens=32768 timeout=200s compact_ms=9
+00:32:32 harness.model_adapter [?] LLM_OK agent=senior_critic latency=53777ms prompt_tokens=57886 completion_tokens=3984 finish_reason=stop
+        AGENT [senior_critic] -> completed | confidence=0.00
+00:32:32 harness [REVIEW] _run_agent DONE agent=senior_critic total=55705ms postproc=0ms validate=0ms status=completed payload_keys=8 warnings=2
+        GATE SENIOR_CRITIC_GATE: FAIL
+             - critic_decision_not_pass:revision_required
+             - blocking_critic_findings:unidentified_finding,unidentified_finding,unidentified_finding
+        AGENT [thesis_report] Revise the report once using the senior critic instructions.
+00:32:37 harness [REVIEW] _run_agent agent=thesis_report context_ms=0 serialize_ms=3 state_chars=497124 input_refs=12
+00:32:37 harness.model_adapter [?] LLM_CALL agent=thesis_report model=gpt-5-mini est_input_tokens=48209 max_output_tokens=32768 timeout=200s compact_ms=5
+00:34:01 harness.model_adapter [?] LLM_OK agent=thesis_report latency=84470ms prompt_tokens=61486 completion_tokens=6274 finish_reason=stop
+        AGENT [thesis_report] -> completed | confidence=0.00
+00:34:01 harness [REVIEW] _run_agent DONE agent=thesis_report total=86437ms postproc=0ms validate=0ms status=completed payload_keys=9 warnings=2
+        GATE CITATION_GATE: PASS
+00:34:04 harness [REVIEW] STAGE_DONE artifacts_added=['critic_review', 'quality', 'revised_report_draft'] total=17 gates=['SENIOR_CRITIC_GATE']
+        !! REVIEW done in 157.3s [blocked]
+
+  *** BLOCKED at REVIEW: critic_decision_not_pass:revision_required; blocking_critic_findings:unidentified_finding,unidentified_finding,unidentified_finding
+
+
+======================================================================
+  RUN COMPLETE: DHG | blocked | 477.5s
+  Stages: 7/9
+  Gates: 8 passed, 1 failed
+  Output: NO PDF GENERATED
+======================================================================
+
+[run_valuation] DHG — creating/loading research snapshot
+[run_valuation] DHG snapshot: v2snap_2f4cb01f491cd5d3f532 (96 facts, periods=['2022FY', '2023FY', '2024FY', '2025FY'])
+[run_valuation] DHG — loading facts from snapshot
+[run_valuation] DHG — 96 facts loaded from snapshot
+[run_valuation] DHG FY periods: ['2022FY', '2023FY', '2024FY', '2025FY']
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                                 ┃
+┃  ⚠️ THÔNG BÁO QUAN TRỌNG                                                        ┃
+┃                                                                                 ┃
+┃  Phát hành vnstock 4.0.1 cung cấp sửa lỗi quan trọng và bổ sung giao diện API   ┃
+┃  thống nhất (Unified UI), tăng tính ổn định của code.                           ┃
+┃  Cập nhật: pip install vnstock -U                                               ┃
+┃  AI Agent Guide: https://github.com/vnstock-hq/vnstock-agent-guide/             ┃
+┃                                                                                 ┃
+┃  ────────────────────────────────────────────────────────────────────────────── ┃
+┃                                                                                 ┃
+┃  🚀 VNSTOCK INSIDERS PROGRAM - NÂNG TẦM TRẢI NGHIỆM CỦA BẠN! 🚀                 ┃
+┃                                                                                 ┃
+┃  Nếu bạn cảm thấy khó chịu với các thông báo và quảng cáo:                      ┃
+┃                                                                                 ┃
+┃  ✨ Ẩn toàn bộ thông báo và quảng cáo phiền hà                                  ┃
+┃  🔓 Mở rộng khả năng sử dụng API tối đa                                         ┃
+┃  ⚡ Tăng tốc tải dữ liệu từ 5-8 lần                                              ┃
+┃  📈 Tăng giới hạn truy cập API lên đến 5 lần                                    ┃
+┃  🤖 Dùng AI Agent viết code hiệu quả với tài liệu Agent Guide                    ┃
+┃                                                                                 ┃
+┃  🔗 Tham gia ngay: https://vnstocks.com/insiders-program#tiers                  ┃
+┃                                                                                 ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+[run_valuation] DHG — injected shares_outstanding.ending=130,746,071
+
+[run_valuation] DHG — computing ratios
+
+Ratio                            2022FY    2023FY    2024FY    2025FY
+----------------------------------------------------------------------
+  revenue_growth                      —      7.3%     -2.6%      7.8%
+  gross_margin                    48.3%     46.7%     43.8%     47.6%
+  net_margin                      21.1%     20.9%     15.9%     16.2%
+  roe                             23.0%     21.6%     19.0%     20.6%
+  roa                             19.1%     17.2%     13.0%     16.5%
+  debt_to_equity                  0.03x     0.12x     0.16x     0.00x
+  net_debt_to_equity              0.02x     0.10x     0.14x    -0.03x
+  interest_coverage              88.56x    40.25x    37.46x    39.49x
+  ocf_margin                      19.3%      4.8%     27.0%     23.0%
+  fcf_margin                      14.3%     -4.9%     25.2%     22.4%
+  ocf_to_net_income               0.91x     0.23x     1.70x     1.42x
+  eps_growth                          —      6.3%    -25.9%      9.5%
+  fcf_absolute_bn               667.29x  -246.17x  1228.88x  1181.83x
+  gross_profit_growth                 —      3.8%     -8.8%     17.2%
+  net_income_growth                   —      6.3%    -26.1%      9.8%
+  roce                            22.4%     19.4%     16.4%     20.6%
+  roic                            22.4%     19.4%     16.4%     20.6%
+
+[run_valuation] DHG — running DCF (3 scenarios)
+  DCF bear : could not compute — ['Simplified OCF-CAPEX DCF — sử dụng CAGR lịch sử, không phải driver-based forecast. Dùng FCFF/FCFE blend (60/40) làm định giá chính. Kết quả này chỉ mang tính tham khảo.', "Negative FCF in history: ['2023FY'] — CAGR-based projection unreliable; simplified DCF target price blocked"]
+  DCF base : could not compute — ['Simplified OCF-CAPEX DCF — sử dụng CAGR lịch sử, không phải driver-based forecast. Dùng FCFF/FCFE blend (60/40) làm định giá chính. Kết quả này chỉ mang tính tham khảo.', "Negative FCF in history: ['2023FY'] — CAGR-based projection unreliable; simplified DCF target price blocked", 'Terminal value weight 77.9% > 70% — sensitivity analysis required']
+  DCF bull : could not compute — ['Simplified OCF-CAPEX DCF — sử dụng CAGR lịch sử, không phải driver-based forecast. Dùng FCFF/FCFE blend (60/40) làm định giá chính. Kết quả này chỉ mang tính tham khảo.', "Negative FCF in history: ['2023FY'] — CAGR-based projection unreliable; simplified DCF target price blocked", 'Terminal value weight 87.1% > 85% — DCF result highly unreliable']
+
+[run_valuation] DHG — building simplified sensitivity table (OCF-CAPEX FCF)
+
+  Simplified FCF (OCF-CAPEX) — WACC rows x terminal-growth cols
+  WACC            2.0%       2.5%       3.0%       3.5%       4.0%
+  -------------------------------------------------------------------
+  8.0%               —          —          —          —          —
+  9.0%               —          —          —          —          —
+  10.0%              —          —          —          —          —
+  11.0%              —          —          —          —          —
+  12.0%              —          —          —          —          —
+
+[run_valuation] DHG — fetching current market price
+[run_valuation] DHG current price: 93,700 VND
+[run_valuation] DHG — computing multiples
+
+  Latest FY: 2025FY
+  EPS (VND):        6,308
+  Shares (mn):      130.8
+  Observed P/E:     14.8x
+  WARN: Relative valuation is PENDING — no peer_data_source provided. Target P/E, P/B, and EV/EBITDA require a real peer group dataset. Implied prices blocked until peer data is available.
+
+[run_valuation] DHG — running 5-year financial forecast
+  WARN (forecast): [DebtSchedule] Debt forecast holds debt flat at last reported balance = 0.0 VND bn. Low confidence — recommend analyst review.
+  WARN (forecast): [ForecastWarning] Interest expense is single-pass (no convergence iteration). Debt method = 'target_debt_ratio' — FCFE is blocked; analyst must supply approved debt path before publishing.
+  WARN (forecast): [DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout — equity may be overstated. Recommend analyst review and explicit payout assumption.
+  WARN (forecast): [WorkingCapital] DHG: no historical AR data — AR forecast will be 0 (delta_nwc may be understated)
+  WARN (forecast): [WorkingCapital] DHG: no historical inventory data — inventory forecast will be 0
+  WARN (forecast): [WorkingCapital] DHG: no historical AP data — AP forecast will be 0 (delta_nwc may be overstated)
+  WARN (forecast): [ShareRollForward] DHG: no corporate action data provided — shares held constant at 130.746mn. Private placement / ESOP dilution is NOT modelled. Diluted EPS and target price/share may be overstated.
+  WARN (forecast): [CashSweep] CashSweepArtifact: no reported_ending_cash supplied — reconciliation not verifiable; status = pending.
+[run_valuation] DHG — net_borrowing_schedule connected: {'2026F': 0.0, '2027F': 0.0, '2028F': 0.0, '2029F': 0.0, '2030F': 0.0}
+
+[run_valuation] DHG — FCFF valuation (EBIT(1-T)+D&A-CAPEX-DeltaNWC, discounted at WACC)
+  FCFF target price: 91271.0  (91,271 VND/share)
+  FCFF upside:       -2.59%
+  FCFF EV/Eq Value:  11,803.5 VND bn
+  FCFF TV weight:    61.3% [ok]
+  WARN (FCFF): [DebtSchedule] Debt forecast holds debt flat at last reported balance = 0.0 VND bn. Low confidence — recommend analyst review.
+  WARN (FCFF): [ForecastWarning] Interest expense is single-pass (no convergence iteration). Debt method = 'target_debt_ratio' — FCFE is blocked; analyst must supply approved debt path before publishing.
+  WARN (FCFF): [DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout — equity may be overstated. Recommend analyst review and explicit payout assumption.
+  WARN (FCFF): [WorkingCapital] DHG: no historical AR data — AR forecast will be 0 (delta_nwc may be understated)
+  WARN (FCFF): [WorkingCapital] DHG: no historical inventory data — inventory forecast will be 0
+  WARN (FCFF): [WorkingCapital] DHG: no historical AP data — AP forecast will be 0 (delta_nwc may be overstated)
+  WARN (FCFF): [ShareRollForward] DHG: no corporate action data provided — shares held constant at 130.746mn. Private placement / ESOP dilution is NOT modelled. Diluted EPS and target price/share may be overstated.
+  WARN (FCFF): [CashSweep] CashSweepArtifact: no reported_ending_cash supplied — reconciliation not verifiable; status = pending.
+  WARN (FCFF): FCFF: WACCAssumptions.tax_rate=20.0% differs from TaxPolicy.effective_tax_rate=11.9% by 8.1%; using TaxPolicy rate for EBIT(1-T)
+  WARN (FCFF): FCFF 2026F: delta_nwc estimated as 2% revenue change (no WC schedule)
+
+[run_valuation] DHG — FCFE valuation (NI+D&A-CAPEX-DeltaNWC+NetBorr, discounted at Re)
+  FCFE target price: N/A
+  FCFE EV/Eq Value:  11,803.5 VND bn
+  FCFE TV weight:    61.3% [ok]
+  WARN (FCFE): [DebtSchedule] Debt forecast holds debt flat at last reported balance = 0.0 VND bn. Low confidence — recommend analyst review.
+  WARN (FCFE): [ForecastWarning] Interest expense is single-pass (no convergence iteration). Debt method = 'target_debt_ratio' — FCFE is blocked; analyst must supply approved debt path before publishing.
+  WARN (FCFE): [DividendSchedule] Dividend data not found in fact_table (dividends_paid.total missing). Forecast assumes zero dividend payout — equity may be overstated. Recommend analyst review and explicit payout assumption.
+  WARN (FCFE): [WorkingCapital] DHG: no historical AR data — AR forecast will be 0 (delta_nwc may be understated)
+  WARN (FCFE): [WorkingCapital] DHG: no historical inventory data — inventory forecast will be 0
+  WARN (FCFE): [WorkingCapital] DHG: no historical AP data — AP forecast will be 0 (delta_nwc may be overstated)
+  WARN (FCFE): [ShareRollForward] DHG: no corporate action data provided — shares held constant at 130.746mn. Private placement / ESOP dilution is NOT modelled. Diluted EPS and target price/share may be overstated.
+  WARN (FCFE): [CashSweep] CashSweepArtifact: no reported_ending_cash supplied — reconciliation not verifiable; status = pending.
+  WARN (FCFE): FCFE BLOCKED — debt_schedule.is_fcfe_publishable = False. Reason: Debt forecast uses historical_median_debt as proxy — net_borrowing is NOT sourced from CFS or maturity schedule. Analyst must provide approved debt path before publishing FCFE.
+  WARN (FCFE): FCFE 2026F: delta_nwc estimated as 2% revenue change (no WC schedule)
+
+[run_valuation] DHG — P/E Forward anchor: EPS_FY1=10,033 × P/E=15.0x = 150,492 VND/share
+  WARN [PEForward] target_pe = 15.0x is the model default — no peer dataset used. Validate with peer-median P/E before publishing.
+
+[run_valuation] DHG — Blended target price (60% FCFF + 40% FCFE)
+  Price_FCFF:           91,271 VND/share
+  Price_FCFE: N/A
+  Target Price (blend): 91,271 VND/share
+  Upside:               -2.59%
+  Margin of Safety:     -2.66%
+  WARN (blend): Price_FCFE không có — dùng 100% FCFF. Không đúng trọng số 60/40; kết quả cần phê duyệt thủ công.
+
+[run_valuation] DHG — Core P/E + Net Cash (Guidance §11, core_pe=19.0×)
+  Net Cash/share:       993 VND  (cash=129.9, STI=0.0, debt=0.0 bn)
+  Net Fin. Income: N/A
+  ATI/share: N/A
+  EPS Forward:          10,033 VND
+  Core EPS:             10,033 VND  (= EPS − ATI/share)
+  Target (19× core + cash): 191,617 VND/share
+
+[run_valuation] DHG — Cross-model validation
+  [CAPEX-AUDIT] Simplified OCF-CAPEX DCF — sử dụng CAGR lịch sử, không phải driver-based forecast. Dùng FCFF/FCFE blend (60/40) làm định giá chính. Kết quả này chỉ mang tính tham khảo.
+  [CAPEX-AUDIT] Negative FCF in history: ['2023FY'] — CAGR-based projection unreliable; simplified DCF target price blocked
+  [CAPEX-AUDIT] Simplified OCF-CAPEX DCF — sử dụng CAGR lịch sử, không phải driver-based forecast. Dùng FCFF/FCFE blend (60/40) làm định giá chính. Kết quả này chỉ mang tính tham khảo.
+  [CAPEX-AUDIT] Negative FCF in history: ['2023FY'] — CAGR-based projection unreliable; simplified DCF target price blocked
+  [CAPEX-AUDIT] Simplified OCF-CAPEX DCF — sử dụng CAGR lịch sử, không phải driver-based forecast. Dùng FCFF/FCFE blend (60/40) làm định giá chính. Kết quả này chỉ mang tính tham khảo.
+  [CAPEX-AUDIT] Negative FCF in history: ['2023FY'] — CAGR-based projection unreliable; simplified DCF target price blocked
+
+[run_valuation] DHG — FCFF sensitivity (WACC x terminal growth)
+
+  Price_FCFF (VND/share) — WACC rows x terminal-growth cols
+  WACC            2.0%       2.5%       3.0%       3.5%       4.0%
+  -------------------------------------------------------------------
+  11.8%        103,728    107,616    111,946    116,797    122,271
+  12.8%         94,091     97,165    100,553    104,305    108,483
+  13.8%         86,091     88,566     91,271     94,239     97,509
+  14.8%         79,344     81,369     83,565     85,956     88,567
+  15.8%         73,579     75,256     77,065     79,020     81,141
+
+[run_valuation] DHG — FCFE sensitivity (Re x terminal growth)
+
+  Price_FCFE (VND/share) — Re rows x terminal-growth cols
+  Re              2.0%       2.5%       3.0%       3.5%       4.0%
+  -------------------------------------------------------------------
+  11.8%              —          —          —          —          —
+  12.8%              —          —          —          —          —
+  13.8%              —          —          —          —          —
+  14.8%              —          —          —          —          —
+  15.8%              —          —          —          —          —
+
+[run_valuation] DHG — Blend sensitivity skipped (FCFF or FCFE unavailable)
+
+[run_valuation] DHG — P/E sensitivity (EPS_FY1 x Forward P/E)
+  EPS \ P/E           10x         12x         14x         16x         18x
+  ---------------------------------------------------------------------
+       8,528      85,280    102,336    119,392    136,448    153,504
+       9,230      92,300    110,760    129,220    147,680    166,140
+      10,033     100,330    120,396    140,462    160,528    180,594
+      10,835     108,350    130,020    151,690    173,360    195,030
+      11,538     115,380    138,456    161,532    184,608    207,684
+
+[run_valuation] DHG — EV/EBITDA sensitivity (EBITDA rows x Multiple cols)
+  EBITDA \ x         7.0x        8.0x        9.0x       10.0x       11.0x
+  ---------------------------------------------------------------------
+        1359      73,742     84,135     94,528    104,920    115,313
+        1471      79,733     90,982    102,230    113,479    124,727
+        1599      86,581     98,808    111,034    123,261    135,488
+        1726      93,428    106,633    119,838    133,043    146,248
+        1838      99,419    113,480    127,541    141,602    155,663
+
+[run_valuation] DHG — Assumption gate: draft_needs_analyst_review
+  GATE: Tax policy has not been approved — tax rate source uncertain.
+  GATE: Debt schedule not approved — FCFE net borrowing is unverified.
+  GATE: Dividend schedule not approved — retained earnings and equity forecast may be overstated.
+  GATE: Peer multiples not approved — relative valuation (P/E, EV/EBITDA) is pending verified peer dataset.
+  GATE: Final recommendation has not been explicitly approved by analyst.
+[run_valuation] DHG — Valuation confidence: final_rating=draft_only
+  CONFIDENCE: Tax policy: historical effective rate used but not analyst-approved.
+  CONFIDENCE: Debt schedule: projected using historical median ratio (low confidence).
+  CONFIDENCE: Dividend schedule: no dividend data — all earnings treated as retained.
+  CONFIDENCE: FCFF DCF: computation warnings present (missing inputs in some years).
+  CONFIDENCE: FCFE DCF: Net Borrowing is missing/assumed zero — low confidence.
+  CONFIDENCE: Relative P/E: pending — no peer group data.
+  CONFIDENCE: Relative EV/EBITDA: pending — no peer group data.
+
+[run_valuation] Artifact saved: C:\Users\Admin\AppData\Local\Temp\valuation-run_dhg_20260612T172607_fab53e395f-zasvbqe6\valuation.json
+[run_research] harness run_id=run_dhg_20260612T172607_fab53e395f
+[run_research] submitted through FullReportOrchestrator

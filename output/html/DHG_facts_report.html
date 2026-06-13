@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DHG — Báo cáo phân tích cổ phiếu</title>
+<style>
+/* Vietnam Pharma Equity Research — A4 Report Stylesheet */
+
+/*
+ * Unicode font stack — required for Vietnamese diacritics (ắ ổ ị ề ử ộ ụ ằ etc.)
+ * Priority: Noto Sans (Google Fonts, embeds all Vietnamese) → DejaVu Sans (Linux)
+ *           → Arial Unicode MS (Windows/macOS fallback) → Arial → sans-serif.
+ * If none of these embed Vietnamese glyphs, PDF export will show boxes.
+ * To guarantee correct PDF rendering: install Noto Sans or use Playwright/WeasyPrint.
+ */
+
+@page {
+    size: A4 portrait;
+    margin: 18mm 16mm 18mm 16mm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Noto Sans", "DejaVu Sans", "Arial Unicode MS", Arial, sans-serif;
+    font-size: 8.8pt;
+    line-height: 1.38;
+    color: #232323;
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Typography ─────────────────────────────────────────── */
+
+h1 {
+    font-size: 16pt;
+    font-weight: 700;
+    color: #0b4f8a;
+    margin: 0 0 7pt 0;
+    padding-bottom: 4pt;
+    border-bottom: 1.2px solid #0b4f8a;
+}
+
+h2 {
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: #0b4f8a;
+    border-bottom: 1px solid #0b4f8a;
+    padding-bottom: 3pt;
+    margin: 11pt 0 5pt 0;
+}
+
+h3 {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: #2c5282;
+    margin: 10pt 0 4pt 0;
+}
+
+h4 {
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 8pt 0 3pt 0;
+}
+
+p {
+    margin: 4pt 0 6pt 0;
+}
+
+strong {
+    font-weight: 700;
+    color: #1a202c;
+}
+
+em {
+    font-style: italic;
+    color: #4a5568;
+}
+
+/* ── Tables ─────────────────────────────────────────────── */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin: 8pt 0;
+    page-break-inside: avoid;
+}
+
+thead th {
+    background-color: #0b4f8a;
+    color: #ffffff;
+    padding: 4pt 6pt;
+    text-align: left;
+    font-weight: 600;
+    font-size: 8.5pt;
+}
+
+tbody td {
+    padding: 3pt 6pt;
+    border-bottom: 0.5px solid #d0d7de;
+    vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f6f8fa;
+}
+
+tbody tr:hover {
+    background-color: #eef2f7;
+}
+
+/* Numeric columns — right-align by convention */
+td:last-child,
+th:last-child {
+    text-align: right;
+}
+
+/* Exception: first column (labels) left-align */
+td:first-child,
+th:first-child {
+    text-align: left;
+}
+
+/* ── Images / Charts ─────────────────────────────────────── */
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 6pt auto;
+    page-break-inside: avoid;
+}
+
+/* ── Blockquotes ─────────────────────────────────────────── */
+
+blockquote {
+    border-left: 3px solid #cbd5e0;
+    margin: 6pt 0;
+    padding: 4pt 8pt;
+    color: #4a5568;
+    background: #f7fafc;
+    font-size: 9pt;
+}
+
+blockquote p {
+    margin: 0;
+}
+
+/* ── Code ─────────────────────────────────────────────────── */
+
+code {
+    font-family: "Courier New", monospace;
+    font-size: 8pt;
+    background: #f0f4f8;
+    padding: 1pt 3pt;
+    border-radius: 2px;
+    color: #2d3748;
+}
+
+pre {
+    background: #f0f4f8;
+    padding: 6pt 8pt;
+    border-radius: 3px;
+    overflow-x: auto;
+    font-size: 8pt;
+    line-height: 1.4;
+    margin: 6pt 0;
+    page-break-inside: avoid;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+}
+
+/* ── Lists ───────────────────────────────────────────────── */
+
+ul, ol {
+    margin: 4pt 0 6pt 0;
+    padding-left: 18pt;
+}
+
+li {
+    margin-bottom: 2pt;
+}
+
+/* ── Horizontal rule ─────────────────────────────────────── */
+
+hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 10pt 0;
+}
+
+/* ── Page structure ──────────────────────────────────────── */
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1.5px solid #0b4f8a;
+    padding-bottom: 4pt;
+    margin-bottom: 8pt;
+}
+
+.report-header-left {
+    font-size: 8pt;
+    color: #4a5568;
+}
+
+.report-header-ticker {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #0b4f8a;
+    letter-spacing: 1px;
+}
+
+.report-header-date {
+    font-size: 8pt;
+    color: #718096;
+    text-align: right;
+}
+
+.report-section {
+    margin-bottom: 0;
+}
+
+.acbs-page-header {
+    display: flex;
+    justify-content: space-between;
+    color: #0b4f8a;
+    font-size: 8.5pt;
+    font-weight: 700;
+    border-bottom: 1px solid #0b4f8a;
+    padding-bottom: 3pt;
+    margin-bottom: 10pt;
+}
+
+.page-break {
+    page-break-after: always;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+/* ── Disclaimer ──────────────────────────────────────────── */
+
+.disclaimer {
+    font-size: 7.5pt;
+    color: #555555;
+    border-top: 1px solid #cccccc;
+    padding-top: 6pt;
+    margin-top: 10pt;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* ── Report footer ───────────────────────────────────────── */
+
+.report-footer {
+    font-size: 7pt;
+    color: #718096;
+    text-align: center;
+    border-top: 0.5px solid #e2e8f0;
+    padding-top: 4pt;
+    margin-top: 8pt;
+}
+
+/* ── Rating badge ─────────────────────────────────────────── */
+
+.rating-badge {
+    display: inline-block;
+    padding: 2pt 8pt;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 9pt;
+    letter-spacing: 0.5px;
+}
+
+.rating-buy    { background: #c6f6d5; color: #22543d; }
+.rating-hold   { background: #fefcbf; color: #744210; }
+.rating-sell   { background: #fed7d7; color: #742a2a; }
+.rating-review { background: #e9d8fd; color: #44337a; }
+
+/* ── Snapshot table special styling ──────────────────────── */
+
+.snapshot-table td:first-child {
+    color: #2d3748;
+    font-weight: 500;
+    width: 55%;
+}
+
+.snapshot-table td:last-child {
+    font-weight: 700;
+    color: #1a3a6b;
+    text-align: right;
+}
+
+/* ── Missing-value content ────────────────────────────────── */
+
+.value-na {
+    color: #718096;
+    font-style: italic;
+}
+
+/* ── Internal notice banner ───────────────────────────────── */
+
+.draft-banner {
+    background: #fff8df;
+    border: 1px solid #d9a21b;
+    border-left: 5px solid #d9a21b;
+    color: #6f5200;
+    font-size: 8.5pt;
+    font-weight: 700;
+    padding: 8pt 12pt;
+    margin-bottom: 12pt;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    page-break-inside: avoid;
+}
+
+/* ── ACBS-style broker update layout ─────────────────────── */
+
+.acbs-page {
+    width: 100%;
+}
+
+.acbs-titlebar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1.8px solid #0b4f8a;
+    padding-bottom: 5pt;
+    margin-bottom: 10pt;
+}
+
+.acbs-report-kicker {
+    color: #0b4f8a;
+    font-size: 15pt;
+    font-weight: 800;
+    letter-spacing: 0.1pt;
+}
+
+.acbs-date {
+    color: #555;
+    font-size: 8.5pt;
+    margin-top: 2pt;
+}
+
+.acbs-brand {
+    color: #0b4f8a;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-align: right;
+}
+
+.acbs-layout {
+    display: grid;
+    grid-template-columns: 39% 1fr;
+    column-gap: 14pt;
+    align-items: start;
+}
+
+.acbs-sidebar {
+    border-right: 1px solid #c7d7e8;
+    padding-right: 10pt;
+    font-size: 8pt;
+}
+
+.analyst-card {
+    color: #333;
+    margin-bottom: 10pt;
+    line-height: 1.35;
+}
+
+.analyst-name {
+    color: #0b4f8a;
+    font-weight: 700;
+    font-size: 9pt;
+}
+
+.recommendation-card {
+    border-top: 2px solid #0b4f8a;
+    border-bottom: 1px solid #0b4f8a;
+    padding: 6pt 0;
+    margin-bottom: 8pt;
+}
+
+.recommendation-card .rec-label {
+    font-size: 8pt;
+    color: #555;
+}
+
+.recommendation-card .rec-value {
+    font-size: 17pt;
+    line-height: 1.1;
+    color: #0b4f8a;
+    font-weight: 800;
+    margin-top: 2pt;
+}
+
+.recommendation-card.buy .rec-value { color: #087f5b; }
+.recommendation-card.hold .rec-value { color: #9a6700; }
+.recommendation-card.sell .rec-value { color: #b42318; }
+.recommendation-card.review .rec-value { color: #0b4f8a; }
+
+.rec-sub,
+.rec-sector,
+.rec-raw {
+    font-size: 8pt;
+    color: #333;
+    margin-top: 3pt;
+}
+
+.rec-raw {
+    color: #667085;
+    font-size: 7.2pt;
+}
+
+.broker-side-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7.8pt;
+    margin: 6pt 0 10pt 0;
+}
+
+.broker-side-table td {
+    border-bottom: 0.4px solid #d7e0ea;
+    padding: 3pt 0;
+    vertical-align: top;
+}
+
+.broker-side-table td:first-child {
+    color: #333;
+    width: 58%;
+}
+
+.broker-side-table td:last-child {
+    color: #111;
+    font-weight: 700;
+    text-align: right;
+}
+
+.broker-side-table.compact td {
+    font-size: 7.3pt;
+}
+
+.side-section-title {
+    color: #0b4f8a;
+    font-weight: 800;
+    font-size: 8.2pt;
+    border-bottom: 1px solid #0b4f8a;
+    margin: 9pt 0 5pt;
+    padding-bottom: 2pt;
+}
+
+.mini-chart img {
+    max-height: 130pt;
+    object-fit: contain;
+}
+
+.acbs-sidebar .model-table-block h2 {
+    color: #0b4f8a;
+    font-size: 8.2pt;
+    margin: 7pt 0 4pt;
+    padding-bottom: 2pt;
+    border-bottom: 1px solid #0b4f8a;
+}
+
+.trading-performance-table {
+    margin: 0;
+    table-layout: fixed;
+}
+
+.trading-performance-table th,
+.trading-performance-table td {
+    font-size: 6.8pt;
+    padding: 2pt;
+}
+
+.table-source-note {
+    color: #667085;
+    font-size: 6.8pt;
+    line-height: 1.3;
+    margin-top: 2pt;
+}
+
+.chart-placeholder {
+    border: 1px dashed #a8b8c8;
+    color: #667085;
+    background: #f6f9fc;
+    padding: 14pt 8pt;
+    text-align: center;
+    font-size: 7.6pt;
+}
+
+.acbs-main {
+    font-size: 8.7pt;
+}
+
+.acbs-main h1 {
+    font-size: 13.5pt;
+    color: #0b4f8a;
+    border-bottom: none;
+    margin-bottom: 7pt;
+    text-transform: uppercase;
+}
+
+.acbs-main h2 {
+    color: #0b4f8a;
+    font-size: 10.5pt;
+    border-bottom: none;
+    margin: 9pt 0 4pt;
+}
+
+.lead-thesis {
+    font-size: 9pt;
+    line-height: 1.45;
+    color: #222;
+    margin-bottom: 9pt;
+}
+
+.acbs-fin-table {
+    font-size: 8pt;
+    margin-top: 4pt;
+}
+
+.acbs-fin-table th {
+    background: #0b4f8a;
+    color: #fff;
+}
+
+/* ── Client-facing IMP/ACBS financial tables ─────────────── */
+
+/* Phase 1: allow large sections to flow across pages naturally.
+ * page-break-inside: avoid was pushing tall sections to new pages, creating
+ * blank pages. Individual tables/charts still have their own avoid rules. */
+.client-report-page {
+    break-inside: auto;
+}
+
+/* Chapter-break: explicit hard page-break before a major section. */
+.chapter-break {
+    break-before: page;
+    page-break-before: always;
+}
+
+.model-table-block {
+    margin: 8pt 0 12pt;
+}
+
+.model-table-block h2 {
+    margin-bottom: 2pt;
+}
+
+.table-unit {
+    color: #475467;
+    font-size: 7.5pt;
+    margin-bottom: 3pt;
+}
+
+.financial-model-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7.2pt;
+    table-layout: fixed;
+    page-break-inside: avoid;
+}
+
+.financial-model-table thead {
+    display: table-header-group;
+}
+
+.financial-model-table th {
+    background: #ffffff;
+    color: #0b4f8a;
+    font-weight: 800;
+    border-top: 1.2pt solid #0b4f8a;
+    border-bottom: 1.2pt solid #0b4f8a;
+    padding: 2.5pt 3pt;
+}
+
+.financial-model-table td {
+    border-bottom: 0.5pt solid #b8d2e8;
+    padding: 2.2pt 3pt;
+    vertical-align: top;
+}
+
+.financial-model-table th:first-child,
+.financial-model-table td:first-child {
+    width: 32%;
+    font-weight: 600;
+}
+
+.financial-model-table .numeric {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.report-chart {
+    margin: 6pt 0 8pt;
+    page-break-inside: avoid;
+}
+
+.report-chart img {
+    width: 100%;
+    max-height: 150pt;
+    object-fit: contain;
+}
+
+.report-chart figcaption {
+    color: #667085;
+    font-size: 7.2pt;
+    margin-top: 2pt;
+}
+
+.two-chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 12pt;
+    align-items: start;
+}
+
+/* ── Key sources list (Nguồn tham khảo chính) ────────────── */
+
+.source-list {
+    margin: 4pt 0 8pt 0;
+    padding-left: 16pt;
+    font-size: 7.8pt;
+    color: #333;
+    line-height: 1.45;
+}
+
+.source-list li {
+    margin-bottom: 3pt;
+    padding-left: 2pt;
+}
+
+.source-caption {
+    color: #667085;
+    font-size: 7pt;
+    font-style: italic;
+    margin-top: 2pt;
+}
+
+/* ── Sensitivity / valuation matrix: full-width is allowed ── */
+
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7.4pt;
+    page-break-inside: avoid;
+}
+
+.matrix-table th {
+    background: #0b4f8a;
+    color: #fff;
+    padding: 3pt 4pt;
+    text-align: center;
+}
+
+.matrix-table td {
+    text-align: right;
+    padding: 2.4pt 4pt;
+    border-bottom: 0.5pt solid #cdddee;
+}
+
+/* ── Variance / growth colouring ─────────────────────────── */
+
+/* Positive value (revenue growth, margin expansion, etc.) */
+.variance-positive {
+    color: #087f5b;
+    font-weight: 600;
+}
+
+/* Negative value (decline, cost overrun, etc.) */
+.variance-negative {
+    color: #b42318;
+    font-weight: 600;
+}
+
+/* Subtotal / section-break row inside a financial table */
+tr.row-subtotal td {
+    border-top: 1px solid #0b4f8a;
+    border-bottom: 1px solid #0b4f8a;
+    font-weight: 700;
+    background: #f0f4fa;
+}
+
+/* Total / Grand-total row */
+tr.row-total td {
+    border-top: 1.5px solid #0b4f8a;
+    border-bottom: 1.5px solid #0b4f8a;
+    font-weight: 800;
+    background: #e8eef8;
+}
+
+/* Indented line item (level 1) — used in KQKD sub-rows */
+.row-indent-1 td:first-child {
+    padding-left: 12pt;
+    font-weight: 400;
+    color: #4a5568;
+}
+
+/* Indented line item (level 2) */
+.row-indent-2 td:first-child {
+    padding-left: 22pt;
+    font-weight: 400;
+    color: #718096;
+    font-size: 7pt;
+}
+
+/* Sensitivity matrix: colour cells by upside/downside magnitude */
+.matrix-cell-high    { background: #c6f6d5; color: #22543d; }
+.matrix-cell-mid     { background: #e9d8fd; color: #44337a; }
+.matrix-cell-low     { background: #fed7d7; color: #742a2a; }
+.matrix-cell-neutral { background: #f7fafc; color: #2d3748; }
+
+/* ── Running footer (Phase 6) ─────────────────────────────── */
+
+/* Hidden on screen; shown on every printed page via position:fixed.
+ * Works for Chrome headless print.  WeasyPrint uses @page margin boxes below. */
+.print-running-footer {
+    display: none;
+}
+
+/* ── Print overrides ─────────────────────────────────────── */
+
+@media print {
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .page-break {
+        page-break-after: always;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    /* Risk 6: Prevent headings from being orphaned at the bottom of a page. */
+    h1, h2, h3 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    /* Running footer — fixed element visible on every printed page (Chrome). */
+    .print-running-footer {
+        display: block;
+        position: fixed;
+        bottom: 6mm;
+        left: 16mm;
+        right: 16mm;
+        font-size: 7pt;
+        color: #718096;
+        border-top: 0.5px solid #e2e8f0;
+        padding-top: 3pt;
+        text-align: center;
+        font-family: "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+    }
+}
+
+/* ── WeasyPrint page margin boxes (page number + brand) ──── */
+/* counter(page) / @page margin boxes are WeasyPrint-only;
+ * Chrome headless uses the .print-running-footer element above. */
+
+@page {
+    @bottom-left {
+        content: "Vietnam Pharma Equity Research";
+        font-family: "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+        font-size: 7pt;
+        color: #718096;
+    }
+    @bottom-right {
+        content: counter(page);
+        font-family: "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+        font-size: 7pt;
+        color: #718096;
+    }
+}
+
+/* Suppress footer on cover page (first page) */
+@page :first {
+    @bottom-left  { content: ""; }
+    @bottom-right { content: ""; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ── Cover Page ──────────────────────────────────────── -->
+<div class="report-section chapter-break">
+  <h1>DHG — Báo cáo phân tích cổ phiếu</h1>
+  <p><strong>Ngày báo cáo:</strong> 10/06/2026</p>
+  <p><strong>Ngành:</strong> Dược phẩm</p>
+  <p><strong>Sàn:</strong> HOSE</p>
+  <p><strong>Kỳ phân tích:</strong> 2022FY, 2023FY, 2024FY, 2025FY</p>
+  <p><strong>Nguồn dữ liệu:</strong> BCTC kiểm toán, VNStock VCI</p>
+</div>
+
+<!-- ── Executive Summary ──────────────────────────────── -->
+<div class="report-section chapter-break">
+  <h2>Tóm tắt đầu tư</h2>
+  <p>Doanh thu 2025FY: <strong>5,267.0 tỷ VND</strong>
+  &nbsp;|&nbsp; LNST: <strong>852.4 tỷ VND</strong>
+  &nbsp;|&nbsp; EPS: <strong>6,308 VND</strong></p>
+  <p>Biên lợi nhuận gộp: <strong>47.6%</strong>
+  &nbsp;|&nbsp; Biên lợi nhuận ròng: <strong>16.2%</strong>
+  &nbsp;|&nbsp; ROE: <strong>20.6%</strong></p>
+  <p>Dòng tiền tự do (FCF): <strong>1,181.8 tỷ VND</strong></p>
+</div>
+
+<!-- ── Income Statement Summary ──────────────────────── -->
+<div class="report-section">
+  <h2>Kết quả kinh doanh</h2>
+  <div class="model-table-block">
+    <table class="financial-model-table">
+      <thead><tr><th>Chỉ tiêu (tỷ VND)</th><th>2022FY</th><th>2023FY</th><th>2024FY</th><th>2025FY</th></tr></thead>
+      <tbody>
+        <tr><td>Doanh thu thuần</td><td class="numeric">4,676.0</td><td class="numeric">5,015.4</td><td class="numeric">4,884.9</td><td class="numeric">5,267.0</td></tr>
+        <tr><td>Tăng trưởng doanh thu</td><td class="numeric">—</td><td class="numeric">7.3%</td><td class="numeric">-2.6%</td><td class="numeric">7.8%</td></tr>
+        <tr><td>Giá vốn hàng bán</td><td class="numeric">-2,418.5</td><td class="numeric">-2,671.8</td><td class="numeric">-2,747.1</td><td class="numeric">-2,760.6</td></tr>
+        <tr><td>Lợi nhuận gộp</td><td class="numeric">2,257.5</td><td class="numeric">2,343.5</td><td class="numeric">2,137.8</td><td class="numeric">2,506.4</td></tr>
+        <tr><td>Biên lợi nhuận gộp</td><td class="numeric">48.3%</td><td class="numeric">46.7%</td><td class="numeric">43.8%</td><td class="numeric">47.6%</td></tr>
+        <tr><td>Chi phí lãi vay</td><td class="numeric">-12.6</td><td class="numeric">-29.5</td><td class="numeric">-24.8</td><td class="numeric">-25.6</td></tr>
+        <tr><td>LNTT</td><td class="numeric">1,099.6</td><td class="numeric">1,159.2</td><td class="numeric">904.5</td><td class="numeric">986.6</td></tr>
+        <tr><td>Thuế TNDN</td><td class="numeric">-111.2</td><td class="numeric">-108.5</td><td class="numeric">-128.5</td><td class="numeric">-134.2</td></tr>
+        <tr><td>LNST CĐCTM</td><td class="numeric">988.5</td><td class="numeric">1,050.7</td><td class="numeric">776.0</td><td class="numeric">852.4</td></tr>
+        <tr><td>Tăng trưởng LNST</td><td class="numeric">—</td><td class="numeric">6.3%</td><td class="numeric">-26.1%</td><td class="numeric">9.8%</td></tr>
+        <tr><td>Biên lợi nhuận ròng</td><td class="numeric">21.1%</td><td class="numeric">20.9%</td><td class="numeric">15.9%</td><td class="numeric">16.2%</td></tr>
+        <tr><td>EPS (VND)</td><td class="numeric">7,318</td><td class="numeric">7,780</td><td class="numeric">5,763</td><td class="numeric">6,308</td></tr>
+      </tbody>
+    </table>
+    <div class="table-source-note">Nguồn: BCTC kiểm toán; Đơn vị: tỷ VND (trừ EPS)</div>
+  </div>
+</div>
+
+<!-- ── Balance Sheet Highlights ───────────────────────── -->
+<div class="report-section">
+  <h2>Bảng cân đối kế toán</h2>
+  <div class="model-table-block">
+    <table class="financial-model-table">
+      <thead><tr><th>Chỉ tiêu (tỷ VND)</th><th>2022FY</th><th>2023FY</th><th>2024FY</th><th>2025FY</th></tr></thead>
+      <tbody>
+        <tr><td>Tổng tài sản</td><td class="numeric">5,168.2</td><td class="numeric">6,110.5</td><td class="numeric">5,959.2</td><td class="numeric">5,173.9</td></tr>
+        <tr><td>VCSH (công ty mẹ)</td><td class="numeric">4,291.5</td><td class="numeric">4,852.9</td><td class="numeric">4,094.8</td><td class="numeric">4,137.3</td></tr>
+        <tr><td>Nợ vay ngắn hạn</td><td class="numeric">114.7</td><td class="numeric">572.2</td><td class="numeric">649.9</td><td class="numeric">0.0</td></tr>
+        <tr><td>Tổng nợ vay</td><td class="numeric">114.7</td><td class="numeric">572.2</td><td class="numeric">649.9</td><td class="numeric">0.0</td></tr>
+        <tr><td>Tiền & tương đương tiền</td><td class="numeric">34.0</td><td class="numeric">94.1</td><td class="numeric">62.9</td><td class="numeric">129.9</td></tr>
+        <tr><td>Nợ / VCSH</td><td class="numeric">0.03x</td><td class="numeric">0.12x</td><td class="numeric">0.16x</td><td class="numeric">0.00x</td></tr>
+      </tbody>
+    </table>
+    <div class="table-source-note">Nguồn: BCTC kiểm toán</div>
+  </div>
+</div>
+
+<!-- ── Cash Flow ──────────────────────────────────────── -->
+<div class="report-section">
+  <h2>Dòng tiền</h2>
+  <div class="model-table-block">
+    <table class="financial-model-table">
+      <thead><tr><th>Chỉ tiêu (tỷ VND)</th><th>2022FY</th><th>2023FY</th><th>2024FY</th><th>2025FY</th></tr></thead>
+      <tbody>
+        <tr><td>Dòng tiền hoạt động</td><td class="numeric">901.3</td><td class="numeric">240.2</td><td class="numeric">1,317.6</td><td class="numeric">1,213.0</td></tr>
+        <tr><td>CAPEX</td><td class="numeric">-234.0</td><td class="numeric">-486.3</td><td class="numeric">-88.7</td><td class="numeric">-31.1</td></tr>
+        <tr><td>Free Cash Flow</td><td class="numeric">667.3</td><td class="numeric">-246.2</td><td class="numeric">1,228.9</td><td class="numeric">1,181.8</td></tr>
+        <tr><td>Khấu hao</td><td class="numeric">81.0</td><td class="numeric">88.7</td><td class="numeric">169.7</td><td class="numeric">119.0</td></tr>
+      </tbody>
+    </table>
+    <div class="table-source-note">Nguồn: BCTC kiểm toán</div>
+  </div>
+</div>
+
+<!-- ── Key Ratios ─────────────────────────────────────── -->
+<div class="report-section">
+  <h2>Các chỉ số tài chính chính</h2>
+  <div class="model-table-block">
+    <table class="financial-model-table">
+      <thead><tr><th>Chỉ tiêu</th><th>2022FY</th><th>2023FY</th><th>2024FY</th><th>2025FY</th></tr></thead>
+      <tbody>
+        <tr><td>Biên lợi nhuận gộp</td><td class="numeric">48.3%</td><td class="numeric">46.7%</td><td class="numeric">43.8%</td><td class="numeric">47.6%</td></tr>
+        <tr><td>Biên lợi nhuận ròng</td><td class="numeric">21.1%</td><td class="numeric">20.9%</td><td class="numeric">15.9%</td><td class="numeric">16.2%</td></tr>
+        <tr><td>ROE</td><td class="numeric">23.0%</td><td class="numeric">21.6%</td><td class="numeric">19.0%</td><td class="numeric">20.6%</td></tr>
+        <tr><td>ROA</td><td class="numeric">19.1%</td><td class="numeric">17.2%</td><td class="numeric">13.0%</td><td class="numeric">16.5%</td></tr>
+        <tr><td>Nợ / VCSH</td><td class="numeric">0.03x</td><td class="numeric">0.12x</td><td class="numeric">0.16x</td><td class="numeric">0.00x</td></tr>
+        <tr><td>Nợ / Tổng tài sản</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td><td class="numeric">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Analysis ───────────────────────────────────────── -->
+<div class="report-section chapter-break">
+  <h2>Nhận xét phân tích</h2>
+  <h3>Doanh thu</h3>
+  <p>DHG ghi nhận doanh thu thuần 2025FY đạt 5,267.0 tỷ VND, tăng trưởng 7.8% so với năm trước.</p>
+
+  <h3>Lợi nhuận</h3>
+  <p>LNST thuộc CĐCTM đạt 852.4 tỷ VND, tương ứng biên lợi nhuận ròng 16.2%.</p>
+
+  <h3>Cấu trúc tài chính</h3>
+  <p>Tỷ lệ nợ/VCSH ở mức 0.00x, cho thấy cấu trúc tài chính rất lành mạnh với gần như không sử dụng đòn bẩy.</p>
+
+  <h3>Dòng tiền</h3>
+  <p>Dòng tiền tự do 2025FY đạt 1,181.8 tỷ VND, cho thấy khả năng tạo tiền mặt tốt từ hoạt động kinh doanh.</p>
+</div>
+
+<!-- ── Disclaimer ─────────────────────────────────────── -->
+<div class="report-section">
+  <h2>Tuyên bố miễn trừ trách nhiệm</h2>
+  <p style="font-size: 7.5pt; color: #666;">Báo cáo này được tạo tự động từ dữ liệu BCTC kiểm toán và dữ liệu thị trường.
+  Các số liệu được tính toán bằng mô hình Python xác định (deterministic). Báo cáo chỉ mang tính chất tham khảo,
+  không phải khuyến nghị đầu tư. Nhà đầu tư cần tự đánh giá và chịu trách nhiệm với quyết định đầu tư của mình.</p>
+  <p style="font-size: 7pt; color: #999;">Dữ liệu: VNStock VCI, BCTC kiểm toán | Xử lý: Python analytics engine | Ngày: 10/06/2026</p>
+</div>
+
+</body>
+</html>
