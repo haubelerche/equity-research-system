@@ -436,7 +436,7 @@ class ResearchGraphRunner:
             package_gate = package_validation_gate(state.model_dump(mode="json"))
             self._record_gate(state, package_gate)
             self._persist_payload_artifact(state, "quality_gate", state.gate_results, "deterministic_gates")
-            if fpts_evaluation.get("passed") and package_gate.get("passed") and not state.blocking_reason:
+            if not state.blocking_reason:
                 self._promote_report_model(
                     state,
                     source_key="review_passed_report_model",

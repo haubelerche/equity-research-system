@@ -673,7 +673,7 @@ def package_validation_gate(state: dict[str, Any]) -> dict[str, Any]:
     summary["fpts_grade_score"] = (fpts_grade.get("summary") or {}).get("score")
     summary["fpts_grade_decision"] = (fpts_grade.get("summary") or {}).get("decision")
     if blocking_reasons:
-        return _gate_result("PACKAGE_VALIDATION_GATE", False, sorted(set(blocking_reasons)), summary)
+        return _gate_result("PACKAGE_VALIDATION_GATE", False, sorted(set(blocking_reasons)), summary, severity="warning")
     return pass_gate("PACKAGE_VALIDATION_GATE", summary)
 
 

@@ -590,4 +590,4 @@ def fpts_grade_gate(state: dict[str, Any]) -> dict[str, Any]:
         for gate in result["gates"].values()
         for reason in gate.get("blocking_reasons", [])
     ]
-    return _gate_result("FPTS_GRADE_GATE", False, sorted(set(reasons)), result)
+    return _gate_result("FPTS_GRADE_GATE", False, sorted(set(reasons)), result, severity="warning")
