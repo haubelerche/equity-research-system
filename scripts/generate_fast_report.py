@@ -125,6 +125,16 @@ def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
         "html_path": str(html_dest),
     }
 
+    # The valuation workings .md is a best-effort verification companion: download
+    # it next to the PDF when the publisher produced one.
+    workings_ref = result_dict.get("workings_md")
+    if workings_ref:
+        workings_dest = output_dir / f"{ticker}_valuation_workings.md"
+        storage.download_file(
+            workings_ref["storage_bucket"], workings_ref["storage_path"], workings_dest
+        )
+        out["workings_path"] = str(workings_dest)
+
     print(
         f"[generate_fast_report] ticker={ticker} run_id={used_run_id} "
         f"elapsed={elapsed:.1f}s pdf={pdf_dest} html={html_dest}"

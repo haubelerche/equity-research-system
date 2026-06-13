@@ -161,6 +161,11 @@ def test_validate_environment_missing_openai_key_raises(monkeypatch: pytest.Monk
 def test_run_agent_wraps_connection_error_with_diagnostic(monkeypatch: pytest.MonkeyPatch) -> None:
     secret = "test-secret-value"
     monkeypatch.setenv("OPENAI_API_KEY", secret)
+    # Force the plain-openai client path so the injected FakeOpenAI below is used.
+    # With Langfuse configured, the adapter resolves langfuse.openai instead, which
+    # would bypass the fake and hit the network (env-dependent flakiness).
+    monkeypatch.delenv("LANGFUSE_PUBLIC_KEY", raising=False)
+    monkeypatch.delenv("LANGFUSE_SECRET_KEY", raising=False)
 
     class FakeCompletions:
         def create(self, **_: object) -> object:

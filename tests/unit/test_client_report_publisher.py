@@ -10,10 +10,12 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from backend.reporting import client_report_view_model as crvm
+from backend.reporting import client_chart_builder as ccb
 from backend.reporting import client_section_builder as csb
 from backend.reporting import final_report_renderer as frr
 from backend.reporting import html_renderer as hr
 from backend.reporting import report_data_loader as rdl
+from backend.reporting import valuation_workings as vw
 
 
 class _FakeAdapter:
@@ -50,15 +52,16 @@ class _FakePDFRenderer:
         return path
 
 
-def test_client_report_publisher_uploads_html_and_pdf(monkeypatch, tmp_path):
+def _patch_common(monkeypatch):
     monkeypatch.setattr(
         crvm, "build_client_report_view_model",
-        lambda ticker, mode, run_id: SimpleNamespace(ticker=ticker, mode=mode),
+        lambda ticker, mode, run_id: SimpleNamespace(ticker=ticker, mode=mode, charts={}),
     )
     monkeypatch.setattr(
         csb, "build_client_report_sections",
         lambda vm: [{"page": "snapshot", "markdown": "<p>cover</p>"}],
     )
+    monkeypatch.setattr(ccb, "build_client_report_charts", lambda vm, output_dir, run_id: {})
     monkeypatch.setattr(
         rdl, "load_report_context",
         lambda ticker, run_id: SimpleNamespace(ticker=ticker, status="DRAFT"),
@@ -66,6 +69,10 @@ def test_client_report_publisher_uploads_html_and_pdf(monkeypatch, tmp_path):
     monkeypatch.setattr(hr, "HTMLRenderer", _FakeHTMLRenderer)
     monkeypatch.setattr(frr, "PDFRenderer", _FakePDFRenderer)
 
+
+def test_client_report_publisher_uploads_html_and_pdf(monkeypatch, tmp_path):
+    _patch_common(monkeypatch)
+    # Workings input loading fails without a real manifest -> must stay non-fatal.
     adapter = _FakeAdapter()
     publisher = frr.ClientReportPublisher(storage_adapter=adapter, work_dir=tmp_path)
 
@@ -75,7 +82,48 @@ def test_client_report_publisher_uploads_html_and_pdf(monkeypatch, tmp_path):
     assert published.pdf.storage_path == "run-001/report.pdf"
     assert published.html.artifact_type == "report_html"
     assert published.pdf.artifact_type == "report_pdf"
-    assert {path for _, path in adapter.uploaded} == {
+    assert {
         "run-001/report.html",
         "run-001/report.pdf",
-    }
+    } <= {path for _, path in adapter.uploaded}
+
+
+def test_client_report_publisher_attaches_workings_md(monkeypatch, tmp_path):
+    _patch_common(monkeypatch)
+    monkeypatch.setattr(
+        vw, "load_workings_inputs",
+        lambda run_id: {"valuation": {}, "forecast": {}, "facts": {}},
+    )
+    monkeypatch.setattr(
+        vw, "build_valuation_workings_md",
+        lambda **kwargs: "# Diễn giải định giá — DHG\n",
+    )
+
+    adapter = _FakeAdapter()
+    publisher = frr.ClientReportPublisher(storage_adapter=adapter, work_dir=tmp_path)
+    published = publisher.publish(run_id="run-001", ticker="DHG", mode="client_final")
+
+    assert published.workings is not None
+    assert published.workings.storage_path == "run-001/report_workings.md"
+    assert published.workings.artifact_type == "report_workings_md"
+    assert published.to_dict()["workings_md"]["storage_path"] == "run-001/report_workings.md"
+    assert "run-001/report_workings.md" in {path for _, path in adapter.uploaded}
+
+
+def test_client_report_publisher_workings_failure_is_non_fatal(monkeypatch, tmp_path):
+    _patch_common(monkeypatch)
+
+    def _boom(run_id):
+        raise RuntimeError("no manifest")
+
+    monkeypatch.setattr(vw, "load_workings_inputs", _boom)
+
+    adapter = _FakeAdapter()
+    publisher = frr.ClientReportPublisher(storage_adapter=adapter, work_dir=tmp_path)
+    published = publisher.publish(run_id="run-001", ticker="DHG", mode="client_final")
+
+    # PDF/HTML still published; workings simply absent.
+    assert published.html.storage_path == "run-001/report.html"
+    assert published.pdf.storage_path == "run-001/report.pdf"
+    assert published.workings is None
+    assert "workings_md" not in published.to_dict()

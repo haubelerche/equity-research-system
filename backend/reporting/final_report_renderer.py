@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import html
 import json
+import logging
 import shutil
 import tempfile
 from dataclasses import dataclass
@@ -17,6 +18,8 @@ from backend.reporting.pdf_renderer import PDFRenderError, PDFRenderer
 from backend.reporting.report_assembler import ReportAssembler, ReportAssemblyError
 from backend.storage import RUNS_BUCKET, SupabaseStorageAdapter, run_artifact_key
 from backend.utils import deterministic_id
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -53,15 +56,22 @@ class PublishedReportArtifact:
 class PublishedReport:
     html: PublishedReportArtifact
     pdf: PublishedReportArtifact
+    workings: PublishedReportArtifact | None = None
 
     def artifact_refs(self) -> list[dict[str, Any]]:
-        return [self.html.to_ref(), self.pdf.to_ref()]
+        refs = [self.html.to_ref(), self.pdf.to_ref()]
+        if self.workings is not None:
+            refs.append(self.workings.to_ref())
+        return refs
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        out = {
             "html": self.html.to_ref(),
             "pdf": self.pdf.to_ref(),
         }
+        if self.workings is not None:
+            out["workings_md"] = self.workings.to_ref()
+        return out
 
 
 def _publish_run_file(
@@ -288,10 +298,55 @@ class ClientReportPublisher:
                 section_key="report_pdf",
                 content_type="application/pdf",
             )
-            return PublishedReport(html=html_artifact, pdf=pdf_artifact)
+            workings_artifact = self._build_and_publish_workings(
+                run_id=run_id,
+                ticker=ticker,
+                view_model=view_model,
+                render_dir=render_dir,
+            )
+            return PublishedReport(
+                html=html_artifact, pdf=pdf_artifact, workings=workings_artifact
+            )
         finally:
             if temporary_dir is not None:
                 shutil.rmtree(temporary_dir, ignore_errors=True)
+
+    def _build_and_publish_workings(
+        self,
+        *,
+        run_id: str,
+        ticker: str,
+        view_model: Any,
+        render_dir: Path,
+    ) -> PublishedReportArtifact | None:
+        """Render the valuation workings .md alongside the report. Non-fatal on failure."""
+        from backend.reporting import valuation_workings as vw
+
+        try:
+            inputs = vw.load_workings_inputs(run_id)
+            markdown = vw.build_valuation_workings_md(
+                ticker=ticker,
+                run_id=run_id,
+                view_model=view_model,
+                **inputs,
+            )
+            workings_path = render_dir / "report_workings.md"
+            workings_path.write_text(markdown, encoding="utf-8")
+            return _publish_run_file(
+                self.storage_adapter,
+                run_id=run_id,
+                ticker=ticker,
+                artifact_name="report_workings.md",
+                local_path=workings_path,
+                artifact_type="report_workings_md",
+                section_key="report_workings_md",
+                content_type="text/markdown; charset=utf-8",
+            )
+        except Exception as exc:  # noqa: BLE001
+            _logger.warning(
+                "valuation workings .md build failed for run_id=%s: %s", run_id, exc
+            )
+            return None
 
 
 def render_final_report_model_html(final_report_model: Mapping[str, Any]) -> str:

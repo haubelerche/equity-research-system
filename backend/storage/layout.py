@@ -24,6 +24,7 @@ _RUN_ARTIFACT_NAMES = {
     "report.md",
     "report.html",
     "report.pdf",
+    "report_workings.md",
 }
 _EXPORT_NAMES = {"report.pdf", "report.html", "report.md"}
 
