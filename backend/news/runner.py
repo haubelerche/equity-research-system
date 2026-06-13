@@ -68,6 +68,10 @@ FALLBACK_LISTINGS: tuple[str, ...] = (
 )
 
 
+# MVP pharma coverage set — the first tickers cron'd for ticker-scoped news.
+MVP_TICKERS: tuple[str, ...] = ("DHG", "IMP", "DMC", "TRA", "DBD")
+
+
 def ticker_listing_urls(ticker: str, exchange_slug: str = "hose") -> tuple[str, ...]:
     """Build the ticker-scoped news listing URLs for one company (CafeF + VietStock)."""
     return tuple(
@@ -320,3 +324,27 @@ def run_ticker_news_collection(
         "candidates_relevant": len(articles),
         **counts,
     }
+
+
+def collect_for_tickers(
+    conn,
+    tickers: Sequence[str],
+    *,
+    company_lookup: Callable[[str], tuple[str, str]],
+    collect: Callable[..., dict] = run_ticker_news_collection,
+) -> list[dict]:
+    """Run ticker-scoped collection for each ticker (the cron entrypoint core).
+
+    Idempotent per ticker (see run_ticker_news_collection). One ticker failing is
+    captured and never aborts the batch — cron must keep going for the rest.
+    """
+    results: list[dict] = []
+    for raw in tickers:
+        ticker = raw.upper()
+        company_name, exchange = company_lookup(ticker)
+        try:
+            result = collect(conn, ticker, company_name, exchange_slug=exchange.lower())
+            results.append({"ticker": ticker, **result})
+        except Exception as exc:  # noqa: BLE001 — keep collecting the remaining tickers
+            results.append({"ticker": ticker, "error": str(exc)})
+    return results
