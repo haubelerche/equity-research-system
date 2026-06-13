@@ -1,0 +1,14 @@
+# Astro local-dev settings: connections, pools, variables.
+# These are injected into the local Airflow when running `astro dev start`.
+# For production (Astro Deployment), set these as Deployment env vars / secrets instead.
+#
+# The DAG reads DATABASE_URL from the environment via backend.database.config; set it here
+# for local dev (NEVER commit a real secret — use a placeholder and override locally).
+airflow:
+  connections: []
+  pools: []
+  variables:
+    - variable_name: DATABASE_URL
+      variable_value: "postgresql://USER:PASSWORD@HOST:5432/postgres"   # placeholder — override locally
+    - variable_name: OPENAI_API_KEY
+      variable_value: "sk-REPLACE_ME"                                   # placeholder — override locally
