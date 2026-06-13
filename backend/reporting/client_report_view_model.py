@@ -1899,21 +1899,45 @@ def _approved_agent_narrative(manifest) -> dict[str, str]:
     return result
 
 
-def _load_critic_findings(manifest) -> list[str]:
-    """Extract human-readable critic findings from the run manifest."""
-    if manifest is None or not manifest.resolve("critic_review"):
+def _load_critic_findings(manifest, run_id: str | None = None) -> list[str]:
+    """Extract human-readable critic findings from the critic_review artifact.
+
+    The critic review is persisted as a DB payload (no storage_path), so the
+    manifest won't contain it. Fall back to a direct DB query by run_id.
+    """
+    payload: dict[str, Any] = {}
+    if manifest is not None and manifest.resolve("critic_review"):
+        payload = manifest.load_json("critic_review")
+    elif run_id:
+        try:
+            from backend.database.config import connect_with_retry, require_database_url
+            with connect_with_retry(require_database_url()) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        SELECT payload_json FROM research.run_artifacts
+                        WHERE run_id = %s AND section_key = 'critic_review'
+                        ORDER BY version DESC LIMIT 1
+                        """,
+                        (run_id,),
+                    )
+                    row = cur.fetchone()
+            if row and isinstance(row[0], dict):
+                payload = row[0]
+        except Exception:
+            return []
+    if not payload:
         return []
-    critic = manifest.load_json("critic_review")
-    payload = critic.get("payload") or critic
+    inner = payload.get("payload") or payload
     findings: list[str] = []
-    for finding in payload.get("findings") or []:
+    for finding in inner.get("findings") or []:
         if not isinstance(finding, dict):
             continue
         desc = str(finding.get("description") or finding.get("finding") or "").strip()
         if desc:
             severity = str(finding.get("severity") or "").capitalize()
             findings.append(f"[{severity}] {desc}" if severity else desc)
-    scorecard = payload.get("scorecard") or {}
+    scorecard = inner.get("scorecard") or {}
     for metric, item in scorecard.items():
         if not isinstance(item, dict):
             continue
@@ -2059,7 +2083,7 @@ def build_client_report_view_model(
         _table_sensitivity_matrix(val.get("sensitivity", {}), display_gate["approved_for_display"])
         or _table_driver_sensitivity(fcff, blend if display_gate["approved_for_display"] else {}, forecast)
     )
-    critic_findings = _load_critic_findings(manifest)
+    critic_findings = _load_critic_findings(manifest, run_id=run_id)
 
     return ClientReportViewModel(
         ticker=ticker,
