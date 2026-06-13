@@ -16,6 +16,16 @@ taxonomy:
     statement: income_statement
     unit: vnd_bn
     aliases: [loi_nhuan_gop, gross_profit]
+  financial_income.total:
+    label_vi: Doanh thu hoat dong tai chinh
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [doanh_thu_hoat_dong_tai_chinh, doanh_thu_tai_chinh, financial_income]
+  financial_expense.total:
+    label_vi: Chi phi tai chinh
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [chi_phi_tai_chinh, financial_expense]
   sga.total:
     label_vi: Chi phi ban hang va QLDN
     statement: income_statement
@@ -25,7 +35,12 @@ taxonomy:
     label_vi: Loi nhuan truoc lai vay va thue
     statement: income_statement
     unit: vnd_bn
-    aliases: [ebit, operating_profit]
+    aliases: [ebit, loi_nhuan_truoc_lai_vay_va_thue]
+  operating_profit.total:
+    label_vi: Loi nhuan thuan tu hoat dong kinh doanh
+    statement: income_statement
+    unit: vnd_bn
+    aliases: [loi_nhuan_thuan_tu_hoat_dong_kinh_doanh, operating_profit_vas]
   ebitda.total:
     label_vi: EBITDA
     statement: income_statement
@@ -55,7 +70,7 @@ taxonomy:
     label_vi: Tong no vay
     statement: balance_sheet
     unit: vnd_bn
-    aliases: [no_vay_ngan_han, no_vay_dai_han, total_debt]
+    aliases: [tong_no_vay, total_debt]
   total_assets.ending:
     label_vi: TONG CONG TAI SAN
     statement: balance_sheet
@@ -150,12 +165,25 @@ taxonomy:
     # Slug: "Vay ngắn hạn" → vay_ngan_han
     aliases: [vay_ngan_han, short_term_debt, no_vay_ngan_han]
 
+  long_term_debt.ending:
+    label_vi: Vay dai han
+    statement: balance_sheet
+    unit: vnd_bn
+    aliases: [vay_dai_han, long_term_debt, no_vay_dai_han]
+
   total_liabilities.ending:
     label_vi: No phai tra
     statement: balance_sheet
     unit: vnd_bn
     # Slug: "NỢ PHẢI TRẢ" → no_phai_tra
     aliases: [no_phai_tra, tong_no_phai_tra, total_liabilities]
+
+  non_current_liabilities.ending:
+    label_vi: No dai han
+    statement: balance_sheet
+    unit: vnd_bn
+    # Slug: "Nợ dài hạn" → no_dai_han
+    aliases: [no_dai_han, tong_no_dai_han, non_current_liabilities, long_term_liabilities]
 
   short_term_investments.ending:
     label_vi: Au tu ngan han
@@ -164,6 +192,37 @@ taxonomy:
     # Slug: "Đầu tư ngắn hạn" → au_tu_ngan_han (Đ dropped → 'au')
     # Also: "Đầu tư tài chính ngắn hạn" → au_tu_tai_chinh_ngan_han
     aliases: [au_tu_ngan_han, au_tu_tai_chinh_ngan_han, short_term_investments]
+
+  # ── Cash-flow extras used by broker-style report tables ──────────────────
+  investing_cash_flow.total:
+    label_vi: Luu chuyen tien thuan tu hoat dong dau tu
+    statement: cash_flow
+    unit: vnd_bn
+    aliases: [luu_chuyen_tien_thuan_tu_hoat_dong_dau_tu, investing_cash_flow]
+
+  financing_cash_flow.total:
+    label_vi: Luu chuyen tien thuan tu hoat dong tai chinh
+    statement: cash_flow
+    unit: vnd_bn
+    aliases: [luu_chuyen_tien_thuan_tu_hoat_dong_tai_chinh, financing_cash_flow]
+
+  dividends_paid.total:
+    label_vi: Co tuc da tra
+    statement: cash_flow
+    unit: vnd_bn
+    aliases: [co_tuc_da_tra, tien_chi_tra_co_tuc, tra_co_tuc, dividends_paid]
+
+  dividends_per_share.cash:
+    label_vi: Co tuc tien mat tren moi co phieu
+    statement: capital_structure
+    unit: vnd
+    aliases: [co_tuc_tien_mat_tren_moi_co_phieu, co_tuc_tien_mat_moi_co_phieu, cash_dividend_per_share, dps]
+
+  change_in_working_capital.total:
+    label_vi: Thay doi von luu dong
+    statement: cash_flow
+    unit: vnd_bn
+    aliases: [thay_doi_von_luu_dong, tang_giam_von_luu_dong, change_in_working_capital]
 
 # ── Derived metrics (computed in Python; NOT stored in fact.financial_facts) ───
 # free_cash_flow.total is computed by backend/facts/normalizer.py:compute_derived()
