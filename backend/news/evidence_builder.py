@@ -11,7 +11,9 @@ from __future__ import annotations
 import json
 from collections.abc import Callable
 
-from backend.news.types import EvidenceItem, RawArticle
+from collections.abc import Iterable
+
+from backend.news.types import ALLOWED_DOMAINS, EvidenceItem, RawArticle
 from backend.news.whitelist import is_allowed_url
 
 LlmExtract = Callable[[str], object]
@@ -57,10 +59,15 @@ def build_evidence(
     topic: str | None = None,
     ticker: str | None = None,
     company_name: str | None = None,
+    allowed_domains: Iterable[str] = ALLOWED_DOMAINS,
 ) -> list[EvidenceItem]:
-    """Extract validated EvidenceItems from one article. Returns [] on any invalid input."""
+    """Extract validated EvidenceItems from one article. Returns [] on any invalid input.
+
+    ``allowed_domains`` defaults to the automated-discovery whitelist; manual ingest passes
+    the wider citation allowlist so a human-vetted reputable-media article yields evidence.
+    """
     # Defense in depth: never build evidence from a non-whitelisted source.
-    if not is_allowed_url(article.source_url):
+    if not is_allowed_url(article.source_url, allowed_domains):
         return []
 
     prompt = build_extraction_prompt(article.raw_text)
@@ -107,10 +114,14 @@ def default_llm_extract(prompt: str, *, model: str | None = None) -> object:
     from backend.harness.model_adapter import CHEAP_MODEL
 
     client = openai.OpenAI()
+    # gpt-5.x reasoning models: (1) only the default temperature is allowed, and (2)
+    # max_completion_tokens is shared with reasoning tokens — too small a budget plus the
+    # default reasoning effort exhausts the budget on reasoning and returns empty content.
+    # reasoning_effort="minimal" + a larger budget makes extraction emit the JSON.
     response = client.chat.completions.create(
         model=model or CHEAP_MODEL,
-        max_completion_tokens=2048,
-        temperature=0.0,
+        max_completion_tokens=6000,
+        reasoning_effort="minimal",
         messages=[
             {"role": "system", "content": "You extract factual claims and return JSON only."},
             {"role": "user", "content": prompt},
@@ -119,6 +130,21 @@ def default_llm_extract(prompt: str, *, model: str | None = None) -> object:
     )
     text = response.choices[0].message.content or "[]"
     try:
-        return json.loads(text)
+        return _coerce_to_list(json.loads(text))
     except json.JSONDecodeError:
         return []
+
+
+def _coerce_to_list(data: object) -> list:
+    """Normalize an LLM JSON payload to a list of claim objects.
+
+    response_format=json_object yields a top-level object; the claim list is usually the
+    first list-valued field (e.g. {"facts": [...]}). A bare list passes through.
+    """
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        for value in data.values():
+            if isinstance(value, list):
+                return value
+    return []

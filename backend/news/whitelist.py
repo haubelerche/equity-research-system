@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from urllib.parse import urlparse
 
-from backend.news.types import ALLOWED_DOMAINS
+from backend.news.types import ALLOWED_DOMAINS, CITATION_ALLOWED_DOMAINS
 
 
 def url_domain(url: str) -> str | None:
@@ -37,6 +37,15 @@ def is_allowed_url(url: str, allowed_domains: Iterable[str] = ALLOWED_DOMAINS) -
         return False
     allowed = {d.lower() for d in allowed_domains}
     return any(host == d or host.endswith("." + d) for d in allowed)
+
+
+def is_citation_allowed_url(url: str) -> bool:
+    """True if url may be CITED (manual ingest): the wider reputable/official allowlist.
+
+    Broader than is_allowed_url (automated discovery). A URL whose host is not exactly a
+    citation-allowed domain (or a true subdomain of one) is never citable.
+    """
+    return is_allowed_url(url, CITATION_ALLOWED_DOMAINS)
 
 
 def filter_allowed_urls(

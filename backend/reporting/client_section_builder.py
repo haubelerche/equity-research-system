@@ -18,14 +18,6 @@ def _e(value: Any) -> str:
     return escape(str(value))
 
 
-def _excerpt(value: Any, limit: int) -> str:
-    text = str(value or "").strip()
-    if len(text) <= limit:
-        return text
-    shortened = text[:limit].rsplit(" ", 1)[0].rstrip(" ,;:")
-    return shortened + "."
-
-
 def _with_refs(value: Any, refs: str) -> str:
     """Attach source markers to client-facing qualitative assertions."""
     text = str(value or "").strip()
@@ -34,6 +26,17 @@ def _with_refs(value: Any, refs: str) -> str:
     if text.endswith(refs) or any(text.endswith(f"[{idx}]") for idx in range(1, 10)):
         return text
     return f"{text} {refs}"
+
+
+def _qual_refs(vm: Any) -> str:
+    """Source markers for qualitative narrative: financial data [1], plus the real
+    news articles [3..n] when whitelisted articles have been collected. No fake news
+    marker is attached when no real article backs the section."""
+    refs = "[1]"
+    news = getattr(vm, "news_citations", None) or []
+    if news:
+        refs += "".join(f"[{idx}]" for idx in range(3, 3 + len(news)))
+    return refs
 
 
 def _is_missing(value: Any) -> bool:
@@ -341,9 +344,6 @@ def _rec_hero(vm: ClientReportViewModel) -> str:
     rec_css_class = "recommendation-" + _rec_css(vm.recommendation)
     tp_display = _format_price(vm.target_price)
     upside_display = _format_percent(vm.upside_downside)
-    method_note = (
-        '\n  <div class="rec-draft-note">Giá mục tiêu và khuyến nghị được tính từ mô hình định lượng; xem trang giải trình phương pháp ở cuối báo cáo</div>'
-    )
     return f"""
 <div class="recommendation-card {_e(rec_css_class)}">
   <span class="rec-label">Khuyến nghị &nbsp;·&nbsp; {_e(vm.exchange)}: {_e(vm.ticker)}</span>
@@ -354,7 +354,7 @@ def _rec_hero(vm: ClientReportViewModel) -> str:
     Tiềm năng tăng/giảm: <strong>{_e(upside_display)}</strong>
     &nbsp;|&nbsp;
     {_e(vm.report_date)}
-  </div>{method_note}
+  </div>
 </div>
 """
 
@@ -409,11 +409,11 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
     </aside>
     <main class="acbs-main">
       {_rec_hero(vm)}
-      <div class="lead-thesis">{_e(_with_refs(_excerpt(vm.investment_thesis, 1050), "[1][2]"))}</div>
+      <div class="lead-thesis">{_e(_with_refs(vm.investment_thesis, "[1][2]"))}</div>
       <h2>Luận điểm cập nhật</h2>
-      <p>{_e(_with_refs(_excerpt(vm.latest_business_update, 900), "[1][3]"))}</p>
+      <p>{_e(_with_refs(vm.latest_business_update, _qual_refs(vm)))}</p>
       <h2>Động lực tăng trưởng</h2>
-      <p>{_e(_with_refs(_excerpt(vm.key_growth_drivers, 700), "[1][3]"))}</p>
+      <p>{_e(_with_refs(vm.key_growth_drivers, "[1]"))}</p>
     </main>
   </div>
 </div>
@@ -486,39 +486,63 @@ def _render_key_sources(vm: ClientReportViewModel) -> str:
     return f'<ol class="source-list">{items}</ol>'
 
 
+def _news_citations(vm: ClientReportViewModel) -> list[dict[str, str]]:
+    """Real news articles backing qualitative claims, numbered from [3]. Empty until
+    whitelisted articles have actually been collected for this ticker."""
+    return list(getattr(vm, "news_citations", None) or [])
+
+
 def _render_methodology_sources(vm: ClientReportViewModel) -> str:
-    base_sources = "".join(
-        f"<li>{_e(s.get('label', ''))}</li>"
-        for s in getattr(vm, "key_sources", [])
-        if s.get("label")
-    )
-    base_sources_block = (
-        '<p><strong>Nguồn dữ liệu cụ thể trong bản này:</strong></p>'
-        f'<ol class="source-list">{base_sources}</ol>'
-        if base_sources
-        else ""
-    )
-    return (
-        '<ol class="source-list">'
-        "<li><strong>[1]</strong> Dữ liệu tài chính công ty, dữ liệu thị trường và các bảng đã chuẩn hóa trong quy trình xử lý; dùng cho nhận định về doanh thu, lợi nhuận, dòng tiền, nợ, vốn lưu động, biên lợi nhuận và định giá.</li>"
-        "<li><strong>[2]</strong> Mô hình định giá nội bộ; dùng cho dự phóng dòng tiền tự do doanh nghiệp, dòng tiền tự do cổ đông, chi phí vốn bình quân, giá trị cuối kỳ, nợ ròng, số cổ phiếu và giá mục tiêu.</li>"
-        "<li><strong>[3]</strong> Mô-đun tin tức; chỉ dùng cho nhận định định tính về sự kiện tác động, rủi ro và động lực kinh doanh khi có bài báo đã nạp từ VnExpress, VnEconomy, CafeF hoặc Vietstock. Bản DHG hiện tại không dùng bài báo riêng lẻ làm nguồn trực tiếp cho số liệu định lượng.</li>"
-        "</ol>"
-        + base_sources_block
-    )
+    """Citation legend mapping the [n] markers used throughout the report.
+
+    [1] and [2] are always present (financial data + valuation model). [3]+ are the
+    real whitelisted news articles collected for this ticker, each shown with its
+    outlet, headline and link so the reader can open and judge the source directly.
+    """
+    lines = [
+        '<p class="citation-ref"><strong>[1]</strong> Dữ liệu tài chính &amp; thị trường — '
+        "Báo cáo tài chính (BCTC) đã chuẩn hóa và dữ liệu giao dịch thị trường; dùng cho mọi "
+        "số liệu và nhận định về doanh thu, lợi nhuận, dòng tiền, nợ vay, vốn lưu động, biên "
+        "lợi nhuận và định giá.</p>",
+        '<p class="citation-ref"><strong>[2]</strong> Mô hình định giá nội bộ — dự phóng dòng '
+        "tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết khấu theo chi phí vốn bình quân "
+        "(WACC), giá trị cuối kỳ, nợ ròng, số cổ phiếu và giá mục tiêu.</p>",
+    ]
+    citations = _news_citations(vm)
+    for idx, citation in enumerate(citations, start=3):
+        source = _e(citation.get("source_name") or citation.get("source_domain") or "Nguồn tin")
+        title = _e(citation.get("title") or "")
+        url = str(citation.get("url") or citation.get("source_url") or "").strip()
+        published = _e(citation.get("published_at") or "")
+        title_html = f'<a href="{_e(url)}">{title}</a>' if url else title
+        meta = f" ({published})" if published else ""
+        lines.append(
+            f'<p class="citation-ref"><strong>[{idx}]</strong> {source} — “{title_html}”{meta}</p>'
+        )
+    if not citations:
+        # Transparent coverage note — news is not a hard requirement. Missing external
+        # articles is a source-coverage limitation, not a claim that nothing happened.
+        lines.append(
+            '<p class="citation-ref citation-coverage-note">Tại thời điểm lập báo cáo, '
+            "hệ thống chưa thu thập được bài báo bên ngoài phù hợp từ các nguồn được phép. "
+            "Phần nhận định định tính được xây dựng từ báo cáo tài chính, công bố chính thức, "
+            "dữ liệu định lượng và so sánh cùng ngành. Đây là hạn chế về coverage nguồn tin, "
+            "không phải xác nhận rằng doanh nghiệp không có sự kiện mới.</p>"
+        )
+    return f'<div class="citation-legend">{"".join(lines)}</div>'
 
 
 def _business_financials_page(vm: ClientReportViewModel) -> str:
     return f"""
 <div class="client-report-page">
   <h1>Triển vọng kinh doanh và tài chính</h1>
-  {_section_block("Cập nhật hoạt động kinh doanh", f"<p>{_e(_with_refs(vm.latest_business_update, '[1][3]'))}</p>")}
+  {_section_block("Cập nhật hoạt động kinh doanh", f"<p>{_e(_with_refs(vm.latest_business_update, _qual_refs(vm)))}</p>")}
   <div class="two-chart-grid">
     {_chart(vm, "C2")}
     {_chart(vm, "C4")}
   </div>
   {_section_block("Kết quả tài chính chính", f"<p>{_e(_with_refs(vm.current_context, '[1]'))}</p>{_render_main_table(vm.financial_summary_table)}")}
-  {_section_block("Động lực dự phóng", f"<p>{_e(_with_refs(vm.key_growth_drivers, '[1][3]'))}</p><p>{_e(_with_refs(vm.key_margin_drivers, '[1][3]'))}</p>{_chart(vm, 'C5')}{_render_table(vm.key_forecast_drivers_table, 'financial-model-table driver-table')}", "driver-section")}
+  {_section_block("Động lực dự phóng", f"<p>{_e(_with_refs(vm.key_growth_drivers, '[1]'))}</p><p>{_e(_with_refs(vm.key_margin_drivers, '[1]'))}</p>{_chart(vm, 'C5')}{_render_table(vm.key_forecast_drivers_table, 'financial-model-table driver-table')}", "driver-section")}
 </div>
 """
 
@@ -544,7 +568,7 @@ def _risks_sources_page(vm: ClientReportViewModel) -> str:
     return f"""
 <div class="client-report-page">
   <h1>Rủi ro đầu tư</h1>
-  {_section_block("Yếu tố cần theo dõi", f"<p>{_e(_with_refs(vm.material_events, '[1][3]'))}</p>")}
+  {_section_block("Yếu tố cần theo dõi", f"<p>{_e(_with_refs(vm.material_events, _qual_refs(vm)))}</p>")}
   <div class="fpts-section">
   <div class="fpts-section-title">Rủi ro đầu tư</div>
   <table class="financial-model-table">
@@ -563,9 +587,11 @@ def _client_status_sentence(vm: ClientReportViewModel) -> str:
     'analyst_review_only; blockers: valuation_gap_gt_25pct'.
     """
     return (
-        "Hệ thống tổng hợp dữ liệu tài chính, dữ liệu thị trường, bằng chứng tin tức "
-        "và mô hình định giá để tạo ra kết luận định lượng; người đọc có thể kiểm tra "
-        "chuỗi dữ liệu, công thức và ngưỡng quyết định bên dưới để tự đánh giá mức độ tin cậy."
+        "Báo cáo này trình bày đầy đủ nguồn dữ liệu, công thức tính toán và ngưỡng ra quyết "
+        "định để người đọc có thể tự kiểm chứng từng bước. Hệ thống thu thập dữ liệu, tính "
+        "toán theo phương pháp dưới đây và đưa ra kết luận một cách nhất quán, không thiên "
+        "kiến. Nhờ vậy báo cáo là sản phẩm chính thức: việc đánh giá đúng/sai và quyết định "
+        "có tin theo hay không thuộc về người đọc."
     )
 
 
@@ -579,47 +605,54 @@ def _render_report_status(vm: ClientReportViewModel) -> str:
 
     rows = [
         (
-            "Dữ liệu định lượng",
-            "Số liệu doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt, số cổ phiếu và giá thị trường được lấy từ lớp dữ liệu tài chính chuẩn hóa và dữ liệu thị trường; tin tức không được dùng làm nguồn số liệu định lượng trực tiếp.",
+            "Số liệu định lượng lấy từ đâu",
+            "Doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt và số cổ phiếu lấy trực tiếp từ "
+            "Báo cáo tài chính (BCTC) đã chuẩn hóa; giá, vốn hóa và thanh khoản lấy từ dữ liệu "
+            "thị trường. Các con số này không do hệ thống tự bịa ra mà bám theo báo cáo gốc của "
+            "doanh nghiệp. [1]",
         ),
         (
-            "Tin tức và sự kiện tác động",
-            "Mô-đun tin tức chỉ thu thập bằng chứng từ danh sách nguồn được phép gồm VnExpress, VnEconomy, CafeF và Vietstock; bài báo chỉ được dùng để giải thích sự kiện tác động, rủi ro, động lực kinh doanh hoặc điều kiện bác bỏ luận điểm khi có bằng chứng liên kết.",
+            "Vì sao dự phóng theo cách này",
+            "Mỗi dòng dự phóng nối tiếp số liệu lịch sử: tăng trưởng doanh thu, biên lợi nhuận, "
+            "vốn lưu động, chi đầu tư (capex) và thuế được kéo dài từ xu hướng quá khứ và đặc thù "
+            "ngành dược, để dòng tiền dự phóng bám sát năng lực thực tế của doanh nghiệp thay vì "
+            "giả định tùy ý. [1][2]",
         ),
         (
             "Cách tính giá mục tiêu",
-            "Mô hình dự phóng doanh thu, biên lợi nhuận, vốn lưu động, chi đầu tư và thuế để tính dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE); sau đó chiết khấu bằng chi phí vốn bình quân, cộng giá trị cuối kỳ, điều chỉnh nợ ròng và chia cho số cổ phiếu để ra giá mục tiêu.",
+            "Từ dự phóng, hệ thống tính dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết "
+            "khấu về hiện tại bằng chi phí vốn bình quân (WACC), cộng giá trị cuối kỳ, trừ nợ ròng "
+            "rồi chia cho số cổ phiếu đang lưu hành để ra giá trị mỗi cổ phần. [2]",
         ),
         (
             "Cách ra khuyến nghị",
-            "Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức; MUA nếu >20%, BÁN nếu <-10%, còn lại là NẮM GIỮ.",
+            "Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. "
+            "MUA nếu >20%, BÁN nếu <-10%, còn lại là NẮM GIỮ.",
         ),
         (
             "Kết quả hiện tại",
-            f"Giá hiện tại {current_price} VND, giá mục tiêu {target_price} VND, tiềm năng tăng/giảm {upside}, tổng lợi suất kỳ vọng {total_return}, khuyến nghị hệ thống: {vm.recommendation}.",
+            f"Giá hiện tại {current_price} VND, giá mục tiêu {target_price} VND, tiềm năng "
+            f"tăng/giảm {upside}, tổng lợi suất kỳ vọng {total_return}, khuyến nghị hệ thống: "
+            f"{vm.recommendation}.",
         ),
         (
-            "Cách kiểm tra đúng sai",
-            "Người đọc có thể đối chiếu từng giả định trong bảng dự phóng, bảng định giá, ma trận độ nhạy và nguồn tham khảo; nếu không đồng ý với giả định chi phí vốn bình quân, tăng trưởng dài hạn, biên lợi nhuận hoặc vốn lưu động, có thể thay đổi giả định và kết luận định giá sẽ thay đổi tương ứng.",
+            "Người đọc tự kiểm chứng thế nào",
+            "Mọi giả định đều hiển thị trong bảng dự phóng, mô hình định giá và ma trận độ nhạy. "
+            "Nếu không đồng ý với giả định về chi phí vốn bình quân (WACC), tăng trưởng dài hạn, "
+            "biên lợi nhuận hay vốn lưu động, người đọc có thể thay đổi và thấy ngay kết luận định "
+            "giá thay đổi tương ứng. Mỗi nhận định định tính đều có đánh số [n] dẫn về nguồn ở mục "
+            "Chú giải nguồn trích dẫn bên dưới.",
         ),
     ]
     table_rows = "".join(
         f"<tr><td>{_e(label)}</td><td>{_e(value)}</td></tr>"
         for label, value in rows
     )
-    body = (
+    return (
         f"<p>{intro}</p>"
         '<table class="financial-model-table report-status-table">'
         "<thead><tr><th>Hạng mục</th><th>Diễn giải</th></tr></thead>"
         f"<tbody>{table_rows}</tbody></table>"
-    )
-
-    reasons = _review_reasons(vm)
-    items = "".join(f"<li>{_e(reason)}</li>" for reason in reasons[:5])
-    return (
-        body
-        + f"<p><strong>Các điểm nhạy cảm cần người đọc kiểm tra khi sử dụng kết quả:</strong></p>"
-        + f"<ol class=\"source-list\">{items}</ol>"
     )
 
 
@@ -646,30 +679,6 @@ def _appendix_page(vm: ClientReportViewModel) -> str:
 """
 
 
-# Backend blocker/missing-field codes → client-facing Vietnamese reasons.
-# Audit rule: never surface raw gate keys in the client output.
-_BLOCKER_REASONS_VI: dict[str, str] = {
-    "blend_is_draft_only": "Mô hình định giá hợp nhất giữa dòng tiền tự do doanh nghiệp và dòng tiền tự do cổ đông đang phụ thuộc vào giả định cấu trúc vốn; người đọc nên kiểm tra cầu nối định giá trước khi sử dụng kết quả.",
-    "valuation_gap_gt_25pct": "Chênh lệch giữa định giá dòng tiền tự do doanh nghiệp và dòng tiền tự do cổ đông vượt ngưỡng kiểm định (>25%), cần soát lại giả định nợ vay, chi đầu tư và vốn lưu động.",
-    "valuation_result_not_publishable": "Kết quả định giá cần được đối chiếu lại với bảng giả định và cầu nối giá mục tiêu để xác nhận khả năng tái lập.",
-    "current_price": "Thiếu giá thị trường hiện tại đã xác thực.",
-    "target_price": "Chưa tính được giá mục tiêu hợp lệ.",
-    "upside_downside": "Chưa xác định được tiềm năng tăng/giảm.",
-    "forecast_years": "Thiếu bảng dự phóng 5 năm hợp lệ.",
-    "fcff_table": "Thiếu bảng dòng tiền FCFF chi tiết.",
-    "price_chart": "Thiếu biểu đồ diễn biến giá.",
-    "shares_outstanding": "Thiếu số lượng cổ phiếu đang lưu hành đã xác thực (EPS không reconcile được).",
-    "approval_status": "Giả định định giá là điểm người đọc cần tự kiểm tra: chi phí vốn, tăng trưởng dài hạn, vốn lưu động, nợ vay và số cổ phiếu quyết định trực tiếp giá mục tiêu.",
-}
-
-def _review_reasons(vm: ClientReportViewModel) -> list[str]:
-    codes = list(dict.fromkeys(list(vm.display_blocking_reasons) + list(vm.missing_required_fields)))
-    reasons = [_BLOCKER_REASONS_VI.get(c) for c in codes]
-    reasons = [r for r in reasons if r]
-    if not reasons:
-        reasons = ["Mô hình định giá cần được đối chiếu thêm để xác nhận khả năng tái lập của kết quả."]
-    return reasons
-
 
 def build_client_report_sections(vm: ClientReportViewModel) -> list[dict[str, Any]]:
     # (page_id, title_vi, html, chart_ids, chapter_break)
@@ -680,7 +689,7 @@ def build_client_report_sections(vm: ClientReportViewModel) -> list[dict[str, An
         ("snapshot",             "Tổng quan đầu tư",                    _snapshot_page(vm),              ["C1"],                False),
         ("business_financials",  "Triển vọng kinh doanh và tài chính",  _business_financials_page(vm),   ["C2", "C4", "C5"],    True),
         ("valuation",            "Định giá và độ nhạy",                _valuation_page(vm),             [],                    True),
-        ("risks_sources",        "Rủi ro đầu tư",                      _risks_sources_page(vm),         [],                    False),
+        ("risks_sources",        "Rủi ro đầu tư",                      _risks_sources_page(vm),         [],                    True),
         ("appendix",             "Phụ lục bảng tài chính",             _appendix_page(vm),              [],                    True),
         ("report_status",        "Giải trình phương pháp và quyết định", _report_status_page(vm),       [],                    True),
     ]

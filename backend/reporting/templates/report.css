@@ -1030,12 +1030,6 @@ tbody tr:nth-child(even) {
     color: var(--research-green);
 }
 
-.rec-draft-note {
-    color: #7a4d00;
-    font-size: 7.6pt;
-    margin-top: 3pt;
-}
-
 .lead-thesis {
     font-size: 9.2pt;
     line-height: 1.42;
@@ -1181,3 +1175,58 @@ tbody tr:nth-child(even) {
         display: none !important;
     }
 }
+
+/* ════════════════════════════════════════════════════════════════════
+ * READABILITY FLOOR — minimum 12pt body text across the whole report.
+ *
+ * The report has no page budget, so nothing is shrunk to fit a page count.
+ * This block sits last so it overrides every earlier (smaller) font-size.
+ * Headings stay proportionally larger; body/table/caption text is >=12pt.
+ * Only the marginal page-number chrome (@page boxes) stays small.
+ * ════════════════════════════════════════════════════════════════════ */
+
+body {
+    font-size: 12pt !important;
+    line-height: 1.5;
+}
+
+h1, .acbs-main h1 { font-size: 20pt !important; line-height: 1.2; }
+h2, .acbs-main h2, .model-table-block h2,
+.acbs-sidebar .model-table-block h2 { font-size: 15pt !important; }
+h3 { font-size: 13.5pt !important; }
+h4, h5, h6 { font-size: 12.5pt !important; }
+
+/* All running text, tables, sidebars, captions, lists and notes >=12pt. */
+p, li, td, th, span, div, a, strong, em, blockquote,
+table, thead th, tbody td,
+.financial-model-table, .financial-model-table th, .financial-model-table td,
+.main-financial-table, .main-financial-table .numeric,
+.appendix-financial-table, .appendix-financial-table th,
+.appendix-financial-table td, .appendix-financial-table .numeric,
+.driver-table, .matrix-table, .matrix-table th, .matrix-table td,
+.broker-side-table, .broker-side-table td, .broker-side-table.compact td,
+.trading-performance-table, .trading-performance-table th, .trading-performance-table td,
+.acbs-sidebar, .acbs-main, .acbs-page-header, .acbs-date, .acbs-brand,
+.analyst-name, .analyst-card, .side-section-title,
+.recommendation-card .rec-label, .rec-sub, .rec-sector, .rec-raw,
+.lead-thesis, .table-unit, .table-source-note, .report-chart figcaption,
+.source-list, .source-list li, .citation-legend, .citation-ref,
+.report-status-table td, .report-status-table th,
+.fpts-section-title, .fpts-cover-meta, .fpts-cover-report-type,
+.fpts-company-bar div:last-child, .disclaimer {
+    font-size: 12pt !important;
+}
+
+/* Cover hero recommendation and section banners can be a touch larger. */
+.recommendation-card .rec-value { font-size: 22pt !important; }
+.fpts-section-title { font-size: 13pt !important; }
+.fpts-company-bar { font-size: 15pt !important; }
+.fpts-cover-brand { font-size: 16pt !important; }
+
+/* Wide multi-year appendix tables: keep cells from overflowing the page
+ * now that every cell is >=12pt — allow long labels to wrap and numbers
+ * to use tight horizontal padding. */
+.appendix-financial-table { table-layout: fixed; width: 100%; }
+.appendix-financial-table th,
+.appendix-financial-table td { padding: 3pt 2pt; overflow-wrap: anywhere; }
+.appendix-financial-table .numeric { white-space: normal; }

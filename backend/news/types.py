@@ -13,6 +13,23 @@ ALLOWED_DOMAINS: frozenset[str] = frozenset(
     }
 )
 
+# Citation allowlist — a superset of the discovery whitelist. Automated discovery stays
+# restricted to ALLOWED_DOMAINS, but a human-vetted article (manual ingest) may be cited
+# from this wider set of reputable Vietnamese financial outlets and official company /
+# exchange / regulator sites. A URL outside this set is never stored or cited.
+CITATION_ALLOWED_DOMAINS: frozenset[str] = ALLOWED_DOMAINS | frozenset(
+    {
+        # Reputable financial media
+        "tinnhanhchungkhoan.vn",
+        "mekongasean.vn",
+        "baodautu.vn",
+        # Official company / exchange / regulator
+        "dhgpharma.com.vn",
+        "hsx.vn",
+        "hnx.vn",
+    }
+)
+
 # Discovery methods, in the plan's priority order (plan §4.2).
 DISCOVERY_METHODS: frozenset[str] = frozenset({"rss", "sitemap", "search"})
 
@@ -22,6 +39,12 @@ SOURCE_DISPLAY_NAMES: dict[str, str] = {
     "vneconomy.vn": "VnEconomy",
     "cafef.vn": "CafeF",
     "vietstock.vn": "Vietstock",
+    "tinnhanhchungkhoan.vn": "Tin nhanh Chứng khoán",
+    "mekongasean.vn": "Mekong ASEAN",
+    "baodautu.vn": "Báo Đầu tư",
+    "dhgpharma.com.vn": "DHG Pharma",
+    "hsx.vn": "HOSE",
+    "hnx.vn": "HNX",
 }
 
 

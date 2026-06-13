@@ -16,6 +16,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
 
+from backend.news.relevance import build_ticker_keywords, normalize_vi
 from backend.reporting.report_data_loader import _COMPANIES, ROOT, _read_manifest_or_raise
 from backend.reporting.market_data_artifact import (
     MarketDataArtifact,
@@ -111,6 +112,7 @@ class ClientReportViewModel:
     publication_status: str
     missing_required_fields: list[str] = field(default_factory=list)
     key_sources: list[dict[str, str]] = field(default_factory=list)
+    news_citations: list[dict[str, str]] = field(default_factory=list)
     display_blocking_reasons: list[str] = field(default_factory=list)
     critic_findings: list[str] = field(default_factory=list)
     metric_availability: dict[str, Any] = field(default_factory=dict)
@@ -151,6 +153,10 @@ def _derive_periods(
             if isinstance(metric_dict, dict):
                 all_periods.update(metric_dict.keys())
         actuals = sorted(p for p in all_periods if p.endswith(("FY", "A")))
+        # Display actuals with a single-letter 'A' suffix so column headers read
+        # uniformly against the 'F' forecast labels (2024A 2025A 2026F ...).
+        # Canonical fact keys keep the 'FY' suffix; _to_fact_period() maps back.
+        actuals = [p[:-2] + "A" if p.endswith("FY") else p for p in actuals]
 
     forecast_labels = _forecast_period_labels(forecast)
 
@@ -1699,6 +1705,82 @@ def _load_latest_citation(ticker: str) -> dict[str, Any]:
     return {}
 
 
+def _evidence_to_citations(
+    rows: list[dict[str, Any]], keywords: tuple[str, ...]
+) -> list[dict[str, str]]:
+    """Turn news evidence rows into ordered, de-duplicated citation dicts.
+
+    One citation per article (deduped by URL); rows whose title/claim never mention
+    the ticker or company are dropped so leftover or off-topic data is never cited.
+    """
+    normalized_keywords = [normalize_vi(k) for k in keywords if k]
+    seen: set[str] = set()
+    citations: list[dict[str, str]] = []
+    for row in rows:
+        url = str(row.get("url") or row.get("source_url") or "").strip()
+        title = str(row.get("title") or "").strip()
+        claim = str(row.get("claim") or "").strip()
+        haystack = normalize_vi(f"{title} {claim}")
+        if not any(kw in haystack for kw in normalized_keywords):
+            continue
+        if url and url in seen:
+            continue
+        if url:
+            seen.add(url)
+        citations.append(
+            {
+                "source_name": str(row.get("source_name") or "").strip(),
+                "title": title or claim,
+                "url": url,
+                "published_at": str(row.get("published_at") or "").strip(),
+            }
+        )
+    return citations
+
+
+def _load_news_citations(ticker: str, company_name: str | None) -> list[dict[str, str]]:
+    """Load real whitelisted news articles for the ticker from the news schema.
+
+    Returns [] on any failure (no DB, empty news schema) so the report renders
+    cleanly without news citations until real articles have been collected.
+    """
+    keywords = build_ticker_keywords(ticker, company_name)
+    try:
+        from backend.database.config import connect_with_retry, require_database_url
+
+        with connect_with_retry(require_database_url()) as conn:
+            with conn.cursor() as cur:
+                # One row per article (its title + a sample claim), newest first. The
+                # article title carries the company name so relevance matching works even
+                # when an individual claim text omits the ticker.
+                cur.execute(
+                    """
+                    SELECT DISTINCT ON (a.source_url)
+                        a.source_name, a.title, a.source_url, a.published_at, e.claim
+                    FROM news.extracted_evidence e
+                    JOIN news.raw_articles a ON a.article_id = e.article_id
+                    WHERE e.ticker = %s
+                    ORDER BY a.source_url, a.published_at DESC NULLS LAST
+                    """,
+                    (ticker.upper(),),
+                )
+                fetched = cur.fetchall()
+    except Exception:  # noqa: BLE001 — citations are best-effort; never block a report
+        return []
+
+    rows = [
+        {
+            "source_name": source_name,
+            "title": title or "",
+            "url": source_url,
+            "published_at": str(published_at) if published_at is not None else "",
+            "claim": claim,
+        }
+        for source_name, title, source_url, published_at, claim in fetched
+    ]
+    return _evidence_to_citations(rows, keywords)
+
+
 def _load_market_snapshot(ticker: str):
     """Market snapshot data must be supplied through the run contract."""
     return None
@@ -2188,6 +2270,7 @@ def build_client_report_view_model(
         publication_status=publication_status,
         missing_required_fields=missing,
         key_sources=_key_sources(ticker, snapshot),
+        news_citations=_load_news_citations(ticker, company_name),
         display_blocking_reasons=display_gate["blocking_reasons"],
         critic_findings=critic_findings,
         metric_availability=(

@@ -1,4 +1,9 @@
-"""Regression: cover recommendation hero points readers to the methodology page."""
+"""Regression: cover recommendation hero reads as a finished, official product.
+
+The cover must not carry any draft/hedging note. The methodology page at the end
+of the report explains how the figures are produced; the cover itself just shows
+the conclusion (recommendation, target price, upside) cleanly.
+"""
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -18,18 +23,19 @@ def _vm(publication_status: str) -> SimpleNamespace:
     )
 
 
-def test_methodology_note_present_without_draft_warning():
+def test_cover_hero_has_no_warning_or_draft_note():
     html = _rec_hero(_vm("analyst_review_only"))
 
-    assert "rec-draft-note" in html
-    assert "mô hình định lượng" in html
-    assert "giải trình phương pháp" in html
+    assert "rec-draft-note" not in html
     assert "Dự thảo" not in html
     assert "chưa được công bố chính thức" not in html
+    # The conclusion itself is still shown.
+    assert "NẮM GIỮ" in html
+    assert "91,476" in html
 
 
-def test_methodology_note_also_present_when_client_exportable():
+def test_cover_hero_clean_when_client_exportable():
     html = _rec_hero(_vm("client_exportable"))
 
-    assert "rec-draft-note" in html
-    assert "giải trình phương pháp" in html
+    assert "rec-draft-note" not in html
+    assert "NẮM GIỮ" in html
