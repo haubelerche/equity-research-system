@@ -129,197 +129,51 @@ LANGFUSE_BASE_URL=https://cloud.langfuse.com
 
 ---
 
-## Zero to Hero — thứ tự lệnh tạo báo cáo (ví dụ: DHG)
+## Tạo báo cáo lần đầu
 
-> Trên Windows luôn thêm `PYTHONUTF8=1` để không lỗi Unicode tiếng Việt.
+Chỉ cần chạy theo đúng thứ tự dưới đây. Ví dụ tạo báo cáo cho mã `DHG`.
 
-**Cách nhanh nhất (1 lệnh, recompute toàn bộ):** một `run_id` xuyên suốt
-ingestion → facts → valuation → evidence → report → gates → export.
+### 1. Cài đặt ban đầu
 
-```bash
-# 0. Cài đặt + DB (chỉ làm một lần)
+Chỉ chạy bước này một lần:
+
+```powershell
 pip install -r requirements.txt
-python -m backend.database.migrate              # áp dụng mọi migration
-
-# 1. Chạy full pipeline cho ticker
-PYTHONUTF8=1 python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025 \
-    --auto-approve-assumptions --auto-approve-final
+python -m backend.database.migrate
+$env:PYTHONUTF8 = "1"
 ```
 
-**Cách từng bước (debug / chạy lại một stage):**
+Đảm bảo file `.env` đã có `DATABASE_URL`, `OPENAI_API_KEY` và cấu hình Supabase.
 
-```bash
-PYTHONUTF8=1 python scripts/ingest_ticker.py  --ticker DHG --years 5   # 1. thu thập + promote facts
-PYTHONUTF8=1 python scripts/build_facts.py    --ticker DHG             # 2. canonical facts + quality gates
-PYTHONUTF8=1 python scripts/run_valuation.py  --ticker DHG             # 3. định giá (FCFF/FCFE/blend)
-PYTHONUTF8=1 python scripts/build_index.py    --ticker DHG             # 4. evidence index + citations
-PYTHONUTF8=1 python scripts/run_research.py   --ticker DHG \           # 5. harness: report + gates + export
-    --auto-approve-assumptions --auto-approve-final
+### 2. Chạy nghiên cứu
+
+```powershell
+python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025 --draft
 ```
 
-### ⚠️ Recompute vs Replay — đọc kỹ để khỏi nhầm
+Lệnh này tự chạy toàn bộ quy trình thu thập dữ liệu, chuẩn hóa, định giá, xây dựng
+báo cáo và kiểm tra chất lượng. Không cần chạy riêng từng script trung gian.
 
-| Lệnh | Làm gì | Khi nào dùng |
-|------|--------|--------------|
-| `run_research.py` | **Recompute**: đọc canonical facts mới, tính lại valuation, dựng report model mới rồi export | Sau khi dữ liệu/facts/code đổi — **bắt buộc** để số liệu mới vào báo cáo |
-| `generate_fast_report.py` | **Replay**: chỉ render lại `final_report_model` artifact đã dựng sẵn của run cũ (hoặc tải lại PDF đã publish) | Lấy nhanh báo cáo của một run đã chạy; **KHÔNG** phản ánh thay đổi facts/định giá mới |
+### 3. Xuất báo cáo ra máy
 
-> Sửa facts trong DB rồi chỉ chạy `generate_fast_report.py` sẽ **không thấy thay đổi** —
-> phải chạy lại `run_research.py` để dựng report model mới.
+Sau khi `run_research.py` hoàn tất:
 
-```bash
-# Render nhanh từ artifact của run đã có (không recompute):
-PYTHONUTF8=1 python scripts/generate_fast_report.py --ticker DHG
-# → output/DHG_fast_report.pdf, output/DHG_fast_report.html
+```powershell
+python scripts/generate_fast_report.py --ticker DHG
 ```
+
+Báo cáo được tạo tại:
+
+```text
+output/DHG_fast_report.pdf
+output/DHG_fast_report.html
+```
+
+Để tạo báo cáo cho công ty khác, thay `DHG` bằng mã cổ phiếu cần nghiên cứu.
+Khi cần cập nhật số liệu hoặc nội dung báo cáo, chạy lại bước 2 rồi bước 3.
 
 ---
-
-## Chi tiết từng stage (ví dụ: DHG)
-
-### Bước 1 — Thu thập dữ liệu
-
-```bash
-python scripts/ingest_ticker.py --ticker DHG --years 5
-```
-
-Kết quả:
-- Connector ghi raw fact candidates vào `ingest.observations` (v2 path), sau đó
-  `fact_promotion.promote_accepted_facts` chọn winner mỗi (period, metric) →
-  `fact.canonical_facts`. Winner: tier thấp nhất → confidence cao nhất → `created_at` mới nhất.
-- Source metadata ghi vào `ingest.source_documents`
-- Log ingestion run
-
-### Bước 2 — Xây dựng canonical facts
-
-```bash
-python scripts/build_facts.py --ticker DHG
-```
-
-Kết quả:
-- Đọc canonical facts từ `fact.production_facts` (view trên `fact.canonical_facts`)
-- Validation report + completeness score (coverage / core_keys / source_tier / valuation gates)
-- Research snapshot tạo qua `backend.database.canonical.snapshot_dal` khi valuation gate pass
-
-### Bước 3 — Định giá (Valuation)
-
-```bash
-python scripts/run_valuation.py --ticker DHG
-```
-
-Tùy chọn thêm:
-
-```bash
-python scripts/run_valuation.py --ticker DHG --wacc 0.10 --terminal-growth 0.03
-python scripts/run_valuation.py --ticker DHG --target-pe 18 --target-ev-ebitda 12
-```
-
-Kết quả production tại Supabase Storage `runs/{run_id}/valuation.json` và metadata trong `research.run_artifacts`:
-- Bảng ratio (revenue growth, gross margin, ROE, ROA, ...)
-- DCF 3 kịch bản (bear / base / bull)
-- **FCFF** — EBIT(1−T) + D&A − CAPEX − ΔNWC; chiết khấu WACC; bridge EV → Equity
-- **FCFE** — NI + D&A − CAPEX − ΔNWC + Net Borrowing; chiết khấu Re; Equity Value trực tiếp
-- **Blend 60% FCFF + 40% FCFE** — target price kết hợp theo cẩm nang định giá
-- Sensitivity tables: WACC×g (FCFF), Re×g (FCFE), blend grid, P/E matrix, EV/EBITDA matrix
-
-### Bước 4 — Xây dựng evidence index
-
-```bash
-python scripts/build_index.py --ticker DHG
-```
-
-Kết quả:
-- Document chunks lưu trong DB; run summaries and evidence packets are uploaded to Supabase Storage `runs/{run_id}/`
-
-### Bước 5 — Sinh báo cáo qua harness
-
-```bash
-python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025 --auto-approve-assumptions --auto-approve-final
-```
-
-Báo cáo production được render trong stage `PUBLISH` của harness
-(`ClientReportPublisher`) và upload vào bucket `runs/{run_id}/`. Cấu trúc:
-- §1 Tóm tắt điều hành + Draft rating
-- §2 Giới thiệu doanh nghiệp
-- §3 Kết quả tài chính lịch sử + dự phóng 5 năm
-- §4 Định giá: DCF truyền thống, FCFF (60%), FCFE (40%), Blend DCF (60/40), Multiples
-- §5 Rủi ro đầu tư
-- §6 Kết luận + kiểm toán chất lượng
-- Phụ lục: giả định, bảng bằng chứng, footnotes
-
-### Bước 6 — Đánh giá chất lượng (7 cổng kiểm tra)
-
-Quality gate chạy tự động trong stage `REVIEW` của harness
-(`evaluate_report_quality.run_quality_gate`). Các cổng kiểm tra:
-
-| Cổng | Mô tả |
-|------|-------|
-| numeric_consistency | Số liệu báo cáo khớp canonical facts |
-| citation_coverage | 100% claims có trích dẫn |
-| valuation_reproducibility | Valuation tái lập được từ artifact |
-| stale_data | Dữ liệu không quá 30 ngày |
-| unsupported_claims | Không có "guaranteed return" hoặc absolute advice |
-| user_facing_citation_quality | Citations hợp lệ |
-| balance_sheet_identity_check | Assets = Liabilities + Equity trong forecast |
-
-Kết quả `PASS` mới được phép export. `CRITICAL FAIL` chuyển run sang `blocked`.
-
-### Bước 7 — Export tự động
-
-Khi toàn bộ deterministic gate đạt, stage `PUBLISH` tự render HTML/PDF và chuyển
-run sang trạng thái `approved`/`PUBLISHED`. Không có bước phê duyệt thủ công trong
-pipeline; chuyên gia đánh giá báo cáo đã xuất như một hoạt động hậu kiểm
-(xem `docs/SEQUENCE.md`).
-
----
-
-## Chạy end-to-end một lệnh (Phase 8)
-
-```bash
-python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025 --auto-approve-assumptions --auto-approve-final
-```
-
-Lệnh này chạy toàn bộ pipeline từ ingestion đến evaluation, ghi run trace vào DB.
-
-### Luồng production đầy đủ và render run-scoped
-
-Không chạy riêng lẻ `run_valuation.py` để tạo báo cáo chính thức. Luồng
-production phải dùng một `run_id` xuyên suốt:
-
-```bash
-python scripts/run_research.py --ticker DBD --from-year 2021 --to-year 2025
-```
-
-Pipeline tự render và publish ở stage `PUBLISH` khi mọi gate đạt. Để render nhanh
-từ artifact của một run đã có (không chạy lại pipeline), dùng
-`scripts/generate_fast_report.py --ticker <TICKER>`.
-
----
-
-## Output mẫu — DHG (2026-05-26)
-
-```
-Ticker:        DHG (HOSE — Dược phẩm)
-Giá thị trường: 94,400 VND/CP
-Snapshot:      snap_0c2fbaf394e8fbc5ac14 (96 facts, 2022FY–2025FY)
-
-Định giá:
-  FCFF DCF (60%)          80,963 VND/CP   upside -14.2%
-  FCFE DCF (40%)          87,026 VND/CP   upside  -7.8%
-  Blend 60/40             83,388 VND/CP   upside -11.7%
-  DCF truyền thống (base) 137,010 VND/CP  upside +45.1%
-  P/E 15.0x               94,620 VND/CP
-  EV/EBITDA 10.0x        109,608 VND/CP
-
-Kiểm soát chất lượng:
-  TV weight (FCFF/EV):  61.3%  [ok < 70%]
-  FCFF/FCFE gap:         6.97%  [ok < 25%]
-
-Evaluation: 7/7 gates PASS
-Draft rating: BAN (SELL) — chưa được analyst phê duyệt
-```
-
----
+![alt text](image.png)
 
 ## Cấu trúc thư mục
 
@@ -373,15 +227,66 @@ Draft rating: BAN (SELL) — chưa được analyst phê duyệt
 
 ---
 
-## Ticker universe MVP
+## Danh sách 53 mã cổ phiếu dược phẩm và y tế Việt Nam
 
-| Ticker | Công ty | Ưu tiên |
-|--------|---------|---------|
-| DHG | Dược Hậu Giang | ★ Ticker đầu tiên (đã hoàn thành) |
-| IMP | Imexpharm | ★★ |
-| DMC | Dược phẩm Trung Ương 2 | ★★ |
-| TRA | Traphaco | ★★ |
-| DBD | Dược Bình Định | ★★ |
+Universe nghiên cứu đầy đủ được quản lý tại
+`config/dataset/universe/pharma_vn_universe.csv`.
+
+| Mã | Công ty | Sàn |
+|----|---------|-----|
+| DHG | Công ty Cổ phần Dược Hậu Giang | HOSE |
+| IMP | Công ty Cổ phần Dược phẩm Imexpharm | HOSE |
+| DMC | Công ty Cổ phần Xuất nhập khẩu Y tế Domesco | HOSE |
+| TRA | Công ty Cổ phần Traphaco | HOSE |
+| DBD | Công ty Cổ phần Dược - Trang thiết bị Y tế Bình Định | HOSE |
+| OPC | Công ty Cổ phần Dược phẩm OPC | HOSE |
+| PME | Công ty Cổ phần Pymepharco | HOSE |
+| MKP | Công ty Cổ phần Hóa - Dược phẩm Mekophar | HOSE |
+| TNH | Công ty Cổ phần Bệnh viện Quốc tế Thái Nguyên | HOSE |
+| JVC | Công ty Cổ phần Thiết bị Y tế Việt Nhật | HOSE |
+| DVN | Tổng Công ty Dược Việt Nam - CTCP | UPCOM |
+| DHT | Công ty Cổ phần Dược phẩm Hà Tây | HNX |
+| LDP | Công ty Cổ phần Dược Lâm Đồng - Ladophar | HNX |
+| PPP | Công ty Cổ phần Dược phẩm Phong Phú | HNX |
+| DP3 | Công ty Cổ phần Dược phẩm Trung ương 3 | UPCOM |
+| DP1 | Công ty Cổ phần Dược phẩm Trung ương CPC1 | UPCOM |
+| TW3 | Công ty Cổ phần Dược - Trang thiết bị Y tế Đà Nẵng | UPCOM |
+| MED | Công ty Cổ phần Dược Trung ương Mediplantex | UPCOM |
+| PMC | Công ty Cổ phần Dược phẩm Dược liệu Pharmedic | UPCOM |
+| AMV | Công ty Cổ phần Sản xuất Kinh doanh Dược và Trang thiết bị Y tế Việt Mỹ | HNX |
+| YTC | Công ty Cổ phần Xuất nhập khẩu Y tế Thành phố Hồ Chí Minh | UPCOM |
+| VHE | Công ty Cổ phần Dược liệu Việt Nam | UPCOM |
+| VDP | Công ty Cổ phần Dược phẩm Trung ương Vidipha | UPCOM |
+| DCL | Công ty Cổ phần Dược phẩm Cửu Long | HOSE |
+| SPM | Công ty Cổ phần S.P.M | HOSE |
+| VMD | Công ty Cổ phần Y Dược phẩm Vimedimex | HNX |
+| BVP | Công ty Cổ phần Dược phẩm Bình Việt | HNX |
+| HBH | Công ty Cổ phần Chuỗi Nhà thuốc An Khang | HOSE |
+| DNM | Công ty Cổ phần Điều dưỡng Minh Hải | UPCOM |
+| DBT | Công ty Cổ phần Dược phẩm Trung Việt | UPCOM |
+| DPP | Công ty Cổ phần Dược phẩm Phúc Thành | UPCOM |
+| DRP | Công ty Cổ phần Dược Rarapharm | UPCOM |
+| T32 | Công ty Cổ phần Y tế Hà Tây | UPCOM |
+| DTP | Công ty Cổ phần Dược Tây Ninh | UPCOM |
+| VMC | Công ty Cổ phần Y Dược Việt Nam | UPCOM |
+| NDT | Công ty Cổ phần Bệnh viện Đa khoa tỉnh Ninh Bình | UPCOM |
+| P29 | Công ty Cổ phần Dược phẩm Trung ương 29 | UPCOM |
+| DDS | Công ty Cổ phần Diagnostics | UPCOM |
+| BID | Công ty Cổ phần Dược Bình Dương | UPCOM |
+| PDT | Công ty Cổ phần Dược phẩm Đồng Tháp | UPCOM |
+| BCR | Công ty Cổ phần Bio-Pharmachemie | UPCOM |
+| VNP | Công ty Cổ phần Dược Việt Nhơn | UPCOM |
+| YT1 | Công ty Cổ phần Dược phẩm Y tế 1 | UPCOM |
+| CPC | Công ty Cổ phần Dược phẩm CPC1 Hà Nội | UPCOM |
+| HDA | Công ty Cổ phần Dược Hà Đông | UPCOM |
+| TMP | Công ty Cổ phần Dược phẩm Tâm Phúc | UPCOM |
+| DRG | Công ty Cổ phần Dược Rế Giang | UPCOM |
+| LNT | Công ty Cổ phần Dược Liên | UPCOM |
+| HGP | Công ty Cổ phần Dược phẩm Hưng Gia | UPCOM |
+| PVD | Công ty Cổ phần Dược phẩm Việt Đức | UPCOM |
+| DGW | Công ty Cổ phần Thế Giới Số | HOSE |
+| CON | Công ty Cổ phần Dược phẩm Con Khỉ | UPCOM |
+| TNT | Công ty Cổ phần Dược phẩm Tân Nhơn Tây | UPCOM |
 
 ---
 
@@ -407,13 +312,3 @@ python -m pytest tests/integration/ -v
 
 ---
 
-## Tài liệu tham khảo nội bộ
-
-| File | Nội dung |
-|------|----------|
-| `CLAUDE.md` | Project rules, implementation protocol, phase roadmap |
-| `specs/02_ARCHITECTURE_DECISIONS.md` | Các quyết định kiến trúc |
-| `specs/03_DATA_CONTRACTS.md` | Data contracts |
-| `specs/07_EVALUATION_RUBRIC.md` | Rubric đánh giá báo cáo |
-| `.claude/plan/Cam_nang_dinh_gia_60_FCFF_40_FCFE_ban_sach.md` | Cẩm nang định giá 60/40 |
-| `.claude/plan/Huong_dan_danh_gia_sensitivity_analysis.md` | Hướng dẫn sensitivity analysis |

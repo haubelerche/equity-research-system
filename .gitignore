@@ -8,7 +8,7 @@ plans/
 fin_data/
 .claude/
 .claude/EXECUTION_STATE.md
-tests/
+
 docs/superpowers/
 
 # Large reference repos
@@ -57,16 +57,7 @@ storage/runs/
 storage/exports/
 storage/archive/
 
-# Browser automation profile — not source data (explicit reference)
-# artifacts/chrome-profile/
-# artifacts/.chrome-profile/
 
-# Generated report outputs — reproducible, not for git (explicit reference)
-output/
-# artifacts/reports_html/
-# artifacts/reports_pdf/
-# artifacts/charts/
-# artifacts/manifests/
 
 # Font binaries — provisioned locally via scripts/setup_fonts.py
 assets/fonts/*.ttf
@@ -79,3 +70,13 @@ artifacts/dev/
 
 # Runtime storage-migration dumps — reproducible audit output, not source
 audits/storage_migrations/
+/docs
+/docs/*.md
+
+# Reproducible runtime output — never source (reports, logs, dumps, debug traces)
+artifacts/
+data/
+output/
+storage/debug/
+image.png
+
