@@ -67,18 +67,17 @@ pip install -r requirements.txt
 
 ### PostgreSQL
 
-Cần một PostgreSQL instance (local hoặc Supabase). Chạy migrations theo thứ tự:
+Cần một PostgreSQL instance (local hoặc Supabase). Áp dụng toàn bộ migrations bằng
+migration runner (tự động theo thứ tự, idempotent — không chạy psql thủ công từng file):
 
 ```bash
-psql $DATABASE_URL -f backend/database/migrations/001_ref_schema.sql
-psql $DATABASE_URL -f backend/database/migrations/002_ingest_schema.sql
-psql $DATABASE_URL -f backend/database/migrations/003_fact_schema.sql
-psql $DATABASE_URL -f backend/database/migrations/004_research_schema.sql
-psql $DATABASE_URL -f backend/database/migrations/005_seed_reference_data.sql
-psql $DATABASE_URL -f backend/database/migrations/006_grants_and_privileges.sql
-psql $DATABASE_URL -f backend/database/migrations/007_expand_line_items.sql
-psql $DATABASE_URL -f backend/database/migrations/008_research_snapshots.sql
+python -m backend.database.migrate --check     # liệt kê migration đang pending
+python -m backend.database.migrate             # áp dụng tất cả migration còn thiếu
+python -m backend.database.migrate --version    # in version schema cao nhất đã áp dụng
 ```
+
+Runner đọc `DATABASE_URL` từ `.env`. `CURRENT_SCHEMA_VERSION` trong
+`backend/database/migrate.py` phải khớp file migration mới nhất.
 
 ### OCR Runtime Requirements
 
@@ -110,11 +109,10 @@ python scripts/check_ocr_runtime.py
 Tạo file `.env` ở root:
 
 ```env
-DATABASE_URL=postgresql://postgres.your-project:your-password@aws-0-your-region.pooler.supabase.com:6543/postgres
-ANTHROPIC_API_KEY=sk-ant-...
-OPENAI_API_KEY=sk-...  # optional for embeddings/OpenAI adapter
-DEFAULT_MODEL_NAME=claude-sonnet-4-6
-FALLBACK_MODEL=gpt-4.1
+# Dùng Supabase SESSION pooler cổng 5432 — KHÔNG dùng transaction pooler 6543
+# (6543 không giữ session/prepared statements → ingestion & migration lỗi).
+DATABASE_URL=postgresql://postgres.your-project:your-password@aws-0-your-region.pooler.supabase.com:5432/postgres
+OPENAI_API_KEY=sk-...   # production models: gpt-5.4-mini + gpt-5.4-nano
 LOG_LEVEL=INFO
 ```
 
@@ -131,7 +129,53 @@ LANGFUSE_BASE_URL=https://cloud.langfuse.com
 
 ---
 
-## Chạy pipeline đầy đủ cho một ticker (ví dụ: DHG)
+## Zero to Hero — thứ tự lệnh tạo báo cáo (ví dụ: DHG)
+
+> Trên Windows luôn thêm `PYTHONUTF8=1` để không lỗi Unicode tiếng Việt.
+
+**Cách nhanh nhất (1 lệnh, recompute toàn bộ):** một `run_id` xuyên suốt
+ingestion → facts → valuation → evidence → report → gates → export.
+
+```bash
+# 0. Cài đặt + DB (chỉ làm một lần)
+pip install -r requirements.txt
+python -m backend.database.migrate              # áp dụng mọi migration
+
+# 1. Chạy full pipeline cho ticker
+PYTHONUTF8=1 python scripts/run_research.py --ticker DHG --from-year 2021 --to-year 2025 \
+    --auto-approve-assumptions --auto-approve-final
+```
+
+**Cách từng bước (debug / chạy lại một stage):**
+
+```bash
+PYTHONUTF8=1 python scripts/ingest_ticker.py  --ticker DHG --years 5   # 1. thu thập + promote facts
+PYTHONUTF8=1 python scripts/build_facts.py    --ticker DHG             # 2. canonical facts + quality gates
+PYTHONUTF8=1 python scripts/run_valuation.py  --ticker DHG             # 3. định giá (FCFF/FCFE/blend)
+PYTHONUTF8=1 python scripts/build_index.py    --ticker DHG             # 4. evidence index + citations
+PYTHONUTF8=1 python scripts/run_research.py   --ticker DHG \           # 5. harness: report + gates + export
+    --auto-approve-assumptions --auto-approve-final
+```
+
+### ⚠️ Recompute vs Replay — đọc kỹ để khỏi nhầm
+
+| Lệnh | Làm gì | Khi nào dùng |
+|------|--------|--------------|
+| `run_research.py` | **Recompute**: đọc canonical facts mới, tính lại valuation, dựng report model mới rồi export | Sau khi dữ liệu/facts/code đổi — **bắt buộc** để số liệu mới vào báo cáo |
+| `generate_fast_report.py` | **Replay**: chỉ render lại `final_report_model` artifact đã dựng sẵn của run cũ (hoặc tải lại PDF đã publish) | Lấy nhanh báo cáo của một run đã chạy; **KHÔNG** phản ánh thay đổi facts/định giá mới |
+
+> Sửa facts trong DB rồi chỉ chạy `generate_fast_report.py` sẽ **không thấy thay đổi** —
+> phải chạy lại `run_research.py` để dựng report model mới.
+
+```bash
+# Render nhanh từ artifact của run đã có (không recompute):
+PYTHONUTF8=1 python scripts/generate_fast_report.py --ticker DHG
+# → output/DHG_fast_report.pdf, output/DHG_fast_report.html
+```
+
+---
+
+## Chi tiết từng stage (ví dụ: DHG)
 
 ### Bước 1 — Thu thập dữ liệu
 
@@ -140,8 +184,10 @@ python scripts/ingest_ticker.py --ticker DHG --years 5
 ```
 
 Kết quả:
-- Raw financial data lưu DB; runtime artifacts must be uploaded to Supabase Storage, not loose repo folders
-- Source metadata ghi vào `ref.source_versions`
+- Connector ghi raw fact candidates vào `ingest.observations` (v2 path), sau đó
+  `fact_promotion.promote_accepted_facts` chọn winner mỗi (period, metric) →
+  `fact.canonical_facts`. Winner: tier thấp nhất → confidence cao nhất → `created_at` mới nhất.
+- Source metadata ghi vào `ingest.source_documents`
 - Log ingestion run
 
 ### Bước 2 — Xây dựng canonical facts
@@ -151,9 +197,9 @@ python scripts/build_facts.py --ticker DHG
 ```
 
 Kết quả:
-- Canonical financial facts lưu `public.financial_facts`
-- Validation report + completeness score
-- Research snapshot tạo tại `research.snapshots`
+- Đọc canonical facts từ `fact.production_facts` (view trên `fact.canonical_facts`)
+- Validation report + completeness score (coverage / core_keys / source_tier / valuation gates)
+- Research snapshot tạo qua `backend.database.canonical.snapshot_dal` khi valuation gate pass
 
 ### Bước 3 — Định giá (Valuation)
 
