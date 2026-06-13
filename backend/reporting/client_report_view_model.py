@@ -113,6 +113,7 @@ class ClientReportViewModel:
     missing_required_fields: list[str] = field(default_factory=list)
     key_sources: list[dict[str, str]] = field(default_factory=list)
     news_citations: list[dict[str, str]] = field(default_factory=list)
+    insight_pack: list[dict[str, Any]] = field(default_factory=list)
     display_blocking_reasons: list[str] = field(default_factory=list)
     critic_findings: list[str] = field(default_factory=list)
     metric_availability: dict[str, Any] = field(default_factory=dict)
@@ -1738,6 +1739,46 @@ def _evidence_to_citations(
     return citations
 
 
+def _build_insight_pack_for_report(
+    facts: dict[str, dict[str, float]],
+    forecast_rows: dict[str, dict[str, Any]],
+    periods: list[str],
+    upside: float | None,
+    recommendation: str,
+    news_count: int,
+) -> list[dict[str, Any]]:
+    """Assemble the deterministic insight pack from the report's computed series."""
+    from backend.reporting.insight_builder import build_insight_pack
+
+    first_fc = next((i for i, p in enumerate(periods) if p.endswith("F")), len(periods))
+    actual_idx = [i for i, p in enumerate(periods) if not p.endswith("F")]
+
+    def _at(series: list[float | None], idx: int) -> float | None:
+        return series[idx] if 0 <= idx < len(series) else None
+
+    rev_growth = _revenue_growth(facts, forecast_rows, periods)
+    profit_growth = _net_profit_growth(facts, forecast_rows, periods)
+    gross_profit = _row_values(facts, forecast_rows, "gross_profit", periods)
+    revenue = _row_values(facts, forecast_rows, "revenue", periods)
+    gm = [_safe_div(gross_profit[i], revenue[i]) for i in actual_idx]
+    net_debt = _net_debt_canonical(facts, forecast_rows, periods)
+    ebitda = _ebitda_values(forecast_rows, facts, periods)
+    nde = [_safe_div(net_debt[i], ebitda[i]) for i in actual_idx]
+
+    return build_insight_pack(
+        {
+            "revenue_growth_latest": _at(rev_growth, first_fc),
+            "profit_growth_latest": _at(profit_growth, first_fc),
+            "gross_margin_latest": gm[-1] if gm else None,
+            "gross_margin_prev": gm[-2] if len(gm) >= 2 else None,
+            "net_debt_ebitda": next((v for v in reversed(nde) if v is not None), None),
+            "upside": upside,
+            "recommendation": recommendation,
+            "news_count": news_count,
+        }
+    )
+
+
 def _load_news_citations(ticker: str, company_name: str | None) -> list[dict[str, str]]:
     """Load real whitelisted news articles for the ticker from the news schema.
 
@@ -2168,6 +2209,11 @@ def build_client_report_view_model(
     )
     critic_findings = _load_critic_findings(manifest, run_id=run_id)
 
+    news_citations = _load_news_citations(ticker, company_name)
+    insight_pack = _build_insight_pack_for_report(
+        facts, forecast_rows, periods, upside, recommendation, len(news_citations)
+    )
+
     return ClientReportViewModel(
         ticker=ticker,
         company_name=company_name,
@@ -2271,7 +2317,8 @@ def build_client_report_view_model(
         publication_status=publication_status,
         missing_required_fields=missing,
         key_sources=_key_sources(ticker, snapshot),
-        news_citations=_load_news_citations(ticker, company_name),
+        news_citations=news_citations,
+        insight_pack=insight_pack,
         display_blocking_reasons=display_gate["blocking_reasons"],
         critic_findings=critic_findings,
         metric_availability=(

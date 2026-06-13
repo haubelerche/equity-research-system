@@ -560,6 +560,41 @@ def _valuation_page(vm: ClientReportViewModel) -> str:
 """
 
 
+def _render_insights(vm: ClientReportViewModel) -> str:
+    """Render the ready insights from the research insight pack, each with its evidence
+    markers and valuation implication. Insufficient-evidence insights are not shown."""
+    items: list[str] = []
+    for insight in getattr(vm, "insight_pack", []) or []:
+        if insight.get("status") != "ready":
+            continue
+        claim = str(insight.get("claim") or "").strip()
+        if not claim:
+            continue
+        refs = "".join(insight.get("evidence_refs") or [])
+        logic = str(insight.get("analysis_logic") or "").strip()
+        valimp = str(insight.get("valuation_implication") or "").strip()
+        valimp_html = (
+            f'<p class="insight-implication"><em>Hàm ý định giá:</em> {_e(valimp)}</p>'
+            if valimp else ""
+        )
+        logic_html = f"<p class=\"insight-logic\">{_e(logic)}</p>" if logic else ""
+        items.append(
+            '<div class="insight-item">'
+            f'<p class="insight-claim"><strong>{_e(claim)}</strong> {_e(refs)}</p>'
+            f"{logic_html}{valimp_html}</div>"
+        )
+    return "".join(items)
+
+
+def _insights_page(vm: ClientReportViewModel) -> str:
+    return f"""
+<div class="client-report-page insights-page">
+  <h1>Phân tích &amp; nhận định</h1>
+  {_render_insights(vm)}
+</div>
+"""
+
+
 def _risks_sources_page(vm: ClientReportViewModel) -> str:
     risk_body = "".join(
         f"<tr><td>{_e(label)}</td>{''.join(f'<td>{_e(v)}</td>' for v in values)}</tr>"
@@ -689,6 +724,7 @@ def build_client_report_sections(vm: ClientReportViewModel) -> list[dict[str, An
         ("snapshot",             "Tổng quan đầu tư",                    _snapshot_page(vm),              ["C1"],                False),
         ("business_financials",  "Triển vọng kinh doanh và tài chính",  _business_financials_page(vm),   ["C2", "C4", "C5"],    True),
         ("valuation",            "Định giá và độ nhạy",                _valuation_page(vm),             [],                    True),
+        ("insights",             "Phân tích và nhận định",             _insights_page(vm),              [],                    True),
         ("risks_sources",        "Rủi ro đầu tư",                      _risks_sources_page(vm),         [],                    True),
         ("appendix",             "Phụ lục bảng tài chính",             _appendix_page(vm),              [],                    True),
         ("report_status",        "Giải trình phương pháp và quyết định", _report_status_page(vm),       [],                    True),
