@@ -22,6 +22,7 @@ from backend.news.extractor import extract_main_content
 from backend.news.relevance import build_ticker_keywords, filter_relevant
 from backend.news.store import (
     create_research_run,
+    evidenced_source_urls,
     link_run_article,
     mark_run_status,
     save_evidence,
@@ -95,13 +96,16 @@ def gather_ticker_evidence(
     company_name: str | None,
     topic: str,
     listings: Sequence[str] = (),
+    skip_urls: set[str] | None = None,
     max_articles: int = 15,
 ) -> tuple[list[RawArticle], dict[str, list[EvidenceItem]]]:
     """Run the offline-testable core pipeline and return collected articles + evidence.
 
-    Discovery combines RSS feeds and plain-HTML listing pages. No database access:
-    callers persist the result separately.
+    Discovery combines RSS feeds and plain-HTML listing pages. Candidates in ``skip_urls``
+    (already-processed articles) are dropped before any fetch/LLM call, so repeated runs
+    are idempotent and cheap. No database access: callers persist the result separately.
     """
+    skip = skip_urls or set()
     candidates = list(discover_candidates(feeds, fetch_xml=fetch_xml))
     if listings:
         seen = {c.source_url for c in candidates}
@@ -109,7 +113,7 @@ def gather_ticker_evidence(
             if candidate.source_url not in seen:
                 seen.add(candidate.source_url)
                 candidates.append(candidate)
-    relevant = filter_relevant(candidates, keywords)
+    relevant = [c for c in filter_relevant(candidates, keywords) if c.source_url not in skip]
     articles = collect_articles(relevant, fetch_html=fetch_html, max_articles=max_articles)
 
     evidence_by_url: dict[str, list[EvidenceItem]] = {}
@@ -287,6 +291,9 @@ def run_ticker_news_collection(
     )
     research_run_id = f"news_{ticker}_{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}"
 
+    # Skip articles already extracted for this ticker → idempotent, no redundant LLM calls.
+    skip_urls = evidenced_source_urls(conn, ticker)
+
     articles, evidence_by_url = gather_ticker_evidence(
         keywords=keywords,
         feeds=feeds,
@@ -297,6 +304,7 @@ def run_ticker_news_collection(
         company_name=company_name,
         topic=topic,
         listings=listings,
+        skip_urls=skip_urls,
         max_articles=max_articles,
     )
     counts = persist_ticker_evidence(

@@ -57,6 +57,24 @@ def test_pipeline_collects_only_ticker_articles_and_extracts_evidence() -> None:
     assert items[0].source_name == "CafeF"
 
 
+def test_skip_urls_excludes_already_processed_articles() -> None:
+    # An article already collected (in skip_urls) is not fetched or extracted again.
+    articles, evidence_by_url = gather_ticker_evidence(
+        keywords=("DHG", "Dược Hậu Giang"),
+        feeds=[("https://cafef.vn/thi-truong.rss", "rss")],
+        fetch_xml=_fetch_xml,
+        fetch_html=_fetch_html,
+        llm_extract=_llm_extract,
+        ticker="DHG",
+        company_name="Dược Hậu Giang",
+        topic="DHG news",
+        skip_urls={"https://cafef.vn/dhg-lai.chn"},
+        max_articles=10,
+    )
+    assert articles == []
+    assert evidence_by_url == {}
+
+
 def test_pipeline_returns_empty_when_no_article_matches_ticker() -> None:
     articles, evidence_by_url = gather_ticker_evidence(
         keywords=("XYZ",),

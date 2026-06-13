@@ -138,7 +138,12 @@ def link_run_article(
 
 
 def save_evidence(conn, article_id: int, items: list[EvidenceItem]) -> list[int]:
-    """Insert evidence rows for one article. Returns the new evidence_ids."""
+    """Insert evidence rows for one article, idempotently. Returns newly-inserted ids.
+
+    A repeated collection run for the same ticker re-extracts the same claims; the
+    unique index on (article_id, md5(claim)) + ON CONFLICT DO NOTHING means an identical
+    claim is stored once, so cron re-runs never duplicate evidence.
+    """
     ids: list[int] = []
     for item in items:
         with conn.cursor() as cur:
@@ -148,6 +153,7 @@ def save_evidence(conn, article_id: int, items: list[EvidenceItem]) -> list[int]
                     (article_id, topic, ticker, company_name, claim, evidence_text, evidence_type,
                      source_name, source_domain, source_url, published_at, accessed_at, confidence)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (article_id, md5(claim)) DO NOTHING
                 RETURNING evidence_id
                 """,
                 (
@@ -166,8 +172,24 @@ def save_evidence(conn, article_id: int, items: list[EvidenceItem]) -> list[int]
                     item.confidence,
                 ),
             )
-            ids.append(cur.fetchone()[0])
+            row = cur.fetchone()
+            if row is not None:  # None when the row already existed (ON CONFLICT DO NOTHING)
+                ids.append(row[0])
     return ids
+
+
+def evidenced_source_urls(conn, ticker: str) -> set[str]:
+    """Source URLs that already have >=1 extracted evidence row for this ticker.
+
+    Used to skip re-fetching/re-extracting already-processed articles on repeated
+    (cron) runs — making collection idempotent and avoiding redundant LLM calls.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT DISTINCT source_url FROM news.extracted_evidence WHERE ticker = %s",
+            (ticker,),
+        )
+        return {row[0] for row in cur.fetchall()}
 
 
 def get_evidence_by_ticker(conn, ticker: str, *, limit: int = 30) -> list[EvidenceItem]:
