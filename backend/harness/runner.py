@@ -411,8 +411,10 @@ class ResearchGraphRunner:
         elif stage == "PUBLISH":
             if not self._render_and_publish_final_report(state):
                 return state
-            state.status = "approved"
-            self.store.update_run_state(state.run_id, "approved", "PUBLISH", finished=True)
+            # Auto-render reaches here with no human sign-off; the terminal status
+            # reflects that it is an auto-exported draft, not an approved report.
+            state.status = "auto_exported"
+            self.store.update_run_state(state.run_id, "auto_exported", "PUBLISH", finished=True)
 
         return state
 
@@ -1206,6 +1208,6 @@ class ResearchGraphRunner:
             "WRITE_REPORT": "report_ready",
             "REVIEW": "report_ready",
             "EXPORT_GATES": "report_ready",
-            "PUBLISH": "approved",
+            "PUBLISH": "auto_exported",
         }
         return mapping.get(stage, "running")

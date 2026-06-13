@@ -220,3 +220,15 @@ def test_draft_forecast_stage_uses_deterministic_fast_path(monkeypatch) -> None:
     assert result.artifacts["forecast_narrative"]["mode"] == "draft_fast_path"
     assert "valuation_proposal" not in result.artifacts
     assert result.artifacts["research_lock"]["locked"] is True
+
+
+def test_publish_sets_auto_exported_status(monkeypatch) -> None:
+    store = MagicMock()
+    runner = ResearchGraphRunner(store=store)
+    state = ResearchGraphState(run_id="run_pub", ticker="DHG", objective="test")
+    monkeypatch.setattr(runner, "_render_and_publish_final_report", lambda s: True)
+
+    result = runner._execute_stage(state, "PUBLISH")
+
+    assert result.status == "auto_exported"
+    store.update_run_state.assert_any_call("run_pub", "auto_exported", "PUBLISH", finished=True)

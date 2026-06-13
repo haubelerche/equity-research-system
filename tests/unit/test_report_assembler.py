@@ -322,7 +322,7 @@ def test_render_stage_persists_artifact_refs() -> None:
     state = runner._execute_stage(_runner_state(), "PUBLISH")
 
     assert publisher.calls == 1
-    assert state.status == "approved"
+    assert state.status == "auto_exported"
     assert [artifact["artifact_type"] for artifact in store.saved_artifacts] == [
         "report_html",
         "report_pdf",
@@ -333,7 +333,7 @@ def test_render_stage_persists_artifact_refs() -> None:
     }
     assert store.updates[-1] == {
         "run_id": "run-001",
-        "status": "approved",
+        "status": "auto_exported",
         "stage": "PUBLISH",
         "finished": True,
     }
