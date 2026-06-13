@@ -1,5 +1,5 @@
 from pathlib import Path
-from backend.reporting.output_inventory import scan_report_inventory, ReportInventoryItem
+from backend.reporting.output_inventory import scan_report_inventory, ReportInventoryItem, load_universe
 
 
 def _universe():
@@ -97,3 +97,18 @@ def test_directory_inside_preview_not_counted_as_page(tmp_path: Path):
 
     dhg = items[0]
     assert dhg.preview_pages == [1]  # page 9 (directory) must NOT be counted
+
+
+def test_load_universe_reads_csv(tmp_path: Path):
+    csv = tmp_path / "u.csv"
+    csv.write_text(
+        "ticker,company_name,exchange,segment,is_mvp,notes\n"
+        "DHG,Duoc Hau Giang,HOSE,pharma,true,MVP core\n"
+        "OPC,OPC Pharma,HOSE,pharma,false,\n",
+        encoding="utf-8",
+    )
+    rows = load_universe(csv)
+    assert len(rows) == 2
+    assert rows[0]["ticker"] == "DHG"
+    assert rows[0]["is_mvp"] is True
+    assert rows[1]["is_mvp"] is False

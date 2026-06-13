@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv as _csv
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -53,6 +54,23 @@ def _resolve_report_files(ticker: str, output_dir: Path) -> _ResolvedFiles:
         explanation=explanation if explanation.is_file() else None,
         preview_pages=sorted(pages),  # numeric order
     )
+
+
+def load_universe(csv_path: Path) -> list[dict]:
+    rows: list[dict] = []
+    with open(csv_path, newline="", encoding="utf-8") as fh:
+        for r in _csv.DictReader(fh):
+            rows.append(
+                {
+                    "ticker": (r.get("ticker") or "").strip().upper(),
+                    "company_name": (r.get("company_name") or "").strip(),
+                    "exchange": (r.get("exchange") or "").strip(),
+                    "segment": (r.get("segment") or "").strip(),
+                    "is_mvp": (r.get("is_mvp") or "").strip().lower() == "true",
+                    "notes": (r.get("notes") or "").strip(),
+                }
+            )
+    return rows
 
 
 def scan_report_inventory(output_dir: Path, universe: list[dict]) -> list[ReportInventoryItem]:
