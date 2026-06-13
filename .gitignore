@@ -76,7 +76,7 @@ audits/storage_migrations/
 # Reproducible runtime output — never source (reports, logs, dumps, debug traces)
 artifacts/
 data/
-output/
+
 storage/debug/
-image.png
+
 

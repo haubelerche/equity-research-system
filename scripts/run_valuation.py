@@ -867,6 +867,8 @@ def run_valuation(
         "valuation_confidence": confidence.to_dict(),
         "formula_traces": formula_traces,
     }
+    from backend.evaluation.fpts_grade import build_valuation_bridge
+    artifact["valuation_bridge"] = build_valuation_bridge(artifact)
 
     VALUATION_DIR.mkdir(parents=True, exist_ok=True)
     ts = generated_at.strftime("%Y%m%dT%H%M%S")

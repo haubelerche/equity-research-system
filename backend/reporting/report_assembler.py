@@ -116,6 +116,7 @@ class ReportAssembler:
                 errors.append(f"missing or invalid required spec: {name}")
 
         errors.extend(self._identity_errors(report_draft, merged_artifacts, merged_specs))
+        errors.extend(self._snapshot_errors(merged_artifacts))
         return ReportAssemblyValidation(tuple(errors))
 
     def assemble(
@@ -154,9 +155,22 @@ class ReportAssembler:
                 if name != "claim_ledger"
             },
         }
+        snapshot_id = self._snapshot_id(merged_artifacts)
+        if snapshot_id:
+            model["snapshot_id"] = snapshot_id
 
         # These are authored draft fields, so preserving them does not create content.
-        for field in ("claims", "required_tables", "required_charts", "limitations"):
+        for field in (
+            "claims",
+            "required_tables",
+            "required_charts",
+            "limitations",
+            "recommendation",
+            "target_price",
+            "target_price_vnd",
+            "publication_status",
+            "approval_status",
+        ):
             if field in report_draft:
                 model[field] = copy.deepcopy(report_draft[field])
 
@@ -235,6 +249,25 @@ class ReportAssembler:
                             f"{name}.{field} does not match report_draft.{field}"
                         )
         return errors
+
+    @staticmethod
+    def _snapshot_id(artifacts: Mapping[str, Any]) -> str | None:
+        for name in ("valuation", "forecast_model", "market_snapshot", "financial_analysis"):
+            payload = artifacts.get(name)
+            if isinstance(payload, Mapping) and payload.get("snapshot_id"):
+                return str(payload["snapshot_id"])
+        return None
+
+    @staticmethod
+    def _snapshot_errors(artifacts: Mapping[str, Any]) -> list[str]:
+        snapshots = {
+            str(payload["snapshot_id"])
+            for payload in artifacts.values()
+            if isinstance(payload, Mapping) and payload.get("snapshot_id")
+        }
+        if len(snapshots) > 1:
+            return ["source artifacts do not share one snapshot_id"]
+        return []
 
 
 def assemble_report(

@@ -42,14 +42,14 @@ def _load_dotenv() -> None:
 
 
 def _latest_run_id(ticker: str) -> str | None:
-    """Most-recent run_id for *ticker* that has a built final_report_model."""
+    """Most-recent run_id for *ticker* with a publishable final report model."""
     from backend.database.config import connect_with_retry, require_database_url
 
     with connect_with_retry(require_database_url()) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT DISTINCT run_id FROM research.run_artifacts "
-                "WHERE run_id LIKE %s AND section_key = 'final_report_model' "
+                "WHERE run_id LIKE %s AND section_key = 'publishable_final_report_model' "
                 "ORDER BY run_id DESC LIMIT 1",
                 (f"run_{ticker.lower()}%",),
             )
@@ -87,7 +87,7 @@ def main() -> int:
 
     run_id = args.run_id or _latest_run_id(ticker)
     if not run_id:
-        print(f"No run with a final_report_model found for {ticker}.")
+        print(f"No run with a publishable_final_report_model found for {ticker}.")
         return 1
 
     manifest = _read_manifest_or_raise(run_id, base_dir=ROOT)

@@ -16,6 +16,7 @@ from backend.reporting.final_report_renderer import (
     PublishedReportArtifact,
 )
 from backend.reporting.pdf_renderer import PDFRenderError
+from backend.reporting.publication_readiness import ClientFinalAuthorization
 from backend.reporting.report_assembler import (
     REQUIRED_SECTIONS,
     ReportAssembler,
@@ -116,6 +117,16 @@ def test_mismatched_artifact_identity_fails() -> None:
     )
 
 
+def test_mismatched_artifact_snapshots_fail_assembly() -> None:
+    draft, artifacts, specs = _inputs()
+    artifacts["valuation"]["snapshot_id"] = "snap-valuation"
+    artifacts["forecast_model"]["snapshot_id"] = "snap-forecast"
+
+    validation = ReportAssembler().validate(draft, artifacts, specs)
+
+    assert "source artifacts do not share one snapshot_id" in validation.errors
+
+
 def test_explicit_keyword_inputs_are_supported() -> None:
     draft, artifacts, specs = _inputs()
 
@@ -189,6 +200,9 @@ def test_final_report_publisher_creates_run_html_and_pdf_refs(tmp_path: Path) ->
         renderer=FinalReportRenderer(pdf_renderer=FakePDFRenderer()),
         storage_adapter=adapter,  # type: ignore[arg-type]
         work_dir=tmp_path,
+        authorization_provider=lambda **_: ClientFinalAuthorization(
+            "run-001", "DBD", "snap-1", 90
+        ),
     )
 
     published = publisher.publish(
@@ -283,7 +297,7 @@ def _runner_state() -> ResearchGraphState:
         objective="render publish test",
         current_stage="PUBLISH",
         artifacts={
-            "final_report_model": assemble_report(*_inputs()),
+            "publishable_final_report_model": assemble_report(*_inputs()),
             "report": {"snapshot_id": "snap-1"},
         },
         draft_report={"snapshot_id": "snap-1"},
@@ -315,22 +329,16 @@ def _runner_with_publisher(publisher: FakePublisher) -> tuple[ResearchGraphRunne
     return runner, store
 
 
-def test_render_stage_persists_artifact_refs() -> None:
+def test_publish_stage_finalizes_without_rendering() -> None:
     publisher = FakePublisher()
     runner, store = _runner_with_publisher(publisher)
 
     state = runner._execute_stage(_runner_state(), "PUBLISH")
 
-    assert publisher.calls == 1
+    # PUBLISH no longer renders — it just verifies the locked model and sets status.
+    assert publisher.calls == 0
     assert state.status == "auto_exported"
-    assert [artifact["artifact_type"] for artifact in store.saved_artifacts] == [
-        "report_html",
-        "report_pdf",
-    ]
-    assert {ref["section_key"] for ref in state.artifact_refs} >= {
-        "report_html",
-        "report_pdf",
-    }
+    assert "rendered_report" not in state.artifacts
     assert store.updates[-1] == {
         "run_id": "run-001",
         "status": "auto_exported",
@@ -339,14 +347,15 @@ def test_render_stage_persists_artifact_refs() -> None:
     }
 
 
-def test_render_stage_blocks_when_supabase_publisher_fails() -> None:
-    publisher = FakePublisher(fail_pdf=True)
+def test_publish_stage_blocks_when_publishable_model_missing() -> None:
+    publisher = FakePublisher()
     runner, store = _runner_with_publisher(publisher)
+    state = _runner_state()
+    del state.artifacts["publishable_final_report_model"]
 
-    state = runner._execute_stage(_runner_state(), "PUBLISH")
+    runner._execute_stage(state, "PUBLISH")
 
-    assert publisher.calls == 1
-    assert state.status == "failed"
-    assert state.blocking_reason and "render_publish_failed" in state.blocking_reason
-    assert any("render_publish_failed" in e for e in state.errors)
-    assert store.updates[-1]["status"] == "failed"
+    assert publisher.calls == 0
+    assert state.status == "blocked"
+    assert "publishable_final_report_model_missing" in state.blocking_reason
+    assert store.updates[-1]["status"] == "blocked"

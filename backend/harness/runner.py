@@ -274,6 +274,21 @@ class ResearchGraphRunner:
             gate = financial_analyst_gate(state.financial_tables)
             self._record_gate(state, gate)
 
+            from backend.documents.company_research_pack import build_company_research_pack
+
+            company_research_pack = build_company_research_pack(
+                ticker=state.ticker,
+                evidence_pack=state.artifacts.get("evidence_pack") or {},
+                financial_analysis=state.artifacts.get("financial_analysis") or {},
+            )
+            state.artifacts["company_research_pack"] = company_research_pack
+            self._persist_payload_artifact(
+                state,
+                "company_research_pack",
+                company_research_pack,
+                "deterministic_company_research_pack_builder",
+            )
+
         elif stage == "FORECAST_AND_VALUE":
             # Driver-based forecast.
             forecast_result = self._run_tool(
@@ -359,8 +374,17 @@ class ResearchGraphRunner:
             if not validation.passed:
                 self._record_gate(state, fail_gate("REPORT_ASSEMBLY_GATE", ";".join(validation.errors)))
             else:
-                state.artifacts["final_report_model"] = ReportAssembler().assemble(state.draft_report, artifacts, specs)
-                self._persist_payload_artifact(state, "final_report_model", state.artifacts["final_report_model"], "report_assembler")
+                state.artifacts["report_candidate_model"] = ReportAssembler().assemble(
+                    state.draft_report,
+                    artifacts,
+                    specs,
+                )
+                self._persist_payload_artifact(
+                    state,
+                    "report_candidate_model",
+                    state.artifacts["report_candidate_model"],
+                    "report_assembler",
+                )
                 self._record_gate(state, pass_gate("REPORT_ASSEMBLY_GATE"))
 
         elif stage == "REVIEW":
@@ -387,58 +411,73 @@ class ResearchGraphRunner:
             # Citation gate.
             gate = citation_gate(state.draft_report or state.artifacts.get("report", {}))
             self._record_gate(state, gate)
+            if not state.blocking_reason:
+                self._promote_report_model(
+                    state,
+                    source_key="report_candidate_model",
+                    target_key="review_passed_report_model",
+                    producer="review_gate_promotion",
+                    locked=True,
+                )
 
         elif stage == "EXPORT_GATES":
+            from backend.evaluation.fpts_grade import fpts_grade_gate
+
             self._write_evidence_packet(state)
-            self._record_gate(state, package_validation_gate(state.model_dump(mode="json")))
+            fpts_evaluation = fpts_grade_gate(state.model_dump(mode="json"))
+            self._record_gate(state, fpts_evaluation)
+            state.artifacts["fpts_grade_evaluation"] = fpts_evaluation.get("summary") or {}
+            self._persist_payload_artifact(
+                state,
+                "fpts_grade_evaluation",
+                state.artifacts["fpts_grade_evaluation"],
+                "deterministic_fpts_grade_evaluator",
+            )
+            package_gate = package_validation_gate(state.model_dump(mode="json"))
+            self._record_gate(state, package_gate)
             self._persist_payload_artifact(state, "quality_gate", state.gate_results, "deterministic_gates")
+            if fpts_evaluation.get("passed") and package_gate.get("passed") and not state.blocking_reason:
+                self._promote_report_model(
+                    state,
+                    source_key="review_passed_report_model",
+                    target_key="publishable_final_report_model",
+                    producer="export_gate_promotion",
+                    locked=True,
+                )
 
         elif stage == "PUBLISH":
-            if not self._render_and_publish_final_report(state):
+            # Automation stops at the locked publishable model. No PDF is rendered
+            # here — client-final rendering is an explicitly authorized action via
+            # generate_fast_report.py with --mode client_final.
+            if not self._finalize_publish(state):
                 return state
-            # Auto-render reaches here with no human sign-off; the terminal status
-            # reflects that it is an auto-exported draft, not an approved report.
             state.status = "auto_exported"
             self.store.update_run_state(state.run_id, "auto_exported", "PUBLISH", finished=True)
 
         return state
 
-    def _render_and_publish_final_report(self, state: ResearchGraphState) -> bool:
-        from backend.reporting.final_report_renderer import ClientReportPublisher
+    def _finalize_publish(self, state: ResearchGraphState) -> bool:
+        """Verify the publishable model exists and write the final manifest.
 
-        final_model = state.artifacts.get("final_report_model")
+        No PDF is rendered here. Rendering happens only through explicit
+        authorization (generate_fast_report.py --mode client_final or
+        --mode analyst_draft).
+        """
+        final_model = state.artifacts.get("publishable_final_report_model")
         if not isinstance(final_model, dict):
             state.status = "blocked"
-            state.blocking_reason = "final_report_model_missing_for_render"
+            state.blocking_reason = "publishable_final_report_model_missing"
             self.store.update_run_state(state.run_id, "blocked", "PUBLISH")
             return False
 
         try:
-            try:
-                self._write_run_manifest(state)
-            except Exception as manifest_exc:  # noqa: BLE001
-                import logging
-                logging.getLogger(__name__).warning(
-                    "Manifest pre-write before render failed for run=%s: %s",
-                    state.run_id, manifest_exc,
-                )
-            publisher = self.report_publisher or ClientReportPublisher()
-            published = publisher.publish(
-                run_id=state.run_id,
-                ticker=state.ticker,
-                mode="client_final",
+            self._write_run_manifest(state)
+        except Exception as manifest_exc:  # noqa: BLE001
+            import logging
+            logging.getLogger(__name__).warning(
+                "Manifest write failed for run=%s: %s",
+                state.run_id, manifest_exc,
             )
-            state.artifacts["rendered_report"] = published.to_dict()
-            for ref in published.artifact_refs():
-                self._persist_published_artifact_ref(state, ref)
-        except Exception as exc:  # noqa: BLE001
-            state.status = "failed"
-            state.blocking_reason = f"render_publish_failed:{exc}"
-            state.errors.append(state.blocking_reason)
-            self.store.update_run_state(state.run_id, "failed", "PUBLISH")
-            self.progress.error("PUBLISH", state.blocking_reason)
-            return False
-
         return True
 
     def _persist_published_artifact_ref(
@@ -1007,6 +1046,8 @@ class ResearchGraphRunner:
         section_key: str,
         payload: dict[str, Any],
         producer: str,
+        *,
+        is_locked: bool = False,
     ) -> None:
         state.checkpoint_version += 1
         version = state.checkpoint_version
@@ -1021,7 +1062,7 @@ class ResearchGraphRunner:
             payload=payload,
             checksum=checksum,
             created_by_agent=producer,
-            is_locked=False,
+            is_locked=is_locked,
         )
         state.artifact_refs.append(
             {
@@ -1030,9 +1071,34 @@ class ResearchGraphRunner:
                 "section_key": section_key,
                 "version": version,
                 "checksum": checksum,
-                "is_locked": False,
+                "is_locked": is_locked,
                 "producer": producer,
             }
+        )
+
+    def _promote_report_model(
+        self,
+        state: ResearchGraphState,
+        *,
+        source_key: str,
+        target_key: str,
+        producer: str,
+        locked: bool,
+    ) -> None:
+        model = state.artifacts.get(source_key)
+        if not isinstance(model, dict):
+            self._record_gate(
+                state,
+                fail_gate("REPORT_ARTIFACT_LIFECYCLE_GATE", f"{source_key}_missing"),
+            )
+            return
+        state.artifacts[target_key] = model
+        self._persist_payload_artifact(
+            state,
+            target_key,
+            model,
+            producer,
+            is_locked=locked,
         )
 
     def _record_tool_trace(

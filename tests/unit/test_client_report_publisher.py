@@ -16,6 +16,7 @@ from backend.reporting import final_report_renderer as frr
 from backend.reporting import html_renderer as hr
 from backend.reporting import report_data_loader as rdl
 from backend.reporting import valuation_workings as vw
+from backend.reporting.publication_readiness import ClientFinalAuthorization
 
 
 class _FakeAdapter:
@@ -52,6 +53,10 @@ class _FakePDFRenderer:
         return path
 
 
+def _authorize(*, run_id, ticker):
+    return ClientFinalAuthorization(run_id, ticker, "snap-1", 90)
+
+
 def _patch_common(monkeypatch):
     monkeypatch.setattr(
         crvm, "build_client_report_view_model",
@@ -74,7 +79,11 @@ def test_client_report_publisher_uploads_html_and_pdf(monkeypatch, tmp_path):
     _patch_common(monkeypatch)
     # Workings input loading fails without a real manifest -> must stay non-fatal.
     adapter = _FakeAdapter()
-    publisher = frr.ClientReportPublisher(storage_adapter=adapter, work_dir=tmp_path)
+    publisher = frr.ClientReportPublisher(
+        storage_adapter=adapter,
+        work_dir=tmp_path,
+        authorization_provider=_authorize,
+    )
 
     published = publisher.publish(run_id="run-001", ticker="DHG", mode="client_final")
 
@@ -100,7 +109,11 @@ def test_client_report_publisher_attaches_workings_md(monkeypatch, tmp_path):
     )
 
     adapter = _FakeAdapter()
-    publisher = frr.ClientReportPublisher(storage_adapter=adapter, work_dir=tmp_path)
+    publisher = frr.ClientReportPublisher(
+        storage_adapter=adapter,
+        work_dir=tmp_path,
+        authorization_provider=_authorize,
+    )
     published = publisher.publish(run_id="run-001", ticker="DHG", mode="client_final")
 
     assert published.workings is not None
@@ -119,7 +132,11 @@ def test_client_report_publisher_workings_failure_is_non_fatal(monkeypatch, tmp_
     monkeypatch.setattr(vw, "load_workings_inputs", _boom)
 
     adapter = _FakeAdapter()
-    publisher = frr.ClientReportPublisher(storage_adapter=adapter, work_dir=tmp_path)
+    publisher = frr.ClientReportPublisher(
+        storage_adapter=adapter,
+        work_dir=tmp_path,
+        authorization_provider=_authorize,
+    )
     published = publisher.publish(run_id="run-001", ticker="DHG", mode="client_final")
 
     # PDF/HTML still published; workings simply absent.

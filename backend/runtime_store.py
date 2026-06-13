@@ -279,6 +279,36 @@ class RuntimeStore:
             "finished_at":          row[10].isoformat() if row[10] else None,
         }
 
+    def get_latest_approval(
+        self,
+        run_id: str,
+        approval_stage: str,
+    ) -> dict[str, Any] | None:
+        with self.conn() as connection:
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT approval_stage, decision, reviewer, feedback_patch_json,
+                           created_at, approved_at
+                    FROM research.run_approvals
+                    WHERE run_id = %s AND approval_stage = %s
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                    """,
+                    (run_id, approval_stage),
+                )
+                row = cur.fetchone()
+        if row is None:
+            return None
+        return {
+            "approval_stage": row[0],
+            "decision": row[1],
+            "reviewer": row[2],
+            "feedback_patch_json": row[3] or {},
+            "created_at": row[4].isoformat(),
+            "approved_at": row[5].isoformat() if row[5] else None,
+        }
+
     def add_step(
         self,
         run_id: str,
@@ -385,7 +415,8 @@ class RuntimeStore:
                         storage_bucket     = EXCLUDED.storage_bucket,
                         checksum           = EXCLUDED.checksum,
                         content_type       = EXCLUDED.content_type,
-                        file_size_bytes    = EXCLUDED.file_size_bytes
+                        file_size_bytes    = EXCLUDED.file_size_bytes,
+                        is_locked          = EXCLUDED.is_locked
                     """,
                     (
                         artifact_id,

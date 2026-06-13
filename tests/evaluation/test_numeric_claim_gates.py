@@ -35,6 +35,18 @@ def test_full_coverage_passes():
     assert gate_citation_coverage(claims, cmap).status == "pass"
 
 
+def test_production_quantitative_boolean_is_checked():
+    claims = [{
+        "claim_type": "fact",
+        "quantitative": True,
+        "ticker": "DHG",
+        "period": "2023FY",
+        "metric": "revenue.net",
+        "value": 5015.4,
+    }]
+    assert gate_citation_coverage(claims, {}).status == "fail"
+
+
 # 4. Report with numeric mismatch fails.
 def test_numeric_mismatch_fails():
     cmap = {"DHG/2023FY/revenue.net": _rec(value=5015.4)}

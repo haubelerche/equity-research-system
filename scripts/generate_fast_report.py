@@ -1,8 +1,8 @@
 """Fast report path: locally render PDF/HTML from already-built run artifacts.
 
-This script does NOT run the multi-agent pipeline, ingestion, OCR, parsing,
-indexing, or any blocking review gates. It preserves immutable published reports
-for audit while rendering the local fast report with the current report code.
+This script does NOT run the multi-agent pipeline, ingestion, OCR, or parsing.
+It may only reuse a run that already passed the required lifecycle and export
+gates. Client-final rendering additionally requires final human approval.
 
 Target: well under 120 seconds.
 
@@ -41,20 +41,32 @@ def _load_dotenv() -> None:
 
 from backend.dataops.snapshot_freshness import latest_ready_snapshot
 from backend.reporting.final_report_renderer import render_client_report_to_directory
+from backend.reporting.publication_readiness import (
+    PublicationBlockedError,
+    authorize_client_final,
+)
 from backend.storage import RUNS_BUCKET, SupabaseStorageAdapter, run_artifact_key
 
 
-def _latest_report_run_ids(ticker: str) -> list[str]:
-    """Return run_ids for *ticker* that have a built final_report_model, newest first."""
+def _latest_report_run_ids(ticker: str, mode: str = "client_final") -> list[str]:
+    """Return lifecycle-approved report runs for *ticker*, newest first."""
     from backend.database.config import connect_with_retry, require_database_url
 
+    statuses = ["approved"] if mode == "client_final" else ["approved", "auto_exported"]
     with connect_with_retry(require_database_url()) as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT DISTINCT run_id FROM research.run_artifacts "
-                "WHERE run_id LIKE %s AND section_key = 'final_report_model' "
-                "ORDER BY run_id DESC",
-                (f"run_{ticker.lower()}%",),
+                """
+                SELECT DISTINCT r.run_id
+                FROM research.runs r
+                JOIN research.run_artifacts a ON a.run_id = r.run_id
+                WHERE r.ticker = %s
+                  AND r.status = ANY(%s)
+                  AND a.section_key = 'publishable_final_report_model'
+                  AND a.is_locked = TRUE
+                ORDER BY r.run_id DESC
+                """,
+                (ticker.upper(), statuses),
             )
             rows = cur.fetchall()
     return [row[0] for row in rows]
@@ -77,7 +89,7 @@ def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
         )
 
     # 2. Find the most-recent run that has a built report artifact.
-    run_ids = _latest_report_run_ids(ticker)
+    run_ids = _latest_report_run_ids(ticker, mode)
     if not run_ids:
         raise SystemExit(
             f"No prior run with a built report for {ticker}; run the full pipeline first."
@@ -97,6 +109,13 @@ def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
     last_error: Exception | None = None
     for rid in run_ids:
         try:
+            authorization = None
+            if mode == "client_final":
+                authorization = authorize_client_final(run_id=rid, ticker=ticker)
+                if authorization.snapshot_id != snapshot.get("snapshot_id"):
+                    raise PublicationBlockedError(
+                        "client_final_render_blocked:latest_ready_snapshot_mismatch"
+                    )
             workings_key = run_artifact_key(rid, "report_workings.md")
             with tempfile.TemporaryDirectory(prefix=f"fast-report-{rid}-") as temp_dir:
                 html_path, pdf_path, _ = render_client_report_to_directory(
@@ -104,6 +123,7 @@ def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
                     ticker=ticker,
                     mode=mode,
                     output_dir=temp_dir,
+                    authorization=authorization,
                 )
                 shutil.copy2(pdf_path, pdf_dest)
                 shutil.copy2(html_path, html_dest)

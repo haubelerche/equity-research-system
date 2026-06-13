@@ -45,14 +45,24 @@ def _quant_records(cmap: CitationMap) -> list:
     return [r for r in cmap.values() if not r.is_derived]
 
 
+def _is_quantitative_claim(claim: dict) -> bool:
+    quantitative = claim.get("quantitative")
+    if isinstance(quantitative, bool):
+        return quantitative
+    return claim.get("claim_type", "quantitative") in (
+        "quantitative",
+        "valuation",
+        "catalyst",
+    )
+
+
 # ── Gate 1 — Citation Coverage ─────────────────────────────────────────────────
 
 def gate_citation_coverage(claims: list[dict], cmap: CitationMap) -> GateResult:
     issues: list[str] = []
     checked = 0
     for claim in claims:
-        ctype = claim.get("claim_type", "quantitative")
-        if ctype not in ("quantitative", "valuation", "catalyst"):
+        if not _is_quantitative_claim(claim):
             continue
         checked += 1
         ticker = claim.get("ticker", "")
@@ -100,7 +110,7 @@ def gate_numeric_consistency(
     issues: list[str] = []
     checked = 0
     for claim in report_claims:
-        if claim.get("claim_type") not in ("quantitative", "valuation"):
+        if not _is_quantitative_claim(claim):
             continue
         ticker = claim.get("ticker", "")
         period = claim.get("period") or (f"{claim.get('year')}FY" if claim.get("year") else "")

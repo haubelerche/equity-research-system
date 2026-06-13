@@ -12,9 +12,14 @@ import shutil
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from backend.reporting.pdf_renderer import PDFRenderError, PDFRenderer
+from backend.reporting.publication_readiness import (
+    ClientFinalAuthorization,
+    assert_client_final_authorization,
+    authorize_client_final,
+)
 from backend.reporting.report_assembler import ReportAssembler, ReportAssemblyError
 from backend.storage import RUNS_BUCKET, SupabaseStorageAdapter, run_artifact_key
 from backend.utils import deterministic_id
@@ -120,7 +125,14 @@ class FinalReportRenderer:
         self,
         final_report_model: Mapping[str, Any],
         output_dir: Path | str,
+        *,
+        authorization: ClientFinalAuthorization | None = None,
     ) -> tuple[Path, Path]:
+        assert_client_final_authorization(
+            authorization,
+            run_id=str(final_report_model.get("run_id") or ""),
+            ticker=str(final_report_model.get("ticker") or ""),
+        )
         validation = ReportAssembler().validate_final_report_model(final_report_model)
         if not validation.valid:
             raise ReportAssemblyError(validation)
@@ -151,10 +163,12 @@ class FinalReportPublisher:
         renderer: FinalReportRenderer | None = None,
         storage_adapter: SupabaseStorageAdapter | None = None,
         work_dir: Path | str | None = None,
+        authorization_provider: Callable[..., ClientFinalAuthorization] | None = None,
     ) -> None:
         self.renderer = renderer or FinalReportRenderer()
         self.storage_adapter = storage_adapter or SupabaseStorageAdapter()
         self.work_dir = Path(work_dir) if work_dir is not None else None
+        self.authorization_provider = authorization_provider or authorize_client_final
 
     def publish(
         self,
@@ -171,9 +185,11 @@ class FinalReportPublisher:
             render_dir = self.work_dir
 
         try:
+            authorization = self.authorization_provider(run_id=run_id, ticker=ticker)
             html_path, pdf_path = self.renderer.render_to_directory(
                 final_report_model,
                 render_dir,
+                authorization=authorization,
             )
             html_artifact = self._persist_file(
                 run_id=run_id,
@@ -227,8 +243,15 @@ def render_client_report_to_directory(
     ticker: str,
     mode: str,
     output_dir: Path | str,
+    authorization: ClientFinalAuthorization | None = None,
 ) -> tuple[Path, Path, Any]:
     """Render a client report locally with the current chart pipeline."""
+    if mode == "client_final":
+        assert_client_final_authorization(
+            authorization,
+            run_id=run_id,
+            ticker=ticker,
+        )
     from backend.reporting.client_chart_builder import build_client_report_charts
     from backend.reporting.client_report_view_model import build_client_report_view_model
     from backend.reporting.client_section_builder import build_client_report_sections
@@ -276,9 +299,11 @@ class ClientReportPublisher:
         *,
         storage_adapter: SupabaseStorageAdapter | None = None,
         work_dir: Path | str | None = None,
+        authorization_provider: Callable[..., ClientFinalAuthorization] | None = None,
     ) -> None:
         self.storage_adapter = storage_adapter or SupabaseStorageAdapter()
         self.work_dir = Path(work_dir) if work_dir is not None else None
+        self.authorization_provider = authorization_provider or authorize_client_final
 
     def publish(
         self,
@@ -295,11 +320,17 @@ class ClientReportPublisher:
             render_dir = self.work_dir
 
         try:
+            authorization = (
+                self.authorization_provider(run_id=run_id, ticker=ticker)
+                if mode == "client_final"
+                else None
+            )
             html_path, pdf_path, view_model = render_client_report_to_directory(
                 run_id=run_id,
                 ticker=ticker,
                 mode=mode,
                 output_dir=render_dir,
+                authorization=authorization,
             )
             html_artifact = _publish_run_file(
                 self.storage_adapter,

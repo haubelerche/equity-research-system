@@ -84,69 +84,53 @@ def test_run_until_pause_keeps_the_actual_failed_stage(monkeypatch) -> None:
     assert result.status == "failed"
 
 
-def test_render_publish_creates_html_pdf_artifact_refs() -> None:
+def test_finalize_publish_locks_model_without_rendering() -> None:
     store = MagicMock()
     runner = ResearchGraphRunner(store=store)
     state = ResearchGraphState(run_id="run_render", ticker="DHG", objective="test")
-    state.artifacts["final_report_model"] = {
+    state.artifacts["publishable_final_report_model"] = {
         "ticker": "DHG",
-        "sections": {
-            "cover_investment_summary": {"text": "Investment summary"},
-            "valuation_and_recommendation": {"text": "Valuation"},
-        },
+        "sections": {"cover_investment_summary": {"text": "x"}},
     }
 
-    class FakePublisher:
-        def publish(self, *, run_id, ticker, mode="client_final"):
-            assert run_id == "run_render"
-            assert ticker == "DHG"
-            assert mode == "client_final"
+    result = runner._finalize_publish(state)
 
-            class Published:
-                def to_dict(self):
-                    return {
-                        "html": {"storage_path": "runs/run_render/report.html"},
-                        "pdf": {"storage_path": "runs/run_render/report.pdf"},
-                    }
+    assert result is True
+    # No rendered_report artifact — rendering is an explicit user action.
+    assert "rendered_report" not in state.artifacts
 
-                def artifact_refs(self):
-                    return [
-                        {
-                            "artifact_id": "html",
-                            "artifact_type": "report_html",
-                            "section_key": "report_html",
-                            "storage_bucket": "runs",
-                            "storage_path": "runs/run_render/report.html",
-                            "checksum": "checksum-html",
-                            "content_type": "text/html; charset=utf-8",
-                            "file_size_bytes": 100,
-                            "is_locked": True,
-                            "producer": "render_and_publish:DHG",
-                        },
-                        {
-                            "artifact_id": "pdf",
-                            "artifact_type": "report_pdf",
-                            "section_key": "report_pdf",
-                            "storage_bucket": "runs",
-                            "storage_path": "runs/run_render/report.pdf",
-                            "checksum": "checksum-pdf",
-                            "content_type": "application/pdf",
-                            "file_size_bytes": 100,
-                            "is_locked": True,
-                            "producer": "render_and_publish:DHG",
-                        },
-                    ]
 
-            return Published()
+def test_finalize_publish_blocks_when_model_missing() -> None:
+    store = MagicMock()
+    runner = ResearchGraphRunner(store=store)
+    state = ResearchGraphState(run_id="run_no_model", ticker="DHG", objective="test")
 
-    runner.report_publisher = FakePublisher()
+    result = runner._finalize_publish(state)
 
-    runner._render_and_publish_final_report(state)
+    assert result is False
+    assert state.status == "blocked"
+    assert "publishable_final_report_model_missing" in state.blocking_reason
+    store.update_run_state.assert_called_once_with("run_no_model", "blocked", "PUBLISH")
 
-    assert state.artifacts["rendered_report"]["html"]["storage_path"] == "runs/run_render/report.html"
-    assert state.artifacts["rendered_report"]["pdf"]["storage_path"] == "runs/run_render/report.pdf"
-    assert {ref["section_key"] for ref in state.artifact_refs} >= {"report_html", "report_pdf"}
-    assert store.save_artifact.call_count == 2
+
+def test_report_artifact_lifecycle_promotes_locked_models() -> None:
+    store = MagicMock()
+    runner = ResearchGraphRunner(store=store)
+    state = ResearchGraphState(run_id="run_lifecycle", ticker="DHG", objective="test")
+    state.artifacts["report_candidate_model"] = {"run_id": "run_lifecycle", "ticker": "DHG"}
+
+    runner._promote_report_model(
+        state,
+        source_key="report_candidate_model",
+        target_key="review_passed_report_model",
+        producer="review_gate_promotion",
+        locked=True,
+    )
+
+    assert "final_report_model" not in state.artifacts
+    assert state.artifacts["review_passed_report_model"] == state.artifacts["report_candidate_model"]
+    assert state.artifact_refs[-1]["section_key"] == "review_passed_report_model"
+    assert state.artifact_refs[-1]["is_locked"] is True
 
 
 def test_draft_forecast_stage_uses_deterministic_fast_path(monkeypatch) -> None:
@@ -226,7 +210,7 @@ def test_publish_sets_auto_exported_status(monkeypatch) -> None:
     store = MagicMock()
     runner = ResearchGraphRunner(store=store)
     state = ResearchGraphState(run_id="run_pub", ticker="DHG", objective="test")
-    monkeypatch.setattr(runner, "_render_and_publish_final_report", lambda s: True)
+    monkeypatch.setattr(runner, "_finalize_publish", lambda s: True)
 
     result = runner._execute_stage(state, "PUBLISH")
 

@@ -258,6 +258,11 @@ def run_valuation_tool(
             shutil.rmtree(staging_dir, ignore_errors=True)
     formula_traces = artifact.get("formula_traces") or []
     summary = dict(artifact)
+    from backend.evaluation.fpts_grade import build_valuation_bridge
+
+    valuation_bridge = build_valuation_bridge(artifact)
+    artifact["valuation_bridge"] = valuation_bridge
+    summary["valuation_bridge"] = valuation_bridge
     fcff = artifact.get("fcff") or {}
     fcfe = artifact.get("fcfe") or {}
     blend = artifact.get("blend_dcf") or {}
@@ -352,6 +357,7 @@ def run_valuation_tool(
         "formula_trace_count": len(formula_traces),
         "missing_formula_trace_count": 0 if formula_traces else 1,
         "formula_traces": formula_traces,
+        "valuation_bridge": valuation_bridge,
         "storage_bucket": storage_bucket,
         "storage_path": storage_path,
     })
@@ -408,6 +414,9 @@ def run_forecast_tool(
         fact_table=fact_table,
         assumptions=ForecastAssumptions(assumption_status="default_unapproved"),
     ).to_dict()
+    from backend.evaluation.fpts_grade import build_pharma_driver_model
+
+    pharma_driver_model = build_pharma_driver_model(forecast)
     rows = {
         str(row.get("label")): row
         for row in forecast.get("forecast_years", [])
@@ -514,6 +523,7 @@ def run_forecast_tool(
             "balance_sheet_balance_check": balance_passed,
             "cash_flow_consistency_check": cash_flow_passed,
         },
+        "pharma_driver_model": pharma_driver_model,
         "evidence_refs": [snapshot_id],
         "limitations": list(forecast.get("warnings") or []),
         "deterministic_forecast": forecast,

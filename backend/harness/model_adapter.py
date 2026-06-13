@@ -360,7 +360,8 @@ class OpenAIModelAdapter:
             "valuation_read", "market_snapshot", "readiness_review",
         },
         "REVIEW": {
-            "report_draft", "final_report_model", "report_assembly_validation",
+            "report_draft", "report_candidate_model", "review_passed_report_model",
+            "publishable_final_report_model", "report_assembly_validation",
             "financial_analysis", "valuation", "quality", "critic_review",
         },
     }

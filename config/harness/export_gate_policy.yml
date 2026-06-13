@@ -22,6 +22,15 @@ block_on:
   - required_harness_gate_missing
   - evidence_packet_missing
   - stage_trace_missing
+  - profit_growth_requires_bridge
+  - eps_growth_requires_bridge
+  - ebit_margin_jump_without_gross_margin_support
+  - balance_sheet_incomplete
+  - report_mentions_missing_valuation_method
+  - dividend_yield_total_return_inconsistent
+  - citation_coverage_below_threshold
+  - recommendation_visible_before_approval
+  - fpts_grade_below_85
 warn_on:
   - minor_source_discrepancy
   - low_confidence_ocr_fact

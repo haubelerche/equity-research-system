@@ -69,6 +69,8 @@ class FCFFResult:
     ticker: str
     wacc_assumptions: WACCAssumptions
     wacc: float
+    debt_weight: float
+    equity_weight: float
     terminal_growth: float
     forecast_years: list[FCFFYear]
     sum_pv_fcff: float
@@ -97,16 +99,24 @@ class FCFFResult:
                 "risk_free_rate": self.wacc_assumptions.risk_free_rate,
                 "beta": self.wacc_assumptions.beta,
                 "expected_market_return": self.wacc_assumptions.expected_market_return,
+                "equity_risk_premium": (
+                    self.wacc_assumptions.expected_market_return
+                    - self.wacc_assumptions.risk_free_rate
+                ),
                 "size_premium": self.wacc_assumptions.size_premium,
                 "specific_risk_premium": self.wacc_assumptions.specific_risk_premium,
                 "cost_of_equity": round(self.wacc_assumptions.cost_of_equity, 4),
                 "cost_of_debt": self.wacc_assumptions.cost_of_debt,
+                "pre_tax_cost_of_debt": self.wacc_assumptions.cost_of_debt,
                 # Reflect the actual rate used: TaxPolicy.effective_tax_rate when provided
                 "tax_rate": (
                     self.wacc_assumptions.tax_policy.effective_tax_rate
                     if self.wacc_assumptions.tax_policy is not None
                     else self.wacc_assumptions.tax_rate
                 ),
+                "target_debt_weight": round(self.debt_weight, 4),
+                "target_equity_weight": round(self.equity_weight, 4),
+                "wacc": round(self.wacc, 4),
                 "wacc_override": self.wacc_assumptions.wacc_override,
             },
             "capex_convention": "positive_outflow",
@@ -313,6 +323,8 @@ def compute_fcff(
         ticker=ticker,
         wacc_assumptions=wacc_assumptions,
         wacc=wacc,
+        debt_weight=d_weight,
+        equity_weight=e_weight,
         terminal_growth=terminal_growth,
         forecast_years=fcff_years,
         sum_pv_fcff=sum_pv,
