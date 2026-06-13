@@ -82,19 +82,41 @@ def create_research_run(
 
 
 def save_raw_article(conn, article: RawArticle) -> int:
-    """Upsert a news.raw_articles row keyed on source_url. Returns article_id."""
+    """Upsert a news.raw_articles row. Returns article_id.
+
+    Cross-URL dedup: if an article with the same content fingerprint already exists (the
+    same story at another URL), return that row instead of inserting a duplicate. Otherwise
+    upsert keyed on source_url, recording content_hash + canonical_url.
+    """
+    from backend.news.dedup import canonicalize_url, content_fingerprint
+
+    fingerprint = content_fingerprint(article.raw_text)
+    canonical = canonicalize_url(article.source_url)
     with conn.cursor() as cur:
+        # Same content under a different URL → reuse the existing article.
+        cur.execute(
+            "SELECT article_id FROM news.raw_articles "
+            "WHERE content_hash = %s AND source_url <> %s LIMIT 1",
+            (fingerprint, article.source_url),
+        )
+        existing = cur.fetchone()
+        if existing is not None:
+            return existing[0]
+
         cur.execute(
             """
             INSERT INTO news.raw_articles
                 (source_name, source_domain, source_url, title, summary, published_at,
-                 accessed_at, raw_text, discovery_method, extraction_method)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 accessed_at, raw_text, discovery_method, extraction_method,
+                 content_hash, canonical_url)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (source_url) DO UPDATE SET
                 title = EXCLUDED.title,
                 summary = EXCLUDED.summary,
                 raw_text = EXCLUDED.raw_text,
                 published_at = EXCLUDED.published_at,
+                content_hash = EXCLUDED.content_hash,
+                canonical_url = EXCLUDED.canonical_url,
                 updated_at = NOW()
             RETURNING article_id
             """,
@@ -109,6 +131,8 @@ def save_raw_article(conn, article: RawArticle) -> int:
                 article.raw_text,
                 article.discovery_method,
                 article.extraction_method,
+                fingerprint,
+                canonical,
             ),
         )
         return cur.fetchone()[0]
