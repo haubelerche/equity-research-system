@@ -273,3 +273,22 @@ def test_review_does_not_auto_revise(monkeypatch) -> None:
     assert agent_calls == ["senior_critic"]
     assert "revised_report_draft" not in result.artifacts
     assert result.report_revision_count == 0
+
+
+def test_plan_stage_is_deterministic_no_llm(monkeypatch) -> None:
+    from backend.harness.contracts import validate_agent_artifact
+
+    runner = ResearchGraphRunner(store=MagicMock())
+    state = ResearchGraphState(run_id="run_plan", ticker="DHG", objective="test")
+    monkeypatch.setattr(
+        runner, "_run_agent",
+        lambda *a, **k: (_ for _ in ()).throw(AssertionError("PLAN must not call the LLM")),
+    )
+
+    result = runner._execute_stage(state, "PLAN")
+
+    assert result.plan["producer"] == "research_manager_agent"
+    assert result.plan["run_id"] == "run_plan"
+    assert "deterministic" in result.plan["known_constraints"][0]
+    # Must satisfy the same contract the LLM artifact did.
+    validate_agent_artifact("ResearchManagerArtifact", result.plan)

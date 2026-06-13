@@ -173,9 +173,12 @@ class ResearchGraphRunner:
             self._preflight(state)
 
         elif stage == "PLAN":
-            result = self._run_agent(state, "research_manager", "Create the typed research plan.")
-            state.plan = result.payload
-            self._merge_agent_result(state, result)
+            # Report template is fixed, so the plan is deterministic — no LLM call.
+            plan_payload = self._deterministic_research_plan(state)
+            self._inject_artifact_lineage(state, plan_payload)
+            state.plan = plan_payload
+            state.artifacts["research_plan"] = plan_payload
+            self._persist_payload_artifact(state, "research_plan", plan_payload, "deterministic_planner")
 
         elif stage == "INGEST_AND_VALIDATE":
             from backend.dataops.snapshot_freshness import latest_ready_snapshot
@@ -588,6 +591,34 @@ class ResearchGraphRunner:
             "warnings": [
                 "draft_fast_path_skipped_forecast_valuation_llm",
                 "deterministic_forecast_model_used_as_authoritative_source",
+            ],
+        }
+
+    @staticmethod
+    def _deterministic_research_plan(state: ResearchGraphState) -> dict[str, Any]:
+        return {
+            "schema_version": "1.0",
+            "producer": "research_manager_agent",
+            "research_questions": [],
+            "required_sections": [
+                "cover_investment_summary",
+                "company_overview",
+                "recent_financial_performance",
+                "driver_based_forecast",
+                "valuation_and_recommendation",
+                "risks_and_monitoring_factors",
+                "forecast_financial_summary",
+            ],
+            "specialist_instructions": {},
+            "completion_criteria": {
+                "minimum_evidence_coverage": 0.8,
+                "required_tables": [],
+                "required_charts": [],
+                "required_valuation_outputs": ["fcff", "fcfe", "blend", "sensitivity"],
+                "required_critic_scores": {},
+            },
+            "known_constraints": [
+                "deterministic_template_plan_used_no_llm",
             ],
         }
 
