@@ -70,8 +70,8 @@ artifacts/dev/
 
 # Runtime storage-migration dumps — reproducible audit output, not source
 audits/storage_migrations/
-/docs
-/docs/*.md
+/docs/*
+!/docs/ARCHITECTURE.md
 
 # Reproducible runtime output — never source (reports, logs, dumps, debug traces)
 artifacts/
