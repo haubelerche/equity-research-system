@@ -221,6 +221,47 @@ class FinalReportPublisher:
         )
 
 
+def render_client_report_to_directory(
+    *,
+    run_id: str,
+    ticker: str,
+    mode: str,
+    output_dir: Path | str,
+) -> tuple[Path, Path, Any]:
+    """Render a client report locally with the current chart pipeline."""
+    from backend.reporting.client_chart_builder import build_client_report_charts
+    from backend.reporting.client_report_view_model import build_client_report_view_model
+    from backend.reporting.client_section_builder import build_client_report_sections
+    from backend.reporting.html_renderer import HTMLRenderer
+    from backend.reporting.report_data_loader import load_report_context
+
+    render_dir = Path(output_dir)
+    render_dir.mkdir(parents=True, exist_ok=True)
+    view_model = build_client_report_view_model(ticker, mode, run_id=run_id)
+    view_model.charts.update(
+        build_client_report_charts(view_model, render_dir / "charts", run_id=run_id)
+    )
+    sections = build_client_report_sections(view_model)
+    context = load_report_context(ticker, run_id=run_id)
+    html_path = HTMLRenderer().render(
+        sections,
+        context,
+        output_dir=render_dir,
+        run_id=run_id,
+        render_mode=str(mode),
+    )
+    pdf_path = PDFRenderer().render(
+        html_path,
+        output_dir=render_dir,
+        run_id=run_id,
+        allow_stub=False,
+        strict_preflight=True,
+    )
+    if pdf_path.suffix.lower() != ".pdf":
+        raise PDFRenderError(f"Strict PDF renderer returned non-PDF artifact: {pdf_path}")
+    return html_path, pdf_path, view_model
+
+
 class ClientReportPublisher:
     """Render the broker-quality client report from locked run artifacts and publish it.
 
@@ -246,11 +287,6 @@ class ClientReportPublisher:
         ticker: str,
         mode: str = "client_final",
     ) -> PublishedReport:
-        from backend.reporting.client_report_view_model import build_client_report_view_model
-        from backend.reporting.client_section_builder import build_client_report_sections
-        from backend.reporting.html_renderer import HTMLRenderer
-        from backend.reporting.report_data_loader import load_report_context
-
         temporary_dir: Path | None = None
         if self.work_dir is None:
             temporary_dir = Path(tempfile.mkdtemp(prefix=f"client-render-{run_id}-"))
@@ -259,25 +295,12 @@ class ClientReportPublisher:
             render_dir = self.work_dir
 
         try:
-            view_model = build_client_report_view_model(ticker, mode, run_id=run_id)
-            sections = build_client_report_sections(view_model)
-            context = load_report_context(ticker, run_id=run_id)
-            html_path = HTMLRenderer().render(
-                sections,
-                context,
-                output_dir=render_dir,
+            html_path, pdf_path, view_model = render_client_report_to_directory(
                 run_id=run_id,
-                render_mode=str(mode),
-            )
-            pdf_path = PDFRenderer().render(
-                html_path,
+                ticker=ticker,
+                mode=mode,
                 output_dir=render_dir,
-                run_id=run_id,
-                allow_stub=False,
-                strict_preflight=True,
             )
-            if pdf_path.suffix.lower() != ".pdf":
-                raise PDFRenderError(f"Strict PDF renderer returned non-PDF artifact: {pdf_path}")
             html_artifact = _publish_run_file(
                 self.storage_adapter,
                 run_id=run_id,

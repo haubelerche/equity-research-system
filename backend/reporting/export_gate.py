@@ -249,8 +249,108 @@ def _forecast_gate(
     if div and div.get("method") == "missing":
         issues.append("dividend_schedule.method=missing — payout not modelled")
 
+    _check_profit_growth_vs_revenue_growth(forecast_artifact, issues)
+    _check_cash_accumulation_without_dividend_policy(forecast_artifact, issues)
+
     status: GateStatus = "FAIL" if issues else "PASS"
     return GateResult("forecast_gate", status, issues, metadata)
+
+
+def _check_profit_growth_vs_revenue_growth(
+    forecast_artifact: dict[str, Any],
+    issues: list[str],
+) -> None:
+    """Block unexplained profit jumps that exceed revenue growth by >15 ppts."""
+    if forecast_artifact.get("margin_bridge") or forecast_artifact.get("profit_growth_explanation"):
+        return
+    rows = [
+        row for row in forecast_artifact.get("forecast_years", [])
+        if isinstance(row, dict)
+    ]
+    for previous, current in zip(rows, rows[1:]):
+        rev_growth = current.get("revenue_growth")
+        profit_growth = current.get("net_income_growth")
+        if rev_growth is None:
+            prev_rev = previous.get("revenue")
+            curr_rev = current.get("revenue")
+            if prev_rev not in (None, 0) and curr_rev is not None:
+                rev_growth = curr_rev / prev_rev - 1
+        if profit_growth is None:
+            prev_profit = previous.get("net_income")
+            curr_profit = current.get("net_income")
+            if prev_profit not in (None, 0) and curr_profit is not None:
+                profit_growth = curr_profit / prev_profit - 1
+        if rev_growth is None or profit_growth is None:
+            continue
+        if profit_growth - rev_growth > 0.15 and not current.get("margin_bridge"):
+            label = current.get("label", "forecast period")
+            issues.append(
+                f"{label}: net income growth {profit_growth:.1%} exceeds revenue growth "
+                f"{rev_growth:.1%} by more than 15 percentage points without a margin bridge."
+            )
+
+
+def _cash_by_label(forecast_artifact: dict[str, Any]) -> dict[str, float]:
+    cash: dict[str, float] = {}
+    for row in forecast_artifact.get("forecast_years", []):
+        if isinstance(row, dict) and row.get("label") and row.get("cash") is not None:
+            cash[str(row["label"])] = float(row["cash"])
+    for row in (forecast_artifact.get("cash_sweep_artifact") or {}).get("year_results", []):
+        if not isinstance(row, dict):
+            continue
+        label = row.get("year_label") or row.get("label")
+        value = row.get("computed_ending_cash") if row.get("computed_ending_cash") is not None else row.get("cash")
+        if label and value is not None:
+            cash[str(label)] = float(value)
+    return cash
+
+
+def _dividend_policy_missing(forecast_artifact: dict[str, Any]) -> bool:
+    schedule = forecast_artifact.get("dividend_schedule")
+    if not schedule:
+        return True
+    if schedule.get("method") == "missing":
+        return True
+    rows = schedule.get("forecast_rows") or []
+    if rows and any((row.get("cash_dividend") or 0) > 0 for row in rows if isinstance(row, dict)):
+        return False
+    return not bool(schedule.get("policy") or schedule.get("payout_ratio"))
+
+
+def _check_cash_accumulation_without_dividend_policy(
+    forecast_artifact: dict[str, Any],
+    issues: list[str],
+) -> None:
+    """Block mature-profitable forecasts that accumulate excess cash with no payout policy."""
+    if not _dividend_policy_missing(forecast_artifact):
+        return
+    cash_by_label = _cash_by_label(forecast_artifact)
+    rows = [
+        row for row in forecast_artifact.get("forecast_years", [])
+        if isinstance(row, dict) and row.get("label")
+    ]
+    cash_series: list[float] = []
+    max_cash_to_revenue = 0.0
+    has_profit = False
+    for row in rows:
+        label = str(row["label"])
+        cash = cash_by_label.get(label)
+        revenue = row.get("revenue")
+        if row.get("net_income") is not None and row.get("net_income") > 0:
+            has_profit = True
+        if cash is None:
+            continue
+        cash_series.append(cash)
+        if revenue not in (None, 0):
+            max_cash_to_revenue = max(max_cash_to_revenue, cash / revenue)
+    if len(cash_series) < 2 or not has_profit:
+        return
+    monotonic_cash = all(curr >= prev for prev, curr in zip(cash_series, cash_series[1:]))
+    if monotonic_cash and max_cash_to_revenue > 0.75:
+        issues.append(
+            "cash accumulation anomaly: projected cash exceeds 75% of revenue and rises "
+            "monotonically while dividend policy is missing."
+        )
 
 
 def _valuation_gate(
@@ -329,6 +429,7 @@ def _sensitivity_gate(
                     f"Base WACC {base_wacc:.1%} not in sensitivity wacc_range — "
                     "base assumption must be included (plan §2.3)"
                 )
+        _check_sensitivity_base_cell_matches_target(valuation_artifact, fcff_sens, issues)
 
     # Operating sensitivity — warn but do not FAIL (Phase 5 addition; not always present)
     op_sens = valuation_artifact.get("operating_sensitivity", {})
@@ -338,6 +439,253 @@ def _sensitivity_gate(
 
     status = "FAIL" if issues else "PASS"
     return GateResult("sensitivity_gate", status, issues, metadata)
+
+
+def _target_price_from_valuation(valuation_artifact: dict[str, Any]) -> float | None:
+    blend = valuation_artifact.get("blend_dcf", {}) or {}
+    fcff = valuation_artifact.get("fcff", {}) or {}
+    for candidate in (
+        blend.get("target_price_dcf_vnd"),
+        blend.get("target_price_vnd"),
+        fcff.get("target_price_vnd"),
+        valuation_artifact.get("target_price_vnd"),
+    ):
+        if candidate is not None:
+            return float(candidate)
+    return None
+
+
+def _matrix_value(matrix: Any, row_index: int, col_index: int, row_key: Any, col_key: Any) -> float | None:
+    if isinstance(matrix, list):
+        try:
+            value = matrix[row_index][col_index]
+        except (IndexError, TypeError):
+            return None
+        return float(value) if value is not None else None
+    if not isinstance(matrix, dict):
+        return None
+
+    row_candidates = [
+        row_key,
+        str(row_key),
+        f"{float(row_key):.3f}" if isinstance(row_key, (int, float)) else None,
+        f"{float(row_key):.4f}".rstrip("0").rstrip(".") if isinstance(row_key, (int, float)) else None,
+    ]
+    col_candidates = [
+        col_key,
+        str(col_key),
+        f"{float(col_key):.3f}" if isinstance(col_key, (int, float)) else None,
+        f"{float(col_key):.4f}".rstrip("0").rstrip(".") if isinstance(col_key, (int, float)) else None,
+    ]
+    for rk in [c for c in row_candidates if c is not None]:
+        row = matrix.get(rk)
+        if not isinstance(row, dict):
+            continue
+        for ck in [c for c in col_candidates if c is not None]:
+            value = row.get(ck)
+            if value is not None:
+                return float(value)
+    return None
+
+
+def _check_sensitivity_base_cell_matches_target(
+    valuation_artifact: dict[str, Any],
+    fcff_sens: dict[str, Any],
+    issues: list[str],
+) -> None:
+    target = _target_price_from_valuation(valuation_artifact)
+    base_wacc = fcff_sens.get("base_wacc")
+    base_g = (
+        fcff_sens.get("base_terminal_growth")
+        if fcff_sens.get("base_terminal_growth") is not None
+        else fcff_sens.get("base_g")
+    )
+    wacc_range = fcff_sens.get("wacc_range") or []
+    g_range = fcff_sens.get("g_range") or fcff_sens.get("terminal_growth_range") or []
+    matrix = fcff_sens.get("matrix")
+    if target is None or base_wacc is None or base_g is None or not wacc_range or not g_range:
+        return
+    try:
+        row_index = min(range(len(wacc_range)), key=lambda i: abs(float(wacc_range[i]) - float(base_wacc)))
+        col_index = min(range(len(g_range)), key=lambda i: abs(float(g_range[i]) - float(base_g)))
+    except (TypeError, ValueError):
+        return
+    value = _matrix_value(matrix, row_index, col_index, wacc_range[row_index], g_range[col_index])
+    if value is None:
+        return
+    if abs(value - target) / max(abs(target), 1.0) > 0.01:
+        issues.append(
+            f"sensitivity base cell {value:,.0f} differs from target price {target:,.0f} by more than 1%."
+        )
+
+
+def _sensitivity_gate_v2(
+    valuation_artifact: dict[str, Any] | None,
+) -> GateResult:
+    issues: list[str] = []
+    if valuation_artifact is None:
+        return GateResult("sensitivity_gate", "SKIP",
+                          ["valuation_artifact missing - sensitivity gate skipped"])
+
+    sensitivity = valuation_artifact.get("sensitivity", {}) or {}
+    fcff_sens = valuation_artifact.get("fcff_sensitivity") or sensitivity.get("fcff_wacc_g") or {}
+    fcfe_sens = valuation_artifact.get("fcfe_sensitivity") or sensitivity.get("fcfe_re_g") or {}
+    blend_sens = valuation_artifact.get("blend_sensitivity") or sensitivity.get("blend_grid") or {}
+
+    if not fcff_sens or not fcff_sens.get("matrix"):
+        issues.append("fcff_sensitivity matrix missing or empty")
+    else:
+        _check_axis_contains_base_v2("FCFF", "WACC", fcff_sens.get("base_wacc"), fcff_sens.get("wacc_range") or [], issues)
+        _check_sensitivity_base_cell_v2(
+            valuation_artifact,
+            fcff_sens,
+            issues,
+            axis="fcff",
+            target=_target_price_from_valuation_v2(valuation_artifact, "fcff"),
+        )
+
+    if not fcfe_sens or not fcfe_sens.get("matrix"):
+        issues.append("fcfe_sensitivity matrix missing or empty")
+    else:
+        _check_axis_contains_base_v2("FCFE", "Re", fcfe_sens.get("base_re"), fcfe_sens.get("re_range") or [], issues)
+        _check_sensitivity_base_cell_v2(
+            valuation_artifact,
+            fcfe_sens,
+            issues,
+            axis="fcfe",
+            target=_target_price_from_valuation_v2(valuation_artifact, "fcfe"),
+        )
+
+    if not blend_sens or not blend_sens.get("matrix"):
+        issues.append("blend_sensitivity matrix missing or empty")
+    else:
+        _check_sensitivity_base_cell_v2(
+            valuation_artifact,
+            blend_sens,
+            issues,
+            axis="blend",
+            target=_target_price_from_valuation_v2(valuation_artifact, "blend"),
+        )
+
+    op_sens = valuation_artifact.get("operating_sensitivity", {})
+    metadata: dict[str, Any] = {}
+    if not op_sens:
+        metadata["operating_sensitivity"] = "missing - warn only"
+
+    status = "FAIL" if issues else "PASS"
+    return GateResult("sensitivity_gate", status, issues, metadata)
+
+
+def _target_price_from_valuation_v2(
+    valuation_artifact: dict[str, Any],
+    target_kind: str,
+) -> float | None:
+    blend = valuation_artifact.get("blend_dcf", {}) or {}
+    fcff = valuation_artifact.get("fcff", {}) or {}
+    fcfe = valuation_artifact.get("fcfe", {}) or {}
+    if target_kind == "fcff":
+        candidates = (
+            blend.get("price_fcff_vnd"),
+            fcff.get("target_price_vnd"),
+            valuation_artifact.get("price_fcff_vnd"),
+        )
+    elif target_kind == "fcfe":
+        candidates = (
+            blend.get("price_fcfe_vnd"),
+            fcfe.get("target_price_vnd"),
+            valuation_artifact.get("price_fcfe_vnd"),
+        )
+    else:
+        candidates = (
+            blend.get("target_price_dcf_vnd"),
+            blend.get("target_price_vnd"),
+            valuation_artifact.get("target_price_vnd"),
+        )
+    for candidate in candidates:
+        if candidate is not None:
+            return float(candidate)
+    return None
+
+
+def _check_axis_contains_base_v2(
+    label: str,
+    axis_label: str,
+    base_value: Any,
+    axis_range: list[Any],
+    issues: list[str],
+) -> None:
+    if base_value is None or not axis_range:
+        return
+    try:
+        if not any(abs(float(v) - float(base_value)) < 0.001 for v in axis_range):
+            issues.append(
+                f"{label} base {axis_label} {float(base_value):.1%} not in sensitivity range."
+            )
+    except (TypeError, ValueError):
+        return
+
+
+def _check_sensitivity_base_cell_v2(
+    valuation_artifact: dict[str, Any],
+    table: dict[str, Any],
+    issues: list[str],
+    *,
+    axis: str,
+    target: float | None,
+) -> None:
+    row_range, col_range, base_row, base_col = _sensitivity_axes_v2(valuation_artifact, table, axis)
+    matrix = table.get("matrix")
+    if target is None or base_row is None or base_col is None or not row_range or not col_range:
+        return
+    try:
+        row_index = min(range(len(row_range)), key=lambda i: abs(float(row_range[i]) - float(base_row)))
+        col_index = min(range(len(col_range)), key=lambda i: abs(float(col_range[i]) - float(base_col)))
+    except (TypeError, ValueError):
+        return
+    value = _matrix_value(matrix, row_index, col_index, row_range[row_index], col_range[col_index])
+    if value is None:
+        return
+    if abs(value - target) / max(abs(target), 1.0) > 0.01:
+        issues.append(
+            f"{axis} sensitivity base cell {value:,.0f} differs from target price {target:,.0f} by more than 1%."
+        )
+
+
+def _sensitivity_axes_v2(
+    valuation_artifact: dict[str, Any],
+    table: dict[str, Any],
+    axis: str,
+) -> tuple[list[Any], list[Any], float | None, float | None]:
+    if axis == "fcff":
+        fcff = valuation_artifact.get("fcff", {}) or {}
+        base_g = table.get("base_terminal_growth", table.get("base_g"))
+        if base_g is None:
+            base_g = fcff.get("terminal_growth")
+        return (
+            table.get("wacc_range") or [],
+            table.get("g_range") or table.get("terminal_growth_range") or [],
+            table.get("base_wacc") or fcff.get("wacc"),
+            base_g,
+        )
+    if axis == "fcfe":
+        fcfe = valuation_artifact.get("fcfe", {}) or {}
+        base_g = table.get("base_terminal_growth", table.get("base_g"))
+        if base_g is None:
+            base_g = fcfe.get("terminal_growth")
+        return (
+            table.get("re_range") or [],
+            table.get("g_range") or table.get("terminal_growth_range") or [],
+            table.get("base_re") or fcfe.get("cost_of_equity"),
+            base_g,
+        )
+
+    blend = valuation_artifact.get("blend_dcf", {}) or {}
+    return (
+        table.get("price_fcff_range") or [],
+        table.get("price_fcfe_range") or [],
+        blend.get("price_fcff_vnd"),
+        blend.get("price_fcfe_vnd"),
+    )
 
 
 def _citation_gate_from_ledger(
@@ -413,7 +761,7 @@ def evaluate_export_gate(
         ),
         "forecast_gate": _forecast_gate(forecast_artifact),
         "valuation_gate": _valuation_gate(valuation_artifact),
-        "sensitivity_gate": _sensitivity_gate(valuation_artifact),
+        "sensitivity_gate": _sensitivity_gate_v2(valuation_artifact),
         "citation_gate": _citation_gate_from_ledger(
             claim_ledger, require_tier_01_citations
         ),

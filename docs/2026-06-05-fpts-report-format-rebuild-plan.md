@@ -91,7 +91,7 @@ Báo cáo tham chiếu không chỉ khác về màu sắc hoặc font. Đây là
   - bounding box nội dung;
   - số chart/table trên mỗi trang;
   - orphan heading và bảng bị tách.
-- Lưu golden snapshots cho DBD và DHG.
+- Lưu golden snapshots cho tickers.
 
 ### Files
 
@@ -129,7 +129,7 @@ Báo cáo tham chiếu không chỉ khác về màu sắc hoặc font. Đây là
 ### Acceptance
 
 - Không còn blank-page regression.
-- DBD/DHG dùng 12-18 trang tùy dữ liệu, không bị khóa ở 8 section hoặc 12 trang.
+- Ticker dùng 12-18 trang tùy dữ liệu, không bị khóa ở 8 section hoặc 12 trang.
 - Heading không đứng một mình ở cuối trang.
 
 ## Phase 2 - Trang mở đầu theo kiến trúc broker report
@@ -257,7 +257,7 @@ Báo cáo tham chiếu không chỉ khác về màu sắc hoặc font. Đây là
 
 ### Scope
 
-- Render DBD, DHG, IMP, DMC và TRA bằng cùng template.
+- Render tickers bằng cùng template.
 - Kiểm tra pixel/screenshot và layout metrics.
 - Thêm gate cho:
   - blank-page ratio;

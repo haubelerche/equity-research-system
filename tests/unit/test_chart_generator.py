@@ -104,6 +104,19 @@ def test_c1_price_vs_vnindex(tmp_path):
     assert path.stat().st_size > 1000
 
 
+def test_c1_stock_only_history(tmp_path):
+    spec = ChartSpec(
+        chart_id="C1",
+        ticker="DHG",
+        price_series=[100.0, 102.0, 101.0],
+        date_labels=["2026-05-27", "2026-05-28", "2026-05-29"],
+    )
+    gen = ChartGenerator(output_dir=tmp_path)
+    path = gen.render_c1_price_vs_vnindex(spec)
+    assert path.exists()
+    assert path.stat().st_size > 1000
+
+
 def test_empty_data_does_not_crash(tmp_path):
     """Empty lists must render zero-filled chart without raising."""
     spec = ChartSpec(

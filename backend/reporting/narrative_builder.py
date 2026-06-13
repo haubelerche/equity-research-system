@@ -1,10 +1,10 @@
 """Deterministic, artifact-grounded narrative builder for client reports.
 
 Every sentence is composed from values already computed by the deterministic engines
-(facts, forecast drivers, valuation blend, sensitivity). No number is invented here —
+(facts, forecast assumptions, valuation blend, sensitivity). No number is invented here —
 when an input is missing the text says so explicitly rather than fabricating a figure
 (CLAUDE.md §5.1). Each section follows the four-layer logic:
-  quantitative anchor → driver/cause → valuation impact → risk to watch.
+  quantitative anchor → key variable/cause → valuation impact → risk to watch.
 
 Design principle: numbers appear *once* to anchor a claim; repetition is removed.
 The reader should finish each section with an analytical view, not a data dump.
@@ -29,7 +29,7 @@ class NarrativeInputs:
     gross_margin_latest: float | None = None        # fraction
     eps_latest: float | None = None                 # VND
     cash_conversion: float | None = None            # CFO/NI ratio
-    # Forecast drivers (fraction)
+    # Forecast key variables (fraction)
     rev_growth_driver: float | None = None
     gross_margin_driver: float | None = None
     sga_driver: float | None = None
@@ -115,7 +115,7 @@ def build_business_update(n: NarrativeInputs) -> str:
         f"lượng lợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt {_times(n.cash_conversion)} cho thấy mức độ lợi "
         f"nhuận kế toán được hỗ trợ bởi dòng tiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực "
         f"vốn lưu động từ phải thu bệnh viện. "
-        f"Driver vận hành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu "
+        f"Biến số vận hành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu "
         f"cao vừa chịu áp lực chính sách đấu thầu định kỳ. Bất kỳ sai lệch nào ở đây sẽ truyền dẫn qua doanh "
         f"thu → biên gộp → EBIT → FCFF, ảnh hưởng trực tiếp đến giá mục tiêu. Diễn biến giá API và tiến độ "
         f"nâng chuẩn nhà máy là hai chỉ báo vận hành cần theo dõi song song với kết quả tài chính quý."
@@ -139,7 +139,7 @@ def build_financial_performance(n: NarrativeInputs) -> str:
         f"dòng tiền tự do. "
         f"Biến động lợi nhuận giữa các năm chủ yếu đến từ ba nguồn: (1) thay đổi giá vốn API/tỷ giá; "
         f"(2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí SG&A liên quan đấu thầu. Những yếu tố này được chuẩn "
-        f"hóa thành driver dự phóng (biên gộp {_pct(n.gross_margin_driver)}, SG&A {_pct(n.sga_driver)} doanh "
+        f"hóa thành biến số dự phóng (biên gộp {_pct(n.gross_margin_driver)}, SG&A {_pct(n.sga_driver)} doanh "
         f"thu) và là cơ sở để phân tích độ nhạy — người đọc có thể kiểm tra xem kết quả mô hình thay đổi như "
         f"thế nào khi từng giả định dịch chuyển."
     )
@@ -147,18 +147,18 @@ def build_financial_performance(n: NarrativeInputs) -> str:
 
 def build_forecast_assumptions(n: NarrativeInputs) -> str:
     return (
-        f"Dự phóng theo phương pháp driver-based, đi từ biến số kinh doanh tới dòng tài chính tới định giá. "
+        f"Dự phóng theo phương pháp dự phóng theo biến số, đi từ biến số kinh doanh tới dòng tài chính tới định giá. "
         f"Giả định cơ sở: tăng trưởng doanh thu {_pct(n.rev_growth_driver)} (căn cứ CAGR lịch sử "
         f"{_pct(n.revenue_cagr)} và kế hoạch mở rộng ETC/OTC); biên lợi nhuận gộp {_pct(n.gross_margin_driver)} "
         f"(phản ánh áp lực API và cơ cấu sản phẩm); SG&A {_pct(n.sga_driver)} doanh thu; thuế suất hiệu dụng "
         f"{_pct(n.tax_driver)}; capex {_pct(n.capex_driver)} doanh thu. "
-        f"Driver có tác động lớn nhất tới giá trị là: (1) tăng trưởng doanh thu — mỗi điểm phần trăm hụt so "
+        f"Biến số có tác động lớn nhất tới giá trị là: (1) tăng trưởng doanh thu — mỗi điểm phần trăm hụt so "
         f"với giả định cơ sở sẽ kéo EBIT và FCFF giảm theo tỷ lệ; (2) biên lợi nhuận gộp — biến động chi phí "
         f"API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) capex và vốn lưu động — "
         f"quyết định bao nhiêu phần EBIT còn lại dưới dạng FCFF sau tái đầu tư. "
         f"Hai tham số định giá quan trọng nhất là WACC {_pct(n.wacc)} và tăng trưởng dài hạn "
         f"{_pct(n.terminal_growth)}; chúng xác định cách quy đổi FCFF tương lai về hiện giá. Độ nhạy của giá "
-        f"mục tiêu với hai tham số này cao hơn bất kỳ driver vận hành nào — đây là lý do ma trận độ nhạy là "
+        f"mục tiêu với hai tham số này cao hơn bất kỳ biến số vận hành nào — đây là lý do ma trận độ nhạy là "
         f"bắt buộc chứ không phải tùy chọn. Rủi ro sai lệch lớn nhất là khi giả định tăng trưởng lạc quan "
         f"gặp thực tế đấu thầu thắt chặt hoặc giá API tăng đột biến cùng lúc."
     )
@@ -224,7 +224,7 @@ def build_risks_catalysts(n: NarrativeInputs) -> str:
         f"biên gộp {_pct(n.gross_margin_driver)} giả định; (3) kéo dài chu kỳ phải thu bệnh viện — làm tăng "
         f"ΔNWC và giảm FCFF dù lợi nhuận kế toán vẫn cao; (4) cạnh tranh generic gia tăng — tạo áp lực "
         f"giảm giá trên sản phẩm chủ lực; (5) thay đổi chính sách đăng ký lưu hành và tiêu chuẩn GMP. "
-        f"Yếu tố hỗ trợ: trúng thêm thầu ETC mới là catalyst có tác động lớn nhất và gần nhất đến FCFF; "
+        f"Yếu tố hỗ trợ: trúng thêm thầu ETC mới là yếu tố có tác động lớn nhất và gần nhất đến FCFF; "
         f"cải thiện cơ cấu sản phẩm biên cao (chuyển dần từ generic sang branded generic) nâng biên gộp "
         f"một cách bền vững hơn mở rộng sản lượng thuần túy; hoàn tất đầu tư GMP-EU mở rộng tập khách hàng "
         f"xuất khẩu, giảm phụ thuộc vào chu kỳ đấu thầu nội địa. "

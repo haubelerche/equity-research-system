@@ -114,19 +114,29 @@ def _aligned_return(
     benchmark: pd.DataFrame,
     start: date,
 ) -> tuple[float | None, float | None]:
+    stock_window = stock[stock["trade_date"] >= start].dropna(subset=["adjusted_close"])
+    if len(stock_window) < 2:
+        return None, None
+    first_stock = stock_window.iloc[0]["adjusted_close"]
+    last_stock = stock_window.iloc[-1]["adjusted_close"]
+    stock_return = (
+        float(last_stock / first_stock - 1.0)
+        if first_stock not in (None, 0) else None
+    )
+
+    if benchmark.empty:
+        return stock_return, None
+
     left = stock[["trade_date", "adjusted_close"]].rename(columns={"adjusted_close": "stock"})
     right = benchmark[["trade_date", "adjusted_close"]].rename(columns={"adjusted_close": "benchmark"})
     aligned = left.merge(right, on="trade_date", how="inner").dropna()
     aligned = aligned[aligned["trade_date"] >= start]
     if len(aligned) < 2:
-        return None, None
+        return stock_return, None
     first, last = aligned.iloc[0], aligned.iloc[-1]
-    if not first["stock"] or not first["benchmark"]:
-        return None, None
-    return (
-        float(last["stock"] / first["stock"] - 1.0),
-        float(last["benchmark"] / first["benchmark"] - 1.0),
-    )
+    if not first["benchmark"]:
+        return stock_return, None
+    return stock_return, float(last["benchmark"] / first["benchmark"] - 1.0)
 
 
 def build_market_data_artifact(
@@ -232,6 +242,51 @@ def fetch_market_data_artifact(
     secondary_frame = primary_frame if primary == "VNINDEX" else history_loader("VNINDEX", start, end)
     return build_market_data_artifact(
         ticker, exchange, stock_frame, primary_frame, secondary_frame, source="vnstock_quote"
+    )
+
+
+def load_market_data_from_fact_store(
+    ticker: str,
+    exchange: str,
+    *,
+    days: int = 400,
+    store=None,
+) -> MarketDataArtifact:
+    """Build market data from the canonical Supabase price-history table."""
+    if store is None:
+        from backend.database.fact_store import PostgresFactStore
+
+        store = PostgresFactStore()
+
+    end = datetime.now(timezone.utc).date()
+    start = end - timedelta(days=days)
+    primary_symbol = benchmark_for_exchange(exchange)
+
+    def load_history(symbol: str, *, required: bool) -> pd.DataFrame:
+        last_error: Exception | None = None
+        for _ in range(3):
+            try:
+                return store.get_price_history(symbol, start.isoformat(), end.isoformat())
+            except Exception as exc:  # noqa: BLE001
+                last_error = exc
+        if required and last_error is not None:
+            raise last_error
+        return pd.DataFrame()
+
+    stock_frame = load_history(ticker.upper(), required=True)
+    primary_frame = load_history(primary_symbol, required=False)
+    secondary_frame = (
+        primary_frame
+        if primary_symbol == "VNINDEX"
+        else load_history("VNINDEX", required=False)
+    )
+    return build_market_data_artifact(
+        ticker,
+        exchange,
+        stock_frame,
+        primary_frame,
+        secondary_frame,
+        source="fact.price_history",
     )
 
 

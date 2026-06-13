@@ -22,6 +22,96 @@ def _make_artifact(ticker: str = "TEST") -> ReportArtifact:
     )
 
 
+def _passing_gate_inputs() -> dict:
+    val = {
+        "blend_dcf": {
+            "price_fcff_vnd": 100_000,
+            "price_fcfe_vnd": 100_000,
+            "target_price_dcf_vnd": 100_000,
+        },
+        "fcff": {
+            "shares_mn": 100,
+            "wacc": 0.12,
+            "terminal_growth": 0.03,
+            "enterprise_value": 1000,
+            "equity_value": 800,
+        },
+        "fcfe": {
+            "equity_value": 750,
+            "cost_of_equity": 0.12,
+            "terminal_growth": 0.03,
+        },
+        "fcff_sensitivity": {
+            "matrix": [
+                [92_000, 96_000, 100_000],
+                [96_000, 100_000, 104_000],
+                [100_000, 104_000, 108_000],
+            ],
+            "base_wacc": 0.12,
+            "base_terminal_growth": 0.03,
+            "wacc_range": [0.11, 0.12, 0.13],
+            "terminal_growth_range": [0.02, 0.03, 0.04],
+        },
+        "fcfe_sensitivity": {
+            "matrix": [
+                [92_000, 96_000, 100_000],
+                [96_000, 100_000, 104_000],
+                [100_000, 104_000, 108_000],
+            ],
+            "base_re": 0.12,
+            "base_terminal_growth": 0.03,
+            "re_range": [0.11, 0.12, 0.13],
+            "terminal_growth_range": [0.02, 0.03, 0.04],
+        },
+        "blend_sensitivity": {
+            "matrix": [
+                [96_000, 98_000, 100_000],
+                [98_000, 100_000, 102_000],
+                [100_000, 102_000, 104_000],
+            ],
+            "price_fcff_range": [95_000, 100_000, 105_000],
+            "price_fcfe_range": [95_000, 100_000, 105_000],
+        },
+    }
+    forecast = {
+        "forecast_years": [
+            {
+                "label": "FY2026E",
+                "revenue": 1_000,
+                "net_income": 100,
+                "eps": 1000,
+                "diluted_shares": 100,
+            },
+            {
+                "label": "FY2027E",
+                "revenue": 1_040,
+                "net_income": 104,
+                "eps": 1040,
+                "diluted_shares": 100,
+            },
+        ],
+        "working_capital_schedule": {"delta_nwc": [10, 20]},
+        "debt_schedule": {"is_fcfe_publishable": True},
+        "dividend_schedule": {"policy": "explicit payout", "payout_ratio": 0.30},
+    }
+    source_manifest = {"untraced_valuation_facts": [], "tier3_only_valuation_facts": []}
+    recon = {"material_conflicts": []}
+    claim_ledger = {"summary": {"unsupported": 0, "partial": 0}}
+
+    from backend.reporting.layout_audit import LayoutRenderAudit
+
+    layout = LayoutRenderAudit(ticker="TEST", report_id="test_001", render_mode="client_final")
+    return {
+        "valuation_artifact": val,
+        "forecast_artifact": forecast,
+        "source_manifest": source_manifest,
+        "reconciliation_artifact": recon,
+        "claim_ledger": claim_ledger,
+        "layout_audit": layout,
+        "approval_status": "approved",
+    }
+
+
 class TestGateSkipIsFail:
     """Spec §1.1: Any gate returning SKIP must have passed=false and block export."""
 
@@ -66,14 +156,32 @@ class TestExportGateControlsRender:
     def test_all_pass_means_client_final(self):
         artifact = _make_artifact()
         val = {
-            "blend_dcf": {},
+            "blend_dcf": {
+                "price_fcff_vnd": 5,
+                "price_fcfe_vnd": 5,
+                "target_price_dcf_vnd": 5,
+            },
             "fcff": {"shares_mn": 100, "wacc": 0.12, "terminal_growth": 0.03, "enterprise_value": 1000, "equity_value": 800},
             "fcfe": {"equity_value": 750, "cost_of_equity": 0.12, "terminal_growth": 0.03},
             "fcff_sensitivity": {
-                "matrix": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                "matrix": [[1, 2, 3], [4, 5, 6], [7, 5, 9]],
+                "base_terminal_growth": 0.03,
                 "base_wacc": 0.12,
-                "wacc_range": [0.10, 0.11, 0.12, 0.13, 0.14]
-            }
+                "wacc_range": [0.10, 0.11, 0.12, 0.13, 0.14],
+                "terminal_growth_range": [0.02, 0.03, 0.04],
+            },
+            "fcfe_sensitivity": {
+                "matrix": [[1, 2, 3], [4, 5, 6], [7, 5, 9]],
+                "base_terminal_growth": 0.03,
+                "base_re": 0.12,
+                "re_range": [0.10, 0.11, 0.12, 0.13, 0.14],
+                "terminal_growth_range": [0.02, 0.03, 0.04],
+            },
+            "blend_sensitivity": {
+                "matrix": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                "price_fcff_range": [4, 5, 6],
+                "price_fcfe_range": [4, 5, 6],
+            },
         }
         forecast = {
             "forecast_years": [
@@ -107,3 +215,134 @@ class TestExportGateControlsRender:
         )
         assert result.is_final_exportable is True
         assert result.render_mode == "client_final"
+
+
+class TestForecastAndValuationAnomalyGates:
+    """Regression tests for DHG-style financial model red flags."""
+
+    def test_profit_growth_outlier_blocks_final_export_without_margin_bridge(self):
+        artifact = _make_artifact()
+        inputs = _passing_gate_inputs()
+        inputs["forecast_artifact"]["forecast_years"] = [
+            {
+                "label": "FY2025A",
+                "revenue": 1_000,
+                "net_income": 100,
+                "eps": 1000,
+                "diluted_shares": 100,
+            },
+            {
+                "label": "FY2026E",
+                "revenue": 1_040,
+                "net_income": 153,
+                "eps": 1530,
+                "diluted_shares": 100,
+            },
+        ]
+
+        result = evaluate_export_gate(artifact, **inputs)
+
+        forecast_gate = result.gate("forecast_gate")
+        assert forecast_gate is not None
+        assert forecast_gate.status == "FAIL"
+        assert any("net income growth" in issue for issue in forecast_gate.issues)
+        assert result.is_final_exportable is False
+
+    def test_cash_accumulation_without_dividend_policy_blocks_final_export(self):
+        artifact = _make_artifact()
+        inputs = _passing_gate_inputs()
+        inputs["forecast_artifact"]["dividend_schedule"] = {}
+        inputs["forecast_artifact"]["forecast_years"] = [
+            {
+                "label": "FY2026E",
+                "revenue": 1_000,
+                "net_income": 100,
+                "cash": 800,
+                "eps": 1000,
+                "diluted_shares": 100,
+            },
+            {
+                "label": "FY2027E",
+                "revenue": 1_040,
+                "net_income": 104,
+                "cash": 950,
+                "eps": 1040,
+                "diluted_shares": 100,
+            },
+            {
+                "label": "FY2028E",
+                "revenue": 1_082,
+                "net_income": 108,
+                "cash": 1_100,
+                "eps": 1080,
+                "diluted_shares": 100,
+            },
+        ]
+
+        result = evaluate_export_gate(artifact, **inputs)
+
+        forecast_gate = result.gate("forecast_gate")
+        assert forecast_gate is not None
+        assert forecast_gate.status == "FAIL"
+        assert any("cash accumulation anomaly" in issue for issue in forecast_gate.issues)
+        assert result.is_final_exportable is False
+
+    def test_sensitivity_base_cell_must_match_target_price(self):
+        artifact = _make_artifact()
+        inputs = _passing_gate_inputs()
+        inputs["valuation_artifact"]["fcff_sensitivity"]["matrix"][1][1] = 90_000
+
+        result = evaluate_export_gate(artifact, **inputs)
+
+        sensitivity_gate = result.gate("sensitivity_gate")
+        assert sensitivity_gate is not None
+        assert sensitivity_gate.status == "FAIL"
+        assert any("fcff sensitivity base cell" in issue for issue in sensitivity_gate.issues)
+        assert result.is_final_exportable is False
+
+    def test_current_sensitivity_artifact_shape_passes(self):
+        artifact = _make_artifact()
+        inputs = _passing_gate_inputs()
+        inputs["valuation_artifact"].pop("fcff_sensitivity")
+        inputs["valuation_artifact"].pop("fcfe_sensitivity")
+        inputs["valuation_artifact"].pop("blend_sensitivity")
+        inputs["valuation_artifact"]["sensitivity"] = {
+            "fcff_wacc_g": {
+                "matrix": {"0.120": {"0.030": 100_000}},
+                "base_wacc": 0.12,
+                "base_terminal_growth": 0.03,
+                "wacc_range": [0.12],
+                "g_range": [0.03],
+            },
+            "fcfe_re_g": {
+                "matrix": {"0.120": {"0.030": 100_000}},
+                "base_re": 0.12,
+                "base_terminal_growth": 0.03,
+                "re_range": [0.12],
+                "g_range": [0.03],
+            },
+            "blend_grid": {
+                "matrix": {"100000": {"100000": 100_000}},
+                "price_fcff_range": [100_000],
+                "price_fcfe_range": [100_000],
+            },
+        }
+
+        result = evaluate_export_gate(artifact, **inputs)
+
+        sensitivity_gate = result.gate("sensitivity_gate")
+        assert sensitivity_gate is not None
+        assert sensitivity_gate.status == "PASS"
+
+    def test_missing_fcfe_sensitivity_blocks_final_export(self):
+        artifact = _make_artifact()
+        inputs = _passing_gate_inputs()
+        inputs["valuation_artifact"].pop("fcfe_sensitivity")
+
+        result = evaluate_export_gate(artifact, **inputs)
+
+        sensitivity_gate = result.gate("sensitivity_gate")
+        assert sensitivity_gate is not None
+        assert sensitivity_gate.status == "FAIL"
+        assert any("fcfe_sensitivity matrix missing" in issue for issue in sensitivity_gate.issues)
+        assert result.is_final_exportable is False

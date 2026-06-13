@@ -12,6 +12,275 @@ from __future__ import annotations
 import pytest
 
 
+class TestClientReportFinancialTables:
+    def test_front_page_shares_can_fall_back_to_explicit_valuation_artifacts(self):
+        from backend.reporting import client_report_view_model as vm
+
+        assert vm._derive_artifact_shares_mn(
+            fcff={"shares_mn": 130.75},
+            core_pe_net_cash={},
+            valuation={},
+            forecast={},
+        ) == pytest.approx(130.75)
+        assert vm._derive_artifact_shares_mn(
+            fcff={},
+            core_pe_net_cash={},
+            valuation={},
+            forecast={"share_rollforward": {"base_shares_mn": 130.75}},
+        ) == pytest.approx(130.75)
+        assert vm._derive_artifact_shares_mn(
+            fcff={},
+            core_pe_net_cash={},
+            valuation={},
+            forecast={"forecast_years": [{"eps": 5000.0, "net_income": 650.0}]},
+        ) == 0.0
+
+    def test_front_page_dividend_per_share_uses_forecast_cash_dividend(self):
+        from backend.reporting import client_report_view_model as vm
+
+        dps = vm._derive_report_dividend_per_share(
+            facts={},
+            forecast_rows={"2026F": {"cash_dividend": 300.0, "diluted_shares": 100.0}},
+            periods=["2026F"],
+            shares_mn=100.0,
+        )
+
+        assert dps == pytest.approx(3000.0)
+        assert dps / 93_700.0 == pytest.approx(0.0320170758)
+
+    def test_front_page_build_fills_shares_market_cap_and_dividend_yield(self, monkeypatch):
+        from backend.reporting import client_report_view_model as vm
+
+        forecast = {
+            "forecast_years": [{
+                "label": "2026F",
+                "cash_dividend": 300.0,
+                "diluted_shares": 130.75,
+            }],
+            "share_rollforward": {"base_shares_mn": 130.75},
+        }
+        fcff = {"shares_mn": 130.75, "fcff_table": [{"label": "2026F"}]}
+        blend = {
+            "current_price_vnd": 93_700.0,
+            "target_price_dcf_vnd": 91_476.0,
+            "upside_pct": -0.0237353255,
+        }
+        valuation = {"forecast": forecast, "fcff": fcff, "blend_dcf": blend}
+
+        monkeypatch.setattr(vm, "_facts", lambda *args, **kwargs: {})
+        monkeypatch.setattr(vm, "_valuation", lambda *args, **kwargs: valuation)
+        monkeypatch.setattr(vm, "_valuation_result", lambda *args, **kwargs: valuation)
+        monkeypatch.setattr(vm, "_forecast", lambda *args, **kwargs: forecast)
+        monkeypatch.setattr(vm, "_fcff", lambda *args, **kwargs: fcff)
+        monkeypatch.setattr(vm, "_blend", lambda *args, **kwargs: blend)
+        monkeypatch.setattr(vm, "_core_pe_net_cash", lambda *args, **kwargs: {})
+        monkeypatch.setattr(vm, "_charts", lambda *args, **kwargs: {})
+        monkeypatch.setattr(vm, "_load_market_snapshot", lambda *args, **kwargs: None)
+        monkeypatch.setattr(vm, "_market_data", lambda *args, **kwargs: None)
+
+        report = vm.build_client_report_view_model("DHG", mode="analyst_draft")
+
+        assert 130.75 in report.market_statistics.values()
+        assert 93_700.0 * 130.75 / 1000.0 in report.market_statistics.values()
+        assert report.dividend_yield is not None
+        assert report.dividend_yield.value == pytest.approx(300.0 * 1000.0 / 130.75 / 93_700.0)
+
+    def test_actual_canonical_metrics_fill_broker_table_rows(self):
+        from backend.reporting import client_report_view_model as vm
+
+        bn = 1_000_000_000
+        facts = {
+            "revenue.net": {"2025FY": 1000 * bn},
+            "gross_profit.total": {"2025FY": 400 * bn},
+            "ebit.total": {"2025FY": 160 * bn},
+            "ebitda.total": {"2025FY": 200 * bn},
+            "depreciation.total": {"2025FY": 40 * bn},
+            "financial_income.total": {"2025FY": 20 * bn},
+            "financial_expense.total": {"2025FY": -10 * bn},
+            "profit_before_tax.total": {"2025FY": 170 * bn},
+            "tax_expense.total": {"2025FY": -34 * bn},
+            "net_income.parent": {"2025FY": 136 * bn},
+            "operating_cash_flow.total": {"2025FY": 180 * bn},
+            "capex.total": {"2025FY": -60 * bn},
+            "free_cash_flow.total": {"2025FY": 120 * bn},
+            "change_in_working_capital.total": {"2025FY": 5 * bn},
+            "dividends_paid.total": {"2025FY": -50 * bn},
+            "equity.parent": {"2025FY": 500 * bn},
+            "total_assets.ending": {"2025FY": 900 * bn},
+            "total_debt.ending": {"2025FY": 300 * bn},
+            "cash_and_equivalents.ending": {"2025FY": 100 * bn},
+            "shares_outstanding.ending": {"2025FY": 100_000_000},
+            "eps.basic": {"2025FY": 1360.0},
+        }
+        periods = ["2025FY"]
+
+        model = {
+            label: values
+            for label, values in vm._table_valuation_model(
+                facts, {}, {}, periods, 100.0
+            ).rows
+        }
+        bs = {
+            label: values
+            for label, values in vm._table_bs_cf(
+                facts, {}, {}, periods, 100.0
+            ).rows
+        }
+        profitability = {
+            label: values
+            for label, values in vm._table_profitability_valuation(
+                facts,
+                {},
+                10_000.0,
+                {"wacc": 0.12, "wacc_breakdown": {"tax_rate": 0.2}},
+                periods,
+                100.0,
+                None,
+            ).rows
+        }
+
+        assert model["Doanh thu tài chính"][0] == pytest.approx(20.0)
+        assert model["Chi phí tài chính"][0] == pytest.approx(-10.0)
+        assert model["EBITDA"][0] == pytest.approx(200.0)
+        assert model["Lợi nhuận từ HĐKD / EBIT"][0] == pytest.approx(160.0)
+        assert model["Số lượng cổ phiếu (triệu)"][0] == pytest.approx(100.0)
+        assert bs["Thay đổi vốn lưu động"][0] == pytest.approx(5.0)
+        assert bs["Cổ tức"][0] == pytest.approx(50.0)
+        assert bs["Giá trị sổ sách/cp (VND)"][0] == pytest.approx(5000.0)
+        assert profitability["EV/EBITDA"][0] == pytest.approx(6.0)
+        assert profitability["EV/FCF"][0] == pytest.approx(10.0)
+        assert profitability["P/S"][0] == pytest.approx(1.0)
+        assert profitability["EV/Doanh thu"][0] == pytest.approx(1.2)
+        assert profitability["Suất sinh lợi cổ tức"][0] == pytest.approx(0.05)
+
+    def test_operating_profit_can_seed_derived_ebit(self):
+        from backend.facts.normalizer import FactEntry, compute_derived
+
+        result = compute_derived({
+            "operating_profit.total": {"2025FY": FactEntry(value=160.0)},
+            "depreciation.total": {"2025FY": FactEntry(value=40.0)},
+            "revenue.net": {"2025FY": FactEntry(value=1000.0)},
+        })
+
+        assert result["ebit.total"]["2025FY"].value == pytest.approx(160.0)
+        assert result["ebitda.total"]["2025FY"].value == pytest.approx(200.0)
+
+    def test_taxonomy_registers_broker_table_source_metrics(self):
+        from backend.dataset.config_io import load_financial_taxonomy
+
+        taxonomy = load_financial_taxonomy()["taxonomy"]
+        for metric in (
+            "financial_income.total",
+            "financial_expense.total",
+            "operating_profit.total",
+            "long_term_debt.ending",
+            "dividends_paid.total",
+            "change_in_working_capital.total",
+        ):
+            assert metric in taxonomy
+
+    def test_forecast_rows_are_enriched_from_schedules(self):
+        from backend.reporting import client_report_view_model as vm
+
+        forecast = {
+            "forecast_years": [{"label": "2026F", "revenue": 1000.0}],
+            "cash_sweep_artifact": {
+                "year_results": [{"year_label": "2026F", "computed_ending_cash": 120.0}]
+            },
+            "debt_schedule": {
+                "is_fcfe_publishable": True,
+                "forecast_rows": [{
+                    "label": "2026F",
+                    "beginning_interest_bearing_debt": 180.0,
+                    "ending_interest_bearing_debt": 200.0,
+                    "net_borrowing": 20.0,
+                }]
+            },
+            "dividend_schedule": {
+                "forecast_rows": [{
+                    "label": "2026F",
+                    "cash_dividend": 50.0,
+                    "payout_ratio": 0.5,
+                    "retained_earnings_addition": 50.0,
+                }]
+            },
+        }
+
+        rows = vm._forecast_by_label(forecast)
+
+        assert rows["2026F"]["cash"] == pytest.approx(120.0)
+        assert rows["2026F"]["total_debt"] == pytest.approx(200.0)
+        assert rows["2026F"]["net_borrowing"] == pytest.approx(20.0)
+        assert rows["2026F"]["cash_dividend"] == pytest.approx(50.0)
+
+    def test_financial_summary_omits_dividend_rows(self):
+        from backend.reporting import client_report_view_model as vm
+
+        forecast_rows = {
+            "2026F": {
+                "revenue": 1000.0,
+                "net_income": 100.0,
+                "eps": 1000.0,
+                "equity": 500.0,
+                "total_debt": 300.0,
+                "cash": 100.0,
+                "ebitda": 200.0,
+                "cash_dividend": 50.0,
+                "diluted_shares": 100.0,
+                "total_assets": 900.0,
+            }
+        }
+
+        table = vm._table_financial_summary(
+            facts={},
+            forecast_rows=forecast_rows,
+            current_price=10_000.0,
+            periods=["2026F"],
+            dividend_per_share=None,
+            shares_mn=100.0,
+        )
+        rows = {label: values for label, values in table.rows}
+
+        assert rows["Nợ ròng / EBITDA"][0] == pytest.approx(1.0)
+        assert rows["P/B"][0] == pytest.approx(2.0)
+        assert "Cổ tức/cp" not in rows
+        assert "Suất sinh lợi cổ tức" not in rows
+
+    def test_profitability_table_ev_ebitda_includes_net_debt_and_dividend_yield(self):
+        from backend.reporting import client_report_view_model as vm
+
+        forecast_rows = {
+            "2026F": {
+                "revenue": 1000.0,
+                "net_income": 100.0,
+                "eps": 1000.0,
+                "equity": 500.0,
+                "total_debt": 300.0,
+                "cash": 100.0,
+                "ebit": 160.0,
+                "ebitda": 200.0,
+                "cash_dividend": 50.0,
+                "diluted_shares": 100.0,
+                "total_assets": 900.0,
+            }
+        }
+
+        table = vm._table_profitability_valuation(
+            facts={},
+            forecast_rows=forecast_rows,
+            current_price=10_000.0,
+            fcff={"wacc": 0.12, "wacc_breakdown": {"tax_rate": 0.2}},
+            periods=["2026F"],
+            shares_mn=100.0,
+            dividend_per_share=None,
+        )
+        rows = {label: values for label, values in table.rows}
+
+        assert rows["EV/EBITDA"][0] == pytest.approx(6.0)
+        assert rows["P/B"][0] == pytest.approx(2.0)
+        assert rows["Suất sinh lợi cổ tức"][0] == pytest.approx(0.05)
+
+
 # ── ForecastArtifact schema ───────────────────────────────────────────────────
 
 class TestForecastArtifactSchema:
@@ -55,6 +324,7 @@ class TestForecastArtifactSchema:
             "profit_before_tax", "tax_expense", "net_income",
             "net_margin", "capex", "eps",
             "beginning_debt", "ending_debt", "net_borrowing",
+            "cash",
             "cash_dividend", "payout_ratio", "retained_earnings_addition",
             "delta_nwc", "net_working_capital", "diluted_shares",
         ]

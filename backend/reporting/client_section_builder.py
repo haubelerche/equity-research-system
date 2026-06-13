@@ -8,6 +8,7 @@ from backend.reporting.client_report_view_model import (
     ClientReportViewModel,
     TableData,
 )
+from backend.reporting.fpts_chart_policy import is_main_report_chart, main_report_chart_ids
 
 
 DASH = "—"
@@ -46,11 +47,17 @@ def _fmt_metric(label: str, value: Any, format_type: str = "auto") -> str:
     except (TypeError, ValueError):
         return _e(value)
 
+    def _zeroed(threshold: float) -> float:
+        return 0.0 if abs(number) < threshold else number
+
     if format_type == "currency":
+        number = _zeroed(0.5)
         return f"{number:,.0f}"
     if format_type == "percent":
+        number = _zeroed(0.0005)
         return f"{number * 100:.1f}%"
     if format_type == "multiple":
+        number = _zeroed(0.05)
         return f"{number:.1f}x"
     if format_type == "text":
         return _e(value)
@@ -66,6 +73,7 @@ def _fmt_metric(label: str, value: Any, format_type: str = "auto") -> str:
         "khấu hao /",
         "capex /",
         "effective tax rate",
+        "chuyển đổi dòng tiền",
         "cash conversion",
         "terminal growth",
         "tỷ suất",
@@ -79,17 +87,23 @@ def _fmt_metric(label: str, value: Any, format_type: str = "auto") -> str:
         "suất sinh lời",
         "nợ ròng / vcsh",
         "upside/downside",
+        "tiềm năng tăng/giảm",
         "stress",
     ]
     multiple_tokens = ["p/e", "p/b", "p/s", "ev/", "peg", "nợ ròng / ebitda"]
     if any(token in lower for token in percent_tokens):
+        number = _zeroed(0.0005)
         return f"{number * 100:.1f}%"
     if any(token in lower for token in multiple_tokens):
+        number = _zeroed(0.05)
         return f"{number:.1f}x"
     if "eps" in lower or "giá trị sổ sách" in lower:
+        number = _zeroed(0.5)
         return f"{number:,.0f}"
     if "target price" in lower or "giá mục tiêu" in lower:
+        number = _zeroed(0.5)
         return f"{number:,.0f}"
+    number = _zeroed(0.5)
     return f"{number:,.0f}"
 
 
@@ -248,6 +262,43 @@ def _render_sensitivity_matrix_table(table: TableData) -> str:
 """
 
 
+def _slice_table(table: TableData, max_periods: int = 6) -> TableData:
+    """Return a recent-period view for the main report body.
+
+    Detailed multi-year tables stay available in the appendix; the body keeps
+    broker-style readability by showing only the most recent columns.
+    """
+    if len(table.periods) <= max_periods:
+        return table
+    start = len(table.periods) - max_periods
+    return TableData(
+        title=table.title,
+        periods=table.periods[start:],
+        rows=[(label, values[start:]) for label, values in table.rows],
+        unit=table.unit,
+        format_type=table.format_type,
+        source_note=table.source_note,
+    )
+
+
+def _render_main_table(table: TableData, class_name: str = "financial-model-table main-financial-table") -> str:
+    return _render_variance_table(_slice_table(table), class_name)
+
+
+def _render_appendix_table(table: TableData) -> str:
+    return _render_variance_table(table, "financial-model-table appendix-financial-table")
+
+
+def _section_block(title: str, body: str, class_name: str = "") -> str:
+    extra = f" {class_name}" if class_name else ""
+    return f"""
+<section class="fpts-section{extra}">
+  <div class="fpts-section-title">{_e(title)}</div>
+  {body}
+</section>
+"""
+
+
 def _render_key_value_table(rows: list[tuple[str, Any]], class_name: str = "broker-side-table") -> str:
     body = "".join(
         f"<tr><td>{_e(label)}</td><td>{_fmt_metric(label, value)}</td></tr>"
@@ -257,6 +308,8 @@ def _render_key_value_table(rows: list[tuple[str, Any]], class_name: str = "brok
 
 
 def _chart(vm: ClientReportViewModel, chart_id: str) -> str:
+    if not is_main_report_chart(chart_id):
+        return ""
     chart = vm.charts.get(chart_id)
     if not chart:
         return ""
@@ -294,7 +347,7 @@ def _rec_hero(vm: ClientReportViewModel) -> str:
     # is not yet publication-ready, mark the recommendation as preliminary instead of
     # presenting unapproved figures as a final published call.
     draft_note = (
-        '\n  <div class="rec-draft-note">Dự thảo — khuyến nghị và giá mục tiêu chưa được công bố chính thức</div>'
+        '\n  <div class="rec-draft-note">Dự thảo: khuyến nghị và giá mục tiêu chưa được công bố chính thức</div>'
         if vm.publication_status != "client_exportable"
         else ""
     )
@@ -305,7 +358,7 @@ def _rec_hero(vm: ClientReportViewModel) -> str:
   <div class="rec-sub">
     Giá mục tiêu: <strong>{_e(tp_display)} VND</strong>
     &nbsp;|&nbsp;
-    Upside/Downside: <strong>{_e(upside_display)}</strong>
+    Tiềm năng tăng/giảm: <strong>{_e(upside_display)}</strong>
     &nbsp;|&nbsp;
     {_e(vm.report_date)}
   </div>{draft_note}
@@ -318,7 +371,6 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
         ("Giá mục tiêu (VND)", _format_price(vm.target_price)),
         ("Giá hiện tại (VND)", _format_price(vm.current_price)),
         ("Tỷ lệ tăng/giảm", _format_percent(vm.upside_downside)),
-        ("Suất sinh lời cổ tức", _format_percent(vm.dividend_yield)),
         ("Tổng tỷ suất lợi nhuận", _format_percent(vm.total_return)),
     ]
     stats_rows = [
@@ -332,20 +384,19 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
         ("KLGD bình quân 30 phiên", vm.market_statistics.get("KLGD bình quân 30 phiên", "N/A")),
         ("Tỷ lệ sở hữu nước ngoài", vm.market_statistics.get("Tỷ lệ sở hữu nước ngoài", "N/A")),
     ]
-    profile_rows = list(vm.company_profile.items()) if vm.company_profile else [
-        ("Tên", vm.company_name),
-        ("Mã giao dịch", vm.ticker),
-        ("Sàn", vm.exchange),
-        ("Ngành", vm.sector),
-    ]
     return f"""
 <div class="client-report-page snapshot-page">
-  <div class="acbs-titlebar">
-    <div>
-      <div class="acbs-report-kicker">{_e(vm.report_title)}</div>
-      <div class="acbs-date">Ngày {_e(vm.report_date)}</div>
-    </div>
-    <div class="acbs-brand">Vietnam Pharma Equity Research</div>
+  <div class="fpts-cover-topline">
+    <div class="fpts-cover-brand">Equity Research</div>
+    <div class="fpts-cover-report-type">BÁO CÁO CẬP NHẬT ĐỊNH GIÁ</div>
+  </div>
+  <div class="fpts-cover-meta">
+    <span>NGÀNH {_e(vm.sector).upper()}</span>
+    <span>Ngày {_e(vm.report_date)}</span>
+  </div>
+  <div class="fpts-company-bar">
+    <div>{_e(vm.company_name)} ({_e(vm.ticker)} VN)</div>
+    <div>{_e(vm.exchange)}: {_e(vm.ticker)}</div>
   </div>
   <div class="acbs-layout">
     <aside class="acbs-sidebar">
@@ -362,11 +413,8 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
       {_render_table(vm.trading_performance_table, "broker-side-table compact trading-performance-table")}
       <div class="side-section-title">Thông tin giao dịch</div>
       {_render_key_value_table(stats_rows, "broker-side-table compact")}
-      <div class="side-section-title">Tổng quan doanh nghiệp</div>
-      {_render_key_value_table(profile_rows, "broker-side-table compact")}
     </aside>
     <main class="acbs-main">
-      <h1>{_e(vm.company_name)} ({_e(vm.ticker)} VN)</h1>
       {_rec_hero(vm)}
       <div class="lead-thesis">{_e(_excerpt(vm.investment_thesis, 1050))}</div>
       <h2>Luận điểm cập nhật</h2>
@@ -445,98 +493,53 @@ def _render_key_sources(vm: ClientReportViewModel) -> str:
     return f'<ol class="source-list">{items}</ol>'
 
 
-def _company_overview_page(vm: ClientReportViewModel) -> str:
+def _business_financials_page(vm: ClientReportViewModel) -> str:
     return f"""
 <div class="client-report-page">
-  <h1>Tổng quan doanh nghiệp</h1>
-  <h2>Cập nhật hoạt động kinh doanh</h2>
-  <p>{_e(vm.latest_business_update)}</p>
+  <h1>Triển vọng kinh doanh và tài chính</h1>
+  {_section_block("Cập nhật hoạt động kinh doanh", f"<p>{_e(vm.latest_business_update)}</p>")}
   <div class="two-chart-grid">
     {_chart(vm, "C2")}
     {_chart(vm, "C4")}
   </div>
+  {_section_block("Kết quả tài chính chính", f"<p>{_e(vm.current_context)}</p>{_render_main_table(vm.financial_summary_table)}")}
+  {_section_block("Động lực dự phóng", f"<p>{_e(vm.key_growth_drivers)}</p><p>{_e(vm.key_margin_drivers)}</p>{_chart(vm, 'C5')}{_render_table(vm.key_forecast_drivers_table, 'financial-model-table driver-table')}", "driver-section")}
 </div>
 """
 
 
-def _financial_performance_page(vm: ClientReportViewModel) -> str:
-    # C3 (EPS & P/E history) is colocated with financial performance narrative
-    c3_block = _chart(vm, "C3")
+def _valuation_page(vm: ClientReportViewModel) -> str:
+    peer = _render_table(vm.peer_table, "financial-model-table peer-table") if vm.peer_table is not None else ""
     return f"""
 <div class="client-report-page">
-  <h1>Kết quả hoạt động kinh doanh</h1>
-  <p>{_e(vm.current_context)}</p>
-  {_render_variance_table(vm.financial_summary_table)}
-  {_render_variance_table(vm.balance_sheet_cashflow_table)}
-  <div class="two-chart-grid">
-    {c3_block}
-    {_chart(vm, "C4")}
-  </div>
-  {_render_variance_table(vm.profitability_valuation_table)}
-</div>
-"""
-
-
-def _forecast_drivers_page(vm: ClientReportViewModel) -> str:
-    # C5 (forecast revenue/profit) is colocated with forecast narrative
-    c5_block = _chart(vm, "C5")
-    return f"""
-<div class="client-report-page">
-  <h1>Dự phóng tài chính</h1>
-  <h2>Động lực tăng trưởng</h2>
-  <p>{_e(vm.key_growth_drivers)}</p>
-  {c5_block}
-  <h2>Động lực biên lợi nhuận</h2>
-  <p>{_e(vm.key_margin_drivers)}</p>
-  {_render_table(vm.key_forecast_drivers_table)}
-</div>
-"""
-
-
-def _valuation_model_page(vm: ClientReportViewModel) -> str:
-    # C6 (DCF bridge waterfall) is colocated with valuation narrative
-    c6_block = _chart(vm, "C6")
-    return f"""
-<div class="client-report-page">
-  <h1>Mô hình định giá</h1>
-  <p>{_e(vm.forecast_valuation_narrative)}</p>
-  {c6_block}
-  {_render_table(vm.valuation_model_table)}
-</div>
-"""
-
-
-def _sensitivity_peer_page(vm: ClientReportViewModel) -> str:
-    # C7 (sensitivity heatmap) + C8 (peer comparison) colocated with the tables
-    peer = _render_table(vm.peer_table) if vm.peer_table is not None else ""
-    c7_block = _chart(vm, "C7")
-    c8_block = _chart(vm, "C8")
-    charts_grid = ""
-    if c7_block or c8_block:
-        charts_grid = f'<div class="two-chart-grid">{c7_block}{c8_block}</div>'
-    return f"""
-<div class="client-report-page">
-  <h1>Phân tích độ nhạy và so sánh ngành</h1>
-  {_render_sensitivity_matrix_table(vm.sensitivity_table)}
-  {charts_grid}
+  <h1>Định giá và độ nhạy</h1>
+  {_section_block("Luận điểm định giá", f"<p>{_e(vm.forecast_valuation_narrative)}</p>")}
+  {_section_block("Mô hình định giá", _render_main_table(vm.valuation_model_table))}
+  {_section_block("Độ nhạy giá mục tiêu", _render_sensitivity_matrix_table(vm.sensitivity_table), "sensitivity-section")}
   {peer}
 </div>
 """
 
 
-def _risks_catalysts_page(vm: ClientReportViewModel) -> str:
+def _risks_sources_page(vm: ClientReportViewModel) -> str:
     risk_body = "".join(
         f"<tr><td>{_e(label)}</td>{''.join(f'<td>{_e(v)}</td>' for v in values)}</tr>"
         for label, values in vm.risk_table.rows
     )
     return f"""
 <div class="client-report-page">
-  <h1>Rủi ro và sự kiện trọng yếu</h1>
-  <p>{_e(vm.material_events)}</p>
+  <h1>Rủi ro, trạng thái và nguồn tham khảo</h1>
+  {_section_block("Yếu tố cần theo dõi", f"<p>{_e(vm.material_events)}</p>")}
+  <div class="fpts-section">
+  <div class="fpts-section-title">Rủi ro đầu tư</div>
   <table class="financial-model-table">
     <thead><tr><th>Rủi ro</th>{''.join(f'<th>{_e(p)}</th>' for p in vm.risk_table.periods)}</tr></thead>
     <tbody>{risk_body}</tbody>
   </table>
+  </div>
+  {_section_block("Trạng thái báo cáo", f"<p>{_e(_client_status_sentence(vm))}</p>")}
+  {_section_block("Nguồn tham khảo chính", _render_key_sources(vm))}
+  {_section_block("Tuyên bố miễn trừ trách nhiệm", f"<p>{_e(vm.disclaimer)}</p>")}
 </div>
 """
 
@@ -558,16 +561,14 @@ def _client_status_sentence(vm: ClientReportViewModel) -> str:
     )
 
 
-def _conclusion_sources_page(vm: ClientReportViewModel) -> str:
+def _appendix_page(vm: ClientReportViewModel) -> str:
     return f"""
-<div class="client-report-page">
-  <h1>Kết luận và Nguồn tham khảo</h1>
-  <h2>Trạng thái báo cáo</h2>
-  <p>{_e(_client_status_sentence(vm))}</p>
-  <h2>Nguồn tham khảo chính</h2>
-  {_render_key_sources(vm)}
-  <h2>Tuyên bố miễn trừ trách nhiệm</h2>
-  <p>{_e(vm.disclaimer)}</p>
+<div class="client-report-page appendix-page">
+  <h1>Phụ lục bảng tài chính</h1>
+  {_render_appendix_table(vm.financial_summary_table)}
+  {_render_appendix_table(vm.balance_sheet_cashflow_table)}
+  {_render_appendix_table(vm.profitability_valuation_table)}
+  {_render_appendix_table(vm.valuation_model_table)}
 </div>
 """
 
@@ -685,17 +686,15 @@ def _review_dashboard_pages(vm: ClientReportViewModel) -> list[tuple[str, str, s
 
 def build_client_report_sections(vm: ClientReportViewModel) -> list[dict[str, Any]]:
     # (page_id, title_vi, html, chart_ids, chapter_break)
-    # chapter_break=True → explicit page break before this section in the template.
-    # Major editorial chapters always start on a new page; flowing sub-sections do not.
+    # chapter_break=True → explicit page break before a major editorial chapter.
+    # The cover does not force a break, and related sub-sections now flow inside
+    # each chapter to avoid sparse, mechanical pagination.
     pages: list[tuple[str, str, str, list[str], bool]] = [
-        ("snapshot",             "Tổng quan đầu tư",                    _snapshot_page(vm),             ["C1"],                True),
-        ("company_overview",     "Tổng quan doanh nghiệp",              _company_overview_page(vm),     ["C2", "C4"],          True),
-        ("financial_performance","Kết quả hoạt động kinh doanh",        _financial_performance_page(vm),["C3", "C4"],          True),
-        ("forecast_drivers",     "Dự phóng tài chính",                  _forecast_drivers_page(vm),     ["C5"],                True),
-        ("valuation_model",      "Mô hình định giá",                    _valuation_model_page(vm),      ["C6"],                True),
-        ("sensitivity_peer",     "Phân tích độ nhạy và so sánh ngành",  _sensitivity_peer_page(vm),     ["C7", "C8"],          True),
-        ("risks_catalysts",      "Rủi ro và sự kiện trọng yếu",        _risks_catalysts_page(vm),      [],                    True),
-        ("conclusion_sources",   "Kết luận và nguồn tham khảo",        _conclusion_sources_page(vm),   [],                    True),
+        ("snapshot",             "Tổng quan đầu tư",                    _snapshot_page(vm),              ["C1"],                False),
+        ("business_financials",  "Triển vọng kinh doanh và tài chính",  _business_financials_page(vm),   ["C2", "C4", "C5"],    True),
+        ("valuation",            "Định giá và độ nhạy",                _valuation_page(vm),             [],                    True),
+        ("risks_sources",        "Rủi ro và nguồn tham khảo",          _risks_sources_page(vm),         [],                    False),
+        ("appendix",             "Phụ lục bảng tài chính",             _appendix_page(vm),              [],                    True),
     ]
     sections: list[dict[str, Any]] = []
     for index, (page, title, html, chart_ids, chapter_break) in enumerate(pages, start=1):
@@ -705,7 +704,7 @@ def build_client_report_sections(vm: ClientReportViewModel) -> list[dict[str, An
                 "page_number": index,
                 "title": title,
                 "markdown": html,
-                "chart_ids": chart_ids,
+                "chart_ids": main_report_chart_ids(chart_ids),
                 "word_count": len(html.split()),
                 "chapter_break": chapter_break,
             }

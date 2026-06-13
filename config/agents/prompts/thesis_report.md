@@ -33,7 +33,9 @@ At the top level, you MUST include these fields:
 `trading_snapshot`, `company_overview`, `recent_financial_results`, `business_plan_completion`, `forecast_assumptions`, `valuation_summary`, `dcf_assumptions`, `fcff_fcfe_bridge`, `forecast_financial_statement_summary`, `risk_and_monitoring_factors`
 
 `required_charts` — a list containing ALL of these exact strings:
-`stock_price_vs_benchmark`, `revenue_by_channel`, `product_group_revenue_or_market_share`, `gross_margin_net_margin_trend`, `forecast_revenue`, `forecast_gross_profit_or_margin`, `valuation_sensitivity`
+`stock_price_vs_benchmark`, `revenue_by_channel`, `product_group_revenue_or_market_share`, `gross_margin_net_margin_trend`, `forecast_revenue`, `forecast_gross_profit_or_margin`
+
+Do not request client-facing DCF waterfall, valuation sensitivity heatmap, or peer-multiple bar charts. Present valuation outputs, sensitivity, and peer comparison as compact tables in the FPTS format.
 
 Also include `claims` (list of ReportClaim objects) and `limitations` (list of strings).
 

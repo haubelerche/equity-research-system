@@ -18,8 +18,10 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -329,11 +331,11 @@ class PDFRenderer:
         # --- Try installed Chromium/Chrome/Edge headless print-to-PDF ---
         chrome = _find_chromium_executable()
         if chrome:
+            profile_dir: Path | None = None
             try:
                 if pdf_path.exists():
                     pdf_path.unlink()
-                profile_dir = (output_dir / f".chrome-profile-{os.getpid()}").resolve()
-                profile_dir.mkdir(parents=True, exist_ok=True)
+                profile_dir = Path(tempfile.mkdtemp(prefix="chrome-profile-")).resolve()
                 chrome_pdf_path = pdf_path.resolve()
                 cmd = [
                     str(chrome),
@@ -364,6 +366,9 @@ class PDFRenderer:
                 print(f"[pdf] chrome failed ({err[:400]}), trying xhtml2pdf...")
             except Exception as e:
                 print(f"[pdf] chrome failed ({_safe_error_text(e)}), trying xhtml2pdf...")
+            finally:
+                if profile_dir is not None:
+                    shutil.rmtree(profile_dir, ignore_errors=True)
 
         # --- Try xhtml2pdf with Unicode font injection ---
         try:

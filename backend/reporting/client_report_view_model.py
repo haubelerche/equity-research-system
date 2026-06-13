@@ -481,14 +481,43 @@ def _forecast_by_label(forecast: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if isinstance(r, dict) and r.get("label")
     }
 
-    for result in (forecast.get("cash_sweep_artifact") or {}).get("year_results", []):
-        if not isinstance(result, dict):
-            continue
-        label = result.get("year_label")
-        if label and label in rows and rows[label].get("cash") is None:
-            rows[label]["cash"] = result.get("computed_ending_cash")
+    dividend_schedule = forecast.get("dividend_schedule") or {}
+    dividend_publishable = (
+        bool(dividend_schedule)
+        and dividend_schedule.get("method") != "missing"
+        and any(
+            isinstance(div_row, dict) and div_row.get("cash_dividend") is not None
+            for div_row in dividend_schedule.get("forecast_rows", [])
+        )
+    )
+    if not dividend_publishable and dividend_schedule.get("method") == "missing":
+        for row in rows.values():
+            row["cash"] = None
+    if dividend_publishable:
+        for result in (forecast.get("cash_sweep_artifact") or {}).get("year_results", []):
+            if not isinstance(result, dict):
+                continue
+            label = result.get("year_label")
+            if label and label in rows and rows[label].get("cash") is None:
+                rows[label]["cash"] = result.get("computed_ending_cash")
 
-    for debt_row in (forecast.get("debt_schedule") or {}).get("forecast_rows", []):
+    debt_schedule = forecast.get("debt_schedule") or {}
+    debt_method = str(debt_schedule.get("forecast_method") or "")
+    debt_status = str(debt_schedule.get("status") or "")
+    debt_publishable = (
+        bool(debt_schedule)
+        and debt_schedule.get("is_fcfe_publishable") is True
+        and debt_method not in {"stable_debt", "target_debt_ratio", "balance_sheet_delta", "missing"}
+        and debt_status not in {"low", "blocked"}
+    )
+    if not debt_publishable:
+        for row in rows.values():
+            for key in ("beginning_debt", "ending_debt", "total_debt", "net_borrowing", "cost_of_debt"):
+                row[key] = None
+
+    for debt_row in debt_schedule.get("forecast_rows", []):
+        if not debt_publishable:
+            break
         if not isinstance(debt_row, dict):
             continue
         label = debt_row.get("label")
@@ -559,10 +588,7 @@ def _period_value(
         value = _fact_value(facts, actual_map.get(metric, metric), fact_period)
         if value is None and metric == "sga":
             gross_profit = _fact_value(facts, "gross_profit.total", fact_period)
-            ebit = (
-                _fact_value(facts, "ebit.total", fact_period)
-                or _fact_value(facts, "operating_profit.total", fact_period)
-            )
+            ebit = _historical_ebit_from_facts(facts, fact_period)
             value = None if gross_profit is None or ebit is None else ebit - gross_profit
         if value is None:
             return None
@@ -685,12 +711,22 @@ def _total_liabilities_values(
     values: list[float | None] = []
     for period in periods:
         if _is_actual(period):
-            values.append(_fact_value(facts, "total_liabilities.ending", _to_fact_period(period)))
+            fact_period = _to_fact_period(period)
+            direct = _fact_value(facts, "total_liabilities.ending", fact_period)
+            if direct is not None:
+                values.append(direct)
+                continue
+            total_assets = _fact_value(facts, "total_assets.ending", fact_period)
+            equity = (
+                _fact_value(facts, "equity.parent", fact_period)
+                or _fact_value(facts, "equity.ending", fact_period)
+            )
+            values.append(None if total_assets is None or equity is None else total_assets - equity)
         else:
             row = forecast_rows.get(period, {})
             td = row.get("total_debt")
             ol = row.get("other_liabilities")
-            values.append(None if td is None and ol is None else (td or 0.0) + (ol or 0.0))
+            values.append(None if td is None or ol is None else td + ol)
     return values
 
 
@@ -719,6 +755,38 @@ def _safe_div(numerator: float | None, denominator: float | None) -> float | Non
     if numerator is None or denominator in (None, 0):
         return None
     return numerator / denominator
+
+
+def _historical_ebit_from_facts(facts: dict[str, dict[str, float]], fact_period: str) -> float | None:
+    """Derive historical EBIT only from explicit accounting facts.
+
+    Priority:
+    1. Direct EBIT / operating profit facts.
+    2. Gross profit plus SG&A when both are available.
+    3. Profit before tax plus net financial expense, where expense facts are
+       stored as negative costs in the normalized fact layer.
+    """
+    direct = (
+        _fact_value(facts, "ebit.total", fact_period)
+        or _fact_value(facts, "operating_profit.total", fact_period)
+    )
+    if direct is not None:
+        return direct
+
+    gross_profit = _fact_value(facts, "gross_profit.total", fact_period)
+    sga = _fact_value(facts, "sga.total", fact_period)
+    if gross_profit is not None and sga is not None:
+        return gross_profit + sga
+
+    pbt = _fact_value(facts, "profit_before_tax.total", fact_period)
+    if pbt is None:
+        return None
+    net_financial_expense = _fact_value(facts, "financial_expense.total", fact_period)
+    if net_financial_expense is None:
+        net_financial_expense = _fact_value(facts, "interest_expense.total", fact_period)
+    if net_financial_expense is None:
+        return None
+    return pbt - net_financial_expense
 
 
 def _row_values(
@@ -785,13 +853,7 @@ def _ebit_values(forecast_rows: dict[str, dict[str, Any]], facts: dict[str, dict
             value = forecast_rows.get(period, {}).get("ebit")
         else:
             fact_period = _to_fact_period(period)
-            value = _fact_value(facts, "ebit.total", fact_period)
-            if value is None:
-                value = _fact_value(facts, "operating_profit.total", fact_period)
-            if value is None:
-                gross_profit = _period_value(facts, forecast_rows, "gross_profit", period)
-                sga = _period_value(facts, forecast_rows, "sga", period)
-                value = None if None in (gross_profit, sga) else gross_profit + sga
+            value = _historical_ebit_from_facts(facts, fact_period)
         ebit.append(value)
     return ebit
 
@@ -970,7 +1032,7 @@ def _other_profit_values(
             continue
         fact_period = _to_fact_period(period)
         pbt = _fact_value(facts, "profit_before_tax.total", fact_period)
-        operating_profit = _fact_value(facts, "operating_profit.total", fact_period)
+        operating_profit = _historical_ebit_from_facts(facts, fact_period)
         values.append(None if pbt is None or operating_profit is None else pbt - operating_profit)
     return values
 
@@ -991,7 +1053,13 @@ def _historical_delta_nwc_values(
         inventory = _fact_value(facts, "inventory.ending", fact_period)
         ap = _fact_value(facts, "accounts_payable.ending", fact_period)
         nwc = None if None in (ar, inventory, ap) else ar + inventory - ap
-        values.append(None if nwc is None or previous_nwc is None else nwc - previous_nwc)
+        if nwc is not None and previous_nwc is not None:
+            values.append(nwc - previous_nwc)
+        else:
+            ni = _period_value(facts, {}, "net_income", period)
+            dep = _period_value(facts, {}, "depreciation", period)
+            cfo = _period_value(facts, {}, "cfo", period)
+            values.append(None if None in (ni, dep, cfo) else ni + dep - cfo)
         previous_nwc = nwc
     return values
 
@@ -2027,8 +2095,7 @@ def build_client_report_view_model(
             ],
             format_type="percent",
             source_note=(
-                f"Nguồn: dữ liệu giá {ticker} và {trading_perf.benchmark_symbol if trading_perf else benchmark_for_exchange(exchange)} "
-                f"từ artifact thị trường; cập nhật {market_data.as_of_date}."
+                f"Nguồn nhóm phân tích thu thập; cập nhật {market_data.as_of_date}."
                 if market_data is not None else "Chưa có dữ liệu thị trường đã kiểm chứng."
             ),
         ),

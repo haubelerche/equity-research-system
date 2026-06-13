@@ -133,6 +133,7 @@ def run_layout_audit(
     _check_empty_sections(artifact, audit)
     _check_duplicate_sections(artifact, audit)
     _check_backend_terms(artifact, audit)
+    _check_generic_source_notes(artifact, audit)
     _check_bare_dashes(artifact, audit)
     _check_chart_registry(artifact, audit)
     _check_target_price_consistency(artifact, audit)
@@ -141,6 +142,8 @@ def run_layout_audit(
         _check_vietnamese_font(html_full, audit)
         _check_table_overflow_heuristic(html_full, audit)
         _check_english_headings(html_full, audit)
+        _check_chapter_break_density(html_full, audit)
+        _check_main_body_table_width(html_full, audit)
 
     return audit
 
@@ -210,6 +213,29 @@ def _check_backend_terms(artifact: ReportArtifact, audit: LayoutRenderAudit) -> 
                     message=(
                         f"Backend term '{term}' found in section '{section.section_id}'. "
                         "Must be removed before client export."
+                    ),
+                ))
+
+
+def _check_generic_source_notes(artifact: ReportArtifact, audit: LayoutRenderAudit) -> None:
+    """Client-final reports must not cite generic source placeholders."""
+    patterns = [
+        "Nguồn nhóm phân tích thu thập",
+        "Nguồn: nhóm phân tích thu thập",
+        "tính toán nội bộ",
+        "Nguồn dữ liệu thị trường chưa khả dụng",
+    ]
+    severity = "error" if artifact.render_mode == "client_final" else "warning"
+    for section in artifact.sections:
+        for pattern in patterns:
+            if pattern in section.html_content:
+                audit.issues.append(AuditIssue(
+                    severity=severity,
+                    check_name="generic_source_note",
+                    section_id=section.section_id,
+                    message=(
+                        f"Generic source note '{pattern}' found in section "
+                        f"'{section.section_id}'. Use specific documents, fact ids, or model artifact paths."
                     ),
                 ))
 
@@ -345,5 +371,47 @@ def _check_table_overflow_heuristic(html_full: str, audit: LayoutRenderAudit) ->
                     message=(
                         f"Table #{i + 1} has {len(cols)} columns — "
                         "may overflow PDF page width. Consider splitting or abbreviating."
+                    ),
+                ))
+
+
+def _check_chapter_break_density(html_full: str, audit: LayoutRenderAudit) -> None:
+    """Flag mechanical pagination that starts too many hard pages."""
+    breaks = len(re.findall(r"\bchapter-break\b", html_full))
+    if breaks > 4:
+        audit.issues.append(AuditIssue(
+            severity="warning",
+            check_name="excessive_chapter_breaks",
+            section_id=None,
+            message=(
+                f"Report contains {breaks} forced chapter breaks. "
+                "FPTS-style reports should flow related analysis blocks and reserve hard breaks for major chapters."
+            ),
+        ))
+
+
+def _check_main_body_table_width(html_full: str, audit: LayoutRenderAudit) -> None:
+    """Main analytical pages should avoid very wide tables; keep detail in appendix."""
+    section_pattern = re.compile(
+        r'<div class="report-section[^"]*" id="section-([^"]+)".*?</div>\s*(?=<div class="report-section|\s*<!--|</body>)',
+        re.DOTALL | re.IGNORECASE,
+    )
+    for section_id, section_html in section_pattern.findall(html_full):
+        if section_id == "appendix":
+            continue
+        table_blocks = re.findall(r"<table[^>]*>.*?</table>", section_html, re.DOTALL | re.IGNORECASE)
+        for i, table in enumerate(table_blocks):
+            header_row = re.search(r"<tr[^>]*>(.*?)</tr>", table, re.DOTALL | re.IGNORECASE)
+            if not header_row:
+                continue
+            cols = re.findall(r"<t[hd][^>]*>", header_row.group(1), re.IGNORECASE)
+            if len(cols) > 7:
+                audit.issues.append(AuditIssue(
+                    severity="warning",
+                    check_name="main_body_table_too_wide",
+                    section_id=section_id,
+                    message=(
+                        f"Main-body table #{i + 1} in '{section_id}' has {len(cols)} columns. "
+                        "Move full history to appendix or render a recent-period slice in the body."
                     ),
                 ))
