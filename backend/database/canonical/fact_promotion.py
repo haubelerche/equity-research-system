@@ -33,6 +33,32 @@ def _source_tier(value: Any) -> int:
     return 3 if value is None else int(value)
 
 
+def _created_ts(value: Any) -> float:
+    """created_at → epoch seconds for tiebreak ordering (0.0 if missing)."""
+    try:
+        return value.timestamp() if value is not None else 0.0
+    except (AttributeError, TypeError, ValueError):
+        return 0.0
+
+
+def select_winner(group: list[dict]) -> dict:
+    """Pick the canonical winner among competing observations for one (period, metric).
+
+    Order: lowest source_tier, then highest confidence, then freshest created_at.
+    The created_at tiebreak makes the result deterministic when tier and confidence
+    are equal, and lets a re-ingested observation supersede a stale legacy_import of
+    the same rank (e.g. DHG short_term_investments: legacy 0 vs fresh api 2024 bn).
+    """
+    return sorted(
+        group,
+        key=lambda o: (
+            _source_tier(o.get("source_tier")),
+            -(o["confidence"] or 0.0),
+            -_created_ts(o.get("created_at")),
+        ),
+    )[0]
+
+
 @dataclass
 class PromotionResult:
     ticker: str
@@ -77,12 +103,8 @@ def promote_accepted_facts(
         candidates.setdefault(key, []).append(obs)
 
     for (period, metric), group in candidates.items():
-        # Sort by source_tier ASC, confidence DESC to find winner
-        sorted_group = sorted(
-            group,
-            key=lambda o: (_source_tier(o.get("source_tier")), -(o["confidence"] or 0.0)),
-        )
-        winner = sorted_group[0]
+        # Winner: lowest tier, highest confidence, freshest created_at (deterministic).
+        winner = select_winner(group)
         conf = winner.get("confidence")
         winner_tier = _source_tier(winner.get("source_tier"))
         official_document_id = winner.get("source_doc_id") if winner_tier <= 1 else None

@@ -126,8 +126,14 @@ taxonomy:
     label_vi: Phai thu khach hang
     statement: balance_sheet
     unit: vnd_bn
-    # Slug: "Phải thu khách hàng" → phai_thu_khach_hang
-    aliases: [phai_thu_khach_hang, accounts_receivable, phai_thu_ngan_han_khach_hang]
+    # Trade receivables only — the DSO/NWC input. Must NOT capture the broad total
+    # "Các khoản phải thu" / "Accounts receivable" (item_id accounts_receivable), which
+    # also includes supplier prepayments and other receivables and would inflate DSO.
+    # The English alias `accounts_receivable` was removed because vnstock VCI emits both
+    # "Phải thu khách hàng" (trade, 615 bn) and "Các khoản phải thu" (total, 684 bn) for
+    # DHG; the broad row matched on item_en and collided on this key.
+    # Slug: "Phải thu khách hàng" → phai_thu_khach_hang; VCI item_id → trade_accounts_receivable
+    aliases: [phai_thu_khach_hang, phai_thu_ngan_han_khach_hang, trade_accounts_receivable]
 
   current_assets.ending:
     label_vi: Tai san ngan han

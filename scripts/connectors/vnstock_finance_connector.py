@@ -19,9 +19,30 @@ from vnstock.api.financial import Finance
 
 from backend.dataset.config_io import ROOT, load_financial_taxonomy, load_universe_tickers
 from backend.dataset.dqf import validate_financial_fact
+from backend.database.canonical.observation_dal import insert_observations
 from backend.database.fact_store import FinancialFact, PostgresFactStore
 from backend.database.source_registry import SourceInput, SourceRegistry
 from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
+
+
+# vnstock API statements are Tier 3 (structured API, not an official audited PDF).
+_VNSTOCK_SOURCE_TIER = 3
+
+
+def _fact_to_observation(fact: FinancialFact) -> dict[str, Any]:
+    """Map a FinancialFact to an ingest.observations row dict (v2 write path)."""
+    return {
+        "ticker": fact.ticker,
+        "period": f"{fact.fiscal_year}{fact.fiscal_period}",  # e.g. "2025FY"
+        "metric": fact.line_item_code,
+        "value": fact.value,
+        "unit": fact.unit,
+        "currency": fact.currency,
+        "source_doc_id": fact.source_id,
+        "source_tier": _VNSTOCK_SOURCE_TIER,
+        "extraction_method": "api_structured",
+        "confidence": fact.confidence,
+    }
 
 
 CONNECTOR_VERSION = "vn_finance_v2"
@@ -254,6 +275,40 @@ def _extract_facts_from_frame(
     return facts
 
 
+def _resolve_fact_collisions(facts: list[FinancialFact]) -> list[FinancialFact]:
+    """Collapse same-key facts, keeping the largest-magnitude value.
+
+    vnstock VCI emits some balance-sheet concepts twice for the same period —
+    once with the real figure and once as a 0 placeholder (e.g. DHG
+    'Đầu tư ngắn hạn' → short_term_investments = [2024 bn, 0]). The previous
+    keep-last dedup let a trailing 0 overwrite the real value; here we keep the
+    larger |value| so a placeholder can never zero out a real figure. A genuine
+    conflict (two distinct nonzero values for one key) is logged, not hidden.
+    """
+    groups: dict[tuple, list[FinancialFact]] = {}
+    order: list[tuple] = []
+    for fact in facts:
+        key = (fact.ticker, fact.fiscal_year, fact.fiscal_period, fact.line_item_code, fact.source_id)
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(fact)
+
+    resolved: list[FinancialFact] = []
+    for key in order:
+        group = groups[key]
+        best = max(group, key=lambda f: abs(f.value))
+        distinct_nonzero = {f.value for f in group if f.value != 0.0}
+        if len(distinct_nonzero) > 1:
+            print(
+                f"[finance] {best.ticker} {best.fiscal_year}{best.fiscal_period} "
+                f"{best.line_item_code}: conflicting nonzero values "
+                f"{sorted(distinct_nonzero)}; kept |max|={best.value}"
+            )
+        resolved.append(best)
+    return resolved
+
+
 def _finance_frames(ticker: str, source: str, period: str) -> dict[str, pd.DataFrame]:
     client = Finance(source=source, symbol=ticker, period=period)
     return {
@@ -422,12 +477,16 @@ def sync_financial_for_ticker(
             f"(outside {from_year}–{to_year})"
         )
 
-    # Deduplicate: keep last occurrence per unique upsert key within this batch.
-    seen: dict[tuple, FinancialFact] = {}
-    for fact in fy_facts:
-        key = (fact.ticker, fact.fiscal_year, fact.fiscal_period, fact.line_item_code, fact.source_id)
-        seen[key] = fact
-    return store.upsert_financial_facts(list(seen.values()))
+    # Collapse same-key facts within this batch. vnstock VCI emits some concepts
+    # twice for a period (real value + 0 placeholder); keep the larger |value| so a
+    # trailing 0 cannot zero out a real figure (e.g. DHG short_term_investments).
+    resolved = _resolve_fact_collisions(fy_facts)
+
+    # v2 write path: connectors write raw candidates to ingest.observations.
+    # fact_promotion.promote_accepted_facts() later selects the canonical winner.
+    # insert_observations dedups on (ticker, period, metric, source_doc_id), so the
+    # single resolved value per metric lands without duplication.
+    return insert_observations(_fact_to_observation(f) for f in resolved)
 
 
 def sync_financial_for_universe(

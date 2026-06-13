@@ -61,14 +61,22 @@ def _ingest_financials(
     provider: str = "auto",
 ) -> dict[str, Any]:
     from scripts.connectors.vnstock_finance_connector import sync_financial_for_ticker
+    from backend.database.canonical.fact_promotion import promote_accepted_facts
 
     try:
         inserted = sync_financial_for_ticker(
             ticker=ticker, store=store, registry=registry,
             period=period, from_year=from_year, to_year=to_year, provider=provider,
         )
+        # v2 pipeline: observations were written by the connector; promote the
+        # winner per (period, metric) into fact.canonical_facts so build_facts /
+        # valuation can read them.
+        promo = promote_accepted_facts(ticker=ticker, from_year=from_year, to_year=to_year)
         return {
             "status": "ok", "facts_upserted": inserted,
+            "facts_promoted": promo.promoted,
+            "promotion_skipped_low_confidence": promo.skipped_low_confidence,
+            "promotion_warnings": promo.warnings[:10],
             "period": period, "from_year": from_year, "to_year": to_year, "provider": provider,
         }
     except Exception as exc:  # noqa: BLE001

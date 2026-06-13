@@ -160,11 +160,14 @@ class SourceRegistry:
             published_at=_parse_published_at(data.published_at),
             fiscal_year=data.fiscal_year,
             fiscal_period=data.fiscal_period,
-            local_path=data.raw_path,
             connector_version=data.connector_version,
             metadata={
                 "logical_id": data.logical_id,
                 "reliability_tier": data.reliability_tier,
+                # Local raw-snapshot path kept for lineage only. Per migration 030
+                # (Supabase Storage contract) the storage_path column holds a Storage
+                # object key paired with storage_bucket, never a local filesystem path.
+                "raw_path": data.raw_path,
                 **data.metadata_json,
             },
         )
@@ -219,7 +222,6 @@ class SourceRegistry:
                     """
                     UPDATE ingest.source_documents
                     SET metadata_json  = metadata_json || %s::jsonb,
-                        local_path     = COALESCE(%s, local_path),
                         fetch_status   = CASE WHEN fetch_status = 'registered'
                                               THEN 'fetched'
                                               ELSE fetch_status END
@@ -227,7 +229,6 @@ class SourceRegistry:
                     """,
                     (
                         __import__("json").dumps(payload_meta),
-                        storage_path,
                         source_id,
                     ),
                 )
