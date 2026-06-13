@@ -460,16 +460,21 @@ def build_forecast_debt_schedule(
         warnings.append("Zero-debt policy applied: historical interest-bearing debt is negligible.")
         return rows, "zero_debt_policy", warnings
 
-    # Case 3: Target debt ratio — use median of historical ending debt as stable level
-    # NOTE: net_borrowing here is balance_sheet_delta (ending - beginning), NOT
-    # new_borrowing - debt_repayment. This blocks is_fcfe_publishable by design.
+    # Case 3: Hold debt flat at the last reported closing balance.
+    # The forecast MUST roll forward from the real ending balance (last_ending),
+    # not a backward-looking median — otherwise a company that has paid debt down
+    # (e.g. last_ending = 0) gets a phantom net_borrowing jump in year 1 that flows
+    # into FCFE. Anchoring to last_ending makes net_borrowing = 0 every year and the
+    # series continuous with the actuals.
+    # NOTE: net_borrowing here is a balance-sheet hold (no new_borrowing/repayment
+    # split), so this stays confidence="low" and blocks is_fcfe_publishable by design.
     if all_hist_debts:
-        median_debt = statistics.median(all_hist_debts)
+        anchor = last_ending if last_ending is not None else statistics.median(all_hist_debts)
         rows = []
-        prev_debt = last_ending if last_ending is not None else median_debt
+        prev_debt = anchor
         for label, year in zip(forecast_labels, forecast_years):
-            ending = median_debt
-            nb = ending - prev_debt
+            ending = anchor
+            nb = ending - prev_debt  # 0 once anchored; first year continuous with actuals
             avg = _compute_average_debt(prev_debt, ending)
             rows.append(DebtScheduleRow(
                 year=year, label=label,
@@ -480,13 +485,13 @@ def build_forecast_debt_schedule(
                 identity_check_passes=None,  # new_borrowing/repayment split unknown
                 method="target_debt_ratio", confidence="low",
                 warning=(
-                    f"Forecast debt held at historical median {median_debt:.1f} VND bn. "
+                    f"Forecast debt held flat at last reported balance {anchor:.1f} VND bn. "
                     "This is a simplifying assumption — analyst review required."
                 ),
             ))
             prev_debt = ending
         warnings.append(
-            f"Debt forecast uses target_debt_ratio: median historical debt = {median_debt:.1f} VND bn. "
+            f"Debt forecast holds debt flat at last reported balance = {anchor:.1f} VND bn. "
             "Low confidence — recommend analyst review."
         )
         return rows, "target_debt_ratio", warnings

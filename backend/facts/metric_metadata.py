@@ -191,9 +191,14 @@ METRIC_METADATA: dict[str, MetricMeta] = {
     "inventories.total": _m(SemanticType.MONETARY),
     "receivables.total": _m(SemanticType.MONETARY),
     "fixed_assets.total": _m(SemanticType.MONETARY),
-    "total_liabilities.total": _m(SemanticType.MONETARY),
-    "current_liabilities.total": _m(SemanticType.MONETARY),
-    "non_current_liabilities.total": _m(SemanticType.MONETARY),
+    # Canonical balance-sheet liability keys use the ".ending" suffix everywhere
+    # (taxonomy, fact.production_facts, reconciliation, ratios, golden CSV). The
+    # ".total" form here was a mismatch that made validate_and_normalize reject
+    # these facts as "unknown metric" — silently dropping total/current liabilities
+    # from every fact table and report. Keep them ".ending".
+    "total_liabilities.ending": _m(SemanticType.MONETARY),
+    "current_liabilities.ending": _m(SemanticType.MONETARY),
+    "non_current_liabilities.ending": _m(SemanticType.MONETARY),
     "short_term_debt.ending": _m(SemanticType.MONETARY),
     "long_term_debt.ending": _m(SemanticType.MONETARY),
     "borrowings.total": _m(SemanticType.MONETARY),

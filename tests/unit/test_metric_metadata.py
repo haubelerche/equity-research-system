@@ -51,9 +51,31 @@ class TestRegistry:
             "shares_outstanding.ending", "shares_outstanding.weighted_avg",
             "shares_outstanding.total", "depreciation.total",
             "dividends_per_share.cash",
+            # Balance-sheet liabilities use the ".ending" suffix everywhere
+            # (taxonomy, production_facts, ratios, reconciliation). Registering
+            # them under ".total" made validate_and_normalize reject them.
+            "total_liabilities.ending", "current_liabilities.ending",
         }
         for m in used_in_code:
             assert m in METRIC_METADATA, f"codebase metric {m!r} missing from registry"
+
+    def test_liability_facts_are_accepted_not_rejected(self):
+        """Regression: total/current liabilities (".ending" keys) must normalize, not
+        be dropped as 'unknown metric'. A ".total" suffix mismatch previously made
+        validate_and_normalize reject them, silently removing Tổng nợ phải trả from
+        every fact table and report."""
+        for key in ("total_liabilities.ending", "current_liabilities.ending",
+                    "non_current_liabilities.ending"):
+            r = validate_and_normalize(key, 1036.6, "vnd_bn")
+            assert r.status == "ok", f"{key} was rejected: {r.reason}"
+            assert r.value == pytest.approx(1_036_600_000_000.0)
+
+    def test_total_liabilities_distinct_from_interest_bearing_debt(self):
+        """Total liabilities and interest-bearing debt are different metrics — both
+        must exist independently so the report can show them as separate rows."""
+        assert "total_liabilities.ending" in METRIC_METADATA
+        assert "short_term_debt.ending" in METRIC_METADATA
+        assert "total_liabilities.total" not in METRIC_METADATA  # old buggy key is gone
 
     def test_get_semantic_type(self):
         assert get_semantic_type("revenue.net") is SemanticType.MONETARY

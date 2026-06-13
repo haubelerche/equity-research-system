@@ -186,6 +186,24 @@ class TestInterestExpenseDriverBased:
                     f"Year {fy.year}: cost_of_debt should be {override}, got {fy.cost_of_debt}"
                 )
 
+    def test_approval_flag_without_manual_path_does_not_launder_model_debt(self):
+        """Regression: debt_schedule_approved=True with NO manual_debt_path must not
+        upgrade the model's target_debt_ratio output into an approved/publishable
+        manual_override. Approval is only meaningful against an analyst-supplied path.
+        """
+        table = _debt_bearing_table()
+        assumptions = ForecastAssumptions(
+            debt_schedule_approved=True,
+            manual_debt_path=None,
+        )
+        artifact = run_forecast("TST", table, n_years=3, assumptions=assumptions)
+        ds = artifact.debt_schedule
+        assert ds is not None
+        # Method stays the model path, NOT a fabricated manual_override.
+        assert ds.forecast_method == "target_debt_ratio"
+        # And FCFE stays correctly blocked — no source for the debt path.
+        assert ds.is_fcfe_publishable is False
+
 
 # ---------------------------------------------------------------------------
 # 2. Zero-debt company: interest ≈ 0

@@ -162,6 +162,7 @@ class ForecastYear:
     # Per-share
     eps: float | None
     bvps: float | None
+    cash: float | None = None       # ending cash from cash sweep, VND bn
     # Non-operating line (PBT gap): dividends from subs, forex, financial income, etc.
     other_items: float | None = None
     # Debt detail — sourced from debt_schedule per forecast year
@@ -228,6 +229,7 @@ class ForecastArtifact:
                     "total_assets": round(fy.total_assets, 1) if fy.total_assets is not None else None,
                     "equity": round(fy.equity, 1) if fy.equity is not None else None,
                     "total_debt": round(fy.total_debt, 1) if fy.total_debt is not None else None,
+                    "cash": round(fy.cash, 1) if fy.cash is not None else None,
                     "other_liabilities": round(fy.other_liabilities, 1) if fy.other_liabilities is not None else None,
                     "eps": round(fy.eps, 0) if fy.eps is not None else None,
                     "bvps": round(fy.bvps, 0) if fy.bvps is not None else None,
@@ -444,25 +446,13 @@ def run_forecast(
         manual_debt_path=assumptions.manual_debt_path,
         manual_debt_path_approved=assumptions.debt_schedule_approved,
     )
-    if (
-        assumptions.debt_schedule_approved
-        and assumptions.manual_debt_path is None
-        and debt_sched.forecast_method not in ("zero_debt_policy", "direct_cash_flow")
-        and all(row.ending_interest_bearing_debt is not None for row in debt_sched.forecast_rows)
-    ):
-        approved_path = {
-            row.label: float(row.ending_interest_bearing_debt)  # type: ignore[arg-type]
-            for row in debt_sched.forecast_rows
-        }
-        debt_sched = build_debt_schedule(
-            ticker=ticker,
-            fact_table=fact_table,
-            fy_periods=fy_periods,
-            forecast_labels=forecast_labels_order,
-            forecast_years=forecast_years,
-            manual_debt_path=approved_path,
-            manual_debt_path_approved=True,
-        )
+    # NOTE: An approval flag alone must NOT upgrade a model-generated debt path
+    # (e.g. target_debt_ratio) into an "approved manual_override". Approval is only
+    # meaningful against a concrete analyst-supplied manual_debt_path. Laundering the
+    # model's own output back in as approved fabricated an FCFE-publishable debt path
+    # with no source — it bypassed the high-confidence/HITL gate. Removed by design:
+    # without a real manual_debt_path, the schedule stays target_debt_ratio (low) and
+    # FCFE remains correctly blocked.
     debt_row_by_label = {row.label: row for row in debt_sched.forecast_rows}
     for w in debt_sched.warnings:
         warnings.append(f"[DebtSchedule] {w}")
@@ -598,6 +588,7 @@ def run_forecast(
             total_assets=None,
             equity=None,
             total_debt=ending_debt_y,
+            cash=None,
             other_liabilities=other_liabilities,
             eps=eps,
             bvps=None,
@@ -731,6 +722,12 @@ def run_forecast(
     if cash_sweep:
         for w in cash_sweep.warnings:
             warnings.append(f"[CashSweep] {w}")
+        cash_by_label = {
+            result.year_label: result.computed_ending_cash
+            for result in cash_sweep.year_results
+        }
+        for fy in forecast_year_objects:
+            fy.cash = cash_by_label.get(fy.label)
 
     return ForecastArtifact(
         ticker=ticker,

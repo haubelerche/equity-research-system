@@ -96,6 +96,25 @@ class TestForecastDebtSchedule:
         assert rows[0].confidence == "low"
         assert all(r.ending_interest_bearing_debt is not None for r in rows)
 
+    def test_target_debt_ratio_rolls_forward_from_last_balance_no_phantom_borrowing(self):
+        # Regression: DHG paid debt to 0 by the last actual year. The forecast must
+        # roll forward from that real closing balance (0) — NOT jump to the historical
+        # median — so no phantom net_borrowing is injected into FCFE.
+        ft = _make_ft({"2022FY": 115.0, "2023FY": 572.0, "2024FY": 650.0, "2025FY": 0.0})
+        hist = build_historical_debt_schedule(
+            "TEST", ft, ["2022FY", "2023FY", "2024FY", "2025FY"]
+        )
+        rows, method, _ = build_forecast_debt_schedule(
+            "TEST", ft, hist, _FORECAST_LABELS, _FORECAST_YEARS
+        )
+        assert method == "target_debt_ratio"
+        # First forecast year begins at the real closing balance (0), not 343 median.
+        assert rows[0].beginning_interest_bearing_debt == pytest.approx(0.0)
+        # Every forecast year holds flat at 0 → zero net borrowing throughout.
+        for r in rows:
+            assert r.ending_interest_bearing_debt == pytest.approx(0.0)
+            assert r.net_borrowing == pytest.approx(0.0)
+
     def test_manual_override_uses_provided_path(self):
         hist = self._hist_rows_with_debt(100.0)
         manual = {"2026F": 80.0, "2027F": 60.0, "2028F": 40.0}

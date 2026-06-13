@@ -177,8 +177,11 @@ class TestFCFEGate:
                 assert row.confidence == "low"
             assert not ds.is_fcfe_publishable
 
-    def test_auto_approved_debt_path_allows_fcfe_target_price(self):
-        """Auto-approved assumptions convert deterministic debt path into an approved manual path."""
+    def test_approval_flag_alone_does_not_make_fcfe_publishable(self):
+        """An approval flag with NO analyst-supplied debt path must NOT launder the
+        model's target_debt_ratio output into an approved manual_override. Approval is
+        only meaningful against a concrete path; otherwise FCFE stays blocked
+        (doctrine: no source → no claim; net_borrowing must be high-confidence)."""
         from backend.analytics.forecasting import ForecastAssumptions
 
         ft = self._minimal_ft()
@@ -189,6 +192,29 @@ class TestFCFEGate:
             assumptions=ForecastAssumptions(
                 assumption_status="analyst_approved",
                 debt_schedule_approved=True,
+                manual_debt_path=None,
+            ),
+        )
+        ds = forecast.debt_schedule
+        assert ds is not None
+        assert ds.forecast_method == "target_debt_ratio"
+        assert ds.is_fcfe_publishable is False
+
+    def test_real_manual_debt_path_with_approval_is_publishable(self):
+        """When the analyst DOES supply a concrete debt path and approves it, the
+        schedule legitimately becomes an approved manual_override → FCFE publishable."""
+        from backend.analytics.forecasting import ForecastAssumptions
+
+        ft = self._minimal_ft()
+        forecast = run_forecast(
+            "TST",
+            ft,
+            shares_mn=94.45,
+            assumptions=ForecastAssumptions(
+                assumption_status="analyst_approved",
+                debt_schedule_approved=True,
+                manual_debt_path={"2026F": 100.0, "2027F": 100.0, "2028F": 100.0,
+                                  "2029F": 100.0, "2030F": 100.0},
             ),
         )
         ds = forecast.debt_schedule
