@@ -49,3 +49,34 @@ def test_discover_from_listings_aggregates_and_dedupes() -> None:
     )
     # Two distinct article candidates from the one listing.
     assert len(cands) == 2
+
+
+def test_js_listing_uses_rendered_fetch_static_uses_plain() -> None:
+    # VietStock listings are JS-rendered → must go through rendered_fetch; CafeF stays static.
+    rendered_html = (
+        '<a href="https://vietstock.vn/2026/05/dhg-tra-co-tuc-733-1449999.htm">'
+        "DHG: Trả cổ tức</a>"
+    )
+    calls: dict[str, list[str]] = {"static": [], "rendered": []}
+
+    def static_fetch(url: str) -> str:
+        calls["static"].append(url)
+        return _LISTING_HTML
+
+    def rendered_fetch(url: str) -> str:
+        calls["rendered"].append(url)
+        return rendered_html
+
+    cands = discover_from_listings(
+        [
+            "https://cafef.vn/du-lieu/tin-doanh-nghiep/dhg/Event.chn",
+            "https://finance.vietstock.vn/DHG/tin-tuc-su-kien.htm",
+        ],
+        fetch_html=static_fetch,
+        rendered_fetch=rendered_fetch,
+    )
+    assert calls["rendered"] == ["https://finance.vietstock.vn/DHG/tin-tuc-su-kien.htm"]
+    assert calls["static"] == ["https://cafef.vn/du-lieu/tin-doanh-nghiep/dhg/Event.chn"]
+    assert "https://vietstock.vn/2026/05/dhg-tra-co-tuc-733-1449999.htm" in {
+        c.source_url for c in cands
+    }

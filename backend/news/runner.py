@@ -14,7 +14,7 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 
-from backend.news.collector import collect_articles, default_html_fetch
+from backend.news.collector import collect_articles, default_html_fetch, rendered_html_fetch
 from backend.news.discovery import discover_candidates
 from backend.news.discovery_html import discover_from_listings
 from backend.news.evidence_builder import build_evidence, default_llm_extract
@@ -121,20 +121,24 @@ def gather_ticker_evidence(
     company_name: str | None,
     topic: str,
     listings: Sequence[str] = (),
+    rendered_fetch: Callable[[str], str] | None = None,
     skip_urls: set[str] | None = None,
     max_articles: int = 15,
 ) -> tuple[list[RawArticle], dict[str, list[EvidenceItem]]]:
     """Run the offline-testable core pipeline and return collected articles + evidence.
 
-    Discovery combines RSS feeds and plain-HTML listing pages. Candidates in ``skip_urls``
-    (already-processed articles) are dropped before any fetch/LLM call, so repeated runs
-    are idempotent and cheap. No database access: callers persist the result separately.
+    Discovery combines RSS feeds and plain-HTML listing pages (JS-rendered listings use
+    ``rendered_fetch``). Candidates in ``skip_urls`` (already-processed articles) are dropped
+    before any fetch/LLM call, so repeated runs are idempotent and cheap. No database access:
+    callers persist the result separately.
     """
     skip = skip_urls or set()
     candidates = list(discover_candidates(feeds, fetch_xml=fetch_xml))
     if listings:
         seen = {c.source_url for c in candidates}
-        for candidate in discover_from_listings(listings, fetch_html=fetch_html):
+        for candidate in discover_from_listings(
+            listings, fetch_html=fetch_html, rendered_fetch=rendered_fetch
+        ):
             if candidate.source_url not in seen:
                 seen.add(candidate.source_url)
                 candidates.append(candidate)
@@ -294,13 +298,14 @@ def run_ticker_news_collection(
     keywords: Sequence[str] | None = None,
     fetch_xml: Callable[[str], str] = default_html_fetch,
     fetch_html: Callable[[str], str] = default_html_fetch,
+    rendered_fetch: Callable[[str], str] | None = rendered_html_fetch,
     llm_extract: Callable[[str], object] = default_llm_extract,
     max_articles: int = 15,
 ) -> dict[str, object]:
     """Full production run for one ticker against a live DB connection.
 
-    Defaults to ticker-scoped CafeF/VietStock discovery (no broad RSS cron). Pass
-    ``feeds``/``listings`` explicitly to add fallback sources.
+    Defaults to ticker-scoped CafeF/VietStock discovery (no broad RSS cron); VietStock
+    listings are rendered via headless Chrome. Pass ``feeds``/``listings`` to add fallbacks.
     """
     ticker = ticker.upper()
     if listings is None:
@@ -344,6 +349,7 @@ def run_ticker_news_collection(
         company_name=company_name,
         topic=topic,
         listings=listings,
+        rendered_fetch=rendered_fetch,
         skip_urls=skip_urls,
         max_articles=max_articles,
     )

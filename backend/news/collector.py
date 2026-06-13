@@ -31,6 +31,40 @@ def default_html_fetch(url: str, timeout: int = 15) -> str:
         return resp.read().decode(charset, errors="replace")
 
 
+def rendered_html_fetch(url: str, timeout: int = 40) -> str:
+    """Return a JS-rendered page's DOM via headless Chrome `--dump-dom`.
+
+    For listing pages whose article links are injected by JavaScript (e.g. VietStock).
+    Reuses the installed Chromium/Chrome/Edge binary; returns "" if none is available or
+    rendering fails — discovery then simply finds no candidates from that source.
+    """
+    import subprocess
+
+    from backend.reporting.pdf_renderer import _find_chromium_executable
+
+    chrome = _find_chromium_executable()
+    if chrome is None:
+        return ""
+    try:
+        result = subprocess.run(  # noqa: S603 — fixed args, URL is whitelisted upstream
+            [
+                str(chrome),
+                "--headless=new",
+                "--disable-gpu",
+                "--no-sandbox",
+                "--virtual-time-budget=15000",
+                "--dump-dom",
+                url,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except Exception:  # noqa: BLE001 — a render failure yields no candidates, never a crash
+        return ""
+    return result.stdout or ""
+
+
 def collect_article(candidate: ArticleCandidate, *, fetch_html: FetchHtml) -> RawArticle | None:
     """Fetch + extract a single candidate. Returns None on whitelist/fetch/empty failure."""
     if not is_allowed_url(candidate.source_url):

@@ -1773,7 +1773,8 @@ def _load_news_citations(ticker: str, company_name: str | None) -> list[dict[str
             "source_name": source_name,
             "title": title or "",
             "url": source_url,
-            "published_at": str(published_at) if published_at is not None else "",
+            # Date only (YYYY-MM-DD) — citations don't need the time component.
+            "published_at": str(published_at)[:10] if published_at is not None else "",
             "claim": claim,
         }
         for source_name, title, source_url, published_at, claim in fetched

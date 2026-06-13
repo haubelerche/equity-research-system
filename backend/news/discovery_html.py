@@ -88,14 +88,24 @@ def parse_listing_anchors(html: str, *, source_domain: str) -> list[ArticleCandi
     return candidates
 
 
+# Hosts whose listing pages are JS-rendered → need a rendered (headless-browser) fetch.
+_NEEDS_RENDER = ("vietstock.vn",)
+
+
+def _needs_render(domain: str) -> bool:
+    return any(domain == d or domain.endswith("." + d) for d in _NEEDS_RENDER)
+
+
 def discover_from_listings(
     listing_urls: Iterable[str],
     *,
     fetch_html: Callable[[str], str],
+    rendered_fetch: Callable[[str], str] | None = None,
 ) -> list[ArticleCandidate]:
     """Fetch each whitelisted listing page and aggregate article candidates (deduped).
 
-    A failing listing (network error, non-whitelisted host) is skipped, never fatal.
+    JS-rendered listings (e.g. VietStock) use ``rendered_fetch`` when provided; static
+    listings (e.g. CafeF .chn) use ``fetch_html``. A failing listing is skipped, never fatal.
     """
     seen: set[str] = set()
     out: list[ArticleCandidate] = []
@@ -103,8 +113,11 @@ def discover_from_listings(
         domain = url_domain(listing_url)
         if domain is None or not is_allowed_url(listing_url):
             continue
+        fetcher = fetch_html
+        if rendered_fetch is not None and _needs_render(domain):
+            fetcher = rendered_fetch
         try:
-            html = fetch_html(listing_url)
+            html = fetcher(listing_url)
         except Exception:  # noqa: BLE001 — a failing listing must not abort discovery
             continue
         for candidate in parse_listing_anchors(html, source_domain=domain):
