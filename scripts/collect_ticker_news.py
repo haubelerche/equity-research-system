@@ -53,19 +53,29 @@ def main(argv: list[str] | None = None) -> None:
         help="Tickers, space- or comma-separated (default: MVP pharma set).",
     )
     parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Collect the full ticker universe from the company registry (all 53).",
+    )
+    parser.add_argument(
         "--limit",
         type=int,
         default=15,
         help="Max articles to collect per ticker (passed to the collector).",
     )
     args = parser.parse_args(argv)
-    # Accept both `--tickers DHG TRA` and `--tickers DHG,TRA`.
-    tickers = [
-        t.strip().upper()
-        for entry in args.tickers
-        for t in str(entry).split(",")
-        if t.strip()
-    ]
+    if args.all:
+        from backend.reporting.report_data_loader import _COMPANIES
+
+        tickers = sorted(_COMPANIES)
+    else:
+        # Accept both `--tickers DHG TRA` and `--tickers DHG,TRA`.
+        tickers = [
+            t.strip().upper()
+            for entry in args.tickers
+            for t in str(entry).split(",")
+            if t.strip()
+        ]
 
     with connect_with_retry(require_database_url()) as conn:
         results = collect_for_tickers(
