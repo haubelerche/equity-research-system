@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import TypedDict
 
 _PREVIEW_RE = re.compile(r"_report_page_(\d+)\.png$")
 
@@ -22,7 +23,13 @@ class ReportInventoryItem:
     updated_at: str | None = None
 
 
-def _resolve_report_files(ticker: str, output_dir: Path) -> dict[str, object]:
+class _ResolvedFiles(TypedDict):
+    report: Path | None
+    explanation: Path | None
+    preview_pages: list[int]
+
+
+def _resolve_report_files(ticker: str, output_dir: Path) -> _ResolvedFiles:
     """Single point that maps a ticker to its on-disk artifacts.
 
     Current convention: ``{TICKER}_report.pdf`` / ``{TICKER}_explanation.pdf`` and
@@ -36,16 +43,16 @@ def _resolve_report_files(ticker: str, output_dir: Path) -> dict[str, object]:
     pages: list[int] = []
     if preview_dir.is_dir():
         prefix = f"{ticker}_report_page_"
-        for f in preview_dir.iterdir():
-            if f.name.startswith(prefix):
-                m = _PREVIEW_RE.search(f.name)
+        for entry in preview_dir.iterdir():
+            if entry.is_file() and entry.name.startswith(prefix):
+                m = _PREVIEW_RE.search(entry.name)
                 if m:
                     pages.append(int(m.group(1)))
-    return {
-        "report": report if report.is_file() else None,
-        "explanation": explanation if explanation.is_file() else None,
-        "preview_pages": sorted(pages),  # numeric order
-    }
+    return _ResolvedFiles(
+        report=report if report.is_file() else None,
+        explanation=explanation if explanation.is_file() else None,
+        preview_pages=sorted(pages),  # numeric order
+    )
 
 
 def scan_report_inventory(output_dir: Path, universe: list[dict]) -> list[ReportInventoryItem]:
@@ -54,10 +61,11 @@ def scan_report_inventory(output_dir: Path, universe: list[dict]) -> list[Report
         ticker = str(row["ticker"]).upper()
         resolved = _resolve_report_files(ticker, output_dir)
         report_path = resolved["report"]
-        size = report_path.stat().st_size if report_path else None
+        stat = report_path.stat() if report_path else None
+        size = stat.st_size if stat else None
         updated = (
-            datetime.fromtimestamp(report_path.stat().st_mtime, tz=timezone.utc).isoformat()
-            if report_path
+            datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat()
+            if stat
             else None
         )
         items.append(
