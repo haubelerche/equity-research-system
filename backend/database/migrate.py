@@ -19,7 +19,7 @@ import psycopg2
 from backend.database.config import connect_with_retry, require_database_url
 
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
-CURRENT_SCHEMA_VERSION = "034_runs_status_add_blocked"
+CURRENT_SCHEMA_VERSION = "035_runs_status_auto_exported"
 
 _ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 if _ENV_FILE.exists():

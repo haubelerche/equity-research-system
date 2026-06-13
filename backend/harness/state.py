@@ -20,6 +20,7 @@ RunDbStatus = Literal[
     "report_ready",
     "blocked",
     "approved",
+    "auto_exported",
     "failed",
     "cancelled",
 ]

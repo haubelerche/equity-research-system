@@ -11,7 +11,7 @@ from psycopg2.extras import Json
 
 from backend.database.config import connect_with_retry, require_database_url
 
-REQUIRED_SCHEMA_VERSION = "030_supabase_storage_contract"
+REQUIRED_SCHEMA_VERSION = "035_runs_status_auto_exported"
 
 DB_TO_PUBLIC_STATUS = {
     "initialized": "INIT",
