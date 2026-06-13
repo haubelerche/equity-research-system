@@ -112,6 +112,7 @@ class ClientReportViewModel:
     missing_required_fields: list[str] = field(default_factory=list)
     key_sources: list[dict[str, str]] = field(default_factory=list)
     display_blocking_reasons: list[str] = field(default_factory=list)
+    critic_findings: list[str] = field(default_factory=list)
     metric_availability: dict[str, Any] = field(default_factory=dict)
     company_profile: dict[str, Any] = field(default_factory=dict)
     market_data: MarketDataArtifact | None = None
@@ -1898,6 +1899,31 @@ def _approved_agent_narrative(manifest) -> dict[str, str]:
     return result
 
 
+def _load_critic_findings(manifest) -> list[str]:
+    """Extract human-readable critic findings from the run manifest."""
+    if manifest is None or not manifest.resolve("critic_review"):
+        return []
+    critic = manifest.load_json("critic_review")
+    payload = critic.get("payload") or critic
+    findings: list[str] = []
+    for finding in payload.get("findings") or []:
+        if not isinstance(finding, dict):
+            continue
+        desc = str(finding.get("description") or finding.get("finding") or "").strip()
+        if desc:
+            severity = str(finding.get("severity") or "").capitalize()
+            findings.append(f"[{severity}] {desc}" if severity else desc)
+    scorecard = payload.get("scorecard") or {}
+    for metric, item in scorecard.items():
+        if not isinstance(item, dict):
+            continue
+        explanation = str(item.get("explanation") or "").strip()
+        score = item.get("score")
+        if explanation and score is not None:
+            findings.append(f"{metric} ({score}/10): {explanation}")
+    return findings
+
+
 def build_client_report_view_model(
     ticker: str,
     mode: RenderMode | str = "analyst_draft",
@@ -2033,6 +2059,7 @@ def build_client_report_view_model(
         _table_sensitivity_matrix(val.get("sensitivity", {}), display_gate["approved_for_display"])
         or _table_driver_sensitivity(fcff, blend if display_gate["approved_for_display"] else {}, forecast)
     )
+    critic_findings = _load_critic_findings(manifest)
 
     return ClientReportViewModel(
         ticker=ticker,
@@ -2138,6 +2165,7 @@ def build_client_report_view_model(
         missing_required_fields=missing,
         key_sources=_key_sources(ticker, snapshot),
         display_blocking_reasons=display_gate["blocking_reasons"],
+        critic_findings=critic_findings,
         metric_availability=(
             {key: value.__dict__ for key, value in market_data.availability.items()}
             if market_data is not None else {}

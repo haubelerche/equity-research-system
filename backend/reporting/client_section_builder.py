@@ -537,7 +537,7 @@ def _risks_sources_page(vm: ClientReportViewModel) -> str:
     <tbody>{risk_body}</tbody>
   </table>
   </div>
-  {_section_block("Trạng thái báo cáo", f"<p>{_e(_client_status_sentence(vm))}</p>")}
+  {_section_block("Trạng thái báo cáo", _render_report_status(vm))}
   {_section_block("Nguồn tham khảo chính", _render_key_sources(vm))}
   {_section_block("Tuyên bố miễn trừ trách nhiệm", f"<p>{_e(vm.disclaimer)}</p>")}
 </div>
@@ -558,6 +558,19 @@ def _client_status_sentence(vm: ClientReportViewModel) -> str:
         "Báo cáo đang trong quá trình rà soát của chuyên viên phân tích; "
         "khuyến nghị và giá mục tiêu chưa được công bố chính thức cho đến khi "
         "các giả định định giá và dữ liệu nguồn được phê duyệt."
+    )
+
+
+def _render_report_status(vm: ClientReportViewModel) -> str:
+    """Render the report status section including any critic findings."""
+    status = _e(_client_status_sentence(vm))
+    if not vm.critic_findings:
+        return f"<p>{status}</p>"
+    items = "".join(f"<li>{_e(f)}</li>" for f in vm.critic_findings)
+    return (
+        f"<p>{status}</p>"
+        f"<p><strong>Ghi nhận từ rà soát nội bộ:</strong></p>"
+        f"<ol class=\"source-list\">{items}</ol>"
     )
 
 

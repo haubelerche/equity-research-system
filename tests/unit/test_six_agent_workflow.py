@@ -259,6 +259,52 @@ def test_review_does_not_auto_revise(monkeypatch) -> None:
     assert result.report_revision_count == 0
 
 
+def test_review_promotes_model_when_critic_warns(monkeypatch) -> None:
+    """Critic findings are recorded but do not block report model promotion."""
+    from backend.harness.gates import pass_gate
+
+    runner = ResearchGraphRunner(store=MagicMock())
+    state = ResearchGraphState(run_id="run_critic_warn", ticker="DHG", objective="test")
+    state.current_stage = "REVIEW"
+    state.draft_report = {"claims": [], "storage_path": "runs/run_critic_warn/report.json"}
+    state.artifacts["report_candidate_model"] = {"run_id": "run_critic_warn", "ticker": "DHG"}
+
+    class FakeAgentResult:
+        def __init__(self, agent_id, payload):
+            self.agent_id = agent_id
+            self.payload = payload
+            self.artifact_refs = []
+            self.evidence_refs = []
+
+    def fake_run_agent(s, agent_id, task):
+        return FakeAgentResult(agent_id, {
+            "decision": "revision_required",
+            "scorecard": {"numeric_integrity": {"score": 9.0, "explanation": "minor gaps"}},
+            "findings": [{"finding_id": "f1", "severity": "high", "description": "Missing data"}],
+        })
+
+    def fake_run_tool(s, agent_id, tool_id, *a, **k):
+        return ServiceNodeResult(node_name="QUALITY", status="completed", summary={})
+
+    monkeypatch.setattr(runner, "_run_agent", fake_run_agent)
+    monkeypatch.setattr(runner, "_run_tool", fake_run_tool)
+    monkeypatch.setattr(runner, "_merge_agent_result", lambda s, r: None)
+    monkeypatch.setattr(runner, "_merge_result", lambda s, r: None)
+    monkeypatch.setattr(runner, "_persist_payload_artifact", lambda *a, **k: None)
+    monkeypatch.setattr("backend.harness.runner.report_completeness_gate", lambda r: pass_gate("REPORT_COMPLETENESS_GATE"))
+    monkeypatch.setattr("backend.harness.runner.citation_gate", lambda r: pass_gate("CITATION_GATE"))
+
+    result = runner._execute_stage(state, "REVIEW")
+
+    # Critic gate recorded as warning, not blocking.
+    assert result.gate_results["SENIOR_CRITIC_GATE"]["passed"] is False
+    assert result.gate_results["SENIOR_CRITIC_GATE"]["severity"] == "warning"
+    assert result.status != "blocked"
+    assert not result.blocking_reason
+    # Report model promoted despite critic findings.
+    assert "review_passed_report_model" in result.artifacts
+
+
 def test_plan_stage_is_deterministic_no_llm(monkeypatch) -> None:
     from backend.harness.contracts import validate_agent_artifact
 

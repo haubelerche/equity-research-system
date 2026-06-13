@@ -527,7 +527,7 @@ def senior_critic_gate(critic_review: dict[str, Any]) -> dict[str, Any]:
         "blocking_findings": blocking_findings,
     }
     if reasons:
-        return _gate_result("SENIOR_CRITIC_GATE", False, reasons, summary)
+        return _gate_result("SENIOR_CRITIC_GATE", False, reasons, summary, severity="warning")
     return pass_gate("SENIOR_CRITIC_GATE", summary)
 
 
