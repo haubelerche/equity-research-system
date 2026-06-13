@@ -19,14 +19,10 @@ if not _log.handlers:
 
 from backend.harness.agent_registry import AgentRegistry
 from backend.harness.gates import (
-    artifact_manifest_gate,
     citation_gate,
     data_quality_gate,
-    evidence_packet_gate,
-    workflow_export_gate,
+    package_validation_gate,
     financial_analyst_gate,
-    formula_trace_gate,
-    tool_permission_gate,
     valuation_gate,
     pass_gate,
     fail_gate,
@@ -391,12 +387,7 @@ class ResearchGraphRunner:
 
         elif stage == "EXPORT_GATES":
             self._write_evidence_packet(state)
-            self._record_gate(state, tool_permission_gate(state.trace))
-            self._record_gate(state, artifact_manifest_gate(state.model_dump(mode="json")))
-            self._record_gate(state, formula_trace_gate(state.valuation_outputs or state.artifacts.get("valuation", {})))
-            self._record_gate(state, evidence_packet_gate(state.model_dump(mode="json")))
-            gate = workflow_export_gate(state.model_dump(mode="json"))
-            self._record_gate(state, gate)
+            self._record_gate(state, package_validation_gate(state.model_dump(mode="json")))
             self._persist_payload_artifact(state, "quality_gate", state.gate_results, "deterministic_gates")
 
         elif stage == "PUBLISH":

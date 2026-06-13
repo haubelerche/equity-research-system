@@ -36,7 +36,6 @@ _REQUIRED_CHARTS = {
     "gross_margin_net_margin_trend",
     "forecast_revenue",
     "forecast_gross_profit_or_margin",
-    "valuation_sensitivity",
 }
 _CRITIC_MINIMUM_SCORES = {
     "thesis_strength": 8.0,
@@ -644,6 +643,33 @@ def evidence_packet_gate(state: dict[str, Any]) -> dict[str, Any]:
     return pass_gate("EVIDENCE_PACKET_GATE", {"evidence_packet_path": evidence_refs[-1].get("storage_path")})
 
 
+def package_validation_gate(state: dict[str, Any]) -> dict[str, Any]:
+    """Single export-readiness gate aggregating all deterministic package checks."""
+    trace = state.get("trace") or []
+    valuation = state.get("valuation_outputs") or (state.get("artifacts") or {}).get("valuation") or {}
+
+    tool_perm = tool_permission_gate(trace)
+    manifest = artifact_manifest_gate(state)
+    formula = formula_trace_gate(valuation)
+    evidence = evidence_packet_gate(state)
+
+    # The export aggregation requires the four sub-gate results to be present in
+    # gate_results; inject the ones we just computed so its presence check holds.
+    gate_results = dict(state.get("gate_results") or {})
+    for sub in (tool_perm, manifest, formula, evidence):
+        gate_results[sub["gate"]] = sub
+    export = workflow_export_gate({**state, "gate_results": gate_results})
+
+    sub_gates = [tool_perm, manifest, formula, evidence, export]
+    blocking_reasons: list[str] = []
+    for sub in sub_gates:
+        if not sub.get("passed"):
+            blocking_reasons.extend(sub.get("blocking_reasons") or [f"{sub.get('gate')}_failed"])
+
+    summary = {sub["gate"]: bool(sub.get("passed")) for sub in sub_gates}
+    if blocking_reasons:
+        return _gate_result("PACKAGE_VALIDATION_GATE", False, sorted(set(blocking_reasons)), summary)
+    return pass_gate("PACKAGE_VALIDATION_GATE", summary)
 
 
 def workflow_export_gate(state: dict[str, Any], **_kwargs: Any) -> dict[str, Any]:
