@@ -377,6 +377,7 @@ def collect_for_tickers(
     *,
     company_lookup: Callable[[str], tuple[str, str]],
     collect: Callable[..., dict] = run_ticker_news_collection,
+    max_articles: int = 15,
 ) -> list[dict]:
     """Run ticker-scoped collection for each ticker (the cron entrypoint core).
 
@@ -388,7 +389,10 @@ def collect_for_tickers(
         ticker = raw.upper()
         company_name, exchange = company_lookup(ticker)
         try:
-            result = collect(conn, ticker, company_name, exchange_slug=exchange.lower())
+            result = collect(
+                conn, ticker, company_name,
+                exchange_slug=exchange.lower(), max_articles=max_articles,
+            )
             results.append({"ticker": ticker, **result})
         except Exception as exc:  # noqa: BLE001 — keep collecting the remaining tickers
             results.append({"ticker": ticker, "error": str(exc)})

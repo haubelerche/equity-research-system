@@ -43,7 +43,36 @@ The DAG `collect_ticker_news` appears in the UI; trigger it or let the 3h schedu
   NOT in `airflow_settings.yaml`.
 - `astro deploy` (or `astro deploy --dags` for DAG-only iterations once the image exists).
 
-## Decision needed
-Do you want the repo **root** converted to an Astro project (option B — invasive, changes the
-app's base image), or keep this non-invasive kit (option A) and run the DAG on a separate
-Airflow instance? See the parent task summary.
+## Deploy into a STANDALONE Astro/Airflow instance (chosen approach — option A)
+
+The backend stays a plain Python 3.11 app; Airflow is only a separate scheduler runtime.
+Nothing in the app imports Airflow, and `apache-airflow` is not in the app's requirements.
+
+1. Build the scheduler image from the **repo root** (so `backend/` + `dags/` are included):
+   ```bash
+   docker build -f astro/Dockerfile -t maer-airflow .
+   ```
+   Or, with the Astro CLI in a throwaway project dir, use `astro/Dockerfile` as the project
+   Dockerfile and `astro dev start`.
+2. Provide secrets to that instance (NOT in the app): `DATABASE_URL`, `OPENAI_API_KEY`
+   as Deployment env vars (prod) or via `astro/airflow_settings.yaml` (local dev only).
+3. The DAG `collect_ticker_news` runs `backend.news.runner.collect_for_tickers` for the MVP
+   tickers every 3h on weekdays; idempotent, so re-runs are safe.
+4. `astro deploy` (or `astro deploy --dags` for DAG-only iterations) to ship updates.
+
+The app and the scheduler are decoupled: local backend development never needs Airflow.
+
+## Validation without the Astro CLI
+
+These run on a plain Python env (no Airflow, no Astro CLI):
+```bash
+# 1. Byte-compile DAG + backend (catches syntax errors; does not import Airflow)
+python -m compileall dags/ backend/
+
+# 2. Exercise the collector entrypoint the DAG calls (live; small batch)
+python scripts/collect_ticker_news.py --tickers DHG TRA --limit 5
+```
+
+> **Full DAG validation** (parse/import errors, schedule, task wiring, a real run) requires an
+> external Airflow/Astro runtime — e.g. `astro dev parse` / `astro dev start`, or the `af`
+> CLI against a running instance. It cannot be done from the plain app environment.

@@ -5,8 +5,10 @@ ticker. Idempotent: already-extracted articles are skipped, so it is safe to run
 2–4h cron. One ticker failing never aborts the batch.
 
 Usage:
-    python scripts/collect_ticker_news.py                 # MVP tickers
-    python scripts/collect_ticker_news.py --tickers DHG,IMP
+    python scripts/collect_ticker_news.py                      # MVP tickers
+    python scripts/collect_ticker_news.py --tickers DHG TRA     # space-separated
+    python scripts/collect_ticker_news.py --tickers DHG,IMP     # comma-separated
+    python scripts/collect_ticker_news.py --tickers DHG TRA --limit 5
 """
 from __future__ import annotations
 
@@ -46,14 +48,29 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Collect ticker-scoped news for tickers.")
     parser.add_argument(
         "--tickers",
-        default=",".join(MVP_TICKERS),
-        help="Comma-separated tickers (default: MVP pharma set).",
+        nargs="*",
+        default=list(MVP_TICKERS),
+        help="Tickers, space- or comma-separated (default: MVP pharma set).",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=15,
+        help="Max articles to collect per ticker (passed to the collector).",
     )
     args = parser.parse_args(argv)
-    tickers = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
+    # Accept both `--tickers DHG TRA` and `--tickers DHG,TRA`.
+    tickers = [
+        t.strip().upper()
+        for entry in args.tickers
+        for t in str(entry).split(",")
+        if t.strip()
+    ]
 
     with connect_with_retry(require_database_url()) as conn:
-        results = collect_for_tickers(conn, tickers, company_lookup=_company_lookup)
+        results = collect_for_tickers(
+            conn, tickers, company_lookup=_company_lookup, max_articles=args.limit
+        )
 
     for result in results:
         if "error" in result:

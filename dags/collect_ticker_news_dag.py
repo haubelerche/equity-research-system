@@ -17,7 +17,14 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
-from airflow.decorators import dag, task
+try:
+    from airflow.decorators import dag, task
+except ModuleNotFoundError as exc:  # pragma: no cover - app runtime has no scheduler dep
+    raise ModuleNotFoundError(
+        "collect_ticker_news_dag requires Apache Airflow, which is a SEPARATE scheduler "
+        "runtime (see astro/README.md) — it is intentionally not an application dependency. "
+        "Deploy this file into an Astro/Airflow instance; do not import it from the app."
+    ) from exc
 
 
 @dag(
