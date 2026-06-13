@@ -385,15 +385,6 @@ class ResearchGraphRunner:
             self._merge_agent_result(state, critic)
             self._record_gate(state, senior_critic_gate(critic.payload))
 
-            # Optional single revision.
-            critic_data = state.artifacts.get("critic_review") or {}
-            if critic_data.get("decision") == "revision_required" and state.report_revision_count == 0:
-                revision = self._run_agent(state, "thesis_report", "Revise the report once using the senior critic instructions.")
-                state.report_revision_count = 1
-                state.draft_report = revision.payload
-                state.artifacts["revised_report_draft"] = revision.payload
-                self._merge_agent_result(state, revision)
-
             # Citation gate.
             gate = citation_gate(state.draft_report or state.artifacts.get("report", {}))
             self._record_gate(state, gate)

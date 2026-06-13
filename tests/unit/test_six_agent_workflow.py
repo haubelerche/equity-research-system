@@ -232,3 +232,44 @@ def test_publish_sets_auto_exported_status(monkeypatch) -> None:
 
     assert result.status == "auto_exported"
     store.update_run_state.assert_any_call("run_pub", "auto_exported", "PUBLISH", finished=True)
+
+
+def test_review_does_not_auto_revise(monkeypatch) -> None:
+    from backend.harness.gates import pass_gate
+
+    runner = ResearchGraphRunner(store=MagicMock())
+    state = ResearchGraphState(run_id="run_rev", ticker="DHG", objective="test")
+    state.current_stage = "REVIEW"
+    state.draft_report = {"claims": [], "storage_path": "runs/run_rev/report.json"}
+
+    agent_calls: list[str] = []
+
+    class FakeAgentResult:
+        def __init__(self, agent_id, payload):
+            self.agent_id = agent_id
+            self.payload = payload
+            self.artifact_refs = []
+            self.evidence_refs = []
+
+    def fake_run_agent(s, agent_id, task):
+        agent_calls.append(agent_id)
+        # Critic asks for a revision — the old code would have triggered a rewrite.
+        return FakeAgentResult(agent_id, {"decision": "revision_required", "scorecard": {}, "findings": []})
+
+    def fake_run_tool(s, agent_id, tool_id, *a, **k):
+        return ServiceNodeResult(node_name="QUALITY", status="completed", summary={})
+
+    monkeypatch.setattr(runner, "_run_agent", fake_run_agent)
+    monkeypatch.setattr(runner, "_run_tool", fake_run_tool)
+    monkeypatch.setattr(runner, "_merge_agent_result", lambda s, r: None)
+    monkeypatch.setattr(runner, "_merge_result", lambda s, r: None)
+    monkeypatch.setattr("backend.harness.runner.report_completeness_gate", lambda r: pass_gate("REPORT_COMPLETENESS_GATE"))
+    monkeypatch.setattr("backend.harness.runner.senior_critic_gate", lambda c: pass_gate("SENIOR_CRITIC_GATE"))
+    monkeypatch.setattr("backend.harness.runner.citation_gate", lambda r: pass_gate("CITATION_GATE"))
+
+    result = runner._execute_stage(state, "REVIEW")
+
+    # Only the senior critic runs; the thesis writer is NOT re-invoked for a revision.
+    assert agent_calls == ["senior_critic"]
+    assert "revised_report_draft" not in result.artifacts
+    assert result.report_revision_count == 0
