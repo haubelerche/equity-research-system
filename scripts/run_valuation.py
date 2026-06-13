@@ -20,6 +20,7 @@ import argparse
 import json
 import os
 import sys
+from dataclasses import replace as _dc_replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -413,7 +414,8 @@ def run_valuation(
     # Net borrowing schedule — sourced from forecast.debt_schedule (driver-based NB per year)
     _net_borrowing_sched = (
         forecast.debt_schedule.net_borrowing_schedule()
-        if forecast.debt_schedule is not None else None
+        if forecast.debt_schedule is not None and forecast.debt_schedule.is_fcfe_publishable
+        else None
     )
     if _net_borrowing_sched:
         print(f"[run_valuation] {ticker} — net_borrowing_schedule connected: {_net_borrowing_sched}")
@@ -571,9 +573,10 @@ def run_valuation(
         ticker=ticker,
         forecast=forecast,
         fact_table=full_table,
-        base_wacc_assumptions=wacc_assumptions,
+        base_wacc_assumptions=_dc_replace(wacc_assumptions, wacc_override=fcff_result.wacc),
         shares_mn=_shares_mn,
         current_price_vnd=current_price,
+        base_terminal_growth=terminal_growth,
     )
     _print_wacc_g_matrix(sens_fcff["matrix"], sens_fcff["g_range"], "Price_FCFF (VND/share)")
 
@@ -587,6 +590,7 @@ def run_valuation(
         shares_mn=_shares_mn,
         current_price_vnd=current_price,
         net_borrowing_schedule=_net_borrowing_sched,
+        base_terminal_growth=terminal_growth,
     )
     _print_wacc_g_matrix(sens_fcfe["matrix"], sens_fcfe["g_range"], "Price_FCFE (VND/share)", row_label="Re")
 

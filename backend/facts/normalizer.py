@@ -370,9 +370,14 @@ def compute_derived(table: FactTable) -> FactTable:
             sga = get("sga.total")
 
         ebit = get("ebit.total")
-        if ebit is None and gp is not None and sga is not None:
-            ebit = gp + sga
-            derived.setdefault("ebit.total", {})[period] = _derived_entry(round(ebit, 4))
+        if ebit is None:
+            operating_profit = get("operating_profit.total")
+            if operating_profit is not None:
+                ebit = operating_profit
+                derived.setdefault("ebit.total", {})[period] = _derived_entry(round(ebit, 4))
+            elif gp is not None and sga is not None:
+                ebit = gp + sga
+                derived.setdefault("ebit.total", {})[period] = _derived_entry(round(ebit, 4))
 
         # ebitda.total — derive if not directly ingested
         ebitda = get("ebitda.total")

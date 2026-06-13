@@ -19,7 +19,10 @@ balance_sheet:
   - total_assets.ending
   - equity.parent
   - total_debt.ending
+  - short_term_debt.ending
+  - long_term_debt.ending
   - cash_and_equivalents.ending
+  - short_term_investments.ending
   - total_liabilities.ending
 
 cash_flow:
@@ -28,6 +31,7 @@ cash_flow:
   - free_cash_flow.total
   - investing_cash_flow.total
   - financing_cash_flow.total
+  - dividends_paid.total
 
 valuation_outputs:
   - target_price
@@ -40,7 +44,9 @@ valuation_outputs:
   - pe_implied_price
 
 market:
-  - shares_outstanding
+  - shares_outstanding.ending
+  - shares_outstanding.weighted_avg
+  - dividends_per_share.cash
   - market_cap
   - enterprise_value
   - current_price

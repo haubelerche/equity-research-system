@@ -35,6 +35,17 @@ class TestHistoricalPayoutRatio:
         ratio = _compute_historical_payout_ratio(ft, ["2024FY"])
         assert ratio is None
 
+    def test_uses_cash_dps_and_explicit_shares_when_total_dividend_is_missing(self):
+        ft = {
+            "dividends_per_share.cash": {"2024FY": 3000.0},
+            "shares_outstanding.ending": {"2024FY": 100_000_000},
+            "net_income.parent": {"2024FY": 600.0},
+        }
+
+        ratio = _compute_historical_payout_ratio(ft, ["2024FY"])
+
+        assert ratio == pytest.approx(0.50)
+
     def test_excludes_payout_above_100pct(self):
         ft = _make_ft_with_dividends(
             ["2022FY", "2023FY"],

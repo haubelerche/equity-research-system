@@ -26,7 +26,6 @@ VALID_AGENT_ROLES = {
     "FinancialAnalysisAgent",
     "ForecastValuationAgent",
     "ThesisReportAgent",
-    # Whitelisted news-research subsystem (NEWS_CRAWLER_EDITOR_AGENT_PLAN §7).
     "SeniorCriticAgent",
 }
 

@@ -40,7 +40,11 @@ def test_zero_debt_fcfe_computes() -> None:
     from backend.analytics.forecasting import ForecastAssumptions, run_forecast
     from backend.analytics.fcfe import compute_fcfe, CostOfEquityAssumptions
 
-    # Minimal 3-year history — no debt entries at all
+    # Minimal 3-year history — debt explicitly reported as zero every year.
+    # A genuinely debt-free company carries total_debt.ending = 0 facts (the
+    # balance-sheet line is reported as 0), which drives the zero_debt_policy
+    # path. Absent debt facts would instead be treated as missing data and
+    # block FCFE, so the zero values must be explicit.
     table = _table(
         ("revenue.net",        "2022FY", 500.0),
         ("revenue.net",        "2023FY", 550.0),
@@ -53,7 +57,9 @@ def test_zero_debt_fcfe_computes() -> None:
         ("net_income.parent",  "2024FY",  60.0),
         ("total_assets.ending","2024FY", 800.0),
         ("equity.parent",      "2024FY", 700.0),
-        # deliberately NO total_debt.ending entries
+        ("total_debt.ending",  "2022FY",   0.0),
+        ("total_debt.ending",  "2023FY",   0.0),
+        ("total_debt.ending",  "2024FY",   0.0),
     )
 
     forecast = run_forecast(
@@ -319,6 +325,9 @@ def test_extreme_forecast_with_fcfe_no_crash() -> None:
         ("net_income.parent",  "2024FY",   88.0),
         ("total_assets.ending","2024FY", 1500.0),
         ("equity.parent",      "2024FY", 1200.0),
+        ("total_debt.ending",  "2022FY",    0.0),
+        ("total_debt.ending",  "2023FY",    0.0),
+        ("total_debt.ending",  "2024FY",    0.0),
     )
 
     horizon = list(range(2025, 2025 + 20))

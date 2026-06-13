@@ -234,14 +234,19 @@ def compute_fcfe(
             delta_nwc = 0.0
 
         # Net Borrowing: from schedule if provided, else 0
-        net_borrowing = (
-            net_borrowing_schedule.get(fy.label, 0.0)
-            if net_borrowing_schedule
-            else 0.0
-        )
+        if _debt_block_reason:
+            net_borrowing = None
+        else:
+            net_borrowing = (
+                net_borrowing_schedule.get(fy.label, 0.0)
+                if net_borrowing_schedule
+                else 0.0
+            )
 
         # FCFE = NI + D&A - CAPEX_positive - ΔNWC + Net Borrowing
-        if ni is not None and dep is not None and capex_pos is not None:
+        if _debt_block_reason:
+            fcfe = None
+        elif ni is not None and dep is not None and capex_pos is not None:
             fcfe = ni + dep - capex_pos - delta_nwc + net_borrowing
         else:
             fcfe = None

@@ -188,7 +188,7 @@ class TestInterestExpenseDriverBased:
 
     def test_approval_flag_without_manual_path_does_not_launder_model_debt(self):
         """Regression: debt_schedule_approved=True with NO manual_debt_path must not
-        upgrade the model's target_debt_ratio output into an approved/publishable
+        upgrade the model's stable_debt output into an approved/publishable
         manual_override. Approval is only meaningful against an analyst-supplied path.
         """
         table = _debt_bearing_table()
@@ -200,7 +200,7 @@ class TestInterestExpenseDriverBased:
         ds = artifact.debt_schedule
         assert ds is not None
         # Method stays the model path, NOT a fabricated manual_override.
-        assert ds.forecast_method == "target_debt_ratio"
+        assert ds.forecast_method == "stable_debt"
         # And FCFE stays correctly blocked — no source for the debt path.
         assert ds.is_fcfe_publishable is False
 

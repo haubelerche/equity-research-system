@@ -1,8 +1,8 @@
-"""Fast report path: render viewable PDF/HTML from the latest already-built run artifacts.
+"""Fast report path: locally render PDF/HTML from already-built run artifacts.
 
 This script does NOT run the multi-agent pipeline, ingestion, OCR, parsing,
-indexing, or any blocking review gates. It reads existing persisted artifacts
-and renders them using the ClientReportPublisher.
+indexing, or any blocking review gates. It preserves immutable published reports
+for audit while rendering the local fast report with the current report code.
 
 Target: well under 120 seconds.
 
@@ -14,7 +14,9 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -38,8 +40,8 @@ def _load_dotenv() -> None:
 # --- module-level names expected by tests (patchable) ---
 
 from backend.dataops.snapshot_freshness import latest_ready_snapshot
-from backend.reporting.final_report_renderer import ClientReportPublisher
-from backend.storage import SupabaseStorageAdapter
+from backend.reporting.final_report_renderer import render_client_report_to_directory
+from backend.storage import RUNS_BUCKET, SupabaseStorageAdapter, run_artifact_key
 
 
 def _latest_report_run_ids(ticker: str) -> list[str]:
@@ -81,38 +83,48 @@ def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
             f"No prior run with a built report for {ticker}; run the full pipeline first."
         )
 
-    # 3. Try each candidate run_id newest-first; use the first that succeeds.
-    published = None
+    # 3. Always render locally with the current renderer/chart policy. Published
+    # run reports stay immutable for audit and may have been created by older code.
+    output_dir = ROOT / "output"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    pdf_dest = output_dir / f"{ticker}_fast_report.pdf"
+    html_dest = output_dir / f"{ticker}_fast_report.html"
+    workings_dest = output_dir / f"{ticker}_valuation_workings.md"
+
+    storage = SupabaseStorageAdapter()
     used_run_id = None
+    workings_path = None
     last_error: Exception | None = None
     for rid in run_ids:
         try:
-            published = ClientReportPublisher().publish(run_id=rid, ticker=ticker, mode=mode)
+            workings_key = run_artifact_key(rid, "report_workings.md")
+            with tempfile.TemporaryDirectory(prefix=f"fast-report-{rid}-") as temp_dir:
+                html_path, pdf_path, _ = render_client_report_to_directory(
+                    run_id=rid,
+                    ticker=ticker,
+                    mode=mode,
+                    output_dir=temp_dir,
+                )
+                shutil.copy2(pdf_path, pdf_dest)
+                shutil.copy2(html_path, html_dest)
+
+            if storage.exists(RUNS_BUCKET, workings_key):
+                storage.download_file(RUNS_BUCKET, workings_key, workings_dest)
+                workings_path = str(workings_dest)
+
             used_run_id = rid
             break
         except Exception as exc:  # noqa: BLE001
-            print(f"[generate_fast_report] WARNING: run_id={rid} failed to render: {exc}", file=sys.stderr)
+            print(
+                f"[generate_fast_report] WARNING: run_id={rid} failed to reuse or render: {exc}",
+                file=sys.stderr,
+            )
             last_error = exc
 
-    if published is None or used_run_id is None:
+    if used_run_id is None:
         raise SystemExit(
-            f"All candidate runs failed to render for {ticker}. Last error: {last_error}"
+            f"All candidate runs failed to reuse or render for {ticker}. Last error: {last_error}"
         )
-
-    # 4. Download rendered files to output/.
-    output_dir = ROOT / "output"
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    result_dict = published.to_dict()
-    pdf_ref = result_dict["pdf"]
-    html_ref = result_dict["html"]
-
-    pdf_dest = output_dir / f"{ticker}_fast_report.pdf"
-    html_dest = output_dir / f"{ticker}_fast_report.html"
-
-    storage = SupabaseStorageAdapter()
-    storage.download_file(pdf_ref["storage_bucket"], pdf_ref["storage_path"], pdf_dest)
-    storage.download_file(html_ref["storage_bucket"], html_ref["storage_path"], html_dest)
 
     elapsed = time.monotonic() - t_start
 
@@ -125,15 +137,9 @@ def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
         "html_path": str(html_dest),
     }
 
-    # The valuation workings .md is a best-effort verification companion: download
-    # it next to the PDF when the publisher produced one.
-    workings_ref = result_dict.get("workings_md")
-    if workings_ref:
-        workings_dest = output_dir / f"{ticker}_valuation_workings.md"
-        storage.download_file(
-            workings_ref["storage_bucket"], workings_ref["storage_path"], workings_dest
-        )
-        out["workings_path"] = str(workings_dest)
+    # The valuation workings .md is a best-effort verification companion.
+    if workings_path:
+        out["workings_path"] = workings_path
 
     print(
         f"[generate_fast_report] ticker={ticker} run_id={used_run_id} "

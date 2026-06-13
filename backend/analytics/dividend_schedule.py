@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from typing import Any, Literal
 
 from backend.analytics._entry import entry_value
+from backend.analytics.shares import explicit_shares_mn
 from backend.facts.normalizer import FactTable
 
 
@@ -97,6 +98,12 @@ def _compute_historical_payout_ratio(
     ratios: list[float] = []
     for period in fy_periods:
         div = _get(fact_table, "dividends_paid.total", period)
+        if div is None:
+            dps = _get(fact_table, "dividends_per_share.cash", period)
+            shares_mn = explicit_shares_mn(fact_table, period)
+            if dps is not None and dps >= 0 and shares_mn is not None:
+                # VND/share * million shares / 1,000 = VND billion.
+                div = dps * shares_mn / 1_000.0
         ni = _get(fact_table, "net_income.parent", period)
         if div is not None and ni is not None and ni > 0:
             ratio = abs(div) / ni

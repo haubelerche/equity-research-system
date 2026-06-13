@@ -108,7 +108,7 @@ class TestIsfcfePublishable:
 
 
 class TestFCFEGate:
-    """When debt_schedule uses target_debt_ratio, FCFE target_price must be None."""
+    """When debt_schedule uses an unapproved model path, FCFE target_price must be None."""
 
     def _minimal_ft(self) -> dict:
         return {
@@ -126,13 +126,13 @@ class TestFCFEGate:
             "net_income.parent": {"2023FY": 240.0, "2024FY": 265.0, "2025FY": 292.0},
         }
 
-    def test_target_debt_ratio_blocks_fcfe_target_price(self):
+    def test_stable_debt_blocks_fcfe_target_price(self):
         """P0: historical_median_debt path MUST block FCFE publishable target price."""
         ft = self._minimal_ft()
         forecast = run_forecast("TST", ft, shares_mn=94.45)
-        # forecast.debt_schedule uses target_debt_ratio (no CFS data)
+        # forecast.debt_schedule uses stable_debt (no CFS data)
         assert forecast.debt_schedule is not None
-        assert forecast.debt_schedule.forecast_method == "target_debt_ratio"
+        assert forecast.debt_schedule.forecast_method == "stable_debt"
         assert not forecast.debt_schedule.is_fcfe_publishable
 
         result = compute_fcfe(
@@ -142,6 +142,8 @@ class TestFCFEGate:
         )
         assert result.target_price_vnd is None
         assert any("BLOCKED" in w for w in result.warnings)
+        assert all(row.fcfe is None for row in result.forecast_years)
+        assert all(row.net_borrowing is None for row in result.forecast_years)
 
     def test_zero_debt_policy_allows_fcfe_target_price(self):
         """When company carries no debt (zero_debt_policy), FCFE must produce target price."""
@@ -170,10 +172,10 @@ class TestFCFEGate:
         ds = forecast.debt_schedule
         assert ds is not None
 
-        if ds.forecast_method == "target_debt_ratio":
-            # Verify net_borrowing is derived from median_debt
+        if ds.forecast_method == "stable_debt":
+            # Verify net_borrowing is a low-confidence model path, not CFS-sourced.
             for row in ds.forecast_rows:
-                assert row.method == "target_debt_ratio"
+                assert row.method == "stable_debt"
                 assert row.confidence == "low"
             assert not ds.is_fcfe_publishable
 
@@ -197,7 +199,7 @@ class TestFCFEGate:
         )
         ds = forecast.debt_schedule
         assert ds is not None
-        assert ds.forecast_method == "target_debt_ratio"
+        assert ds.forecast_method == "stable_debt"
         assert ds.is_fcfe_publishable is False
 
     def test_real_manual_debt_path_with_approval_is_publishable(self):

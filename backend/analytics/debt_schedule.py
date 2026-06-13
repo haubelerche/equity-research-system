@@ -30,6 +30,7 @@ DebtForecastMethod = Literal[
     "direct_cash_flow",
     "balance_sheet_delta",
     "target_debt_ratio",
+    "stable_debt",
     "manual_override",
     "zero_debt_policy",
     "missing",
@@ -152,6 +153,11 @@ class DebtSchedule:
                 "net_borrowing is NOT sourced from CFS or maturity schedule. "
                 "Analyst must provide approved debt path before publishing FCFE."
             ),
+            "stable_debt": (
+                "Debt forecast holds the last reported balance flat. "
+                "Net borrowing is not sourced from CFS or a maturity schedule. "
+                "Analyst must provide approved debt path before publishing FCFE."
+            ),
             "balance_sheet_delta": (
                 "Net borrowing approximated from balance-sheet delta (medium confidence). "
                 "FCFE requires high-confidence debt schedule (direct CFS data or analyst approval)."
@@ -211,7 +217,7 @@ class DebtSchedule:
                 return "approved"
         if self.forecast_method in ("balance_sheet_delta", "manual_override"):
             return "medium"
-        if self.forecast_method == "target_debt_ratio":
+        if self.forecast_method in ("stable_debt", "target_debt_ratio"):
             return "low"
         return "blocked"
 
@@ -483,7 +489,7 @@ def build_forecast_debt_schedule(
                 net_borrowing=nb,
                 average_debt=avg,
                 identity_check_passes=None,  # new_borrowing/repayment split unknown
-                method="target_debt_ratio", confidence="low",
+                method="stable_debt", confidence="low",
                 warning=(
                     f"Forecast debt held flat at last reported balance {anchor:.1f} VND bn. "
                     "This is a simplifying assumption — analyst review required."
@@ -494,7 +500,7 @@ def build_forecast_debt_schedule(
             f"Debt forecast holds debt flat at last reported balance = {anchor:.1f} VND bn. "
             "Low confidence — recommend analyst review."
         )
-        return rows, "target_debt_ratio", warnings
+        return rows, "stable_debt", warnings
 
     # Case 4: Missing
     rows = []

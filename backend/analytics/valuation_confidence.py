@@ -116,9 +116,9 @@ def build_valuation_confidence(
     elif debt_schedule_method == "balance_sheet_delta":
         debt = "medium"
         reasons.append("Debt schedule: approximated from balance sheet delta (missing CFS detail).")
-    elif debt_schedule_method == "target_debt_ratio":
+    elif debt_schedule_method in ("stable_debt", "target_debt_ratio"):
         debt = "low"
-        reasons.append("Debt schedule: projected using historical median ratio (low confidence).")
+        reasons.append("Debt schedule: projected from an unapproved model path (low confidence).")
     else:  # missing
         debt = "low"
         reasons.append("Debt schedule: MISSING — forecast debt unavailable. FCFE is unreliable.")

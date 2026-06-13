@@ -114,6 +114,7 @@ def build_fcff_sensitivity_table(
     g_range: list[float] | None = None,
     shares_mn: float | None = None,
     current_price_vnd: float | None = None,
+    base_terminal_growth: float | None = None,
 ) -> dict[str, Any]:
     """WACC × terminal_growth sensitivity for FCFF.
 
@@ -132,6 +133,8 @@ def build_fcff_sensitivity_table(
 
     if g_range is None:
         g_range = _DEFAULT_G_RANGE
+    if base_terminal_growth is None:
+        base_terminal_growth = 0.03 if 0.03 in g_range else g_range[len(g_range) // 2]
     if base_wacc_assumptions is None:
         base_wacc_assumptions = WACCAssumptions()
     if wacc_range is None:
@@ -170,6 +173,7 @@ def build_fcff_sensitivity_table(
         "matrix": matrix,
         "unit": "VND/share (Price_FCFF)",
         "base_wacc": round(base_wacc_assumptions.wacc_override or base_wacc_assumptions.cost_of_equity, 4),
+        "base_terminal_growth": round(base_terminal_growth, 4),
         "warnings": list(dict.fromkeys(all_warnings)),
     }
 
@@ -186,6 +190,7 @@ def build_fcfe_sensitivity_table(
     shares_mn: float | None = None,
     current_price_vnd: float | None = None,
     net_borrowing_schedule: dict[str, float] | None = None,
+    base_terminal_growth: float | None = None,
 ) -> dict[str, Any]:
     """Re × terminal_growth sensitivity for FCFE.
 
@@ -209,6 +214,8 @@ def build_fcfe_sensitivity_table(
 
     if g_range is None:
         g_range = _DEFAULT_G_RANGE
+    if base_terminal_growth is None:
+        base_terminal_growth = 0.03 if 0.03 in g_range else g_range[len(g_range) // 2]
     if base_coe_assumptions is None:
         base_coe_assumptions = CostOfEquityAssumptions()
     if re_range is None:
@@ -247,6 +254,7 @@ def build_fcfe_sensitivity_table(
         "matrix": matrix,
         "unit": "VND/share (Price_FCFE)",
         "base_re": round(base_coe_assumptions.cost_of_equity, 4),
+        "base_terminal_growth": round(base_terminal_growth, 4),
         "warnings": list(dict.fromkeys(all_warnings)),
     }
 

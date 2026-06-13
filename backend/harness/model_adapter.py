@@ -64,6 +64,35 @@ def create_model_adapter(model: str | None = None):
     return OpenAIModelAdapter()
 
 
+def _langfuse_configured() -> bool:
+    """True when both Langfuse keys are present — enables the tracing drop-in."""
+    return bool(os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY"))
+
+
+def _resolve_openai_client(timeout: int):
+    """Return (client, langfuse_active). Uses the Langfuse OpenAI drop-in when
+    Langfuse is configured so every completion is traced; else plain openai."""
+    if _langfuse_configured():
+        try:
+            from langfuse.openai import OpenAI as _LangfuseOpenAI
+            return _LangfuseOpenAI(timeout=timeout), True
+        except Exception as exc:  # noqa: BLE001 — never let tracing break the run
+            _log.warning("Langfuse OpenAI drop-in unavailable, tracing disabled: %s", exc)
+    import openai
+    return openai.OpenAI(timeout=timeout), False
+
+
+def flush_traces() -> None:
+    """Flush queued Langfuse events before a short-lived run exits. No-op if unconfigured."""
+    if not _langfuse_configured():
+        return
+    try:
+        from langfuse import get_client
+        get_client().flush()
+    except Exception as exc:  # noqa: BLE001
+        _log.warning("Langfuse flush failed: %s", exc)
+
+
 class OpenAIModelAdapter:
     """Production model adapter — OpenAI chat completions only."""
 
@@ -115,8 +144,7 @@ class OpenAIModelAdapter:
 
         self.validate_environment(agent_config, state, task)
 
-        import openai
-        client = openai.OpenAI(timeout=agent_config.timeout_seconds)
+        client, langfuse_active = _resolve_openai_client(agent_config.timeout_seconds)
 
         # ── 2. Build messages + estimate input size ─────────────────────
         system_msg = agent_config.prompt
@@ -147,6 +175,19 @@ class OpenAIModelAdapter:
         }
         if agent_config.model not in _TEMPERATURE_NOT_SUPPORTED:
             create_kwargs["temperature"] = agent_config.temperature
+        # Langfuse drop-in consumes name/metadata; plain openai would reject them,
+        # so only attach when the traced client is active. langfuse_session_id groups
+        # every agent of one run under a single Langfuse session.
+        if langfuse_active:
+            create_kwargs["name"] = agent_config.agent_id
+            create_kwargs["metadata"] = {
+                "langfuse_session_id": state.get("run_id") or "",
+                "ticker": state.get("ticker"),
+                "agent_id": agent_config.agent_id,
+                "task": task[:300],
+                "stage": stage,
+                "run_type": state.get("run_type"),
+            }
         _transient = _transient_exc_types()
         _fatal_exc: BaseException | None = None  # non-transient or exhausted-transient
         _response = None

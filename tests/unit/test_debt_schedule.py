@@ -86,17 +86,17 @@ class TestForecastDebtSchedule:
             assert r.ending_interest_bearing_debt == 0.0
             assert r.net_borrowing == 0.0
 
-    def test_target_debt_ratio_when_historical_debt_exists(self):
+    def test_stable_debt_when_historical_debt_exists(self):
         ft = _make_ft({"2022FY": 100.0, "2023FY": 200.0, "2024FY": 150.0})
         hist = build_historical_debt_schedule("TEST", ft, ["2022FY", "2023FY", "2024FY"])
         rows, method, warnings = build_forecast_debt_schedule(
             "TEST", ft, hist, _FORECAST_LABELS, _FORECAST_YEARS
         )
-        assert method == "target_debt_ratio"
+        assert method == "stable_debt"
         assert rows[0].confidence == "low"
         assert all(r.ending_interest_bearing_debt is not None for r in rows)
 
-    def test_target_debt_ratio_rolls_forward_from_last_balance_no_phantom_borrowing(self):
+    def test_stable_debt_rolls_forward_from_last_balance_no_phantom_borrowing(self):
         # Regression: DHG paid debt to 0 by the last actual year. The forecast must
         # roll forward from that real closing balance (0) — NOT jump to the historical
         # median — so no phantom net_borrowing is injected into FCFE.
@@ -107,7 +107,7 @@ class TestForecastDebtSchedule:
         rows, method, _ = build_forecast_debt_schedule(
             "TEST", ft, hist, _FORECAST_LABELS, _FORECAST_YEARS
         )
-        assert method == "target_debt_ratio"
+        assert method == "stable_debt"
         # First forecast year begins at the real closing balance (0), not 343 median.
         assert rows[0].beginning_interest_bearing_debt == pytest.approx(0.0)
         # Every forecast year holds flat at 0 → zero net borrowing throughout.
@@ -186,8 +186,8 @@ class TestDebtScheduleEntryPoint:
 
 
 class TestFCFEIntegration:
-    def test_fcfe_uses_net_borrowing_from_debt_schedule(self):
-        """FCFE net_borrowing for each year must come from debt schedule, not default 0."""
+    def test_fcfe_blocks_net_borrowing_from_unpublishable_debt_schedule(self):
+        """FCFE must not publish net borrowing from a low-confidence debt schedule."""
         from backend.analytics.fcfe import compute_fcfe, CostOfEquityAssumptions
         from backend.analytics.forecasting import run_forecast
 
@@ -221,7 +221,7 @@ class TestFCFEIntegration:
             net_borrowing_schedule=nb_schedule,
             cost_of_equity_assumptions=re_asm,
         )
-        # Confirm net_borrowing was passed through (may be 0 or non-0 depending on method)
-        assert all(fy.net_borrowing is not None for fy in result.forecast_years)
-        # The FCFE result must exist (not blocked)
-        assert result.equity_value is not None
+        assert ds.is_fcfe_publishable is False
+        assert all(fy.net_borrowing is None for fy in result.forecast_years)
+        assert all(fy.fcfe is None for fy in result.forecast_years)
+        assert result.target_price_vnd is None
