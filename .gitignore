@@ -72,6 +72,20 @@ artifacts/dev/
 audits/storage_migrations/
 /docs/*
 !/docs/ARCHITECTURE.md
+!/docs/README.md
+!/docs/GETTING_STARTED.md
+!/docs/PROJECT_STRUCTURE.md
+!/docs/CONFIGURATION.md
+!/docs/WORKFLOW.md
+!/docs/AGENTS_AND_TOOLS.md
+!/docs/DATA_AND_STORAGE.md
+!/docs/SOURCES_AND_INGESTION.md
+!/docs/VALUATION.md
+!/docs/REPORTING.md
+!/docs/EVALUATION_GATES.md
+!/docs/API.md
+!/docs/TESTING_AND_OPERATIONS.md
+!/docs/OCR_PIPELINE.md
 
 # Reproducible runtime output — never source (reports, logs, dumps, debug traces)
 artifacts/

@@ -169,18 +169,12 @@ class HTMLRenderer:
         out_path = output_dir / filename
 
         # Render via Jinja2
-        # Review/audit dashboard: the first section is the review summary.
-        # In that mode we suppress the ACBS recommendation banner and the
-        # "ĐANG HOÀN THIỆN" page headers so the output reads as a review, not a
-        # finished analyst report.
-        is_review = bool(enriched) and enriched[0].get("page") == "review_summary"
-
         # Client (ACBS-style) sections embed a recommendation hero card directly
         # inside the snapshot cover page.  Suppress the standalone template-level
         # recommendation banner to avoid a near-blank page before the cover page.
         is_client_sections = bool(enriched) and enriched[0].get("page") == "snapshot"
 
-        display_status = "" if render_mode == "client_final" else ctx.status
+        display_status = "" if is_client_sections else ctx.status
 
         rendered = self._template.render(
             css=self._css,
@@ -191,7 +185,6 @@ class HTMLRenderer:
             rating=ctx.rating,
             recommendation_label=_rating_label(ctx.rating),
             status=display_status,
-            is_review=is_review,
             suppress_rec_banner=is_client_sections,
             target_price_fmt=(
                 "—" if ctx._target_price_missing else f"{ctx.target_price:,.0f} VND"

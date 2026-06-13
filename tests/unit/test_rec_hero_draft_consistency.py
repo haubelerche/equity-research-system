@@ -1,5 +1,4 @@
-"""Regression: cover rec hero must signal draft when report is not publication-ready,
-so it agrees with the running header and the status page (no published-vs-draft contradiction)."""
+"""Regression: cover recommendation hero points readers to the methodology page."""
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -19,12 +18,18 @@ def _vm(publication_status: str) -> SimpleNamespace:
     )
 
 
-def test_draft_note_present_when_not_exportable():
+def test_methodology_note_present_without_draft_warning():
     html = _rec_hero(_vm("analyst_review_only"))
+
     assert "rec-draft-note" in html
-    assert "Dự thảo" in html
+    assert "mô hình định lượng" in html
+    assert "giải trình phương pháp" in html
+    assert "Dự thảo" not in html
+    assert "chưa được công bố chính thức" not in html
 
 
-def test_no_draft_note_when_client_exportable():
+def test_methodology_note_also_present_when_client_exportable():
     html = _rec_hero(_vm("client_exportable"))
-    assert "rec-draft-note" not in html
+
+    assert "rec-draft-note" in html
+    assert "giải trình phương pháp" in html

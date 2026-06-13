@@ -138,3 +138,32 @@ def test_client_final_mode_hides_internal_status_banner(tmp_path):
     assert "NEEDS_REVIEW" not in content, (
         "NEEDS_REVIEW must not appear in client_final HTML output"
     )
+
+
+def test_default_mode_does_not_render_internal_status_banner(tmp_path):
+    """The report template must not render the former draft-warning banner in any mode."""
+    ctx = _make_ctx()
+    sections = build_report_sections(ctx)
+    content = HTMLRenderer().render(
+        sections, ctx, output_dir=tmp_path
+    ).read_text(encoding="utf-8")
+
+    assert '<div class="draft-banner">' not in content
+    assert "BÁO CÁO NHÁP" not in content
+    assert "Không xuất bản chính thức" not in content
+    assert "Assumptions" not in content
+
+
+def test_client_sections_do_not_repeat_review_label_in_page_header(tmp_path):
+    ctx = _make_ctx()
+    sections = [
+        {"page": "snapshot", "markdown": "<div>cover</div>", "chapter_break": False},
+        {"page": "methodology", "markdown": "<div>methodology</div>", "chapter_break": True},
+    ]
+
+    content = HTMLRenderer().render(sections, ctx, output_dir=tmp_path).read_text(
+        encoding="utf-8"
+    )
+
+    assert "Cập nhật DHG - ĐANG XEM XÉT" not in content
+    assert "Cập nhật DHG" in content

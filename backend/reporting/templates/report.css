@@ -1,4 +1,4 @@
-/* Equity Research — A4 report stylesheet */
+/* Báo cáo nghiên cứu cổ phiếu — A4 report stylesheet */
 
 /*
  * Unicode font stack — required for Vietnamese diacritics (ắ ổ ị ề ử ộ ụ ằ etc.)
@@ -9,7 +9,7 @@
  */
 
 @page {
-    size: A4 portrait;
+    size: 210mm 297mm;
     margin: 18mm 16mm 18mm 16mm;
 }
 
@@ -303,22 +303,6 @@ hr {
 .value-na {
     color: #718096;
     font-style: italic;
-}
-
-/* ── Internal notice banner ───────────────────────────────── */
-
-.draft-banner {
-    background: #fff8df;
-    border: 1px solid #d9a21b;
-    border-left: 5px solid #d9a21b;
-    color: #6f5200;
-    font-size: 8.5pt;
-    font-weight: 700;
-    padding: 8pt 12pt;
-    margin-bottom: 12pt;
-    border-radius: 4px;
-    letter-spacing: 0.3px;
-    page-break-inside: avoid;
 }
 
 /* ── ACBS-style broker update layout ─────────────────────── */
@@ -812,7 +796,7 @@ tr.row-total td {
 
 @page {
     @bottom-left {
-        content: "Equity Research";
+        content: "Nghiên cứu cổ phiếu";
         font-family: "Noto Sans", "DejaVu Sans", Arial, sans-serif;
         font-size: 7pt;
         color: #718096;
@@ -847,7 +831,7 @@ tr.row-total td {
 }
 
 @page {
-    size: A4 portrait;
+    size: 210mm 297mm;
     margin: 13mm 12mm 22mm 12mm;
 }
 
@@ -1095,13 +1079,15 @@ tbody tr:nth-child(even) {
 }
 
 .appendix-financial-table {
-    font-size: 7.4pt;
+    font-size: 5.8pt;
     table-layout: fixed;
+    width: 100%;
 }
 
 .appendix-financial-table th,
 .appendix-financial-table td {
-    padding: 2.1pt 2.4pt;
+    padding: 1.4pt 1.3pt;
+    overflow-wrap: anywhere;
 }
 
 .financial-model-table th:first-child,
@@ -1113,6 +1099,7 @@ tbody tr:nth-child(even) {
 .appendix-financial-table .numeric {
     text-align: right;
     white-space: normal;
+    font-size: 5.6pt;
 }
 
 .table-unit,

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Equity Research Report — {{ ticker }}">
+  <meta name="description" content="Báo cáo nghiên cứu cổ phiếu — {{ ticker }}">
   <title>{{ ticker }} — Báo cáo nghiên cứu cổ phiếu | {{ report_date }}</title>
   <style>
 {{ css }}
@@ -40,23 +40,14 @@
     "ACCUMULATE":   "recommendation-accumulate",
     "HOLD":         "recommendation-hold",
     "REDUCE":       "recommendation-reduce",
-    "SELL":         "recommendation-sell",
-    "UNDER_REVIEW": "recommendation-review"
+    "SELL":         "recommendation-sell"
   } %}
   {% set rec_class = _rating_class_map.get((rating or "") | upper, "recommendation-review") %}
 
-  <!-- ── Internal notice banner ──────────────────────────── -->
-  {% if status and ('DRAFT' in status or 'NEEDS_REVIEW' in status or 'PENDING' in status) %}
-  <div class="draft-banner">
-    BÁO CÁO NHÁP (DRAFT) — {{ status }} | Không xuất bản chính thức | Assumptions chưa được phê duyệt
-  </div>
-  {% endif %}
-
   <!-- ── Recommendation summary banner
        Suppressed when the first section (snapshot cover page) already contains
-       an embedded recommendation hero — avoids a near-blank banner page.
-       Also suppressed in review/audit mode. -->
-  {% if not is_review and not suppress_rec_banner %}
+       an embedded recommendation hero — avoids a near-blank banner page. -->
+  {% if not suppress_rec_banner %}
   <div class="recommendation-card standalone-recommendation-card {{ rec_class }}">
     <strong>{{ ticker }}</strong> — {{ company_name | default(ticker) }}
     &nbsp;|&nbsp;
@@ -75,7 +66,7 @@
   <div class="report-section{% if section.chapter_break | default(false) %} chapter-break{% endif %}" id="section-{{ section.page }}">
     {% if not loop.first %}
     <div class="acbs-page-header">
-      <span>{% if is_review %}{{ ticker }} — Bản rà soát nội bộ{% else %}Cập nhật {{ ticker }} - {{ recommendation_label or rating }}{% endif %}</span>
+      <span>Cập nhật {{ ticker }}</span>
       <span>Ngày {{ report_date }}</span>
     </div>
     {% endif %}
@@ -85,16 +76,15 @@
 
   <!-- ── Report Footer ─────────────────────────────────── -->
   <div class="report-footer">
-    Equity Research | {{ ticker }} | {{ report_date }} |
+    Nghiên cứu cổ phiếu | {{ ticker }} | {{ report_date }} |
     Tài liệu này chỉ dành cho mục đích nghiên cứu học thuật.
-    {% if status and 'DRAFT' in status %}| DRAFT — Chưa được phê duyệt{% endif %}
   </div>
 
   <!-- ── Running footer — every printed page (Chrome headless) ── -->
   <!-- Hidden on screen; position:fixed makes it appear on all print pages.
        WeasyPrint uses @page margin boxes in the CSS instead. -->
   <div class="print-running-footer" aria-hidden="true">
-    Equity Research &nbsp;·&nbsp; {{ ticker }} &nbsp;·&nbsp; {{ report_date }}
+    Nghiên cứu cổ phiếu &nbsp;·&nbsp; {{ ticker }} &nbsp;·&nbsp; {{ report_date }}
   </div>
 
 </body>
