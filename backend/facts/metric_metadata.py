@@ -215,6 +215,12 @@ METRIC_METADATA: dict[str, MetricMeta] = {
     "capex.total": _m(SemanticType.MONETARY),
     "dividends_paid.total": _m(SemanticType.MONETARY),
     "net_borrowing.total": _m(SemanticType.MONETARY),
+    # Gross CFS financing lines — required for high-confidence FCFE net borrowing.
+    # debt_schedule.build_historical_debt_schedule() reads these to reach
+    # method="direct_cash_flow"; without them it falls back to balance_sheet_delta
+    # (medium) and FCFE is blocked from publication.
+    "proceeds_from_borrowings.total": _m(SemanticType.MONETARY),
+    "repayment_of_borrowings.total": _m(SemanticType.MONETARY),
     "change_in_working_capital.total": _m(SemanticType.MONETARY),
 
     # --- Valuation aggregates (monetary) ---
