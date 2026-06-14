@@ -7,7 +7,7 @@ describe("EvalDashboardPage", () => {
   it("renders all 8 layer titles and the pipeline", () => {
     render(<EvalDashboardPage />);
     expect(screen.getByText(/1 · Data reliability/)).toBeInTheDocument();
-    expect(screen.getByText(/6 · Report FPTS quality/)).toBeInTheDocument();
+    expect(screen.getByText(/6 · Report quality/)).toBeInTheDocument();
     expect(screen.getByText(/8 · Rollout & CI/)).toBeInTheDocument();
     expect(screen.getByText(/Client-final render authorization/)).toBeInTheDocument();
   });

@@ -60,7 +60,7 @@ const LAYER_VALUE_MAP: Record<string, Record<string, number>> = {
     plan_adherence: agent.plan_adherence,
     critic_issue_recall: agent.critic_issue_recall,
   },
-  report_fpts: { fpts_score: report.fpts_score },
+  report_quality: { report_quality_score: report.report_quality_score },
   observability: {
     llm_retry_rate: observability.llm.retry_rate,
     retrieval_fallback_rate: observability.retrieval.fallback_rate,

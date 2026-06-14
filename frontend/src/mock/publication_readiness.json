@@ -1,5 +1,5 @@
 {
   "passed": true, "run_approval": true, "final_approval": true,
   "locked_publishable_model": true, "package_gate": true,
-  "fpts_allow_export": true, "snapshot_match": true, "blocking_reasons": []
+  "report_quality_allow_export": true, "snapshot_match": true, "blocking_reasons": []
 }

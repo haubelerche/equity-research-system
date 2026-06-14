@@ -1,5 +1,5 @@
 {
-  "rubric": "fpts_grade_v1", "fpts_score": 87, "score": 87,
+  "rubric": "report_quality_v1", "report_quality_score": 87, "score": 87,
   "decision": "allow_export", "failed_gates": [],
   "section_scores": { "thesis": 88, "valuation": 86, "risks": 85, "presentation": 89 },
   "report_artifacts": { "html": "output/DHG_report.html", "pdf": "output/DHG_report.pdf", "manifest": "output/DHG_manifest.json" },

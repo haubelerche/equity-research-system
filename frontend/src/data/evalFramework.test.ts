@@ -5,7 +5,7 @@ describe("evalFramework", () => {
   it("has 8 layers in fail-closed order", () => {
     expect(EVAL_LAYERS.length).toBe(8);
     expect(EVAL_LAYERS[0].id).toBe("data_reliability");
-    expect(EVAL_LAYERS[5].id).toBe("report_fpts");
+    expect(EVAL_LAYERS[5].id).toBe("report_quality");
   });
   it("each layer references its artifact and has metrics or rows", () => {
     for (const l of EVAL_LAYERS) {
