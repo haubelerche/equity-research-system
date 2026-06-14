@@ -1,0 +1,121 @@
+{
+  "schema_version": "2.0",
+  "plan_id": "04",
+  "plan_name": "Citation and source provenance",
+  "ticker": "DHG",
+  "run_id": "project-eval-20260614T033415Z",
+  "generated_at": "2026-06-14T03:34:15.588631+00:00",
+  "status": "blocked",
+  "test_execution": {
+    "status": "pass",
+    "targets": [
+      "tests/citations",
+      "tests/evaluation/test_final_source_gates.py",
+      "tests/evaluation/test_numeric_claim_gates.py",
+      "tests/evaluation/test_catalyst_evidence_gates.py",
+      "tests/unit/test_citation_coverage.py",
+      "tests/unit/test_claim_ledger.py"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.56,
+    "summary": {
+      "passed": 142
+    },
+    "output_tail": [
+      "........................................................................ [ 50%]",
+      "......................................................................   [100%]",
+      "142 passed in 0.24s"
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [
+      "citation_eval.json"
+    ],
+    "found": {
+      "citation_eval.json": []
+    },
+    "missing": [
+      "citation_eval.json"
+    ],
+    "status": "blocked"
+  },
+  "blocking_issues": [
+    "claim_ledger_missing"
+  ],
+  "metrics": {
+    "test_suite_status": "pass",
+    "tests_passed": 142,
+    "tests_failed": 0,
+    "runtime_evidence_coverage": 0.0
+  },
+  "metric_results": [
+    {
+      "id": "quantitative_citation_coverage",
+      "label": "Quantitative citation coverage",
+      "value": null,
+      "threshold": "100%",
+      "status": "measured_only",
+      "source": "claim ledger missing",
+      "detail": "PDF-level source counts cannot prove claim-level coverage."
+    },
+    {
+      "id": "citation_key_resolution",
+      "label": "Citation key resolution",
+      "value": null,
+      "threshold": "100%",
+      "status": "measured_only",
+      "source": "claim ledger missing",
+      "detail": ""
+    },
+    {
+      "id": "source_id_validity",
+      "label": "Source ID validity",
+      "value": null,
+      "threshold": "100%",
+      "status": "measured_only",
+      "source": "claim ledger missing",
+      "detail": ""
+    },
+    {
+      "id": "official_source_coverage",
+      "label": "Official source coverage",
+      "value": null,
+      "threshold": "100%",
+      "status": "measured_only",
+      "source": "claim ledger missing",
+      "detail": ""
+    },
+    {
+      "id": "generic_citations",
+      "label": "Generic citation labels",
+      "value": 0,
+      "threshold": "0",
+      "status": "pass",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DHG_report.pdf",
+      "detail": ""
+    },
+    {
+      "id": "pdf_source_mentions",
+      "label": "PDF source labels",
+      "value": 4,
+      "threshold": "> 0",
+      "status": "pass",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DHG_report.pdf",
+      "detail": ""
+    }
+  ],
+  "claim_count": null,
+  "quantitative_claim_count": 102,
+  "citation_coverage_ratio": null,
+  "source_tier_counts": {},
+  "official_source_coverage": null,
+  "numeric_mismatches": [],
+  "generic_citations": 0,
+  "citation_markers": 0,
+  "report": {
+    "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DHG_report.pdf",
+    "exists": true,
+    "pages": 13
+  },
+  "export_blocked": true
+}

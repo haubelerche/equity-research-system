@@ -44,6 +44,8 @@ def _inputs() -> tuple[dict, dict, dict]:
             "ticker": "DBD",
             "claims": [{"claim_id": "c1", "supporting_refs": ["valuation:value"]}],
         },
+        "company_research_pack": {"run_id": "run-001", "ticker": "DBD", "schema_version": "2.0"},
+        "analyst_insight_pack": {"run_id": "run-001", "ticker": "DBD", "schema_version": "2.0"},
         "financial_analysis": {"run_id": "run-001", "ticker": "DBD", "revenue": 101},
         "forecast_model": {"run_id": "run-001", "ticker": "DBD", "eps": [10, 12]},
         "valuation": {"run_id": "run-001", "ticker": "DBD", "target_price": 202},

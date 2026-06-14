@@ -50,7 +50,7 @@ Trong `FORECAST_AND_VALUE`, runner thực hiện:
 | `VALUATION_GATE` | Thiếu FCFF, blend, sensitivity, formula version, assumption version, unit policy, currency, period scope, assumptions |
 | `VALUATION_RECONCILIATION_GATE` | FCFF bridge không khớp, value per share không reconcile, terminal growth >= WACC, thiếu current price, upside/recommendation không khớp |
 | `FORMULA_TRACE_GATE` | Thiếu formula trace hoặc trace thiếu formula id/version/calculation steps |
-| `FPTS_GRADE_GATE` | Score dưới ngưỡng hoặc fail financial model integrity/valuation completeness |
+| `REPORT_QUALITY_GATE` | Score dưới ngưỡng hoặc fail financial model integrity/valuation completeness |
 
 ### 4. Recommendation logic
 

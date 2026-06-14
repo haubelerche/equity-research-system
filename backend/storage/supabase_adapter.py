@@ -116,7 +116,14 @@ class SupabaseStorageAdapter:
         target.write_bytes(self._request("GET", f"object/{quote(bucket)}/{quote(path, safe='/')}"))
         return target
 
-    def upload_json(self, bucket: str, path: str, payload: Any) -> dict[str, Any]:
+    def upload_json(
+        self,
+        bucket: str,
+        path: str,
+        payload: Any,
+        *,
+        upsert: bool = False,
+    ) -> dict[str, Any]:
         validate_bucket_path(bucket, path)
         body = json.dumps(payload, indent=2, ensure_ascii=False, default=str).encode("utf-8")
         result = self._request(
@@ -124,7 +131,7 @@ class SupabaseStorageAdapter:
             f"object/{quote(bucket)}/{quote(path, safe='/')}",
             body=body,
             content_type="application/json",
-            extra_headers={"x-upsert": "false"},
+            extra_headers={"x-upsert": "true" if upsert else "false"},
             expected=(200, 201),
         )
         return json.loads(result or b"{}")

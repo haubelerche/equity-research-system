@@ -1,7 +1,7 @@
 {
-  "ticker": "DHG", "run_id": "mock-001",
-  "retrieval_backend": "hybrid", "query_set_version": "rag_golden_v1",
-  "ragas_scores": { "context_precision": 0.83, "context_recall": 0.81, "faithfulness": 0.88, "response_relevancy": 0.86 },
-  "golden_scores": { "hit_rate_at_5": 0.92, "mrr_at_5": 0.79 },
-  "blocking_failures": []
+  "ticker": "DHG", "run_id": "project-eval-20260614T033415Z",
+  "retrieval_backend": "not_measured", "query_set_version": "rag_golden_v1",
+  "ragas_scores": { "context_precision": null, "context_recall": null, "faithfulness": null, "response_relevancy": null },
+  "golden_scores": { "hit_rate_at_5": 0.6, "mrr_at_5": 0.35 },
+  "blocking_failures": ["evidence_packet_completeness", "hit_rate_at_5", "mrr_at_5"]
 }

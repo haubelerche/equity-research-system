@@ -12,6 +12,7 @@ import pytest
 
 from backend.reporting.valuation_workings import (
     SECTION_TITLES,
+    build_report_explanation_md,
     build_valuation_workings_md,
 )
 
@@ -146,6 +147,10 @@ def _sample_view_model() -> SimpleNamespace:
         exchange="HOSE",
         sector="Dược phẩm",
         report_date="2026-06-12",
+        publication_status="needs_human_review",
+        missing_required_fields=["debt_schedule_publishable"],
+        display_blocking_reasons=["blend_is_draft_only"],
+        critic_findings=["fcff_fcfe_gap_gt_25pct"],
         recommendation="MUA",
         current_price=SimpleNamespace(amount=75000, currency="VND"),
         target_price=SimpleNamespace(amount=101546, currency="VND"),
@@ -164,6 +169,19 @@ def _build(**overrides) -> str:
     )
     kwargs.update(overrides)
     return build_valuation_workings_md(**kwargs)
+
+
+def _build_explanation(**overrides) -> str:
+    kwargs = dict(
+        ticker="DHG",
+        run_id="run_dhg_001",
+        valuation=_sample_valuation(),
+        forecast=_sample_forecast(),
+        facts=_sample_facts(),
+        view_model=_sample_view_model(),
+    )
+    kwargs.update(overrides)
+    return build_report_explanation_md(**kwargs)
 
 
 def test_renders_all_eleven_section_titles():
@@ -223,3 +241,50 @@ def test_does_not_raise_on_empty_artifacts():
     assert "DHG" in md
     # Header section still rendered even with no data.
     assert f"## {SECTION_TITLES[0]}" in md
+
+
+def test_report_explanation_embeds_full_valuation_workings():
+    md = _build_explanation()
+
+    assert "# Phụ lục giải trình định giá - DHG" in md
+    assert "## Vì sao báo cáo chính kết luận như vậy" in md
+    assert "## Chi tiết tính toán định giá" in md
+    for title in SECTION_TITLES:
+        assert f"## {title}" in md, f"missing section: {title}"
+
+    assert "FCFF = EBIT×(1−t) + D&A − CAPEX − ΔNWC" in md
+    assert "13.8%" in md
+    assert "Giá trị cuối kỳ" in md
+    assert "PV d" in md
+    assert "0.60" in md and "0.40" in md
+    assert "54,518" in md
+    assert "P/E" in md
+    assert "Mã băm tái lập" in md
+    assert "abc123" in md
+
+
+def test_report_explanation_surfaces_data_and_method_warnings():
+    md = _build_explanation()
+
+    assert "Lịch nợ vay chưa đủ" in md
+    assert "Hai phương pháp dòng tiền" in md
+    assert "Giá trị theo FCFF và FCFE lệch trên 25%" in md
+
+
+def test_report_explanation_translates_user_facing_finance_terms():
+    md = _build_explanation()
+
+    for english_term in [
+        "Terminal value",
+        "Enterprise value",
+        "Equity value",
+        "Cost of equity",
+        "Premium/Discount",
+        "driver-based",
+        "sensitivity",
+        "reproducibility_hash",
+        "Lineage:",
+        "canonical facts",
+        "artifact định giá",
+    ]:
+        assert english_term not in md

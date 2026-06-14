@@ -11,13 +11,15 @@ from backend.reporting.publication_readiness import (
 
 def _artifacts(snapshot_id: str = "snap-1") -> list[dict]:
     return [
+        {"section_key": "company_research_pack", "payload": {"schema_version": "2.0"}},
+        {"section_key": "analyst_insight_pack", "payload": {"schema_version": "2.0"}},
         {
             "section_key": "valuation",
             "payload": {"snapshot_id": snapshot_id},
             "is_locked": True,
         },
         {
-            "section_key": "fpts_grade_evaluation",
+            "section_key": "report_quality_evaluation",
             "payload": {"passed": True, "decision": "allow_export", "score": 90},
             "is_locked": False,
         },
@@ -44,7 +46,7 @@ def test_client_final_readiness_requires_all_governance_evidence() -> None:
 
     assert result.passed
     assert result.snapshot_id == "snap-1"
-    assert result.fpts_score == 90
+    assert result.report_quality_score == 90
 
 
 def test_client_final_readiness_blocks_snapshot_mismatch_and_unapproved_run() -> None:

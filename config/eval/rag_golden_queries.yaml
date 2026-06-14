@@ -1,0 +1,19 @@
+version: rag_golden_v1
+ticker: DHG
+corpus: latest_official_ocr
+queries:
+  - id: income_statement
+    query: bao cao ket qua hoat dong kinh doanh doanh thu
+    expected_pages: [10]
+  - id: cash_flow_statement
+    query: bao cao luu chuyen tien te
+    expected_pages: [11, 12]
+  - id: balance_sheet_assets
+    query: bang can doi ke toan tong cong tai san
+    expected_pages: [7, 8]
+  - id: balance_sheet_equity
+    query: bang can doi ke toan von chu so huu
+    expected_pages: [9]
+  - id: equity_note
+    query: von chu so huu loi nhuan trong nam
+    expected_pages: [30]

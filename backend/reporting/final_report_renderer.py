@@ -62,11 +62,14 @@ class PublishedReport:
     html: PublishedReportArtifact
     pdf: PublishedReportArtifact
     workings: PublishedReportArtifact | None = None
+    explanation: PublishedReportArtifact | None = None
 
     def artifact_refs(self) -> list[dict[str, Any]]:
         refs = [self.html.to_ref(), self.pdf.to_ref()]
         if self.workings is not None:
             refs.append(self.workings.to_ref())
+        if self.explanation is not None:
+            refs.append(self.explanation.to_ref())
         return refs
 
     def to_dict(self) -> dict[str, Any]:
@@ -76,6 +79,8 @@ class PublishedReport:
         }
         if self.workings is not None:
             out["workings_md"] = self.workings.to_ref()
+        if self.explanation is not None:
+            out["explanation_pdf"] = self.explanation.to_ref()
         return out
 
 
@@ -282,7 +287,60 @@ def render_client_report_to_directory(
     )
     if pdf_path.suffix.lower() != ".pdf":
         raise PDFRenderError(f"Strict PDF renderer returned non-PDF artifact: {pdf_path}")
+    try:
+        from backend.reporting.post_render_audit import audit_client_final_render
+
+        audit = audit_client_final_render(html_path, pdf_path)
+        if not audit.passed:
+            existing = list(getattr(view_model, "display_blocking_reasons", []) or [])
+            view_model.display_blocking_reasons = sorted(
+                set([*existing, *audit.blocking_reasons])
+            )
+    except Exception as exc:  # noqa: BLE001
+        _logger.warning("post-render audit unavailable for run_id=%s: %s", run_id, exc)
     return html_path, pdf_path, view_model
+
+
+def render_report_explanation_to_directory(
+    *,
+    run_id: str,
+    ticker: str,
+    view_model: Any,
+    output_dir: Path | str,
+) -> tuple[Path, Path]:
+    """Render the calculation and reasoning companion as standalone HTML/PDF."""
+    import markdown
+
+    from backend.reporting import valuation_workings as vw
+
+    render_dir = Path(output_dir)
+    render_dir.mkdir(parents=True, exist_ok=True)
+    inputs = vw.load_workings_inputs(run_id)
+    body_md = vw.build_report_explanation_md(
+        ticker=ticker,
+        run_id=run_id,
+        view_model=view_model,
+        **inputs,
+    )
+    body_html = markdown.markdown(
+        body_md,
+        extensions=["tables", "fenced_code", "nl2br", "sane_lists"],
+    )
+    html_path = render_dir / f"{ticker.upper()}_explanation.html"
+    html_path.write_text(
+        _render_explanation_html(ticker=ticker, run_id=run_id, body_html=body_html),
+        encoding="utf-8",
+    )
+    pdf_path = PDFRenderer().render(
+        html_path,
+        output_dir=render_dir,
+        run_id="",
+        allow_stub=False,
+        strict_preflight=True,
+    )
+    if pdf_path.suffix.lower() != ".pdf":
+        raise PDFRenderError(f"Strict PDF renderer returned non-PDF artifact: {pdf_path}")
+    return html_path, pdf_path
 
 
 class ClientReportPublisher:
@@ -358,8 +416,17 @@ class ClientReportPublisher:
                 view_model=view_model,
                 render_dir=render_dir,
             )
+            explanation_artifact = self._build_and_publish_explanation(
+                run_id=run_id,
+                ticker=ticker,
+                view_model=view_model,
+                render_dir=render_dir,
+            )
             return PublishedReport(
-                html=html_artifact, pdf=pdf_artifact, workings=workings_artifact
+                html=html_artifact,
+                pdf=pdf_artifact,
+                workings=workings_artifact,
+                explanation=explanation_artifact,
             )
         finally:
             if temporary_dir is not None:
@@ -401,6 +468,69 @@ class ClientReportPublisher:
                 "valuation workings .md build failed for run_id=%s: %s", run_id, exc
             )
             return None
+
+    def _build_and_publish_explanation(
+        self,
+        *,
+        run_id: str,
+        ticker: str,
+        view_model: Any,
+        render_dir: Path,
+    ) -> PublishedReportArtifact | None:
+        """Render and publish the user-facing calculation/reasoning companion."""
+        try:
+            _, explanation_path = render_report_explanation_to_directory(
+                run_id=run_id,
+                ticker=ticker,
+                view_model=view_model,
+                output_dir=render_dir,
+            )
+            return _publish_run_file(
+                self.storage_adapter,
+                run_id=run_id,
+                ticker=ticker,
+                artifact_name="report_explanation.pdf",
+                local_path=explanation_path,
+                artifact_type="report_explanation_pdf",
+                section_key="report_explanation_pdf",
+                content_type="application/pdf",
+            )
+        except Exception as exc:  # noqa: BLE001
+            _logger.warning(
+                "report explanation PDF build failed for run_id=%s: %s", run_id, exc
+            )
+            return None
+
+
+def _render_explanation_html(*, ticker: str, run_id: str, body_html: str) -> str:
+    """Return compact print-oriented HTML for the explanation companion."""
+    return f"""<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<title>{html.escape(ticker.upper())} - Giải trình báo cáo</title>
+<style>
+@page {{ size: A4; margin: 12mm 11mm 14mm; }}
+body {{ font-family: Arial, sans-serif; color: #172033; font-size: 10pt; line-height: 1.34; }}
+h1 {{ color: #123b6d; font-size: 18pt; border-bottom: 1.4px solid #123b6d; padding-bottom: 4pt; margin: 0 0 7pt; }}
+h2 {{ color: #123b6d; font-size: 12pt; margin: 9pt 0 4pt; page-break-after: avoid; }}
+h3 {{ color: #315b86; font-size: 10.5pt; margin: 7pt 0 3pt; page-break-after: avoid; }}
+p {{ margin: 3pt 0 5pt; }}
+table {{ width: 100%; border-collapse: collapse; margin: 5pt 0 7pt; font-size: 8.8pt; page-break-inside: auto; }}
+th, td {{ border: 0.5pt solid #b9c5d3; padding: 2.6pt 3pt; vertical-align: top; }}
+th {{ background: #eaf0f6; color: #123b6d; }}
+tr {{ page-break-inside: auto; }}
+code {{ color: #7b2d26; font-size: 8.8pt; }}
+blockquote {{ margin: 5pt 0; padding: 5pt 7pt; background: #f2f5f8; border-left: 2.2pt solid #6086ad; }}
+.meta {{ color: #607080; font-size: 8pt; }}
+</style>
+</head>
+<body>
+<p class="meta">Mã cổ phiếu: {html.escape(ticker.upper())}</p>
+{body_html}
+</body>
+</html>
+"""
 
 
 def render_final_report_model_html(final_report_model: Mapping[str, Any]) -> str:

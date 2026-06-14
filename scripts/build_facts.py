@@ -300,8 +300,11 @@ def build_facts(
     artifact["artifact_path"] = str(out_path)
     print(f"\n[build_facts] Artifact saved: {out_path}")
 
-    # Create v2 snapshot if valuation gate passed
-    if report.get("valuation_gate") == "pass":
+    # Freeze every usable FY fact set into a snapshot. Source-quality and
+    # valuation-readiness gates remain explicit metadata; withholding the
+    # snapshot would prevent draft/advisory workflows from analyzing and
+    # disclosing the same quality limitations.
+    if periods_available and report.get("coverage_gate") == "pass" and report.get("core_keys_gate") == "pass":
         try:
             from backend.database.canonical.snapshot_dal import create_snapshot
             snap = create_snapshot(

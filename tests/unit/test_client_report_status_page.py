@@ -15,20 +15,18 @@ def test_methodology_page_is_the_final_client_section(monkeypatch):
     monkeypatch.setattr(
         csb,
         "_report_status_page",
-        lambda vm: "<div>Giải trình phương pháp và quyết định</div>",
+        lambda vm: "<div>Phương pháp định giá và nguồn dữ liệu</div>",
     )
 
     sections = csb.build_client_report_sections(SimpleNamespace())
 
     assert sections[-1]["page"] == "report_status"
-    assert sections[-1]["title"] == "Giải trình phương pháp và quyết định"
-    assert sections[-1]["chapter_break"] is True
-    # Every section after the cover emits an inline page-header ("Cập nhật DHG /
-    # Ngày ...") at its top. Each such section must therefore start on a fresh
-    # page; otherwise the header floats into the middle of a flowing page.
-    assert all(section["chapter_break"] is True for section in sections[1:])
+    assert sections[-1]["title"] == "Phương pháp định giá và nguồn dữ liệu"
+    assert sections[-1]["chapter_break"] is False
+    # Sections now flow naturally; forced chapter breaks created sparse PDF pages.
+    assert all(section["chapter_break"] is False for section in sections)
     assert all(
-        "Giải trình phương pháp và quyết định" not in section["markdown"]
+        "Phương pháp định giá và nguồn dữ liệu" not in section["markdown"]
         for section in sections[:-1]
     )
 
@@ -51,19 +49,18 @@ def test_methodology_page_explains_data_calculation_and_decision_without_warning
 
     html = csb._report_status_page(vm)
 
-    assert "Giải trình phương pháp và quyết định" in html
+    assert "Phương pháp định giá và nguồn dữ liệu" in html
     # Explains where the quantitative numbers come from and how they are computed.
     assert "Báo cáo tài chính" in html
     assert "FCFF/FCFE" in html
     assert "WACC" in html or "chi phí vốn bình quân" in html
     # Decision rule + the actual conclusion are stated.
     assert "MUA nếu &gt;20%, BÁN nếu &lt;-10%, còn lại là NẮM GIỮ" in html
-    assert "khuyến nghị hệ thống: NẮM GIỮ" in html
+    assert "khuyến nghị: NẮM GIỮ" in html
     # Citation legend: real, always-present sources are numbered.
     assert "<strong>[1]</strong>" in html
     assert "<strong>[2]</strong>" in html
-    # Responsibility shifts to the reader, who can verify every assumption.
-    assert "thuộc về người đọc" in html
+    assert "thuộc về người đọc" not in html
     # The hedging "sensitive points to check" warning list is gone.
     assert "Các điểm nhạy cảm" not in html
     # No internal jargon / leaked artifacts.

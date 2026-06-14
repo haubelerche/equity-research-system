@@ -1,6 +1,7 @@
 """ACBS/IMP-style section builders for client and analyst PDF reports."""
 from __future__ import annotations
 
+import re
 from html import escape
 from typing import Any
 
@@ -28,15 +29,86 @@ def _with_refs(value: Any, refs: str) -> str:
     return f"{text} {refs}"
 
 
-def _qual_refs(vm: Any) -> str:
+def _news_refs(vm: Any, limit: int = 1) -> str:
+    """Return a short inline news reference string.
+
+    The full article list is disclosed in the citation legend. Inline prose only
+    carries the nearest evidence marker so paragraphs do not degrade into
+    citation clusters such as [1][3][4][5][6].
+    """
+    news = getattr(vm, "news_citations", None) or []
+    count = min(max(limit, 0), len(news))
+    return "".join(f"[{idx}]" for idx in range(3, 3 + count))
+
+
+def _qual_refs(vm: Any, news_limit: int = 1) -> str:
     """Source markers for qualitative narrative: financial data [1], plus the real
     news articles [3..n] when whitelisted articles have been collected. No fake news
     marker is attached when no real article backs the section."""
-    refs = "[1]"
-    news = getattr(vm, "news_citations", None) or []
-    if news:
-        refs += "".join(f"[{idx}]" for idx in range(3, 3 + len(news)))
-    return refs
+    return "[1]" + _news_refs(vm, news_limit)
+
+
+def _citation_ref_for_news(index: int) -> str:
+    return f"[{index + 3}]"
+
+
+def _news_theme(title: str) -> str:
+    folded = title.lower()
+    if any(token in folded for token in ("quý", "q1", "lợi nhuận", "kế hoạch", "hoàn thành")):
+        return "kết quả kinh doanh ngắn hạn"
+    if any(token in folded for token in ("cổ tức", "trả cổ tức", "bằng tiền")):
+        return "chính sách cổ tức và phân phối tiền mặt"
+    if any(token in folded for token in ("đhcđ", "đại hội", "nghị quyết")):
+        return "quản trị và định hướng từ đại hội cổ đông"
+    if any(token in folded for token in ("đkkd", "kinh doanh", "ngành nghề")):
+        return "mở rộng phạm vi hoạt động"
+    if any(token in folded for token in ("nhân sự", "hđqt", "ban điều hành")):
+        return "thay đổi quản trị hoặc nhân sự"
+    return "cập nhật khác"
+
+
+def _news_impact(title: str) -> str:
+    theme = _news_theme(title)
+    if "cổ tức" in theme:
+        return "Tác động trực tiếp đến suất sinh lợi cổ tức và khả năng phân phối tiền mặt."
+    if "kết quả kinh doanh" in theme:
+        return "Dùng để kiểm chứng giả định doanh thu, biên lợi nhuận và tiến độ hoàn thành kế hoạch."
+    if "quản trị" in theme or "nhân sự" in theme:
+        return "Theo dõi tác động đến kỷ luật phân bổ vốn và mức bù rủi ro."
+    if "mở rộng" in theme:
+        return "Chỉ đưa vào dự phóng khi có quy mô đầu tư, tiến độ và đóng góp doanh thu định lượng."
+    return "Chưa đủ bằng chứng để điều chỉnh định giá; tiếp tục theo dõi."
+
+
+def _render_news_synthesis(vm: ClientReportViewModel) -> str:
+    """Render only concrete headlines with an explicit financial implication."""
+    citations = list(getattr(vm, "news_citations", None) or [])
+    if not citations:
+        return ""
+    rows = []
+    selected = [
+        item for item in citations
+        if str(item.get("severity") or "medium").lower() in {"medium", "high"}
+    ][:3]
+    for idx, citation in enumerate(selected):
+        title = str(citation.get("title") or "").strip()
+        if not title:
+            continue
+        rows.append(
+            "<tr>"
+            f"<td>{_e(title)} {_e(_citation_ref_for_news(idx))}</td>"
+            f"<td>{_e(_news_theme(title))}</td>"
+            f"<td>{_e(_news_impact(title))}</td>"
+            "</tr>"
+        )
+    if not rows:
+        return ""
+    body = (
+        '<table class="financial-model-table news-materiality-table">'
+        "<thead><tr><th>Tin tức</th><th>Phân loại</th><th>Hàm ý đầu tư</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table>"
+    )
+    return _section_block("Tin tức trọng yếu và hàm ý đầu tư", body)
 
 
 def _is_missing(value: Any) -> bool:
@@ -85,6 +157,8 @@ def _fmt_metric(label: str, value: Any, format_type: str = "auto") -> str:
         "sg&a",
         "khấu hao /",
         "capex /",
+        "chi đầu tư /",
+        "chi phí bán hàng và quản lý /",
         "effective tax rate",
         "chuyển đổi dòng tiền",
         "cash conversion",
@@ -120,6 +194,12 @@ def _fmt_metric(label: str, value: Any, format_type: str = "auto") -> str:
     return f"{number:,.0f}"
 
 
+def _display_period(period: Any) -> str:
+    """Preserve actual/forecast markers in broker financial tables."""
+    text = str(period)
+    return re.sub(r"^(\d{4})FY$", r"\1A", text)
+
+
 def _format_price(money: Any) -> str:
     if money is None:
         return DASH
@@ -133,7 +213,7 @@ def _format_percent(percent: Any) -> str:
 
 
 def _render_table(table: TableData, class_name: str = "financial-model-table") -> str:
-    header = "".join(f"<th>{_e(period)}</th>" for period in table.periods)
+    header = "".join(f"<th>{_e(_display_period(period))}</th>" for period in table.periods)
     body = []
     for label, values in table.rows:
         cells = "".join(
@@ -185,7 +265,7 @@ def _render_variance_table(table: TableData, class_name: str = "financial-model-
         css = "variance-positive" if num >= 0 else "variance-negative"
         return f'<td class="numeric {css}">{raw}</td>'
 
-    header = "".join(f"<th>{_e(period)}</th>" for period in table.periods)
+    header = "".join(f"<th>{_e(_display_period(period))}</th>" for period in table.periods)
     body = []
     for label, values in table.rows:
         cells = "".join(_cell(label, v) for v in values)
@@ -242,7 +322,7 @@ def _render_sensitivity_matrix_table(table: TableData) -> str:
             return "matrix-cell-low"
         return "matrix-cell-neutral"
 
-    header = "".join(f"<th>{_e(period)}</th>" for period in table.periods)
+    header = "".join(f"<th>{_e(_display_period(period))}</th>" for period in table.periods)
     body = []
     for label, values in table.rows:
         cells = "".join(
@@ -283,7 +363,88 @@ def _slice_table(table: TableData, max_periods: int = 6) -> TableData:
 
 
 def _render_main_table(table: TableData, class_name: str = "financial-model-table main-financial-table") -> str:
-    return _render_variance_table(_slice_table(table), class_name)
+    return _render_variance_table(table, class_name)
+
+
+def _render_profit_bridge(table: TableData) -> str:
+    """Render the key 2025A-2026F changes directly from the published model."""
+    try:
+        from_index = table.periods.index("2025A")
+        to_index = table.periods.index("2026F")
+    except ValueError:
+        return ""
+
+    rows: list[tuple[str, list[Any]]] = []
+    for label, values in table.rows:
+        if label not in {
+            "Doanh thu thuần",
+            "Biên lợi nhuận gộp",
+            "Chi phí bán hàng và quản lý",
+            "Biên lợi nhuận HĐKD / EBIT",
+            "LNST sau CĐKKS / LNST CĐ mẹ",
+            "Biên lợi nhuận ròng",
+            "EPS",
+        } or len(values) <= to_index:
+            continue
+        previous, current = values[from_index], values[to_index]
+        delta: Any = DASH
+        if isinstance(previous, (int, float)) and isinstance(current, (int, float)):
+            delta = (
+                f"{(current - previous) * 10_000:+.0f} bps"
+                if "Biên" in label
+                else f"{(current / previous - 1) * 100:+.1f}%" if previous else DASH
+            )
+        rows.append((label, [previous, current, delta, _bridge_comment(label, previous, current)]))
+
+    if not rows:
+        return ""
+    body = []
+    for label, values in rows:
+        numeric_cells = "".join(
+            f'<td class="numeric">{_fmt_metric(label, value)}</td>'
+            for value in values[:3]
+        )
+        body.append(
+            f"<tr><td>{_e(label)}</td>{numeric_cells}"
+            f'<td class="bridge-comment">{_e(values[3])}</td></tr>'
+        )
+    return f"""
+<div class="model-table-block">
+  <h2>CẦU NỐI LỢI NHUẬN 2025A-2026F</h2>
+  <div class="table-unit">Đối chiếu trực tiếp với số liệu công bố trong mô hình định giá.</div>
+  <table class="financial-model-table profit-bridge-table">
+    <colgroup>
+      <col class="bridge-metric-col" />
+      <col class="bridge-period-col" />
+      <col class="bridge-period-col" />
+      <col class="bridge-delta-col" />
+      <col class="bridge-comment-col" />
+    </colgroup>
+    <thead><tr><th>Chỉ tiêu</th><th>2025A</th><th>2026F</th><th>Chênh lệch</th><th>Nhận định</th></tr></thead>
+    <tbody>{''.join(body)}</tbody>
+  </table>
+</div>
+"""
+
+
+def _bridge_comment(label: str, previous: Any, current: Any) -> str:
+    if not isinstance(previous, (int, float)) or not isinstance(current, (int, float)):
+        return "Chưa đủ dữ liệu để đối chiếu."
+    if label == "Doanh thu thuần":
+        return "Cơ sở kiểm tra mức tăng lợi nhuận."
+    if label == "Chi phí bán hàng và quản lý":
+        return (
+            "Chi phí tuyệt đối giảm dù doanh thu tăng; cần bằng chứng vận hành."
+            if abs(current) < abs(previous)
+            else "Chi phí vận hành tăng cùng quy mô doanh thu."
+        )
+    if "Biên" in label:
+        return (
+            "Biên tăng trên 300 bps; cần cầu nối chi phí và bằng chứng định lượng."
+            if current - previous > 0.03
+            else "Biến động biên trong ngưỡng theo dõi."
+        )
+    return "Đối chiếu với tăng trưởng doanh thu và giả định mô hình."
 
 
 def _render_appendix_table(table: TableData) -> str:
@@ -314,12 +475,42 @@ def _chart(vm: ClientReportViewModel, chart_id: str) -> str:
     chart = vm.charts.get(chart_id)
     if not chart:
         return ""
+    takeaway = _CHART_COMMENTARY.get(chart_id, "")
+    takeaway_html = (
+        f'<p class="chart-takeaway"><strong>Nhận định:</strong> {_e(takeaway)}</p>'
+        if takeaway else ""
+    )
     return f"""
 <figure class="report-chart">
   <img src="{_e(chart.path)}" alt="{_e(chart.title)}" />
   <figcaption>{_e(chart.caption)}</figcaption>
+  {takeaway_html}
 </figure>
 """
+
+
+_CHART_COMMENTARY: dict[str, str] = {
+    "C1": (
+        "Diễn biến giá cổ phiếu cần được đối chiếu với giá mục tiêu, thanh khoản và các mốc công bố "
+        "kết quả kinh doanh để đánh giá biên an toàn."
+    ),
+    "C2": (
+        "Doanh thu tăng trong giai đoạn gần nhất nhưng biên EBITDA/EBIT không tăng tương ứng, "
+        "cho thấy động lực doanh thu cần được đọc cùng khả năng kiểm soát giá vốn và chi phí bán hàng."
+    ),
+    "C4": (
+        "Biên lợi nhuận gộp, biên lợi nhuận ròng và ROE phản ánh chất lượng tăng trưởng: "
+        "nếu ROE đi xuống trong khi doanh thu tăng, định giá phải chiết khấu rủi ro hiệu quả vốn."
+    ),
+    "C5": (
+        "Quỹ đạo dự phóng hàm ý tăng trưởng doanh thu ổn định hơn giai đoạn lịch sử; "
+        "độ tin cậy của giá mục tiêu phụ thuộc vào việc lợi nhuận sau thuế bắt kịp quy mô doanh thu."
+    ),
+}
+
+
+def _chart_with_commentary(vm: ClientReportViewModel, chart_id: str) -> str:
+    return _chart(vm, chart_id)
 
 
 _REC_CSS: dict[str, str] = {
@@ -403,7 +594,6 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
       </div>
       {_render_key_value_table(sidebar_rows)}
       {_chart(vm, "C1")}
-      {_render_table(vm.trading_performance_table, "broker-side-table compact trading-performance-table")}
       <div class="side-section-title">Thông tin giao dịch</div>
       {_render_key_value_table(stats_rows, "broker-side-table compact")}
     </aside>
@@ -412,6 +602,7 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
       <div class="lead-thesis">{_e(_with_refs(vm.investment_thesis, "[1][2]"))}</div>
       <h2>Luận điểm cập nhật</h2>
       <p>{_e(_with_refs(vm.latest_business_update, _qual_refs(vm)))}</p>
+      {_render_news_synthesis(vm)}
       <h2>Động lực tăng trưởng</h2>
       <p>{_e(_with_refs(vm.key_growth_drivers, "[1]"))}</p>
     </main>
@@ -424,6 +615,7 @@ def _narrative_page(vm: ClientReportViewModel) -> str:
     return f"""
 <div class="client-report-page">
   <h1>Cập nhật hoạt động kinh doanh</h1>
+  {_render_news_synthesis(vm)}
   <div class="two-chart-grid">
     {_chart(vm, "C2")}
     {_chart(vm, "C4")}
@@ -538,61 +730,61 @@ def _business_financials_page(vm: ClientReportViewModel) -> str:
   <h1>Triển vọng kinh doanh và tài chính</h1>
   {_section_block("Cập nhật hoạt động kinh doanh", f"<p>{_e(_with_refs(vm.latest_business_update, _qual_refs(vm)))}</p>")}
   <div class="two-chart-grid">
-    {_chart(vm, "C2")}
-    {_chart(vm, "C4")}
+    {_chart_with_commentary(vm, "C2")}
+    {_chart_with_commentary(vm, "C4")}
   </div>
-  {_section_block("Kết quả tài chính chính", f"<p>{_e(_with_refs(vm.current_context, '[1]'))}</p>{_render_main_table(vm.financial_summary_table)}")}
-  {_section_block("Động lực dự phóng", f"<p>{_e(_with_refs(vm.key_growth_drivers, '[1]'))}</p><p>{_e(_with_refs(vm.key_margin_drivers, '[1]'))}</p>{_chart(vm, 'C5')}{_render_table(vm.key_forecast_drivers_table, 'financial-model-table driver-table')}", "driver-section")}
+  {_section_block("Kết quả tài chính chính", f"<p>{_e(_with_refs(vm.current_context, '[1]'))}</p>{_render_section_insights(vm, {'growth', 'leverage'})}{_render_main_table(vm.financial_summary_table, 'financial-model-table main-financial-table full-financial-table')}{_render_profit_bridge(vm.valuation_model_table)}")}
+  {_section_block("Động lực dự phóng", f"<p>{_e(_with_refs(vm.key_growth_drivers, '[1]'))}</p><p>{_e(_with_refs(vm.key_margin_drivers, '[1]'))}</p>{_render_section_insights(vm, {'margin'})}{_chart_with_commentary(vm, 'C5')}{_render_table(vm.key_forecast_drivers_table, 'financial-model-table driver-table')}", "driver-section")}
 </div>
 """
 
 
 def _valuation_page(vm: ClientReportViewModel) -> str:
     peer = _render_table(vm.peer_table, "financial-model-table peer-table") if vm.peer_table is not None else ""
+    valuation_summary = (
+        _render_table(vm.valuation_summary_table, "financial-model-table valuation-summary-table")
+        if vm.valuation_summary_table is not None else ""
+    )
+    wacc_bridge = (
+        _render_table(vm.wacc_bridge_table, "financial-model-table wacc-bridge-table")
+        if vm.wacc_bridge_table is not None else ""
+    )
+    valuation_bridge = (
+        _render_table(vm.valuation_bridge_table, "financial-model-table valuation-bridge-table")
+        if vm.valuation_bridge_table is not None else ""
+    )
     return f"""
 <div class="client-report-page">
   <h1>Định giá và độ nhạy</h1>
-  {_section_block("Luận điểm định giá", f"<p>{_e(_with_refs(vm.forecast_valuation_narrative, '[1][2]'))}</p>")}
-  {_section_block("Mô hình định giá", _render_main_table(vm.valuation_model_table))}
-  {_section_block("Độ nhạy giá mục tiêu", _render_sensitivity_matrix_table(vm.sensitivity_table), "sensitivity-section")}
+  {_section_block("Luận điểm định giá", f"<p>{_e(_with_refs(vm.forecast_valuation_narrative, '[1][2]'))}</p>{_render_section_insights(vm, {'valuation'})}")}
+  {valuation_summary}
+  {wacc_bridge}
+  {valuation_bridge}
+  {_render_main_table(vm.valuation_model_table)}
+  <div class="sensitivity-section">
+    {_render_sensitivity_matrix_table(vm.sensitivity_table)}
+  </div>
   {peer}
 </div>
 """
 
 
-def _render_insights(vm: ClientReportViewModel) -> str:
-    """Render the ready insights from the research insight pack, each with its evidence
-    markers and valuation implication. Insufficient-evidence insights are not shown."""
+def _render_section_insights(vm: ClientReportViewModel, sections: set[str]) -> str:
+    """Render ready insights as prose inside their relevant editorial section."""
     items: list[str] = []
     for insight in getattr(vm, "insight_pack", []) or []:
-        if insight.get("status") != "ready":
+        if insight.get("status") != "ready" or insight.get("section") not in sections:
             continue
         claim = str(insight.get("claim") or "").strip()
         if not claim:
             continue
         refs = "".join(insight.get("evidence_refs") or [])
-        logic = str(insight.get("analysis_logic") or "").strip()
         valimp = str(insight.get("valuation_implication") or "").strip()
-        valimp_html = (
-            f'<p class="insight-implication"><em>Hàm ý định giá:</em> {_e(valimp)}</p>'
-            if valimp else ""
-        )
-        logic_html = f"<p class=\"insight-logic\">{_e(logic)}</p>" if logic else ""
+        prose = " ".join(part for part in (claim, valimp) if part)
         items.append(
-            '<div class="insight-item">'
-            f'<p class="insight-claim"><strong>{_e(claim)}</strong> {_e(refs)}</p>'
-            f"{logic_html}{valimp_html}</div>"
+            f'<p class="section-insight"><strong>Nhận định:</strong> {_e(prose)} {_e(refs)}</p>'
         )
-    return "".join(items)
-
-
-def _insights_page(vm: ClientReportViewModel) -> str:
-    return f"""
-<div class="client-report-page insights-page">
-  <h1>Phân tích &amp; nhận định</h1>
-  {_render_insights(vm)}
-</div>
-"""
+    return f'<div class="section-insights">{"".join(items)}</div>' if items else ""
 
 
 def _risks_sources_page(vm: ClientReportViewModel) -> str:
@@ -603,7 +795,7 @@ def _risks_sources_page(vm: ClientReportViewModel) -> str:
     return f"""
 <div class="client-report-page">
   <h1>Rủi ro đầu tư</h1>
-  {_section_block("Yếu tố cần theo dõi", f"<p>{_e(_with_refs(vm.material_events, _qual_refs(vm)))}</p>")}
+  {_section_block("Yếu tố cần theo dõi", f"<p>{_e(_with_refs(vm.material_events, _qual_refs(vm)))}</p>{_render_section_insights(vm, {'catalyst'})}")}
   <div class="fpts-section">
   <div class="fpts-section-title">Rủi ro đầu tư</div>
   <table class="financial-model-table">
@@ -622,12 +814,19 @@ def _client_status_sentence(vm: ClientReportViewModel) -> str:
     'analyst_review_only; blockers: valuation_gap_gt_25pct'.
     """
     return (
-        "Báo cáo này trình bày đầy đủ nguồn dữ liệu, công thức tính toán và ngưỡng ra quyết "
-        "định để người đọc có thể tự kiểm chứng từng bước. Hệ thống thu thập dữ liệu, tính "
-        "toán theo phương pháp dưới đây và đưa ra kết luận một cách nhất quán, không thiên "
-        "kiến. Nhờ vậy báo cáo là sản phẩm chính thức: việc đánh giá đúng/sai và quyết định "
-        "có tin theo hay không thuộc về người đọc."
+        "Báo cáo trình bày nguồn dữ liệu, giả định dự phóng và phương pháp định giá để các "
+        "kết luận chính có thể được đối chiếu. Những khoảng trống dữ liệu trọng yếu được công "
+        "khai trong bản nháp phân tích và phải được xử lý trước khi phát hành cho khách hàng."
     )
+
+
+def _valuation_method_label(vm: ClientReportViewModel) -> str:
+    methods = [str(item).upper() for item in getattr(vm, "selected_valuation_methods", []) if item]
+    if methods == ["FCFF"]:
+        return "dòng tiền tự do doanh nghiệp (FCFF)"
+    if methods == ["FCFE"]:
+        return "dòng tiền tự do vốn chủ sở hữu (FCFE)"
+    return "dòng tiền tự do doanh nghiệp và vốn chủ sở hữu (FCFF/FCFE)"
 
 
 def _render_report_status(vm: ClientReportViewModel) -> str:
@@ -643,19 +842,19 @@ def _render_report_status(vm: ClientReportViewModel) -> str:
             "Số liệu định lượng lấy từ đâu",
             "Doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt và số cổ phiếu lấy trực tiếp từ "
             "Báo cáo tài chính (BCTC) đã chuẩn hóa; giá, vốn hóa và thanh khoản lấy từ dữ liệu "
-            "thị trường. Các con số này không do hệ thống tự bịa ra mà bám theo báo cáo gốc của "
+            "thị trường. Các số liệu được đối chiếu với báo cáo gốc của "
             "doanh nghiệp. [1]",
         ),
         (
             "Vì sao dự phóng theo cách này",
             "Mỗi dòng dự phóng nối tiếp số liệu lịch sử: tăng trưởng doanh thu, biên lợi nhuận, "
-            "vốn lưu động, chi đầu tư (capex) và thuế được kéo dài từ xu hướng quá khứ và đặc thù "
+            "vốn lưu động, chi đầu tư và thuế được kéo dài từ xu hướng quá khứ và đặc thù "
             "ngành dược, để dòng tiền dự phóng bám sát năng lực thực tế của doanh nghiệp thay vì "
             "giả định tùy ý. [1][2]",
         ),
         (
             "Cách tính giá mục tiêu",
-            "Từ dự phóng, hệ thống tính dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết "
+            f"Từ dự phóng, mô hình tính {_valuation_method_label(vm)}, chiết "
             "khấu về hiện tại bằng chi phí vốn bình quân (WACC), cộng giá trị cuối kỳ, trừ nợ ròng "
             "rồi chia cho số cổ phiếu đang lưu hành để ra giá trị mỗi cổ phần. [2]",
         ),
@@ -667,7 +866,7 @@ def _render_report_status(vm: ClientReportViewModel) -> str:
         (
             "Kết quả hiện tại",
             f"Giá hiện tại {current_price} VND, giá mục tiêu {target_price} VND, tiềm năng "
-            f"tăng/giảm {upside}, tổng lợi suất kỳ vọng {total_return}, khuyến nghị hệ thống: "
+            f"tăng/giảm {upside}, tổng lợi suất kỳ vọng {total_return}, khuyến nghị: "
             f"{vm.recommendation}.",
         ),
         (
@@ -688,14 +887,40 @@ def _render_report_status(vm: ClientReportViewModel) -> str:
         '<table class="financial-model-table report-status-table">'
         "<thead><tr><th>Hạng mục</th><th>Diễn giải</th></tr></thead>"
         f"<tbody>{table_rows}</tbody></table>"
+        + _render_disclosed_limitations(vm)
     )
+
+
+def _render_disclosed_limitations(vm: ClientReportViewModel) -> str:
+    """Render concrete data gaps in user-facing language."""
+    if getattr(vm, "mode", "analyst_draft") == "client_final":
+        return ""
+    labels = {
+        "price_chart": "biểu đồ giá và lịch sử giao dịch",
+        "shares_outstanding": "số cổ phiếu đang lưu hành",
+        "working_capital_schedule": "lịch dự phóng vốn lưu động",
+        "dividend_schedule": "lịch dự phóng cổ tức",
+        "debt_schedule_publishable": "lịch dự phóng nợ vay",
+        "forecast_debt": "lịch dự phóng nợ vay",
+        "valuation_result": "kết quả định giá có thể kiểm tra lại",
+        "current_price": "giá thị trường hiện tại",
+        "target_price": "giá mục tiêu",
+    }
+    gaps = list(dict.fromkeys(labels.get(str(gap), str(gap)) for gap in (vm.missing_required_fields or [])))
+    if not gaps:
+        return "<h2>Trạng thái dữ liệu</h2><p>Không ghi nhận khoảng trống dữ liệu trọng yếu trong các mục bắt buộc.</p>"
+    items = []
+    for gap in gaps:
+        text = labels.get(str(gap), str(gap).replace("_", " "))
+        items.append(f"<li>Chưa đủ dữ liệu kiểm chứng cho: {_e(text)}.</li>")
+    return "<h2>Trạng thái dữ liệu và phần còn thiếu</h2><ul>" + "".join(items) + "</ul>"
 
 
 def _report_status_page(vm: ClientReportViewModel) -> str:
     return f"""
 <div class="client-report-page report-status-page">
-  <h1>Giải trình phương pháp và quyết định</h1>
-  {_section_block("Hệ thống tính toán và ra quyết định như thế nào", _render_report_status(vm))}
+  <h1>Phương pháp định giá và nguồn dữ liệu</h1>
+  {_section_block("Phương pháp và giả định chính", _render_report_status(vm))}
   {_section_block("Chú giải nguồn trích dẫn", _render_methodology_sources(vm))}
   {_section_block("Tuyên bố miễn trừ trách nhiệm", f"<p>{_e(vm.disclaimer)}</p>")}
 </div>
@@ -724,10 +949,9 @@ def build_client_report_sections(vm: ClientReportViewModel) -> list[dict[str, An
         ("snapshot",             "Tổng quan đầu tư",                    _snapshot_page(vm),              ["C1"],                False),
         ("business_financials",  "Triển vọng kinh doanh và tài chính",  _business_financials_page(vm),   ["C2", "C4", "C5"],    True),
         ("valuation",            "Định giá và độ nhạy",                _valuation_page(vm),             [],                    True),
-        ("insights",             "Phân tích và nhận định",             _insights_page(vm),              [],                    True),
         ("risks_sources",        "Rủi ro đầu tư",                      _risks_sources_page(vm),         [],                    True),
         ("appendix",             "Phụ lục bảng tài chính",             _appendix_page(vm),              [],                    True),
-        ("report_status",        "Giải trình phương pháp và quyết định", _report_status_page(vm),       [],                    True),
+        ("report_status",        "Phương pháp định giá và nguồn dữ liệu", _report_status_page(vm),       [],                    True),
     ]
     sections: list[dict[str, Any]] = []
     for index, (page, title, html, chart_ids, chapter_break) in enumerate(pages, start=1):
@@ -739,7 +963,7 @@ def build_client_report_sections(vm: ClientReportViewModel) -> list[dict[str, An
                 "markdown": html,
                 "chart_ids": main_report_chart_ids(chart_ids),
                 "word_count": len(html.split()),
-                "chapter_break": chapter_break,
+                "chapter_break": False,
             }
         )
     return sections

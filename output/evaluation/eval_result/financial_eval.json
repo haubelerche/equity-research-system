@@ -1,0 +1,207 @@
+{
+  "schema_version": "2.0",
+  "plan_id": "03",
+  "plan_name": "Financial calculation",
+  "ticker": "DHG",
+  "run_id": "project-eval-20260614T033415Z",
+  "generated_at": "2026-06-14T03:34:15.588631+00:00",
+  "status": "fail",
+  "test_execution": {
+    "status": "pass",
+    "targets": [
+      "tests/analytics",
+      "tests/reconciliation",
+      "tests/unit/test_dcf.py",
+      "tests/unit/test_ratios.py",
+      "tests/unit/test_debt_schedule.py",
+      "tests/unit/test_dividend_schedule.py",
+      "tests/unit/test_sensitivity.py",
+      "tests/unit/test_export_gate.py",
+      "tests/unit/test_valuation_workings.py",
+      "tests/evaluation/test_client_final_governance.py"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.615,
+    "summary": {
+      "passed": 124
+    },
+    "output_tail": [
+      "........................................................................ [ 58%]",
+      "....................................................                     [100%]",
+      "124 passed in 0.28s"
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [
+      "financial_eval.json",
+      "valuation.json",
+      "formula_trace.json"
+    ],
+    "found": {
+      "financial_eval.json": [],
+      "valuation.json": [
+        "storage\\runs\\dhg_verify_stinv\\valuation.json"
+      ],
+      "formula_trace.json": []
+    },
+    "missing": [
+      "financial_eval.json",
+      "formula_trace.json"
+    ],
+    "status": "blocked"
+  },
+  "blocking_issues": [
+    "blend_sensitivity:threshold_not_met",
+    "fcfe:threshold_not_met"
+  ],
+  "metrics": {
+    "test_suite_status": "pass",
+    "tests_passed": 124,
+    "tests_failed": 0,
+    "runtime_evidence_coverage": 0.3333333333333333
+  },
+  "metric_results": [
+    {
+      "id": "net_debt",
+      "label": "Net debt reconciliation",
+      "value": 1,
+      "threshold": "pass",
+      "status": "pass",
+      "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+      "detail": ""
+    },
+    {
+      "id": "fcff",
+      "label": "FCFF formula",
+      "value": 1,
+      "threshold": "pass",
+      "status": "pass",
+      "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+      "detail": ""
+    },
+    {
+      "id": "fcfe",
+      "label": "FCFE formula",
+      "value": 0,
+      "threshold": "pass",
+      "status": "fail",
+      "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+      "detail": ""
+    },
+    {
+      "id": "target_price",
+      "label": "Target price reproduction",
+      "value": 1,
+      "threshold": "pass",
+      "status": "pass",
+      "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+      "detail": ""
+    },
+    {
+      "id": "gordon_growth",
+      "label": "Discount rate exceeds terminal growth",
+      "value": 1,
+      "threshold": "pass",
+      "status": "pass",
+      "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+      "detail": ""
+    },
+    {
+      "id": "sensitivity_varies",
+      "label": "FCFF sensitivity matrix varies",
+      "value": 1,
+      "threshold": "pass",
+      "status": "pass",
+      "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+      "detail": ""
+    },
+    {
+      "id": "fcfe_sensitivity",
+      "label": "FCFE sensitivity matrix varies",
+      "value": 1,
+      "threshold": "pass",
+      "status": "pass",
+      "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+      "detail": ""
+    },
+    {
+      "id": "blend_sensitivity",
+      "label": "Blend sensitivity matrix varies",
+      "value": 0,
+      "threshold": "pass",
+      "status": "fail",
+      "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+      "detail": ""
+    },
+    {
+      "id": "formula_trace",
+      "label": "Formula trace available",
+      "value": 1,
+      "threshold": "pass",
+      "status": "pass",
+      "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+      "detail": ""
+    }
+  ],
+  "valuation_artifact": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+  "invariants": [
+    {
+      "id": "net_debt",
+      "severity": "critical",
+      "passed": true,
+      "detail": "Net debt reconciliation"
+    },
+    {
+      "id": "fcff",
+      "severity": "critical",
+      "passed": true,
+      "detail": "FCFF formula"
+    },
+    {
+      "id": "fcfe",
+      "severity": "critical",
+      "passed": false,
+      "detail": "FCFE formula"
+    },
+    {
+      "id": "target_price",
+      "severity": "critical",
+      "passed": true,
+      "detail": "Target price reproduction"
+    },
+    {
+      "id": "gordon_growth",
+      "severity": "critical",
+      "passed": true,
+      "detail": "Discount rate exceeds terminal growth"
+    },
+    {
+      "id": "sensitivity_varies",
+      "severity": "critical",
+      "passed": true,
+      "detail": "FCFF sensitivity matrix varies"
+    },
+    {
+      "id": "fcfe_sensitivity",
+      "severity": "critical",
+      "passed": true,
+      "detail": "FCFE sensitivity matrix varies"
+    },
+    {
+      "id": "blend_sensitivity",
+      "severity": "critical",
+      "passed": false,
+      "detail": "Blend sensitivity matrix varies"
+    },
+    {
+      "id": "formula_trace",
+      "severity": "critical",
+      "passed": true,
+      "detail": "Formula trace available"
+    }
+  ],
+  "critical_failures": 2,
+  "golden_drift_out_of_tolerance": null,
+  "missing_traces": [],
+  "decision": "block"
+}

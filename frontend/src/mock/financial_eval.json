@@ -1,10 +1,10 @@
 {
-  "ticker": "DHG", "run_id": "mock-001",
+  "ticker": "DHG", "run_id": "project-eval-20260614T033415Z",
   "invariants": [
     { "id": "net_debt", "severity": "critical", "passed": true, "detail": "" },
     { "id": "fcff", "severity": "critical", "passed": true, "detail": "" },
-    { "id": "fcfe", "severity": "critical", "passed": true, "detail": "" }
+    { "id": "fcfe", "severity": "critical", "passed": false, "detail": "" }
   ],
-  "critical_failures": 0, "golden_drift_out_of_tolerance": 0,
-  "missing_traces": [], "decision": "pass"
+  "critical_failures": 2, "golden_drift_out_of_tolerance": null,
+  "missing_traces": [], "decision": "block"
 }

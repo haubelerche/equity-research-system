@@ -152,6 +152,28 @@ def test_forecast_quality_gate_blocks_missing_driver_and_failed_balance_check() 
     assert "unexplained_abnormal_forecast_growth" in result["blocking_reasons"]
 
 
+def test_forecast_quality_gate_blocks_unexplained_profit_and_margin_jump() -> None:
+    model = _forecast_model()
+    model["forecast_years"] = [
+        {
+            "label": "2025A", "revenue": 100, "net_income": 10, "eps": 1,
+            "gross_margin": 0.47, "ebit_margin": 0.20, "net_margin": 0.10, "sga": -20,
+        },
+        {
+            "label": "2026F", "revenue": 104, "net_income": 16, "eps": 1.6,
+            "gross_margin": 0.47, "ebit_margin": 0.27, "net_margin": 0.16, "sga": -15,
+        },
+    ]
+
+    result = forecast_quality_gate(model)
+
+    assert not result["passed"]
+    assert "profit_growth_requires_bridge:2026F" in result["blocking_reasons"]
+    assert "eps_growth_requires_bridge:2026F" in result["blocking_reasons"]
+    assert "ebit_margin_jump_without_gross_margin_support:2026F" in result["blocking_reasons"]
+    assert "sga_decline_requires_bridge:2026F" in result["blocking_reasons"]
+
+
 def test_valuation_reconciliation_gate_passes_reconciled_artifact() -> None:
     assert valuation_reconciliation_gate(_valuation())["passed"]
 

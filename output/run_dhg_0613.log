@@ -1,1 +1,0 @@
-[run_research] FAILED: DB schema out of date: version '035_runs_status_auto_exported' not applied. Run: python -m backend.database.migrate

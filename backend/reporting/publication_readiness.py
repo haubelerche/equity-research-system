@@ -14,7 +14,7 @@ class ClientFinalAuthorization:
     run_id: str
     ticker: str
     snapshot_id: str
-    fpts_score: float
+    report_quality_score: float
 
 
 @dataclass(frozen=True)
@@ -22,7 +22,7 @@ class PublicationReadiness:
     passed: bool
     blocking_reasons: tuple[str, ...]
     snapshot_id: str | None = None
-    fpts_score: float | None = None
+    report_quality_score: float | None = None
 
 
 def _latest_by_section(artifacts: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -62,6 +62,12 @@ def evaluate_client_final_readiness(
         reasons.append("final_report_approval_missing")
 
     sections = _latest_by_section(artifacts)
+    for required in ("company_research_pack", "analyst_insight_pack"):
+        artifact = sections.get(required)
+        if not artifact:
+            reasons.append(f"{required}_missing")
+        elif not _payload(artifact):
+            reasons.append(f"{required}_empty")
     publishable = sections.get("publishable_final_report_model")
     if not publishable:
         reasons.append("publishable_final_report_model_missing")
@@ -72,15 +78,15 @@ def evaluate_client_final_readiness(
     if package.get("passed") is not True:
         reasons.append("package_validation_not_passed")
 
-    fpts = _payload(sections.get("fpts_grade_evaluation"))
-    fpts_score = fpts.get("score")
+    report_quality = _payload(sections.get("report_quality_evaluation"))
+    report_quality_score = report_quality.get("score")
     if (
-        fpts.get("passed") is not True
-        or fpts.get("decision") != "allow_export"
-        or not isinstance(fpts_score, (int, float))
-        or float(fpts_score) < 85
+        report_quality.get("passed") is not True
+        or report_quality.get("decision") != "allow_export"
+        or not isinstance(report_quality_score, (int, float))
+        or float(report_quality_score) < 85
     ):
-        reasons.append("fpts_grade_not_publishable")
+        reasons.append("report_quality_not_publishable")
 
     publishable_payload = _payload(publishable)
     valuation_payload = _payload(sections.get("valuation"))
@@ -95,7 +101,7 @@ def evaluate_client_final_readiness(
         passed=not reasons,
         blocking_reasons=tuple(sorted(set(reasons))),
         snapshot_id=str(publishable_snapshot) if publishable_snapshot else None,
-        fpts_score=float(fpts_score) if isinstance(fpts_score, (int, float)) else None,
+        report_quality_score=float(report_quality_score) if isinstance(report_quality_score, (int, float)) else None,
     )
 
 
@@ -125,7 +131,7 @@ def authorize_client_final(
         run_id=run_id,
         ticker=ticker.strip().upper(),
         snapshot_id=str(readiness.snapshot_id),
-        fpts_score=float(readiness.fpts_score),
+        report_quality_score=float(readiness.report_quality_score),
     )
 
 

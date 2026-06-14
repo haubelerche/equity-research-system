@@ -1,0 +1,136 @@
+{
+  "schema_version": "2.0",
+  "plan_id": "01",
+  "plan_name": "Data reliability",
+  "ticker": "DHG",
+  "run_id": "project-eval-20260614T033415Z",
+  "generated_at": "2026-06-14T03:34:15.588631+00:00",
+  "status": "pass",
+  "test_execution": {
+    "status": "pass",
+    "targets": [
+      "tests/reconciliation",
+      "tests/official_sources",
+      "tests/sources",
+      "tests/unit/test_data_quality.py",
+      "tests/unit/test_golden_provenance_required.py",
+      "tests/unit/test_ocr_promotion_gate.py",
+      "tests/unit/test_ocr_reconciliation_gate.py",
+      "tests/unit/test_source_provenance_gate.py"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.698,
+    "summary": {
+      "passed": 70
+    },
+    "output_tail": [
+      "......................................................................   [100%]",
+      "70 passed in 0.32s"
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [
+      "data_quality.json"
+    ],
+    "found": {
+      "data_quality.json": []
+    },
+    "missing": [
+      "data_quality.json"
+    ],
+    "status": "blocked"
+  },
+  "blocking_issues": [],
+  "metrics": {
+    "test_suite_status": "pass",
+    "tests_passed": 70,
+    "tests_failed": 0,
+    "runtime_evidence_coverage": 0.0
+  },
+  "metric_results": [
+    {
+      "id": "core_metric_coverage",
+      "label": "Core metric coverage",
+      "value": 1.0,
+      "threshold": ">= 95%",
+      "status": "pass",
+      "source": "config\\dataset\\golden\\financials\\DHG.csv",
+      "detail": ""
+    },
+    {
+      "id": "period_completeness",
+      "label": "Statement completeness",
+      "value": 1.0,
+      "threshold": "100%",
+      "status": "pass",
+      "source": "data\\raw\\bctc\\DHG",
+      "detail": ""
+    },
+    {
+      "id": "provenance_coverage",
+      "label": "Source provenance coverage",
+      "value": 1.0,
+      "threshold": "100%",
+      "status": "pass",
+      "source": "config\\dataset\\golden\\financials\\DHG.csv",
+      "detail": ""
+    },
+    {
+      "id": "official_reconciliation_rate",
+      "label": "Accepted official reconciliation",
+      "value": 1.0,
+      "threshold": ">= 95%",
+      "status": "pass",
+      "source": "config\\dataset\\golden\\financials\\DHG.csv",
+      "detail": ""
+    },
+    {
+      "id": "ocr_unresolved_rate",
+      "label": "OCR unresolved rate",
+      "value": 0.0,
+      "threshold": "0%",
+      "status": "pass",
+      "source": "latest OCR metadata",
+      "detail": ""
+    },
+    {
+      "id": "duplicate_fact_rate",
+      "label": "Duplicate canonical fact rate",
+      "value": 0.0,
+      "threshold": "0%",
+      "status": "pass",
+      "source": "config\\dataset\\golden\\financials\\DHG.csv",
+      "detail": ""
+    }
+  ],
+  "core_metric_coverage": 1.0,
+  "period_completeness": 1.0,
+  "provenance_coverage": 1.0,
+  "official_reconciliation_rate": 1.0,
+  "ocr_unresolved_rate": 0.0,
+  "duplicate_fact_rate": 0.0,
+  "ocr": {
+    "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+    "document_id": "DHG_2025_abaaac8d3813",
+    "ticker": "DHG",
+    "fiscal_year": 2025,
+    "source_uri": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\storage\\sources\\official_documents\\DHG\\2025\\00c16423bad04feaab36f8cb998ef22511550cabeaddb12a6fe152450aad5b5e.pdf",
+    "source_checksum": "abaaac8d3813329db1987e769f325fbee7b8c4776b4205b26a4673f95b589973",
+    "pdf_type": "scanned",
+    "ocr_engine": "tesseract",
+    "ocr_lang": "eng",
+    "dpi": 200,
+    "parser_version": "1.0.0",
+    "started_at": "2026-06-10T03:49:04.202634+00:00",
+    "completed_at": "2026-06-10T03:50:02.815960+00:00",
+    "status": "completed",
+    "pages_processed": 40,
+    "pages_failed": 0,
+    "candidate_row_count": 0,
+    "mapped_fact_count": 0,
+    "warnings": [
+      "english_only_ocr"
+    ],
+    "errors": []
+  }
+}

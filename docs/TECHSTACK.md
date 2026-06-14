@@ -1,6 +1,6 @@
 # Tổng hợp kỹ thuật và công nghệ sử dụng trong dự án
 
-Cập nhật: 2026-06-12
+Cập nhật: 2026-06-14
 
 ## Context
 
@@ -26,7 +26,7 @@ Các rủi ro chính được phát hiện:
 
 | Rủi ro | Biểu hiện trong repo | Tác động vận hành |
 |---|---|---|
-| Dependency manifest chưa đầy đủ | Code import `requests`, `bs4`, `vnstock`, `apscheduler`, `pdfkit`, `pypdf`, nhưng `requirements.txt` chưa khai báo trực tiếp các gói này | Môi trường sạch hoặc Docker build có thể lỗi khi chạy crawler, scheduler, PDF fallback, hoặc PDF preflight |
+| Dependency manifest chưa đầy đủ | Code import `requests`, `bs4`, `vnstock`, `pdfkit`, `pypdf`, nhưng `requirements.txt` chưa khai báo trực tiếp các gói này | Môi trường sạch hoặc Docker build có thể lỗi khi chạy crawler, PDF fallback, hoặc PDF preflight |
 | Cấu hình LLM bị lệch pha | `.env.example` vẫn nhắc `ANTHROPIC_API_KEY`, `requirements.txt` có `anthropic`, nhưng `backend/harness/model_adapter.py` production chỉ gọi OpenAI | Người vận hành có thể cấp sai secret, hoặc hiểu sai provider production |
 | Quan sát hệ thống | `langfuse>=4.0` đã nối qua drop-in `langfuse.openai` trong `model_adapter.py`; bật khi có credentials, no-op nếu thiếu | Observability optional, không phải backbone bắt buộc |
 | PDF rendering có fallback chưa đủ dependency hệ thống | Code hỗ trợ WeasyPrint, pdfkit/wkhtmltopdf, Chrome headless, xhtml2pdf, pypdf preflight; Docker chỉ cài OCR/Poppler/libpq/curl/build tools | Khả năng render PDF phụ thuộc môi trường cục bộ nhiều hơn tài liệu hiện tại thể hiện |
@@ -66,8 +66,12 @@ Các endpoint chính hiện có:
 | `POST /research/start` | Tạo run, ghi state ban đầu, submit executor |
 | `GET /research/{run_id}/status` | Trả trạng thái run |
 | `GET /research/{run_id}/artifacts` | Liệt kê artifact metadata |
+| `GET /reports` | Quét report inventory local cho universe |
+| `GET /reports/{ticker}/file/{kind}` | Phục vụ report/explanation PDF local |
+| `GET /reports/{ticker}/preview/{page}` | Phục vụ preview PNG local |
 | `GET /reports/{run_id}` | Lọc artifact liên quan đến report/evaluation/log |
-| `POST /research/{run_id}/approve` | Trả trạng thái hiện tại; logic approval đầy đủ nằm ở flow/gate khác |
+
+Backend hiện chưa expose evaluation API; route frontend `/eval` đọc mock artifacts. Khi có `frontend/dist/`, FastAPI mount assets và SPA fallback sau các API route.
 
 ### 3. Multi-agent harness và lớp LLM
 
@@ -210,12 +214,12 @@ Gap manifest và system dependency: `pdfkit` và `pypdf` đang được import n
 |---|---|---|---|
 | Canonical CLI commands | Makefile | `make test`, `make audit`, `make run-research`, `make dev-render` | `Makefile` |
 | Research entrypoint | Python scripts | `scripts/run_research.py`, `scripts/run_valuation.py`, `scripts/generate_report.py` | `scripts/` |
-| Scheduler | APScheduler | Weekly sync, daily prices, monthly valuation; optional nếu package thiếu | `backend/jobs/scheduler.py` |
+| Scheduler | Apache Airflow/Astro | DAG deploy kit tách biệt; app runtime không phụ thuộc Airflow | `dags/`, `astro/` |
 | Docker entrypoint | Shell CMD | Chạy migrations rồi `scripts/run_research.py` | `Dockerfile` |
 | OCR smoke test | Python script | Kiểm tra Tesseract/Poppler/Python OCR packages | `scripts/check_ocr_runtime.py` |
 | Storage migration scripts | Python scripts | Di chuyển local artifacts/documents lên Supabase Storage | `scripts/storage/` |
 
-Gap manifest: `apscheduler` đang được import trong `backend/jobs/` nhưng chưa có trong `requirements.txt`. Vì scheduler được thiết kế optional khi thiếu package, lỗi có thể không xuất hiện ở API path nhưng sẽ xuất hiện khi chạy scheduler standalone hoặc khi kỳ vọng jobs tự động hoạt động.
+Scheduling được tách khỏi app runtime qua Astro/Airflow deploy kit; application requirements không chứa scheduler dependency.
 
 ### 12. Testing và quality assurance
 
@@ -275,7 +279,7 @@ Langfuse là optional: khi credentials có mặt, adapter chuyển sang drop-in 
 | Nhóm | Package/công nghệ | Trạng thái hiện tại |
 |---|---|---|
 | Đã khai báo và đang dùng | `fastapi`, `uvicorn`, `pydantic`, `psycopg2-binary`, `pandas`, `numpy`, `pdfplumber`, `pyyaml`, `openai`, `pytest`, `pytesseract`, `pdf2image`, `Pillow`, `matplotlib`, `seaborn`, `jinja2`, `markdown`, `weasyprint`, `xhtml2pdf` | Hợp lệ về mặt manifest, cần pin version nếu muốn reproducibility |
-| Được import nhưng thiếu trong `requirements.txt` | `vnstock`, `requests`, `beautifulsoup4`, `apscheduler`, `pdfkit`, `pypdf` | Cần bổ sung trực tiếp hoặc loại bỏ code path tương ứng |
+| Được import nhưng thiếu trong `requirements.txt` | `vnstock`, `requests`, `beautifulsoup4`, `pdfkit`, `pypdf` | Cần bổ sung trực tiếp hoặc loại bỏ code path tương ứng |
 | Khai báo nhưng chưa thấy runtime integration chính | `anthropic` | Cần quyết định giữ làm optional hoặc loại khỏi production requirements (`langfuse` đã được tích hợp qua drop-in OpenAI) |
 | System packages đã khai báo | Tesseract, Vietnamese Tesseract data, Poppler, libpq, compiler toolchain, curl | Đủ cho OCR cơ bản và DB build/runtime |
 | System packages còn thiếu hoặc phụ thuộc môi trường | Unicode fonts, wkhtmltopdf, Chrome/Chromium, WeasyPrint native/font prerequisites | Cần chuẩn hóa nếu PDF là output bắt buộc |
@@ -286,7 +290,7 @@ Langfuse là optional: khi credentials có mặt, adapter chuyển sang drop-in 
 
 | Ưu tiên | Hành động | Lý do |
 |---|---|---|
-| P0 | Bổ sung `vnstock`, `requests`, `beautifulsoup4`, `apscheduler`, `pdfkit`, `pypdf` vào `requirements.txt` hoặc tách thành extras rõ ràng | Đây là các import thực tế; thiếu chúng làm môi trường sạch không đáng tin cậy |
+| P0 | Bổ sung `vnstock`, `requests`, `beautifulsoup4`, `pdfkit`, `pypdf` vào `requirements.txt` hoặc tách thành extras rõ ràng | Đây là các import thực tế; thiếu chúng làm môi trường sạch không đáng tin cậy |
 | P0 | Cập nhật `.env.example`: bỏ hoặc ghi rõ `ANTHROPIC_API_KEY` là legacy/unused nếu chưa có Anthropic adapter | Tránh cấu hình sai provider production |
 | P1 | Pin version tối thiểu có kiểm chứng hoặc tạo `requirements.lock` | Giảm drift do dependency floating |
 | P1 | Chuẩn hóa PDF dependencies: chọn WeasyPrint-only hoặc cài đủ fallback system packages | Giảm lỗi PDF tiếng Việt theo môi trường |
@@ -313,6 +317,6 @@ Langfuse là optional: khi credentials có mặt, adapter chuyển sang drop-in 
 
 ### 4. Kết luận kỹ thuật
 
-Tech stack thực tế của dự án gồm Python 3.11, FastAPI/Uvicorn, Pydantic v2, Supabase PostgreSQL, psycopg2, Supabase Storage REST adapter tự viết, OpenAI Chat Completions, OpenAI embeddings, pgvector, PostgreSQL full-text search, vnstock, pandas/numpy, OCR bằng Tesseract/Poppler/pdfplumber/pdf2image/Pillow, reporting bằng Jinja2/Markdown/Matplotlib/Seaborn, PDF export bằng WeasyPrint/pdfkit/Chrome/xhtml2pdf/pypdf preflight, deterministic valuation modules, pytest, và optional APScheduler/Langfuse/Anthropic tùy trạng thái tích hợp.
+Tech stack thực tế của dự án gồm Python 3.11, FastAPI/Uvicorn, Pydantic v2, Supabase PostgreSQL, psycopg2, Supabase Storage REST adapter tự viết, OpenAI Chat Completions, OpenAI embeddings, pgvector, PostgreSQL full-text search, vnstock, pandas/numpy, OCR bằng Tesseract/Poppler/pdfplumber/pdf2image/Pillow, reporting bằng Jinja2/Markdown/Matplotlib/Seaborn, PDF export bằng WeasyPrint/pdfkit/Chrome/xhtml2pdf/pypdf preflight, deterministic valuation modules, pytest, Astro/Airflow deploy kit, và optional Langfuse/Anthropic tùy trạng thái tích hợp.
 
 Điểm mạnh kiến trúc là dự án đã đặt agent vào một workflow có graph cố định, typed contracts, source provenance, run-scoped artifacts, và export gates. Điểm yếu cần xử lý ngay là sự lệch pha giữa code import, dependency manifest, env template, và Docker system packages; nếu không sửa, reliability của môi trường triển khai sẽ thấp hơn đáng kể so với độ chặt của thiết kế dữ liệu và valuation logic.

@@ -4,6 +4,30 @@ from __future__ import annotations
 from typing import Any
 
 
+def compute_causal_deltas(event: dict[str, Any]) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Compute scenario and valuation deltas from explicit numeric sensitivities."""
+    base = event.get("financial_base") or {}
+    scenario: dict[str, Any] = {}
+    revenue = base.get("revenue")
+    revenue_impact = event.get("revenue_impact_pct")
+    if isinstance(revenue, (int, float)) and isinstance(revenue_impact, (int, float)):
+        scenario["revenue_delta"] = float(revenue) * float(revenue_impact) / 100
+    ebit = base.get("ebit")
+    margin_impact = event.get("margin_impact_bps")
+    if isinstance(ebit, (int, float)) and isinstance(revenue, (int, float)) and isinstance(margin_impact, (int, float)):
+        scenario["ebit_delta"] = float(revenue) * float(margin_impact) / 10_000
+        scenario["ebit_after_delta"] = float(ebit) + scenario["ebit_delta"]
+    target = base.get("target_price_vnd")
+    target_impact = event.get("target_price_impact_pct")
+    valuation = None
+    if isinstance(target, (int, float)) and isinstance(target_impact, (int, float)):
+        valuation = {
+            "target_price_delta_vnd": float(target) * float(target_impact) / 100,
+            "target_price_after_delta_vnd": float(target) * (1 + float(target_impact) / 100),
+        }
+    return scenario or None, valuation
+
+
 def build_analyst_insight(event: dict[str, Any]) -> dict[str, Any]:
     """Normalize one researched event without inventing financial transmission."""
     observation = (
@@ -21,9 +45,11 @@ def build_analyst_insight(event: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(financial_transmission, dict):
         financial_transmission = {}
 
+    computed_scenario, computed_valuation = compute_causal_deltas(event)
     insight = {
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "observation": observation,
+        "operating_cause": event.get("operating_cause"),
         "evidence_refs": evidence_refs,
         "company_specificity": event.get("company_specificity")
         or ("company_specific" if event.get("ticker") else "sector_level"),
@@ -36,8 +62,9 @@ def build_analyst_insight(event: dict[str, Any]) -> dict[str, Any]:
             "time_horizon": financial_transmission.get("time_horizon"),
             "magnitude_range": financial_transmission.get("magnitude_range"),
         },
-        "scenario_delta": event.get("scenario_delta"),
-        "valuation_delta": event.get("valuation_delta"),
+        "scenario_delta": event.get("scenario_delta") or computed_scenario,
+        "valuation_delta": event.get("valuation_delta") or computed_valuation,
+        "monitoring_kpi": event.get("monitoring_kpi"),
         "thesis_implication": event.get("thesis_implication"),
         "falsification_trigger": event.get("falsification_trigger"),
         "confidence": event.get("confidence"),
@@ -47,8 +74,12 @@ def build_analyst_insight(event: dict[str, Any]) -> dict[str, Any]:
         "observation",
         "evidence_refs",
         "materiality",
+        "operating_cause",
         "thesis_implication",
         "falsification_trigger",
+        "scenario_delta",
+        "valuation_delta",
+        "monitoring_kpi",
         "confidence",
     ):
         if not insight.get(field):

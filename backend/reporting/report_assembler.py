@@ -29,6 +29,8 @@ REQUIRED_SECTIONS: tuple[str, ...] = (
 
 REQUIRED_ARTIFACTS: tuple[str, ...] = (
     "claim_ledger",
+    "company_research_pack",
+    "analyst_insight_pack",
     "financial_analysis",
     "forecast_model",
     "valuation",

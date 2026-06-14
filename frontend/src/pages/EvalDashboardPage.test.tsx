@@ -4,18 +4,25 @@ import userEvent from "@testing-library/user-event";
 import { EvalDashboardPage } from "./EvalDashboardPage";
 
 describe("EvalDashboardPage", () => {
-  it("renders all 8 layer titles and the pipeline", () => {
+  it("renders binary evaluation groups without maturity levels or CI matrix", () => {
     render(<EvalDashboardPage />);
-    expect(screen.getByText(/1 · Data reliability/)).toBeInTheDocument();
-    expect(screen.getByText(/6 · Report quality/)).toBeInTheDocument();
-    expect(screen.getByText(/8 · Rollout & CI/)).toBeInTheDocument();
-    expect(screen.getByText(/Client-final render authorization/)).toBeInTheDocument();
+    expect(screen.getByText(/1 · Chất lượng và độ tin cậy dữ liệu/)).toBeInTheDocument();
+    expect(screen.getByText(/2 · RAG$/)).toBeInTheDocument();
+    expect(screen.getByText(/7 · Vận hành, chi phí và độ trễ/)).toBeInTheDocument();
+    expect(screen.queryByText(/P0|P1|P2/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ma trận cổng kiểm soát CI/i)).not.toBeInTheDocument();
+    expect(screen.getAllByText(/chưa đạt/i).length).toBeGreaterThan(0);
   });
 
-  it("RAG hit-rate flips from measured-only at P0 to pass at P1", async () => {
+  it("opens benchmark history and explanation dialogs", async () => {
     render(<EvalDashboardPage />);
-    expect(screen.getAllByText(/measured/i).length).toBeGreaterThan(0);
-    await userEvent.click(screen.getByRole("button", { name: "P1" }));
-    expect(screen.getAllByText(/pass/i).length).toBeGreaterThan(0);
+    await userEvent.click(screen.getAllByRole("button", { name: "Xem thêm" })[0]);
+    expect(screen.getByRole("dialog", { name: /Lịch sử benchmark/i })).toBeInTheDocument();
+    expect(screen.getAllByText("project-eval-20260614T033415Z").length).toBeGreaterThan(0);
+    await userEvent.click(screen.getByRole("button", { name: "Đóng cửa sổ" }));
+
+    await userEvent.click(screen.getAllByRole("button", { name: "Giải thích" })[0]);
+    expect(screen.getByRole("dialog", { name: /Giải thích:/i })).toBeInTheDocument();
+    expect(screen.getByText(/Công thức hoặc phương pháp tính/i)).toBeInTheDocument();
   });
 });

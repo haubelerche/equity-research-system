@@ -14,6 +14,7 @@ C8 — Peer Comparison (horizontal grouped bar)              — required
 
 from __future__ import annotations
 
+import re
 import matplotlib
 matplotlib.use("Agg")  # non-interactive backend — must be before pyplot import
 
@@ -35,9 +36,10 @@ _RED = "#C00000"
 _GREY = "#7F7F7F"
 _LIGHT_BLUE = "#D9EAF7"
 
-_DPI = 170
-_FIG_W = 7.2
-_FIG_H = 4.1
+_DPI = 200
+_FIG_W = 9.2
+_FIG_H = 5.35
+_CHART_FONT_PT = 11
 
 
 # ---------------------------------------------------------------------------
@@ -125,6 +127,11 @@ class ChartGenerator:
         return out
 
     @staticmethod
+    def _display_periods(periods: list[str]) -> list[str]:
+        """Remove A/F/FY suffixes from visual labels to avoid cramped chart axes."""
+        return [re.sub(r"^(\d{4})(?:FY|A|F)$", r"\1", str(period)) for period in periods]
+
+    @staticmethod
     def _has_nonzero(lst: list[float], min_count: int = 1) -> bool:
         """Return True if lst contains at least min_count non-zero, non-NaN values."""
         count = sum(
@@ -135,23 +142,19 @@ class ChartGenerator:
 
     @staticmethod
     def _source_caption(ax: plt.Axes, ticker: str) -> None:
-        ax.annotate(
-            f"Nguồn: Dữ liệu doanh nghiệp; tính toán của nhóm phân tích — {ticker}",
-            xy=(0, 0), xycoords="axes fraction",
-            xytext=(1, -0.15), textcoords="axes fraction",
-            fontsize=7.2, color=_GREY, ha="right", style="italic",
-        )
+        # The report renderer owns the single source note below each chart.
+        return None
 
     @staticmethod
     def _style_ax(ax: plt.Axes, title: str = "", xlabel: str = "", ylabel: str = "") -> None:
-        ax.set_title(title, fontsize=10.2, fontweight="bold", fontstyle="italic", color=_BLUE, loc="left", pad=8)
+        ax.set_title(title, fontsize=_CHART_FONT_PT, fontweight="bold", fontstyle="italic", color=_BLUE, loc="left", pad=8)
         if xlabel:
-            ax.set_xlabel(xlabel, fontsize=8.2)
+            ax.set_xlabel(xlabel, fontsize=_CHART_FONT_PT)
         if ylabel:
-            ax.set_ylabel(ylabel, fontsize=8.2)
+            ax.set_ylabel(ylabel, fontsize=_CHART_FONT_PT)
         ax.spines[["top", "right"]].set_visible(False)
         ax.spines[["left", "bottom"]].set_color("#A6A6A6")
-        ax.tick_params(axis="both", labelsize=8, color="#A6A6A6")
+        ax.tick_params(axis="both", labelsize=_CHART_FONT_PT, color="#A6A6A6")
         ax.grid(False)
 
     @staticmethod
@@ -166,7 +169,7 @@ class ChartGenerator:
                 textcoords="offset points",
                 ha="center",
                 va="bottom",
-                fontsize=7.2,
+                fontsize=_CHART_FONT_PT,
                 color="white",
                 fontweight="bold",
                 bbox={"boxstyle": "round,pad=0.2", "facecolor": _BLUE, "edgecolor": "none"},
@@ -207,13 +210,13 @@ class ChartGenerator:
         # C1 is displayed in the cover-page sidebar.  A full-width chart
         # scaled down into that narrow column makes axis labels unreadable, so
         # render it at a sidebar-native aspect ratio with larger relative type.
-        fig, ax = plt.subplots(figsize=(3.45, 2.45))
+        fig, ax = plt.subplots(figsize=(4.15, 2.95))
         x = np.arange(n)
         ax.plot(x, prices_norm, color=_BLUE, linewidth=1.8,
                 label=f"%{spec.ticker}")
         if bench:
             ax.plot(x, _base100(bench), color=_TEAL, linewidth=1.3,
-                    label=spec.benchmark_label or "Benchmark")
+                    label=spec.benchmark_label or "Chỉ số tham chiếu")
         if spec.secondary_benchmark_series:
             secondary_norm = _base100(secondary)
             ax.plot(x, secondary_norm, color=_GREY, linewidth=1.1, linestyle=":",
@@ -221,8 +224,8 @@ class ChartGenerator:
         ax.axhline(100, color="#A6A6A6", linewidth=0.6)
         tick_positions = np.unique(np.linspace(0, n - 1, min(8, n), dtype=int))
         ax.set_xticks(tick_positions)
-        ax.set_xticklabels([labels[i] for i in tick_positions], rotation=90, fontsize=7.4)
-        ax.legend(fontsize=7.4, frameon=False, ncol=2, loc="upper center")
+        ax.set_xticklabels([labels[i] for i in tick_positions], rotation=90, fontsize=_CHART_FONT_PT)
+        ax.legend(fontsize=_CHART_FONT_PT, frameon=False, ncol=2, loc="upper center")
         self._style_ax(
             ax,
             title=(
@@ -231,14 +234,14 @@ class ChartGenerator:
             ),
             ylabel="Chỉ số (gốc = 100)",
         )
-        ax.title.set_fontsize(9.0)
-        ax.yaxis.label.set_fontsize(7.8)
-        ax.tick_params(axis="y", labelsize=7.4)
+        ax.title.set_fontsize(_CHART_FONT_PT)
+        ax.yaxis.label.set_fontsize(_CHART_FONT_PT)
+        ax.tick_params(axis="y", labelsize=_CHART_FONT_PT)
         ax.annotate(
             "Nguồn nhóm phân tích thu thập",
             xy=(0, 0), xycoords="axes fraction",
             xytext=(1, -0.15), textcoords="axes fraction",
-            fontsize=7.2, color=_GREY, ha="right", style="italic",
+            fontsize=_CHART_FONT_PT, color=_GREY, ha="right", style="italic",
         )
         return self._save_close(fig, path)
 
@@ -251,7 +254,7 @@ class ChartGenerator:
         spec.chart_id = "C2"
         path = self._out_path(spec)
 
-        periods = spec.periods or ["—"]
+        periods = self._display_periods(spec.periods or ["—"])
         n = len(periods)
         rev = self._safe(spec.revenue_bn, n)
         ebitda_m = self._safe(spec.ebitda_margin_pct, n)
@@ -266,21 +269,23 @@ class ChartGenerator:
                  label="Biên EBITDA")
         ax2.plot(x, ebit_m, color=_GREY, linewidth=1.4, marker="o", markersize=3,
                  label="Biên EBIT")
+        if rev:
+            ax1.set_ylim(0, max(rev) * 1.22)
         self._label_bars(ax1, bars, rev)
 
         ax1.set_xticks(x)
-        ax1.set_xticklabels(periods, rotation=45, ha="right", fontsize=8)
+        ax1.set_xticklabels(periods, rotation=45, ha="right", fontsize=_CHART_FONT_PT)
         self._style_ax(ax1,
                        title=f"Doanh thu và biên lợi nhuận {spec.ticker}",
                        ylabel="Tỷ VND")
-        ax2.set_ylabel("%", fontsize=7.5)
+        ax2.set_ylabel("%", fontsize=_CHART_FONT_PT)
         ax2.spines[["top"]].set_visible(False)
-        ax2.tick_params(axis="y", labelsize=8)
+        ax2.tick_params(axis="y", labelsize=_CHART_FONT_PT)
 
         # Combined legend
         h1, l1 = ax1.get_legend_handles_labels()
         h2, l2 = ax2.get_legend_handles_labels()
-        ax1.legend(h1 + h2, l1 + l2, fontsize=7.5, loc="upper center", frameon=False, ncol=3)
+        ax1.legend(h1 + h2, l1 + l2, fontsize=_CHART_FONT_PT, loc="upper center", frameon=False, ncol=3)
 
         self._source_caption(ax1, spec.ticker)
         return self._save_close(fig, path)
@@ -294,7 +299,7 @@ class ChartGenerator:
         spec.chart_id = "C3"
         path = self._out_path(spec)
 
-        periods = spec.periods or ["—"]
+        periods = self._display_periods(spec.periods or ["—"])
         n = len(periods)
         eps = self._safe(spec.eps_vnd, n)
         pe = self._safe(spec.pe_x, n)
@@ -307,17 +312,17 @@ class ChartGenerator:
         ax2.plot(x, pe, color=_RED, linewidth=2, marker="D", markersize=5, label="P/E (x)")
 
         ax1.set_xticks(x)
-        ax1.set_xticklabels(periods, rotation=45, ha="right", fontsize=8)
+        ax1.set_xticklabels(periods, rotation=45, ha="right", fontsize=_CHART_FONT_PT)
         self._style_ax(ax1,
-                       title=f"{spec.ticker} — EPS & P/E Trend",
+                       title=f"{spec.ticker} — EPS và P/E lịch sử",
                        ylabel="EPS (VND)")
-        ax2.set_ylabel("P/E (x)", fontsize=9)
+        ax2.set_ylabel("P/E (x)", fontsize=_CHART_FONT_PT)
         ax2.spines[["top"]].set_visible(False)
-        ax2.tick_params(axis="y", labelsize=8)
+        ax2.tick_params(axis="y", labelsize=_CHART_FONT_PT)
 
         h1, l1 = ax1.get_legend_handles_labels()
         h2, l2 = ax2.get_legend_handles_labels()
-        ax1.legend(h1 + h2, l1 + l2, fontsize=8, loc="upper left")
+        ax1.legend(h1 + h2, l1 + l2, fontsize=_CHART_FONT_PT, loc="upper left")
 
         self._source_caption(ax1, spec.ticker)
         return self._save_close(fig, path)
@@ -331,7 +336,7 @@ class ChartGenerator:
         spec.chart_id = "C4"
         path = self._out_path(spec)
 
-        periods = spec.periods or ["—"]
+        periods = self._display_periods(spec.periods or ["—"])
         n = len(periods)
         gm = self._safe(spec.gross_margin_pct, n)
         nm = self._safe(spec.net_margin_pct, n)
@@ -344,10 +349,10 @@ class ChartGenerator:
         ax.plot(x, roe, color=_GREY, linewidth=1.3, marker="o", markersize=3, label="ROE")
 
         ax.set_xticks(x)
-        ax.set_xticklabels(periods, rotation=45, ha="right", fontsize=8)
-        ax.set_ylabel("%", fontsize=9)
+        ax.set_xticklabels(periods, rotation=45, ha="right", fontsize=_CHART_FONT_PT)
+        ax.set_ylabel("%", fontsize=_CHART_FONT_PT)
         self._style_ax(ax, title=f"Biên lợi nhuận và ROE {spec.ticker}")
-        ax.legend(fontsize=7.5, frameon=False, ncol=3, loc="upper center")
+        ax.legend(fontsize=_CHART_FONT_PT, frameon=False, ncol=3, loc="upper center")
         self._source_caption(ax, spec.ticker)
         return self._save_close(fig, path)
 
@@ -364,7 +369,7 @@ class ChartGenerator:
         spec.chart_id = "C5"
         path = self._out_path(spec)
 
-        periods = spec.forecast_periods or ["—"]
+        periods = self._display_periods(spec.forecast_periods or ["—"])
         n = len(periods)
 
         # Validate before rendering — require at least 2 non-zero revenue values
@@ -372,7 +377,7 @@ class ChartGenerator:
             fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
             ax.text(0.5, 0.5,
                     "Biểu đồ dự phóng chưa hiển thị\nGiả định cần chuyên viên phê duyệt",
-                    ha="center", va="center", fontsize=11, color=_GREY,
+                    ha="center", va="center", fontsize=_CHART_FONT_PT, color=_GREY,
                     transform=ax.transAxes)
             self._style_ax(ax, title=f"{spec.ticker} — Dự phóng doanh thu và lợi nhuận chưa phê duyệt")
             self._source_caption(ax, spec.ticker)
@@ -397,20 +402,24 @@ class ChartGenerator:
         )
         ax2.plot(x, profit, color=_TEAL, linewidth=1.8, marker="o", markersize=3.5,
                  label="LNST dự phóng")
+        if rev:
+            ax1.set_ylim(0, max(rev) * 1.28)
+        if profit:
+            ax2.set_ylim(min(profit) * 0.96, max(profit) * 1.06)
         self._label_bars(ax1, bars, rev)
 
         ax1.set_xticks(x)
-        ax1.set_xticklabels(periods, rotation=45, ha="right", fontsize=8)
+        ax1.set_xticklabels(periods, rotation=45, ha="right", fontsize=_CHART_FONT_PT)
         self._style_ax(ax1,
                        title=f"Dự phóng doanh thu và lợi nhuận {spec.ticker}",
                        ylabel="Tỷ VND")
-        ax2.set_ylabel("Tỷ VND", fontsize=7.5)
+        ax2.set_ylabel("Tỷ VND", fontsize=_CHART_FONT_PT)
         ax2.spines[["top"]].set_visible(False)
-        ax2.tick_params(axis="y", labelsize=8)
+        ax2.tick_params(axis="y", labelsize=_CHART_FONT_PT)
 
         h1, l1 = ax1.get_legend_handles_labels()
         h2, l2 = ax2.get_legend_handles_labels()
-        ax1.legend(h1 + h2, l1 + l2, fontsize=7.5, loc="upper center", frameon=False, ncol=2)
+        ax1.legend(h1 + h2, l1 + l2, fontsize=_CHART_FONT_PT, loc="upper center", frameon=False, ncol=2)
 
         self._source_caption(ax1, spec.ticker)
         return self._save_close(fig, path)
@@ -428,10 +437,10 @@ class ChartGenerator:
         if not items:
             # Render placeholder
             fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
-            ax.text(0.5, 0.5, "No DCF bridge data available",
-                    ha="center", va="center", fontsize=12, color=_GREY,
+            ax.text(0.5, 0.5, "Chưa có dữ liệu cầu nối định giá",
+                    ha="center", va="center", fontsize=_CHART_FONT_PT, color=_GREY,
                     transform=ax.transAxes)
-            self._style_ax(ax, title=f"{spec.ticker} — DCF Value Bridge")
+            self._style_ax(ax, title=f"{spec.ticker} — Cầu nối định giá")
             self._source_caption(ax, spec.ticker)
             return self._save_close(fig, path)
 
@@ -476,13 +485,13 @@ class ChartGenerator:
         for i, (bot, val) in enumerate(zip(bottoms, bar_values)):
             ax.text(i, bot + val + max(bar_values) * 0.01,
                     f"{bot + val:,.0f}",
-                    ha="center", va="bottom", fontsize=7.5)
+                    ha="center", va="bottom", fontsize=_CHART_FONT_PT)
 
         ax.set_xticks(x)
-        ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=8)
+        ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=_CHART_FONT_PT)
         self._style_ax(ax,
-                       title=f"{spec.ticker} — DCF Equity Value Bridge",
-                       ylabel="Value (bn VND)")
+                       title=f"{spec.ticker} — Cầu nối giá trị vốn chủ sở hữu",
+                       ylabel="Giá trị (tỷ VND)")
         self._source_caption(ax, spec.ticker)
         return self._save_close(fig, path)
 
@@ -530,10 +539,10 @@ class ChartGenerator:
         if not matrix or not wacc_range or not tg_range or not has_valid_data:
             # Placeholder
             fig, ax = plt.subplots(figsize=(_FIG_W, _FIG_H))
-            ax.text(0.5, 0.5, "No sensitivity data available",
-                    ha="center", va="center", fontsize=12, color=_GREY,
+            ax.text(0.5, 0.5, "Chưa có dữ liệu độ nhạy",
+                    ha="center", va="center", fontsize=_CHART_FONT_PT, color=_GREY,
                     transform=ax.transAxes)
-            self._style_ax(ax, title=f"{spec.ticker} — DCF Sensitivity")
+            self._style_ax(ax, title=f"{spec.ticker} — Độ nhạy định giá")
             self._source_caption(ax, spec.ticker)
             return self._save_close(fig, path)
 
@@ -553,16 +562,16 @@ class ChartGenerator:
             ax=ax,
             linewidths=0.4,
             linecolor="white",
-            annot_kws={"size": 8},
+            annot_kws={"size": _CHART_FONT_PT},
         )
         ax.set_title(
-            f"{spec.ticker} — DCF Target Price Sensitivity\n"
-            "Rows: Terminal Growth (%), Cols: WACC (%)",
-            fontsize=10, fontweight="bold", pad=12,
+            f"{spec.ticker} — Độ nhạy giá mục tiêu\n"
+            "Hàng: tăng trưởng dài hạn; cột: WACC",
+            fontsize=_CHART_FONT_PT, fontweight="bold", pad=12,
         )
-        ax.set_xlabel("WACC (%)", fontsize=9)
-        ax.set_ylabel("Terminal Growth (%)", fontsize=9)
-        ax.tick_params(axis="both", labelsize=8)
+        ax.set_xlabel("WACC (%)", fontsize=_CHART_FONT_PT)
+        ax.set_ylabel("Tăng trưởng dài hạn (%)", fontsize=_CHART_FONT_PT)
+        ax.tick_params(axis="both", labelsize=_CHART_FONT_PT)
         self._source_caption(ax, spec.ticker)
 
         return self._save_close(fig, path)
@@ -599,7 +608,7 @@ class ChartGenerator:
             ax.text(
                 0.5, 0.5,
                 "Chưa có dữ liệu peer group",
-                ha="center", va="center", fontsize=12, color=_GREY,
+                ha="center", va="center", fontsize=_CHART_FONT_PT, color=_GREY,
                 transform=ax.transAxes,
             )
             self._style_ax(ax, title=f"So sánh đồng ngành — {spec.ticker}")
@@ -634,41 +643,41 @@ class ChartGenerator:
         pe_colors = _bar_colors(tickers)
         ax_pe.barh(y, pe_vals, height=bar_height, color=pe_colors, alpha=0.88)
         ax_pe.set_yticks(y)
-        ax_pe.set_yticklabels(tickers, fontsize=9)
-        ax_pe.set_xlabel("P/E (x)", fontsize=9)
+        ax_pe.set_yticklabels(tickers, fontsize=_CHART_FONT_PT)
+        ax_pe.set_xlabel("P/E (x)", fontsize=_CHART_FONT_PT)
         self._style_ax(ax_pe, title="P/E")
         # Value labels
         for i, val in enumerate(pe_vals):
             if val:
                 ax_pe.text(val + max(pe_vals) * 0.01, i, f"{val:.1f}x",
-                           va="center", fontsize=8)
+                           va="center", fontsize=_CHART_FONT_PT)
         # Median line
         pe_median = _median_nonzero(pe_vals)
         if pe_median is not None:
             ax_pe.axvline(pe_median, color=_MEDIAN_LINE, linewidth=1.2,
-                          linestyle="--", label=f"Median {pe_median:.1f}x")
-            ax_pe.legend(fontsize=8)
+                          linestyle="--", label=f"Trung vị {pe_median:.1f}x")
+            ax_pe.legend(fontsize=_CHART_FONT_PT)
 
         # --- EV/EBITDA subplot ---
         ev_colors = _bar_colors(tickers)
         ax_ev.barh(y, ev_vals, height=bar_height, color=ev_colors, alpha=0.88)
         ax_ev.set_yticks(y)
-        ax_ev.set_yticklabels(tickers, fontsize=9)
-        ax_ev.set_xlabel("EV/EBITDA (x)", fontsize=9)
+        ax_ev.set_yticklabels(tickers, fontsize=_CHART_FONT_PT)
+        ax_ev.set_xlabel("EV/EBITDA (x)", fontsize=_CHART_FONT_PT)
         self._style_ax(ax_ev, title="EV/EBITDA")
         # Value labels
         for i, val in enumerate(ev_vals):
             if val:
                 ax_ev.text(val + max(ev_vals) * 0.01, i, f"{val:.1f}x",
-                           va="center", fontsize=8)
+                           va="center", fontsize=_CHART_FONT_PT)
         # Median line
         ev_median = _median_nonzero(ev_vals)
         if ev_median is not None:
             ax_ev.axvline(ev_median, color=_MEDIAN_LINE, linewidth=1.2,
-                          linestyle="--", label=f"Median {ev_median:.1f}x")
-            ax_ev.legend(fontsize=8)
+                          linestyle="--", label=f"Trung vị {ev_median:.1f}x")
+            ax_ev.legend(fontsize=_CHART_FONT_PT)
 
-        fig.suptitle(f"So sánh đồng ngành — {spec.ticker}", fontsize=12, fontweight="bold")
+        fig.suptitle(f"So sánh đồng ngành — {spec.ticker}", fontsize=_CHART_FONT_PT, fontweight="bold")
         fig.tight_layout(rect=[0, 0.04, 1, 0.95])
 
         # Source caption on left subplot (conventional)

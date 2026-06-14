@@ -31,44 +31,44 @@
 
   /* ---------- Color palette ----------------------------------------------- */
   /* Ground */
-  --color-ground:       #080e0c;   /* deepest background */
-  --color-surface-0:    #0d1512;   /* primary surface */
-  --color-surface-1:    #111c18;   /* elevated card */
-  --color-surface-2:    #162119;   /* hover / selected */
-  --color-surface-3:    #1d2b24;   /* active / pressed */
+  --color-ground:       #ffffff;
+  --color-surface-0:    #ffffff;
+  --color-surface-1:    #f7faff;
+  --color-surface-2:    #edf4ff;
+  --color-surface-3:    #dceafe;
 
   /* Borders */
-  --color-border-subtle:  #213029;
-  --color-border-default: #2d4339;
-  --color-border-strong:  #3d5c4e;
+  --color-border-subtle:  #dbe6f3;
+  --color-border-default: #b9cce3;
+  --color-border-strong:  #7897bb;
 
   /* Text */
-  --color-text-primary:   #ddebd4;   /* near-white with green cast */
-  --color-text-secondary: #8aaa98;   /* mid-tone muted */
-  --color-text-tertiary:  #5a7a6a;   /* dim labels */
-  --color-text-disabled:  #3a5045;
+  --color-text-primary:   #0b2748;
+  --color-text-secondary: #294d73;
+  --color-text-tertiary:  #557493;
+  --color-text-disabled:  #7890a8;
 
   /* Accent — acid chartreuse, the one bright note */
-  --color-accent:         #c8f400;
-  --color-accent-dim:     #8ab000;
-  --color-accent-bg:      #1a2400;
+  --color-accent:         #0759b7;
+  --color-accent-dim:     #164f8d;
+  --color-accent-bg:      #e7f1ff;
 
   /* Semantic status */
-  --color-pass:           #4ade80;   /* green-400 */
-  --color-pass-bg:        #052515;
-  --color-pass-border:    #166534;
+  --color-pass:           #166534;
+  --color-pass-bg:        #ecfdf3;
+  --color-pass-border:    #86d7a5;
 
-  --color-fail:           #f87171;   /* red-400 */
-  --color-fail-bg:        #2a0a0a;
-  --color-fail-border:    #7f1d1d;
+  --color-fail:           #b42318;
+  --color-fail-bg:        #fff1f0;
+  --color-fail-border:    #f2aaa4;
 
-  --color-measured:       #7dd3fc;   /* sky-300 — measured only */
-  --color-measured-bg:    #0a1a2a;
-  --color-measured-border: #0c4a6e;
+  --color-measured:       #0759b7;
+  --color-measured-bg:    #edf5ff;
+  --color-measured-border: #9cc3ec;
 
-  --color-warn:           #fbbf24;   /* amber-400 — blocked */
-  --color-warn-bg:        #271a04;
-  --color-warn-border:    #78350f;
+  --color-warn:           #8a4b08;
+  --color-warn-bg:        #fff8e6;
+  --color-warn-border:    #e9c46a;
 
   /* ---------- Spacing scale ----------------------------------------------- */
   --space-1:   0.25rem;   /*  4px */
@@ -89,10 +89,10 @@
   --radius-lg:  6px;
 
   /* ---------- Shadows ----------------------------------------------------- */
-  --shadow-sm:  0 1px 2px rgba(0, 0, 0, .5);
-  --shadow-md:  0 4px 12px rgba(0, 0, 0, .6);
-  --shadow-lg:  0 8px 24px rgba(0, 0, 0, .7);
-  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, .03);
+  --shadow-sm:  0 1px 3px rgba(11, 39, 72, .08);
+  --shadow-md:  0 8px 20px rgba(11, 39, 72, .12);
+  --shadow-lg:  0 16px 40px rgba(11, 39, 72, .18);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, .8);
 
   /* ---------- Nav --------------------------------------------------------- */
   --nav-height: 56px;

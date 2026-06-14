@@ -1,6 +1,6 @@
 # Testing và vận hành
 
-Cập nhật: 2026-06-13
+Cập nhật: 2026-06-14
 
 ## Context
 
@@ -32,7 +32,7 @@ make audit
 | Thư mục | Phạm vi |
 |---|---|
 | `tests/unit/` | Analytics, gates, report, storage contract, adapters, validators |
-| `tests/evaluation/` | Numeric claim gates, FPTS grade, source gates |
+| `tests/evaluation/` | Numeric claim gates, Report quality, source gates |
 | `tests/documents/` | Official document connectors và auto ingest |
 | `tests/database/` | DB connection/store retry |
 | `tests/storage/` | Request retry và storage behavior |
@@ -46,7 +46,11 @@ make audit
 | Migrations pending | `python -m backend.database.migrate --check` | Liệt kê pending hoặc báo không còn pending |
 | Schema version | `python -m backend.database.migrate --version` | Có version mới nhất |
 | OCR runtime | `python scripts/check_ocr_runtime.py` | Tesseract/Poppler/Python packages sẵn sàng |
-| Unit tests gates | `python -m pytest -q tests/unit/test_production_gates.py tests/evaluation/test_fpts_grade.py` | Pass |
+| Unit tests gates | `python -m pytest -q tests/unit/test_production_gates.py tests/evaluation/test_report_quality.py` | Pass |
+| Client-final governance | `python -m pytest -q tests/evaluation/test_client_final_governance.py tests/unit/test_publication_readiness.py tests/unit/test_package_validation_gate.py tests/unit/test_export_gate.py` | Pass; `auto_exported` không được xem là approved final |
+| Project evaluation | `python scripts/run_project_evaluation.py --ticker DHG --output-dir output/evaluation/eval_result` | Tạo tám plan artifacts và `evaluation_packet.json`; thiếu runtime evidence vẫn fail-closed |
+| Frontend | `cd frontend; npm test; npm run build` | Vitest pass và Vite production build thành công |
+| Static SPA serving | `python -m pytest -q tests/api/test_static_serving.py` | API routes được ưu tiên trước SPA fallback |
 | Full run draft | `python scripts/run_research.py --ticker DHG --from-year 2022 --to-year 2025 --draft` | Terminal status không `failed`; nếu `blocked`, đọc gate reasons |
 
 ### 4. Failure triage
@@ -59,6 +63,8 @@ make audit
 | Storage 401/403 | Service-role key thiếu/sai | Kiểm tra `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` |
 | Storage 404 khi đọc artifact | Artifact chưa được upload hoặc key không thuộc contract | Kiểm tra run manifest và `run_artifacts` |
 | `publishable_final_report_model_missing` | Export gates không promote model | Đọc `quality_gate` và gate results |
+| `client_final_render_blocked:*` | Thiếu approval, package validation, Report-quality allow_export, locked model hoặc snapshot match | Đọc `publication_readiness` và artifacts `report_quality_evaluation`, `quality_gate`, `publishable_final_report_model`, `valuation` |
+| Eval dashboard chỉ hiện dữ liệu mẫu | Frontend `/eval` hiện dùng `frontend/src/mock/`; backend chưa có evaluation API | Không diễn giải dashboard như runtime truth; dùng project/run evaluation artifacts trực tiếp |
 | Fast report không tìm thấy run | Chưa có locked publishable model hoặc mode yêu cầu approved | Chạy full pipeline hoặc approval flow phù hợp |
 | PDF mojibake | Font/renderer issue | Kiểm tra WeasyPrint, fallback renderer và Unicode fonts |
 

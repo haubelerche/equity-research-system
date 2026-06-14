@@ -258,7 +258,7 @@ def run_valuation_tool(
             shutil.rmtree(staging_dir, ignore_errors=True)
     formula_traces = artifact.get("formula_traces") or []
     summary = dict(artifact)
-    from backend.evaluation.fpts_grade import build_valuation_bridge
+    from backend.evaluation.report_quality import build_valuation_bridge
 
     valuation_bridge = build_valuation_bridge(artifact)
     artifact["valuation_bridge"] = valuation_bridge
@@ -414,7 +414,7 @@ def run_forecast_tool(
         fact_table=fact_table,
         assumptions=ForecastAssumptions(assumption_status="default_unapproved"),
     ).to_dict()
-    from backend.evaluation.fpts_grade import build_pharma_driver_model
+    from backend.evaluation.report_quality import build_pharma_driver_model
 
     pharma_driver_model = build_pharma_driver_model(forecast)
     rows = {

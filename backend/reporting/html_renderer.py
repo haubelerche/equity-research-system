@@ -110,7 +110,7 @@ class HTMLRenderer:
             else:
                 return (
                     f'<div style="background:#f0f4f8;border:1px dashed #aaa;'
-                    f"padding:20px;text-align:center;color:#666;font-size:9pt;"
+                    f"padding:20px;text-align:center;color:#666;font-size:11pt;"
                     f'margin:8pt 0;">{alt} — chưa có dữ liệu</div>'
                 )
 

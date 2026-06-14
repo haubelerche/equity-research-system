@@ -1,14 +1,14 @@
 # API backend
 
-Cập nhật: 2026-06-13
+Cập nhật: 2026-06-14
 
 ## Context
 
-Backend API dùng FastAPI và expose surface tối thiểu để tạo research run, kiểm tra trạng thái và lấy artifact metadata. API không render report client-final trực tiếp; publication/rendering vẫn bị kiểm soát bởi artifact lifecycle và approval path.
+Backend API dùng FastAPI để tạo research run, kiểm tra trạng thái, lấy artifact metadata, phục vụ inventory/file báo cáo local và phục vụ Vite SPA production. API không render report client-final trực tiếp; publication/rendering vẫn bị kiểm soát bởi artifact lifecycle và approval path.
 
 ## Problem Statement
 
-API cho agentic workflow không nên chỉ trả về "success" hoặc "failed". Consumer cần phân biệt run đang phân tích, đang valuation, đã auto-export draft, đã approved, blocked do gate hay failed do exception. Nếu status mapping không rõ, frontend hoặc operator có thể công bố nhầm draft.
+API cho agentic workflow không nên chỉ trả về "success" hoặc "failed". Consumer cần phân biệt run đang phân tích, đang valuation, đã auto-export draft, đã approved, blocked do lifecycle condition hay failed do exception. Gate diagnostics và client-final authorization phải được đọc riêng; nếu status mapping không rõ, frontend hoặc operator có thể công bố nhầm draft.
 
 ## Technical Deep-Dive
 
@@ -31,7 +31,12 @@ API cho agentic workflow không nên chỉ trả về "success" hoặc "failed".
 | `POST` | `/research/start` | Tạo run `full_report`, register ticker từ universe, submit executor |
 | `GET` | `/research/{run_id}/status` | Trả trạng thái public của run |
 | `GET` | `/research/{run_id}/artifacts` | Liệt kê artifact metadata của run |
+| `GET` | `/reports` | Quét inventory local cho toàn bộ ticker trong universe |
+| `GET` | `/reports/{ticker}/file/{kind}` | Trả PDF local; `kind` chỉ nhận `report` hoặc `explanation` |
+| `GET` | `/reports/{ticker}/preview/{page}` | Trả preview PNG local theo số trang |
 | `GET` | `/reports/{run_id}` | Lọc artifact liên quan report/evaluation/log |
+
+API hiện chưa có `/eval/framework`, `/eval/results/*` hoặc `/research/{run_id}/evaluation`. Trang frontend `/eval` đang dùng mock artifacts trong `frontend/src/mock/`.
 
 ### 3. StartRunRequest
 
@@ -65,6 +70,10 @@ API tạo `run_id` deterministic từ ticker, run type, objective và requester.
 ### 5. Artifact response
 
 Artifact item gồm `artifact_id`, `artifact_type`, `section_key`, `payload`, `confidence`, `created_by_agent` và `created_at`. RuntimeStore còn lưu `storage_bucket`, `storage_path`, checksum, content type, file size và lock flag; nếu API consumer cần các field này, response schema cần được mở rộng có kiểm soát.
+
+### 6. Frontend và report inventory
+
+`mount_frontend` chỉ mount `frontend/dist/` khi có `index.html`; API routes được đăng ký trước SPA catch-all. `/reports` dùng `config/dataset/universe/pharma_vn_universe.csv` và convention file local dưới `output/`, không đọc run manifest hoặc Supabase Storage. Đây là surface MVP để duyệt báo cáo, không phải artifact source of truth production.
 
 ## Strategic Recommendations
 

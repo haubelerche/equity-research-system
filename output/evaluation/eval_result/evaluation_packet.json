@@ -1,0 +1,620 @@
+{
+  "schema_version": "2.0",
+  "run_id": "project-eval-20260614T033415Z",
+  "ticker": "DHG",
+  "generated_at": "2026-06-14T03:34:15.588631+00:00",
+  "evaluation_order": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08"
+  ],
+  "fail_closed": true,
+  "overall_status": "blocked",
+  "client_final_authorized": false,
+  "artifacts": [
+    {
+      "plan_id": "01",
+      "name": "Data reliability",
+      "artifact": "data_quality.json",
+      "status": "pass",
+      "metrics": {
+        "test_suite_status": "pass",
+        "tests_passed": 70,
+        "tests_failed": 0,
+        "runtime_evidence_coverage": 0.0
+      },
+      "metric_results": [
+        {
+          "id": "core_metric_coverage",
+          "label": "Core metric coverage",
+          "value": 1.0,
+          "threshold": ">= 95%",
+          "status": "pass",
+          "source": "config\\dataset\\golden\\financials\\DHG.csv",
+          "detail": ""
+        },
+        {
+          "id": "period_completeness",
+          "label": "Statement completeness",
+          "value": 1.0,
+          "threshold": "100%",
+          "status": "pass",
+          "source": "data\\raw\\bctc\\DHG",
+          "detail": ""
+        },
+        {
+          "id": "provenance_coverage",
+          "label": "Source provenance coverage",
+          "value": 1.0,
+          "threshold": "100%",
+          "status": "pass",
+          "source": "config\\dataset\\golden\\financials\\DHG.csv",
+          "detail": ""
+        },
+        {
+          "id": "official_reconciliation_rate",
+          "label": "Accepted official reconciliation",
+          "value": 1.0,
+          "threshold": ">= 95%",
+          "status": "pass",
+          "source": "config\\dataset\\golden\\financials\\DHG.csv",
+          "detail": ""
+        },
+        {
+          "id": "ocr_unresolved_rate",
+          "label": "OCR unresolved rate",
+          "value": 0.0,
+          "threshold": "0%",
+          "status": "pass",
+          "source": "latest OCR metadata",
+          "detail": ""
+        },
+        {
+          "id": "duplicate_fact_rate",
+          "label": "Duplicate canonical fact rate",
+          "value": 0.0,
+          "threshold": "0%",
+          "status": "pass",
+          "source": "config\\dataset\\golden\\financials\\DHG.csv",
+          "detail": ""
+        }
+      ],
+      "blocking_issues": []
+    },
+    {
+      "plan_id": "02",
+      "name": "RAG and evidence",
+      "artifact": "retrieval_eval.json",
+      "status": "fail",
+      "metrics": {
+        "test_suite_status": "pass",
+        "tests_passed": 92,
+        "tests_failed": 0,
+        "runtime_evidence_coverage": 0.0
+      },
+      "metric_results": [
+        {
+          "id": "hit_rate_at_5",
+          "label": "Hit-rate@5",
+          "value": 0.6,
+          "threshold": ">= 90%",
+          "status": "fail",
+          "source": "config\\eval\\rag_golden_queries.yaml",
+          "detail": ""
+        },
+        {
+          "id": "mrr_at_5",
+          "label": "MRR@5",
+          "value": 0.35,
+          "threshold": ">= 0.80",
+          "status": "fail",
+          "source": "config\\eval\\rag_golden_queries.yaml",
+          "detail": ""
+        },
+        {
+          "id": "context_precision",
+          "label": "Context precision",
+          "value": null,
+          "threshold": ">= 0.85",
+          "status": "measured_only",
+          "source": "config\\eval\\rag_golden_queries.yaml",
+          "detail": "Requires a versioned golden query set and retrieval run."
+        },
+        {
+          "id": "context_recall",
+          "label": "Context recall",
+          "value": null,
+          "threshold": ">= 0.85",
+          "status": "measured_only",
+          "source": "config\\eval\\rag_golden_queries.yaml",
+          "detail": "Requires a versioned golden query set and retrieval run."
+        },
+        {
+          "id": "faithfulness",
+          "label": "Faithfulness",
+          "value": null,
+          "threshold": ">= 0.85",
+          "status": "measured_only",
+          "source": "config\\eval\\rag_golden_queries.yaml",
+          "detail": "Requires a versioned golden query set and retrieval run."
+        },
+        {
+          "id": "response_relevancy",
+          "label": "Response relevancy",
+          "value": null,
+          "threshold": ">= 0.85",
+          "status": "measured_only",
+          "source": "config\\eval\\rag_golden_queries.yaml",
+          "detail": "Requires a versioned golden query set and retrieval run."
+        },
+        {
+          "id": "evidence_packet_completeness",
+          "label": "Evidence packet completeness",
+          "value": 0.3333333333333333,
+          "threshold": "100%",
+          "status": "fail",
+          "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\evidence_packets\\run1_evidence_packet.json",
+          "detail": "Requires source documents, citation map, and formula traces."
+        }
+      ],
+      "blocking_issues": [
+        "evidence_packet_completeness:Requires source documents, citation map, and formula traces.",
+        "hit_rate_at_5:threshold_not_met",
+        "mrr_at_5:threshold_not_met"
+      ]
+    },
+    {
+      "plan_id": "03",
+      "name": "Financial calculation",
+      "artifact": "financial_eval.json",
+      "status": "fail",
+      "metrics": {
+        "test_suite_status": "pass",
+        "tests_passed": 124,
+        "tests_failed": 0,
+        "runtime_evidence_coverage": 0.3333333333333333
+      },
+      "metric_results": [
+        {
+          "id": "net_debt",
+          "label": "Net debt reconciliation",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+          "detail": ""
+        },
+        {
+          "id": "fcff",
+          "label": "FCFF formula",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+          "detail": ""
+        },
+        {
+          "id": "fcfe",
+          "label": "FCFE formula",
+          "value": 0,
+          "threshold": "pass",
+          "status": "fail",
+          "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+          "detail": ""
+        },
+        {
+          "id": "target_price",
+          "label": "Target price reproduction",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+          "detail": ""
+        },
+        {
+          "id": "gordon_growth",
+          "label": "Discount rate exceeds terminal growth",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+          "detail": ""
+        },
+        {
+          "id": "sensitivity_varies",
+          "label": "FCFF sensitivity matrix varies",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+          "detail": ""
+        },
+        {
+          "id": "fcfe_sensitivity",
+          "label": "FCFE sensitivity matrix varies",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+          "detail": ""
+        },
+        {
+          "id": "blend_sensitivity",
+          "label": "Blend sensitivity matrix varies",
+          "value": 0,
+          "threshold": "pass",
+          "status": "fail",
+          "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+          "detail": ""
+        },
+        {
+          "id": "formula_trace",
+          "label": "Formula trace available",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "storage\\runs\\dhg_verify_stinv\\valuation.json",
+          "detail": ""
+        }
+      ],
+      "blocking_issues": [
+        "blend_sensitivity:threshold_not_met",
+        "fcfe:threshold_not_met"
+      ]
+    },
+    {
+      "plan_id": "04",
+      "name": "Citation and source provenance",
+      "artifact": "citation_eval.json",
+      "status": "blocked",
+      "metrics": {
+        "test_suite_status": "pass",
+        "tests_passed": 142,
+        "tests_failed": 0,
+        "runtime_evidence_coverage": 0.0
+      },
+      "metric_results": [
+        {
+          "id": "quantitative_citation_coverage",
+          "label": "Quantitative citation coverage",
+          "value": null,
+          "threshold": "100%",
+          "status": "measured_only",
+          "source": "claim ledger missing",
+          "detail": "PDF-level source counts cannot prove claim-level coverage."
+        },
+        {
+          "id": "citation_key_resolution",
+          "label": "Citation key resolution",
+          "value": null,
+          "threshold": "100%",
+          "status": "measured_only",
+          "source": "claim ledger missing",
+          "detail": ""
+        },
+        {
+          "id": "source_id_validity",
+          "label": "Source ID validity",
+          "value": null,
+          "threshold": "100%",
+          "status": "measured_only",
+          "source": "claim ledger missing",
+          "detail": ""
+        },
+        {
+          "id": "official_source_coverage",
+          "label": "Official source coverage",
+          "value": null,
+          "threshold": "100%",
+          "status": "measured_only",
+          "source": "claim ledger missing",
+          "detail": ""
+        },
+        {
+          "id": "generic_citations",
+          "label": "Generic citation labels",
+          "value": 0,
+          "threshold": "0",
+          "status": "pass",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DHG_report.pdf",
+          "detail": ""
+        },
+        {
+          "id": "pdf_source_mentions",
+          "label": "PDF source labels",
+          "value": 4,
+          "threshold": "> 0",
+          "status": "pass",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DHG_report.pdf",
+          "detail": ""
+        }
+      ],
+      "blocking_issues": [
+        "claim_ledger_missing"
+      ]
+    },
+    {
+      "plan_id": "05",
+      "name": "Agent workflow and LLM judge",
+      "artifact": "agent_eval.json",
+      "status": "pass",
+      "metrics": {
+        "test_suite_status": "pass",
+        "tests_passed": 42,
+        "tests_failed": 0,
+        "runtime_evidence_coverage": 0.0
+      },
+      "metric_results": [
+        {
+          "id": "tool_permission_compliance",
+          "label": "Tool permission compliance",
+          "value": 1.0,
+          "threshold": "100%",
+          "status": "pass",
+          "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\evidence_packets\\run1_evidence_packet.json",
+          "detail": ""
+        },
+        {
+          "id": "schema_validity",
+          "label": "Output schema validity",
+          "value": 1.0,
+          "threshold": "100%",
+          "status": "pass",
+          "source": "archived agent JSON outputs",
+          "detail": ""
+        },
+        {
+          "id": "role_adherence",
+          "label": "Role adherence",
+          "value": null,
+          "threshold": ">= 0.90",
+          "status": "measured_only",
+          "source": "calibrated LLM judge missing",
+          "detail": ""
+        },
+        {
+          "id": "groundedness",
+          "label": "Groundedness",
+          "value": null,
+          "threshold": ">= 0.90",
+          "status": "measured_only",
+          "source": "claim-level evidence judge missing",
+          "detail": ""
+        },
+        {
+          "id": "no_unauthorized_calc",
+          "label": "No unauthorized financial calculation",
+          "value": null,
+          "threshold": "100%",
+          "status": "measured_only",
+          "source": "agent trace classifier missing",
+          "detail": ""
+        },
+        {
+          "id": "task_completion",
+          "label": "Task completion",
+          "value": 1.0,
+          "threshold": ">= 0.85",
+          "status": "pass",
+          "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\audits\\run1_agent_effectiveness_audit.json",
+          "detail": ""
+        },
+        {
+          "id": "plan_adherence",
+          "label": "Plan adherence",
+          "value": null,
+          "threshold": ">= 0.85",
+          "status": "measured_only",
+          "source": "plan trace comparison missing",
+          "detail": ""
+        },
+        {
+          "id": "critic_issue_recall",
+          "label": "Critic issue recall",
+          "value": null,
+          "threshold": ">= 90%",
+          "status": "measured_only",
+          "source": "seeded failure dataset missing",
+          "detail": ""
+        }
+      ],
+      "blocking_issues": []
+    },
+    {
+      "plan_id": "06",
+      "name": "Report quality",
+      "artifact": "report_eval.json",
+      "status": "fail",
+      "metrics": {
+        "test_suite_status": "pass",
+        "tests_passed": 38,
+        "tests_failed": 0,
+        "runtime_evidence_coverage": 0.0
+      },
+      "metric_results": [
+        {
+          "id": "report_pdf_rendered",
+          "label": "Report PDF rendered",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DHG_report.pdf",
+          "detail": ""
+        },
+        {
+          "id": "explanation_pdf_rendered",
+          "label": "Explanation PDF rendered",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DHG_explanation.pdf",
+          "detail": ""
+        },
+        {
+          "id": "financial_gate_passed",
+          "label": "Deterministic finance gate",
+          "value": 0,
+          "threshold": "pass",
+          "status": "fail",
+          "source": "financial_eval.json",
+          "detail": ""
+        },
+        {
+          "id": "report_quality_score",
+          "label": "Report quality score",
+          "value": null,
+          "threshold": ">= 85",
+          "status": "measured_only",
+          "source": "publishable report model missing",
+          "detail": ""
+        },
+        {
+          "id": "publication_readiness",
+          "label": "Publication readiness",
+          "value": 0,
+          "threshold": "pass",
+          "status": "fail",
+          "source": "final approval and locked publishable model missing",
+          "detail": ""
+        }
+      ],
+      "blocking_issues": [
+        "final_report_approval_missing",
+        "financial_gate_passed:threshold_not_met",
+        "publication_readiness:threshold_not_met",
+        "publishable_final_report_model_missing"
+      ]
+    },
+    {
+      "plan_id": "07",
+      "name": "Observability, cost, and latency",
+      "artifact": "observability_eval.json",
+      "status": "pass",
+      "metrics": {
+        "test_suite_status": "pass",
+        "tests_passed": 26,
+        "tests_failed": 0,
+        "runtime_evidence_coverage": 0.0
+      },
+      "metric_results": [
+        {
+          "id": "duration_seconds",
+          "label": "Full run duration",
+          "value": null,
+          "threshold": "<= baseline p95 + 30%",
+          "status": "measured_only",
+          "source": "run trace missing",
+          "detail": ""
+        },
+        {
+          "id": "llm_retry_rate",
+          "label": "LLM retry rate",
+          "value": null,
+          "threshold": "<= 5%",
+          "status": "measured_only",
+          "source": "run trace missing",
+          "detail": ""
+        },
+        {
+          "id": "retrieval_fallback_rate",
+          "label": "Retrieval fallback rate",
+          "value": null,
+          "threshold": "<= 20%",
+          "status": "measured_only",
+          "source": "retrieval trace missing",
+          "detail": ""
+        },
+        {
+          "id": "ocr_failure_rate",
+          "label": "OCR failure rate",
+          "value": 0.0,
+          "threshold": "<= 5%",
+          "status": "pass",
+          "source": "latest OCR metadata",
+          "detail": ""
+        },
+        {
+          "id": "pdf_render_failures",
+          "label": "PDF render failures",
+          "value": 0,
+          "threshold": "0",
+          "status": "pass",
+          "source": "output/DHG_report.pdf",
+          "detail": ""
+        },
+        {
+          "id": "cost_per_report",
+          "label": "Cost per full report",
+          "value": null,
+          "threshold": "<= soft budget",
+          "status": "measured_only",
+          "source": "cost ledger missing",
+          "detail": ""
+        }
+      ],
+      "blocking_issues": []
+    },
+    {
+      "plan_id": "08",
+      "name": "Rollout and CI",
+      "artifact": "rollout_ci_eval.json",
+      "status": "pass",
+      "metrics": {
+        "test_suite_status": "pass",
+        "tests_passed": 110,
+        "tests_failed": 0,
+        "runtime_evidence_coverage": null
+      },
+      "metric_results": [
+        {
+          "id": "evaluation_gates_ci",
+          "label": "Evaluation gate CI scope",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "pytest plan scope",
+          "detail": ""
+        },
+        {
+          "id": "deterministic_fail_closed",
+          "label": "Deterministic fail-closed policy",
+          "value": 1,
+          "threshold": "pass",
+          "status": "pass",
+          "source": "evaluation packet decision rule",
+          "detail": ""
+        },
+        {
+          "id": "rag_golden_ci",
+          "label": "RAG golden CI",
+          "value": 1,
+          "threshold": "available",
+          "status": "pass",
+          "source": "config/eval/rag_golden_queries.yaml",
+          "detail": ""
+        },
+        {
+          "id": "llm_judge_offline",
+          "label": "LLM judge offline CI",
+          "value": null,
+          "threshold": "warn then block",
+          "status": "measured_only",
+          "source": "calibrated judge dataset missing",
+          "detail": ""
+        }
+      ],
+      "blocking_issues": []
+    }
+  ],
+  "summary": {
+    "pass": 4,
+    "fail": 3,
+    "blocked": 1,
+    "not_measured": 0
+  }
+}

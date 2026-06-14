@@ -30,7 +30,7 @@ block_on:
   - dividend_yield_total_return_inconsistent
   - citation_coverage_below_threshold
   - recommendation_visible_before_approval
-  - fpts_grade_below_85
+  - report_quality_score_below_85
 warn_on:
   - minor_source_discrepancy
   - low_confidence_ocr_fact

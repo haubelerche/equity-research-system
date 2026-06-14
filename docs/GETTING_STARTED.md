@@ -1,6 +1,6 @@
 # Hướng dẫn bắt đầu
 
-Cập nhật: 2026-06-13
+Cập nhật: 2026-06-14
 
 ## Context
 
@@ -85,6 +85,35 @@ python -m uvicorn backend.api:app --host 0.0.0.0 --port 8010
 ```
 
 API dùng `RuntimeStore`, `RunExecutor` và `FullReportOrchestrator`; endpoint `/research/start` tạo run bất đồng bộ qua thread pool.
+
+### 8. Chạy frontend
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Vite chạy tại `http://localhost:5173` và proxy `/reports`, `/research` sang backend tại cổng `8000`. Nếu backend chạy theo ví dụ cổng `8010` ở trên, cần đồng bộ cổng proxy hoặc chạy Uvicorn tại `8000`.
+
+Production-like:
+
+```powershell
+cd frontend
+npm run build
+cd ..
+python -m uvicorn backend.api:app --host 0.0.0.0 --port 8010
+```
+
+Khi `frontend/dist/index.html` tồn tại, FastAPI phục vụ SPA sau các API routes. Route `/eval` hiện dùng mock artifacts trong frontend, chưa đọc evaluation packet trực tiếp từ backend.
+
+### 9. Chạy project evaluation
+
+```powershell
+python scripts/run_project_evaluation.py --ticker DHG --output-dir output/evaluation/eval_result
+```
+
+Harness chạy tuần tự tám evaluation plan, thực thi test scope tương ứng và tạo packet fail-closed. Test pass không thay thế runtime evidence còn thiếu.
 
 ## Strategic Recommendations
 

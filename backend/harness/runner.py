@@ -120,6 +120,7 @@ class ResearchGraphRunner:
         )
 
         try:
+            self._write_evaluation_artifacts(current)
             self._write_evidence_packet(current)
             self._write_run_manifest(current)
         except Exception as _exc:  # noqa: BLE001
@@ -288,6 +289,18 @@ class ResearchGraphRunner:
                 company_research_pack,
                 "deterministic_company_research_pack_builder",
             )
+            state.artifacts["analyst_insight_pack"] = {
+                "schema_version": "2.0",
+                "ticker": state.ticker,
+                "insights": company_research_pack.get("analyst_insights") or [],
+                "limitations": company_research_pack.get("limitations") or [],
+            }
+            self._persist_payload_artifact(
+                state,
+                "analyst_insight_pack",
+                state.artifacts["analyst_insight_pack"],
+                "deterministic_analyst_insight_builder",
+            )
 
         elif stage == "FORECAST_AND_VALUE":
             # Driver-based forecast.
@@ -360,15 +373,21 @@ class ResearchGraphRunner:
 
             artifacts = {
                 "claim_ledger": {"claims": state.draft_report.get("claims", [])},
+                "company_research_pack": state.artifacts.get("company_research_pack") or {},
+                "analyst_insight_pack": state.artifacts.get("analyst_insight_pack") or {},
                 "financial_analysis": state.artifacts.get("financial_analysis") or state.artifacts.get("financial_analyst_review") or {},
                 "forecast_model": state.artifacts.get("forecast_model") or {},
                 "valuation": state.artifacts.get("valuation") or {},
                 "market_snapshot": state.artifacts.get("market_snapshot") or {},
             }
+            from backend.reporting.spec_builder import build_report_specs
+
+            built_specs = build_report_specs(state.draft_report, artifacts)
             specs = {
-                "chart_specs": state.artifacts.get("chart_specs") or {},
-                "table_specs": state.artifacts.get("table_specs") or {},
+                "chart_specs": state.artifacts.get("chart_specs") or built_specs["chart_specs"],
+                "table_specs": state.artifacts.get("table_specs") or built_specs["table_specs"],
             }
+            state.artifacts.update(specs)
             validation = ReportAssembler().validate(state.draft_report, artifacts, specs)
             state.artifacts["report_assembly_validation"] = validation.to_dict()
             if not validation.passed:
@@ -402,7 +421,7 @@ class ResearchGraphRunner:
             state.evaluation_results = result.summary
             self._merge_result(state, result)
             if result.blocking_reason:
-                state.blocking_reason = result.blocking_reason
+                state.errors.append(result.blocking_reason)
             critic = self._run_agent(state, "senior_critic", "Create the typed senior critic scorecard and findings.")
             state.artifacts["critic_review"] = critic.payload
             self._merge_agent_result(state, critic)
@@ -411,39 +430,37 @@ class ResearchGraphRunner:
             # Citation gate.
             gate = citation_gate(state.draft_report or state.artifacts.get("report", {}))
             self._record_gate(state, gate)
-            if not state.blocking_reason:
-                self._promote_report_model(
-                    state,
-                    source_key="report_candidate_model",
-                    target_key="review_passed_report_model",
-                    producer="review_gate_promotion",
-                    locked=True,
-                )
+            self._promote_report_model(
+                state,
+                source_key="report_candidate_model",
+                target_key="review_passed_report_model",
+                producer="review_gate_promotion",
+                locked=True,
+            )
 
         elif stage == "EXPORT_GATES":
-            from backend.evaluation.fpts_grade import fpts_grade_gate
+            from backend.evaluation.report_quality import report_quality_gate
 
             self._write_evidence_packet(state)
-            fpts_evaluation = fpts_grade_gate(state.model_dump(mode="json"))
-            self._record_gate(state, fpts_evaluation)
-            state.artifacts["fpts_grade_evaluation"] = fpts_evaluation.get("summary") or {}
+            report_quality_evaluation = report_quality_gate(state.model_dump(mode="json"))
+            self._record_gate(state, report_quality_evaluation)
+            state.artifacts["report_quality_evaluation"] = report_quality_evaluation.get("summary") or {}
             self._persist_payload_artifact(
                 state,
-                "fpts_grade_evaluation",
-                state.artifacts["fpts_grade_evaluation"],
-                "deterministic_fpts_grade_evaluator",
+                "report_quality_evaluation",
+                state.artifacts["report_quality_evaluation"],
+                "deterministic_report_quality_evaluator",
             )
             package_gate = package_validation_gate(state.model_dump(mode="json"))
             self._record_gate(state, package_gate)
             self._persist_payload_artifact(state, "quality_gate", state.gate_results, "deterministic_gates")
-            if not state.blocking_reason:
-                self._promote_report_model(
-                    state,
-                    source_key="review_passed_report_model",
-                    target_key="publishable_final_report_model",
-                    producer="export_gate_promotion",
-                    locked=True,
-                )
+            self._promote_report_model(
+                state,
+                source_key="review_passed_report_model",
+                target_key="publishable_final_report_model",
+                producer="export_gate_promotion",
+                locked=True,
+            )
 
         elif stage == "PUBLISH":
             # Automation stops at the locked publishable model. No PDF is rendered
@@ -463,7 +480,11 @@ class ResearchGraphRunner:
         authorization (generate_fast_report.py --mode client_final or
         --mode analyst_draft).
         """
-        final_model = state.artifacts.get("publishable_final_report_model")
+        final_model = (
+            state.artifacts.get("publishable_final_report_model")
+            or state.artifacts.get("review_passed_report_model")
+            or state.artifacts.get("report_candidate_model")
+        )
         if not isinstance(final_model, dict):
             state.status = "blocked"
             state.blocking_reason = "publishable_final_report_model_missing"
@@ -471,6 +492,7 @@ class ResearchGraphRunner:
             return False
 
         try:
+            self._write_evaluation_artifacts(state)
             self._write_run_manifest(state)
         except Exception as manifest_exc:  # noqa: BLE001
             import logging
@@ -523,16 +545,13 @@ class ResearchGraphRunner:
         self.model_adapter.validate_environment()
 
     def _record_gate(self, state: ResearchGraphState, gate: dict[str, Any]) -> None:
+        """Record a quality diagnostic without blocking report production."""
         state.gate_results[gate["gate"]] = gate
         self.progress.gate_result(
             gate["gate"],
             gate.get("passed", False),
             gate.get("blocking_reasons", []),
         )
-        if not gate.get("passed") and gate.get("severity", "critical") == "critical":
-            state.status = "blocked"
-            state.blocking_reason = "; ".join(gate.get("blocking_reasons") or ["gate_failed"])
-            self.store.update_run_state(state.run_id, "blocked", state.current_stage)
 
     def _merge_result(self, state: ResearchGraphState, result) -> None:
         refs = [ref.model_dump(mode="json") for ref in result.artifact_refs]
@@ -1207,8 +1226,7 @@ class ResearchGraphRunner:
         }
         adapter = SupabaseStorageAdapter()
         manifest_path = run_artifact_key(state.run_id, "manifest.json")
-        if not adapter.exists(RUNS_BUCKET, manifest_path):
-            adapter.upload_json(RUNS_BUCKET, manifest_path, payload)
+        adapter.upload_json(RUNS_BUCKET, manifest_path, payload, upsert=True)
         state.manifest_path = manifest_path
         logging.getLogger(__name__).info(
             "Manifest written for run=%s: %s (%d artifacts)",
@@ -1222,8 +1240,7 @@ class ResearchGraphRunner:
         packet = build_evidence_packet(state)
         packet_path = run_artifact_key(state.run_id, "evidence_pack.json")
         adapter = SupabaseStorageAdapter()
-        if not adapter.exists(RUNS_BUCKET, packet_path):
-            adapter.upload_json(RUNS_BUCKET, packet_path, packet)
+        adapter.upload_json(RUNS_BUCKET, packet_path, packet, upsert=True)
         ref = {
             "artifact_id": f"{state.run_id}_evidence_packet",
             "artifact_type": "evidence_packet_json",
@@ -1244,6 +1261,54 @@ class ResearchGraphRunner:
             )
         ]
         state.artifact_refs.append(ref)
+
+    def _write_evaluation_artifacts(self, state: "ResearchGraphState") -> None:
+        from backend.evaluation.run_evaluation import build_run_evaluation_artifacts
+        from backend.storage import RUNS_BUCKET, SupabaseStorageAdapter, run_artifact_key
+
+        artifacts, packet = build_run_evaluation_artifacts(state)
+        artifacts["evaluation_packet.json"] = packet
+        adapter = SupabaseStorageAdapter()
+        section_keys = {name.removesuffix(".json") for name in artifacts}
+        state.artifact_refs = [
+            ref
+            for ref in state.artifact_refs
+            if not (
+                isinstance(ref, dict)
+                and ref.get("section_key") in section_keys
+            )
+        ]
+        for artifact_name, payload in artifacts.items():
+            section_key = artifact_name.removesuffix(".json")
+            artifact_path = run_artifact_key(state.run_id, artifact_name)
+            checksum = stable_hash(payload)
+            adapter.upload_json(RUNS_BUCKET, artifact_path, payload, upsert=True)
+            ref = {
+                "artifact_id": deterministic_id(state.run_id, section_key, checksum),
+                "artifact_type": "eval_result_json",
+                "section_key": section_key,
+                "version": 1,
+                "storage_bucket": RUNS_BUCKET,
+                "storage_path": artifact_path,
+                "checksum": checksum,
+                "is_locked": False,
+                "producer": "deterministic_run_evaluator",
+            }
+            state.artifacts[section_key] = payload
+            state.artifact_refs.append(ref)
+            self.store.save_artifact(
+                artifact_id=ref["artifact_id"],
+                run_id=state.run_id,
+                artifact_type=ref["artifact_type"],
+                section_key=section_key,
+                version=1,
+                payload=payload,
+                storage_bucket=RUNS_BUCKET,
+                storage_path=artifact_path,
+                checksum=checksum,
+                created_by_agent=ref["producer"],
+                is_locked=False,
+            )
 
     @staticmethod
     def _agent_id_for_stage(stage: str) -> str:

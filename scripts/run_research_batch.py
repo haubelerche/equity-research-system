@@ -3,6 +3,7 @@
 Each ticker runs as an ISOLATED subprocess (scripts/run_research.py), so a crash in one
 ticker's heavy pipeline (OCR / agents / valuation) cannot take down the batch. Failure-
 isolated and resumable (--resume skips tickers that already have a built report).
+Every successful or resumed ticker is then exported into a report PDF and explanation PDF.
 
 This is the expensive tier — OCR + multi-agent LLM + valuation PER ticker. Stage it
 (start with a few tickers) and watch cost/time before running the full universe.
@@ -121,6 +122,7 @@ def main(argv: list[str] | None = None) -> int:
             f"tickers={','.join(preview_tickers)}"
         )
         print(f"[batch] per-ticker command: {command}")
+        print("[batch] export command: python scripts/generate_fast_report.py --ticker <TICKER>")
         return 0
 
     should_skip = _make_should_skip() if args.resume else None
@@ -134,10 +136,26 @@ def main(argv: list[str] | None = None) -> int:
     ok = sum(1 for r in results if r["status"] == "ok")
     skipped = sum(1 for r in results if r["status"] == "skipped")
     errors = [r for r in results if r["status"] == "error"]
+    export_errors: list[dict[str, str]] = []
+    export_script = str(ROOT / "scripts" / "generate_fast_report.py")
+    for result in results:
+        if result["status"] not in {"ok", "skipped"}:
+            continue
+        ticker = str(result["ticker"])
+        print(f"[batch] >>> export {ticker}: report PDF + explanation PDF", flush=True)
+        proc = subprocess.run(
+            [sys.executable, export_script, "--ticker", ticker],
+            cwd=str(ROOT),
+        )
+        if proc.returncode != 0:
+            export_errors.append({"ticker": ticker, "error": f"report export exited {proc.returncode}"})
+
     print(f"\n[batch] done: ok={ok} skipped={skipped} error={len(errors)} / {len(results)}")
     for r in errors:
         print(f"[batch] FAILED {r['ticker']}: {r['error']}", file=sys.stderr)
-    return 1 if errors else 0
+    for r in export_errors:
+        print(f"[batch] EXPORT FAILED {r['ticker']}: {r['error']}", file=sys.stderr)
+    return 1 if errors or export_errors else 0
 
 
 if __name__ == "__main__":

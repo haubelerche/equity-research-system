@@ -867,7 +867,18 @@ def run_valuation(
         "valuation_confidence": confidence.to_dict(),
         "formula_traces": formula_traces,
     }
-    from backend.evaluation.fpts_grade import build_valuation_bridge
+    from backend.valuation_method_policy import select_valuation_methods
+
+    method_policy = select_valuation_methods(
+        fcff=artifact["fcff"],
+        fcfe=artifact["fcfe"],
+        valuation_confidence=artifact["valuation_confidence"],
+        dividend_history_available=bool((forecast.to_dict().get("dividend_schedule") or {}).get("forecast_rows")),
+    )
+    artifact["valuation_method_policy"] = method_policy
+    artifact["selected_methods"] = method_policy["selected_methods"]
+    artifact["method_weights"] = method_policy["method_weights"]
+    from backend.evaluation.report_quality import build_valuation_bridge
     artifact["valuation_bridge"] = build_valuation_bridge(artifact)
 
     VALUATION_DIR.mkdir(parents=True, exist_ok=True)

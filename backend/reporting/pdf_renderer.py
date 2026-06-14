@@ -194,6 +194,37 @@ def extract_pdf_text(pdf_path: Path) -> str:
     return "\n".join(page.extract_text() or "" for page in reader.pages)
 
 
+def remove_trailing_blank_pages(pdf_path: Path, *, min_text_chars: int = 40) -> None:
+    """Remove print-backend trailing blank pages before publishing the PDF.
+
+    Chrome can occasionally emit a final page containing only page chrome
+    after CSS flow changes. Such a page has no report content and should not
+    survive into a client-facing artifact.
+    """
+    try:
+        from pypdf import PdfReader, PdfWriter  # type: ignore
+    except ImportError:
+        return
+
+    reader = PdfReader(str(pdf_path))
+    keep_count = len(reader.pages)
+    while keep_count > 1:
+        text = (reader.pages[keep_count - 1].extract_text() or "").strip()
+        if len(text) >= min_text_chars:
+            break
+        keep_count -= 1
+    if keep_count == len(reader.pages):
+        return
+
+    writer = PdfWriter()
+    for page in reader.pages[:keep_count]:
+        writer.add_page(page)
+    tmp_path = pdf_path.with_suffix(".trimmed.pdf")
+    with open(tmp_path, "wb") as fh:
+        writer.write(fh)
+    tmp_path.replace(pdf_path)
+
+
 def preflight_forbidden_terms(text: str, forbidden_terms: tuple[str, ...]) -> None:
     """Fail if client-facing text contains internal/debug terminology."""
     found = [term for term in forbidden_terms if term in text]
@@ -280,6 +311,7 @@ class PDFRenderer:
             pdf_path.unlink()
 
         def _publish_pdf(backend: str) -> Path:
+            remove_trailing_blank_pages(pdf_path)
             pdf_path.replace(final_pdf_path)
             print(f"[pdf] saved ({backend}): {final_pdf_path}")
             return final_pdf_path

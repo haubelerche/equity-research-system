@@ -1,0 +1,216 @@
+{
+  "schema_version": "2.0",
+  "plan_id": "02",
+  "plan_name": "RAG and evidence",
+  "ticker": "DHG",
+  "run_id": "project-eval-20260614T033415Z",
+  "generated_at": "2026-06-14T03:34:15.588631+00:00",
+  "status": "fail",
+  "test_execution": {
+    "status": "pass",
+    "targets": [
+      "tests/unit/test_citation_map.py",
+      "tests/unit/test_news_relevance.py",
+      "tests/citations"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.605,
+    "summary": {
+      "passed": 92
+    },
+    "output_tail": [
+      "........................................................................ [ 78%]",
+      "....................                                                     [100%]",
+      "92 passed in 0.22s"
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [
+      "retrieval_eval.json",
+      "evidence_packet.json"
+    ],
+    "found": {
+      "retrieval_eval.json": [],
+      "evidence_packet.json": []
+    },
+    "missing": [
+      "retrieval_eval.json",
+      "evidence_packet.json"
+    ],
+    "status": "blocked"
+  },
+  "blocking_issues": [
+    "evidence_packet_completeness:Requires source documents, citation map, and formula traces.",
+    "hit_rate_at_5:threshold_not_met",
+    "mrr_at_5:threshold_not_met"
+  ],
+  "metrics": {
+    "test_suite_status": "pass",
+    "tests_passed": 92,
+    "tests_failed": 0,
+    "runtime_evidence_coverage": 0.0
+  },
+  "metric_results": [
+    {
+      "id": "hit_rate_at_5",
+      "label": "Hit-rate@5",
+      "value": 0.6,
+      "threshold": ">= 90%",
+      "status": "fail",
+      "source": "config\\eval\\rag_golden_queries.yaml",
+      "detail": ""
+    },
+    {
+      "id": "mrr_at_5",
+      "label": "MRR@5",
+      "value": 0.35,
+      "threshold": ">= 0.80",
+      "status": "fail",
+      "source": "config\\eval\\rag_golden_queries.yaml",
+      "detail": ""
+    },
+    {
+      "id": "context_precision",
+      "label": "Context precision",
+      "value": null,
+      "threshold": ">= 0.85",
+      "status": "measured_only",
+      "source": "config\\eval\\rag_golden_queries.yaml",
+      "detail": "Requires a versioned golden query set and retrieval run."
+    },
+    {
+      "id": "context_recall",
+      "label": "Context recall",
+      "value": null,
+      "threshold": ">= 0.85",
+      "status": "measured_only",
+      "source": "config\\eval\\rag_golden_queries.yaml",
+      "detail": "Requires a versioned golden query set and retrieval run."
+    },
+    {
+      "id": "faithfulness",
+      "label": "Faithfulness",
+      "value": null,
+      "threshold": ">= 0.85",
+      "status": "measured_only",
+      "source": "config\\eval\\rag_golden_queries.yaml",
+      "detail": "Requires a versioned golden query set and retrieval run."
+    },
+    {
+      "id": "response_relevancy",
+      "label": "Response relevancy",
+      "value": null,
+      "threshold": ">= 0.85",
+      "status": "measured_only",
+      "source": "config\\eval\\rag_golden_queries.yaml",
+      "detail": "Requires a versioned golden query set and retrieval run."
+    },
+    {
+      "id": "evidence_packet_completeness",
+      "label": "Evidence packet completeness",
+      "value": 0.3333333333333333,
+      "threshold": "100%",
+      "status": "fail",
+      "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\evidence_packets\\run1_evidence_packet.json",
+      "detail": "Requires source documents, citation map, and formula traces."
+    }
+  ],
+  "retrieval_backend": "not_measured",
+  "query_set_version": null,
+  "ragas_scores": {
+    "context_precision": null,
+    "context_recall": null,
+    "faithfulness": null,
+    "response_relevancy": null
+  },
+  "golden_scores": {
+    "query_set_version": "rag_golden_v1",
+    "hit_rate_at_5": 0.6,
+    "mrr_at_5": 0.35,
+    "queries": [
+      {
+        "id": "income_statement",
+        "top_5_pages": [
+          19,
+          17,
+          32,
+          18,
+          16
+        ],
+        "expected_pages": [
+          10
+        ],
+        "hit": false,
+        "reciprocal_rank": 0.0
+      },
+      {
+        "id": "cash_flow_statement",
+        "top_5_pages": [
+          14,
+          11,
+          32,
+          5,
+          2
+        ],
+        "expected_pages": [
+          11,
+          12
+        ],
+        "hit": true,
+        "reciprocal_rank": 0.5
+      },
+      {
+        "id": "balance_sheet_assets",
+        "top_5_pages": [
+          19,
+          13,
+          14,
+          17,
+          5
+        ],
+        "expected_pages": [
+          7,
+          8
+        ],
+        "hit": false,
+        "reciprocal_rank": 0.0
+      },
+      {
+        "id": "balance_sheet_equity",
+        "top_5_pages": [
+          5,
+          17,
+          14,
+          9,
+          19
+        ],
+        "expected_pages": [
+          9
+        ],
+        "hit": true,
+        "reciprocal_rank": 0.25
+      },
+      {
+        "id": "equity_note",
+        "top_5_pages": [
+          30,
+          31,
+          5,
+          20,
+          39
+        ],
+        "expected_pages": [
+          30
+        ],
+        "hit": true,
+        "reciprocal_rank": 1.0
+      }
+    ]
+  },
+  "evidence_packet": {
+    "path": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\evidence_packets\\run1_evidence_packet.json",
+    "source_documents": 0,
+    "citation_records": 0,
+    "formula_traces": 1
+  }
+}

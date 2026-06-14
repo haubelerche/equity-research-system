@@ -2,12 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, UTC
 from typing import Any
-
-
-def utc_now_iso() -> str:
-    return datetime.now(UTC).isoformat()
 
 
 def deterministic_id(*parts: str) -> str:

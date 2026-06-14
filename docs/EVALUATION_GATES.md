@@ -1,16 +1,29 @@
 # Evaluation gates và quality governance
 
-Cập nhật: 2026-06-13
+Cập nhật: 2026-06-14
 
 ## Context
 
-Evaluation gates là lớp reliability cốt lõi của hệ thống. Agent được phép sinh narrative, nhưng xuất bản bị kiểm soát bằng deterministic gates, source provenance, formula trace, evidence packet và FPTS-grade rubric. Gate output phải có `gate`, `passed`, `status`, `severity`, `issues`, `blocking_reasons` và `summary`.
+Evaluation gates là lớp reliability cốt lõi của hệ thống. Agent được phép sinh narrative, còn client-final bị kiểm soát bằng deterministic gates, source provenance, formula trace, evidence packet, institutional report-quality rubric và publication authorization. Gate output phải có `gate`, `passed`, `status`, `severity`, `issues`, `blocking_reasons` và `summary`.
 
 ## Problem Statement
 
 Trong workflow agentic, false pass nguy hiểm hơn fail-fast vì nó tạo cảm giác báo cáo đã an toàn trong khi số liệu, nguồn hoặc recommendation chưa đủ điều kiện. Vì vậy hệ thống cần nhiều gate nhỏ chuyên biệt và một package validation gate tổng hợp trước publishable model.
 
 ## Technical Deep-Dive
+
+### 0. Current plan alignment
+
+Các kế hoạch chi tiết trong [`../eval/`](../eval/) là lớp planning hiện hành cho data reliability, RAG, financial calculation, citation provenance, agent workflow, report quality, observability và rollout/CI. Tài liệu này là contract vận hành của gates; thư mục `eval/` mô tả cách mở rộng, đo lường và đưa các gate đó vào regression workflow.
+
+| Contract hiện tại | Ý nghĩa vận hành |
+|---|---|
+| `auto_exported` chỉ là publishable draft | Không được xem là client-facing final hoặc analyst-approved report |
+| `approved` cộng với `final_report_approval` là điều kiện client-final | Final render phải đi qua `authorize_client_final` |
+| `publishable_final_report_model` phải locked và cùng `snapshot_id` với valuation | Chặn render từ candidate/stale artifact |
+| `PACKAGE_VALIDATION_GATE` phải pass | Tool permission, manifest, formula trace, evidence packet, report quality và export blockers đều phải đạt |
+| Report-quality `decision` phải là `allow_export` và score >= 85 | `draft_only` hoặc `block_export` không được client-final |
+| Post-render audit có thể bổ sung blocker hiển thị | Model pass không bảo đảm HTML/PDF final không có lỗi trình bày |
 
 ### 1. Gate trong harness
 
@@ -32,9 +45,23 @@ Trong workflow agentic, false pass nguy hiểm hơn fail-fast vì nó tạo cả
 | `PACKAGE_VALIDATION_GATE` | Aggregate gate trước promotion final |
 | `EXPORT_GATE` | Block nếu upstream gate fail hoặc report/valuation/evaluation có blocker |
 
-### 2. FPTS grade
+### 1.1. Client-final authorization gate
 
-`backend/evaluation/fpts_grade.py` chấm theo rubric 100 điểm:
+Client-final rendering không chỉ phụ thuộc vào report model. `backend/reporting/publication_readiness.py` đánh giá readiness bằng các điều kiện fail-closed sau:
+
+| Điều kiện | Blocking reason khi thiếu |
+|---|---|
+| Run tồn tại, ticker khớp và status là `approved` | `run_missing`, `run_ticker_mismatch`, `run_not_approved:*` |
+| Approval cuối luồng cho `final_report` có decision `approved` | `final_report_approval_missing` |
+| Có `company_research_pack` và `analyst_insight_pack` không rỗng | `company_research_pack_missing`, `analyst_insight_pack_missing` |
+| Có `publishable_final_report_model` locked | `publishable_final_report_model_missing`, `publishable_final_report_model_not_locked` |
+| `quality_gate.PACKAGE_VALIDATION_GATE.passed == True` | `package_validation_not_passed` |
+| `report_quality_evaluation` pass, `decision == allow_export`, score >= 85 | `report_quality_not_publishable` |
+| Report và valuation cùng `snapshot_id` | `artifact_snapshot_id_missing`, `artifact_snapshot_mismatch` |
+
+### 2. Report quality
+
+`backend/evaluation/report_quality.py` chấm theo rubric 100 điểm:
 
 | Nhóm điểm | Trọng số |
 |---|---:|
@@ -72,14 +99,18 @@ Quyết định:
 
 ### 4. Severity semantics
 
-Gate `severity="critical"` đặt run thành `blocked` ngay trong `_record_gate`. Một số gate như `SENIOR_CRITIC_GATE`, `FPTS_GRADE_GATE` hoặc `PACKAGE_VALIDATION_GATE` có thể dùng warning severity nhưng vẫn ảnh hưởng aggregate decision. Khi debug, cần đọc cả `passed`, `severity`, `blocking_reasons` và `issues`, không chỉ đọc boolean.
+`severity` hiện là metadata chẩn đoán; `_record_gate` không tự đặt run thành `blocked`. Một số tool-level blocking reason được chuyển thành exception và làm run `failed`, còn client-final authorization đọc trực tiếp package/report-quality/governance artifacts để fail-closed. Khi debug, cần đọc cả `passed`, `severity`, `blocking_reasons`, `issues`, trạng thái run và publication readiness, không chỉ đọc boolean.
+
+### 5. Evaluation artifacts hiện hành
+
+`backend/evaluation/run_evaluation.py` tạo tám artifact theo research run: `data_quality.json`, `retrieval_eval.json`, `financial_eval.json`, `citation_eval.json`, `agent_eval.json`, `report_eval.json`, `publication_readiness.json` và `observability_eval.json`. `backend/evaluation/project_evaluator.py` là harness riêng ở cấp repository, chạy tám plan trong `eval/`, thực thi test scope và không suy diễn metric run-specific từ test pass.
 
 ## Strategic Recommendations
 
 | Hành động | Yêu cầu kiểm thử |
 |---|---|
 | Thêm gate mới | Unit test pass/fail/warning và integration vào package validation nếu là export blocker |
-| Sửa ngưỡng FPTS | Test score boundary 69/70/84/85 |
+| Sửa ngưỡng report quality | Test score boundary 69/70/84/85 |
 | Sửa citation policy | Test Tier 3-only, generic citation và unsupported numeric claims |
 | Sửa valuation gate | Test formula trace, WACC/g, target price và recommendation reconciliation |
 | Sửa report sections | Test report completeness và renderer không tạo final khi thiếu section |

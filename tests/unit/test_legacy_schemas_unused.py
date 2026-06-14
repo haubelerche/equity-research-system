@@ -102,6 +102,13 @@ def test_build_facts_imports_v2_snapshot_dal():
         "build_facts.py must import from backend.database.canonical.snapshot_dal"
 
 
+def test_build_facts_freezes_usable_data_even_when_valuation_gate_warns():
+    src = _build_facts_source()
+    assert 'report.get("coverage_gate") == "pass"' in src
+    assert 'report.get("core_keys_gate") == "pass"' in src
+    assert 'if report.get("valuation_gate") == "pass":' not in src
+
+
 def test_build_facts_does_not_call_legacy_get_facts():
     src = _build_facts_source()
     assert "get_financial_facts_for_ticker" not in src, \

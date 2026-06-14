@@ -116,6 +116,41 @@ class EvidencePack(ArtifactContract):
     limitations: list[str] = Field(default_factory=list)
 
 
+class CompanyEvidenceRecord(BaseModel):
+    """One auditable company-specific observation or approved analyst estimate."""
+
+    value: Any
+    as_of: str
+    status: Literal["observed", "approved_estimate", "insufficient_evidence"]
+    confidence: float = Field(ge=0, le=1)
+    evidence_refs: list[str] = Field(default_factory=list)
+    source_class: Literal["company", "regulator", "analyst_estimate"]
+
+
+class CompanyResearchPackV2(BaseModel):
+    schema_version: Literal["2.0"] = "2.0"
+    ticker: str
+    archetype: str
+    topics: dict[str, dict[str, CompanyEvidenceRecord] | list[dict[str, Any]]] = Field(default_factory=dict)
+    analyst_insights: list[dict[str, Any]] = Field(default_factory=list)
+    source_map: dict[str, Any] = Field(default_factory=dict)
+    coverage: dict[str, Any] = Field(default_factory=dict)
+    limitations: list[str] = Field(default_factory=list)
+
+
+class CausalInsight(BaseModel):
+    schema_version: Literal["2.0"] = "2.0"
+    observation: str
+    operating_cause: str
+    financial_transmission: dict[str, Any]
+    scenario_delta: dict[str, Any]
+    valuation_delta: dict[str, Any]
+    monitoring_kpi: str
+    evidence_refs: list[str] = Field(default_factory=list)
+    confidence: float | Literal["low", "medium", "high"]
+    status: Literal["ready", "insufficient_evidence"]
+
+
 class EvidenceRequest(BaseModel):
     request_id: str
     requested_items: list[str] = Field(default_factory=list)

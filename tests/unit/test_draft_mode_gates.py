@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from backend.harness.gates import valuation_gate, valuation_reconciliation_gate
+from backend.valuation_method_policy import select_valuation_methods
 
 
 def test_valuation_gate_passes_when_fcff_valid_without_fcfe():
@@ -99,3 +100,15 @@ def test_valuation_reconciliation_gate_fails_when_fcff_incomplete():
     }
     gate = valuation_reconciliation_gate(valuation)
     assert gate["passed"] is False
+
+
+def test_low_confidence_fcff_is_not_selected_as_primary_method():
+    policy = select_valuation_methods(
+        fcff={"target_price_vnd": 27_207},
+        fcfe={"target_price_vnd": None},
+        valuation_confidence={"fcff_dcf": "low", "fcfe_dcf": "low"},
+    )
+
+    assert policy["selected_methods"] == []
+    assert policy["method_weights"] == {}
+    assert {"method": "FCFF", "reason": "fcff_low_confidence"} in policy["excluded_methods"]

@@ -1,27 +1,23 @@
-import { evalMetricStatus, type MetricDef, type Maturity } from "../../lib/evalStatus";
+import {
+  evalMetricStatus,
+  formatMetricNumber,
+  formatPassCondition,
+  type MetricDef,
+} from "../../lib/evalStatus";
 import { StatusPill } from "./StatusPill";
 
-interface Props { def: MetricDef; value: number | null | undefined; maturity: Maturity; }
+interface Props { def: MetricDef; value: number | null | undefined; }
 
-function fmtThreshold(def: MetricDef, m: Maturity): string {
-  const v = def.thresholds[m];
-  if (v === null || v === undefined) return "—";
-  const cmp = def.comparator === "gte" ? "≥" : "≤";
-  return def.unit === "%" ? `${cmp} ${(v * 100).toFixed(0)}%` : `${cmp} ${v}`;
-}
-
-function fmtValue(def: MetricDef, value: number | null | undefined): string {
-  if (value === null || value === undefined) return "—";
-  return def.unit === "%" ? `${(value * 100).toFixed(1)}%` : `${value}`;
-}
-
-export function MetricRow({ def, value, maturity }: Props) {
-  const status = evalMetricStatus(def, value, maturity);
+export function MetricRow({ def, value }: Props) {
+  const status = evalMetricStatus(def, value);
   return (
     <tr>
-      <td>{def.label}</td>
-      <td className="num">{fmtThreshold(def, maturity)}</td>
-      <td className="num">{fmtValue(def, value)}</td>
+      <td>
+        <strong>{def.label}</strong>
+        <span className="metric-technology">{def.technology}</span>
+      </td>
+      <td className="num">{formatPassCondition(def)}</td>
+      <td className="num">{value === null || value === undefined ? "Thiếu dữ liệu" : formatMetricNumber(def, value)}</td>
       <td><StatusPill status={status} /></td>
     </tr>
   );

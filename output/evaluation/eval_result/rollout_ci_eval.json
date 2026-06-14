@@ -1,0 +1,89 @@
+{
+  "schema_version": "2.0",
+  "plan_id": "08",
+  "plan_name": "Rollout and CI",
+  "ticker": "DHG",
+  "run_id": "project-eval-20260614T033415Z",
+  "generated_at": "2026-06-14T03:34:15.588631+00:00",
+  "status": "pass",
+  "test_execution": {
+    "status": "pass",
+    "targets": [
+      "tests/unit/test_package_validation_gate.py",
+      "tests/unit/test_publication_readiness.py",
+      "tests/evaluation",
+      "tests/citations",
+      "tests/reconciliation"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.622,
+    "summary": {
+      "passed": 110
+    },
+    "output_tail": [
+      "........................................................................ [ 65%]",
+      "......................................                                   [100%]",
+      "110 passed in 0.25s"
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [],
+    "found": {},
+    "missing": [],
+    "status": "not_applicable"
+  },
+  "blocking_issues": [],
+  "metrics": {
+    "test_suite_status": "pass",
+    "tests_passed": 110,
+    "tests_failed": 0,
+    "runtime_evidence_coverage": null
+  },
+  "metric_results": [
+    {
+      "id": "evaluation_gates_ci",
+      "label": "Evaluation gate CI scope",
+      "value": 1,
+      "threshold": "pass",
+      "status": "pass",
+      "source": "pytest plan scope",
+      "detail": ""
+    },
+    {
+      "id": "deterministic_fail_closed",
+      "label": "Deterministic fail-closed policy",
+      "value": 1,
+      "threshold": "pass",
+      "status": "pass",
+      "source": "evaluation packet decision rule",
+      "detail": ""
+    },
+    {
+      "id": "rag_golden_ci",
+      "label": "RAG golden CI",
+      "value": 1,
+      "threshold": "available",
+      "status": "pass",
+      "source": "config/eval/rag_golden_queries.yaml",
+      "detail": ""
+    },
+    {
+      "id": "llm_judge_offline",
+      "label": "LLM judge offline CI",
+      "value": null,
+      "threshold": "warn then block",
+      "status": "measured_only",
+      "source": "calibrated judge dataset missing",
+      "detail": ""
+    }
+  ],
+  "ci_gate_matrix": {
+    "unit-core": "block",
+    "evaluation-gates": "block",
+    "finance-regression": "block",
+    "report-render-smoke": "block",
+    "rag-golden": "warn",
+    "llm-judge-offline": "warn",
+    "integration-db": "scheduled"
+  }
+}

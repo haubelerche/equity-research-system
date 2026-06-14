@@ -79,5 +79,5 @@ $env:PYTHONUTF8 = "1"
 |---|---|---|
 | P0 | Cập nhật `.env.example` để phản ánh OpenAI là production provider hiện tại | Tránh operator cấp sai secret và hiểu sai runtime |
 | P0 | Không nới lỏng Supabase-only guard nếu chưa có kế hoạch local schema parity | Local DB dễ làm sai migration, bucket metadata và source provenance |
-| P1 | Chuẩn hóa dependency còn thiếu trong `requirements.txt` như `vnstock`, `requests`, `beautifulsoup4`, `apscheduler`, `pdfkit`, `pypdf` nếu các code path đó là production | Môi trường sạch sẽ fail import nếu chỉ dựa vào dependency bắc cầu |
+| P1 | Chuẩn hóa dependency còn thiếu trong `requirements.txt` như `vnstock`, `requests`, `beautifulsoup4`, `pdfkit`, `pypdf` nếu các code path đó là production | Môi trường sạch sẽ fail import nếu chỉ dựa vào dependency bắc cầu |
 | P1 | Thêm smoke test Docker cho migration, OCR và render PDF | Giảm rủi ro image build được nhưng không xuất được report |

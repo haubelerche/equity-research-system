@@ -43,6 +43,11 @@ class CatalystEvent:
     impact_area: str | None = None
     causality_level: str = "contextual_event"
     confidence: float | None = None
+    revenue_impact_pct: float | None = None
+    margin_impact_bps: float | None = None
+    capex_impact_pct: float | None = None
+    governance_impact_score: float | None = None
+    dividend_impact_pct: float | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -54,6 +59,11 @@ class CatalystEvent:
             "event_summary": self.event_summary, "impact_direction": self.impact_direction,
             "impact_area": self.impact_area, "causality_level": self.causality_level,
             "confidence": self.confidence,
+            "revenue_impact_pct": self.revenue_impact_pct,
+            "margin_impact_bps": self.margin_impact_bps,
+            "capex_impact_pct": self.capex_impact_pct,
+            "governance_impact_score": self.governance_impact_score,
+            "dividend_impact_pct": self.dividend_impact_pct,
         }
 
 

@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from backend.news.relevance import build_ticker_keywords, normalize_vi
+from backend.valuation_method_policy import build_valuation_publishability_policy
 from backend.reporting.report_data_loader import _COMPANIES, ROOT, _read_manifest_or_raise
 from backend.reporting.market_data_artifact import (
     MarketDataArtifact,
@@ -28,7 +29,7 @@ from backend.reporting.market_data_artifact import (
 
 _logger = logging.getLogger(__name__)
 
-RenderMode = Literal["client_final", "analyst_draft", "internal_debug"]
+RenderMode = Literal["standard", "client_final", "analyst_draft", "internal_debug"]
 
 
 class ClientReportDataMissing(Exception):
@@ -119,6 +120,10 @@ class ClientReportViewModel:
     metric_availability: dict[str, Any] = field(default_factory=dict)
     company_profile: dict[str, Any] = field(default_factory=dict)
     market_data: MarketDataArtifact | None = None
+    selected_valuation_methods: list[str] = field(default_factory=list)
+    valuation_summary_table: TableData | None = None
+    wacc_bridge_table: TableData | None = None
+    valuation_bridge_table: TableData | None = None
 
 
 _DASH = "—"
@@ -1106,8 +1111,16 @@ def _report_display_governance(
     mode: RenderMode | str,
     val_result: dict[str, Any],
     blend: dict[str, Any],
+    policy: Any = None,
 ) -> dict[str, Any]:
-    """Central policy for report-facing recommendation, target and upside display."""
+    """Central policy for report-facing recommendation, target and upside display.
+
+    When a ``ValuationPublishabilityPolicy`` is supplied it is authoritative: a
+    non-publishable valuation cannot promote a hero target price or a
+    BUY/HOLD/SELL recommendation, regardless of any numeric value present in the
+    blend artifact. This is the renderer-side enforcement of the single source
+    of truth in ``backend.valuation_method_policy``.
+    """
     reasons: list[str] = []
     is_publishable = str(val_result.get("is_publishable")).lower() == "true"
     if not val_result:
@@ -1116,6 +1129,19 @@ def _report_display_governance(
         reasons.append("valuation_result_not_publishable")
     if blend.get("is_draft_only") is True:
         reasons.append("blend_is_draft_only")
+    method_policy = val_result.get("valuation_method_policy") or {}
+    selected_methods = method_policy.get("selected_methods")
+    if isinstance(selected_methods, list) and not selected_methods:
+        reasons.append("no_eligible_valuation_method")
+    confidence = val_result.get("valuation_confidence") or {}
+    confidence_keys = {"FCFF": "fcff_dcf", "FCFE": "fcfe_dcf"}
+    if isinstance(selected_methods, list) and selected_methods:
+        selected_confidence = [
+            str(confidence.get(confidence_keys.get(str(method).upper()), "")).lower()
+            for method in selected_methods
+        ]
+        if selected_confidence and all(level in {"low", "unavailable"} for level in selected_confidence):
+            reasons.append("no_eligible_valuation_method")
     gap = blend.get("fcff_fcfe_gap_pct")
     try:
         if gap is not None and float(gap) > 0.25:
@@ -1128,13 +1154,30 @@ def _report_display_governance(
     # model outputs remain visible for analysis while client-final blockers stay
     # available to the export workflow as internal metadata.
     approved_for_display = True
-    blocking_reasons = sorted(set(reasons)) if mode == "client_final" else []
+    blocking_reasons = sorted(set(reasons))
 
     current, target, upside = _market_price_inputs(mode, val_result, blend)
-    if target is None:
+    if "no_eligible_valuation_method" in reasons:
         approved_for_display = False
         target = None
         upside = None
+    elif target is None:
+        approved_for_display = False
+        target = None
+        upside = None
+
+    # Authoritative override: the ValuationPublishabilityPolicy is the single
+    # source of truth. A non-publishable valuation (low-confidence primary,
+    # blocked FCFE driving a blend, missing/constant sensitivity, critical method
+    # divergence, market-sanity break without a bridge) must not promote a hero
+    # target price or a BUY/HOLD/SELL recommendation — regardless of any numeric
+    # value present in the blend artifact.
+    if policy is not None and not getattr(policy, "target_price_publishable", True):
+        approved_for_display = False
+        target = None
+        upside = None
+        reasons = list(reasons) + list(getattr(policy, "blocking_reasons", None) or [])
+        blocking_reasons = sorted(set(reasons))
 
     # Publication QA stays in metadata/review artifacts. It must not replace
     # usable client-facing values or inject internal workflow states into PDF.
@@ -1277,6 +1320,80 @@ def _table_valuation_model(
     )
 
 
+def _table_valuation_summary(valuation: dict[str, Any]) -> TableData | None:
+    methods = [str(item).upper() for item in valuation.get("selected_methods") or []]
+    weights = valuation.get("method_weights") or {}
+    confidence = valuation.get("valuation_confidence") or {}
+    confidence_keys = {"FCFF": "fcff_dcf", "FCFE": "fcfe_dcf"}
+    rows: list[tuple[str, list[Any]]] = []
+    for method in methods:
+        level = str(confidence.get(confidence_keys.get(method), "")).lower()
+        if level in {"low", "unavailable"}:
+            continue
+        payload = valuation.get(method.lower()) or {}
+        price = payload.get("value_per_share") or payload.get("target_price_vnd")
+        weight = weights.get(method) or weights.get(method.lower())
+        if price is None:
+            continue
+        rows.append((method, [f"{float(price):,.0f}", f"{float(weight):.1f}%" if weight is not None else _DASH]))
+    weighted = valuation.get("weighted_target_price") or valuation.get("blend_dcf") or {}
+    target = weighted.get("raw") or weighted.get("target_price_vnd") or weighted.get("blended_price")
+    if rows and target is not None:
+        rows.append(("Giá mục tiêu tổng hợp", [f"{float(target):,.0f}", "100.0%"]))
+    if not rows:
+        return None
+    return TableData(
+        title="KẾT QUẢ ĐỊNH GIÁ",
+        periods=["Giá trị mỗi cổ phiếu (VND)", "Trọng số"],
+        rows=rows,
+        format_type="text",
+    )
+
+
+def _table_wacc_bridge(valuation: dict[str, Any]) -> TableData | None:
+    assumptions = valuation.get("key_assumptions") or valuation.get("assumptions") or {}
+    fcff = valuation.get("fcff") or {}
+    breakdown = fcff.get("wacc_breakdown") or {}
+    values = {**assumptions, **breakdown}
+    fields = (
+        ("Lãi suất phi rủi ro", "risk_free_rate"),
+        ("Beta", "beta"),
+        ("Phần bù rủi ro thị trường", "equity_risk_premium"),
+        ("Chi phí vốn chủ sở hữu", "cost_of_equity"),
+        ("Chi phí nợ vay", "cost_of_debt"),
+        ("Thuế suất", "tax_rate"),
+        ("Tỷ lệ nợ/vốn chủ sở hữu mục tiêu", "target_de"),
+        ("WACC", "wacc"),
+    )
+    rows = []
+    for label, key in fields:
+        value = values.get(key)
+        if value is None and key == "wacc":
+            value = fcff.get("wacc")
+        if value is None:
+            continue
+        rendered = f"{float(value):.2f}" if key == "beta" else f"{float(value) * 100:.1f}%"
+        rows.append((label, [rendered]))
+    return TableData(title="CẦU NỐI WACC", periods=["Giá trị"], rows=rows, format_type="text") if rows else None
+
+
+def _table_valuation_bridge(valuation: dict[str, Any]) -> TableData | None:
+    fcff = valuation.get("fcff") or {}
+    net_debt_bridge = fcff.get("net_debt_bridge") or {}
+    fields = (
+        ("PV dòng tiền dự phóng", fcff.get("pv_of_fcff")),
+        ("PV giá trị cuối kỳ", fcff.get("pv_of_terminal_value") or fcff.get("pv_terminal_value")),
+        ("Giá trị doanh nghiệp", fcff.get("enterprise_value")),
+        ("Tiền mặt và đầu tư ngắn hạn", fcff.get("cash_and_short_term_investments") or net_debt_bridge.get("cash")),
+        ("Nợ vay", fcff.get("debt") or net_debt_bridge.get("total_debt")),
+        ("Giá trị vốn chủ sở hữu", fcff.get("equity_value")),
+        ("Số cổ phiếu lưu hành (triệu)", fcff.get("shares_outstanding") or fcff.get("shares_mn")),
+        ("Giá mục tiêu (VND/cổ phiếu)", fcff.get("value_per_share") or fcff.get("target_price_vnd")),
+    )
+    rows = [(label, [value]) for label, value in fields if value is not None]
+    return TableData(title="CẦU NỐI ĐỊNH GIÁ FCFF", periods=["Giá trị"], rows=rows) if rows else None
+
+
 def _table_bs_cf(
     facts: dict[str, dict[str, float]],
     forecast_rows: dict[str, dict[str, Any]],
@@ -1356,7 +1473,7 @@ def _table_bs_cf(
         unit="Đơn vị: tỷ đồng nếu không có ghi chú khác",
         rows=[
             ("Thay đổi vốn lưu động", delta_nwc),
-            ("Capex", [abs(v) if isinstance(v, (int, float)) else v for v in capex]),
+            ("Chi đầu tư", [abs(v) if isinstance(v, (int, float)) else v for v in capex]),
             ("Đầu tư vào công ty liên kết/liên doanh", [_DASH] * n),
             ("Các khoản mục dòng tiền khác", [_DASH] * n),
             ("Dòng tiền tự do", fcff_vals),
@@ -1493,15 +1610,15 @@ def _table_key_forecast_drivers(
         cash_conversion_note = "Kỷ luật vốn lưu động"
 
     rows = [
-        ("Tăng trưởng doanh thu", [rev_growth, "Doanh thu -> EBIT -> FCFF"]),
-        ("Biên lợi nhuận gộp", [gross_margin, "Giá vốn -> lợi nhuận gộp"]),
-        ("SG&A / doanh thu", [sga, "Chi phí vận hành -> biên EBIT"]),
+        ("Tăng trưởng doanh thu", [rev_growth, "Doanh thu dẫn tới EBIT và dòng tiền tự do"]),
+        ("Biên lợi nhuận gộp", [gross_margin, "Giá vốn dẫn tới lợi nhuận gộp"]),
+        ("Chi phí bán hàng và quản lý / doanh thu", [sga, "Chi phí vận hành dẫn tới biên EBIT"]),
         ("Khấu hao / doanh thu", [dep, "EBIT và lá chắn thuế"]),
-        ("Capex / doanh thu", [capex, "FCFF và mở rộng công suất"]),
+        ("Chi đầu tư / doanh thu", [capex, "Dòng tiền tự do và mở rộng công suất"]),
         ("Thuế suất hiệu dụng", [tax_rate, "LNST và NOPAT"]),
         ("Chuyển đổi dòng tiền 2025", [cash_conversion, cash_conversion_note]),
-        ("WACC", [wacc, "Tỷ lệ chiết khấu DCF"]),
-        ("Tăng trưởng dài hạn", [terminal_growth, "Giá trị cuối kỳ (terminal value) trong mô hình DCF"]),
+        ("WACC", [wacc, "Tỷ lệ chiết khấu dòng tiền"]),
+        ("Tăng trưởng dài hạn", [terminal_growth, "Giá trị cuối kỳ trong mô hình chiết khấu dòng tiền"]),
     ]
     return TableData(
         title="ĐỘNG LỰC DỰ PHÓNG CHÍNH",
@@ -1546,7 +1663,7 @@ def _table_sensitivity_matrix(sensitivity: dict[str, Any], valuation_publishable
     return TableData(
         title="ĐỘ NHẠY GIÁ MỤC TIÊU (WACC × tăng trưởng dài hạn)",
         periods=periods,
-        unit="Đơn vị: VND/cp — định giá FCFF DCF.",
+        unit="Đơn vị: VND/cp — mô hình chiết khấu dòng tiền FCFF.",
         rows=rows,
         format_type=fmt,
     )
@@ -1611,7 +1728,7 @@ def _table_driver_sensitivity(
     ]
     return TableData(
         title="ĐỘ NHẠY THEO DRIVER",
-        periods=["Bear", "Base", "Bull"],
+        periods=["Thận trọng", "Cơ sở", "Tích cực"],
         unit="Minh họa độ nhạy theo kịch bản; báo cáo chính thức cần giả định được phê duyệt.",
         rows=rows,
     )
@@ -1635,11 +1752,11 @@ def _build_current_context(ticker: str, company_name: str, facts: dict[str, Any]
     return (
         f"{company_name} đang trong giai đoạn kiểm soát biên lợi nhuận với biên gộp trung vị "
         f"{gm_str}. Áp lực đến từ chi phí API/nguyên liệu nhập khẩu, biến động tỷ giá và "
-        f"cạnh tranh đấu thầu ETC. Chu kỳ đầu tư capex/{capex_str} doanh thu cần được theo dõi sát "
+        f"cạnh tranh đấu thầu ETC. Chu kỳ chi đầu tư ở mức {capex_str} doanh thu cần được theo dõi sát "
         "trong bối cảnh nâng chuẩn GMP-EU và dự án nhà máy. "
         "Tồn kho và nợ vay, hàng tồn kho được phản ánh qua CCC và delta NWC trong mô hình FCFF. "
         "Các biến số biên lợi nhuận, giá vốn, chi phí bán hàng, hàng tồn kho và nợ vay tăng "
-        "là các tín hiệu cần đưa trực tiếp vào giả định biên lợi nhuận, SG&A và vốn lưu động của mô hình."
+        "là các tín hiệu cần đưa trực tiếp vào giả định biên lợi nhuận, chi phí bán hàng và quản lý và vốn lưu động của mô hình."
     )
 
 
@@ -1734,6 +1851,9 @@ def _evidence_to_citations(
                 "title": title or claim,
                 "url": url,
                 "published_at": str(row.get("published_at") or "").strip(),
+                "materiality": str(row.get("materiality") or "non-material"),
+                "impact": str(row.get("impact") or "no valuation impact"),
+                "severity": str(row.get("severity") or "low"),
             }
         )
     return citations
@@ -1817,10 +1937,29 @@ def _load_news_citations(ticker: str, company_name: str | None) -> list[dict[str
             # Date only (YYYY-MM-DD) — citations don't need the time component.
             "published_at": str(published_at)[:10] if published_at is not None else "",
             "claim": claim,
+            **_news_materiality_fields(title or "", claim or ""),
         }
         for source_name, title, source_url, published_at, claim in fetched
     ]
     return _evidence_to_citations(rows, keywords)
+
+
+def _news_materiality_fields(title: str, claim: str) -> dict[str, str]:
+    text = normalize_vi(f"{title} {claim}").lower()
+    rules = (
+        (("co tuc", "tam ung"), "dividend", "dividend"),
+        (("loi nhuan", "doanh thu", "ket qua kinh doanh"), "earnings", "margin"),
+        (("nha may", "dau tu", "capex"), "capex", "revenue"),
+        (("san pham", "thuoc moi"), "product", "revenue"),
+        (("dau thau",), "tender", "revenue"),
+        (("gmp", "quy dinh", "giay phep"), "regulatory", "margin"),
+        (("hdqt", "dai hoi", "nhan su"), "governance", "WACC"),
+    )
+    for tokens, materiality, impact in rules:
+        if any(token in text for token in tokens):
+            severity = "high" if materiality in {"earnings", "capex", "regulatory"} else "medium"
+            return {"materiality": materiality, "impact": impact, "severity": severity}
+    return {"materiality": "non-material", "impact": "no valuation impact", "severity": "low"}
 
 
 def _load_market_snapshot(ticker: str):
@@ -1956,7 +2095,7 @@ def _charts(ticker: str, run_id: str | None = None) -> dict[str, ChartArtifact]:
         "C3": "EPS và P/E lịch sử",
         "C4": "Biên lợi nhuận và ROE",
         "C5": "Dự phóng doanh thu và lợi nhuận",
-        "C6": "Cầu nối định giá DCF",
+        "C6": "Cầu nối định giá chiết khấu dòng tiền",
         "C7": "Ma trận độ nhạy định giá",
         "C8": "So sánh định giá với cùng ngành",
     }
@@ -1966,7 +2105,7 @@ def _charts(ticker: str, run_id: str | None = None) -> dict[str, ChartArtifact]:
         "C3": "Nguồn: Báo cáo tài chính công ty; Bloomberg; tính toán của nhóm phân tích.",
         "C4": "Nguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.",
         "C5": "Nguồn: Dự phóng của nhóm phân tích dựa trên giả định đã phê duyệt.",
-        "C6": "Nguồn: Mô hình DCF nội bộ; giả định đã được phê duyệt.",
+        "C6": "Nguồn: Mô hình chiết khấu dòng tiền nội bộ; giả định đã được phê duyệt.",
         "C7": "Nguồn: Phân tích độ nhạy — WACC × tăng trưởng dài hạn; nhóm phân tích.",
         "C8": "Nguồn: Bloomberg; báo cáo công ty; tính toán của nhóm phân tích.",
     }
@@ -2094,7 +2233,8 @@ def build_client_report_view_model(
     cpnc = _core_pe_net_cash(ticker, manifest, allow_latest_artifacts)
     forecast_rows = _forecast_by_label(forecast)
     fcff_rows = _fcff_by_label(fcff)
-    display_gate = _report_display_governance(mode, val_result, blend)
+    valuation_policy = build_valuation_publishability_policy(val, ticker=ticker, run_id=run_id)
+    display_gate = _report_display_governance(mode, val_result, blend, policy=valuation_policy)
     current_price = display_gate["current_price"]
     target_price = display_gate["target_price"]
     upside = display_gate["upside"]
@@ -2175,12 +2315,11 @@ def build_client_report_view_model(
         missing.append("shares_outstanding")
 
     publication_status = (
-        "client_exportable"
-        if mode == "client_final" and not missing and str(val_result.get("is_publishable")).lower() == "true"
-        else "analyst_review_only"
+        "complete"
+        if not missing and str(val_result.get("is_publishable")).lower() == "true"
+        else "available_with_disclosures"
     )
-    if mode == "client_final" and (missing or publication_status != "client_exportable"):
-        missing = sorted(set(missing + ["approval_status"]))
+    missing = sorted(set(missing))
 
     _narr = _build_narratives(
         ticker, company_name, facts, forecast, fcff, blend, val, periods,
@@ -2269,7 +2408,7 @@ def build_client_report_view_model(
                     [trading_perf.absolute_returns.get(p) if trading_perf else _NA for p in ("YTD", "1T", "3T", "12T")],
                 ),
                 (
-                    f"Tương đối với {trading_perf.benchmark_symbol if trading_perf else benchmark_for_exchange(exchange)}",
+                    f"So với {trading_perf.benchmark_symbol if trading_perf else benchmark_for_exchange(exchange)}",
                     [trading_perf.relative_returns.get(p) if trading_perf else _NA for p in ("YTD", "1T", "3T", "12T")],
                 ),
             ],
@@ -2333,6 +2472,10 @@ def build_client_report_view_model(
             "Hoạt động chính": "Sản xuất và phân phối dược phẩm",
         },
         market_data=market_data,
+        selected_valuation_methods=[str(item).upper() for item in (val.get("selected_methods") or [])],
+        valuation_summary_table=_table_valuation_summary(val),
+        wacc_bridge_table=_table_wacc_bridge(val),
+        valuation_bridge_table=_table_valuation_bridge(val),
     )
 
 

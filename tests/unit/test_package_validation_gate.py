@@ -10,8 +10,8 @@ def _patch_all_pass(monkeypatch):
     monkeypatch.setattr(gates, "evidence_packet_gate", lambda s: gates.pass_gate("EVIDENCE_PACKET_GATE"))
     monkeypatch.setattr(gates, "workflow_export_gate", lambda s, **k: gates.pass_gate("EXPORT_GATE"))
     monkeypatch.setattr(
-        "backend.evaluation.fpts_grade.fpts_grade_gate",
-        lambda s: gates.pass_gate("FPTS_GRADE_GATE", {"score": 100, "decision": "allow_export"}),
+        "backend.evaluation.report_quality.report_quality_gate",
+        lambda s: gates.pass_gate("REPORT_QUALITY_GATE", {"score": 100, "decision": "allow_export"}),
     )
 
 

@@ -1,6 +1,6 @@
 # Kiểm định sequence và flow của hệ thống
 
-Cập nhật theo mã nguồn hiện tại: 2026-06-13
+Cập nhật theo mã nguồn hiện tại: 2026-06-14
 
 ## Context
 
@@ -26,9 +26,9 @@ PREFLIGHT
 -> PUBLISH
 ```
 
-Khi một cổng kiểm định nghiêm trọng thất bại, bộ chạy nghiên cứu (`ResearchGraphRunner`) đặt trạng thái run thành `blocked`, ghi `blocking_reason`, lưu checkpoint và dừng trước chặng tiếp theo. Khi toàn bộ cổng kiểm định đạt yêu cầu, chặng `PUBLISH` tự xuất báo cáo, lưu `report.html` và `report.pdf` trong bucket `runs`, sau đó trạng thái cơ sở dữ liệu chuyển thành `auto_exported`; API ánh xạ trạng thái này thành `PUBLISHED_DRAFT`. Tên `auto_exported` thể hiện rõ đây là báo cáo tự xuất sau khi cổng tự động đạt, không phải chữ ký phê duyệt thủ công.
+Runner ghi mọi gate vào `gate_results`, nhưng `_record_gate` hiện không tự đặt run thành `blocked`. Tool/stage exception chuyển run thành `failed`; thiếu publishable model tại `PUBLISH` chuyển run thành `blocked`. Chặng `PUBLISH` không render HTML/PDF: nó ghi evaluation artifacts, manifest và chuyển trạng thái cơ sở dữ liệu thành `auto_exported`; API ánh xạ trạng thái này thành `PUBLISHED_DRAFT`.
 
-Đánh giá chuyên gia sau đầu ra là hoạt động hậu kiểm, không phải cổng chặn nằm giữa `EXPORT_GATES` và `PUBLISH`. Điều này cần được trình bày rõ trong đồ án để tránh nhầm giữa kiểm định tự động trong runtime và phản hồi chuyên gia sau khi báo cáo đã được tạo.
+Client-final render là đường riêng, yêu cầu run status `approved`, final approval và publication authorization fail-closed. Điều này cần được trình bày rõ để tránh nhầm `auto_exported` với báo cáo client-final đã render.
 
 ## Technical Deep-Dive
 
@@ -48,7 +48,7 @@ flowchart TD
     LLM["Mô hình ngôn ngữ (LLM)"]
     T["Công cụ tất định"]
     G["Cổng kiểm định tự động"]
-    P["Bộ xuất báo cáo khách hàng (ClientReportPublisher)"]
+    P["Bộ render báo cáo có authorization"]
     E["Chuyên gia hậu kiểm"]
 
     U --> CLI
@@ -62,12 +62,13 @@ flowchart TD
     R --> T
     R --> G
     G --> R
-    R --> P
+    R -->|"tạo locked model + manifest"| ST
+    U -->|"lệnh render riêng"| P
     P --> ST
     ST --> E
 ```
 
-Ý nghĩa chính: orchestration chỉ là lớp điều phối, còn toàn bộ trình tự thực thi và dừng chặn nằm trong `ResearchGraphRunner`.
+Ý nghĩa chính: orchestration chỉ là lớp điều phối; runner tạo artifact và diagnostic gates, còn client-final renderer là boundary riêng có authorization.
 
 ### 2. Luồng khởi tạo bằng CLI
 
@@ -132,20 +133,15 @@ flowchart TD
     F["WRITE_REPORT<br/>Viết bản nháp có nguồn và lắp ráp mô hình báo cáo cuối"]
     G["REVIEW<br/>Kiểm tra độ đầy đủ, chất lượng, phản biện và trích dẫn"]
     H["EXPORT_GATES<br/>Kiểm định quyền tool, manifest, công thức, gói bằng chứng và khả năng xuất"]
-    I["PUBLISH<br/>Xuất báo cáo HTML/PDF và chuyển run thành auto_exported"]
+    I["PUBLISH<br/>Ghi evaluation artifacts/manifest và chuyển run thành auto_exported"]
     X["BLOCKED<br/>Ghi blocking_reason, lưu checkpoint và dừng"]
-    Y["FAILED<br/>Ghi lỗi khi có exception hoặc render lỗi"]
+    Y["FAILED<br/>Ghi lỗi khi có exception"]
 
     A --> B --> C --> D --> E --> F --> G --> H --> I
-    C -. "cổng nghiêm trọng thất bại" .-> X
-    D -. "cổng nghiêm trọng thất bại" .-> X
-    E -. "cổng nghiêm trọng thất bại" .-> X
-    F -. "cổng nghiêm trọng thất bại" .-> X
-    G -. "cổng nghiêm trọng thất bại" .-> X
-    H -. "cổng nghiêm trọng thất bại" .-> X
+    H -. "thiếu publishable model tại PUBLISH" .-> X
     A -. "exception" .-> Y
     B -. "exception" .-> Y
-    I -. "render lỗi" .-> Y
+    I -. "manifest/evaluation writer exception" .-> Y
 ```
 
 ### 5. Luồng tiền kiểm và lập kế hoạch
@@ -337,7 +333,7 @@ sequenceDiagram
     else Bản nháp không hợp lệ
         A-->>R: Danh sách lỗi
         R->>G: REPORT_ASSEMBLY_GATE fail
-        R->>S: Chuyển run thành blocked
+        R->>S: Ghi diagnostic; không tạo candidate model
     end
 ```
 
@@ -364,7 +360,7 @@ sequenceDiagram
     R->>S: Lưu gate results và checkpoint
 ```
 
-Chặng REVIEW không tự sửa báo cáo. Phản biện cấp cao chỉ tạo `findings`; nếu có phát hiện nghiêm trọng thì `SENIOR_CRITIC_GATE` chặn run. Nhánh tự sửa một lần (auto-repair) đã được loại bỏ vì bản sửa trước đây không được chạy lại qua assembler và các cổng nên không bao giờ tới khâu render.
+Chặng REVIEW không tự sửa báo cáo. Phản biện cấp cao chỉ tạo `findings`; `SENIOR_CRITIC_GATE` được ghi như diagnostic và có thể làm client-final không đủ điều kiện thông qua aggregate governance. Nhánh tự sửa một lần (auto-repair) đã được loại bỏ.
 
 ### 13. Luồng kiểm định xuất bản
 
@@ -379,43 +375,38 @@ sequenceDiagram
     R->>ST: Ghi evidence_pack.json
     R->>G: PACKAGE_VALIDATION_GATE
     Note over G: Gộp nội bộ tool permission, manifest, formula trace,<br/>evidence packet và tổng hợp xuất bản trong một cổng
-    alt Có cổng nghiêm trọng thất bại
-        G-->>R: fail với blocking_reasons
-        R->>S: Cập nhật status = blocked
-    else Tất cả cổng đạt
-        G-->>R: pass
-        R->>S: Lưu quality_gate và checkpoint
-    end
+    G-->>R: pass hoặc fail với blocking_reasons
+    R->>S: Lưu quality_gate và checkpoint
 ```
 
 `PACKAGE_VALIDATION_GATE` không hỏi phê duyệt con người. Cổng này chạy nội bộ các kiểm tra tool permission, manifest, formula trace và evidence packet, rồi tổng hợp lỗi từ kết quả đánh giá chất lượng, liên kết snapshot, trạng thái formula trace và các điều kiện xuất bản định lượng — tất cả gói trong một kết quả cổng duy nhất.
 
-### 14. Luồng xuất báo cáo
+### 14. Luồng publish model và render báo cáo
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant R as Bộ chạy nghiên cứu
     participant S as Kho runtime
-    participant ST as Kho tệp Supabase Storage
-    participant P as Bộ xuất báo cáo khách hàng (ClientReportPublisher)
+    participant ST as Kho artifact
+    participant A as Client-final authorization
+    participant P as Bộ render báo cáo
 
-    R->>R: Kiểm tra final_report_model có tồn tại
-    alt Thiếu final_report_model
-        R->>S: status = blocked, blocking_reason = final_report_model_missing_for_render
-    else Có final_report_model
-        R->>ST: Ghi manifest.json trước render nếu cần
-        R->>P: publish(run_id, ticker, mode = client_final)
-        P->>ST: Đọc artifact theo manifest và run_id
-        P->>P: Dựng view model, section và chart
-        P->>ST: Upload report.html vào bucket runs
-        P->>ST: Upload report.pdf vào bucket runs
-        R->>S: Lưu artifact refs đã xuất
+    R->>R: Kiểm tra publishable model có tồn tại
+    alt Thiếu publishable model
+        R->>S: status = blocked, blocking_reason = publishable_final_report_model_missing
+    else Có publishable model
+        R->>ST: Ghi evaluation artifacts và manifest
         R->>S: status = auto_exported, current_stage = PUBLISH
     end
+    P->>A: authorize_client_final(run_id, ticker)
+    A->>S: Kiểm tra approved run/final approval/artifacts/gates/snapshot
+    A-->>P: Authorization hoặc PublicationBlockedError
+    P->>ST: Đọc artifacts theo run_id
+    P->>P: Dựng view model, section, chart, HTML/PDF và post-render audit
 ```
 
-Đường xuất báo cáo hiện tại ghi HTML/PDF vào bucket `runs` theo khóa `{run_id}/report.html` và `{run_id}/report.pdf`. Bucket `exports` vẫn tồn tại trong storage contract, nhưng publish path hiện tại của runner không ghi bản sao vào bucket này.
+Runtime `PUBLISH` không ghi HTML/PDF. `scripts/generate_fast_report.py` và `final_report_renderer.py` thực hiện render local theo mode; `client_final` bắt buộc có authorization.
 
 ### 15. Luồng artifact theo run_id
 
@@ -428,8 +419,8 @@ flowchart TD
     E["evidence_pack.json"]
     F["quality_gate.json"]
     G["manifest.json"]
-    H["report.html"]
-    I["report.pdf"]
+    H["evaluation artifacts"]
+    I["publishable_final_report_model"]
     J["research.run_artifacts"]
 
     A --> B
@@ -461,16 +452,13 @@ stateDiagram-v2
     analysis_ready --> valuation_ready: FORECAST_AND_VALUE
     valuation_ready --> report_ready: WRITE_REPORT
     report_ready --> report_ready: REVIEW / EXPORT_GATES
-    report_ready --> auto_exported: PUBLISH thành công
-    running --> blocked: cổng nghiêm trọng fail
-    analysis_ready --> blocked: cổng nghiêm trọng fail
-    valuation_ready --> blocked: cổng nghiêm trọng fail
-    report_ready --> blocked: cổng nghiêm trọng fail
+    report_ready --> auto_exported: PUBLISH ghi manifest thành công
+    report_ready --> blocked: thiếu publishable model
     initialized --> failed: exception
     running --> failed: exception
     analysis_ready --> failed: exception
     valuation_ready --> failed: exception
-    report_ready --> failed: render hoặc exception
+    report_ready --> failed: exception
     auto_exported --> [*]
     blocked --> [*]
     failed --> [*]
@@ -493,7 +481,7 @@ flowchart LR
     I["cancelled"] --> I1["FAILED"]
 ```
 
-Trong giao diện công khai, `auto_exported` của cơ sở dữ liệu được hiển thị là `PUBLISHED_DRAFT`. Tên này nên được hiểu là run đã vượt qua cổng tự động và đã xuất báo cáo, không phải chữ ký phê duyệt thủ công của chuyên gia. Các run cũ trước migration 035 còn trạng thái `approved` vẫn ánh xạ về `PUBLISHED`.
+Trong giao diện công khai, `auto_exported` của cơ sở dữ liệu được hiển thị là `PUBLISHED_DRAFT`. Tên này nên được hiểu là runner đã tạo locked publishable model và manifest, không phải bằng chứng HTML/PDF đã render hoặc chữ ký phê duyệt thủ công. Các run `approved` ánh xạ về `PUBLISHED`.
 
 ### 18. Luồng tham gia của agent và công cụ
 
@@ -548,18 +536,18 @@ flowchart TD
     E --> E2["SENIOR_CRITIC_GATE"]
     E --> E3["CITATION_GATE"]
     F["EXPORT_GATES"] --> F1["PACKAGE_VALIDATION_GATE"]
-    F1 --> X["BLOCKED nếu có fail nghiêm trọng"]
+    F1 --> X["Diagnostic fail được ghi vào gate_results"]
 ```
 
 | Stage | Cổng kiểm định chính | Khi fail nghiêm trọng |
 |---|---|---|
-| `INGEST_AND_VALIDATE` | `DATA_QUALITY_GATE` | `blocked` |
-| `ANALYZE` | `FINANCIAL_ANALYST_GATE` | `blocked` |
-| `FORECAST_AND_VALUE` | `FORECAST_QUALITY_GATE`, `VALUATION_GATE`, `VALUATION_RECONCILIATION_GATE` | `blocked`, trừ cảnh báo không nghiêm trọng |
-| `WRITE_REPORT` | `REPORT_ASSEMBLY_GATE` | `blocked` |
-| `REVIEW` | `REPORT_COMPLETENESS_GATE`, `SENIOR_CRITIC_GATE`, `CITATION_GATE` | `blocked` |
-| `EXPORT_GATES` | `PACKAGE_VALIDATION_GATE` (gộp tool permission, manifest, formula trace, evidence packet và tổng hợp xuất bản) | `blocked` |
-| `PUBLISH` | Không có cổng phê duyệt thủ công | Render thành công thì `auto_exported`; render lỗi thì `failed` |
+| `INGEST_AND_VALIDATE` | `DATA_QUALITY_GATE` | Ghi diagnostic; tool exception có thể làm run `failed` |
+| `ANALYZE` | `FINANCIAL_ANALYST_GATE` | Ghi diagnostic; tool/agent exception có thể làm run `failed` |
+| `FORECAST_AND_VALUE` | `FORECAST_QUALITY_GATE`, `VALUATION_GATE`, `VALUATION_RECONCILIATION_GATE` | Ghi diagnostic; tool exception có thể làm run `failed` |
+| `WRITE_REPORT` | `REPORT_ASSEMBLY_GATE` | Ghi diagnostic và candidate model nếu assemble được |
+| `REVIEW` | `REPORT_COMPLETENESS_GATE`, `SENIOR_CRITIC_GATE`, `CITATION_GATE` | Ghi diagnostic |
+| `EXPORT_GATES` | `REPORT_QUALITY_GATE`, `PACKAGE_VALIDATION_GATE` | Ghi diagnostic và promote locked model |
+| `PUBLISH` | Kiểm tra publishable model | Thiếu model thì `blocked`; có model thì ghi manifest và `auto_exported` |
 
 ### 20. Luồng hậu kiểm chuyên gia sau báo cáo
 
@@ -572,8 +560,8 @@ sequenceDiagram
     actor E as Chuyên gia đánh giá
     participant N as Lần chạy hoặc cải tiến tiếp theo
 
-    R->>P: Publish sau khi cổng tự động đạt
-    P->>ST: Lưu report.html, report.pdf, manifest và evidence_pack
+    R->>ST: Lưu locked model, manifest, evidence pack và evaluation artifacts
+    E->>ST: Đọc artifact hoặc yêu cầu authorized render
     ST-->>E: Cung cấp báo cáo và bằng chứng hỗ trợ
     E->>E: Đánh giá luận điểm, số liệu, rủi ro và khả năng sử dụng
     E-->>N: Gửi phản hồi để sửa dữ liệu, quy tắc, prompt hoặc cấu trúc báo cáo
@@ -582,7 +570,7 @@ sequenceDiagram
 
 Hậu kiểm chuyên gia là vòng phản hồi cho chất lượng sản phẩm, không phải một chặng runtime bắt buộc trước khi xuất báo cáo.
 
-### 21. Luồng xử lý khi bị chặn
+### 21. Luồng xử lý diagnostic fail và runtime failure
 
 ```mermaid
 sequenceDiagram
@@ -593,12 +581,12 @@ sequenceDiagram
     participant ST as Kho artifact
     actor A as Người vận hành
 
-    G-->>R: fail, severity = critical, blocking_reasons
-    R->>R: Đặt state.status = blocked
-    R->>R: Ghi state.blocking_reason
-    R->>S: update_run_state(run_id, blocked, current_stage)
-    R->>ST: Ghi graph_state_snapshot và evidence_pack nếu có thể
-    A->>S: Xem trạng thái và blocking_reason
+    G-->>R: fail, blocking_reasons
+    R->>S: Ghi gate_results và checkpoint
+    R->>ST: Ghi graph_state_snapshot/evidence nếu có thể
+    Note over R,S: Gate fail không tự đổi status trong _record_gate
+    R-->>S: Tool/stage exception -> failed; thiếu publishable model -> blocked
+    A->>S: Xem trạng thái, errors và gate_results
     A->>ST: Xem artifact liên quan để xác định nguyên nhân
 ```
 
@@ -626,7 +614,7 @@ flowchart TD
     G --> H
 ```
 
-Khác biệt chính: fail do cổng kiểm định thường là `blocked`; fail do exception hoặc render lỗi là `failed`.
+Khác biệt chính: gate fail hiện là diagnostic; exception là `failed`; thiếu publishable model tại `PUBLISH` là `blocked`; client-final governance fail thì renderer bị từ chối bằng `PublicationBlockedError`.
 
 ### 23. Luồng dữ liệu lưu trữ theo bucket
 
@@ -655,7 +643,7 @@ flowchart TD
     K --> L
 ```
 
-Bucket `exports` là một phần của storage contract, nhưng luồng publish hiện tại của `ResearchGraphRunner` dùng `ClientReportPublisher` và ghi báo cáo vào bucket `runs`.
+Bucket `exports` là một phần của storage contract, nhưng `ResearchGraphRunner.PUBLISH` hiện không render hoặc upload HTML/PDF.
 
 ### 24. Luồng IPO cho đồ án
 
@@ -663,8 +651,8 @@ Bucket `exports` là một phần của storage contract, nhưng luồng publish
 flowchart LR
     A["Đầu vào<br/>Ticker, khoảng năm, objective, OCR flag, policy, nguồn dữ liệu"]
     B["Xử lý<br/>CLI/API, orchestrator, runner chín chặng, agent, tool, gates, checkpoint"]
-    C["Đầu ra<br/>Snapshot, facts, forecast, valuation, evidence pack, manifest, HTML/PDF hoặc blocking_reason"]
-    D["Hậu kiểm<br/>Chuyên gia đánh giá báo cáo đã xuất và tạo phản hồi cải tiến"]
+    C["Đầu ra runtime<br/>Snapshot, facts, forecast, valuation, evidence pack, locked model, evaluation packet, manifest"]
+    D["Đầu ra render riêng<br/>Authorized client-final hoặc analyst-draft HTML/PDF"]
 
     A --> B --> C --> D
 ```
@@ -678,12 +666,12 @@ flowchart LR
 | Có hai cửa vào chính: CLI và API | Đúng |
 | Orchestrator là lớp điều phối mỏng | Đúng |
 | Runtime có 9 stage trong `GRAPH_STAGES` | Đúng |
-| Cổng nghiêm trọng fail thì trạng thái là `blocked` | Đúng |
+| Gate fail tự động đặt trạng thái `blocked` | Sai trong runner hiện tại; `_record_gate` chỉ ghi diagnostic |
 | `needs_human_review` là trạng thái runtime hiện tại | Sai |
 | Có cổng phê duyệt con người trước `PUBLISH` | Sai |
-| `PUBLISH` dùng `ClientReportPublisher` trong đường chạy hiện tại | Đúng |
-| Báo cáo HTML/PDF được ghi vào bucket `runs` | Đúng |
-| Hậu kiểm chuyên gia diễn ra sau khi báo cáo đã xuất | Đúng theo ranh giới runtime hiện tại |
+| `PUBLISH` dùng `ClientReportPublisher` trong đường chạy hiện tại | Sai |
+| `PUBLISH` render HTML/PDF | Sai |
+| Client-final render yêu cầu authorization riêng | Đúng |
 
 ## Strategic Recommendations
 
@@ -713,4 +701,4 @@ Không nên dùng các sơ đồ mô tả:
 
 ### 4. Kết luận kiến trúc
 
-Luồng cốt lõi của hệ thống là pipeline chín chặng tự động, kết hợp agent chuyên trách, công cụ tất định, cổng kiểm định, artifact lineage, manifest, evidence packet và xuất báo cáo theo `run_id`. Thiết kế này ưu tiên khả năng tái lập, khả năng truy vết và kiểm soát sai số tài chính hơn là tốc độ thời gian thực. Vai trò chuyên gia được đặt ở vòng hậu kiểm để đánh giá chất lượng báo cáo đã xuất và tạo tín hiệu cải tiến cho các lần chạy tiếp theo.
+Luồng cốt lõi của hệ thống là pipeline chín chặng tự động tạo locked model, evaluation artifacts và manifest theo `run_id`; HTML/PDF được tạo qua render path riêng. Thiết kế này ưu tiên khả năng tái lập và truy vết, nhưng runtime hiện cần enforcement tường minh nếu muốn mọi deterministic gate fail chặn trước `auto_exported`.

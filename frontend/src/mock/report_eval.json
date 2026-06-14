@@ -1,7 +1,8 @@
 {
-  "rubric": "report_quality_v1", "report_quality_score": 87, "score": 87,
-  "decision": "allow_export", "failed_gates": [],
-  "section_scores": { "thesis": 88, "valuation": 86, "risks": 85, "presentation": 89 },
+  "run_id": "project-eval-20260614T033415Z",
+  "rubric": "report_quality_v1", "report_quality_score": null, "score": null,
+  "decision": "block_export", "failed_gates": ["financial_gate"],
+  "section_scores": {},
   "report_artifacts": { "html": "output/DHG_report.html", "pdf": "output/DHG_report.pdf", "manifest": "output/DHG_manifest.json" },
-  "publication_readiness": { "passed": true, "blocking_reasons": [] }
+  "publication_readiness": { "passed": false, "blocking_reasons": ["financial_gate_passed", "publication_readiness"] }
 }

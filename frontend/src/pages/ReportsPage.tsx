@@ -50,9 +50,15 @@ export function ReportsPage() {
           </tr>
         </thead>
         <tbody>
-          {filtered.map((it) => (
-            <ReportRow key={it.ticker} item={it} onPreview={setPreviewTicker} onGenerated={load} />
-          ))}
+          {filtered.length === 0 ? (
+            <tr>
+              <td colSpan={6}>Không có mã nào khớp lựa chọn.</td>
+            </tr>
+          ) : (
+            filtered.map((it) => (
+              <ReportRow key={it.ticker} item={it} onPreview={setPreviewTicker} onGenerated={load} />
+            ))
+          )}
         </tbody>
       </table>
 

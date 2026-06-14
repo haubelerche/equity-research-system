@@ -91,8 +91,8 @@ def build_investment_thesis(n: NarrativeInputs) -> str:
         f"{_pct(n.rev_growth_driver)} mà không cần mở rộng đòn bẩy vận hành quá mức. "
         f"{valuation_clause} "
         f"Luận điểm đầu tư xoay quanh ba câu hỏi: (i) doanh nghiệp có giữ được biên gộp trước áp lực chi phí "
-        f"nguyên liệu API và tỷ giá không? (ii) kỷ luật chi phí SG&A có đảm bảo biên EBIT không bị xói mòn khi "
-        f"tăng doanh thu? (iii) capex dài hạn phục vụ nâng chuẩn nhà máy GMP-EU có phá vỡ cấu trúc dòng tiền "
+        f"nguyên liệu API và tỷ giá không? (ii) kỷ luật chi phí bán hàng và quản lý có đảm bảo biên EBIT không bị xói mòn khi "
+        f"tăng doanh thu? (iii) chi đầu tư dài hạn phục vụ nâng chuẩn nhà máy GMP-EU có phá vỡ cấu trúc dòng tiền "
         f"tự do hay không? Ba câu hỏi này quyết định độ tin cậy của kết quả mô hình FCFF và từ đó quyết định "
         f"giá trị hợp lý. Rủi ro trọng yếu là kết quả đấu thầu ETC và biến động giá API — hai yếu tố này tác "
         f"động đồng thời lên cả doanh thu lẫn biên, và là nguồn sai lệch lớn nhất so với giả định cơ sở."
@@ -117,7 +117,7 @@ def build_business_update(n: NarrativeInputs) -> str:
         f"vốn lưu động từ phải thu bệnh viện. "
         f"Biến số vận hành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu "
         f"cao vừa chịu áp lực chính sách đấu thầu định kỳ. Bất kỳ sai lệch nào ở đây sẽ truyền dẫn qua doanh "
-        f"thu → biên gộp → EBIT → FCFF, ảnh hưởng trực tiếp đến giá mục tiêu. Diễn biến giá API và tiến độ "
+        f"thu, biên gộp, EBIT và FCFF, ảnh hưởng trực tiếp đến giá mục tiêu. Diễn biến giá API và tiến độ "
         f"nâng chuẩn nhà máy là hai chỉ báo vận hành cần theo dõi song song với kết quả tài chính quý."
     )
 
@@ -138,8 +138,8 @@ def build_financial_performance(n: NarrativeInputs) -> str:
         f"sao biên lợi nhuận ròng {_pct(n.net_margin_latest)} không nhất thiết tương đương với khả năng tạo "
         f"dòng tiền tự do. "
         f"Biến động lợi nhuận giữa các năm chủ yếu đến từ ba nguồn: (1) thay đổi giá vốn API/tỷ giá; "
-        f"(2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí SG&A liên quan đấu thầu. Những yếu tố này được chuẩn "
-        f"hóa thành biến số dự phóng (biên gộp {_pct(n.gross_margin_driver)}, SG&A {_pct(n.sga_driver)} doanh "
+        f"(2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí bán hàng và quản lý liên quan đấu thầu. Những yếu tố này được chuẩn "
+        f"hóa thành biến số dự phóng (biên gộp {_pct(n.gross_margin_driver)}, chi phí bán hàng và quản lý {_pct(n.sga_driver)} doanh "
         f"thu) và là cơ sở để phân tích độ nhạy — người đọc có thể kiểm tra xem kết quả mô hình thay đổi như "
         f"thế nào khi từng giả định dịch chuyển."
     )
@@ -150,11 +150,11 @@ def build_forecast_assumptions(n: NarrativeInputs) -> str:
         f"Dự phóng theo phương pháp dự phóng theo biến số, đi từ biến số kinh doanh tới dòng tài chính tới định giá. "
         f"Giả định cơ sở: tăng trưởng doanh thu {_pct(n.rev_growth_driver)} (căn cứ CAGR lịch sử "
         f"{_pct(n.revenue_cagr)} và kế hoạch mở rộng ETC/OTC); biên lợi nhuận gộp {_pct(n.gross_margin_driver)} "
-        f"(phản ánh áp lực API và cơ cấu sản phẩm); SG&A {_pct(n.sga_driver)} doanh thu; thuế suất hiệu dụng "
-        f"{_pct(n.tax_driver)}; capex {_pct(n.capex_driver)} doanh thu. "
+        f"(phản ánh áp lực API và cơ cấu sản phẩm); chi phí bán hàng và quản lý {_pct(n.sga_driver)} doanh thu; thuế suất hiệu dụng "
+        f"{_pct(n.tax_driver)}; chi đầu tư {_pct(n.capex_driver)} doanh thu. "
         f"Biến số có tác động lớn nhất tới giá trị là: (1) tăng trưởng doanh thu — mỗi điểm phần trăm hụt so "
         f"với giả định cơ sở sẽ kéo EBIT và FCFF giảm theo tỷ lệ; (2) biên lợi nhuận gộp — biến động chi phí "
-        f"API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) capex và vốn lưu động — "
+        f"API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) chi đầu tư và vốn lưu động — "
         f"quyết định bao nhiêu phần EBIT còn lại dưới dạng FCFF sau tái đầu tư. "
         f"Hai tham số định giá quan trọng nhất là WACC {_pct(n.wacc)} và tăng trưởng dài hạn "
         f"{_pct(n.terminal_growth)}; chúng xác định cách quy đổi FCFF tương lai về hiện giá. Độ nhạy của giá "
@@ -168,36 +168,36 @@ def build_valuation_narrative(n: NarrativeInputs) -> str:
     # Primary methodology: Core EPS x Core P/E + Net Cash (Guidance §11)
     if n.core_pe_target is not None:
         method_clause = (
-            f"Phương pháp định giá chính là Core EPS × P/E + Net Cash (Hướng dẫn §11) — "
+            f"Phương pháp định giá chính là EPS cốt lõi nhân P/E cộng tiền mặt ròng — "
             f"tách biệt giá trị hoạt động cốt lõi và danh mục đầu tư tài chính thanh khoản. "
-            f"Core EPS {_vnd(n.core_eps)} được nhân với P/E mục tiêu "
-            f"{f'{n.target_core_pe:.0f}x' if n.target_core_pe else ''} (peer median ngành dược VN), "
-            f"cộng thêm Net Cash/CP {_vnd(n.net_cash_per_share)}, "
+            f"EPS cốt lõi {_vnd(n.core_eps)} được nhân với P/E mục tiêu "
+            f"{f'{n.target_core_pe:.0f}x' if n.target_core_pe else ''} (trung vị nhóm so sánh ngành dược Việt Nam), "
+            f"cộng thêm tiền mặt ròng trên mỗi cổ phiếu {_vnd(n.net_cash_per_share)}, "
             f"cho giá mục tiêu {_vnd(n.core_pe_target)}. "
-            f"FCFF ({_vnd(n.price_fcff)}) và Blend ({_vnd(n.target_price)}) dùng làm kiểm tra chéo độc lập."
+            f"FCFF ({_vnd(n.price_fcff)}) và giá trị tổng hợp ({_vnd(n.target_price)}) dùng làm kiểm tra chéo độc lập."
         )
     else:
         if n.target_price or n.core_pe_target:
             method_clause = (
-                f"Phương pháp định giá chính là FCFF DCF, kiểm tra chéo bằng bội số P/E Forward. "
+                f"Phương pháp định giá chính là chiết khấu dòng tiền FCFF, kiểm tra chéo bằng bội số P/E dự phóng. "
                 f"FCFF được chiết khấu bằng WACC {_pct(n.wacc)} — phản ánh cơ cấu vốn và phần bù rủi ro "
-                f"thị trường ngành dược Việt Nam — với tốc độ tăng trưởng dài hạn (terminal growth) "
+                f"thị trường ngành dược Việt Nam — với tốc độ tăng trưởng dài hạn "
                 f"{_pct(n.terminal_growth)}, tương đương tốc độ tăng trưởng danh nghĩa nền kinh tế dài hạn. "
-                f"Giá trị DCF nhạy cảm nhất với giả định WACC và terminal growth: thay đổi ±1% WACC làm "
+                f"Giá trị chiết khấu dòng tiền nhạy cảm nhất với giả định WACC và tăng trưởng dài hạn: thay đổi ±1% WACC làm "
                 f"giá trị thay đổi đáng kể, nên hai biến này phải được xác nhận bởi dữ liệu thị trường vốn. "
                 f"Giá mục tiêu {_vnd(n.target_price)} tổng hợp 60% FCFF ({_vnd(n.price_fcff)}) "
                 f"và 40% FCFE ({_vnd(n.price_fcfe)}). "
                 f"Trọng số 60/40 phản ánh ưu tiên phương pháp dòng tiền trên nền kiểm tra chéo bội số, "
                 f"phù hợp với doanh nghiệp có lịch sử FCFF dương và chu kỳ vốn có thể dự báo được. "
-                f"P/E Forward dùng EPS dự phóng kỳ tới, điều chỉnh cho chu kỳ đấu thầu đặc thù ngành. "
+                f"P/E dự phóng dùng EPS kỳ tới, điều chỉnh cho chu kỳ đấu thầu đặc thù ngành. "
                 f"Biên lợi nhuận gộp giả định {_pct(n.gross_margin_driver)} là đầu vào trọng yếu: "
                 f"mỗi thay đổi 100 bps biên gộp ảnh hưởng trực tiếp đến FCFF và làm dịch chuyển giá trị."
             )
         else:
             method_clause = (
                 f"Giá mục tiêu hợp nhất hiện {_NA}; một số đầu vào định giá chưa đủ điều kiện. "
-                f"Khi dữ liệu đầy đủ, phương pháp chính sẽ là FCFF DCF chiết khấu bằng WACC, "
-                f"kiểm tra chéo bằng P/E Forward theo thông lệ phân tích cổ phiếu vốn."
+                f"Khi dữ liệu đầy đủ, phương pháp chính sẽ là chiết khấu dòng tiền FCFF bằng WACC, "
+                f"kiểm tra chéo bằng P/E dự phóng theo thông lệ phân tích cổ phiếu vốn."
             )
 
     display_target = n.core_pe_target or n.target_price
@@ -259,7 +259,7 @@ def build_growth_drivers(n: NarrativeInputs) -> str:
         f"Nguồn tăng trưởng chính là mở rộng sản lượng kênh ETC (đấu thầu bệnh viện) — kênh này vừa có "
         f"quy mô lớn vừa bị chi phối bởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các "
         f"quý. Kênh OTC ổn định hơn nhưng tăng trưởng thấp hơn; nó đóng vai trò giảm thiểu biến động hơn "
-        f"là dẫn dắt tăng trưởng. Mức đầu tư capex {_pct(n.capex_driver)} doanh thu để nâng chuẩn GMP là "
+        f"là dẫn dắt tăng trưởng. Mức chi đầu tư {_pct(n.capex_driver)} doanh thu để nâng chuẩn GMP là "
         f"điều kiện cần để mở rộng tập sản phẩm và khách hàng trung hạn — nhưng trong ngắn hạn làm giảm "
         f"FCFF. Hiểu được đánh đổi này là chìa khóa để diễn giải FCFF hiện tại đúng với giai đoạn đầu tư. "
         f"Chỉ báo cần theo dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức độ "
@@ -295,7 +295,7 @@ def build_margin_drivers(n: NarrativeInputs) -> str:
         f"cùng chiều, giá vốn hàng bán tăng và biên gộp bị thu hẹp ngay trong quý tiếp theo vì chu kỳ nhập "
         f"khẩu thường ngắn. Dư địa hấp thụ cú sốc này bị giới hạn bởi biên lợi nhuận ròng hiện ở mức "
         f"{_pct(n.net_margin_latest)} — không đủ đệm để hấp thụ nếu biên gộp giảm quá 2–3 điểm phần trăm. "
-        f"Chi phí SG&A {_pct(n.sga_driver)} doanh thu là lớp chi phí quyết định khoảng cách biên gộp → "
+        f"Chi phí bán hàng và quản lý {_pct(n.sga_driver)} doanh thu là lớp chi phí quyết định khoảng cách biên gộp đến "
         f"biên EBIT; đặc biệt chi phí phục vụ đấu thầu ETC có xu hướng không co giãn theo doanh thu. "
         f"Thuế suất hiệu dụng {_pct(n.tax_driver)} là bước chuyển cuối từ EBIT sang lợi nhuận sau thuế — "
         f"biến số này ít biến động nhưng bất kỳ thay đổi ưu đãi thuế nào sẽ tác động trực tiếp. "

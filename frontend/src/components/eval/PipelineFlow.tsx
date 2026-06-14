@@ -2,15 +2,22 @@ import { PIPELINE_ORDER } from "../../data/evalFramework";
 
 export function PipelineFlow() {
   return (
-    <nav aria-label="fail-closed pipeline" className="pipeline">
-      {PIPELINE_ORDER.map((stage, i) => (
-        <span key={stage} className="pipeline__stage">
-          {stage}{i < PIPELINE_ORDER.length - 1 ? " →" : ""}
-        </span>
-      ))}
-      <p className="pipeline__rule">
-        Một lớp deterministic critical fail không được LLM-judge ghi đè bằng điểm cao.
-      </p>
-    </nav>
+    <figure aria-labelledby="pipeline-title" className="pipeline-flowchart">
+      <div className="pipeline-flowchart__heading">
+        <h2 id="pipeline-title">Luồng đánh giá tổng quan</h2>
+        <span>Fail-closed</span>
+      </div>
+      <ol className="pipeline-flowchart__steps">
+        {PIPELINE_ORDER.map((stage, index) => (
+          <li
+            key={stage}
+            className={index === PIPELINE_ORDER.length - 1 ? "pipeline-flowchart__step pipeline-flowchart__step--final" : "pipeline-flowchart__step"}
+          >
+            <span className="pipeline-flowchart__number">{index + 1}</span>
+            <span>{stage}</span>
+          </li>
+        ))}
+      </ol>
+    </figure>
   );
 }

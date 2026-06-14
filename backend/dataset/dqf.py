@@ -41,6 +41,27 @@ def validate_financial_fact(payload: dict[str, Any]) -> DQFResult:
     return DQFResult(status="accepted", confidence=0.98)
 
 
+def score_materiality(payload: dict[str, Any]) -> dict[str, Any]:
+    """Score event materiality from measurable exposure; title is only a fallback."""
+    dimensions = {
+        "revenue": abs(float(payload.get("revenue_impact_pct") or 0)),
+        "margin": abs(float(payload.get("margin_impact_bps") or 0)) / 100,
+        "capex": abs(float(payload.get("capex_impact_pct") or 0)),
+        "dividend": abs(float(payload.get("dividend_impact_pct") or 0)),
+        "governance": float(payload.get("governance_impact_score") or 0),
+    }
+    max_impact = max(dimensions.values(), default=0.0)
+    if max_impact >= 10:
+        level = "high"
+    elif max_impact >= 3:
+        level = "medium"
+    elif max_impact > 0:
+        level = "low"
+    else:
+        level = infer_materiality(str(payload.get("event_type") or ""), str(payload.get("title") or ""))
+    return {"level": level, "dimensions": dimensions, "max_impact": max_impact}
+
+
 def infer_materiality(event_type: str, title: str = "") -> str:
     title_lower = title.lower()
     if event_type in {"regulatory_recall", "tender_award", "bhyt_reimbursement_rate_change"}:
@@ -58,7 +79,7 @@ def validate_catalyst_event(payload: dict[str, Any]) -> DQFResult:
     if missing:
         return DQFResult(status="rejected", confidence=0.0, errors=[f"Missing: {', '.join(missing)}"])
 
-    materiality = payload.get("materiality_hint") or infer_materiality(payload["event_type"], payload.get("title", ""))
+    materiality = payload.get("materiality_hint") or score_materiality(payload)["level"]
     if materiality not in {"low", "medium", "high"}:
         materiality = "low"
     return DQFResult(status="accepted", confidence=0.9, materiality=materiality)

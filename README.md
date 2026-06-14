@@ -312,3 +312,174 @@ python -m pytest tests/integration/ -v
 
 ---
 
+## Cau truc va logic hien tai
+
+### Context
+
+He thong hien tai gom ba lop van hanh chinh:
+
+1. **Research pipeline** trong `backend/`, `scripts/` va `tests/`: thu thap du lieu, tao canonical
+   facts, tinh valuation deterministic, lap bao cao va ap dung cac governance gate.
+2. **Project evaluation harness** trong `backend/evaluation/project_evaluator.py`: chay lan luot
+   8 evaluation plan trong `eval/`, tong hop ket qua test va kiem tra runtime evidence theo nguyen
+   tac fail-closed.
+3. **Evaluation dashboard** trong `frontend/`: Vite + React + TypeScript doc evaluation packet
+   truc tiep tu FastAPI va hien thi trang thai tung lop.
+4. **Run-scoped evaluation writer** trong `backend/evaluation/run_evaluation.py`: moi research run
+   sinh cac evaluation artifact fail-closed, upload vao Supabase Storage va dang ky trong manifest.
+
+### Evaluation flow
+
+```text
+eval/01_data_reliability_plan.md
+  -> eval/02_rag_and_ragas_plan.md
+  -> eval/03_financial_calculation_plan.md
+  -> eval/04_citation_and_source_provenance_plan.md
+  -> eval/05_agent_workflow_and_llm_judge_plan.md
+  -> eval/06_report_quality_plan.md
+  -> eval/07_observability_cost_latency_plan.md
+  -> eval/08_rollout_and_ci_plan.md
+  -> output/evaluation/eval_result/evaluation_packet.json
+  -> GET /eval/framework
+  -> frontend dashboard
+```
+
+Moi plan chay test scope rieng va tao mot JSON artifact. Test suite pass khong tu dong co nghia
+mot research run du dieu kien publish. Neu thieu run-specific artifact, lop do duoc danh dau
+`blocked`; diem narrative hoac LLM judge khong duoc ghi de deterministic failure.
+
+Chay evaluation cho ticker pilot:
+
+```powershell
+python scripts/run_project_evaluation.py --ticker DHG --output-dir output/evaluation/eval_result
+```
+
+Output chinh:
+
+```text
+output/evaluation/eval_result/
+|-- evaluation_packet.json
+|-- data_quality.json
+|-- retrieval_eval.json
+|-- financial_eval.json
+|-- citation_eval.json
+|-- agent_eval.json
+|-- report_eval.json
+|-- observability_eval.json
+`-- rollout_ci_eval.json
+```
+
+### API va frontend
+
+FastAPI dang ky API route truoc khi mount frontend static:
+
+| Endpoint | Vai tro |
+|---|---|
+| `GET /eval/framework` | Tra ve evaluation packet moi nhat cho dashboard |
+| `GET /eval/results/{artifact_name}` | Tra ve artifact chi tiet da duoc allow-list |
+| `GET /research/{run_id}/evaluation` | Tra ve evaluation packet runtime cua mot research run |
+| `GET /research/{run_id}/evaluation/{artifact_name}` | Tra ve runtime evaluation artifact chi tiet |
+| `GET /` | Phuc vu `frontend/dist/` neu production build ton tai |
+
+Trong development, Vite chay tai cong `5173` va proxy `/eval`, `/research`, `/reports` sang FastAPI
+tai cong `8010`. Trong production, FastAPI phuc vu truc tiep build trong `frontend/dist/`.
+
+### Cau truc thu muc lien quan
+
+```text
+.
+|-- backend/
+|   |-- api.py                         # Evaluation API va static frontend mount
+|   `-- evaluation/
+|       `-- project_evaluator.py       # Sequential 8-plan evaluation harness
+|-- eval/                              # Evaluation plans 01..08
+|-- frontend/
+|   |-- src/
+|   |   |-- App.tsx                   # Dashboard UI
+|   |   |-- api.ts                    # Typed evaluation API client
+|   |   |-- evalFramework.ts          # Pipeline va maturity thresholds
+|   |   `-- styles.css                # Dashboard visual system
+|   |-- vite.config.ts                # Development proxy
+|   `-- dist/                         # Production build, generated
+|-- output/
+|   `-- evaluation/
+|       `-- eval_result/               # Latest evaluation packet va artifacts
+|-- scripts/
+|   `-- run_project_evaluation.py      # Evaluation CLI entrypoint
+`-- tests/
+    `-- unit/test_project_evaluator.py # Evaluator contract tests
+```
+
+---
+
+## Chay frontend
+
+### Development mode
+
+Mo hai terminal tu project root.
+
+Terminal 1 - chay FastAPI:
+
+```powershell
+python -m backend.main
+```
+
+Terminal 2 - cai dependency va chay Vite:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Mo dashboard tai:
+
+```text
+http://localhost:5173
+```
+
+Neu chua co evaluation packet, chay evaluator truoc hoac trong mot terminal rieng:
+
+```powershell
+python scripts/run_project_evaluation.py --ticker DHG --output-dir output/evaluation/eval_result
+```
+
+Sau khi evaluator hoan tat, bam **Refresh packet** tren dashboard de tai ket qua moi.
+
+### Production-like mode
+
+Build frontend:
+
+```powershell
+cd frontend
+npm install
+npm run build
+cd ..
+```
+
+Chay FastAPI:
+
+```powershell
+python -m backend.main
+```
+
+FastAPI se phuc vu dashboard da build tai:
+
+```text
+http://localhost:8010
+```
+
+### Frontend verification
+
+```powershell
+cd frontend
+npm run build
+npm test
+```
+
+`npm run build` kiem tra TypeScript va tao `frontend/dist/`. Dashboard mac dinh hien packet hau
+kiem moi nhat. Mo `http://localhost:5173/?run_id=<research-run-id>` de xem packet runtime cua mot
+research run. Runtime evaluator tu dong sinh artifact, nhung khong thay the final approval.
+
+---
+

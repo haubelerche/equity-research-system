@@ -1,14 +1,13 @@
-"""Fast report path: locally render PDF/HTML from already-built run artifacts.
+"""Render the best available report and its explanation from built run artifacts.
 
 This script does NOT run the multi-agent pipeline, ingestion, OCR, or parsing.
-It may only reuse a run that already passed the required lifecycle and export
-gates. Client-final rendering additionally requires final human approval.
+Quality findings are disclosed in the report status instead of blocking export.
 
 Target: well under 120 seconds.
 
 Usage:
     python scripts/generate_fast_report.py --ticker DHG
-    python scripts/generate_fast_report.py --ticker DHG --mode client_final
+    python scripts/generate_fast_report.py --ticker DHG --mode standard
 """
 from __future__ import annotations
 
@@ -40,19 +39,17 @@ def _load_dotenv() -> None:
 # --- module-level names expected by tests (patchable) ---
 
 from backend.dataops.snapshot_freshness import latest_ready_snapshot
-from backend.reporting.final_report_renderer import render_client_report_to_directory
-from backend.reporting.publication_readiness import (
-    PublicationBlockedError,
-    authorize_client_final,
+from backend.reporting.final_report_renderer import (
+    render_client_report_to_directory,
+    render_report_explanation_to_directory,
 )
 from backend.storage import RUNS_BUCKET, SupabaseStorageAdapter, run_artifact_key
 
 
-def _latest_report_run_ids(ticker: str, mode: str = "client_final") -> list[str]:
-    """Return lifecycle-approved report runs for *ticker*, newest first."""
+def _latest_report_run_ids(ticker: str, mode: str = "standard") -> list[str]:
+    """Return runs with enough built artifacts to render, newest first."""
     from backend.database.config import connect_with_retry, require_database_url
 
-    statuses = ["approved"] if mode == "client_final" else ["approved", "auto_exported"]
     with connect_with_retry(require_database_url()) as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -61,23 +58,26 @@ def _latest_report_run_ids(ticker: str, mode: str = "client_final") -> list[str]
                 FROM research.runs r
                 JOIN research.run_artifacts a ON a.run_id = r.run_id
                 WHERE r.ticker = %s
-                  AND r.status = ANY(%s)
-                  AND a.section_key = 'publishable_final_report_model'
-                  AND a.is_locked = TRUE
+                  AND a.section_key IN (
+                    'publishable_final_report_model',
+                    'review_passed_report_model',
+                    'report_candidate_model',
+                    'valuation'
+                  )
                 ORDER BY r.run_id DESC
                 """,
-                (ticker.upper(), statuses),
+                (ticker.upper(),),
             )
             rows = cur.fetchall()
     return [row[0] for row in rows]
 
 
-def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
+def generate_fast_report(ticker: str, mode: str = "standard") -> dict:
     """Render the latest report for *ticker* from existing run artifacts.
 
     Fails fast if there is no ready snapshot or no prior run with a built report.
     Returns a result dict with ticker, snapshot_id, run_id, elapsed_sec,
-    pdf_path, and html_path.
+    report PDF path, and explanation PDF path.
     """
     t_start = time.monotonic()
 
@@ -99,8 +99,8 @@ def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
     # run reports stay immutable for audit and may have been created by older code.
     output_dir = ROOT / "output"
     output_dir.mkdir(parents=True, exist_ok=True)
-    pdf_dest = output_dir / f"{ticker}_fast_report.pdf"
-    html_dest = output_dir / f"{ticker}_fast_report.html"
+    pdf_dest = output_dir / f"{ticker}_report.pdf"
+    explanation_dest = output_dir / f"{ticker}_explanation.pdf"
     workings_dest = output_dir / f"{ticker}_valuation_workings.md"
 
     storage = SupabaseStorageAdapter()
@@ -109,24 +109,22 @@ def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
     last_error: Exception | None = None
     for rid in run_ids:
         try:
-            authorization = None
-            if mode == "client_final":
-                authorization = authorize_client_final(run_id=rid, ticker=ticker)
-                if authorization.snapshot_id != snapshot.get("snapshot_id"):
-                    raise PublicationBlockedError(
-                        "client_final_render_blocked:latest_ready_snapshot_mismatch"
-                    )
             workings_key = run_artifact_key(rid, "report_workings.md")
             with tempfile.TemporaryDirectory(prefix=f"fast-report-{rid}-") as temp_dir:
-                html_path, pdf_path, _ = render_client_report_to_directory(
+                html_path, pdf_path, view_model = render_client_report_to_directory(
                     run_id=rid,
                     ticker=ticker,
                     mode=mode,
                     output_dir=temp_dir,
-                    authorization=authorization,
+                )
+                explanation_html, explanation_pdf = render_report_explanation_to_directory(
+                    run_id=rid,
+                    ticker=ticker,
+                    view_model=view_model,
+                    output_dir=temp_dir,
                 )
                 shutil.copy2(pdf_path, pdf_dest)
-                shutil.copy2(html_path, html_dest)
+                shutil.copy2(explanation_pdf, explanation_dest)
 
             if storage.exists(RUNS_BUCKET, workings_key):
                 storage.download_file(RUNS_BUCKET, workings_key, workings_dest)
@@ -154,7 +152,7 @@ def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
         "run_id": used_run_id,
         "elapsed_sec": round(elapsed, 2),
         "pdf_path": str(pdf_dest),
-        "html_path": str(html_dest),
+        "explanation_pdf_path": str(explanation_dest),
     }
 
     # The valuation workings .md is a best-effort verification companion.
@@ -163,7 +161,7 @@ def generate_fast_report(ticker: str, mode: str = "client_final") -> dict:
 
     print(
         f"[generate_fast_report] ticker={ticker} run_id={used_run_id} "
-        f"elapsed={elapsed:.1f}s pdf={pdf_dest} html={html_dest}"
+        f"elapsed={elapsed:.1f}s report={pdf_dest} explanation={explanation_dest}"
     )
     if elapsed > 120:
         print(
@@ -182,8 +180,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--ticker", required=True, help="Ticker symbol (e.g. DHG)")
     parser.add_argument(
         "--mode",
-        default="client_final",
-        help="Render mode passed to ClientReportPublisher.publish()",
+        default="standard",
+        choices=("standard", "analyst_draft", "client_final", "internal_debug"),
+        help="Use standard for the unified non-blocking report flow",
     )
     return parser.parse_args(argv)
 

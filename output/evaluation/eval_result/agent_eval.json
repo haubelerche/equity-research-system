@@ -1,0 +1,141 @@
+{
+  "schema_version": "2.0",
+  "plan_id": "05",
+  "plan_name": "Agent workflow and LLM judge",
+  "ticker": "DHG",
+  "run_id": "project-eval-20260614T033415Z",
+  "generated_at": "2026-06-14T03:34:15.588631+00:00",
+  "status": "pass",
+  "test_execution": {
+    "status": "pass",
+    "targets": [
+      "tests/harness",
+      "tests/unit/test_six_agent_workflow.py",
+      "tests/unit/test_tool_registry.py",
+      "tests/unit/test_agent_lineage_injection.py",
+      "tests/unit/test_package_validation_gate.py"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 9.576,
+    "summary": {
+      "passed": 42
+    },
+    "output_tail": [
+      "..........................................                               [100%]",
+      "42 passed in 8.74s"
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [
+      "agent_eval.json",
+      "run_log.json"
+    ],
+    "found": {
+      "agent_eval.json": [],
+      "run_log.json": []
+    },
+    "missing": [
+      "agent_eval.json",
+      "run_log.json"
+    ],
+    "status": "blocked"
+  },
+  "blocking_issues": [],
+  "metrics": {
+    "test_suite_status": "pass",
+    "tests_passed": 42,
+    "tests_failed": 0,
+    "runtime_evidence_coverage": 0.0
+  },
+  "metric_results": [
+    {
+      "id": "tool_permission_compliance",
+      "label": "Tool permission compliance",
+      "value": 1.0,
+      "threshold": "100%",
+      "status": "pass",
+      "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\evidence_packets\\run1_evidence_packet.json",
+      "detail": ""
+    },
+    {
+      "id": "schema_validity",
+      "label": "Output schema validity",
+      "value": 1.0,
+      "threshold": "100%",
+      "status": "pass",
+      "source": "archived agent JSON outputs",
+      "detail": ""
+    },
+    {
+      "id": "role_adherence",
+      "label": "Role adherence",
+      "value": null,
+      "threshold": ">= 0.90",
+      "status": "measured_only",
+      "source": "calibrated LLM judge missing",
+      "detail": ""
+    },
+    {
+      "id": "groundedness",
+      "label": "Groundedness",
+      "value": null,
+      "threshold": ">= 0.90",
+      "status": "measured_only",
+      "source": "claim-level evidence judge missing",
+      "detail": ""
+    },
+    {
+      "id": "no_unauthorized_calc",
+      "label": "No unauthorized financial calculation",
+      "value": null,
+      "threshold": "100%",
+      "status": "measured_only",
+      "source": "agent trace classifier missing",
+      "detail": ""
+    },
+    {
+      "id": "task_completion",
+      "label": "Task completion",
+      "value": 1.0,
+      "threshold": ">= 0.85",
+      "status": "pass",
+      "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\audits\\run1_agent_effectiveness_audit.json",
+      "detail": ""
+    },
+    {
+      "id": "plan_adherence",
+      "label": "Plan adherence",
+      "value": null,
+      "threshold": ">= 0.85",
+      "status": "measured_only",
+      "source": "plan trace comparison missing",
+      "detail": ""
+    },
+    {
+      "id": "critic_issue_recall",
+      "label": "Critic issue recall",
+      "value": null,
+      "threshold": ">= 90%",
+      "status": "measured_only",
+      "source": "seeded failure dataset missing",
+      "detail": ""
+    }
+  ],
+  "advisory_findings": [
+    "role_adherence:calibrated_llm_judge_pending",
+    "groundedness:calibrated_llm_judge_pending",
+    "no_unauthorized_calc:calibrated_llm_judge_pending",
+    "plan_adherence:calibrated_llm_judge_pending",
+    "critic_issue_recall:calibrated_llm_judge_pending"
+  ],
+  "judge_status": "advisory_pending",
+  "tool_permission_compliance": 1.0,
+  "schema_validity": 1.0,
+  "role_adherence": null,
+  "groundedness": null,
+  "no_unauthorized_calc": null,
+  "task_completion": 1.0,
+  "plan_adherence": null,
+  "critic_issue_recall": null,
+  "rubric_scores": {}
+}

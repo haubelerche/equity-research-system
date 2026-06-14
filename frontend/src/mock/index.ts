@@ -18,8 +18,9 @@ export const MOCK_ARTIFACTS = {
   observability_eval: observability,
 };
 
-// Flatten each artifact to a metric-id -> number map matching evalFramework metric ids.
-const LAYER_VALUE_MAP: Record<string, Record<string, number>> = {
+// Flatten the latest evaluation snapshot to metric-id -> nullable value.
+// Null means the evaluator could not prove the metric from runtime evidence.
+const LAYER_VALUE_MAP: Record<string, Record<string, number | null>> = {
   data_reliability: {
     core_metric_coverage: dataQuality.core_metric_coverage,
     period_completeness: dataQuality.period_completeness,
@@ -70,6 +71,19 @@ const LAYER_VALUE_MAP: Record<string, Record<string, number>> = {
   },
 };
 
-export function mockValuesForLayer(layerId: string): Record<string, number> {
+export function mockValuesForLayer(layerId: string): Record<string, number | null> {
   return LAYER_VALUE_MAP[layerId] ?? {};
+}
+
+export function mockRunIdForLayer(layerId: string): string {
+  const runIds: Record<string, string> = {
+    data_reliability: dataQuality.run_id,
+    rag_evidence: retrieval.run_id,
+    financial: financial.run_id,
+    citation: citation.run_id,
+    agent: agent.run_id,
+    report_quality: report.run_id,
+    observability: observability.run_id,
+  };
+  return runIds[layerId] ?? "unknown";
 }

@@ -1,7 +1,8 @@
 import type { MetricStatus } from "../../lib/evalStatus";
 
 const LABEL: Record<MetricStatus, string> = {
-  pass: "Pass", fail: "Fail", measured_only: "Measured-only",
+  pass: "Đạt",
+  fail: "Chưa đạt",
 };
 
 export function StatusPill({ status }: { status: MetricStatus }) {

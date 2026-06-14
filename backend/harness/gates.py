@@ -4,6 +4,8 @@ import re
 from math import isclose
 from typing import Any
 
+from backend.evaluation.governance import forecast_sanity_issues
+
 _FY_PATTERN = re.compile(r"^20\d{2}FY$")
 _METRIC_REF_PATTERN = re.compile(r"\b[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+\b")
 _PERIOD_REF_PATTERN = re.compile(r"\b20\d{2}(?:FY|A|F)?\b")
@@ -296,11 +298,13 @@ def forecast_quality_gate(forecast_model: dict[str, Any]) -> dict[str, Any]:
     unexplained_growth = _unexplained_growth_flags(forecast_model)
     if unexplained_growth:
         reasons.append("unexplained_abnormal_forecast_growth")
-
+    sanity_issues = forecast_sanity_issues(forecast_model)
+    reasons.extend(sanity_issues)
     summary = {
         "channel_count": len(revenue.get("by_channel") or {}),
         "product_group_count": len(revenue.get("by_product_group") or {}),
         "quality_checks": checks,
+        "sanity_issues": sanity_issues,
     }
     if reasons:
         return _gate_result("FORECAST_QUALITY_GATE", False, sorted(set(reasons)), summary)
@@ -645,7 +649,7 @@ def evidence_packet_gate(state: dict[str, Any]) -> dict[str, Any]:
 
 def package_validation_gate(state: dict[str, Any]) -> dict[str, Any]:
     """Single export-readiness gate aggregating all deterministic package checks."""
-    from backend.evaluation.fpts_grade import fpts_grade_gate
+    from backend.evaluation.report_quality import report_quality_gate
 
     trace = state.get("trace") or []
     valuation = state.get("valuation_outputs") or (state.get("artifacts") or {}).get("valuation") or {}
@@ -654,24 +658,24 @@ def package_validation_gate(state: dict[str, Any]) -> dict[str, Any]:
     manifest = artifact_manifest_gate(state)
     formula = formula_trace_gate(valuation)
     evidence = evidence_packet_gate(state)
-    fpts_grade = (state.get("gate_results") or {}).get("FPTS_GRADE_GATE") or fpts_grade_gate(state)
+    report_quality = (state.get("gate_results") or {}).get("REPORT_QUALITY_GATE") or report_quality_gate(state)
 
     # The export aggregation requires the four sub-gate results to be present in
     # gate_results; inject the ones we just computed so its presence check holds.
     gate_results = dict(state.get("gate_results") or {})
-    for sub in (tool_perm, manifest, formula, evidence, fpts_grade):
+    for sub in (tool_perm, manifest, formula, evidence, report_quality):
         gate_results[sub["gate"]] = sub
     export = workflow_export_gate({**state, "gate_results": gate_results})
 
-    sub_gates = [tool_perm, manifest, formula, evidence, fpts_grade, export]
+    sub_gates = [tool_perm, manifest, formula, evidence, report_quality, export]
     blocking_reasons: list[str] = []
     for sub in sub_gates:
         if not sub.get("passed"):
             blocking_reasons.extend(sub.get("blocking_reasons") or [f"{sub.get('gate')}_failed"])
 
     summary = {sub["gate"]: bool(sub.get("passed")) for sub in sub_gates}
-    summary["fpts_grade_score"] = (fpts_grade.get("summary") or {}).get("score")
-    summary["fpts_grade_decision"] = (fpts_grade.get("summary") or {}).get("decision")
+    summary["report_quality_score"] = (report_quality.get("summary") or {}).get("score")
+    summary["report_quality_decision"] = (report_quality.get("summary") or {}).get("decision")
     if blocking_reasons:
         return _gate_result("PACKAGE_VALIDATION_GATE", False, sorted(set(blocking_reasons)), summary, severity="warning")
     return pass_gate("PACKAGE_VALIDATION_GATE", summary)

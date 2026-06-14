@@ -51,6 +51,59 @@ def test_fcff_blend_forecast_fall_back_to_valuation_subsections():
     assert vm._forecast("DHG", manifest, False) == val["forecast"]
 
 
+def test_display_governance_hides_target_when_no_method_is_eligible():
+    valuation = {
+        "valuation_method_policy": {
+            "selected_methods": [],
+            "status": "draft_only",
+        }
+    }
+    blend = {
+        "current_price_vnd": 50_200,
+        "target_price_dcf_vnd": 27_207,
+        "upside_pct": -0.458,
+        "is_draft_only": True,
+    }
+
+    display = vm._report_display_governance("standard", valuation, blend)
+
+    assert display["current_price"] == 50_200
+    assert display["target_price"] is None
+    assert display["upside"] is None
+    assert display["recommendation"] == "ĐANG HOÀN THIỆN"
+    assert "no_eligible_valuation_method" in display["blocking_reasons"]
+
+
+def test_display_governance_hides_low_confidence_selected_method():
+    valuation = {
+        "valuation_method_policy": {"selected_methods": ["FCFF"], "status": "draft_only"},
+        "valuation_confidence": {"fcff_dcf": "low"},
+    }
+    blend = {
+        "current_price_vnd": 50_200,
+        "target_price_dcf_vnd": 27_207,
+        "upside_pct": -0.458,
+        "is_draft_only": True,
+    }
+
+    display = vm._report_display_governance("standard", valuation, blend)
+
+    assert display["target_price"] is None
+    assert display["recommendation"] == "ĐANG HOÀN THIỆN"
+
+
+def test_valuation_summary_omits_low_confidence_target():
+    valuation = {
+        "selected_methods": ["FCFF"],
+        "method_weights": {"FCFF": 100.0},
+        "valuation_confidence": {"fcff_dcf": "low"},
+        "fcff": {"target_price_vnd": 27_207},
+        "blend_dcf": {"target_price_dcf_vnd": 27_207},
+    }
+
+    assert vm._table_valuation_summary(valuation) is None
+
+
 def test_forecast_rows_are_enriched_from_debt_dividend_and_cash_schedules():
     forecast = {
         "forecast_years": [{"label": "2026F", "revenue": 1000.0}],
