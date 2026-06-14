@@ -4,8 +4,8 @@
   "plan_id": "06",
   "plan_name": "Report quality",
   "ticker": "DBD",
-  "run_id": "project-eval-20260614T071412Z",
-  "generated_at": "2026-06-14T07:14:12.208134+00:00",
+  "run_id": "benchmark-01-sample20-DBD",
+  "generated_at": "2026-06-14T11:21:54.088957+00:00",
   "status": "fail",
   "test_execution": {
     "status": "pass",
@@ -18,19 +18,13 @@
       "tests/unit/test_package_validation_gate.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.827,
+    "duration_seconds": 0.866,
     "summary": {
       "passed": 38
     },
     "output_tail": [
       "......................................                                   [100%]",
-      "============================== warnings summary ===============================",
-      "..\\..\\..\\..\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475",
-      "  C:\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475: PytestCacheWarning: could not create cache path C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\.pytest_cache\\v\\cache\\nodeids: [WinError 183] Cannot create a file when that file already exists: 'C:\\\\Users\\\\Admin\\\\Desktop\\\\multi-agent-equity-research\\\\.pytest_cache\\\\v\\\\cache'",
-      "    config.cache.set(\"cache/nodeids\", sorted(self.cached_nodeids))",
-      "",
-      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
-      "38 passed, 1 warning in 0.38s"
+      "38 passed in 0.42s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -85,10 +79,37 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "report",
       "failed_examples": [],
       "remediation_hint": "Render the analyst draft and client-final artifacts from a validated report model.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "report_pdf_rendered",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "explanation_pdf_rendered",
@@ -114,10 +135,37 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "report",
       "failed_examples": [],
       "remediation_hint": "Render the explanation artifact from a validated report model.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "explanation_pdf_rendered",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "financial_gate_passed",
@@ -143,10 +191,42 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "valuation",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "reason": "threshold_not_met",
+          "source": "financial_eval.json"
+        }
+      ],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "financial_gate_passed",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "report_quality_score",
@@ -162,20 +242,52 @@
       "severity": "P1",
       "blocks_publish": true,
       "value": null,
-      "threshold": ">= 85",
+      "threshold": ">= 85/100",
       "threshold_operator": ">=",
       "unit": "score",
-      "status": "warning",
+      "status": "not_evaluable",
       "legacy_status": "measured_only",
-      "sample_size": 1,
+      "sample_size": 0,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "reviewer",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "reason": "evaluation_evidence_missing",
+          "source": "publishable report model missing"
+        }
+      ],
       "remediation_hint": "Improve required sections, forecast rationale, valuation transparency, and presentation quality.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "report_quality_score",
+        "framework": "report_quality_rubric",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "weighted_report_quality_score",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP report-quality threshold before human review.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "publication_readiness",
@@ -201,10 +313,42 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "reviewer",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "reason": "threshold_not_met",
+          "source": "final approval and locked publishable model missing"
+        }
+      ],
       "remediation_hint": "Complete final approval, lock publishable artifacts, and align package validation with snapshot IDs.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "publication_readiness",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     }
   ],
   "rubric": "report_quality_v1",

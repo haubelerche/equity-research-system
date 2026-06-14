@@ -2,8 +2,8 @@ fastapi
 uvicorn
 pydantic>=2
 psycopg2-binary
-pandas
-numpy
+pandas>=2.3,<3
+numpy>=1.24,<2.3
 pdfplumber
 pyyaml
 requests
@@ -28,6 +28,8 @@ pypdf
 # Evaluation stack
 # Deterministic gates run today; these packages support the planned P1/P2
 # retrieval, schema, and judge layers described in eval/.
-ragas
-pandera
-deepeval
+ragas==0.4.3
+pandera==0.31.1
+deepeval==4.0.6
+langchain-community==0.4.1
+websockets<16

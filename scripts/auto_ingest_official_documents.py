@@ -110,6 +110,9 @@ class AutoIngestConfig:
     min_pdf_confidence: float = 0.6
     promote_official_only: bool = True
     ocr: bool = False  # enable OCR path for scanned PDFs
+    # Optional callback(substep, detail) for live progress UI. substep is a
+    # stable key ("cafef", "official_pdf"); detail is a Vietnamese label.
+    progress_cb: Any = None
 
 
 @dataclass
@@ -661,6 +664,15 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
     plan = build_pipeline_plan(cfg)
     results: list[YearResult] = []
 
+    def _emit(substep: str, detail: str) -> None:
+        cb = cfg.progress_cb
+        if cb is None:
+            return
+        try:
+            cb(substep, detail)
+        except Exception:  # noqa: BLE001 — progress is best-effort, never fatal
+            pass
+
     for year in plan.years:
         yr = YearResult(fiscal_year=year, ingest_status=IngestStatus.SOURCE_MISSING)
         doc_dir = OFFICIAL_DOCS_DIR / cfg.ticker / str(year)
@@ -668,6 +680,7 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
 
         # ── Channel 1: CafeF (Tier 2) ──────────────────────────────────────
         if "cafef" in cfg.channels:
+            _emit("cafef", "Đang tìm dữ liệu trên CafeF…")
             cafef_rows = _fetch_cafef(cfg.ticker, year, doc_dir, cfg.dry_run)
             good_cafef = [r for r in cafef_rows if "error" not in r and "note" not in r]
             yr.cafef_rows = len(good_cafef)
@@ -680,6 +693,7 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
 
         # ── Channel 2: PDF (Tier 0) ─────────────────────────────────────────
         if "pdf" in cfg.channels:
+            _emit("official_pdf", "Đang tải BCTC từ HOSE/HNX/SSC…")
             cafef_rows_for_ocr = (
                 [r for r in cafef_rows if "error" not in r and "note" not in r]
                 if "cafef" in cfg.channels

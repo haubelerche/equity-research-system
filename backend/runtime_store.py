@@ -249,6 +249,43 @@ class RuntimeStore:
                 )
         return self._write(_work)
 
+    def update_run_progress(
+        self,
+        run_id: str,
+        *,
+        substep: str | None = None,
+        detail: str | None = None,
+        blocking_reason: str | None = None,
+    ) -> None:
+        """Merge fine-grained progress detail into research.runs.progress_json.
+
+        The coarse stage lives in current_stage (set by update_run_state); this
+        carries within-stage detail (ingestion sub-step + label) and an optional
+        human-readable blocking reason for the progress modal.
+        """
+        patch: dict[str, Any] = {}
+        if substep is not None:
+            patch["substep"] = substep
+        if detail is not None:
+            patch["detail"] = detail
+        if blocking_reason is not None:
+            patch["blocking_reason"] = blocking_reason
+        if not patch:
+            return
+
+        def _work(connection):
+            with connection.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE research.runs
+                    SET progress_json = COALESCE(progress_json, '{}'::jsonb) || %s::jsonb,
+                        updated_at    = NOW()
+                    WHERE run_id = %s
+                    """,
+                    (Json(patch), run_id),
+                )
+        return self._write(_work)
+
     def get_run(self, run_id: str) -> dict[str, Any] | None:
         with self.conn() as connection:
             with connection.cursor() as cur:
@@ -256,7 +293,7 @@ class RuntimeStore:
                     """
                     SELECT run_id, ticker, run_type, status, current_stage,
                            flags_json, request_json, config_snapshot_json,
-                           created_at, updated_at, finished_at
+                           progress_json, created_at, updated_at, finished_at
                     FROM research.runs
                     WHERE run_id = %s
                     """,
@@ -274,9 +311,10 @@ class RuntimeStore:
             "flags_json":           row[5] or {},
             "request_json":         row[6] or {},
             "config_snapshot_json": row[7] or {},
-            "created_at":           row[8].isoformat(),
-            "updated_at":           row[9].isoformat(),
-            "finished_at":          row[10].isoformat() if row[10] else None,
+            "progress_json":        row[8] or {},
+            "created_at":           row[9].isoformat(),
+            "updated_at":           row[10].isoformat(),
+            "finished_at":          row[11].isoformat() if row[11] else None,
         }
 
     def get_latest_approval(

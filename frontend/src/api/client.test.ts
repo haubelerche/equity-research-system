@@ -25,17 +25,15 @@ describe("api client", () => {
     expect(res.items).toEqual(items);
   });
 
-  it("startRun posts full_report run_type and templated objective", async () => {
+  it("startRun POSTs to the ticker generate endpoint", async () => {
     vi.stubGlobal("fetch", vi.fn(async () =>
-      jsonResponse({ run_id: "r1", status: "INIT" }, { status: 200 })));
+      jsonResponse({ run_id: "r1", mode: "full_pipeline" }, { status: 200 })));
     const res = await startRun("DHG");
     const [url, opts] = (globalThis.fetch as any).mock.calls[0];
-    expect(url).toBe("/research/start");
-    const body = JSON.parse(opts.body);
-    expect(body.ticker).toBe("DHG");
-    expect(body.run_type).toBe("full_report");
-    expect(body.objective).toBe("Generate full equity research report for DHG");
+    expect(url).toBe("/reports/DHG/generate");
+    expect(opts.method).toBe("POST");
     expect(res.run_id).toBe("r1");
+    expect(res.mode).toBe("full_pipeline");
   });
 
   it("fetchRunStatus hits status route", async () => {

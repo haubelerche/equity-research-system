@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ReportRow } from "./ReportRow";
+import { GenerationProvider } from "../../generation/GenerationContext";
 import type { ReportItem } from "../../api/types";
 
 const withReport: ReportItem = {
@@ -13,9 +14,9 @@ const noReport: ReportItem = { ...withReport, ticker: "IMP", has_report: false, 
 
 describe("ReportRow", () => {
   it("with a report: shows download + refresh, hides explanation when missing", () => {
-    render(<table><tbody>
+    render(<GenerationProvider><table><tbody>
       <ReportRow item={withReport} onPreview={vi.fn()} onGenerated={vi.fn()} />
-    </tbody></table>);
+    </tbody></table></GenerationProvider>);
     expect(screen.getByText("DHG")).toBeInTheDocument();
     const dl = screen.getByRole("link", { name: /tải báo cáo/i });
     expect(dl).toHaveAttribute("href", "/reports/DHG/file/report");
@@ -24,9 +25,9 @@ describe("ReportRow", () => {
   });
 
   it("without a report: shows only the generate button", () => {
-    render(<table><tbody>
+    render(<GenerationProvider><table><tbody>
       <ReportRow item={noReport} onPreview={vi.fn()} onGenerated={vi.fn()} />
-    </tbody></table>);
+    </tbody></table></GenerationProvider>);
     expect(screen.getByRole("button", { name: /sinh báo cáo/i })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /tải báo cáo/i })).toBeNull();
   });

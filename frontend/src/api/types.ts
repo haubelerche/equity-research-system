@@ -22,11 +22,26 @@ export type RunStatus =
   | "BLOCKED" | "FAILED";
 
 export interface StartRunResponse { run_id: string; status: RunStatus; }
+
+// POST /reports/{ticker}/generate
+export interface GenerateReportResponse {
+  run_id: string;
+  mode: "fast_render" | "full_pipeline" | string;
+}
+
+export interface RunProgress {
+  substep?: string;
+  detail?: string;
+  blocking_reason?: string;
+}
+
 export interface RunStatusResponse {
   run_id: string;
   ticker: string;
   status: RunStatus;
   current_stage: string;
+  progress?: RunProgress;
+  blocking_reason?: string | null;
   updated_at: string;
   finished_at: string | null;
 }
@@ -56,11 +71,41 @@ export interface BenchmarkMetricResult {
   unit?: string;
   status?: BenchmarkMetricStatus | string;
   sample_size?: number;
+  artifact_id?: string | null;
+  artifact_version?: string | null;
+  dataset_version?: string | null;
   owner?: string;
   source?: string;
   detail?: string;
   failed_examples?: unknown[];
   remediation_hint?: string;
+  metric_registry_version?: string | null;
+  evaluator?: {
+    id?: string;
+    framework?: string;
+    framework_version?: string | null;
+    implementation_version?: string | null;
+    execution_status?: string;
+  };
+  calculation?: {
+    formula?: string | null;
+    inputs?: Record<string, unknown>;
+    parameters?: Record<string, unknown>;
+    aggregation?: string | null;
+    numerator?: number | null;
+    denominator?: number | null;
+    per_sample_results?: unknown[];
+  };
+  threshold_policy?: {
+    profile?: string;
+    rationale?: string | null;
+    registry_version?: string | null;
+  };
+  evidence?: {
+    artifact_ids?: string[];
+    dataset_version?: string | null;
+    trace_url?: string | null;
+  };
 }
 
 export interface EvaluationArtifactSummary {

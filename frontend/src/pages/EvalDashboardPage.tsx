@@ -13,11 +13,14 @@ import {
 import { LayerCard } from "../components/eval/LayerCard";
 import { PipelineFlow } from "../components/eval/PipelineFlow";
 import { EvalModal } from "../components/eval/EvalModal";
+import { MetricExplanation } from "../components/eval/MetricExplanation";
 import { StatusPill } from "../components/eval/StatusPill";
+import type { MetricDef } from "../lib/evalStatus";
 
 type ModalState =
   | { kind: "benchmark"; layer: EvalLayer }
   | { kind: "explanation"; layer: EvalLayer }
+  | { kind: "metric"; layer: EvalLayer; metric: MetricDef; result?: BenchmarkMetricResult }
   | null;
 
 type MetricResultMap = Record<string, BenchmarkMetricResult>;
@@ -35,11 +38,17 @@ function resultsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): Met
   const entries = (artifact?.metric_results ?? [])
     .map((result) => [resultKey(result), result] as const)
     .filter(([key]) => key.length > 0);
-  return Object.fromEntries(entries);
+  const results = Object.fromEntries(entries);
+  for (const metric of layer.metrics) {
+    if (results[metric.id]) continue;
+    const alias = metric.aliases?.find((key) => results[key]);
+    if (alias) results[metric.id] = results[alias];
+  }
+  return results;
 }
 
 function valuesForLayer(packet: EvaluationPacket | null, layer: EvalLayer): Record<string, number | null> {
-  const values = { ...mockValuesForLayer(layer.id) };
+  const values = packet ? {} as Record<string, number | null> : { ...mockValuesForLayer(layer.id) };
   const results = resultsForLayer(packet, layer);
   for (const metric of layer.metrics) {
     const value = results[metric.id]?.value;
@@ -57,22 +66,6 @@ function layerMetricsPassed(packet: EvaluationPacket | null, layer: EvalLayer): 
     if (result?.status) return normalizeMetricStatus(String(result.status)) === "pass";
     return evalMetricStatus(metric, values[metric.id]) === "pass";
   });
-}
-
-function topBlockers(packet: EvaluationPacket | null): string[] {
-  const blockers = new Set<string>();
-  for (const artifact of packet?.artifacts ?? []) {
-    for (const issue of artifact.blocking_issues ?? []) {
-      blockers.add(`${artifact.name}: ${issue}`);
-    }
-    for (const metric of artifact.metric_results ?? []) {
-      const status = normalizeMetricStatus(String(metric.status ?? ""));
-      if (status === "fail" || status === "not_evaluable") {
-        blockers.add(`${artifact.name}: ${metric.metric_name ?? metric.label ?? resultKey(metric)}`);
-      }
-    }
-  }
-  return Array.from(blockers).slice(0, 5);
 }
 
 function packetRunId(packet: EvaluationPacket | null, layer: EvalLayer): string {
@@ -109,18 +102,12 @@ export function EvalDashboardPage() {
     () => EVAL_LAYERS.every((layer) => layerMetricsPassed(packet, layer)),
     [packet],
   );
-  const blockers = topBlockers(packet);
   const publicationStatus = packet?.publication_status ?? (allMetricsPassed ? "DRAFT_PUBLISHABLE" : "NOT_EVALUATED");
 
   return (
     <section>
       <header>
         <h1>Khung đánh giá chất lượng hệ thống</h1>
-        <p>
-          Run <code>{packet?.run_id ?? "local-mock"}</code>
-          {packet?.ticker ? `, ticker ${packet.ticker}` : ""}
-          {packet?.benchmark_suite_version ? `, suite ${packet.benchmark_suite_version}` : ""}
-        </p>
       </header>
 
       <PipelineFlow />
@@ -135,17 +122,6 @@ export function EvalDashboardPage() {
         </div>
       )}
 
-      <section className="top-blockers" aria-label="Top Blockers">
-        <div className="section-title-row">
-          <h2>Top Blockers</h2>
-        </div>
-        {blockers.length > 0 ? (
-          <ol>{blockers.map((blocker) => <li key={blocker}>{blocker}</li>)}</ol>
-        ) : (
-          <p>Không có blocker trong packet hiện tại.</p>
-        )}
-      </section>
-
       <div className="layer-grid">
         {EVAL_LAYERS.map((layer) => (
           <LayerCard
@@ -155,6 +131,12 @@ export function EvalDashboardPage() {
             results={resultsForLayer(packet, layer)}
             onViewBenchmark={(selected) => setModal({ kind: "benchmark", layer: selected })}
             onExplain={(selected) => setModal({ kind: "explanation", layer: selected })}
+            onSelectMetric={(selectedLayer, metric, result) => setModal({
+              kind: "metric",
+              layer: selectedLayer,
+              metric,
+              result,
+            })}
           />
         ))}
       </div>
@@ -188,8 +170,11 @@ export function EvalDashboardPage() {
                 return (
                   <tr key={metric.id}>
                     <td><code>{packetRunId(packet, modal.layer)}</code></td>
-                    <td>{result?.metric_name ?? result?.label ?? metric.label}</td>
-                    <td>{result?.metric_type ?? metric.technology}</td>
+                    <td>
+                      <strong>{metric.label}</strong>
+                      <span className="metric-technology">{metric.englishLabel ?? metric.technology}</span>
+                    </td>
+                    <td>{result?.metric_type ?? metric.metricType ?? metric.technology}</td>
                     <td className="num">{String(result?.threshold ?? formatPassCondition(metric))}</td>
                     <td className="num">{displayMetricValue(modal.layer, metric.id, result, values[metric.id])}</td>
                     <td><StatusPill status={status} /></td>
@@ -217,7 +202,10 @@ export function EvalDashboardPage() {
             <tbody>
               {modal.layer.metrics.map((metric) => (
                 <tr key={metric.id}>
-                  <td>{metric.label}</td>
+                  <td>
+                    <strong>{metric.label}</strong>
+                    <span className="metric-technology">{metric.englishLabel ?? metric.technology}</span>
+                  </td>
                   <td>{metric.technology}</td>
                   <td>{metric.formula}</td>
                   <td className="num">{formatFailCondition(metric)}</td>
@@ -225,6 +213,16 @@ export function EvalDashboardPage() {
               ))}
             </tbody>
           </table>
+        </EvalModal>
+      )}
+
+      {modal?.kind === "metric" && (
+        <EvalModal
+          title={`Giải trình metric: ${modal.metric.label}`}
+          subtitle={`${modal.layer.title.replace(/^\d+ . /, "")} · ${modal.metric.englishLabel ?? modal.metric.technology}`}
+          onClose={() => setModal(null)}
+        >
+          <MetricExplanation def={modal.metric} result={modal.result} />
         </EvalModal>
       )}
 

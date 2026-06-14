@@ -91,6 +91,15 @@ class ResearchGraphRunner:
                 self.progress.blocking(stage, current.blocking_reason)
                 break
             current.current_stage = stage
+            # Persist the in-progress stage immediately so the live progress modal
+            # reflects what is running now (the per-stage update in _execute_stage
+            # otherwise only lands as each stage starts its work).
+            try:
+                self.store.update_run_state(
+                    current.run_id, self._db_status_for_stage(stage), stage
+                )
+            except Exception:  # noqa: BLE001 — progress persistence is best-effort
+                pass
             self.progress.stage_start(stage, idx, len(stages))
             stage_t0 = time.monotonic()
             current = self._run_stage(current, stage)
@@ -164,6 +173,18 @@ class ResearchGraphRunner:
             state.errors.append(str(exc))
             self.store.close_step(step_id, "failed", error_message=str(exc), metadata={"stage": stage})
             self.store.update_run_state(state.run_id, "failed", stage, finished=True)
+            # Surface a user-facing Vietnamese reason for the progress modal.
+            _text = str(exc).lower()
+            if ("snapshot" in _text and "missing" in _text) or "no ready snapshot" in _text:
+                _vi = f"Không đủ dữ liệu tài chính để tạo báo cáo cho {state.ticker}."
+            elif stage == "INGEST_AND_VALIDATE":
+                _vi = f"Không thu thập được dữ liệu cho {state.ticker} từ các nguồn (CafeF, BCTC, vnstock)."
+            else:
+                _vi = f"Quá trình tạo báo cáo dừng ở bước xử lý dữ liệu cho {state.ticker}."
+            try:
+                self.store.update_run_progress(state.run_id, blocking_reason=_vi)
+            except Exception:  # noqa: BLE001
+                pass
             self._checkpoint(state)
             return state
 
@@ -215,13 +236,37 @@ class ResearchGraphRunner:
                 state.artifacts["index"] = reuse_index
                 state.retrieval_results = reuse_index
             else:
-                # Auto-ingest official documents (must complete before indexing).
+                # Emit data-collection sub-steps for the live progress modal.
+                def _ingest_progress(substep: str, detail: str) -> None:
+                    try:
+                        self.store.update_run_progress(
+                            state.run_id, substep=substep, detail=detail
+                        )
+                    except Exception:  # noqa: BLE001 — progress is best-effort
+                        pass
+
+                # Auto-ingest official documents (CafeF + official PDFs). The tool
+                # reports per-channel sub-steps via the callback.
                 auto_result = self._run_tool(
                     state, "data_evidence", "auto_ingest",
-                    state.ticker, state.from_year, state.to_year, ocr=state.ocr
+                    state.ticker, state.from_year, state.to_year, ocr=state.ocr,
+                    progress_cb=_ingest_progress,
                 )
                 state.artifacts["auto_ingest"] = auto_result.summary
                 self._merge_result(state, auto_result)
+
+                # Additional source: vnstock financial statements (best-effort).
+                _ingest_progress("vnstock", "Đang lấy dữ liệu vnstock…")
+                try:
+                    from backend.dataops.vnstock_ingest import ingest_vnstock_financials
+
+                    state.artifacts["vnstock_ingest"] = ingest_vnstock_financials(
+                        state.ticker, state.from_year, state.to_year
+                    )
+                except Exception as exc:  # noqa: BLE001 — never let vnstock break ingest
+                    _log.warning("[INGEST] vnstock ingest failed for %s: %s", state.ticker, exc)
+
+                _ingest_progress("validate", "Đang kiểm định & đối chiếu số liệu…")
 
                 # Build facts and evidence index in parallel (independent DB reads).
                 from concurrent.futures import ThreadPoolExecutor

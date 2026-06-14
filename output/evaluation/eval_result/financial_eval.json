@@ -4,8 +4,8 @@
   "plan_id": "03",
   "plan_name": "Financial calculation",
   "ticker": "DBD",
-  "run_id": "project-eval-20260614T071412Z",
-  "generated_at": "2026-06-14T07:14:12.208134+00:00",
+  "run_id": "benchmark-01-sample20-DBD",
+  "generated_at": "2026-06-14T11:21:54.088957+00:00",
   "status": "blocked",
   "test_execution": {
     "status": "pass",
@@ -22,20 +22,14 @@
       "tests/evaluation/test_client_final_governance.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.567,
+    "duration_seconds": 0.535,
     "summary": {
       "passed": 124
     },
     "output_tail": [
       "........................................................................ [ 58%]",
       "....................................................                     [100%]",
-      "============================== warnings summary ===============================",
-      "..\\..\\..\\..\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475",
-      "  C:\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475: PytestCacheWarning: could not create cache path C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\.pytest_cache\\v\\cache\\nodeids: [WinError 183] Cannot create a file when that file already exists: 'C:\\\\Users\\\\Admin\\\\Desktop\\\\multi-agent-equity-research\\\\.pytest_cache\\\\v\\\\cache'",
-      "    config.cache.set(\"cache/nodeids\", sorted(self.cached_nodeids))",
-      "",
-      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
-      "124 passed, 1 warning in 0.25s"
+      "124 passed in 0.23s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -47,7 +41,8 @@
     "found": {
       "financial_eval.json": [],
       "valuation.json": [
-        "storage\\runs\\dhg_verify_stinv\\valuation.json"
+        "storage\\runs\\dhg_verify_stinv\\valuation.json",
+        "storage\\runs\\validation_dhg\\valuation.json"
       ],
       "formula_trace.json": []
     },
@@ -86,11 +81,12 @@
       "unit": "count",
       "status": "not_evaluable",
       "legacy_status": "blocked",
-      "sample_size": 1,
+      "sample_size": 0,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "valuation",
       "failed_examples": [
         {
@@ -99,7 +95,33 @@
         }
       ],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "valuation_artifact",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     }
   ],
   "valuation_artifact": null,

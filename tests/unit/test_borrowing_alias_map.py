@@ -31,3 +31,23 @@ def test_repayment_of_borrowings_resolves():
     )
     assert resolved is not None
     assert resolved[0] == REPAYMENT
+
+
+def test_real_vnstock_vci_labels_resolve():
+    """Lock in the ACTUAL vnstock VCI cash-flow labels (live-validation regression).
+
+    The proceeds line is "Tiền thu được các khoản đi vay" (item_en "Proceeds from
+    loans", item_id "proceeds_from_loans") — NOT "Tiền thu từ đi vay". The first
+    alias guess missed it, so proceeds was silently dropped at ingestion.
+    """
+    alias = _build_alias_map(statement="cash_flow")
+    proceeds = _resolve_label(
+        _row("Tiền thu được các khoản đi vay", "Proceeds from loans", "proceeds_from_loans"),
+        alias,
+    )
+    assert proceeds is not None and proceeds[0] == PROCEEDS
+    repayment = _resolve_label(
+        _row("Tiền trả nợ gốc vay", "Repayment of loans", "repayment_of_loans"),
+        alias,
+    )
+    assert repayment is not None and repayment[0] == REPAYMENT

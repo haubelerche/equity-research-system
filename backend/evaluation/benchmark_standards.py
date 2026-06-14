@@ -7,7 +7,10 @@ used by existing dashboards and tests.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
+
+import yaml
 
 
 PUBLICATION_STATUSES = (
@@ -20,6 +23,26 @@ PUBLICATION_STATUSES = (
 
 STANDARD_SCHEMA_VERSION = "2.1"
 BENCHMARK_SUITE_VERSION = "benchmark_standards_v1"
+METRIC_REGISTRY_PATH = (
+    Path(__file__).resolve().parents[2] / "config" / "eval" / "metric_registry.yaml"
+)
+
+
+def _load_metric_registry() -> dict[str, Any]:
+    try:
+        payload = yaml.safe_load(METRIC_REGISTRY_PATH.read_text(encoding="utf-8")) or {}
+    except (OSError, ValueError, TypeError):
+        return {"version": None, "profiles": {"active": "mvp"}, "metrics": {}}
+    return payload if isinstance(payload, dict) else {"metrics": {}}
+
+
+METRIC_REGISTRY = _load_metric_registry()
+
+
+def metric_policy(metric_id: str) -> dict[str, Any]:
+    metrics = METRIC_REGISTRY.get("metrics") or {}
+    policy = metrics.get(metric_id) if isinstance(metrics, dict) else None
+    return dict(policy) if isinstance(policy, dict) else {}
 
 
 @dataclass(frozen=True)
@@ -145,18 +168,36 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
         "boolean", "data", "Create or attach an immutable snapshot before evaluation.",
     ),
     "required_periods_completeness": PLAN_DEFAULTS["01"],
+    "accepted_facts_source_coverage": PLAN_DEFAULTS["01"],
     "core_metric_coverage": PLAN_DEFAULTS["01"],
     "period_completeness": PLAN_DEFAULTS["01"],
     "provenance_coverage": PLAN_DEFAULTS["01"],
     "source_provenance_coverage": PLAN_DEFAULTS["01"],
     "official_reconciliation_rate": PLAN_DEFAULTS["01"],
+    "material_ocr_error_count": MetricMetadata(
+        "data_quality", "release_gate", "error_count", "report_run", "P0", True,
+        "count", "data", "Resolve OCR errors that affect material numbers used in the report.",
+    ),
     "ocr_unresolved_rate": MetricMetadata(
-        "data_quality", "release_gate", "error_rate", "report_run", "P0", True,
-        "percent", "data", "Resolve material OCR candidates before promoting facts into the final report.",
+        "data_quality", "diagnostic", "error_rate", "benchmark_suite", "P2", False,
+        "percent", "data", "Reduce unresolved OCR corpus errors and keep material OCR errors out of final artifacts.",
+    ),
+    "duplicate_fact_count": MetricMetadata(
+        "data_quality", "release_gate", "error_count", "report_run", "P0", True,
+        "count", "data", "Deduplicate canonical facts by ticker, period, line item, and source priority.",
     ),
     "duplicate_fact_rate": MetricMetadata(
         "data_quality", "release_gate", "error_rate", "report_run", "P0", True,
         "percent", "data", "Deduplicate canonical facts by ticker, period, line item, and source priority.",
+    ),
+    "dataframe_schema_validity": MetricMetadata(
+        "data_quality", "release_gate", "boolean", "report_run", "P0", True,
+        "boolean", "data", "Repair the connector DataFrame rows reported by Pandera before normalization.",
+    ),
+    "valuation_method_data_readiness": MetricMetadata(
+        "data_quality", "release_gate", "boolean", "report_run", "P0", True,
+        "boolean", "valuation",
+        "Block headline target price and recommendation until valuation methods are publishable from high-confidence inputs.",
     ),
     "hit_rate_at_5": MetricMetadata(
         "rag", "diagnostic", "coverage", "benchmark_suite", "P2", False,
@@ -167,6 +208,10 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
     "context_recall": PLAN_DEFAULTS["02"],
     "faithfulness": PLAN_DEFAULTS["02"],
     "response_relevancy": PLAN_DEFAULTS["02"],
+    "source_tier_hit_rate": MetricMetadata(
+        "rag", "diagnostic", "coverage", "benchmark_suite", "P2", False,
+        "percent", "retrieval", "Tune source-tier preferences so material queries retrieve priority sources.",
+    ),
     "evidence_packet_completeness": MetricMetadata(
         "rag", "release_gate", "coverage", "report_run", "P0", True,
         "percent", "retrieval", "Attach source documents, citation map, and formula traces to the evidence packet.",
@@ -191,6 +236,17 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
     "valuation_artifact": PLAN_DEFAULTS["03"],
     "critical_failures": PLAN_DEFAULTS["03"],
     "golden_drift_out_of_tolerance": PLAN_DEFAULTS["03"],
+    "accounting_invariant_violations": PLAN_DEFAULTS["03"],
+    "valuation_regression_failures": PLAN_DEFAULTS["03"],
+    "share_count_mismatch": PLAN_DEFAULTS["03"],
+    "target_price_bridge_error": PLAN_DEFAULTS["03"],
+    "wacc_terminal_growth_violation": PLAN_DEFAULTS["03"],
+    "net_debt_reconciliation_error": PLAN_DEFAULTS["03"],
+    "unexplained_forecast_anomalies": MetricMetadata(
+        "financial_model", "release_gate", "error_count", "report_run", "P1", True,
+        "count", "valuation", "Add forecast explanations, catalysts, or reviewer notes for material anomalies.",
+    ),
+    "recommendation_inconsistency": PLAN_DEFAULTS["03"],
     "citation_gate": PLAN_DEFAULTS["04"],
     "quantitative_citation_coverage": PLAN_DEFAULTS["04"],
     "quant_citation_coverage": PLAN_DEFAULTS["04"],
@@ -205,6 +261,10 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
         "citation", "release_gate", "error_count", "report_run", "P0", True,
         "count", "report", "Fix cited numeric values that do not match the supporting evidence.",
     ),
+    "numeric_citation_mismatch_rate": MetricMetadata(
+        "citation", "release_gate", "error_rate", "report_run", "P0", True,
+        "percent", "report", "Reconcile cited numeric claims against their supporting evidence spans.",
+    ),
     "generic_citations": MetricMetadata(
         "citation", "release_gate", "error_count", "report_run", "P0", True,
         "count", "report", "Replace generic source labels with specific source IDs and evidence spans.",
@@ -212,6 +272,10 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
     "tier3_only_material_claims": MetricMetadata(
         "citation", "release_gate", "error_count", "report_run", "P1", True,
         "count", "report", "Add official or reputable evidence for material claims currently supported only by low-tier sources.",
+    ),
+    "catalyst_without_evidence": MetricMetadata(
+        "citation", "release_gate", "error_count", "report_run", "P0", True,
+        "count", "report", "Attach evidence spans for catalysts used in the investment thesis.",
     ),
     "tool_permission_compliance": MetricMetadata(
         "agent_llm", "release_gate", "coverage", "report_run", "P0", True,
@@ -241,6 +305,22 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
         "percent", "reviewer", "Expand seeded issue fixtures and compare critic recall against expected labels.",
     ),
     "report_quality_score": PLAN_DEFAULTS["06"],
+    "report_completeness": MetricMetadata(
+        "report_quality", "release_gate", "coverage", "report_run", "P1", True,
+        "percent", "reviewer", "Complete required report sections or mark the report as not exportable.",
+    ),
+    "financial_analysis_depth": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P1", False,
+        "score", "reviewer", "Improve ratio analysis, trend explanation, and comparable financial interpretation.",
+    ),
+    "forecast_rationale": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P1", False,
+        "score", "reviewer", "Add explicit drivers, assumptions, and evidence for the forecast.",
+    ),
+    "valuation_transparency": MetricMetadata(
+        "report_quality", "release_gate", "score", "report_run", "P0", True,
+        "score", "valuation", "Attach valuation bridge, method weights, sensitivity grid, and formula traces.",
+    ),
     "report_pdf_rendered": MetricMetadata(
         "report_quality", "release_gate", "boolean", "report_run", "P0", True,
         "boolean", "report", "Render the analyst draft and client-final artifacts from a validated report model.",
@@ -276,6 +356,10 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
     "llm_retry_rate": PLAN_DEFAULTS["07"],
     "retrieval_fallback_rate": PLAN_DEFAULTS["07"],
     "ocr_failure_rate": PLAN_DEFAULTS["07"],
+    "final_ocr_error_count": MetricMetadata(
+        "operations", "release_gate", "error_count", "report_run", "P0", True,
+        "count", "data", "Fix OCR errors that affect final reported numbers before export.",
+    ),
     "artifact_upload_failures": MetricMetadata(
         "operations", "release_gate", "error_count", "report_run", "P0", True,
         "count", "platform", "Retry or repair final artifact storage uploads before export.",
@@ -287,6 +371,30 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
     "full_run_duration": MetricMetadata(
         "operations", "observability", "latency_percentile", "system_window", "P3", False,
         "seconds", "platform", "Compare p95 runtime against warm/cold baseline and inspect slow stages.",
+    ),
+    "warm_full_report_p95_latency": MetricMetadata(
+        "operations", "observability", "latency_percentile", "system_window", "P3", False,
+        "minutes", "platform", "Inspect warm full-report p95 latency regressions.",
+    ),
+    "cold_full_report_p95_latency": MetricMetadata(
+        "operations", "observability", "latency_percentile", "system_window", "P3", False,
+        "minutes", "platform", "Inspect cold full-report p95 latency and ingest/OCR bottlenecks.",
+    ),
+    "render_only_p95_latency": MetricMetadata(
+        "operations", "release_gate", "latency_percentile", "system_window", "P1", True,
+        "minutes", "platform", "Optimize render-only PDF generation and inspect final render telemetry.",
+    ),
+    "flash_memo_warm_p95_latency": MetricMetadata(
+        "operations", "observability", "latency_percentile", "system_window", "P3", False,
+        "seconds", "platform", "Inspect warm flash memo latency regressions.",
+    ),
+    "flash_memo_cold_retrieval_p95_latency": MetricMetadata(
+        "operations", "observability", "latency_percentile", "system_window", "P3", False,
+        "minutes", "platform", "Inspect retrieval/crawl bottlenecks for flash memo generation.",
+    ),
+    "latency_regression_ratio": MetricMetadata(
+        "operations", "observability", "score", "benchmark_suite", "P3", False,
+        "score", "platform", "Compare new p95 latency against the locked baseline and investigate regressions.",
     ),
     "duration_seconds": MetricMetadata(
         "operations", "observability", "latency_percentile", "system_window", "P3", False,
@@ -323,7 +431,7 @@ def _standard_status(status: str) -> str:
         return "pass"
     if normalized in {"fail", "failed"}:
         return "fail"
-    if normalized in {"warning", "warn", "measured_only"}:
+    if normalized in {"warning", "warn"}:
         return "warning"
     return "not_evaluable"
 
@@ -340,12 +448,49 @@ def standard_metric(
     plan_id: str | None = None,
     sample_size: int | None = None,
     failed_examples: list[Any] | None = None,
+    evaluator: dict[str, Any] | None = None,
+    calculation: dict[str, Any] | None = None,
+    evidence: dict[str, Any] | None = None,
+    artifact_id: str | None = None,
+    artifact_version: str | None = None,
+    dataset_version: str | None = None,
 ) -> dict[str, Any]:
     metadata = metadata_for(metric_id, plan_id)
+    policy = metric_policy(metric_id)
+    governed_threshold = str(policy.get("threshold") or threshold)
     benchmark_status = _standard_status(status)
     examples = list(failed_examples or [])
-    if benchmark_status in {"fail", "not_evaluable"} and detail and not examples:
-        examples.append({"reason": detail, "source": source})
+    if benchmark_status in {"fail", "not_evaluable"} and not examples:
+        examples.append({
+            "reason": detail or (
+                "threshold_not_met" if benchmark_status == "fail" else "evaluation_evidence_missing"
+            ),
+            "source": source,
+        })
+    calculation_payload = {
+        "formula": policy.get("formula"),
+        "inputs": {},
+        "parameters": {},
+        "aggregation": None,
+        "numerator": None,
+        "denominator": None,
+        "per_sample_results": [],
+        **(calculation or {}),
+    }
+    evaluator_payload = {
+        "id": metric_id,
+        "framework": policy.get("framework") or "custom",
+        "framework_version": None,
+        "implementation_version": STANDARD_SCHEMA_VERSION,
+        "execution_status": "executed" if value is not None else "not_executed",
+        **(evaluator or {}),
+    }
+    evidence_payload = {
+        "artifact_ids": [artifact_id] if artifact_id else [],
+        "dataset_version": dataset_version,
+        "trace_url": None,
+        **(evidence or {}),
+    }
     return {
         # Backward-compatible fields used by existing dashboard code.
         "id": metric_id,
@@ -362,19 +507,30 @@ def standard_metric(
         "severity": metadata.severity,
         "blocks_publish": metadata.blocks_publish,
         "value": value,
-        "threshold": threshold,
-        "threshold_operator": _operator_from_threshold(threshold),
+        "threshold": governed_threshold,
+        "threshold_operator": _operator_from_threshold(governed_threshold),
         "unit": metadata.unit,
         "status": benchmark_status,
         "legacy_status": status,
-        "sample_size": 1 if sample_size is None else sample_size,
-        "artifact_id": None,
-        "artifact_version": None,
-        "dataset_version": None,
+        "sample_size": 0 if sample_size is None and value is None else (
+            1 if sample_size is None else sample_size
+        ),
+        "artifact_id": artifact_id,
+        "artifact_version": artifact_version,
+        "dataset_version": dataset_version,
         "benchmark_suite_version": BENCHMARK_SUITE_VERSION,
+        "metric_registry_version": METRIC_REGISTRY.get("version"),
         "owner": metadata.owner,
         "failed_examples": examples,
         "remediation_hint": metadata.remediation_hint,
+        "evaluator": evaluator_payload,
+        "calculation": calculation_payload,
+        "threshold_policy": {
+            "profile": (METRIC_REGISTRY.get("profiles") or {}).get("active", "mvp"),
+            "rationale": policy.get("rationale"),
+            "registry_version": METRIC_REGISTRY.get("version"),
+        },
+        "evidence": evidence_payload,
         "evaluated_at": None,
     }
 

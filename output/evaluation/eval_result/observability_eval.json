@@ -4,9 +4,9 @@
   "plan_id": "07",
   "plan_name": "Observability, cost, and latency",
   "ticker": "DBD",
-  "run_id": "project-eval-20260614T071412Z",
-  "generated_at": "2026-06-14T07:14:12.208134+00:00",
-  "status": "pass",
+  "run_id": "benchmark-01-sample20-DBD",
+  "generated_at": "2026-06-14T11:21:54.088957+00:00",
+  "status": "blocked",
   "test_execution": {
     "status": "pass",
     "targets": [
@@ -16,19 +16,13 @@
       "tests/unit/test_run_status_semantics.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.58,
+    "duration_seconds": 0.613,
     "summary": {
       "passed": 26
     },
     "output_tail": [
       "..........................                                               [100%]",
-      "============================== warnings summary ===============================",
-      "..\\..\\..\\..\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475",
-      "  C:\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475: PytestCacheWarning: could not create cache path C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\.pytest_cache\\v\\cache\\nodeids: [WinError 183] Cannot create a file when that file already exists: 'C:\\\\Users\\\\Admin\\\\Desktop\\\\multi-agent-equity-research\\\\.pytest_cache\\\\v\\\\cache'",
-      "    config.cache.set(\"cache/nodeids\", sorted(self.cached_nodeids))",
-      "",
-      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
-      "26 passed, 1 warning in 0.23s"
+      "26 passed in 0.23s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -68,17 +62,49 @@
       "threshold": "<= baseline p95 + 30%",
       "threshold_operator": "<=",
       "unit": "seconds",
-      "status": "warning",
+      "status": "not_evaluable",
       "legacy_status": "measured_only",
-      "sample_size": 1,
+      "sample_size": 0,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "platform",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "reason": "evaluation_evidence_missing",
+          "source": "run trace missing"
+        }
+      ],
       "remediation_hint": "Compare p95 runtime against warm/cold baseline and inspect slow stages.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "duration_seconds",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "llm_retry_rate",
@@ -97,17 +123,49 @@
       "threshold": "<= 5%",
       "threshold_operator": "<=",
       "unit": "percent",
-      "status": "warning",
+      "status": "not_evaluable",
       "legacy_status": "measured_only",
-      "sample_size": 1,
+      "sample_size": 0,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "platform",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "reason": "evaluation_evidence_missing",
+          "source": "run trace missing"
+        }
+      ],
       "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "llm_retry_rate",
+        "framework": "langfuse_tracing",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "llm_retry_calls / llm_calls",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Retry rate should remain low enough to control reliability and cost-to-serve.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "retrieval_fallback_rate",
@@ -126,17 +184,49 @@
       "threshold": "<= 20%",
       "threshold_operator": "<=",
       "unit": "percent",
-      "status": "warning",
+      "status": "not_evaluable",
       "legacy_status": "measured_only",
-      "sample_size": 1,
+      "sample_size": 0,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "platform",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "reason": "evaluation_evidence_missing",
+          "source": "retrieval trace missing"
+        }
+      ],
       "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "retrieval_fallback_rate",
+        "framework": "retrieval_telemetry",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "fallback_retrieval_queries / retrieval_queries",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "High fallback rate indicates degraded retrieval path quality.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "ocr_failure_rate",
@@ -155,17 +245,49 @@
       "threshold": "<= 5%",
       "threshold_operator": "<=",
       "unit": "percent",
-      "status": "warning",
-      "legacy_status": "measured_only",
-      "sample_size": 1,
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 0,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "platform",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "reason": "evaluation_evidence_missing",
+          "source": "latest OCR metadata"
+        }
+      ],
       "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "ocr_failure_rate",
+        "framework": "ocr_runtime_metrics",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "failed_material_ocr_documents / material_ocr_documents",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Material OCR failures should remain rare and visible.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "pdf_render_failures",
@@ -181,7 +303,7 @@
       "severity": "P0",
       "blocks_publish": true,
       "value": 0,
-      "threshold": "0",
+      "threshold": "= 0",
       "threshold_operator": "=",
       "unit": "count",
       "status": "pass",
@@ -191,10 +313,37 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "platform",
       "failed_examples": [],
       "remediation_hint": "Fix final PDF rendering failures before export.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "pdf_render_failures",
+        "framework": "pdf_render_gate",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "count(final_pdf_render_failures)",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Final PDF render failure blocks export.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "cost_per_report",
@@ -213,17 +362,49 @@
       "threshold": "<= soft budget",
       "threshold_operator": "<=",
       "unit": "score",
-      "status": "warning",
+      "status": "not_evaluable",
       "legacy_status": "measured_only",
-      "sample_size": 1,
+      "sample_size": 0,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "platform",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "reason": "evaluation_evidence_missing",
+          "source": "cost ledger missing"
+        }
+      ],
       "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "cost_per_report",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     }
   ],
   "duration_seconds": null,

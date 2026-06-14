@@ -13,6 +13,7 @@ interface Props {
   def: MetricDef;
   value: number | null | undefined;
   result?: BenchmarkMetricResult;
+  onSelect?: (def: MetricDef, result?: BenchmarkMetricResult) => void;
 }
 
 function formatResultValue(
@@ -36,14 +37,24 @@ function statusFor(
   return result?.status ? normalizeMetricStatus(String(result.status)) : evalMetricStatus(def, value);
 }
 
-export function MetricRow({ def, value, result }: Props) {
+export function MetricRow({ def, value, result, onSelect }: Props) {
   const status = statusFor(def, result, value);
   const threshold = result?.threshold ?? formatPassCondition(def);
   return (
-    <tr>
+    <tr
+      className={onSelect ? "metric-row metric-row--clickable" : "metric-row"}
+      tabIndex={onSelect ? 0 : undefined}
+      onClick={() => onSelect?.(def, result)}
+      onKeyDown={(event) => {
+        if (onSelect && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          onSelect(def, result);
+        }
+      }}
+    >
       <td>
-        <strong>{result?.metric_name ?? result?.label ?? def.label}</strong>
-        <span className="metric-technology">{result?.source ?? def.technology}</span>
+        <strong>{def.label}</strong>
+        <span className="metric-technology">{def.englishLabel ?? def.technology}</span>
       </td>
       <td className="num">{String(threshold)}</td>
       <td className="num">{formatResultValue(def, result, value)}</td>

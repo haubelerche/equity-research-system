@@ -4,8 +4,8 @@
   "plan_id": "01",
   "plan_name": "Data reliability",
   "ticker": "DBD",
-  "run_id": "project-eval-20260614T071412Z",
-  "generated_at": "2026-06-14T07:14:12.208134+00:00",
+  "run_id": "benchmark-01-sample20-DBD",
+  "generated_at": "2026-06-14T11:21:54.088957+00:00",
   "status": "fail",
   "test_execution": {
     "status": "pass",
@@ -20,19 +20,13 @@
       "tests/unit/test_source_provenance_gate.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.565,
+    "duration_seconds": 0.584,
     "summary": {
       "passed": 70
     },
     "output_tail": [
       "......................................................................   [100%]",
-      "============================== warnings summary ===============================",
-      "..\\..\\..\\..\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475",
-      "  C:\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475: PytestCacheWarning: could not create cache path C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\.pytest_cache\\v\\cache\\nodeids: [WinError 183] Cannot create a file when that file already exists: 'C:\\\\Users\\\\Admin\\\\Desktop\\\\multi-agent-equity-research\\\\.pytest_cache\\\\v\\\\cache'",
-      "    config.cache.set(\"cache/nodeids\", sorted(self.cached_nodeids))",
-      "",
-      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
-      "70 passed, 1 warning in 0.25s"
+      "70 passed in 0.26s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -48,7 +42,10 @@
     "status": "blocked"
   },
   "blocking_issues": [
-    "period_completeness:threshold_not_met"
+    "core_metric_coverage:threshold_not_met",
+    "ocr_unresolved_rate:threshold_not_met",
+    "official_reconciliation_rate:threshold_not_met",
+    "valuation_method_data_readiness:low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical"
   ],
   "metrics": {
     "test_suite_status": "pass",
@@ -70,26 +67,460 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 1.0,
+      "value": 0.42857142857142855,
       "threshold": ">= 95%",
       "threshold_operator": ">=",
       "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 1,
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": null,
+      "dataset_version": "DBD.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "sample_origin": "valuation_requirement",
+          "canonical_key": "capex.total",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "fcfe_dcf",
+            "fcff_dcf"
+          ]
+        },
+        {
+          "sample_origin": "valuation_requirement",
+          "canonical_key": "change_in_working_capital.total",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "fcff_dcf"
+          ]
+        },
+        {
+          "sample_origin": "valuation_requirement",
+          "canonical_key": "da.total",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "ev_ebitda",
+            "fcff_dcf"
+          ]
+        },
+        {
+          "sample_origin": "valuation_requirement",
+          "canonical_key": "eps.basic",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "pe"
+          ]
+        },
+        {
+          "sample_origin": "valuation_requirement",
+          "canonical_key": "operating_cash_flow.total",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "fcfe_dcf"
+          ]
+        },
+        {
+          "sample_origin": "valuation_requirement",
+          "canonical_key": "proceeds_from_borrowings.total",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "fcfe_dcf"
+          ]
+        },
+        {
+          "sample_origin": "valuation_requirement",
+          "canonical_key": "repayment_of_borrowings.total",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "fcfe_dcf"
+          ]
+        },
+        {
+          "sample_origin": "valuation_requirement",
+          "canonical_key": "tax_expense.total",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "fcff_dcf"
+          ]
+        }
+      ],
       "remediation_hint": "Inspect source provenance, period coverage, OCR promotion, and canonical fact deduplication.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "core_metric_coverage",
+        "framework": "valuation_data_requirements+pandera",
+        "framework_version": "0.31.1",
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "valid_required_core_metrics / required_core_metrics",
+        "inputs": {
+          "ticker": "DBD",
+          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
+          "record_count": 15,
+          "accepted_record_count": 15
+        },
+        "parameters": {
+          "requirement_registry": "backend/valuation/data_requirements.py",
+          "registered_methods": [
+            "ev_ebitda",
+            "fcfe_dcf",
+            "fcff_dcf",
+            "pe"
+          ]
+        },
+        "aggregation": "coverage",
+        "numerator": 6,
+        "denominator": 14,
+        "per_sample_results": [
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "capex.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf",
+              "fcff_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "cash_and_equivalents.ending",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "change_in_working_capital.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcff_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "da.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "ebit.total",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "eps.basic",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "pe"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "long_term_debt.ending",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "operating_cash_flow.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "proceeds_from_borrowings.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "repayment_of_borrowings.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "revenue.net",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "fcff_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "shares_outstanding.ending",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "Tai lieu DHDCD 2026 Bidiphar"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcfe_dcf",
+              "fcff_dcf",
+              "pe"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "short_term_debt.ending",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "tax_expense.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcff_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 14
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "revenue.net",
+            "value": "1865.380",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 1,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "core_metric_coverage",
+            "sample_index": 15
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "cogs.total",
+            "value": "-981.001",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 2,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "core_metric_coverage",
+            "sample_index": 16
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "gross_profit.total",
+            "value": "884.379",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 3,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "core_metric_coverage",
+            "sample_index": 17
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "selling_expense.total",
+            "value": "-418.308",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 4,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "core_metric_coverage",
+            "sample_index": 18
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "admin_expense.total",
+            "value": "-139.794",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 5,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "core_metric_coverage",
+            "sample_index": 19
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "ebit.total",
+            "value": "349.128",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 6,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "core_metric_coverage",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP requires broad core-metric coverage before valuation.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "DBD.csv",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "period_completeness",
       "label": "Statement completeness",
-      "source": "data\\raw\\bctc\\DBD",
+      "source": "config\\dataset\\golden\\financials\\DBD.csv",
       "detail": "",
       "metric_id": "period_completeness",
       "metric_name": "Statement completeness",
@@ -99,21 +530,390 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0.0,
-      "threshold": "100%",
+      "value": 1.0,
+      "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
-      "sample_size": 1,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": null,
+      "dataset_version": "DBD.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
       "failed_examples": [],
       "remediation_hint": "Inspect source provenance, period coverage, OCR promotion, and canonical fact deduplication.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "period_completeness",
+        "framework": "pandera",
+        "framework_version": "0.31.1",
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "complete_required_statements / required_statements",
+        "inputs": {
+          "ticker": "DBD",
+          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
+          "record_count": 15,
+          "accepted_record_count": 15
+        },
+        "parameters": {
+          "required_period_source": "golden_provenance_and_csv"
+        },
+        "aggregation": "coverage",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "sample_origin": "required_period",
+            "period": "2025FY",
+            "accepted_fact_count": 15,
+            "complete": true,
+            "metric_id": "period_completeness",
+            "sample_index": 1
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "revenue.net",
+            "value": "1865.380",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 1,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 2
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "cogs.total",
+            "value": "-981.001",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 2,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 3
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "gross_profit.total",
+            "value": "884.379",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 3,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 4
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "selling_expense.total",
+            "value": "-418.308",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 4,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 5
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "admin_expense.total",
+            "value": "-139.794",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 5,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 6
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "ebit.total",
+            "value": "349.128",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 6,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 7
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "profit_before_tax.total",
+            "value": "346.082",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 7,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 8
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "net_income.parent",
+            "value": "291.940",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 8,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 9
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "202.784",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 9,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 10
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_investments.ending",
+            "value": "409.201",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 10,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 11
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_debt.ending",
+            "value": "43.215",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 11,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 12
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "long_term_debt.ending",
+            "value": "132.000",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 12,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 13
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "equity.parent",
+            "value": "1736.000",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 13,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 14
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "shares_outstanding.ending",
+            "value": "94400000",
+            "unit": "shares",
+            "source_type": "disclosure",
+            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 14,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 15
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "dividends_per_share.cash",
+            "value": "2000",
+            "unit": "vnd",
+            "source_type": "disclosure",
+            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 15,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "period_completeness",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "capex.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf",
+              "fcff_dcf"
+            ],
+            "metric_id": "period_completeness",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "cash_and_equivalents.ending",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "period_completeness",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "change_in_working_capital.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcff_dcf"
+            ],
+            "metric_id": "period_completeness",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "da.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "period_completeness",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Every required statement for the evaluated scope must be present.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "DBD.csv",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "provenance_coverage",
@@ -129,25 +929,362 @@
       "severity": "P0",
       "blocks_publish": true,
       "value": 1.0,
-      "threshold": "100%",
+      "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 1,
+      "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": null,
+      "dataset_version": "DBD.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
       "failed_examples": [],
       "remediation_hint": "Inspect source provenance, period coverage, OCR promotion, and canonical fact deduplication.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "provenance_coverage",
+        "framework": "pandera",
+        "framework_version": "0.31.1",
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "facts_with_complete_provenance / evaluated_facts",
+        "inputs": {
+          "ticker": "DBD",
+          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
+          "record_count": 15,
+          "accepted_record_count": 15
+        },
+        "parameters": {
+          "required_fields": [
+            "source_uri",
+            "source_title",
+            "source_type"
+          ]
+        },
+        "aggregation": "coverage",
+        "numerator": 15,
+        "denominator": 15,
+        "per_sample_results": [
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "revenue.net",
+            "value": "1865.380",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 1
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "cogs.total",
+            "value": "-981.001",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 2
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "gross_profit.total",
+            "value": "884.379",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 3
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "selling_expense.total",
+            "value": "-418.308",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 4
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "admin_expense.total",
+            "value": "-139.794",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 5
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "ebit.total",
+            "value": "349.128",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 6
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "profit_before_tax.total",
+            "value": "346.082",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 7
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "net_income.parent",
+            "value": "291.940",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 8
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "202.784",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 9
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_investments.ending",
+            "value": "409.201",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 10
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_debt.ending",
+            "value": "43.215",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 11
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "long_term_debt.ending",
+            "value": "132.000",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 12
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "equity.parent",
+            "value": "1736.000",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 13
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "shares_outstanding.ending",
+            "value": "94400000",
+            "unit": "shares",
+            "source_type": "disclosure",
+            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 14
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "dividends_per_share.cash",
+            "value": "2000",
+            "unit": "vnd",
+            "source_type": "disclosure",
+            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "has_complete_provenance": true,
+            "metric_id": "provenance_coverage",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "capex.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf",
+              "fcff_dcf"
+            ],
+            "metric_id": "provenance_coverage",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "cash_and_equivalents.ending",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "provenance_coverage",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "change_in_working_capital.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcff_dcf"
+            ],
+            "metric_id": "provenance_coverage",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "da.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "provenance_coverage",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "ebit.total",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "provenance_coverage",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Every evaluated fact must be traceable to a concrete source.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "DBD.csv",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "official_reconciliation_rate",
       "label": "Accepted official reconciliation",
-      "source": "config\\dataset\\golden\\financials\\DBD.csv",
+      "source": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
       "detail": "",
       "metric_id": "official_reconciliation_rate",
       "metric_name": "Accepted official reconciliation",
@@ -157,21 +1294,716 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 1.0,
+      "value": 0.9,
       "threshold": ">= 95%",
       "threshold_operator": ">=",
       "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 1,
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": null,
+      "dataset_version": "DBD.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "data",
+      "failed_examples": [
+        {
+          "ticker": "DBD",
+          "period": "2025FY",
+          "statement_type": "balance_sheet",
+          "canonical_key": "equity.parent",
+          "value": "1736.000",
+          "unit": "vnd_bn",
+          "source_type": "financial_statement",
+          "source_title": "BCTC hop nhat 2025 sau kiem toan",
+          "validation_status": "accepted",
+          "verified": false,
+          "official_source": true,
+          "reconciled": false
+        }
+      ],
+      "remediation_hint": "Inspect source provenance, period coverage, OCR promotion, and canonical fact deduplication.",
+      "evaluator": {
+        "id": "official_reconciliation_rate",
+        "framework": "financial_fact_reconciliation",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "officially_reconciled_material_facts / material_facts",
+        "inputs": {
+          "ticker": "DBD",
+          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
+          "record_count": 15,
+          "accepted_record_count": 15,
+          "provenance_metrics_verified": 14
+        },
+        "parameters": {
+          "material_only": true,
+          "accepted_only": true
+        },
+        "aggregation": "coverage",
+        "numerator": 9,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "revenue.net",
+            "value": "1865.380",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "verified": true,
+            "official_source": true,
+            "reconciled": true,
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 1
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "gross_profit.total",
+            "value": "884.379",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "verified": true,
+            "official_source": true,
+            "reconciled": true,
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 2
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "net_income.parent",
+            "value": "291.940",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "verified": true,
+            "official_source": true,
+            "reconciled": true,
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 3
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "202.784",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "verified": true,
+            "official_source": true,
+            "reconciled": true,
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 4
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_investments.ending",
+            "value": "409.201",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "verified": true,
+            "official_source": true,
+            "reconciled": true,
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 5
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_debt.ending",
+            "value": "43.215",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "verified": true,
+            "official_source": true,
+            "reconciled": true,
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 6
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "long_term_debt.ending",
+            "value": "132.000",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "verified": true,
+            "official_source": true,
+            "reconciled": true,
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 7
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "equity.parent",
+            "value": "1736.000",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "verified": false,
+            "official_source": true,
+            "reconciled": false,
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 8
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "shares_outstanding.ending",
+            "value": "94400000",
+            "unit": "shares",
+            "source_type": "disclosure",
+            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "validation_status": "accepted",
+            "verified": true,
+            "official_source": true,
+            "reconciled": true,
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 9
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "dividends_per_share.cash",
+            "value": "2000",
+            "unit": "vnd",
+            "source_type": "disclosure",
+            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "validation_status": "accepted",
+            "verified": true,
+            "official_source": true,
+            "reconciled": true,
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "capex.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf",
+              "fcff_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "cash_and_equivalents.ending",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "change_in_working_capital.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcff_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "da.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "ebit.total",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "eps.basic",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "pe"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "long_term_debt.ending",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "operating_cash_flow.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "proceeds_from_borrowings.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "repayment_of_borrowings.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Material facts need strong official-source reconciliation.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "DBD.csv",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+    },
+    {
+      "id": "material_ocr_error_count",
+      "label": "Material OCR error count",
+      "source": "config\\dataset\\golden\\financials\\DBD.csv",
+      "detail": "",
+      "metric_id": "material_ocr_error_count",
+      "metric_name": "Material OCR error count",
+      "category": "data_quality",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "= 0",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": "DBD.csv",
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
       "failed_examples": [],
-      "remediation_hint": "Inspect source provenance, period coverage, OCR promotion, and canonical fact deduplication.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "remediation_hint": "Resolve OCR errors that affect material numbers used in the report.",
+      "evaluator": {
+        "id": "material_ocr_error_count",
+        "framework": "ocr_validation_gate",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "material_numeric_ocr_errors_used_in_report",
+        "inputs": {
+          "ticker": "DBD",
+          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
+          "record_count": 15,
+          "accepted_record_count": 15
+        },
+        "parameters": {
+          "material_metric_config": "config/material_metrics.yml"
+        },
+        "aggregation": "error_count",
+        "numerator": 0,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "revenue.net",
+            "value": "1865.380",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "ocr_sourced": false,
+            "material_ocr_error": false,
+            "metric_id": "material_ocr_error_count",
+            "sample_origin": "fallback_1",
+            "sample_index": 1
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "gross_profit.total",
+            "value": "884.379",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "ocr_sourced": false,
+            "material_ocr_error": false,
+            "metric_id": "material_ocr_error_count",
+            "sample_origin": "fallback_1",
+            "sample_index": 2
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "net_income.parent",
+            "value": "291.940",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "ocr_sourced": false,
+            "material_ocr_error": false,
+            "metric_id": "material_ocr_error_count",
+            "sample_origin": "fallback_1",
+            "sample_index": 3
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "202.784",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "ocr_sourced": false,
+            "material_ocr_error": false,
+            "metric_id": "material_ocr_error_count",
+            "sample_origin": "fallback_1",
+            "sample_index": 4
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_investments.ending",
+            "value": "409.201",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "ocr_sourced": false,
+            "material_ocr_error": false,
+            "metric_id": "material_ocr_error_count",
+            "sample_origin": "fallback_1",
+            "sample_index": 5
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_debt.ending",
+            "value": "43.215",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "ocr_sourced": false,
+            "material_ocr_error": false,
+            "metric_id": "material_ocr_error_count",
+            "sample_origin": "fallback_1",
+            "sample_index": 6
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "long_term_debt.ending",
+            "value": "132.000",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "ocr_sourced": false,
+            "material_ocr_error": false,
+            "metric_id": "material_ocr_error_count",
+            "sample_origin": "fallback_1",
+            "sample_index": 7
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "equity.parent",
+            "value": "1736.000",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "ocr_sourced": false,
+            "material_ocr_error": false,
+            "metric_id": "material_ocr_error_count",
+            "sample_origin": "fallback_1",
+            "sample_index": 8
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "shares_outstanding.ending",
+            "value": "94400000",
+            "unit": "shares",
+            "source_type": "disclosure",
+            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "validation_status": "accepted",
+            "ocr_sourced": false,
+            "material_ocr_error": false,
+            "metric_id": "material_ocr_error_count",
+            "sample_origin": "fallback_1",
+            "sample_index": 9
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "dividends_per_share.cash",
+            "value": "2000",
+            "unit": "vnd",
+            "source_type": "disclosure",
+            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "validation_status": "accepted",
+            "ocr_sourced": false,
+            "material_ocr_error": false,
+            "metric_id": "material_ocr_error_count",
+            "sample_origin": "fallback_1",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 1,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "material_ocr_error_count",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 2,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "material_ocr_error_count",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 3,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "material_ocr_error_count",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 4,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "material_ocr_error_count",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 5,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "material_ocr_error_count",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 6,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "material_ocr_error_count",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 7,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "material_ocr_error_count",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 8,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "material_ocr_error_count",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 9,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "material_ocr_error_count",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 10,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "material_ocr_error_count",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "OCR errors affecting material report numbers cannot enter final artifacts.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "DBD.csv",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
       "id": "ocr_unresolved_rate",
@@ -181,62 +2013,1858 @@
       "metric_id": "ocr_unresolved_rate",
       "metric_name": "OCR unresolved rate",
       "category": "data_quality",
-      "layer": "release_gate",
+      "layer": "diagnostic",
       "metric_type": "error_rate",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 0.0,
-      "threshold": "0%",
-      "threshold_operator": "=",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": "<= 5%",
+      "threshold_operator": "<=",
       "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 1,
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
-      "failed_examples": [],
-      "remediation_hint": "Resolve material OCR candidates before promoting facts into the final report.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "failed_examples": [
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 1,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 1
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 2,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 2
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 3,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 3
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 4,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 4
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 5,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 5
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 6,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 6
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 7,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 7
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 8,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 8
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 9,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 9
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 10,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 10
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 11,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 11
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 12,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 12
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 13,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 13
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 14,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 14
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 15,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 15
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 16,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 16
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 17,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 17
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 18,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 18
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 19,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 19
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DBD",
+          "unit_index": 20,
+          "unit_type": "expected_ocr_corpus_unit",
+          "status": "metadata_missing",
+          "evidence_available": false,
+          "reason": "ocr_metadata_missing_for_ticker",
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 20
+        }
+      ],
+      "remediation_hint": "Reduce unresolved OCR corpus errors and keep material OCR errors out of final artifacts.",
+      "evaluator": {
+        "id": "ocr_unresolved_rate",
+        "framework": "ocr_validation_gate",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "unresolved_ocr_candidates / ocr_units_checked",
+        "inputs": {},
+        "parameters": {
+          "unit": "candidate_rows_or_processed_pages"
+        },
+        "aggregation": "error_rate",
+        "numerator": 20,
+        "denominator": 20,
+        "per_sample_results": [
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 1,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 2,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 3,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 4,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 5,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 6,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 7,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 8,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 9,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 10,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 11,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 12,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 13,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 14,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 15,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 16,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 17,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 18,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 19,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "ocr_audit_unit",
+            "ticker": "DBD",
+            "unit_index": 20,
+            "unit_type": "expected_ocr_corpus_unit",
+            "status": "metadata_missing",
+            "evidence_available": false,
+            "reason": "ocr_metadata_missing_for_ticker",
+            "metric_id": "ocr_unresolved_rate",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Corpus-level OCR unresolved rate is an operational warning threshold, not a hard zero release gate.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     },
     {
-      "id": "duplicate_fact_rate",
-      "label": "Duplicate canonical fact rate",
+      "id": "duplicate_fact_count",
+      "label": "Duplicate canonical fact count",
       "source": "config\\dataset\\golden\\financials\\DBD.csv",
       "detail": "",
-      "metric_id": "duplicate_fact_rate",
-      "metric_name": "Duplicate canonical fact rate",
+      "metric_id": "duplicate_fact_count",
+      "metric_name": "Duplicate canonical fact count",
       "category": "data_quality",
       "layer": "release_gate",
-      "metric_type": "error_rate",
+      "metric_type": "error_count",
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0.0,
-      "threshold": "0%",
+      "value": 0,
+      "threshold": "= 0",
       "threshold_operator": "=",
-      "unit": "percent",
+      "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 1,
+      "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": null,
+      "dataset_version": "DBD.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
       "failed_examples": [],
       "remediation_hint": "Deduplicate canonical facts by ticker, period, line item, and source priority.",
-      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
+      "evaluator": {
+        "id": "duplicate_fact_count",
+        "framework": "canonical_fact_deduplication",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "duplicate_canonical_keys",
+        "inputs": {
+          "ticker": "DBD",
+          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
+          "record_count": 15,
+          "accepted_record_count": 15
+        },
+        "parameters": {
+          "dedupe_key": [
+            "ticker",
+            "period",
+            "canonical_key",
+            "source_priority"
+          ]
+        },
+        "aggregation": "error_count",
+        "numerator": 0,
+        "denominator": 15,
+        "per_sample_results": [
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "admin_expense.total",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "cash_and_equivalents.ending",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "cogs.total",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "dividends_per_share.cash",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "ebit.total",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "equity.parent",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "gross_profit.total",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "long_term_debt.ending",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "net_income.parent",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "profit_before_tax.total",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "revenue.net",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "selling_expense.total",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "shares_outstanding.ending",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "short_term_debt.ending",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "canonical_dedupe_key",
+            "ticker": "DBD",
+            "period": "2025FY",
+            "canonical_key": "short_term_investments.ending",
+            "source_priority": "official",
+            "duplicate_count": 1,
+            "is_duplicate": false,
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "capex.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf",
+              "fcff_dcf"
+            ],
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "cash_and_equivalents.ending",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "change_in_working_capital.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcff_dcf"
+            ],
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "da.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "ebit.total",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "duplicate_fact_count",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Canonical facts must have one governed winner per ticker-period-line-item-source-priority key.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "DBD.csv",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+    },
+    {
+      "id": "valuation_method_data_readiness",
+      "label": "Valuation method data readiness",
+      "source": "output\\DBD_valuation_read_audit.json",
+      "detail": "low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical",
+      "metric_id": "valuation_method_data_readiness",
+      "metric_name": "Valuation method data readiness",
+      "category": "data_quality",
+      "layer": "release_gate",
+      "metric_type": "boolean",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": false,
+      "threshold": "= true",
+      "threshold_operator": "=",
+      "unit": "boolean",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [
+        {
+          "sample_origin": "valuation_method",
+          "method": "BLEND",
+          "computed": true,
+          "publishable": false,
+          "confidence": "low",
+          "role": "scenario_only",
+          "target_price_vnd": 27207.0,
+          "blocking_reasons": [
+            "fcfe_unavailable_for_blend",
+            "blend_sensitivity_missing_or_constant",
+            "blend_is_draft_only"
+          ],
+          "required_inputs_present": true,
+          "formula_trace_present": true,
+          "bridge_present": false,
+          "sensitivity_present": false,
+          "sensitivity_varies": false
+        },
+        {
+          "sample_origin": "valuation_method",
+          "method": "CORE_PE_NET_CASH",
+          "computed": true,
+          "publishable": false,
+          "confidence": "medium",
+          "role": "cross_check",
+          "target_price_vnd": 63246.0,
+          "blocking_reasons": [
+            "cross_check_only_not_primary"
+          ],
+          "required_inputs_present": true,
+          "formula_trace_present": false,
+          "bridge_present": false,
+          "sensitivity_present": false,
+          "sensitivity_varies": false
+        },
+        {
+          "sample_origin": "valuation_method",
+          "method": "FCFE",
+          "computed": false,
+          "publishable": false,
+          "confidence": "blocked",
+          "role": "excluded",
+          "target_price_vnd": null,
+          "blocking_reasons": [
+            "fcfe_blocked_net_borrowing_unavailable"
+          ],
+          "required_inputs_present": false,
+          "formula_trace_present": false,
+          "bridge_present": false,
+          "sensitivity_present": true,
+          "sensitivity_varies": true
+        },
+        {
+          "sample_origin": "valuation_method",
+          "method": "FCFF",
+          "computed": true,
+          "publishable": false,
+          "confidence": "low",
+          "role": "scenario_only",
+          "target_price_vnd": 27207.0,
+          "blocking_reasons": [
+            "formula_trace_missing",
+            "fcff_wacc_or_ev_to_equity_bridge_missing",
+            "fcff_low_confidence"
+          ],
+          "required_inputs_present": true,
+          "formula_trace_present": false,
+          "bridge_present": false,
+          "sensitivity_present": true,
+          "sensitivity_varies": true
+        },
+        {
+          "sample_origin": "valuation_method",
+          "method": "PE_FORWARD",
+          "computed": false,
+          "publishable": false,
+          "confidence": "medium",
+          "role": "cross_check",
+          "target_price_vnd": null,
+          "blocking_reasons": [
+            "cross_check_only_not_primary"
+          ],
+          "required_inputs_present": false,
+          "formula_trace_present": false,
+          "bridge_present": false,
+          "sensitivity_present": false,
+          "sensitivity_varies": false
+        }
+      ],
+      "remediation_hint": "Block headline target price and recommendation until valuation methods are publishable from high-confidence inputs.",
+      "evaluator": {
+        "id": "valuation_method_data_readiness",
+        "framework": "valuation_publishability_policy",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "final_report_publishable and recommendation_publishable",
+        "inputs": {
+          "valuation_artifact": "output\\DBD_valuation_read_audit.json",
+          "computed_methods": [
+            "FCFF",
+            "BLEND",
+            "CORE_PE_NET_CASH"
+          ],
+          "publishable_methods": [],
+          "target_price_vnd": null
+        },
+        "parameters": {
+          "requires_final_report_publishable": true,
+          "blocks_low_confidence_primary_method": true,
+          "blocks_fcfe_unavailable_blend": true
+        },
+        "aggregation": "boolean_gate",
+        "numerator": 0,
+        "denominator": 5,
+        "per_sample_results": [
+          {
+            "sample_origin": "valuation_method",
+            "method": "BLEND",
+            "computed": true,
+            "publishable": false,
+            "confidence": "low",
+            "role": "scenario_only",
+            "target_price_vnd": 27207.0,
+            "blocking_reasons": [
+              "fcfe_unavailable_for_blend",
+              "blend_sensitivity_missing_or_constant",
+              "blend_is_draft_only"
+            ],
+            "required_inputs_present": true,
+            "formula_trace_present": true,
+            "bridge_present": false,
+            "sensitivity_present": false,
+            "sensitivity_varies": false,
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "valuation_method",
+            "method": "CORE_PE_NET_CASH",
+            "computed": true,
+            "publishable": false,
+            "confidence": "medium",
+            "role": "cross_check",
+            "target_price_vnd": 63246.0,
+            "blocking_reasons": [
+              "cross_check_only_not_primary"
+            ],
+            "required_inputs_present": true,
+            "formula_trace_present": false,
+            "bridge_present": false,
+            "sensitivity_present": false,
+            "sensitivity_varies": false,
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "valuation_method",
+            "method": "FCFE",
+            "computed": false,
+            "publishable": false,
+            "confidence": "blocked",
+            "role": "excluded",
+            "target_price_vnd": null,
+            "blocking_reasons": [
+              "fcfe_blocked_net_borrowing_unavailable"
+            ],
+            "required_inputs_present": false,
+            "formula_trace_present": false,
+            "bridge_present": false,
+            "sensitivity_present": true,
+            "sensitivity_varies": true,
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "valuation_method",
+            "method": "FCFF",
+            "computed": true,
+            "publishable": false,
+            "confidence": "low",
+            "role": "scenario_only",
+            "target_price_vnd": 27207.0,
+            "blocking_reasons": [
+              "formula_trace_missing",
+              "fcff_wacc_or_ev_to_equity_bridge_missing",
+              "fcff_low_confidence"
+            ],
+            "required_inputs_present": true,
+            "formula_trace_present": false,
+            "bridge_present": false,
+            "sensitivity_present": true,
+            "sensitivity_varies": true,
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "valuation_method",
+            "method": "PE_FORWARD",
+            "computed": false,
+            "publishable": false,
+            "confidence": "medium",
+            "role": "cross_check",
+            "target_price_vnd": null,
+            "blocking_reasons": [
+              "cross_check_only_not_primary"
+            ],
+            "required_inputs_present": false,
+            "formula_trace_present": false,
+            "bridge_present": false,
+            "sensitivity_present": false,
+            "sensitivity_varies": false,
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "BLEND",
+            "check": "computed",
+            "passed": true,
+            "value": true,
+            "blocking_reasons": [
+              "fcfe_unavailable_for_blend",
+              "blend_sensitivity_missing_or_constant",
+              "blend_is_draft_only"
+            ],
+            "confidence": "low",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "BLEND",
+            "check": "publishable",
+            "passed": false,
+            "value": false,
+            "blocking_reasons": [
+              "fcfe_unavailable_for_blend",
+              "blend_sensitivity_missing_or_constant",
+              "blend_is_draft_only"
+            ],
+            "confidence": "low",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "BLEND",
+            "check": "required_inputs_present",
+            "passed": true,
+            "value": true,
+            "blocking_reasons": [
+              "fcfe_unavailable_for_blend",
+              "blend_sensitivity_missing_or_constant",
+              "blend_is_draft_only"
+            ],
+            "confidence": "low",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "BLEND",
+            "check": "formula_trace_present",
+            "passed": true,
+            "value": true,
+            "blocking_reasons": [
+              "fcfe_unavailable_for_blend",
+              "blend_sensitivity_missing_or_constant",
+              "blend_is_draft_only"
+            ],
+            "confidence": "low",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "BLEND",
+            "check": "bridge_present",
+            "passed": false,
+            "value": false,
+            "blocking_reasons": [
+              "fcfe_unavailable_for_blend",
+              "blend_sensitivity_missing_or_constant",
+              "blend_is_draft_only"
+            ],
+            "confidence": "low",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "BLEND",
+            "check": "sensitivity_present",
+            "passed": false,
+            "value": false,
+            "blocking_reasons": [
+              "fcfe_unavailable_for_blend",
+              "blend_sensitivity_missing_or_constant",
+              "blend_is_draft_only"
+            ],
+            "confidence": "low",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "BLEND",
+            "check": "sensitivity_varies",
+            "passed": false,
+            "value": false,
+            "blocking_reasons": [
+              "fcfe_unavailable_for_blend",
+              "blend_sensitivity_missing_or_constant",
+              "blend_is_draft_only"
+            ],
+            "confidence": "low",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "BLEND",
+            "check": "source_backed_assumptions",
+            "passed": false,
+            "value": null,
+            "blocking_reasons": [
+              "fcfe_unavailable_for_blend",
+              "blend_sensitivity_missing_or_constant",
+              "blend_is_draft_only"
+            ],
+            "confidence": "low",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "BLEND",
+            "check": "analyst_approved_assumptions",
+            "passed": false,
+            "value": null,
+            "blocking_reasons": [
+              "fcfe_unavailable_for_blend",
+              "blend_sensitivity_missing_or_constant",
+              "blend_is_draft_only"
+            ],
+            "confidence": "low",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "CORE_PE_NET_CASH",
+            "check": "computed",
+            "passed": true,
+            "value": true,
+            "blocking_reasons": [
+              "cross_check_only_not_primary"
+            ],
+            "confidence": "medium",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "CORE_PE_NET_CASH",
+            "check": "publishable",
+            "passed": false,
+            "value": false,
+            "blocking_reasons": [
+              "cross_check_only_not_primary"
+            ],
+            "confidence": "medium",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "CORE_PE_NET_CASH",
+            "check": "required_inputs_present",
+            "passed": true,
+            "value": true,
+            "blocking_reasons": [
+              "cross_check_only_not_primary"
+            ],
+            "confidence": "medium",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "CORE_PE_NET_CASH",
+            "check": "formula_trace_present",
+            "passed": false,
+            "value": false,
+            "blocking_reasons": [
+              "cross_check_only_not_primary"
+            ],
+            "confidence": "medium",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "CORE_PE_NET_CASH",
+            "check": "bridge_present",
+            "passed": false,
+            "value": false,
+            "blocking_reasons": [
+              "cross_check_only_not_primary"
+            ],
+            "confidence": "medium",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "valuation_policy_check",
+            "method": "CORE_PE_NET_CASH",
+            "check": "sensitivity_present",
+            "passed": false,
+            "value": false,
+            "blocking_reasons": [
+              "cross_check_only_not_primary"
+            ],
+            "confidence": "medium",
+            "metric_id": "valuation_method_data_readiness",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "A numeric valuation output is insufficient; low-confidence FCFF, blocked FCFE, or draft-only blend must block headline target price and recommendation.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+    },
+    {
+      "id": "dataframe_schema_validity",
+      "label": "Pandera DataFrame schema validity",
+      "source": "config\\dataset\\golden\\financials\\DBD.csv",
+      "detail": "",
+      "metric_id": "dataframe_schema_validity",
+      "metric_name": "Pandera DataFrame schema validity",
+      "category": "data_quality",
+      "layer": "release_gate",
+      "metric_type": "boolean",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": true,
+      "threshold": "= true",
+      "threshold_operator": "=",
+      "unit": "boolean",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": "DBD.csv",
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "data",
+      "failed_examples": [],
+      "remediation_hint": "Repair the connector DataFrame rows reported by Pandera before normalization.",
+      "evaluator": {
+        "id": "dataframe_schema_validity",
+        "framework": "pandera",
+        "framework_version": "0.31.1",
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "pandera_dataframe_schema_validation",
+        "inputs": {
+          "ticker": "DBD",
+          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
+          "record_count": 15,
+          "accepted_record_count": 15
+        },
+        "parameters": {
+          "strict": false,
+          "coerce": true,
+          "required_columns": [
+            "ticker",
+            "fiscal_year",
+            "period",
+            "statement_type",
+            "canonical_key",
+            "value",
+            "unit",
+            "currency",
+            "source_uri",
+            "source_title",
+            "confidence",
+            "validation_status"
+          ]
+        },
+        "aggregation": "schema_validation",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "revenue.net",
+            "value": "1865.380",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 1
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "cogs.total",
+            "value": "-981.001",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 2
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "gross_profit.total",
+            "value": "884.379",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 3
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "selling_expense.total",
+            "value": "-418.308",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 4
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "admin_expense.total",
+            "value": "-139.794",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 5
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "ebit.total",
+            "value": "349.128",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 6
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "profit_before_tax.total",
+            "value": "346.082",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 7
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "income_statement",
+            "canonical_key": "net_income.parent",
+            "value": "291.940",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 8
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "202.784",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 9
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_investments.ending",
+            "value": "409.201",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 10
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_debt.ending",
+            "value": "43.215",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 11
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "long_term_debt.ending",
+            "value": "132.000",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 12
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "equity.parent",
+            "value": "1736.000",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 13
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "shares_outstanding.ending",
+            "value": "94400000",
+            "unit": "shares",
+            "source_type": "disclosure",
+            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 14
+          },
+          {
+            "ticker": "DBD",
+            "period": "2025FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "dividends_per_share.cash",
+            "value": "2000",
+            "unit": "vnd",
+            "source_type": "disclosure",
+            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "schema_valid": true,
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "capex.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcfe_dcf",
+              "fcff_dcf"
+            ],
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "cash_and_equivalents.ending",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "change_in_working_capital.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "fcff_dcf"
+            ],
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "da.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "ebit.total",
+            "present": true,
+            "accepted_periods": [
+              "2025FY"
+            ],
+            "source_titles": [
+              "BCTC hop nhat 2025 sau kiem toan"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "dataframe_schema_validity",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Connector and golden fact rows must satisfy the governed DataFrame contract.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "DBD.csv",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
     }
   ],
-  "core_metric_coverage": 1.0,
-  "period_completeness": 0.0,
+  "core_metric_coverage": 0.42857142857142855,
+  "period_completeness": 1.0,
   "provenance_coverage": 1.0,
-  "official_reconciliation_rate": 1.0,
-  "ocr_unresolved_rate": 0.0,
+  "official_reconciliation_rate": 0.9,
+  "material_ocr_error_count": 0,
+  "ocr_unresolved_rate": 1.0,
+  "duplicate_fact_count": 0,
   "duplicate_fact_rate": 0.0,
-  "ocr": {}
+  "valuation_method_data_readiness": false,
+  "valuation_policy": {
+    "ticker": "DBD",
+    "run_id": null,
+    "valuation_artifact_path": "output\\DBD_valuation_read_audit.json",
+    "computed_methods": [
+      "FCFF",
+      "BLEND",
+      "CORE_PE_NET_CASH"
+    ],
+    "publishable_methods": [],
+    "excluded_methods": [
+      {
+        "method_name": "FCFF",
+        "reason": "formula_trace_missing"
+      },
+      {
+        "method_name": "FCFE",
+        "reason": "fcfe_blocked_net_borrowing_unavailable"
+      },
+      {
+        "method_name": "BLEND",
+        "reason": "fcfe_unavailable_for_blend"
+      },
+      {
+        "method_name": "PE_FORWARD",
+        "reason": "cross_check_only_not_primary"
+      },
+      {
+        "method_name": "CORE_PE_NET_CASH",
+        "reason": "cross_check_only_not_primary"
+      }
+    ],
+    "primary_method": null,
+    "target_price_publishable": false,
+    "recommendation_publishable": false,
+    "final_report_publishable": false,
+    "status": "blocked",
+    "severity": "critical",
+    "blocking_reasons": [
+      "low_confidence_primary_method",
+      "market_sanity_bridge_missing",
+      "valuation_method_divergence_critical"
+    ],
+    "warnings": [],
+    "divergence_pct": 1.3246223398390122,
+    "target_price_vnd": null,
+    "method_diagnostics": {
+      "FCFF": {
+        "method_name": "FCFF",
+        "computed": true,
+        "publishable": false,
+        "target_price_vnd": 27207.0,
+        "confidence": "low",
+        "role": "scenario_only",
+        "blocking_reasons": [
+          "formula_trace_missing",
+          "fcff_wacc_or_ev_to_equity_bridge_missing",
+          "fcff_low_confidence"
+        ],
+        "warnings": [],
+        "required_inputs_present": true,
+        "formula_trace_present": false,
+        "bridge_present": false,
+        "sensitivity_present": true,
+        "sensitivity_varies": true,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      },
+      "FCFE": {
+        "method_name": "FCFE",
+        "computed": false,
+        "publishable": false,
+        "target_price_vnd": null,
+        "confidence": "blocked",
+        "role": "excluded",
+        "blocking_reasons": [
+          "fcfe_blocked_net_borrowing_unavailable"
+        ],
+        "warnings": [],
+        "required_inputs_present": false,
+        "formula_trace_present": false,
+        "bridge_present": false,
+        "sensitivity_present": true,
+        "sensitivity_varies": true,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      },
+      "BLEND": {
+        "method_name": "BLEND",
+        "computed": true,
+        "publishable": false,
+        "target_price_vnd": 27207.0,
+        "confidence": "low",
+        "role": "scenario_only",
+        "blocking_reasons": [
+          "fcfe_unavailable_for_blend",
+          "blend_sensitivity_missing_or_constant",
+          "blend_is_draft_only"
+        ],
+        "warnings": [],
+        "required_inputs_present": true,
+        "formula_trace_present": true,
+        "bridge_present": false,
+        "sensitivity_present": false,
+        "sensitivity_varies": false,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      },
+      "PE_FORWARD": {
+        "method_name": "PE_FORWARD",
+        "computed": false,
+        "publishable": false,
+        "target_price_vnd": null,
+        "confidence": "medium",
+        "role": "cross_check",
+        "blocking_reasons": [
+          "cross_check_only_not_primary"
+        ],
+        "warnings": [],
+        "required_inputs_present": false,
+        "formula_trace_present": false,
+        "bridge_present": false,
+        "sensitivity_present": false,
+        "sensitivity_varies": false,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      },
+      "CORE_PE_NET_CASH": {
+        "method_name": "CORE_PE_NET_CASH",
+        "computed": true,
+        "publishable": false,
+        "target_price_vnd": 63246.0,
+        "confidence": "medium",
+        "role": "cross_check",
+        "blocking_reasons": [
+          "cross_check_only_not_primary"
+        ],
+        "warnings": [],
+        "required_inputs_present": true,
+        "formula_trace_present": false,
+        "bridge_present": false,
+        "sensitivity_present": false,
+        "sensitivity_varies": false,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      }
+    }
+  },
+  "ocr": {},
+  "pandera": {
+    "execution_status": "executed",
+    "framework": "pandera",
+    "framework_version": "0.31.1",
+    "sample_size": 15,
+    "passed": true,
+    "failure_cases": [],
+    "reason": null
+  },
+  "golden_provenance": {
+    "ticker": "DBD",
+    "verified_by": "haubelerche",
+    "verification_date": "2026-06-03",
+    "source_tier": 0,
+    "source_document_type": "financial_statement",
+    "fiscal_year": 2025,
+    "fiscal_period": "FY",
+    "publisher": "Bidiphar (Cong ty CP Duoc - Trang thiet bi Y te Binh Dinh)",
+    "published_at": "2026-03-25",
+    "source_documents_used": [
+      "BCTC hop nhat nam 2025 sau kiem toan (Bidiphar)",
+      "Tai lieu / tin DHDCD 2026 Bidiphar (co tuc tien mat 20%, so co phieu luu hanh)"
+    ],
+    "source_urls": [
+      "https://bidiphar.com/wp-content/uploads/2026/03/bao-cao-tai-chinh-hop-nhat-nam-2025-sau-kiem-toan-1774620839.pdf",
+      "https://bidiphar.com/bidiphar-dbd-to-chuc-thanh-cong-dhdcd-2026/",
+      "https://bidiphar.com/category/quan-he-co-dong/bao-cao-tai-chinh/"
+    ],
+    "notes": "Official audited 2025FY figures injected to fix audit items NUMERIC-02 (selling vs admin expense split: SG&A = 418.308 + 139.794 = 558.102), NUMERIC-04 (net debt bridge: long_term_debt 132.0 + short_term_investments 409.201 -> net debt approx -436.77), NUMERIC-01/DATA-03 (shares_outstanding ~94.4m and cash dividend 2,000 VND/cp). Values in VND billion unless unit states otherwise (shares in absolute count; dividend in VND/share). Only 2025FY is injected here: the audit verified the official 2025 split and balance-sheet components; 2021-2024 admin-expense / long-term-debt / short-term-investments official breakdown was NOT independently verified and remains from the provider (vnstock/VCI) pending official sourcing. equity.parent 2025 carried at provider value (confidence 0.85) pending exact audited figure. Q1/2026, 2026 management guidance (revenue 2,090 / PBT 375), private placement (23.3m) and ESOP (1.5m) are NOT canonical FY facts and are deliberately excluded per FY-only scope; they belong to ManagementGuidance / CorporateAction artifacts (follow-up).",
+    "metrics_verified": [
+      "revenue.net",
+      "cogs.total",
+      "gross_profit.total",
+      "selling_expense.total",
+      "admin_expense.total",
+      "ebit.total",
+      "profit_before_tax.total",
+      "net_income.parent",
+      "cash_and_equivalents.ending",
+      "short_term_investments.ending",
+      "short_term_debt.ending",
+      "long_term_debt.ending",
+      "shares_outstanding.ending",
+      "dividends_per_share.cash"
+    ],
+    "checksum": "sha256:pending"
+  }
 }

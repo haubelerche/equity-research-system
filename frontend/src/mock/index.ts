@@ -23,6 +23,7 @@ export const MOCK_ARTIFACTS = {
 const LAYER_VALUE_MAP: Record<string, Record<string, number | null>> = {
   data_reliability: {
     core_metric_coverage: dataQuality.core_metric_coverage,
+    valuation_method_data_readiness: dataQuality.valuation_method_data_readiness ?? null,
     period_completeness: dataQuality.period_completeness,
     provenance_coverage: dataQuality.provenance_coverage,
     official_reconciliation_rate: dataQuality.official_reconciliation_rate,

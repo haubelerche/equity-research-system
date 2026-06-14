@@ -42,6 +42,10 @@ def test_runtime_metrics_follow_benchmark_standards_schema() -> None:
         "sample_size",
         "failed_examples",
         "remediation_hint",
+        "evaluator",
+        "calculation",
+        "threshold_policy",
+        "evidence",
         "evaluated_at",
     ):
         assert required in metric

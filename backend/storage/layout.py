@@ -36,6 +36,10 @@ _RUN_ARTIFACT_NAMES = {
     "report_workings.md",
 }
 _EXPORT_NAMES = {"report.pdf", "report.html", "report.md"}
+# Ticker-stable client downloads served by the web app. Unlike approved_export_key
+# (run-scoped, for audit), these keys are addressed by ticker so the serving
+# endpoint can fetch "the latest report for TICKER" without knowing a run id.
+_CLIENT_REPORT_NAMES = {"report.pdf", "explanation.pdf"}
 
 
 def _component(value: str, label: str) -> str:
@@ -72,6 +76,13 @@ def approved_export_key(ticker: str, run_id: str, report_name: str) -> str:
         f"approved_reports/{_component(ticker.upper(), 'ticker')}/"
         f"{_component(run_id, 'run_id')}/{report_name}"
     )
+
+
+def client_report_key(ticker: str, report_name: str) -> str:
+    """Ticker-stable key in the exports bucket for user-facing downloads."""
+    if report_name not in _CLIENT_REPORT_NAMES:
+        raise ValueError(f"Unsupported client report export: {report_name!r}")
+    return f"client_reports/{_component(ticker.upper(), 'ticker')}/{report_name}"
 
 
 def archive_key(category: str, relative: str) -> str:

@@ -142,12 +142,14 @@ def auto_ingest_tool(
     from_year: int = MVP_FROM_YEAR,
     to_year: int = MVP_TO_YEAR,
     ocr: bool = False,
+    progress_cb=None,
 ) -> ServiceNodeResult:
     """Run auto-ingestion of official documents (web + PDF) for *ticker*.
 
     Non-blocking: if ingestion fails, returns status='completed' with warn info
     in the summary and the pipeline continues with Tier-3-only facts. The warning
-    is recorded in state.artifacts.
+    is recorded in state.artifacts. ``progress_cb(substep, detail)`` is an
+    optional hook for the live progress UI.
     """
     import logging
     _logger = logging.getLogger(__name__)
@@ -160,6 +162,7 @@ def auto_ingest_tool(
             dry_run=False,
             channels=["cafef", "pdf"],
             ocr=ocr,
+            progress_cb=progress_cb,
         )
         results = _run(cfg)
         promoted = sum(r.promoted for r in results)

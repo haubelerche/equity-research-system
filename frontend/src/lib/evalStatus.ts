@@ -4,18 +4,25 @@ export type MetricStatus = "pass" | "fail" | "warning" | "not_evaluable";
 export interface MetricDef {
   id: string;
   label: string;
+  englishLabel?: string;
   unit: string;
   comparator: Comparator;
   threshold: number;
+  thresholdLabel?: string;
   technology: string;
   formula: string;
+  aliases?: string[];
+  metricType?: string;
+  scope?: string;
+  severity?: string;
+  blocksPublish?: boolean;
 }
 
 export function evalMetricStatus(
   def: MetricDef,
   value: number | null | undefined,
 ): MetricStatus {
-  if (value === null || value === undefined || Number.isNaN(value)) return "fail";
+  if (value === null || value === undefined || Number.isNaN(value)) return "not_evaluable";
   if (def.comparator === "gte") return value >= def.threshold ? "pass" : "fail";
   return value <= def.threshold ? "pass" : "fail";
 }
@@ -35,6 +42,7 @@ export function formatMetricNumber(def: MetricDef, value: number): string {
 }
 
 export function formatPassCondition(def: MetricDef): string {
+  if (def.thresholdLabel) return def.thresholdLabel;
   const comparator = def.comparator === "gte" ? "≥" : "≤";
   return `${comparator} ${formatMetricNumber(def, def.threshold)}`;
 }

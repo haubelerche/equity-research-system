@@ -1,7 +1,7 @@
 # Data Reliability Evaluation Plan
 
 ## Context
-
+Dùng framework pandera để đánh giá.
 Data reliability la lop evaluation dau tien vi moi report, valuation va citation deu phu thuoc vao fact canonical. Trong repo hien tai, cac thanh phan lien quan gom `backend/documents/`, `backend/facts/`, `backend/dataops/`, `backend/reconciliation/`, `backend/database/canonical/`, `backend/evaluation/source_provenance_gates.py`, `backend/harness/gates.py`, `tests/unit/test_data_quality.py`, `tests/reconciliation/`, `tests/dataops/`, `tests/documents/`, `tests/official_sources/` va `tests/evaluation/test_final_source_gates.py`.
 
 ## Problem Statement

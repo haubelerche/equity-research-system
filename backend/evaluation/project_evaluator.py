@@ -405,6 +405,7 @@ def evaluate_project(
     manifest = {
         "schema_version": STANDARD_SCHEMA_VERSION,
         "benchmark_suite_version": "benchmark_standards_v1",
+        "source": "project_audit",
         "run_id": run_id,
         "ticker": ticker.upper(),
         "generated_at": generated_at,

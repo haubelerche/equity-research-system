@@ -1,5 +1,6 @@
 import type { EvalLayer } from "../../data/evalFramework";
 import type { BenchmarkMetricResult } from "../../api/types";
+import type { MetricDef } from "../../lib/evalStatus";
 import { MetricRow } from "./MetricRow";
 
 interface Props {
@@ -8,9 +9,10 @@ interface Props {
   results?: Record<string, BenchmarkMetricResult>;
   onViewBenchmark: (layer: EvalLayer) => void;
   onExplain: (layer: EvalLayer) => void;
+  onSelectMetric: (layer: EvalLayer, metric: MetricDef, result?: BenchmarkMetricResult) => void;
 }
 
-export function LayerCard({ layer, values, results = {}, onViewBenchmark, onExplain }: Props) {
+export function LayerCard({ layer, values, results = {}, onViewBenchmark, onExplain, onSelectMetric }: Props) {
   return (
     <article className="layer-card">
       <header>
@@ -21,14 +23,22 @@ export function LayerCard({ layer, values, results = {}, onViewBenchmark, onExpl
           <button type="button" onClick={() => onExplain(layer)}>Giải thích</button>
         </div>
       </header>
-      <table>
-        <thead><tr><th>Chỉ số và công cụ đánh giá</th><th>Đạt khi</th><th>Kết quả</th><th>Trạng thái</th></tr></thead>
-        <tbody>
-          {layer.metrics.map((m) => (
-            <MetricRow key={m.id} def={m} value={values[m.id]} result={results[m.id]} />
-          ))}
-        </tbody>
-      </table>
+      <div className="layer-card__table-scroll">
+        <table>
+          <thead><tr><th>Chỉ số và công cụ đánh giá</th><th>Đạt khi</th><th>Kết quả</th><th>Trạng thái</th></tr></thead>
+          <tbody>
+            {layer.metrics.map((m) => (
+              <MetricRow
+                key={m.id}
+                def={m}
+                value={values[m.id]}
+                result={results[m.id]}
+                onSelect={(metric, result) => onSelectMetric(layer, metric, result)}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </article>
   );
 }

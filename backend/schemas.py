@@ -38,12 +38,23 @@ class StartRunResponse(BaseModel):
     status: RunStatus
 
 
+class GenerateReportResponse(BaseModel):
+    run_id: str
+    # "fast_render" (render from existing artifacts) or "full_pipeline".
+    mode: str
+
+
 class RunStatusResponse(BaseModel):
     run_id: str
     ticker: str
     run_type: RunType
     status: RunStatus
     current_stage: str
+    # Fine-grained within-stage detail for the live progress modal, e.g.
+    # {"substep": "cafef", "detail": "Đang tìm trên CafeF…"}.
+    progress: dict[str, Any] = Field(default_factory=dict)
+    # Human-readable reason a run cannot produce a report (Vietnamese-friendly).
+    blocking_reason: str | None = None
     flags: dict[str, Any]
     created_at: str
     updated_at: str

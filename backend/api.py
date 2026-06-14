@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.requests import Request
 
@@ -41,6 +42,7 @@ from backend.orchestrator import FullReportOrchestrator, RunContext
 from backend.runtime_store import RuntimeStore
 from backend.schemas import (
     ArtifactsResponse,
+    GenerateReportResponse,
     RunStatusResponse,
     RunStatus,
     StartRunRequest,
@@ -53,12 +55,15 @@ from backend.runtime_store import to_public_status
 
 
 def _to_status_response(run: dict[str, Any]) -> RunStatusResponse:
+    progress = run.get("progress_json", {}) or {}
     return RunStatusResponse(
         run_id=run["run_id"],
         ticker=run["ticker"],
         run_type=run["run_type"],
         status=RunStatus(to_public_status(run["status"])),
         current_stage=run["current_stage"],
+        progress=progress,
+        blocking_reason=progress.get("blocking_reason"),
         flags=run.get("flags_json", {}),
         created_at=run["created_at"],
         updated_at=run["updated_at"],
@@ -252,6 +257,36 @@ def create_app(
         }
 
     _FILE_KINDS = {"report": "_report.pdf", "explanation": "_explanation.pdf"}
+    _EXPORT_NAMES = {"report": "report.pdf", "explanation": "explanation.pdf"}
+
+    def _export_storage():
+        """Supabase exports adapter, or None when storage is unconfigured (dev)."""
+        try:
+            from backend.storage import SupabaseStorageAdapter
+
+            return SupabaseStorageAdapter()
+        except Exception:
+            return None
+
+    def _serve_from_exports(ticker: str, kind: str) -> Response | None:
+        """Stream the durable PDF from Supabase exports, or None to fall back."""
+        export_name = _EXPORT_NAMES.get(kind)
+        if export_name is None:
+            return None
+        storage = _export_storage()
+        if storage is None:
+            return None
+        try:
+            from backend.storage import EXPORTS_BUCKET, client_report_key
+
+            data = storage.download_bytes(EXPORTS_BUCKET, client_report_key(ticker, export_name))
+        except Exception:
+            return None
+        return Response(
+            content=data,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'inline; filename="{ticker}_{export_name}"'},
+        )
 
     @app.get("/reports/{ticker}/file/{kind}")
     def get_report_file(ticker: str, kind: str):
@@ -261,6 +296,11 @@ def create_app(
         suffix = _FILE_KINDS.get(kind)
         if suffix is None:
             raise HTTPException(status_code=404, detail="Unknown file kind")
+        # Prefer the durable copy in Supabase exports (survives ephemeral disk);
+        # fall back to a locally rendered file for dev / same-box renders.
+        served = _serve_from_exports(ticker, kind)
+        if served is not None:
+            return served
         path = (_output_dir() / f"{ticker}{suffix}").resolve()
         out_root = _output_dir().resolve()
         if out_root not in path.parents or not path.is_file():
@@ -281,6 +321,69 @@ def create_app(
         if out_root not in path.parents or not path.is_file():
             raise HTTPException(status_code=404, detail="Preview not found")
         return FileResponse(path, media_type="image/png")
+
+    @app.post("/reports/{ticker}/generate", response_model=GenerateReportResponse)
+    def generate_report(ticker: str) -> GenerateReportResponse:
+        ticker = ticker.upper()
+        if ticker not in _universe_index():
+            raise HTTPException(status_code=404, detail="Unknown ticker")
+        store = app.state.store
+        executor = app.state.executor
+
+        # Route fast (render from existing artifacts) vs full pipeline. Any error
+        # here just means "no renderable run yet" -> run the full pipeline.
+        source_run_id: str | None = None
+        try:
+            from backend.dataops.snapshot_freshness import latest_ready_snapshot
+            from backend.reporting.report_delivery import latest_renderable_run_id
+
+            if latest_ready_snapshot(ticker) is not None:
+                source_run_id = latest_renderable_run_id(ticker)
+        except Exception:
+            source_run_id = None
+        mode = "fast_render" if source_run_id else "full_pipeline"
+
+        objective = f"Generate full equity research report for {ticker}"
+        # Fresh run per click (a uuid component) so "Cập nhật"/re-render always
+        # produces a new pollable run instead of returning a stale one.
+        run_id = deterministic_id(ticker, mode, objective, uuid.uuid4().hex)
+        policy = {
+            "budget_policy": settings.default_budget_policy,
+            "soft_budget_usd": settings.soft_budget_usd,
+            "hard_budget_usd": settings.hard_budget_usd,
+            "fallback_model": settings.fallback_model,
+        }
+        flags: dict[str, Any] = {
+            "factsChanged": False,
+            "catalystChanged": False,
+            "valuationChanged": False,
+            "thesisNeedsRefresh": False,
+            "citationsNeedRefresh": False,
+            "generate_mode": mode,
+        }
+        if source_run_id:
+            flags["source_run_id"] = source_run_id
+
+        ensure_ticker_registered_from_universe(store, ticker)
+        store.create_run(
+            run_id=run_id,
+            ticker=ticker,
+            run_type="full_report",
+            objective=objective,
+            flags=flags,
+            config_snapshot_json=policy,
+        )
+        executor.submit(
+            RunContext(
+                run_id=run_id,
+                ticker=ticker,
+                run_type="full_report",
+                objective=objective,
+                policy=policy,
+                flags=flags,
+            )
+        )
+        return GenerateReportResponse(run_id=run_id, mode=mode)
 
     @app.get("/reports/{run_id}", response_model=ArtifactsResponse)
     def get_report(run_id: str) -> ArtifactsResponse:
