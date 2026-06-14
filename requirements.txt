@@ -6,6 +6,9 @@ pandas
 numpy
 pdfplumber
 pyyaml
+requests
+beautifulsoup4
+vnstock
 anthropic>=0.40
 openai  # still needed for chunk_pipeline.py embeddings (text-embedding-3-small)
 langfuse>=4.0
@@ -19,3 +22,12 @@ jinja2>=3.1
 markdown>=3.5
 weasyprint>=61.0
 xhtml2pdf>=0.2.11
+pdfkit
+pypdf
+
+# Evaluation stack
+# Deterministic gates run today; these packages support the planned P1/P2
+# retrieval, schema, and judge layers described in eval/.
+ragas
+pandera
+deepeval
