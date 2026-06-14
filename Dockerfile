@@ -86,7 +86,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
 # ── Entrypoint: run DB migrations then the research pipeline ──────────────────
 # ENABLE_OCR=true adds --ocr flag automatically
 CMD ["sh", "-c", \
-  "python -m backend.database.migrate && \
+  "python -m backend.database.migrate ; \
    if [ \"${APP_MODE}\" = \"worker\" ]; then \
      python scripts/run_research.py \
        --ticker ${TICKER} \
