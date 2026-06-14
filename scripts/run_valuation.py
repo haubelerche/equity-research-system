@@ -299,6 +299,24 @@ def run_valuation(
         except Exception as _exc:  # noqa: BLE001 - non-fatal; valuation will block target instead
             print(f"[run_valuation] WARNING: shares injection failed ({_exc})")
 
+    # ── Pre-valuation data completeness (improvement.md §P0/P1) ──────────────
+    # Diagnose, per method, exactly which canonical facts / assumptions / market
+    # data are present before any method runs. Attached to the artifact so a
+    # blocked method (e.g. FCFE missing CFS financing lines) is explained upfront
+    # instead of failing implicitly downstream.
+    from backend.valuation.data_availability import run_valuation_preflight
+    _preflight_price = _get_current_price(ticker)
+    preflight = run_valuation_preflight(
+        ticker=ticker,
+        fact_table=full_table,
+        fy_periods=fy_periods,
+        current_price_vnd=_preflight_price,
+        peer_dataset_available=False,  # no peer dataset wired yet → P/E & EV/EBITDA stay cross-check
+    )
+    for _gap in preflight["data_gap_report"]["gaps"]:
+        print(f"[run_valuation] DATA GAP {_gap['method']}: missing {_gap['field']} "
+              f"({_gap['classification']}) — {_gap['recommended_fix']}")
+
     # ── Ratio analysis ────────────────────────────────────────────────────────
     print(f"\n[run_valuation] {ticker} — computing ratios")
     ratios = compute_ratios(full_table)
@@ -863,6 +881,8 @@ def run_valuation(
         },
         "multiples": multiples.to_dict(),
         "current_price_vnd": current_price,
+        "data_completeness": preflight["data_completeness"],
+        "data_gap_report": preflight["data_gap_report"],
         "assumption_gate": gate.to_dict(),
         "valuation_confidence": confidence.to_dict(),
         "formula_traces": formula_traces,

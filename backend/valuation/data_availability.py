@@ -8,6 +8,7 @@ exists for the latest period.
 """
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Any
 
 from backend.facts.metric_metadata import is_known_metric
@@ -169,3 +170,41 @@ def build_data_gap_report(matrix: dict[str, dict[str, Any]]) -> dict[str, Any]:
                 "recommended_fix": recommended,
             })
     return {"ready_methods": ready_methods, "gaps": gaps}
+
+
+def run_valuation_preflight(
+    *,
+    ticker: str,
+    fact_table: FactTable,
+    fy_periods: list[str],
+    current_price_vnd: float | None,
+    peer_dataset_available: bool,
+) -> dict[str, Any]:
+    """Build the pre-valuation completeness artifact for a run.
+
+    Assumptions (wacc/cost_of_equity/terminal_growth/forecast_years) are always
+    supplied by the valuation engine as model defaults, so they are treated as
+    present; the discriminating signal is fact + market-data availability.
+    """
+    latest_period = sorted(fy_periods)[-1] if fy_periods else None
+    available_assumptions = {"wacc", "cost_of_equity", "terminal_growth", "forecast_years"}
+    available_market_data: set[str] = set()
+    if current_price_vnd is not None:
+        available_market_data.add("market_price")
+    if peer_dataset_available:
+        available_market_data.update({"peer_pe_median", "peer_ev_ebitda_median", "peer_group"})
+
+    matrix = build_data_availability_matrix(
+        ticker=ticker,
+        fact_table=fact_table,
+        latest_period=latest_period,
+        available_assumptions=available_assumptions,
+        available_market_data=available_market_data,
+    )
+    return {
+        "ticker": ticker,
+        "valuation_date": datetime.now(UTC).isoformat(),
+        "latest_period": latest_period,
+        "data_completeness": matrix,
+        "data_gap_report": build_data_gap_report(matrix),
+    }
