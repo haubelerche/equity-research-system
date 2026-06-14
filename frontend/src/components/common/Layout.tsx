@@ -6,7 +6,7 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="app-shell">
       <nav className="app-nav">
         <span className="app-brand">Pharma Equity Research</span>
-        <NavLink to="/reports">Báo cáo</NavLink>
+        <NavLink to="/" end>Báo cáo</NavLink>
         <NavLink to="/eval">Khung đánh giá</NavLink>
       </nav>
       <main>{children}</main>

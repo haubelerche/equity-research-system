@@ -18,7 +18,7 @@ describe("ReportsPage", () => {
     // DMC is in the static universe but NOT in the API response — must still render
     expect(screen.getByText("DMC")).toBeInTheDocument();
 
-    await userEvent.type(screen.getByLabelText("search"), "imex");
+    await userEvent.selectOptions(screen.getByLabelText("search"), "IMP");
     expect(screen.queryByText("DHG")).toBeNull();
     expect(screen.getByText("IMP")).toBeInTheDocument();
   });

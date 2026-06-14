@@ -7,30 +7,29 @@ interface Props {
 }
 
 /**
- * Type-ahead combobox over the full 53-ticker universe (native <datalist>):
- * users can type to filter or open the dropdown to pick a ticker. Selecting an
- * option fills the input with the ticker code, which filters the list below.
+ * Dropdown to pick one of the 53 tickers (or "all"). Selecting a ticker filters
+ * the list below to that code; the empty value shows the whole universe.
  */
 export function TickerSearch({ value, onChange, options }: Props) {
   return (
     <div className="ticker-search" role="search">
-      <input
+      <label htmlFor="ticker-select">Chọn mã cổ phiếu</label>
+      <select
+        id="ticker-select"
         aria-label="search"
-        list="ticker-options"
-        placeholder="Tìm hoặc chọn mã cổ phiếu…"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-      />
-      <datalist id="ticker-options">
+      >
+        <option value="">Tất cả {options.length} mã</option>
         {options.map((o) => (
           <option key={o.ticker} value={o.ticker}>
             {`${o.ticker} — ${o.company_name}`}
           </option>
         ))}
-      </datalist>
+      </select>
       {value && (
         <button type="button" className="ticker-search__clear" onClick={() => onChange("")}>
-          Xóa lọc
+          Bỏ lọc
         </button>
       )}
     </div>
