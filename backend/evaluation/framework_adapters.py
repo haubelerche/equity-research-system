@@ -8,6 +8,13 @@ from __future__ import annotations
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
+RAGAS_METRICS = (
+    "context_precision",
+    "context_recall",
+    "faithfulness",
+    "response_relevancy",
+)
+
 
 def _version(package: str) -> str | None:
     try:
@@ -98,7 +105,46 @@ def evaluate_ragas_samples(samples: list[dict[str, Any]]) -> dict[str, Any]:
             "framework_version": _version("ragas"),
             "sample_size": 0,
             "scores": {},
+            "samples": [],
             "reason": "ragas_dataset_missing",
+        }
+    offline_scored = [
+        sample for sample in samples
+        if isinstance(sample.get("offline_scores"), dict)
+    ]
+    if len(offline_scored) == len(samples):
+        per_metric: dict[str, list[float]] = {name: [] for name in RAGAS_METRICS}
+        per_sample_results: list[dict[str, Any]] = []
+        for index, sample in enumerate(samples, start=1):
+            raw_scores = sample.get("offline_scores") or {}
+            normalized_scores: dict[str, float] = {}
+            for name in RAGAS_METRICS:
+                if name not in raw_scores:
+                    continue
+                score = max(0.0, min(1.0, float(raw_scores[name])))
+                normalized_scores[name] = score
+                per_metric[name].append(score)
+            per_sample_results.append({
+                "sample_index": index,
+                "sample_origin": "ragas_offline_contract",
+                "id": sample.get("id"),
+                "question": sample.get("question"),
+                "expected_answer": sample.get("expected_answer"),
+                "contexts": sample.get("contexts") or [],
+                "source_tier": sample.get("source_tier"),
+                "scores": normalized_scores,
+                "label_rationale": sample.get("label_rationale"),
+            })
+        return {
+            "execution_status": "executed_offline",
+            "framework": "ragas_offline_contract",
+            "framework_version": "offline_label_v1",
+            "sample_size": len(samples),
+            "scores": {
+                name: sum(values) / len(values) for name, values in per_metric.items() if values
+            },
+            "samples": per_sample_results,
+            "reason": None,
         }
     try:
         from datasets import Dataset
@@ -116,6 +162,7 @@ def evaluate_ragas_samples(samples: list[dict[str, Any]]) -> dict[str, Any]:
             "framework_version": _version("ragas"),
             "sample_size": len(samples),
             "scores": {},
+            "samples": [],
             "reason": str(exc),
         }
     try:
@@ -132,6 +179,7 @@ def evaluate_ragas_samples(samples: list[dict[str, Any]]) -> dict[str, Any]:
             "framework_version": _version("ragas"),
             "sample_size": len(samples),
             "scores": scores,
+            "samples": samples,
             "reason": None,
         }
     except Exception as exc:  # Framework/model-provider errors must remain visible.
@@ -141,6 +189,7 @@ def evaluate_ragas_samples(samples: list[dict[str, Any]]) -> dict[str, Any]:
             "framework_version": _version("ragas"),
             "sample_size": len(samples),
             "scores": {},
+            "samples": [],
             "reason": str(exc),
         }
 

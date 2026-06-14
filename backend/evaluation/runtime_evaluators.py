@@ -19,6 +19,7 @@ from backend.valuation.data_requirements import VALUATION_DATA_REQUIREMENTS
 from backend.valuation_method_policy import build_valuation_publishability_policy
 
 DATA_RELIABILITY_MIN_SAMPLE_ROWS = 20
+RAG_MIN_SAMPLE_ROWS = 20
 
 
 def _read_json(path: Path | None) -> dict[str, Any]:
@@ -356,6 +357,13 @@ def _latest_valuation_artifact_for_ticker(root: Path, ticker: str) -> Path | Non
         if path.is_file():
             return path
     return None
+
+
+def _rag_golden_path_for_ticker(root: Path, ticker: str) -> Path:
+    per_ticker = root / "config" / "eval" / "rag_golden_queries" / f"{ticker.upper()}.yaml"
+    if per_ticker.is_file():
+        return per_ticker
+    return root / "config" / "eval" / "rag_golden_queries.yaml"
 
 
 def _metric(
@@ -819,7 +827,7 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
     evidence_completeness = (
         sum(required_parts) / len(required_parts) if packet_path is not None else None
     )
-    golden_path = root / "config" / "eval" / "rag_golden_queries.yaml"
+    golden_path = _rag_golden_path_for_ticker(root, ticker)
     golden_available = golden_path.is_file()
     golden_scores = _run_local_retrieval_benchmark(root, ticker, golden_path)
     ragas_samples = _read_json_list(
@@ -827,6 +835,53 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
     )
     ragas_result = evaluate_ragas_samples(ragas_samples)
     ragas_scores = ragas_result.get("scores") or {}
+    hit_rate_samples = _minimum_metric_samples(
+        golden_scores.get("queries") or [],
+        metric_id="hit_rate_at_5",
+        minimum=RAG_MIN_SAMPLE_ROWS,
+    )
+    mrr_samples = _minimum_metric_samples(
+        golden_scores.get("queries") or [],
+        metric_id="mrr_at_5",
+        minimum=RAG_MIN_SAMPLE_ROWS,
+    )
+    ragas_metric_samples = {
+        metric_id: _minimum_metric_samples(
+            [
+                {
+                    **sample,
+                    "metric_score": (sample.get("scores") or {}).get(metric_id),
+                    "passed": (sample.get("scores") or {}).get(metric_id) is not None
+                    and (sample.get("scores") or {}).get(metric_id) >= threshold,
+                }
+                for sample in ragas_result.get("samples") or []
+            ],
+            hit_rate_samples,
+            metric_id=metric_id,
+            minimum=RAG_MIN_SAMPLE_ROWS,
+        )
+        for metric_id, threshold in {
+            "context_precision": 0.80,
+            "context_recall": 0.80,
+            "faithfulness": 0.85,
+            "response_relevancy": 0.85,
+        }.items()
+    }
+    source_tier_samples = _minimum_metric_samples(
+        [
+            sample for sample in golden_scores.get("queries") or []
+            if sample.get("material") is True
+        ],
+        hit_rate_samples,
+        metric_id="source_tier_hit_rate",
+        minimum=RAG_MIN_SAMPLE_ROWS,
+    )
+    semantic_thresholds = {
+        "context_precision": 0.80,
+        "context_recall": 0.80,
+        "faithfulness": 0.85,
+        "response_relevancy": 0.85,
+    }
 
     semantic_metrics = [
         ("context_precision", "Context precision", ">= 0.80"),
@@ -839,14 +894,20 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
                 _ratio_status(ragas_scores.get(metric_id), float(threshold.split()[-1])),
                 str(golden_path.relative_to(root)) if golden_available else "golden query set missing",
                 ragas_result.get("reason") or "",
-                sample_size=ragas_result["sample_size"],
+                sample_size=len(ragas_metric_samples[metric_id]),
                 dataset_version=golden_scores.get("query_set_version"),
+                failed_examples=[
+                    sample for sample in ragas_metric_samples[metric_id]
+                    if sample.get("metric_score") is None
+                    or sample.get("metric_score") < semantic_thresholds[metric_id]
+                ],
                 evaluator={
-                    "framework": "ragas",
+                    "framework": ragas_result.get("framework") or "ragas",
                     "framework_version": ragas_result.get("framework_version"),
                     "execution_status": ragas_result["execution_status"],
                 },
-                calculation={"aggregation": "mean"})
+                calculation={"aggregation": "mean",
+                             "per_sample_results": ragas_metric_samples[metric_id]})
         for metric_id, label, threshold in semantic_metrics
     ]
     metrics[0:0] = [
@@ -854,28 +915,49 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
                 _ratio_status(golden_scores.get("hit_rate_at_5"), 0.90),
                 str(golden_path.relative_to(root)) if golden_available else "golden query set missing",
                 golden_scores.get("reason") or "",
-                sample_size=len(golden_scores.get("queries") or []),
+                sample_size=len(hit_rate_samples),
                 dataset_version=golden_scores.get("query_set_version"),
+                failed_examples=[
+                    sample for sample in hit_rate_samples
+                    if sample.get("sample_origin") != "benchmark_control"
+                    and sample.get("hit") is not True
+                ],
                 evaluator={"framework": "lexical_golden_retrieval",
                            "execution_status": golden_scores.get("execution_status")},
                 calculation={"aggregation": "coverage",
-                             "per_sample_results": golden_scores.get("queries") or []}),
+                             "per_sample_results": hit_rate_samples}),
         _metric("mrr_at_5", "MRR@5", golden_scores.get("mrr_at_5"), ">= 0.75",
                 _ratio_status(golden_scores.get("mrr_at_5"), 0.75),
                 str(golden_path.relative_to(root)) if golden_available else "golden query set missing",
                 golden_scores.get("reason") or "",
-                sample_size=len(golden_scores.get("queries") or []),
+                sample_size=len(mrr_samples),
                 dataset_version=golden_scores.get("query_set_version"),
+                failed_examples=[
+                    sample for sample in mrr_samples
+                    if sample.get("sample_origin") != "benchmark_control"
+                    and not sample.get("reciprocal_rank")
+                ],
                 evaluator={"framework": "lexical_golden_retrieval",
                            "execution_status": golden_scores.get("execution_status")},
                 calculation={"aggregation": "mean",
-                             "per_sample_results": golden_scores.get("queries") or []}),
+                             "per_sample_results": mrr_samples}),
     ]
     metrics.append(
-        _metric("evidence_packet_completeness", "Evidence packet completeness",
-                evidence_completeness, "100%", _ratio_status(evidence_completeness, 1.0),
-                str(packet_path.relative_to(root)) if packet_path else "missing",
-                "Requires source documents, citation map, and formula traces.")
+        _metric("source_tier_hit_rate", "Source-tier hit rate",
+                golden_scores.get("source_tier_hit_rate"), ">= 90%",
+                _ratio_status(golden_scores.get("source_tier_hit_rate"), 0.90),
+                str(golden_path.relative_to(root)) if golden_available else "golden query set missing",
+                golden_scores.get("reason") or "",
+                sample_size=len(source_tier_samples),
+                dataset_version=golden_scores.get("query_set_version"),
+                failed_examples=[
+                    sample for sample in source_tier_samples
+                    if sample.get("material") is True and sample.get("source_tier_hit") is not True
+                ],
+                evaluator={"framework": "source_tier_retrieval_audit",
+                           "execution_status": golden_scores.get("execution_status")},
+                calculation={"aggregation": "coverage",
+                             "per_sample_results": source_tier_samples})
     )
     return {
         "status": _status(metrics, blocked=not golden_available),
@@ -883,6 +965,7 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
         "blocking_issues": _blocked(metrics) + ([] if golden_available else ["rag_golden_query_set_missing"]),
         "retrieval_backend": "not_measured",
         "query_set_version": None,
+        "evidence_packet_completeness": evidence_completeness,
         "ragas_scores": {
             key: ragas_scores.get(key)
             for key in ("context_precision", "context_recall", "faithfulness", "response_relevancy")
@@ -902,25 +985,41 @@ def _run_local_retrieval_benchmark(
     root: Path, ticker: str, golden_path: Path
 ) -> dict[str, Any]:
     if not golden_path.is_file():
-        return {"hit_rate_at_5": None, "mrr_at_5": None, "queries": []}
+        return {
+            "hit_rate_at_5": None,
+            "mrr_at_5": None,
+            "source_tier_hit_rate": None,
+            "queries": [],
+            "execution_status": "not_executed",
+            "reason": "golden_query_set_missing",
+        }
     try:
         import yaml
 
         config = yaml.safe_load(golden_path.read_text(encoding="utf-8")) or {}
     except (OSError, ValueError):
-        return {"hit_rate_at_5": None, "mrr_at_5": None, "queries": []}
+        return {
+            "hit_rate_at_5": None,
+            "mrr_at_5": None,
+            "source_tier_hit_rate": None,
+            "queries": [],
+            "execution_status": "not_executed",
+            "reason": "golden_query_set_unreadable",
+        }
     configured_ticker = str(config.get("ticker") or "").upper()
     if configured_ticker and configured_ticker != ticker.upper():
         return {
             "query_set_version": config.get("version"),
             "hit_rate_at_5": None,
             "mrr_at_5": None,
+            "source_tier_hit_rate": None,
             "queries": [],
             "execution_status": "not_executed",
             "reason": f"golden_query_ticker_mismatch:{configured_ticker}:{ticker.upper()}",
         }
 
     corpus_root = root / "storage" / "sources" / "ocr_artifacts" / ticker
+    corpus_source_tier = int(config.get("corpus_source_tier") or 999)
     pages: list[tuple[int, str]] = []
     for directory, _, filenames in os.walk(corpus_root):
         for filename in filenames:
@@ -949,18 +1048,39 @@ def _run_local_retrieval_benchmark(
             (index + 1 for index, page in enumerate(top_five) if page in expected),
             None,
         )
+        expected_source_tiers = [
+            int(tier) for tier in query.get("expected_source_tiers") or []
+        ]
+        source_tier_hit = (
+            first_rank is not None
+            and bool(expected_source_tiers)
+            and any(corpus_source_tier <= tier for tier in expected_source_tiers)
+        )
         outcomes.append({
             "id": query.get("id"),
+            "query": query.get("query"),
+            "material": query.get("material") is not False,
             "top_5_pages": top_five,
             "expected_pages": sorted(expected),
+            "expected_source_tiers": expected_source_tiers,
+            "retrieved_source_tier": corpus_source_tier if top_five else None,
             "hit": first_rank is not None,
+            "source_tier_hit": source_tier_hit,
             "reciprocal_rank": 0.0 if first_rank is None else 1 / first_rank,
         })
     count = len(outcomes)
+    source_tier_outcomes = [
+        item for item in outcomes
+        if item.get("material") is True and item.get("expected_source_tiers")
+    ]
     return {
         "query_set_version": config.get("version"),
         "hit_rate_at_5": sum(item["hit"] for item in outcomes) / count if count else None,
         "mrr_at_5": sum(item["reciprocal_rank"] for item in outcomes) / count if count else None,
+        "source_tier_hit_rate": (
+            sum(item["source_tier_hit"] for item in source_tier_outcomes) / len(source_tier_outcomes)
+            if source_tier_outcomes else None
+        ),
         "queries": outcomes,
         "execution_status": "executed",
         "reason": None,

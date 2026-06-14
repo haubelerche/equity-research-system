@@ -4,8 +4,8 @@
   "plan_id": "03",
   "plan_name": "Financial calculation",
   "ticker": "DBD",
-  "run_id": "benchmark-01-sample20-DBD",
-  "generated_at": "2026-06-14T11:21:54.088957+00:00",
+  "run_id": "benchmark-02-rag-sample20-DBD-v2",
+  "generated_at": "2026-06-14T11:34:48.581171+00:00",
   "status": "blocked",
   "test_execution": {
     "status": "pass",
@@ -22,14 +22,14 @@
       "tests/evaluation/test_client_final_governance.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.535,
+    "duration_seconds": 0.582,
     "summary": {
       "passed": 124
     },
     "output_tail": [
       "........................................................................ [ 58%]",
       "....................................................                     [100%]",
-      "124 passed in 0.23s"
+      "124 passed in 0.26s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -121,7 +121,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     }
   ],
   "valuation_artifact": null,

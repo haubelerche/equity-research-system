@@ -10,6 +10,7 @@ from backend.evaluation.project_evaluator import (
 )
 from backend.evaluation.runtime_evaluators import (
     evaluate_data_reliability,
+    evaluate_retrieval,
     _matrix_varies,
     _run_local_retrieval_benchmark,
 )
@@ -87,6 +88,56 @@ def test_local_retrieval_benchmark_rejects_cross_ticker_golden_set(tmp_path) -> 
     assert result["execution_status"] == "not_executed"
     assert result["hit_rate_at_5"] is None
     assert result["reason"] == "golden_query_ticker_mismatch:DHG:DBD"
+
+
+def test_retrieval_evaluator_uses_ticker_golden_set_and_fails_closed_without_corpus(tmp_path) -> None:
+    golden_dir = tmp_path / "config" / "eval" / "rag_golden_queries"
+    golden_dir.mkdir(parents=True)
+    (golden_dir / "DBD.yaml").write_text(
+        "version: dbd-test-v1\n"
+        "ticker: DBD\n"
+        "corpus_source_tier: 0\n"
+        "queries:\n"
+        "  - id: revenue\n"
+        "    query: DBD revenue 2025 audited report\n"
+        "    expected_pages: [1]\n"
+        "    expected_source_tiers: [0, 1]\n"
+        "    material: true\n",
+        encoding="utf-8",
+    )
+    ragas_dir = tmp_path / "config" / "eval" / "ragas"
+    ragas_dir.mkdir(parents=True)
+    ragas_dir.joinpath("DBD.json").write_text(
+        json.dumps([
+            {
+                "id": "semantic-1",
+                "question": "Revenue?",
+                "expected_answer": "Revenue is supported.",
+                "contexts": ["Audited revenue context"],
+                "offline_scores": {
+                    "context_precision": 0.5,
+                    "context_recall": 0.5,
+                    "faithfulness": 0.5,
+                    "response_relevancy": 0.5,
+                },
+            }
+        ]),
+        encoding="utf-8",
+    )
+
+    result = evaluate_retrieval(tmp_path, "DBD")
+    metrics = {metric["id"]: metric for metric in result["metrics"]}
+
+    assert result["status"] == "fail"
+    assert metrics["hit_rate_at_5"]["value"] == 0.0
+    assert metrics["hit_rate_at_5"]["status"] == "fail"
+    assert metrics["source_tier_hit_rate"]["value"] == 0.0
+    assert metrics["source_tier_hit_rate"]["status"] == "fail"
+    assert metrics["context_precision"]["evaluator"]["framework"] == "ragas_offline_contract"
+    for metric in metrics.values():
+        samples = metric["calculation"]["per_sample_results"]
+        assert metric["sample_size"] >= 20
+        assert len(samples) >= 20
 
 
 def test_data_reliability_does_not_treat_pandera_schema_as_system_readiness(tmp_path) -> None:

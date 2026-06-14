@@ -4,8 +4,8 @@
   "plan_id": "04",
   "plan_name": "Citation and source provenance",
   "ticker": "DBD",
-  "run_id": "benchmark-01-sample20-DBD",
-  "generated_at": "2026-06-14T11:21:54.088957+00:00",
+  "run_id": "benchmark-02-rag-sample20-DBD-v2",
+  "generated_at": "2026-06-14T11:34:48.581171+00:00",
   "status": "blocked",
   "test_execution": {
     "status": "pass",
@@ -18,14 +18,14 @@
       "tests/unit/test_claim_ledger.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.514,
+    "duration_seconds": 0.595,
     "summary": {
       "passed": 142
     },
     "output_tail": [
       "........................................................................ [ 50%]",
       "......................................................................   [100%]",
-      "142 passed in 0.20s"
+      "142 passed in 0.22s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -109,7 +109,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     },
     {
       "id": "citation_key_resolution",
@@ -170,7 +170,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     },
     {
       "id": "source_id_validity",
@@ -231,7 +231,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     },
     {
       "id": "official_source_coverage",
@@ -292,7 +292,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     },
     {
       "id": "generic_citations",
@@ -348,7 +348,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     },
     {
       "id": "pdf_source_mentions",
@@ -404,7 +404,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     }
   ],
   "claim_count": null,

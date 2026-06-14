@@ -4,8 +4,8 @@
   "plan_id": "07",
   "plan_name": "Observability, cost, and latency",
   "ticker": "DBD",
-  "run_id": "benchmark-01-sample20-DBD",
-  "generated_at": "2026-06-14T11:21:54.088957+00:00",
+  "run_id": "benchmark-02-rag-sample20-DBD-v2",
+  "generated_at": "2026-06-14T11:34:48.581171+00:00",
   "status": "blocked",
   "test_execution": {
     "status": "pass",
@@ -16,13 +16,13 @@
       "tests/unit/test_run_status_semantics.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.613,
+    "duration_seconds": 0.842,
     "summary": {
       "passed": 26
     },
     "output_tail": [
       "..........................                                               [100%]",
-      "26 passed in 0.23s"
+      "26 passed in 0.30s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -104,7 +104,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     },
     {
       "id": "llm_retry_rate",
@@ -165,7 +165,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     },
     {
       "id": "retrieval_fallback_rate",
@@ -226,7 +226,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     },
     {
       "id": "ocr_failure_rate",
@@ -287,7 +287,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     },
     {
       "id": "pdf_render_failures",
@@ -343,7 +343,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     },
     {
       "id": "cost_per_report",
@@ -404,7 +404,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:21:54.088957+00:00"
+      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
     }
   ],
   "duration_seconds": null,
