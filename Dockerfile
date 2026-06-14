@@ -94,5 +94,5 @@ CMD ["sh", "-c", \
        --to-year ${TO_YEAR} \
        $([ \"${ENABLE_OCR}\" = \"true\" ] && echo --ocr || echo ''); \
    else \
-     python -m uvicorn backend.api:app --host 0.0.0.0 --port ${PORT:-8010}; \
+     python -m uvicorn backend.api:app --host :: --port ${PORT:-8010}; \
    fi"]
