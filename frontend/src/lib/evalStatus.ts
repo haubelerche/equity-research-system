@@ -1,5 +1,5 @@
 export type Comparator = "gte" | "lte";
-export type MetricStatus = "pass" | "fail";
+export type MetricStatus = "pass" | "fail" | "warning" | "not_evaluable";
 
 export interface MetricDef {
   id: string;
@@ -18,6 +18,16 @@ export function evalMetricStatus(
   if (value === null || value === undefined || Number.isNaN(value)) return "fail";
   if (def.comparator === "gte") return value >= def.threshold ? "pass" : "fail";
   return value <= def.threshold ? "pass" : "fail";
+}
+
+export function normalizeMetricStatus(status: string | null | undefined): MetricStatus {
+  const normalized = (status ?? "").toLowerCase();
+  if (normalized === "pass" || normalized === "passed" || normalized === "ok") return "pass";
+  if (normalized === "warning" || normalized === "warn" || normalized === "measured_only") return "warning";
+  if (normalized === "not_evaluable" || normalized === "blocked" || normalized === "not_measured") {
+    return "not_evaluable";
+  }
+  return "fail";
 }
 
 export function formatMetricNumber(def: MetricDef, value: number): string {

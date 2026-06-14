@@ -391,10 +391,13 @@ class RuntimeStore:
                     """
                     SELECT artifact_id
                     FROM research.run_artifacts
-                    WHERE run_id = %s AND artifact_type = %s AND version = %s
+                    WHERE run_id = %s
+                      AND artifact_type = %s
+                      AND COALESCE(section_key, '') = COALESCE(%s, '')
+                      AND version = %s
                     LIMIT 1
                     """,
-                    (run_id, artifact_type, version),
+                    (run_id, artifact_type, section_key, version),
                 )
                 existing = cur.fetchone()
                 if existing:

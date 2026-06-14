@@ -18,6 +18,7 @@ const REPORT_UNIVERSE = [...UNIVERSE].sort((a, b) => {
 
 export function ReportsPage() {
   const [apiItems, setApiItems] = useState<ReportItem[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [previewTicker, setPreviewTicker] = useState<string | null>(null);
 
@@ -25,8 +26,14 @@ export function ReportsPage() {
   // backend is reachable. On failure, fall back to universe-only (all "chưa có").
   const load = () => {
     fetchReports()
-      .then((r) => setApiItems(r.items))
-      .catch(() => setApiItems([]));
+      .then((r) => {
+        setApiItems(r.items);
+        setApiError(null);
+      })
+      .catch((err: unknown) => {
+        setApiItems([]);
+        setApiError(err instanceof Error ? err.message : "Cannot reach reports API");
+      });
   };
   useEffect(load, []);
 
@@ -45,6 +52,12 @@ export function ReportsPage() {
       </header>
 
       <TickerSearch value={query} onChange={setQuery} options={REPORT_UNIVERSE} />
+
+      {apiError && (
+        <p className="reports-api-warning" role="status">
+          Khong the dong bo trang thai bao cao tu API. Kiem tra VITE_API_BASE tren Vercel.
+        </p>
+      )}
 
       <p className="reports-result-count" aria-live="polite">
         Đang hiển thị {filtered.length} / {rows.length} mã.

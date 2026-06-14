@@ -4,6 +4,11 @@ import os
 from dataclasses import dataclass
 
 
+def _csv_env(name: str, default: str = "") -> tuple[str, ...]:
+    value = os.getenv(name, default)
+    return tuple(item.strip() for item in value.split(",") if item.strip())
+
+
 def _env_first(*names: str, default: str) -> str:
     for name in names:
         value = os.getenv(name)
@@ -24,6 +29,19 @@ class Settings:
     enable_agentic_loops: bool = os.getenv("ENABLE_AGENTIC_LOOPS", "1") == "1"
     supabase_url: str = os.getenv("SUPABASE_URL", "")
     supabase_service_role_key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    report_output_dir: str = os.getenv("REPORT_OUTPUT_DIR", "output")
+    report_universe_csv: str = os.getenv(
+        "REPORT_UNIVERSE_CSV",
+        "config/dataset/universe/pharma_vn_universe.csv",
+    )
+    cors_allow_origins: tuple[str, ...] = _csv_env(
+        "CORS_ALLOW_ORIGINS",
+        "http://localhost:5173,http://localhost:4173,https://multi-agent-equity-research.vercel.app",
+    )
+    cors_allow_origin_regex: str = os.getenv(
+        "CORS_ALLOW_ORIGIN_REGEX",
+        r"https://.*\.vercel\.app",
+    )
 
 
 settings = Settings()

@@ -71,6 +71,8 @@ ENV TO_YEAR=2025
 ENV ENABLE_OCR=false
 # Passed through to psycopg2; override with docker-compose or -e flag
 ENV DATABASE_URL=""
+ENV APP_MODE=api
+ENV PORT=8010
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -79,15 +81,18 @@ RUN python scripts/check_ocr_runtime.py || true
 
 # ── Healthcheck: verify the DB migrations table is reachable ──────────────────
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-  CMD python -c "import psycopg2, os; psycopg2.connect(os.environ['DATABASE_URL']).close()" \
-      || exit 1
+  CMD-SHELL "test \"${APP_MODE}\" != \"api\" || curl -fsS \"http://127.0.0.1:${PORT:-8010}/health\" || exit 1"
 
 # ── Entrypoint: run DB migrations then the research pipeline ──────────────────
 # ENABLE_OCR=true adds --ocr flag automatically
 CMD ["sh", "-c", \
   "python -m backend.database.migrate && \
-   python scripts/run_research.py \
-     --ticker ${TICKER} \
-     --from-year ${FROM_YEAR} \
-     --to-year ${TO_YEAR} \
-     $([ \"${ENABLE_OCR}\" = \"true\" ] && echo --ocr || echo '')"]
+   if [ \"${APP_MODE}\" = \"worker\" ]; then \
+     python scripts/run_research.py \
+       --ticker ${TICKER} \
+       --from-year ${FROM_YEAR} \
+       --to-year ${TO_YEAR} \
+       $([ \"${ENABLE_OCR}\" = \"true\" ] && echo --ocr || echo ''); \
+   else \
+     python -m uvicorn backend.api:app --host 0.0.0.0 --port ${PORT:-8010}; \
+   fi"]

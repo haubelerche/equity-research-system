@@ -13,15 +13,38 @@ describe("MetricRow", () => {
     render(<table><tbody><MetricRow def={def} value={0.97} /></tbody></table>);
     expect(screen.getByText("Coverage")).toBeInTheDocument();
     expect(screen.getByText("Ragas")).toBeInTheDocument();
-    expect(screen.getByText(/^đạt$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Đạt$/i)).toBeInTheDocument();
   });
+
   it("shows not passed when below threshold", () => {
     render(<table><tbody><MetricRow def={def} value={0.5} /></tbody></table>);
-    expect(screen.getByText(/chưa đạt/i)).toBeInTheDocument();
+    expect(screen.getByText(/Chưa đạt/i)).toBeInTheDocument();
   });
+
   it("shows not passed when benchmark data is missing", () => {
     render(<table><tbody><MetricRow def={def} value={undefined} /></tbody></table>);
-    expect(screen.getByText(/thiếu dữ liệu/i)).toBeInTheDocument();
-    expect(screen.getByText(/chưa đạt/i)).toBeInTheDocument();
+    expect(screen.getByText(/Thiếu dữ liệu/i)).toBeInTheDocument();
+    expect(screen.getByText(/Chưa đạt/i)).toBeInTheDocument();
+  });
+
+  it("uses normalized backend benchmark status when provided", () => {
+    render(
+      <table>
+        <tbody>
+          <MetricRow
+            def={def}
+            value={1}
+            result={{
+              metric_id: "cov",
+              metric_name: "Coverage",
+              status: "not_evaluable",
+              threshold: ">= 95%",
+              value: null,
+            }}
+          />
+        </tbody>
+      </table>,
+    );
+    expect(screen.getByText(/Chưa đánh giá/i)).toBeInTheDocument();
   });
 });

@@ -28,6 +28,7 @@ describe("ReportsPage", () => {
     render(<ReportsPage />);
     expect(await screen.findByText("DHG")).toBeInTheDocument();
     expect(screen.getByText("IMP")).toBeInTheDocument();
+    expect(screen.getByText(/VITE_API_BASE/)).toBeInTheDocument();
   });
 
   it("shows the selected ticker row when the API has no completed reports", async () => {

@@ -1,10 +1,11 @@
 {
-  "schema_version": "2.0",
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
   "plan_id": "02",
   "plan_name": "RAG and evidence",
-  "ticker": "DHG",
-  "run_id": "project-eval-20260614T033415Z",
-  "generated_at": "2026-06-14T03:34:15.588631+00:00",
+  "ticker": "DBD",
+  "run_id": "project-eval-20260614T071412Z",
+  "generated_at": "2026-06-14T07:14:12.208134+00:00",
   "status": "fail",
   "test_execution": {
     "status": "pass",
@@ -14,14 +15,20 @@
       "tests/citations"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.605,
+    "duration_seconds": 0.495,
     "summary": {
       "passed": 92
     },
     "output_tail": [
       "........................................................................ [ 78%]",
       "....................                                                     [100%]",
-      "92 passed in 0.22s"
+      "============================== warnings summary ===============================",
+      "..\\..\\..\\..\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475",
+      "  C:\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475: PytestCacheWarning: could not create cache path C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\.pytest_cache\\v\\cache\\nodeids: [WinError 183] Cannot create a file when that file already exists: 'C:\\\\Users\\\\Admin\\\\Desktop\\\\multi-agent-equity-research\\\\.pytest_cache\\\\v\\\\cache'",
+      "    config.cache.set(\"cache/nodeids\", sorted(self.cached_nodeids))",
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "92 passed, 1 warning in 0.18s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -54,65 +61,210 @@
     {
       "id": "hit_rate_at_5",
       "label": "Hit-rate@5",
-      "value": 0.6,
-      "threshold": ">= 90%",
-      "status": "fail",
       "source": "config\\eval\\rag_golden_queries.yaml",
-      "detail": ""
+      "detail": "",
+      "metric_id": "hit_rate_at_5",
+      "metric_name": "Hit-rate@5",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Inspect failed golden queries and improve retrieval ranking.",
+      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
     },
     {
       "id": "mrr_at_5",
       "label": "MRR@5",
-      "value": 0.35,
-      "threshold": ">= 0.80",
-      "status": "fail",
       "source": "config\\eval\\rag_golden_queries.yaml",
-      "detail": ""
+      "detail": "",
+      "metric_id": "mrr_at_5",
+      "metric_name": "MRR@5",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": ">= 0.80",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
     },
     {
       "id": "context_precision",
       "label": "Context precision",
+      "source": "config\\eval\\rag_golden_queries.yaml",
+      "detail": "Requires a versioned golden query set and retrieval run.",
+      "metric_id": "context_precision",
+      "metric_name": "Context precision",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
       "value": null,
       "threshold": ">= 0.85",
-      "status": "measured_only",
-      "source": "config\\eval\\rag_golden_queries.yaml",
-      "detail": "Requires a versioned golden query set and retrieval run."
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "warning",
+      "legacy_status": "measured_only",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
     },
     {
       "id": "context_recall",
       "label": "Context recall",
+      "source": "config\\eval\\rag_golden_queries.yaml",
+      "detail": "Requires a versioned golden query set and retrieval run.",
+      "metric_id": "context_recall",
+      "metric_name": "Context recall",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
       "value": null,
       "threshold": ">= 0.85",
-      "status": "measured_only",
-      "source": "config\\eval\\rag_golden_queries.yaml",
-      "detail": "Requires a versioned golden query set and retrieval run."
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "warning",
+      "legacy_status": "measured_only",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
     },
     {
       "id": "faithfulness",
       "label": "Faithfulness",
+      "source": "config\\eval\\rag_golden_queries.yaml",
+      "detail": "Requires a versioned golden query set and retrieval run.",
+      "metric_id": "faithfulness",
+      "metric_name": "Faithfulness",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
       "value": null,
       "threshold": ">= 0.85",
-      "status": "measured_only",
-      "source": "config\\eval\\rag_golden_queries.yaml",
-      "detail": "Requires a versioned golden query set and retrieval run."
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "warning",
+      "legacy_status": "measured_only",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
     },
     {
       "id": "response_relevancy",
       "label": "Response relevancy",
+      "source": "config\\eval\\rag_golden_queries.yaml",
+      "detail": "Requires a versioned golden query set and retrieval run.",
+      "metric_id": "response_relevancy",
+      "metric_name": "Response relevancy",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
       "value": null,
       "threshold": ">= 0.85",
-      "status": "measured_only",
-      "source": "config\\eval\\rag_golden_queries.yaml",
-      "detail": "Requires a versioned golden query set and retrieval run."
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "warning",
+      "legacy_status": "measured_only",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
     },
     {
       "id": "evidence_packet_completeness",
       "label": "Evidence packet completeness",
+      "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\evidence_packets\\run1_evidence_packet.json",
+      "detail": "Requires source documents, citation map, and formula traces.",
+      "metric_id": "evidence_packet_completeness",
+      "metric_name": "Evidence packet completeness",
+      "category": "rag",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
       "value": 0.3333333333333333,
       "threshold": "100%",
+      "threshold_operator": "=",
+      "unit": "percent",
       "status": "fail",
-      "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\evidence_packets\\run1_evidence_packet.json",
-      "detail": "Requires source documents, citation map, and formula traces."
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "owner": "retrieval",
+      "failed_examples": [
+        {
+          "reason": "Requires source documents, citation map, and formula traces.",
+          "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\evidence_packets\\run1_evidence_packet.json"
+        }
+      ],
+      "remediation_hint": "Attach source documents, citation map, and formula traces to the evidence packet.",
+      "evaluated_at": "2026-06-14T07:14:12.208134+00:00"
     }
   ],
   "retrieval_backend": "not_measured",
@@ -125,18 +277,12 @@
   },
   "golden_scores": {
     "query_set_version": "rag_golden_v1",
-    "hit_rate_at_5": 0.6,
-    "mrr_at_5": 0.35,
+    "hit_rate_at_5": 0.0,
+    "mrr_at_5": 0.0,
     "queries": [
       {
         "id": "income_statement",
-        "top_5_pages": [
-          19,
-          17,
-          32,
-          18,
-          16
-        ],
+        "top_5_pages": [],
         "expected_pages": [
           10
         ],
@@ -145,29 +291,17 @@
       },
       {
         "id": "cash_flow_statement",
-        "top_5_pages": [
-          14,
-          11,
-          32,
-          5,
-          2
-        ],
+        "top_5_pages": [],
         "expected_pages": [
           11,
           12
         ],
-        "hit": true,
-        "reciprocal_rank": 0.5
+        "hit": false,
+        "reciprocal_rank": 0.0
       },
       {
         "id": "balance_sheet_assets",
-        "top_5_pages": [
-          19,
-          13,
-          14,
-          17,
-          5
-        ],
+        "top_5_pages": [],
         "expected_pages": [
           7,
           8
@@ -177,33 +311,21 @@
       },
       {
         "id": "balance_sheet_equity",
-        "top_5_pages": [
-          5,
-          17,
-          14,
-          9,
-          19
-        ],
+        "top_5_pages": [],
         "expected_pages": [
           9
         ],
-        "hit": true,
-        "reciprocal_rank": 0.25
+        "hit": false,
+        "reciprocal_rank": 0.0
       },
       {
         "id": "equity_note",
-        "top_5_pages": [
-          30,
-          31,
-          5,
-          20,
-          39
-        ],
+        "top_5_pages": [],
         "expected_pages": [
           30
         ],
-        "hit": true,
-        "reciprocal_rank": 1.0
+        "hit": false,
+        "reciprocal_rank": 0.0
       }
     ]
   },

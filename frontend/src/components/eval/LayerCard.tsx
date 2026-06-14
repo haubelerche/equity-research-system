@@ -1,14 +1,16 @@
 import type { EvalLayer } from "../../data/evalFramework";
+import type { BenchmarkMetricResult } from "../../api/types";
 import { MetricRow } from "./MetricRow";
 
 interface Props {
   layer: EvalLayer;
   values: Record<string, number | null>;
+  results?: Record<string, BenchmarkMetricResult>;
   onViewBenchmark: (layer: EvalLayer) => void;
   onExplain: (layer: EvalLayer) => void;
 }
 
-export function LayerCard({ layer, values, onViewBenchmark, onExplain }: Props) {
+export function LayerCard({ layer, values, results = {}, onViewBenchmark, onExplain }: Props) {
   return (
     <article className="layer-card">
       <header>
@@ -23,7 +25,7 @@ export function LayerCard({ layer, values, onViewBenchmark, onExplain }: Props) 
         <thead><tr><th>Chỉ số và công cụ đánh giá</th><th>Đạt khi</th><th>Kết quả</th><th>Trạng thái</th></tr></thead>
         <tbody>
           {layer.metrics.map((m) => (
-            <MetricRow key={m.id} def={m} value={values[m.id]} />
+            <MetricRow key={m.id} def={m} value={values[m.id]} result={results[m.id]} />
           ))}
         </tbody>
       </table>

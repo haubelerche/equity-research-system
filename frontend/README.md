@@ -41,6 +41,8 @@ Client gọi thẳng đường dẫn backend — **không có tiền tố `/api`
   fallback, các route API được ưu tiên trước catch-all). Cùng origin nên không cần proxy.
 - **Vercel:** đặt `Root Directory` = `frontend/`, để `frontend/vercel.json` điều khiển `npm ci`,
   `npm run build`, `dist/`, và SPA rewrite.
+  Đặt `VITE_API_BASE` trên Vercel bằng public URL của Railway backend, ví dụ
+  `https://your-railway-backend.up.railway.app`.
 
 ## Cấu trúc
 

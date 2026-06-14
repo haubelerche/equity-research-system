@@ -8,6 +8,8 @@ export default defineConfig({
     proxy: {
       "/reports": { target: "http://localhost:8000", changeOrigin: true },
       "/research": { target: "http://localhost:8000", changeOrigin: true },
+      "/eval": { target: "http://localhost:8000", changeOrigin: true },
+      "/health": { target: "http://localhost:8000", changeOrigin: true },
     },
   },
 });

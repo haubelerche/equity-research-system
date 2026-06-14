@@ -1,12 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fetchReports, startRun, fetchRunStatus, fileUrl, previewUrl } from "./client";
+import {
+  fetchEvaluationPacket,
+  fetchReports,
+  startRun,
+  fetchRunStatus,
+  fileUrl,
+  previewUrl,
+} from "./client";
 
 beforeEach(() => { vi.restoreAllMocks(); });
+
+const jsonResponse = (body: unknown, init: ResponseInit = {}) =>
+  new Response(JSON.stringify(body), {
+    ...init,
+    headers: { "content-type": "application/json", ...init.headers },
+  });
 
 describe("api client", () => {
   it("fetchReports hits /reports and returns items", async () => {
     const items = [{ ticker: "DHG" }];
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ items }), { status: 200 })));
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ items }, { status: 200 })));
     const res = await fetchReports();
     expect((globalThis.fetch as any).mock.calls[0][0]).toBe("/reports");
     expect(res.items).toEqual(items);
@@ -14,7 +27,7 @@ describe("api client", () => {
 
   it("startRun posts full_report run_type and templated objective", async () => {
     vi.stubGlobal("fetch", vi.fn(async () =>
-      new Response(JSON.stringify({ run_id: "r1", status: "INIT" }), { status: 200 })));
+      jsonResponse({ run_id: "r1", status: "INIT" }, { status: 200 })));
     const res = await startRun("DHG");
     const [url, opts] = (globalThis.fetch as any).mock.calls[0];
     expect(url).toBe("/research/start");
@@ -27,9 +40,18 @@ describe("api client", () => {
 
   it("fetchRunStatus hits status route", async () => {
     vi.stubGlobal("fetch", vi.fn(async () =>
-      new Response(JSON.stringify({ run_id: "r1", status: "ANALYZING" }), { status: 200 })));
+      jsonResponse({ run_id: "r1", status: "ANALYZING" }, { status: 200 })));
     await fetchRunStatus("r1");
     expect((globalThis.fetch as any).mock.calls[0][0]).toBe("/research/r1/status");
+  });
+
+  it("fetchEvaluationPacket uses project or run scoped endpoints", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      jsonResponse({ publication_status: "DRAFT_PUBLISHABLE" }, { status: 200 })));
+    await fetchEvaluationPacket();
+    await fetchEvaluationPacket("run-1");
+    expect((globalThis.fetch as any).mock.calls[0][0]).toBe("/eval/framework");
+    expect((globalThis.fetch as any).mock.calls[1][0]).toBe("/research/run-1/evaluation");
   });
 
   it("builds file and preview urls", () => {

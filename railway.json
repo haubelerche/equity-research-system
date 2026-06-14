@@ -1,0 +1,14 @@
+{
+  "$schema": "https://railway.com/project/76522841-24e7-4151-8117-6813e74a15b9",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "python -m backend.database.migrate && python -m uvicorn backend.api:app --host 0.0.0.0 --port ${PORT:-8010}",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

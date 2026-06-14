@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from backend.evaluation.benchmark_standards import standard_metric
+from backend.valuation_method_policy import build_valuation_publishability_policy
 
 
 def _read_json(path: Path | None) -> dict[str, Any]:
@@ -302,18 +303,20 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
         metric = _metric(
             "valuation_artifact", "Valuation run artifact", None, "present",
             "blocked", f"storage/runs/*{ticker.lower()}*/valuation.json",
-            "no_valuation_run_for_ticker",
+            "valuation_artifact_missing_for_ticker",
         )
+        policy = build_valuation_publishability_policy(None, ticker=ticker)
         return {
             "status": "blocked",
             "metrics": [metric],
-            "blocking_issues": ["valuation_run_missing_for_ticker"],
+            "blocking_issues": ["valuation_artifact_missing_for_ticker"],
             "valuation_artifact": None,
             "invariants": [],
             "critical_failures": None,
             "golden_drift_out_of_tolerance": None,
             "missing_traces": ["valuation_formula_trace"],
             "decision": "block",
+            "valuation_publishability": policy.to_dict(),
         }
     valuation = _read_json(valuation_path)
     fcff = valuation.get("fcff") or {}
@@ -370,11 +373,26 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
         ("blend_sensitivity", "Blend sensitivity matrix varies", blend_sensitivity),
         ("formula_trace", "Formula trace available", trace_pass),
     ]
+    artifact_rel = str(valuation_path.relative_to(root))
+    # Single source of truth: a valuation that computes numbers may still be
+    # non-publishable (low-confidence primary, blocked FCFE in blend, missing or
+    # constant sensitivity, critical method divergence, market-sanity break).
+    policy = build_valuation_publishability_policy(
+        valuation, ticker=ticker, valuation_artifact_path=artifact_rel
+    )
     metrics = [
         _metric(metric_id, label, 1 if passed else 0, "pass", "pass" if passed else "fail",
-                str(valuation_path.relative_to(root)) if valuation_path else "missing")
+                artifact_rel)
         for metric_id, label, passed in invariant_values
     ]
+    metrics.append(
+        _metric(
+            "valuation_publishable", "Valuation publishability policy",
+            1 if policy.target_price_publishable else 0, "pass",
+            "pass" if policy.target_price_publishable else "fail",
+            artifact_rel, ",".join(policy.blocking_reasons) or "",
+        )
+    )
     invariants = [
         {"id": metric_id, "severity": "critical", "passed": passed, "detail": label}
         for metric_id, label, passed in invariant_values
@@ -384,12 +402,13 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
         "status": _status(metrics),
         "metrics": metrics,
         "blocking_issues": _blocked(metrics),
-        "valuation_artifact": str(valuation_path.relative_to(root)) if valuation_path else None,
+        "valuation_artifact": artifact_rel,
         "invariants": invariants,
         "critical_failures": critical_failures,
         "golden_drift_out_of_tolerance": None,
         "missing_traces": [] if trace_pass else ["valuation_formula_trace"],
-        "decision": "pass" if critical_failures == 0 else "block",
+        "decision": "pass" if critical_failures == 0 and policy.target_price_publishable else "block",
+        "valuation_publishability": policy.to_dict(),
     }
 
 

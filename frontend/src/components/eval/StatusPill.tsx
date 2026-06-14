@@ -3,6 +3,8 @@ import type { MetricStatus } from "../../lib/evalStatus";
 const LABEL: Record<MetricStatus, string> = {
   pass: "Đạt",
   fail: "Chưa đạt",
+  warning: "Cảnh báo",
+  not_evaluable: "Chưa đánh giá",
 };
 
 export function StatusPill({ status }: { status: MetricStatus }) {

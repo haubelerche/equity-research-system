@@ -31,7 +31,6 @@ data/candidate_facts/
 data/reconciliation/
 reports/
 artifacts/
-output/
 storage/
 
 # Git and IDE

@@ -10,6 +10,7 @@ services:
       FROM_YEAR: ${FROM_YEAR:-2021}
       TO_YEAR: ${TO_YEAR:-2025}
       ENABLE_OCR: ${ENABLE_OCR:-true}
+      APP_MODE: ${APP_MODE:-worker}
       PYTHONUNBUFFERED: "1"
     volumes:
       - ./storage:/app/storage
