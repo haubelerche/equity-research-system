@@ -17,11 +17,10 @@ def _e(v: float) -> FactEntry:
 def _complete_table(period: str = "2024FY") -> dict:
     return {
         "revenue.net": {period: _e(4000.0)},
-        "ebit.total": {period: _e(700.0)},
+        "profit_before_tax.total": {period: _e(700.0)},
         "tax_expense.total": {period: _e(140.0)},
-        "da.total": {period: _e(120.0)},
+        "depreciation.total": {period: _e(120.0)},
         "capex.total": {period: _e(-150.0)},
-        "change_in_working_capital.total": {period: _e(30.0)},
         "cash_and_equivalents.ending": {period: _e(900.0)},
         "short_term_debt.ending": {period: _e(50.0)},
         "long_term_debt.ending": {period: _e(40.0)},

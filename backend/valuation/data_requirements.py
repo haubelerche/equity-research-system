@@ -25,13 +25,17 @@ class MethodRequirement:
 VALUATION_DATA_REQUIREMENTS: dict[str, MethodRequirement] = {
     "fcff_dcf": MethodRequirement(
         method="fcff_dcf",
+        # Stored canonical facts the method genuinely needs. EBIT is derived from
+        # profit_before_tax + interest (not stored as ebit.total); ΔNWC is derived
+        # from the forecast working-capital schedule (not a stored CFS fact); D&A
+        # is stored as depreciation.total. Requiring the derived/idealised keys
+        # produced false "blocked" readings while FCFF actually computed.
         required_facts=(
             "revenue.net",
-            "ebit.total",
+            "profit_before_tax.total",
             "tax_expense.total",
-            "da.total",
+            "depreciation.total",
             "capex.total",
-            "change_in_working_capital.total",
             "cash_and_equivalents.ending",
             "short_term_debt.ending",
             "long_term_debt.ending",
@@ -62,9 +66,11 @@ VALUATION_DATA_REQUIREMENTS: dict[str, MethodRequirement] = {
     ),
     "ev_ebitda": MethodRequirement(
         method="ev_ebitda",
+        # EBITDA derived from profit_before_tax (+ interest) + depreciation; neither
+        # ebit.total nor da.total is stored. Net debt from balance-sheet debt/cash.
         required_facts=(
-            "ebit.total",
-            "da.total",
+            "profit_before_tax.total",
+            "depreciation.total",
             "cash_and_equivalents.ending",
             "short_term_debt.ending",
             "long_term_debt.ending",
