@@ -7,11 +7,18 @@ FROM python:3.11-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
+    pkg-config \
     python3-dev \
     tesseract-ocr \
     tesseract-ocr-vie \
     poppler-utils \
     libpq-dev \
+    libcairo2 \
+    libcairo2-dev \
+    libpango-1.0-0 \
+    libpango1.0-dev \
+    libgdk-pixbuf-2.0-0 \
+    libgdk-pixbuf-2.0-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
