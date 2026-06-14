@@ -8,6 +8,27 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.requests import Request
+
+
+def _load_dotenv() -> None:
+    """Load .env before importing backend.settings (which reads os.environ at
+    import time), so `uvicorn backend.api:app` works without manually exporting
+    variables — matching the CLI scripts' behaviour."""
+    import os
+
+    env_file = Path(__file__).resolve().parents[1] / ".env"
+    if not env_file.exists():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, value = stripped.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+_load_dotenv()
+
 from backend.reporting.output_inventory import scan_report_inventory, load_universe
 
 from backend.executor import RunExecutor
