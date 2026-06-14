@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from backend.reporting.output_inventory import scan_report_inventory, load_universe
 
 from backend.executor import RunExecutor
@@ -142,6 +143,9 @@ def create_app(
             or "config/dataset/universe/pharma_vn_universe.csv"
         )
 
+    def _universe_index() -> dict[str, dict]:
+        return {r["ticker"]: r for r in load_universe(_universe_csv())}
+
     @app.get("/reports")
     def list_reports() -> dict:
         universe = load_universe(_universe_csv())
@@ -163,6 +167,26 @@ def create_app(
                 for i in items
             ]
         }
+
+    _FILE_KINDS = {"report": "_report.pdf", "explanation": "_explanation.pdf"}
+
+    @app.get("/reports/{ticker}/file/{kind}")
+    def get_report_file(ticker: str, kind: str):
+        ticker = ticker.upper()
+        if ticker not in _universe_index():
+            raise HTTPException(status_code=404, detail="Unknown ticker")
+        suffix = _FILE_KINDS.get(kind)
+        if suffix is None:
+            raise HTTPException(status_code=404, detail="Unknown file kind")
+        path = (_output_dir() / f"{ticker}{suffix}").resolve()
+        out_root = _output_dir().resolve()
+        if out_root not in path.parents or not path.is_file():
+            raise HTTPException(status_code=404, detail="File not found")
+        return FileResponse(
+            path,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'inline; filename="{ticker}{suffix}"'},
+        )
 
     @app.get("/reports/{run_id}", response_model=ArtifactsResponse)
     def get_report(run_id: str) -> ArtifactsResponse:

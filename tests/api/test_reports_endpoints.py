@@ -35,3 +35,23 @@ def test_get_reports_lists_universe_with_status(tmp_path):
     assert items[0]["has_explanation"] is True
     assert items[0]["preview_pages"] == [1]
     assert items[1]["has_report"] is False
+
+
+def test_get_report_file_ok_and_404(tmp_path):
+    client = _make_client(tmp_path)
+
+    ok = client.get("/reports/DHG/file/report")
+    assert ok.status_code == 200
+    assert ok.headers["content-type"] == "application/pdf"
+    assert ok.content.startswith(b"%PDF")
+
+    missing = client.get("/reports/IMP/file/report")  # IMP has no file
+    assert missing.status_code == 404
+
+
+def test_get_report_file_rejects_unknown_ticker_and_bad_kind(tmp_path):
+    client = _make_client(tmp_path)
+    assert client.get("/reports/ZZZ/file/report").status_code == 404  # not in universe
+    assert client.get("/reports/DHG/file/secrets").status_code == 404  # bad kind
+    # path traversal attempt in ticker must not escape output dir
+    assert client.get("/reports/..%2f..%2fetc/file/report").status_code == 404
