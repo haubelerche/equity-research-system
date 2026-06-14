@@ -212,6 +212,20 @@ taxonomy:
     unit: vnd_bn
     aliases: [luu_chuyen_tien_thuan_tu_hoat_dong_tai_chinh, financing_cash_flow]
 
+  proceeds_from_borrowings.total:
+    label_vi: Tien thu tu di vay
+    statement: cash_flow
+    unit: vnd_bn
+    # Slug: "Tiền thu từ đi vay" → tien_thu_tu_di_vay
+    aliases: [tien_thu_tu_di_vay, tien_vay_ngan_han_dai_han_nhan_duoc, proceeds_from_borrowings, proceeds_from_borrowing]
+
+  repayment_of_borrowings.total:
+    label_vi: Tien tra no goc vay
+    statement: cash_flow
+    unit: vnd_bn
+    # Slug: "Tiền trả nợ gốc vay" → tien_tra_no_goc_vay
+    aliases: [tien_tra_no_goc_vay, tien_chi_tra_no_goc_vay, repayment_of_borrowings, repayment_of_borrowing]
+
   dividends_paid.total:
     label_vi: Co tuc da tra
     statement: cash_flow
