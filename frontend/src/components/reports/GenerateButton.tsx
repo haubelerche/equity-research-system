@@ -38,8 +38,8 @@ export function GenerateButton({ ticker, onComplete, pollMs = 4000 }: Props) {
     }
   }
 
-  if (state === "running") return <span role="status">Đang chạy…</span>;
-  if (state === "success") return <span role="status">Xong</span>;
-  if (state === "failed") return <span role="status">Thất bại</span>;
-  return <button onClick={handleClick}>Sinh báo cáo</button>;
+  if (state === "running") return <span role="status" className="run-state run-state--running">Đang chạy…</span>;
+  if (state === "success") return <span role="status" className="run-state run-state--success">Xong</span>;
+  if (state === "failed") return <span role="status" className="run-state run-state--failed">Thất bại</span>;
+  return <button className="btn-generate" onClick={handleClick}>Sinh báo cáo</button>;
 }

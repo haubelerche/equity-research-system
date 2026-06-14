@@ -820,17 +820,22 @@ aside[aria-label="preview"] > iframe {
    GENERATE BUTTON (special loading state)
    ========================================================================== */
 
-button[aria-label="Tạo báo cáo"],
-button[aria-busy="true"] {
+.btn-generate {
   border-color: var(--color-accent-dim);
   color: var(--color-accent);
   background: var(--color-accent-bg);
 }
 
-button[aria-busy="true"] {
-  opacity: 0.7;
+.run-state {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.run-state--running {
+  color: var(--color-accent);
   cursor: wait;
 }
+.run-state--success { color: var(--color-pass); }
+.run-state--failed { color: var(--color-fail); }
 
 /* ==========================================================================
    CI GATE MATRIX + MATURITY THRESHOLD sections
