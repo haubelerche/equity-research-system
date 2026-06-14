@@ -148,15 +148,23 @@ class RetrievalService:
         try:
             def _run_search(use_vector: bool) -> list[dict[str, Any]]:
                 with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                    params: list[Any] = [ticker, max_tier]
+                    # Params MUST be appended in the same left-to-right order the %s
+                    # placeholders appear in the final SQL: rank_expr (SELECT), then the
+                    # WHERE clauses (ticker, tier, fts, fiscal year, methods), then
+                    # order_expr (ORDER BY), then LIMIT. Getting this order wrong silently
+                    # binds e.g. the ticker to the ::vector cast and the whole query fails.
+                    rank_param: Any = None
+                    fts_where_param: Any = None
+                    order_param: Any = None
 
                     if use_vector and query_embedding is not None:
                         vector_param = _vector_literal(query_embedding)
                         rank_expr = "(1 - (dc.embedding <=> %s::vector))"
                         order_expr = "dc.embedding <=> %s::vector ASC"
-                        params.extend([vector_param, vector_param])
                         extra_where = "AND dc.embedding IS NOT NULL"
                         fts_clause = ""
+                        rank_param = vector_param
+                        order_param = vector_param
                     elif query and query.strip():
                         # Use simple dictionary for cross-language Vietnamese + number support.
                         fts_clause = (
@@ -168,33 +176,43 @@ class RetrievalService:
                             "plainto_tsquery('simple', %s))"
                         )
                         order_expr = "fts_rank DESC"
-                        params.extend([query, query])
                         extra_where = ""
+                        rank_param = query
+                        fts_where_param = query
                     else:
                         rank_expr = "0.0"
                         order_expr = "fts_rank DESC"
                         extra_where = ""
                         fts_clause = ""
 
-                    # Fiscal year filter
-                    if fiscal_year is not None:
-                        fy_clause = "AND (dc.fiscal_year = %s OR dc.fiscal_year IS NULL)"
-                        params.append(fiscal_year)
-                    else:
-                        fy_clause = ""
-
-                    # Extraction method filter
+                    fy_clause = (
+                        "AND (dc.fiscal_year = %s OR dc.fiscal_year IS NULL)"
+                        if fiscal_year is not None else ""
+                    )
                     if extraction_methods:
                         method_placeholders = ",".join(["%s"] * len(extraction_methods))
                         method_clause = (
                             f"AND (dc.metadata_json->>'extraction_method' IN ({method_placeholders})"
                             f" OR dc.metadata_json->>'extraction_method' IS NULL)"
                         )
-                        params.extend(extraction_methods)
                     else:
                         method_clause = ""
 
-                    params.append(top_k)
+                    # Assemble params in SQL placeholder order.
+                    params: list[Any] = []
+                    if rank_param is not None:
+                        params.append(rank_param)          # {rank_expr} in SELECT
+                    params.append(ticker)                  # WHERE dc.ticker = %s
+                    params.append(max_tier)                # AND s.source_tier <= %s
+                    if fts_where_param is not None:
+                        params.append(fts_where_param)     # {fts_clause}
+                    if fiscal_year is not None:
+                        params.append(fiscal_year)         # {fy_clause}
+                    if extraction_methods:
+                        params.extend(extraction_methods)  # {method_clause}
+                    if order_param is not None:
+                        params.append(order_param)         # {order_expr} in ORDER BY
+                    params.append(top_k)                   # LIMIT %s
 
                     sql = f"""
                         SELECT

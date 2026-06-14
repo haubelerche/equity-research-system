@@ -1,0 +1,499 @@
+{
+  "Data": {
+    "Count": 12,
+    "Value": [
+      {
+        "Time": "2025",
+        "Year": 2025,
+        "Quater": 0,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "DTTBHCCDV",
+            "Name": "Doanh thu bán hàng và CCDV",
+            "Value": 1946612660
+          },
+          {
+            "Code": "GV",
+            "Name": "Giá vốn hàng bán",
+            "Value": 981000795
+          },
+          {
+            "Code": "LNGBHCCDV",
+            "Name": "Lợi nhuận gộp về BH và CCDV",
+            "Value": 884378794
+          },
+          {
+            "Code": "LNTC",
+            "Name": "Lợi nhuận tài chính",
+            "Value": 10571939
+          },
+          {
+            "Code": "LNK",
+            "Name": "Lợi nhuận khác",
+            "Value": -3045922
+          },
+          {
+            "Code": "TotalProfit",
+            "Name": "Tổng lợi nhuận trước thuế",
+            "Value": 346082036
+          },
+          {
+            "Code": "LNSTTNDN",
+            "Name": "Lợi nhuận sau thuế",
+            "Value": 291940165
+          },
+          {
+            "Code": "NetIncome",
+            "Name": "Lợi nhuận sau thuế của công ty mẹ",
+            "Value": 291940165
+          }
+        ]
+      },
+      {
+        "Time": "2024",
+        "Year": 2024,
+        "Quater": 0,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "DTTBHCCDV",
+            "Name": "Doanh thu bán hàng và CCDV",
+            "Value": 1817259154
+          },
+          {
+            "Code": "GV",
+            "Name": "Giá vốn hàng bán",
+            "Value": 894975139
+          },
+          {
+            "Code": "LNGBHCCDV",
+            "Name": "Lợi nhuận gộp về BH và CCDV",
+            "Value": 832573239
+          },
+          {
+            "Code": "LNTC",
+            "Name": "Lợi nhuận tài chính",
+            "Value": -3569362
+          },
+          {
+            "Code": "LNK",
+            "Name": "Lợi nhuận khác",
+            "Value": -3950688
+          },
+          {
+            "Code": "TotalProfit",
+            "Name": "Tổng lợi nhuận trước thuế",
+            "Value": 325135514
+          },
+          {
+            "Code": "LNSTTNDN",
+            "Name": "Lợi nhuận sau thuế",
+            "Value": 275181939
+          },
+          {
+            "Code": "NetIncome",
+            "Name": "Lợi nhuận sau thuế của công ty mẹ",
+            "Value": 275181939
+          }
+        ]
+      },
+      {
+        "Time": "2023",
+        "Year": 2023,
+        "Quater": 0,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "DTTBHCCDV",
+            "Name": "Doanh thu bán hàng và CCDV",
+            "Value": 1731725782
+          },
+          {
+            "Code": "GV",
+            "Name": "Giá vốn hàng bán",
+            "Value": 853249521
+          },
+          {
+            "Code": "LNGBHCCDV",
+            "Name": "Lợi nhuận gộp về BH và CCDV",
+            "Value": 798520058
+          },
+          {
+            "Code": "LNTC",
+            "Name": "Lợi nhuận tài chính",
+            "Value": -3652001
+          },
+          {
+            "Code": "LNK",
+            "Name": "Lợi nhuận khác",
+            "Value": -1947225
+          },
+          {
+            "Code": "TotalProfit",
+            "Name": "Tổng lợi nhuận trước thuế",
+            "Value": 320086360
+          },
+          {
+            "Code": "LNSTTNDN",
+            "Name": "Lợi nhuận sau thuế",
+            "Value": 269054870
+          },
+          {
+            "Code": "NetIncome",
+            "Name": "Lợi nhuận sau thuế của công ty mẹ",
+            "Value": 269054870
+          }
+        ]
+      },
+      {
+        "Time": "2022",
+        "Year": 2022,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "DTTBHCCDV",
+            "Name": "Doanh thu bán hàng và CCDV",
+            "Value": 1617008973.558
+          },
+          {
+            "Code": "GV",
+            "Name": "Giá vốn hàng bán",
+            "Value": 787169807.482
+          },
+          {
+            "Code": "LNGBHCCDV",
+            "Name": "Lợi nhuận gộp về BH và CCDV",
+            "Value": 767651687.734
+          },
+          {
+            "Code": "LNTC",
+            "Name": "Lợi nhuận tài chính",
+            "Value": 548985.665
+          },
+          {
+            "Code": "LNK",
+            "Name": "Lợi nhuận khác",
+            "Value": -116495.079
+          },
+          {
+            "Code": "TotalProfit",
+            "Name": "Tổng lợi nhuận trước thuế",
+            "Value": 298557764.42
+          },
+          {
+            "Code": "LNSTTNDN",
+            "Name": "Lợi nhuận sau thuế",
+            "Value": 243555116.974
+          },
+          {
+            "Code": "NetIncome",
+            "Name": "Lợi nhuận sau thuế của công ty mẹ",
+            "Value": 243555116.974
+          }
+        ]
+      },
+      {
+        "Time": "2021",
+        "Year": 2021,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "DTTBHCCDV",
+            "Name": "Doanh thu bán hàng và CCDV",
+            "Value": 1634683825.343
+          },
+          {
+            "Code": "GV",
+            "Name": "Giá vốn hàng bán",
+            "Value": 935938713.151
+          },
+          {
+            "Code": "LNGBHCCDV",
+            "Name": "Lợi nhuận gộp về BH và cung cấp DV",
+            "Value": 622565620.132
+          },
+          {
+            "Code": "LNTC",
+            "Name": "Lợi nhuận tài chính",
+            "Value": -2326833.193
+          },
+          {
+            "Code": "LNK",
+            "Name": "Lợi nhuận khác",
+            "Value": 1563084.149
+          },
+          {
+            "Code": "TotalProfit",
+            "Name": "Tổng lợi nhuận trước thuế",
+            "Value": 232447899.89
+          },
+          {
+            "Code": "LNSTTNDN",
+            "Name": "Lợi nhuận sau thuế",
+            "Value": 189123578.445
+          },
+          {
+            "Code": "NetIncome",
+            "Name": "Lợi nhuận sau thuế của công ty mẹ",
+            "Value": 189123578.445
+          }
+        ]
+      },
+      {
+        "Time": "2020",
+        "Year": 2020,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "DTTBHCCDV",
+            "Name": "Doanh thu bán hàng và CCDV",
+            "Value": 1329775162.011
+          },
+          {
+            "Code": "GV",
+            "Name": "Giá vốn hàng bán",
+            "Value": 765813093.618
+          },
+          {
+            "Code": "LNGBHCCDV",
+            "Name": "Lợi nhuận gộp về BH và cung cấp DV",
+            "Value": 491139277.925
+          },
+          {
+            "Code": "LNTC",
+            "Name": "Lợi nhuận tài chính",
+            "Value": -6573748.71
+          },
+          {
+            "Code": "LNK",
+            "Name": "Lợi nhuận khác",
+            "Value": 2743585.526
+          },
+          {
+            "Code": "TotalProfit",
+            "Name": "Tổng lợi nhuận trước thuế",
+            "Value": 193191315.397
+          },
+          {
+            "Code": "LNSTTNDN",
+            "Name": "Lợi nhuận sau thuế",
+            "Value": 157859564.816
+          },
+          {
+            "Code": "NetIncome",
+            "Name": "Lợi nhuận sau thuế của công ty mẹ",
+            "Value": 157859564.816
+          }
+        ]
+      },
+      {
+        "Time": "2019",
+        "Year": 2019,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "DTTBHCCDV",
+            "Name": "Doanh thu bán hàng và CCDV",
+            "Value": 1321006229.56
+          },
+          {
+            "Code": "GV",
+            "Name": "Giá vốn hàng bán",
+            "Value": 846933080.364
+          },
+          {
+            "Code": "LNGBHCCDV",
+            "Name": "Lợi nhuận gộp về BH và cung cấp DV",
+            "Value": 414795941.12
+          },
+          {
+            "Code": "LNTC",
+            "Name": "Lợi nhuận tài chính",
+            "Value": -1371784.087
+          },
+          {
+            "Code": "LNK",
+            "Name": "Lợi nhuận khác",
+            "Value": 196026.358
+          },
+          {
+            "Code": "TotalProfit",
+            "Name": "Tổng lợi nhuận trước thuế",
+            "Value": 174013286.702
+          },
+          {
+            "Code": "LNSTTNDN",
+            "Name": "Lợi nhuận sau thuế",
+            "Value": 142227417.237
+          },
+          {
+            "Code": "NetIncome",
+            "Name": "Lợi nhuận sau thuế của công ty mẹ",
+            "Value": 142227417.237
+          }
+        ]
+      },
+      {
+        "Time": "2018",
+        "Year": 2018,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "DTTBHCCDV",
+            "Name": "Doanh thu bán hàng và CCDV",
+            "Value": 1474019031.146
+          },
+          {
+            "Code": "GV",
+            "Name": "Giá vốn hàng bán",
+            "Value": 972896278.931
+          },
+          {
+            "Code": "LNGBHCCDV",
+            "Name": "Lợi nhuận gộp về BH và cung cấp DV",
+            "Value": 428128037.32
+          },
+          {
+            "Code": "LNTC",
+            "Name": "Lợi nhuận tài chính",
+            "Value": 3874459.038
+          },
+          {
+            "Code": "LNK",
+            "Name": "Lợi nhuận khác",
+            "Value": 15148.018
+          },
+          {
+            "Code": "TotalProfit",
+            "Name": "Tổng lợi nhuận trước thuế",
+            "Value": 201026344.098
+          },
+          {
+            "Code": "LNSTTNDN",
+            "Name": "Lợi nhuận sau thuế",
+            "Value": 163004798.294
+          },
+          {
+            "Code": "NetIncome",
+            "Name": "Lợi nhuận sau thuế của công ty mẹ",
+            "Value": 163004798.294
+          }
+        ]
+      },
+      {
+        "Time": "2017",
+        "Year": 2017,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "DTTBHCCDV",
+            "Name": "Doanh thu bán hàng và CCDV",
+            "Value": 1459521443.028
+          },
+          {
+            "Code": "GV",
+            "Name": "Giá vốn hàng bán",
+            "Value": 897554931.536
+          },
+          {
+            "Code": "LNGBHCCDV",
+            "Name": "Lợi nhuận gộp về BH và cung cấp DV",
+            "Value": 490672466.871
+          },
+          {
+            "Code": "LNTC",
+            "Name": "Lợi nhuận tài chính",
+            "Value": 7962062.434
+          },
+          {
+            "Code": "LNK",
+            "Name": "Lợi nhuận khác",
+            "Value": 666124.799
+          },
+          {
+            "Code": "TotalProfit",
+            "Name": "Tổng lợi nhuận trước thuế",
+            "Value": 203596448.638
+          },
+          {
+            "Code": "LNSTTNDN",
+            "Name": "Lợi nhuận sau thuế",
+            "Value": 164390794.127
+          },
+          {
+            "Code": "NetIncome",
+            "Name": "Lợi nhuận sau thuế của công ty mẹ",
+            "Value": 164390794.127
+          }
+        ]
+      },
+      {
+        "Time": "2016",
+        "Year": 2016,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "DTTBHCCDV",
+            "Name": "Doanh thu bán hàng và CCDV",
+            "Value": 1442509289.677
+          },
+          {
+            "Code": "GV",
+            "Name": "Giá vốn hàng bán",
+            "Value": 875702436.851
+          },
+          {
+            "Code": "LNGBHCCDV",
+            "Name": "Lợi nhuận gộp về BH và cung cấp DV",
+            "Value": 509199397.687
+          },
+          {
+            "Code": "LNTC",
+            "Name": "Lợi nhuận tài chính",
+            "Value": 7111066.766
+          },
+          {
+            "Code": "LNK",
+            "Name": "Lợi nhuận khác",
+            "Value": 36649.756
+          },
+          {
+            "Code": "TotalProfit",
+            "Name": "Tổng lợi nhuận trước thuế",
+            "Value": 175881044.291
+          },
+          {
+            "Code": "LNSTTNDN",
+            "Name": "Lợi nhuận sau thuế",
+            "Value": 141491537.934
+          },
+          {
+            "Code": "NetIncome",
+            "Name": "Lợi nhuận sau thuế của công ty mẹ",
+            "Value": 141491537.934
+          }
+        ]
+      }
+    ]
+  },
+  "Message": null,
+  "Success": true
+}

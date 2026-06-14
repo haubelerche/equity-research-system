@@ -4,8 +4,8 @@
   "plan_id": "01",
   "plan_name": "Data reliability",
   "ticker": "DBD",
-  "run_id": "benchmark-02-rag-sample20-DBD-v2",
-  "generated_at": "2026-06-14T11:34:48.581171+00:00",
+  "run_id": "benchmark-02-rag-restored-DBD",
+  "generated_at": "2026-06-14T11:42:07.938612+00:00",
   "status": "fail",
   "test_execution": {
     "status": "pass",
@@ -20,13 +20,13 @@
       "tests/unit/test_source_provenance_gate.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.588,
+    "duration_seconds": 0.552,
     "summary": {
       "passed": 70
     },
     "output_tail": [
       "......................................................................   [100%]",
-      "70 passed in 0.26s"
+      "70 passed in 0.23s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -515,7 +515,7 @@
         "dataset_version": "DBD.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "period_completeness",
@@ -913,7 +913,7 @@
         "dataset_version": "DBD.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "provenance_coverage",
@@ -1279,7 +1279,7 @@
         "dataset_version": "DBD.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "official_reconciliation_rate",
@@ -1668,7 +1668,7 @@
         "dataset_version": "DBD.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "material_ocr_error_count",
@@ -2003,7 +2003,7 @@
         "dataset_version": "DBD.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "ocr_unresolved_rate",
@@ -2503,7 +2503,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "duplicate_fact_count",
@@ -2810,7 +2810,7 @@
         "dataset_version": "DBD.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "valuation_method_data_readiness",
@@ -3282,7 +3282,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "dataframe_schema_validity",
@@ -3659,7 +3659,7 @@
         "dataset_version": "DBD.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     }
   ],
   "core_metric_coverage": 0.42857142857142855,

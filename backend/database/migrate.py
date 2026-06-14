@@ -19,7 +19,7 @@ import psycopg2
 from backend.database.config import connect_with_retry, require_database_url
 
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
-CURRENT_SCHEMA_VERSION = "041_seed_borrowing_line_items"
+CURRENT_SCHEMA_VERSION = "043_cafef_financial_source_type"
 
 _ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 if _ENV_FILE.exists():

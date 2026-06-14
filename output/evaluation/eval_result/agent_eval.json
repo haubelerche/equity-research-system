@@ -4,8 +4,8 @@
   "plan_id": "05",
   "plan_name": "Agent workflow and LLM judge",
   "ticker": "DBD",
-  "run_id": "benchmark-02-rag-sample20-DBD-v2",
-  "generated_at": "2026-06-14T11:34:48.581171+00:00",
+  "run_id": "benchmark-02-rag-restored-DBD",
+  "generated_at": "2026-06-14T11:42:07.938612+00:00",
   "status": "fail",
   "test_execution": {
     "status": "fail",
@@ -17,7 +17,7 @@
       "tests/unit/test_package_validation_gate.py"
     ],
     "exit_code": 1,
-    "duration_seconds": 9.28,
+    "duration_seconds": 8.99,
     "summary": {
       "failed": 1,
       "passed": 41
@@ -27,7 +27,7 @@
       "================================== FAILURES ===================================",
       "____________ test_tracing_kwargs_present_when_langfuse_configured _____________",
       "",
-      "monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000218626822C0>",
+      "monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000027DDF6FA8B0>",
       "",
       "    def test_tracing_kwargs_present_when_langfuse_configured(monkeypatch):",
       "        monkeypatch.setenv(\"LANGFUSE_PUBLIC_KEY\", \"pk-lf-test\")",
@@ -37,21 +37,21 @@
       "    ",
       ">       assert kwargs.get(\"name\") == \"test_agent\"",
       "E       assert None == 'test_agent'",
-      "E        +  where None = <built-in method get of dict object at 0x0000021862712E40>('name')",
-      "E        +    where <built-in method get of dict object at 0x0000021862712E40> = {'max_completion_tokens': 32768, 'messages': [{'content': '# Objective\\nTest agent.\\n# Allowed Inputs\\nstate dict.\\n# ...ings\": [], \"next_action\": null}}', 'role': 'user'}], 'model': 'gpt-5-mini', 'response_format': {'type': 'json_object'}}.get",
+      "E        +  where None = <built-in method get of dict object at 0x0000027DDF7A0C80>('name')",
+      "E        +    where <built-in method get of dict object at 0x0000027DDF7A0C80> = {'max_completion_tokens': 32768, 'messages': [{'content': '# Objective\\nTest agent.\\n# Allowed Inputs\\nstate dict.\\n# ...ings\": [], \"next_action\": null}}', 'role': 'user'}], 'model': 'gpt-5-mini', 'response_format': {'type': 'json_object'}}.get",
       "",
       "tests\\harness\\test_model_adapter_langfuse.py:86: AssertionError",
       "---------------------------- Captured stderr call -----------------------------",
-      "18:34:54 harness.model_adapter Langfuse OpenAI drop-in unavailable, tracing disabled: [Errno 13] Permission denied: 'C:\\\\Python314\\\\Lib\\\\site-packages\\\\psutil\\\\__init__.py'",
-      "18:34:55 harness.model_adapter [TEST] LLM_CALL agent=test_agent model=gpt-5-mini est_input_tokens=234 max_output_tokens=32768 timeout=30s compact_ms=0",
-      "18:34:55 harness.model_adapter [TEST] LLM_OK agent=test_agent latency=804ms prompt_tokens=10 completion_tokens=5 finish_reason=stop",
+      "18:42:13 harness.model_adapter Langfuse OpenAI drop-in unavailable, tracing disabled: [Errno 13] Permission denied: 'C:\\\\Python314\\\\Lib\\\\site-packages\\\\psutil\\\\__init__.py'",
+      "18:42:13 harness.model_adapter [TEST] LLM_CALL agent=test_agent model=gpt-5-mini est_input_tokens=234 max_output_tokens=32768 timeout=30s compact_ms=0",
+      "18:42:13 harness.model_adapter [TEST] LLM_OK agent=test_agent latency=817ms prompt_tokens=10 completion_tokens=5 finish_reason=stop",
       "------------------------------ Captured log call ------------------------------",
       "WARNING  harness.model_adapter:model_adapter.py:80 Langfuse OpenAI drop-in unavailable, tracing disabled: [Errno 13] Permission denied: 'C:\\\\Python314\\\\Lib\\\\site-packages\\\\psutil\\\\__init__.py'",
       "INFO     harness.model_adapter:model_adapter.py:160 [TEST] LLM_CALL agent=test_agent model=gpt-5-mini est_input_tokens=234 max_output_tokens=32768 timeout=30s compact_ms=0",
-      "INFO     harness.model_adapter:model_adapter.py:242 [TEST] LLM_OK agent=test_agent latency=804ms prompt_tokens=10 completion_tokens=5 finish_reason=stop",
+      "INFO     harness.model_adapter:model_adapter.py:242 [TEST] LLM_OK agent=test_agent latency=817ms prompt_tokens=10 completion_tokens=5 finish_reason=stop",
       "=========================== short test summary info ===========================",
       "FAILED tests/harness/test_model_adapter_langfuse.py::test_tracing_kwargs_present_when_langfuse_configured",
-      "1 failed, 41 passed in 8.34s"
+      "1 failed, 41 passed in 8.24s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -138,7 +138,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "schema_validity",
@@ -199,7 +199,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "role_adherence",
@@ -260,7 +260,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "groundedness",
@@ -321,7 +321,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "no_unauthorized_calc",
@@ -382,7 +382,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "task_completion",
@@ -443,7 +443,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "plan_adherence",
@@ -504,7 +504,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     },
     {
       "id": "critic_issue_recall",
@@ -565,7 +565,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:34:48.581171+00:00"
+      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
     }
   ],
   "advisory_findings": [

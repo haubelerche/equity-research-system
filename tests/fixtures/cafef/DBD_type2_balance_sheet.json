@@ -1,0 +1,349 @@
+{
+  "Data": {
+    "Count": 12,
+    "Value": [
+      {
+        "Time": "2025",
+        "Year": 2025,
+        "Quater": 0,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "ShortTermFloatingCapital",
+            "Name": "Tổng tài sản lưu động ngắn hạn",
+            "Value": 1480040156
+          },
+          {
+            "Code": "TotalAsset",
+            "Name": "Tổng tài sản",
+            "Value": 2596213715
+          },
+          {
+            "Code": "TotalShortTermDebt",
+            "Name": "Nợ ngắn hạn",
+            "Value": 587673892
+          },
+          {
+            "Code": "TotalDebt",
+            "Name": "Tổng nợ",
+            "Value": 860234785
+          },
+          {
+            "Code": "TotalOwnerCapital",
+            "Name": "Vốn chủ sở hữu",
+            "Value": 1735978931
+          }
+        ]
+      },
+      {
+        "Time": "2024",
+        "Year": 2024,
+        "Quater": 0,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "ShortTermFloatingCapital",
+            "Name": "Tổng tài sản lưu động ngắn hạn",
+            "Value": 1476280618
+          },
+          {
+            "Code": "TotalAsset",
+            "Name": "Tổng tài sản",
+            "Value": 2264206533
+          },
+          {
+            "Code": "TotalShortTermDebt",
+            "Name": "Nợ ngắn hạn",
+            "Value": 460154614
+          },
+          {
+            "Code": "TotalDebt",
+            "Name": "Tổng nợ",
+            "Value": 603065717
+          },
+          {
+            "Code": "TotalOwnerCapital",
+            "Name": "Vốn chủ sở hữu",
+            "Value": 1661140816
+          }
+        ]
+      },
+      {
+        "Time": "2023",
+        "Year": 2023,
+        "Quater": 0,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "ShortTermFloatingCapital",
+            "Name": "Tổng tài sản lưu động ngắn hạn",
+            "Value": 1260686050
+          },
+          {
+            "Code": "TotalAsset",
+            "Name": "Tổng tài sản",
+            "Value": 1988909305
+          },
+          {
+            "Code": "TotalShortTermDebt",
+            "Name": "Nợ ngắn hạn",
+            "Value": 417989446
+          },
+          {
+            "Code": "TotalDebt",
+            "Name": "Tổng nợ",
+            "Value": 556067765
+          },
+          {
+            "Code": "TotalOwnerCapital",
+            "Name": "Vốn chủ sở hữu",
+            "Value": 1432841540
+          }
+        ]
+      },
+      {
+        "Time": "2022",
+        "Year": 2022,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "ShortTermFloatingCapital",
+            "Name": "Tổng tài sản lưu động ngắn hạn",
+            "Value": 1247789018.909
+          },
+          {
+            "Code": "TotalAsset",
+            "Name": "Tổng tài sản",
+            "Value": 1895717209.447
+          },
+          {
+            "Code": "TotalShortTermDebt",
+            "Name": "Nợ ngắn hạn",
+            "Value": 405457018.941
+          },
+          {
+            "Code": "TotalDebt",
+            "Name": "Tổng nợ",
+            "Value": 540580153.262
+          },
+          {
+            "Code": "TotalOwnerCapital",
+            "Name": "Vốn chủ sở hữu",
+            "Value": 1355137056.185
+          }
+        ]
+      },
+      {
+        "Time": "2021",
+        "Year": 2021,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "ShortTermFloatingCapital",
+            "Name": "Tổng tài sản lưu động ngắn hạn",
+            "Value": 948196601.158
+          },
+          {
+            "Code": "TotalAsset",
+            "Name": "Tổng tài sản",
+            "Value": 1559517987.028
+          },
+          {
+            "Code": "TotalShortTermDebt",
+            "Name": "Nợ ngắn hạn",
+            "Value": 286965689.966
+          },
+          {
+            "Code": "TotalDebt",
+            "Name": "Tổng nợ",
+            "Value": 418969098.17
+          },
+          {
+            "Code": "TotalOwnerCapital",
+            "Name": "Vốn chủ sở hữu",
+            "Value": 1140548888.858
+          }
+        ]
+      },
+      {
+        "Time": "2020",
+        "Year": 2020,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "ShortTermFloatingCapital",
+            "Name": "Tổng tài sản lưu động ngắn hạn",
+            "Value": 835845735.803
+          },
+          {
+            "Code": "TotalAsset",
+            "Name": "Tổng tài sản",
+            "Value": 1437409436.723
+          },
+          {
+            "Code": "TotalShortTermDebt",
+            "Name": "Nợ ngắn hạn",
+            "Value": 347872343.671
+          },
+          {
+            "Code": "TotalDebt",
+            "Name": "Tổng nợ",
+            "Value": 448783906.493
+          },
+          {
+            "Code": "TotalOwnerCapital",
+            "Name": "Vốn chủ sở hữu",
+            "Value": 988625530.23
+          }
+        ]
+      },
+      {
+        "Time": "2019",
+        "Year": 2019,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "ShortTermFloatingCapital",
+            "Name": "Tổng tài sản lưu động ngắn hạn",
+            "Value": 1028808238.795
+          },
+          {
+            "Code": "TotalAsset",
+            "Name": "Tổng tài sản",
+            "Value": 1620552920.656
+          },
+          {
+            "Code": "TotalShortTermDebt",
+            "Name": "Nợ ngắn hạn",
+            "Value": 580312109.969
+          },
+          {
+            "Code": "TotalDebt",
+            "Name": "Tổng nợ",
+            "Value": 688044599.793
+          },
+          {
+            "Code": "TotalOwnerCapital",
+            "Name": "Vốn chủ sở hữu",
+            "Value": 932508320.863
+          }
+        ]
+      },
+      {
+        "Time": "2018",
+        "Year": 2018,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "ShortTermFloatingCapital",
+            "Name": "Tổng tài sản lưu động ngắn hạn",
+            "Value": 1021237151.785
+          },
+          {
+            "Code": "TotalAsset",
+            "Name": "Tổng tài sản",
+            "Value": 1434340877.186
+          },
+          {
+            "Code": "TotalShortTermDebt",
+            "Name": "Nợ ngắn hạn",
+            "Value": 497319705.472
+          },
+          {
+            "Code": "TotalDebt",
+            "Name": "Tổng nợ",
+            "Value": 543686587.994
+          },
+          {
+            "Code": "TotalOwnerCapital",
+            "Name": "Vốn chủ sở hữu",
+            "Value": 890654289.192
+          }
+        ]
+      },
+      {
+        "Time": "2017",
+        "Year": 2017,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "ShortTermFloatingCapital",
+            "Name": "Tổng tài sản lưu động ngắn hạn",
+            "Value": 1115417706.711
+          },
+          {
+            "Code": "TotalAsset",
+            "Name": "Tổng tài sản",
+            "Value": 1544190020.294
+          },
+          {
+            "Code": "TotalShortTermDebt",
+            "Name": "Nợ ngắn hạn",
+            "Value": 655810641.815
+          },
+          {
+            "Code": "TotalDebt",
+            "Name": "Tổng nợ",
+            "Value": 711179768.63
+          },
+          {
+            "Code": "TotalOwnerCapital",
+            "Name": "Vốn chủ sở hữu",
+            "Value": 833010251.664
+          }
+        ]
+      },
+      {
+        "Time": "2016",
+        "Year": 2016,
+        "Quater": 5,
+        "ReportType": "HK",
+        "Conten": "Đã kiểm toán ",
+        "Value": [
+          {
+            "Code": "ShortTermFloatingCapital",
+            "Name": "Tổng tài sản lưu động ngắn hạn",
+            "Value": 1023140020.557
+          },
+          {
+            "Code": "TotalAsset",
+            "Name": "Tổng tài sản",
+            "Value": 1434259954.083
+          },
+          {
+            "Code": "TotalShortTermDebt",
+            "Name": "Nợ ngắn hạn",
+            "Value": 612156084.54
+          },
+          {
+            "Code": "TotalDebt",
+            "Name": "Tổng nợ",
+            "Value": 661230683.709
+          },
+          {
+            "Code": "TotalOwnerCapital",
+            "Name": "Vốn chủ sở hữu",
+            "Value": 773029270.374
+          }
+        ]
+      }
+    ]
+  },
+  "Message": null,
+  "Success": true
+}

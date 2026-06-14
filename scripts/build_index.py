@@ -56,32 +56,32 @@ OFFICIAL_DOCS_DIR = ROOT / "storage" / "sources" / "official_documents"
 
 
 _FACT_LABEL = {
-    "revenue.net": "Doanh thu thu?n",
-    "gross_profit.total": "L?i nhu?n g?p",
-    "net_income.parent": "L?i nhu?n sau thu? (c? dng cng ty m?)",
-    "operating_cash_flow.total": "Dng ti?n t? ho?t d?ng kinh doanh",
-    "free_cash_flow.total": "Dng ti?n t? do",
-    "total_assets.ending": "T?ng ti s?n",
-    "equity.parent": "V?n ch? s? h?u (c? dng cng ty m?)",
-    "eps.basic": "EPS co b?n",
+    "revenue.net": "Doanh thu thuần",
+    "gross_profit.total": "Lợi nhuận gộp",
+    "net_income.parent": "Lợi nhuận sau thuế (cổ đông công ty mẹ)",
+    "operating_cash_flow.total": "Dòng tiền từ hoạt động kinh doanh",
+    "free_cash_flow.total": "Dòng tiền tự do",
+    "total_assets.ending": "Tổng tài sản",
+    "equity.parent": "Vốn chủ sở hữu (cổ đông công ty mẹ)",
+    "eps.basic": "EPS cơ bản",
     "ebitda.total": "EBITDA",
-    "capex.total": "Chi d?u tu TSC (CAPEX)",
-    "total_liabilities.ending": "T?ng n? ph?i tr?",
-    "cash_and_equivalents.ending": "Ti?n v tuong duong ti?n",
-    "short_term_debt.ending": "Vay ng?n h?n",
-    "interest_expense.total": "Chi ph li vay",
-    "depreciation.total": "Kh?u hao",
-    "profit_before_tax.total": "L?i nhu?n tru?c thu?",
-    "cogs.total": "Gi v?n hng bn",
-    "sga.total": "Chi ph bn hng v qu?n l",
-    "inventory.ending": "Hng t?n kho",
-    "accounts_receivable.ending": "Ph?i thu khch hng",
+    "capex.total": "Chi đầu tư TSCĐ (CAPEX)",
+    "total_liabilities.ending": "Tổng nợ phải trả",
+    "cash_and_equivalents.ending": "Tiền và tương đương tiền",
+    "short_term_debt.ending": "Vay ngắn hạn",
+    "interest_expense.total": "Chi phí lãi vay",
+    "depreciation.total": "Khấu hao",
+    "profit_before_tax.total": "Lợi nhuận trước thuế",
+    "cogs.total": "Giá vốn hàng bán",
+    "sga.total": "Chi phí bán hàng và quản lý",
+    "inventory.ending": "Hàng tồn kho",
+    "accounts_receivable.ending": "Phải thu khách hàng",
 }
 
 _STATEMENT_CONTEXT = {
-    "income_statement": "Bo co k?t qu? kinh doanh",
-    "balance_sheet": "B?ng cn d?i k? ton",
-    "cash_flow": "Bo co luu chuy?n ti?n t?",
+    "income_statement": "Báo cáo kết quả kinh doanh",
+    "balance_sheet": "Bảng cân đối kế toán",
+    "cash_flow": "Báo cáo lưu chuyển tiền tệ",
 }
 
 
@@ -179,13 +179,13 @@ def _build_fact_chunks(facts: list[dict]) -> list[tuple[str, str, int | None]]:
     chunks: list[tuple[str, str, int | None]] = []  # (section_title, chunk_text, fiscal_year)
     for year in sorted(by_year):
         year_facts = by_year[year]
-        lines = [f"## Tm t?t ti chnh {ticker_placeholder} nam {year} (FY)\n"]
+        lines = [f"## Tóm tắt tài chính {ticker_placeholder} năm {year} (FY)\n"]
         for f in sorted(year_facts, key=lambda x: x["line_item_code"]):
             label = _FACT_LABEL.get(f["line_item_code"], f["line_item_code"])
             unit = f.get("unit", "")
             val = f["value"]
             if unit == "vnd_bn":
-                formatted = f"{val:,.1f} t? VND"
+                formatted = f"{val:,.1f} tỷ VND"
             elif unit == "vnd":
                 formatted = f"{val:,.0f} VND"
             elif unit == "ratio":
@@ -197,7 +197,7 @@ def _build_fact_chunks(facts: list[dict]) -> list[tuple[str, str, int | None]]:
             currency = f.get("currency", "VND")
             stmt = _STATEMENT_CONTEXT.get(f.get("statement_type") or "", "")
             lines.append(f"- {label} ({stmt}): {formatted} ({currency})")
-        lines.append(f"\nD? li?u t? bo co ti chnh ki?m ton nam {year}.")
+        lines.append(f"\nDữ liệu từ báo cáo tài chính kiểm toán năm {year}.")
         chunks.append((f"Financial Data {year}FY", "\n".join(lines), year))
     return chunks
 
@@ -205,7 +205,7 @@ def _build_fact_chunks(facts: list[dict]) -> list[tuple[str, str, int | None]]:
 def _build_catalyst_chunk(events: list[dict]) -> tuple[str, str, int | None] | None:
     if not events:
         return None
-    lines = ["## S? ki?n doanh nghi?p v mi tru?ng kinh doanh\n"]
+    lines = ["## Sự kiện doanh nghiệp và môi trường kinh doanh\n"]
     for ev in events[:20]:
         date_str = str(ev.get("event_date", ""))[:10]
         event_type = ev.get("event_type", "")

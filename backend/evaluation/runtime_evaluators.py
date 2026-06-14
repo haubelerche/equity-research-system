@@ -833,7 +833,19 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
     ragas_samples = _read_json_list(
         root / "config" / "eval" / "ragas" / f"{ticker.upper()}.json"
     )
-    ragas_result = evaluate_ragas_samples(ragas_samples)
+    # Pure-live RAGAS: when samples carry no hand-written offline_scores and the
+    # production retriever is available, run real ragas.evaluate over live-retrieved
+    # contexts + generated answers. Samples WITH offline_scores keep the deterministic
+    # offline contract (used by CI/unit tests). Either way we never fabricate scores.
+    _ragas_retrieve = _resolve_retrieve_callable()
+    _ragas_needs_live = bool(ragas_samples) and not all(
+        isinstance(sample.get("offline_scores"), dict) for sample in ragas_samples
+    )
+    if _ragas_needs_live and _ragas_retrieve is not None:
+        from backend.evaluation.ragas_live import run_live_ragas
+        ragas_result = run_live_ragas(ragas_samples, ticker, _ragas_retrieve)
+    else:
+        ragas_result = evaluate_ragas_samples(ragas_samples)
     ragas_scores = ragas_result.get("scores") or {}
     hit_rate_samples = _minimum_metric_samples(
         golden_scores.get("queries") or [],
@@ -963,8 +975,8 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
         "status": _status(metrics, blocked=not golden_available),
         "metrics": metrics,
         "blocking_issues": _blocked(metrics) + ([] if golden_available else ["rag_golden_query_set_missing"]),
-        "retrieval_backend": "not_measured",
-        "query_set_version": None,
+        "retrieval_backend": golden_scores.get("retrieval_backend", "not_measured"),
+        "query_set_version": golden_scores.get("query_set_version"),
         "evidence_packet_completeness": evidence_completeness,
         "ragas_scores": {
             key: ragas_scores.get(key)
@@ -1018,55 +1030,76 @@ def _run_local_retrieval_benchmark(
             "reason": f"golden_query_ticker_mismatch:{configured_ticker}:{ticker.upper()}",
         }
 
-    corpus_root = root / "storage" / "sources" / "ocr_artifacts" / ticker
-    corpus_source_tier = int(config.get("corpus_source_tier") or 999)
-    pages: list[tuple[int, str]] = []
-    for directory, _, filenames in os.walk(corpus_root):
-        for filename in filenames:
-            match = re.fullmatch(r"page_(\d+)\.txt", filename)
-            if not match:
-                continue
-            path = Path(directory) / filename
-            pages.append((int(match.group(1)), path.read_text(encoding="utf-8", errors="ignore").lower()))
+    queries = config.get("queries") or []
 
-    outcomes: list[dict[str, Any]] = []
-    for query in config.get("queries") or []:
-        tokens = {
-            token for token in re.findall(r"[a-z0-9]+", str(query.get("query") or "").lower())
-            if len(token) > 2
+    # Pure-live: score against the production RetrievalService (pgvector + FTS), not a
+    # lexical scan of OCR text files. If the retriever cannot be constructed (no DB),
+    # the benchmark is BLOCKED (cannot be measured) — never fake-zeroed.
+    retrieve = _resolve_retrieve_callable()
+    if retrieve is None:
+        return {
+            "query_set_version": config.get("version"),
+            "hit_rate_at_5": None,
+            "mrr_at_5": None,
+            "source_tier_hit_rate": None,
+            "queries": [],
+            "execution_status": "retriever_unavailable",
+            "reason": "production_retrieval_service_unavailable",
+            "retrieval_backend": "unavailable",
         }
-        ranked = sorted(
-            (
-                (page, sum(text.count(token) for token in tokens))
-                for page, text in pages
-            ),
-            key=lambda item: (-item[1], item[0]),
-        )
-        top_five = [page for page, score in ranked[:5] if score > 0]
-        expected = {int(page) for page in query.get("expected_pages") or []}
-        first_rank = next(
-            (index + 1 for index, page in enumerate(top_five) if page in expected),
-            None,
-        )
-        expected_source_tiers = [
-            int(tier) for tier in query.get("expected_source_tiers") or []
-        ]
+
+    backend = "pgvector" if os.getenv("OPENAI_API_KEY") else "full_text"
+    outcomes: list[dict[str, Any]] = []
+    for query in queries:
+        qtext = str(query.get("query") or "")
+        fiscal_year = query.get("fiscal_year")
+        expected_terms = [str(t).lower() for t in (query.get("expected_terms") or [])]
+        expected_source_tiers = [int(t) for t in (query.get("expected_source_tiers") or [])]
+        try:
+            chunks = retrieve(ticker=ticker, query=qtext, fiscal_year=fiscal_year, top_k=5)
+        except Exception:  # noqa: BLE001 — a single failing query must not abort the suite
+            chunks = []
+
+        first_rank: int | None = None
+        matched_tier: int | None = None
+        top_5: list[dict[str, Any]] = []
+        for index, chunk in enumerate(list(chunks)[:5]):
+            text_lower = (getattr(chunk, "chunk_text", "") or "").lower()
+            chunk_fy = getattr(chunk, "fiscal_year", None)
+            tier = getattr(chunk, "reliability_tier", None)
+            top_5.append({
+                "rank": index + 1,
+                "reliability_tier": tier,
+                "fiscal_year": chunk_fy,
+                "extraction_method": getattr(chunk, "extraction_method", None),
+            })
+            term_ok = any(t in text_lower for t in expected_terms) if expected_terms else True
+            fy_ok = (
+                fiscal_year is None
+                or chunk_fy == fiscal_year
+                or str(fiscal_year) in text_lower
+            )
+            if term_ok and fy_ok and first_rank is None:
+                first_rank = index + 1
+                matched_tier = tier
+
+        hit = first_rank is not None
         source_tier_hit = (
-            first_rank is not None
-            and bool(expected_source_tiers)
-            and any(corpus_source_tier <= tier for tier in expected_source_tiers)
+            hit and bool(expected_source_tiers) and matched_tier in expected_source_tiers
         )
         outcomes.append({
             "id": query.get("id"),
-            "query": query.get("query"),
+            "query": qtext,
             "material": query.get("material") is not False,
-            "top_5_pages": top_five,
-            "expected_pages": sorted(expected),
+            "fiscal_year": fiscal_year,
+            "expected_terms": query.get("expected_terms") or [],
             "expected_source_tiers": expected_source_tiers,
-            "retrieved_source_tier": corpus_source_tier if top_five else None,
-            "hit": first_rank is not None,
+            "retrieved_chunks": len(list(chunks)) if not isinstance(chunks, list) else len(chunks),
+            "top_5": top_5,
+            "retrieved_source_tier": matched_tier,
+            "hit": hit,
             "source_tier_hit": source_tier_hit,
-            "reciprocal_rank": 0.0 if first_rank is None else 1 / first_rank,
+            "reciprocal_rank": 0.0 if first_rank is None else 1.0 / first_rank,
         })
     count = len(outcomes)
     source_tier_outcomes = [
@@ -1084,7 +1117,32 @@ def _run_local_retrieval_benchmark(
         "queries": outcomes,
         "execution_status": "executed",
         "reason": None,
+        "retrieval_backend": backend,
     }
+
+
+def _resolve_retrieve_callable():
+    """Return a ``retrieve(ticker, query, fiscal_year, top_k)`` callable, or None.
+
+    Indirection keeps the evaluator pure-live in production while letting tests inject a
+    deterministic fake via ``RETRIEVE_CALLABLE_OVERRIDE`` without a database.
+    """
+    if RETRIEVE_CALLABLE_OVERRIDE is not None:
+        return RETRIEVE_CALLABLE_OVERRIDE
+    try:
+        from backend.retrieval import RetrievalService
+    except Exception:  # noqa: BLE001 — missing deps / import error -> blocked, not crash
+        return None
+    try:
+        service = RetrievalService()
+    except Exception:  # noqa: BLE001
+        return None
+    return service.retrieve
+
+
+# Test seam: when set, the golden retrieval benchmark uses this instead of the live
+# RetrievalService. Production leaves it None (pure-live).
+RETRIEVE_CALLABLE_OVERRIDE = None
 
 
 def _matrix_varies(value: Any) -> bool:

@@ -74,10 +74,7 @@ audits/storage_migrations/
 # Reproducible runtime output — never source (reports, logs, dumps, debug traces)
 artifacts/
 
-data/
-# Frontend source lives under a dir literally named "data" — keep it tracked
-!frontend/src/data/
-!frontend/src/data/**
+
 
 # Frontend source component dirs match gitignored names — keep them tracked
 !frontend/src/components/reports/

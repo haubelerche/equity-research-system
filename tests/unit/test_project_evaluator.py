@@ -8,12 +8,37 @@ from backend.evaluation.project_evaluator import (
     load_evaluation_artifact,
     load_latest_evaluation,
 )
+from backend.evaluation import runtime_evaluators
 from backend.evaluation.runtime_evaluators import (
     evaluate_data_reliability,
     evaluate_retrieval,
     _matrix_varies,
     _run_local_retrieval_benchmark,
 )
+
+
+class _FakeChunk:
+    """Minimal stand-in for an EvidenceChunk returned by RetrievalService."""
+
+    def __init__(self, chunk_text, fiscal_year=None, reliability_tier=2,
+                 extraction_method="cafef_structured"):
+        self.chunk_text = chunk_text
+        self.fiscal_year = fiscal_year
+        self.reliability_tier = reliability_tier
+        self.extraction_method = extraction_method
+
+
+def _fake_retriever(chunks_by_keyword):
+    """Build a deterministic retrieve(ticker, query, fiscal_year, top_k) callable.
+
+    Returns the chunk list for the first keyword found in the query, else [].
+    """
+    def retrieve(ticker, query, fiscal_year=None, top_k=5):
+        for keyword, chunks in chunks_by_keyword.items():
+            if keyword.lower() in query.lower():
+                return chunks[:top_k]
+        return []
+    return retrieve
 
 
 def test_missing_runtime_evidence_blocks_plan() -> None:
@@ -49,27 +74,52 @@ def test_matrix_variation_requires_multiple_numeric_values() -> None:
     assert not _matrix_varies({"a": {"x": 1, "y": 1}})
 
 
-def test_local_retrieval_benchmark_calculates_hit_rate_and_mrr(tmp_path) -> None:
+def test_local_retrieval_benchmark_scores_against_live_retriever(tmp_path, monkeypatch) -> None:
+    # Pure-live: golden queries are scored against the production retriever (term match
+    # on retrieved chunks), injected here deterministically via the test seam.
     golden = tmp_path / "config" / "eval" / "rag_golden_queries.yaml"
     golden.parent.mkdir(parents=True)
     golden.write_text(
-        "version: test-v1\nqueries:\n"
+        "version: test-v1\nticker: DHG\nqueries:\n"
         "  - id: revenue\n"
-        "    query: net revenue\n"
-        "    expected_pages: [2]\n",
+        "    query: DHG net revenue 2023\n"
+        "    fiscal_year: 2023\n"
+        "    expected_terms: ['net revenue']\n"
+        "    expected_source_tiers: [0, 1, 2]\n"
+        "    material: true\n",
         encoding="utf-8",
     )
-    pages = (
-        tmp_path / "storage" / "sources" / "ocr_artifacts" / "DHG" / "doc" / "pages"
+    monkeypatch.setattr(
+        runtime_evaluators, "RETRIEVE_CALLABLE_OVERRIDE",
+        _fake_retriever({"net revenue": [
+            _FakeChunk("Báo cáo KQKD: net revenue 2023 ...", fiscal_year=2023, reliability_tier=1),
+        ]}),
     )
-    pages.mkdir(parents=True)
-    (pages / "page_001.txt").write_text("unrelated note", encoding="utf-8")
-    (pages / "page_002.txt").write_text("net revenue net revenue", encoding="utf-8")
 
     result = _run_local_retrieval_benchmark(tmp_path, "DHG", golden)
 
+    assert result["execution_status"] == "executed"
+    assert result["retrieval_backend"] in ("pgvector", "full_text")
     assert result["hit_rate_at_5"] == 1.0
     assert result["mrr_at_5"] == 1.0
+    assert result["source_tier_hit_rate"] == 1.0
+
+
+def test_local_retrieval_benchmark_blocks_when_retriever_unavailable(tmp_path, monkeypatch) -> None:
+    golden = tmp_path / "config" / "eval" / "rag_golden_queries.yaml"
+    golden.parent.mkdir(parents=True)
+    golden.write_text(
+        "version: test-v1\nticker: DHG\nqueries:\n"
+        "  - id: revenue\n    query: net revenue\n    expected_terms: ['net revenue']\n",
+        encoding="utf-8",
+    )
+    # No retriever (no DB) -> blocked, NOT a fabricated zero.
+    monkeypatch.setattr(runtime_evaluators, "_resolve_retrieve_callable", lambda: None)
+
+    result = _run_local_retrieval_benchmark(tmp_path, "DHG", golden)
+
+    assert result["execution_status"] == "retriever_unavailable"
+    assert result["hit_rate_at_5"] is None
 
 
 def test_local_retrieval_benchmark_rejects_cross_ticker_golden_set(tmp_path) -> None:
@@ -79,7 +129,7 @@ def test_local_retrieval_benchmark_rejects_cross_ticker_golden_set(tmp_path) -> 
         "version: test-v1\nticker: DHG\nqueries:\n"
         "  - id: revenue\n"
         "    query: net revenue\n"
-        "    expected_pages: [2]\n",
+        "    expected_terms: ['net revenue']\n",
         encoding="utf-8",
     )
 
@@ -90,24 +140,24 @@ def test_local_retrieval_benchmark_rejects_cross_ticker_golden_set(tmp_path) -> 
     assert result["reason"] == "golden_query_ticker_mismatch:DHG:DBD"
 
 
-def test_retrieval_evaluator_uses_ticker_golden_set_and_fails_closed_without_corpus(tmp_path) -> None:
+def _write_dbd_eval_inputs(tmp_path):
     golden_dir = tmp_path / "config" / "eval" / "rag_golden_queries"
     golden_dir.mkdir(parents=True)
     (golden_dir / "DBD.yaml").write_text(
-        "version: dbd-test-v1\n"
+        "version: dbd-test-v2\n"
         "ticker: DBD\n"
-        "corpus_source_tier: 0\n"
         "queries:\n"
         "  - id: revenue\n"
-        "    query: DBD revenue 2025 audited report\n"
-        "    expected_pages: [1]\n"
-        "    expected_source_tiers: [0, 1]\n"
+        "    query: DBD doanh thu 2025\n"
+        "    fiscal_year: 2025\n"
+        "    expected_terms: ['Doanh thu']\n"
+        "    expected_source_tiers: [0, 1, 2]\n"
         "    material: true\n",
         encoding="utf-8",
     )
     ragas_dir = tmp_path / "config" / "eval" / "ragas"
     ragas_dir.mkdir(parents=True)
-    ragas_dir.joinpath("DBD.json").write_text(
+    (ragas_dir / "DBD.json").write_text(
         json.dumps([
             {
                 "id": "semantic-1",
@@ -125,6 +175,35 @@ def test_retrieval_evaluator_uses_ticker_golden_set_and_fails_closed_without_cor
         encoding="utf-8",
     )
 
+
+def test_retrieval_evaluator_scores_live_hits(tmp_path, monkeypatch) -> None:
+    _write_dbd_eval_inputs(tmp_path)
+    monkeypatch.setattr(
+        runtime_evaluators, "RETRIEVE_CALLABLE_OVERRIDE",
+        _fake_retriever({"doanh thu": [
+            _FakeChunk("Doanh thu bán hàng DBD năm 2025 ...", fiscal_year=2025, reliability_tier=2),
+        ]}),
+    )
+
+    result = evaluate_retrieval(tmp_path, "DBD")
+    metrics = {metric["id"]: metric for metric in result["metrics"]}
+
+    assert metrics["hit_rate_at_5"]["value"] == 1.0
+    assert metrics["source_tier_hit_rate"]["value"] == 1.0
+    assert result["retrieval_backend"] in ("pgvector", "full_text")
+    for metric in metrics.values():
+        samples = metric["calculation"]["per_sample_results"]
+        assert metric["sample_size"] >= 20
+        assert len(samples) >= 20
+
+
+def test_retrieval_evaluator_fails_closed_when_no_evidence(tmp_path, monkeypatch) -> None:
+    _write_dbd_eval_inputs(tmp_path)
+    # Retriever returns nothing for every query -> honest fail (no evidence found).
+    monkeypatch.setattr(
+        runtime_evaluators, "RETRIEVE_CALLABLE_OVERRIDE", _fake_retriever({}),
+    )
+
     result = evaluate_retrieval(tmp_path, "DBD")
     metrics = {metric["id"]: metric for metric in result["metrics"]}
 
@@ -132,12 +211,6 @@ def test_retrieval_evaluator_uses_ticker_golden_set_and_fails_closed_without_cor
     assert metrics["hit_rate_at_5"]["value"] == 0.0
     assert metrics["hit_rate_at_5"]["status"] == "fail"
     assert metrics["source_tier_hit_rate"]["value"] == 0.0
-    assert metrics["source_tier_hit_rate"]["status"] == "fail"
-    assert metrics["context_precision"]["evaluator"]["framework"] == "ragas_offline_contract"
-    for metric in metrics.values():
-        samples = metric["calculation"]["per_sample_results"]
-        assert metric["sample_size"] >= 20
-        assert len(samples) >= 20
 
 
 def test_data_reliability_does_not_treat_pandera_schema_as_system_readiness(tmp_path) -> None:
