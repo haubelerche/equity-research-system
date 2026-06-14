@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
 from backend.reporting.output_inventory import scan_report_inventory, load_universe
 
 from backend.executor import RunExecutor
@@ -22,10 +21,6 @@ from backend.settings import settings
 from backend.universe_registration import ensure_ticker_registered_from_universe
 from backend.utils import deterministic_id
 from backend.runtime_store import to_public_status
-from backend.evaluation.project_evaluator import (
-    load_evaluation_artifact,
-    load_latest_evaluation,
-)
 
 
 def _to_status_response(run: dict[str, Any]) -> RunStatusResponse:
@@ -70,17 +65,6 @@ def create_app(
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok"}
-
-    @app.get("/eval/framework")
-    def get_evaluation_framework() -> dict[str, Any]:
-        return load_latest_evaluation()
-
-    @app.get("/eval/results/{artifact_name}")
-    def get_evaluation_artifact(artifact_name: str) -> dict[str, Any]:
-        artifact = load_evaluation_artifact(artifact_name)
-        if artifact is None:
-            raise HTTPException(status_code=404, detail="Evaluation artifact not found")
-        return artifact
 
     @app.post("/research/start", response_model=StartRunResponse)
     def start_research(request: StartRunRequest) -> StartRunResponse:
@@ -190,10 +174,6 @@ def create_app(
             if a["artifact_type"] in {"report_md", "eval_result_json", "run_log_json"}
         ]
         return ArtifactsResponse(run_id=run_id, artifacts=artifacts)
-
-    frontend_dist = Path(__file__).resolve().parents[1] / "frontend" / "dist"
-    if frontend_dist.is_dir():
-        app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
 
     return app
 
