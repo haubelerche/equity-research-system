@@ -1,0 +1,7 @@
+{
+  "ticker": "DHG", "run_id": "mock-001",
+  "core_metric_coverage": 0.97, "period_completeness": 1.0,
+  "provenance_coverage": 1.0, "official_reconciliation_rate": 0.96,
+  "ocr_unresolved_rate": 0.0, "duplicate_fact_rate": 0.0,
+  "freshness_days": 12, "blocking_issues": []
+}

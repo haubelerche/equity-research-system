@@ -1,0 +1,10 @@
+{
+  "ticker": "DHG", "run_id": "mock-001",
+  "invariants": [
+    { "id": "net_debt", "severity": "critical", "passed": true, "detail": "" },
+    { "id": "fcff", "severity": "critical", "passed": true, "detail": "" },
+    { "id": "fcfe", "severity": "critical", "passed": true, "detail": "" }
+  ],
+  "critical_failures": 0, "golden_drift_out_of_tolerance": 0,
+  "missing_traces": [], "decision": "pass"
+}

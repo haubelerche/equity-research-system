@@ -1,0 +1,7 @@
+{
+  "ticker": "DHG", "run_id": "mock-001",
+  "retrieval_backend": "hybrid", "query_set_version": "rag_golden_v1",
+  "ragas_scores": { "context_precision": 0.83, "context_recall": 0.81, "faithfulness": 0.88, "response_relevancy": 0.86 },
+  "golden_scores": { "hit_rate_at_5": 0.92, "mrr_at_5": 0.79 },
+  "blocking_failures": []
+}

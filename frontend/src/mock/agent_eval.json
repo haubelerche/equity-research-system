@@ -1,0 +1,8 @@
+{
+  "ticker": "DHG", "run_id": "mock-001",
+  "tool_permission_compliance": 1.0, "schema_validity": 1.0,
+  "no_unauthorized_calc": 1.0, "role_adherence": 0.91, "groundedness": 0.9,
+  "task_completion": 0.88, "plan_adherence": 0.87, "critic_issue_recall": 0.93,
+  "rubric_scores": { "evidence_discipline": 0.9, "financial_restraint": 0.95, "company_specificity": 0.85, "materiality": 0.88, "risk_balance": 0.84, "citation_integrity": 0.92, "professional_tone": 0.9 },
+  "blocking_failures": []
+}
