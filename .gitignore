@@ -79,6 +79,10 @@ data/
 !frontend/src/data/
 !frontend/src/data/**
 
+# Frontend source component dirs match gitignored names — keep them tracked
+!frontend/src/components/reports/
+!frontend/src/components/reports/**
+
 storage/debug/
 
 
