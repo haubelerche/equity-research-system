@@ -6,11 +6,13 @@ interface Props {
   ticker: string;
   onComplete: () => void;
   pollMs?: number;
+  /** Idle-state button label. "Sinh báo cáo" for new, "Cập nhật" for refresh. */
+  label?: string;
 }
 
 type UiState = "idle" | "running" | "success" | "failed";
 
-export function GenerateButton({ ticker, onComplete, pollMs = 4000 }: Props) {
+export function GenerateButton({ ticker, onComplete, pollMs = 4000, label = "Sinh báo cáo" }: Props) {
   const [state, setState] = useState<UiState>("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -41,5 +43,5 @@ export function GenerateButton({ ticker, onComplete, pollMs = 4000 }: Props) {
   if (state === "running") return <span role="status" className="run-state run-state--running">Đang chạy…</span>;
   if (state === "success") return <span role="status" className="run-state run-state--success">Xong</span>;
   if (state === "failed") return <span role="status" className="run-state run-state--failed">Thất bại</span>;
-  return <button className="btn-generate" onClick={handleClick}>Sinh báo cáo</button>;
+  return <button className="btn-generate" onClick={handleClick}>{label}</button>;
 }

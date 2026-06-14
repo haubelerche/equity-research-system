@@ -1,42 +1,61 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchReports } from "../api/client";
 import type { ReportItem } from "../api/types";
-import { filterReports, type ReportFilterState } from "../lib/reportFilter";
-import { ReportFilters } from "../components/reports/ReportFilters";
+import { UNIVERSE } from "../data/universe";
+import { filterByQuery } from "../lib/reportFilter";
+import { mergeUniverseWithReports } from "../lib/mergeReports";
+import { TickerSearch } from "../components/reports/TickerSearch";
 import { ReportRow } from "../components/reports/ReportRow";
 import { PreviewPanel } from "../components/reports/PreviewPanel";
 
-const EMPTY: ReportFilterState = { query: "", segment: "all", exchange: "all", status: "all", mvpOnly: false };
-
 export function ReportsPage() {
-  const [items, setItems] = useState<ReportItem[]>([]);
-  const [filter, setFilter] = useState<ReportFilterState>(EMPTY);
+  const [apiItems, setApiItems] = useState<ReportItem[]>([]);
+  const [query, setQuery] = useState("");
   const [previewTicker, setPreviewTicker] = useState<string | null>(null);
 
-  const load = () => { void fetchReports().then((r) => setItems(r.items)); };
+  // Always render the full universe; enrich with live report status when the
+  // backend is reachable. On failure, fall back to universe-only (all "chưa có").
+  const load = () => {
+    fetchReports()
+      .then((r) => setApiItems(r.items))
+      .catch(() => setApiItems([]));
+  };
   useEffect(load, []);
 
-  const filtered = useMemo(() => filterReports(items, filter), [items, filter]);
-  const segments = useMemo(() => [...new Set(items.map((i) => i.segment))], [items]);
-  const exchanges = useMemo(() => [...new Set(items.map((i) => i.exchange))], [items]);
-  const previewItem = items.find((i) => i.ticker === previewTicker) ?? null;
-  const withReport = items.filter((i) => i.has_report).length;
+  const rows = useMemo(() => mergeUniverseWithReports(UNIVERSE, apiItems), [apiItems]);
+  const filtered = useMemo(() => filterByQuery(rows, query), [rows, query]);
+  const previewItem = rows.find((i) => i.ticker === previewTicker) ?? null;
+  const withReport = rows.filter((i) => i.has_report).length;
 
   return (
     <section>
       <header>
         <h1>Báo cáo dược phẩm</h1>
-        <p>{items.length} ticker · {withReport} đã có báo cáo · {items.length - withReport} chưa sinh</p>
+        <p>
+          {rows.length} mã · {withReport} đã có báo cáo · {rows.length - withReport} chưa có
+        </p>
       </header>
-      <ReportFilters value={filter} onChange={setFilter} segments={segments} exchanges={exchanges} />
+
+      <TickerSearch value={query} onChange={setQuery} options={UNIVERSE} />
+
       <table>
-        <thead><tr><th>Ticker</th><th>Tên</th><th>Sàn</th><th>Segment</th><th>MVP</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Mã</th>
+            <th>Tên công ty</th>
+            <th>Sàn</th>
+            <th>Ngành</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
         <tbody>
           {filtered.map((it) => (
             <ReportRow key={it.ticker} item={it} onPreview={setPreviewTicker} onGenerated={load} />
           ))}
         </tbody>
       </table>
+
       <PreviewPanel item={previewItem} onClose={() => setPreviewTicker(null)} />
     </section>
   );

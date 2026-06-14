@@ -8,29 +8,47 @@ interface Props {
   onGenerated: () => void;
 }
 
+const SEGMENT_LABEL: Record<string, string> = {
+  pharma: "Dược phẩm",
+  healthcare_services: "Dịch vụ y tế",
+  medical_equipment: "Thiết bị y tế",
+  medical_distribution: "Phân phối",
+};
+
 export function ReportRow({ item, onPreview, onGenerated }: Props) {
   const statusLabel = item.has_report
-    ? item.has_explanation ? "✓ Đầy đủ" : "◑ Chỉ report"
-    : "⏳ Chưa sinh";
+    ? item.has_explanation
+      ? "✓ Đầy đủ"
+      : "◑ Chỉ báo cáo"
+    : "⏳ Chưa có";
   return (
     <tr>
-      <td>{item.ticker}</td>
+      <td className="ticker-cell">{item.ticker}</td>
       <td>{item.company_name}</td>
       <td>{item.exchange}</td>
-      <td>{item.segment}</td>
-      <td>{item.is_mvp ? "MVP" : ""}</td>
-      <td>{statusLabel}</td>
+      <td>{SEGMENT_LABEL[item.segment] ?? item.segment}</td>
       <td>
-        {item.has_report && (
-          <button onClick={() => onPreview(item.ticker)}>Xem trước</button>
-        )}
+        <span className={`status-cell status-cell--${item.has_report ? "ready" : "pending"}`}>
+          {statusLabel}
+        </span>
+      </td>
+      <td className="row-actions">
         {item.has_report ? (
-          <a href={fileUrl(item.ticker, "report")} target="_blank" rel="noreferrer">Tải report</a>
-        ) : null}
-        {item.has_explanation ? (
-          <a href={fileUrl(item.ticker, "explanation")} target="_blank" rel="noreferrer">Tải explanation</a>
-        ) : null}
-        {!item.has_report && <GenerateButton ticker={item.ticker} onComplete={onGenerated} />}
+          <>
+            <button onClick={() => onPreview(item.ticker)}>Xem trước</button>
+            <a href={fileUrl(item.ticker, "report")} target="_blank" rel="noreferrer">
+              Tải báo cáo
+            </a>
+            {item.has_explanation && (
+              <a href={fileUrl(item.ticker, "explanation")} target="_blank" rel="noreferrer">
+                Tải giải thích
+              </a>
+            )}
+            <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Cập nhật" />
+          </>
+        ) : (
+          <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Sinh báo cáo" />
+        )}
       </td>
     </tr>
   );

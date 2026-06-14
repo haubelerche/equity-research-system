@@ -3,20 +3,31 @@ import { render, screen } from "@testing-library/react";
 import { ReportRow } from "./ReportRow";
 import type { ReportItem } from "../../api/types";
 
-const item: ReportItem = {
+const withReport: ReportItem = {
   ticker: "DHG", company_name: "Duoc Hau Giang", exchange: "HOSE", segment: "pharma",
   is_mvp: true, has_report: true, has_explanation: false, preview_pages: [1, 2],
   report_size: 100, updated_at: "2026-06-14T00:00:00Z",
 };
 
+const noReport: ReportItem = { ...withReport, ticker: "IMP", has_report: false, has_explanation: false };
+
 describe("ReportRow", () => {
-  it("enables report download, disables explanation when missing", () => {
+  it("with a report: shows download + refresh, hides explanation when missing", () => {
     render(<table><tbody>
-      <ReportRow item={item} onPreview={vi.fn()} onGenerated={vi.fn()} />
+      <ReportRow item={withReport} onPreview={vi.fn()} onGenerated={vi.fn()} />
     </tbody></table>);
     expect(screen.getByText("DHG")).toBeInTheDocument();
-    const dl = screen.getByRole("link", { name: /tải report|download report/i });
+    const dl = screen.getByRole("link", { name: /tải báo cáo/i });
     expect(dl).toHaveAttribute("href", "/reports/DHG/file/report");
-    expect(screen.queryByRole("link", { name: /explanation/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /tải giải thích/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /cập nhật/i })).toBeInTheDocument();
+  });
+
+  it("without a report: shows only the generate button", () => {
+    render(<table><tbody>
+      <ReportRow item={noReport} onPreview={vi.fn()} onGenerated={vi.fn()} />
+    </tbody></table>);
+    expect(screen.getByRole("button", { name: /sinh báo cáo/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /tải báo cáo/i })).toBeNull();
   });
 });

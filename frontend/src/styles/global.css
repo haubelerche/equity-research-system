@@ -64,7 +64,7 @@ a {
   text-decoration: none;
   transition: color var(--transition-fast), opacity var(--transition-fast);
 }
-a:hover { color: #deff40; text-decoration: underline; }
+a:hover { color: #03458f; text-decoration: underline; }
 a:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
@@ -150,7 +150,7 @@ button[data-variant="primary"] {
   color: var(--color-accent);
 }
 button[data-variant="primary"]:hover:not(:disabled) {
-  background: #243400;
+  background: #d8eaff;
   border-color: var(--color-accent);
 }
 
@@ -245,7 +245,7 @@ td {
 
 /* Zebra striping */
 tbody tr:nth-child(even) td {
-  background: rgba(255, 255, 255, 0.015);
+  background: #f9fbfe;
 }
 
 tbody tr:hover td {
@@ -290,12 +290,12 @@ td.num {
   align-items: center;
   gap: var(--space-6);
   padding-inline: clamp(var(--space-6), 4vw, var(--space-12));
-  background: rgba(8, 14, 12, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   border-bottom: 1px solid var(--color-border-subtle);
   /* Subtle scan-line effect on the nav bottom border */
-  box-shadow: 0 1px 0 var(--color-border-subtle), 0 2px 0 rgba(200, 244, 0, 0.06);
+  box-shadow: 0 1px 0 var(--color-border-subtle), 0 4px 14px rgba(11, 39, 72, 0.06);
 }
 
 .app-brand {
@@ -319,13 +319,13 @@ td.num {
   background: var(--color-accent);
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 8px var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-accent-bg);
   animation: pulse-dot 3s ease-in-out infinite;
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--color-accent); }
-  50%       { opacity: 0.55; box-shadow: 0 0 4px var(--color-accent); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 4px var(--color-accent-bg); }
+  50%       { opacity: 0.7; box-shadow: 0 0 0 2px var(--color-accent-bg); }
 }
 
 /* Nav links */
@@ -436,7 +436,7 @@ td.num {
 
 /* Layer card */
 .layer-card {
-  background: var(--color-surface-1);
+  background: var(--color-surface-0);
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -452,7 +452,7 @@ td.num {
 
 .layer-card > header {
   padding: var(--space-4) var(--space-5);
-  background: var(--color-surface-2);
+  background: linear-gradient(135deg, var(--color-surface-1), var(--color-surface-2));
   border-bottom: 1px solid var(--color-border-subtle);
   /* Override section > header to not have extra margin */
   margin-bottom: 0 !important;
@@ -492,7 +492,7 @@ td.num {
   font-size: calc(var(--text-xs) * 0.9);
   padding: var(--space-2) var(--space-3);
   background: transparent;
-  color: var(--color-text-disabled);
+  color: var(--color-text-tertiary);
   top: unset; /* no sticky inside cards */
   position: static;
 }
@@ -782,7 +782,7 @@ aside[aria-label="preview"] > iframe {
    MATURITY TOGGLE (role=group)
    ========================================================================== */
 
-[role="group"][aria-label="maturity"] {
+.maturity-toggle {
   display: flex;
   gap: 2px;
   background: var(--color-surface-2);
@@ -792,7 +792,7 @@ aside[aria-label="preview"] > iframe {
   width: fit-content;
 }
 
-[role="group"][aria-label="maturity"] button {
+.maturity-toggle button {
   border: none;
   background: transparent;
   font-family: var(--font-mono);
@@ -805,13 +805,13 @@ aside[aria-label="preview"] > iframe {
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-[role="group"][aria-label="maturity"] button[aria-pressed="true"] {
+.maturity-toggle button[aria-pressed="true"] {
   background: var(--color-surface-0);
   color: var(--color-accent);
   box-shadow: var(--shadow-sm);
 }
 
-[role="group"][aria-label="maturity"] button:hover:not([aria-pressed="true"]):not(:disabled) {
+.maturity-toggle button:hover:not([aria-pressed="true"]):not(:disabled) {
   background: var(--color-surface-3);
   color: var(--color-text-secondary);
 }
@@ -841,22 +841,22 @@ aside[aria-label="preview"] > iframe {
    CI GATE MATRIX + MATURITY THRESHOLD sections
    ========================================================================== */
 
-section[aria-label="ci-gate-matrix"],
-section[aria-label="maturity-thresholds"] {
+.ci-gate-matrix,
+.maturity-thresholds {
   margin-top: var(--space-12);
   padding-top: var(--space-8);
   border-top: 1px solid var(--color-border-subtle);
 }
 
-section[aria-label="ci-gate-matrix"] h2,
-section[aria-label="maturity-thresholds"] h2 {
+.ci-gate-matrix h2,
+.maturity-thresholds h2 {
   margin-bottom: var(--space-4);
   font-size: var(--text-lg);
   color: var(--color-text-primary);
 }
 
-section[aria-label="ci-gate-matrix"] table,
-section[aria-label="maturity-thresholds"] table {
+.ci-gate-matrix table,
+.maturity-thresholds table {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -944,4 +944,29 @@ section[aria-label="maturity-thresholds"] table {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/* ==========================================================================
+   REPORTS PAGE — ticker search + status cell (v2)
+   ========================================================================== */
+
+.ticker-search input {
+  flex: 1 1 320px;
+  min-width: 240px;
+}
+
+.ticker-search__clear {
+  font-size: var(--text-xs);
+  padding: var(--space-2) var(--space-3);
+}
+
+.status-cell {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.status-cell--ready {
+  color: var(--color-pass, #166534);
+}
+.status-cell--pending {
+  color: var(--color-text-tertiary, #8aaa98);
 }
