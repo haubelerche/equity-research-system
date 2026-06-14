@@ -81,7 +81,7 @@ RUN python scripts/check_ocr_runtime.py || true
 
 # ── Healthcheck: verify the DB migrations table is reachable ──────────────────
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-  CMD-SHELL "test \"${APP_MODE}\" != \"api\" || curl -fsS \"http://127.0.0.1:${PORT:-8010}/health\" || exit 1"
+  CMD test "${APP_MODE}" != "api" || curl -fsS "http://127.0.0.1:${PORT:-8010}/health" || exit 1
 
 # ── Entrypoint: run DB migrations then the research pipeline ──────────────────
 # ENABLE_OCR=true adds --ocr flag automatically
