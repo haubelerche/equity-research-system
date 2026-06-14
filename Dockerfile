@@ -86,13 +86,17 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
 # ── Entrypoint: run DB migrations then the research pipeline ──────────────────
 # ENABLE_OCR=true adds --ocr flag automatically
 CMD ["sh", "-c", \
-  "python -m backend.database.migrate ; \
-   if [ \"${APP_MODE}\" = \"worker\" ]; then \
+  "if [ \"${APP_MODE}\" = \"worker\" ]; then \
+     python -m backend.database.migrate && \
      python scripts/run_research.py \
        --ticker ${TICKER} \
        --from-year ${FROM_YEAR} \
        --to-year ${TO_YEAR} \
        $([ \"${ENABLE_OCR}\" = \"true\" ] && echo --ocr || echo ''); \
    else \
-     python -m uvicorn backend.api:app --host :: --port ${PORT:-8010}; \
+     echo \"[boot] PORT=${PORT:-8010}\"; \
+     echo \"[boot] running migrate\"; \
+     timeout 120s python -m backend.database.migrate || echo \"[boot] migrate failed/timed out, continuing\"; \
+     echo \"[boot] starting uvicorn\"; \
+     exec python -m uvicorn backend.api:app --host :: --port ${PORT:-8010} --proxy-headers; \
    fi"]

@@ -5,7 +5,7 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "python -m backend.database.migrate ; python -m uvicorn backend.api:app --host :: --port ${PORT:-8010}",
+    "startCommand": "sh -c 'echo \"[boot] PORT=${PORT:-8010}\"; echo \"[boot] running migrate\"; timeout 120s python -m backend.database.migrate || echo \"[boot] migrate failed/timed out, continuing\"; echo \"[boot] starting uvicorn\"; exec python -m uvicorn backend.api:app --host :: --port ${PORT:-8010} --proxy-headers'",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
