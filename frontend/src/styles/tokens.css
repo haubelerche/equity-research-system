@@ -1,0 +1,103 @@
+/* =============================================================================
+   DESIGN TOKENS — Pharma Equity Research
+   Scientific instrument-panel aesthetic: dark ground, chartreuse accent,
+   Open Sans UI, monospace numbers, precise grid lines.
+   ============================================================================= */
+
+:root {
+  /* ---------- Typography -------------------------------------------------- */
+  --font-sans:    "Open Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:    ui-monospace, "Cascadia Code", "Fira Mono", "Consolas", monospace;
+
+  /* Modular scale — base 17px (1rem), ratio ≈ 1.25 (major third)
+     xs   = 0.694rem ≈ 11.8px
+     sm   = 0.833rem ≈ 14.2px
+     base = 1rem     = 17px
+     md   = 1.2rem   ≈ 20.4px
+     lg   = 1.44rem  ≈ 24.5px
+     xl   = 1.728rem ≈ 29.4px
+     2xl  = 2.074rem ≈ 35.3px
+     3xl  = 2.488rem ≈ 42.3px
+     4xl  = 2.986rem ≈ 50.8px        */
+  --text-xs:   0.694rem;
+  --text-sm:   0.833rem;
+  --text-base: 1rem;
+  --text-md:   1.2rem;
+  --text-lg:   1.44rem;
+  --text-xl:   1.728rem;
+  --text-2xl:  2.074rem;
+  --text-3xl:  2.488rem;
+  --text-4xl:  2.986rem;
+
+  /* ---------- Color palette ----------------------------------------------- */
+  /* Ground */
+  --color-ground:       #080e0c;   /* deepest background */
+  --color-surface-0:    #0d1512;   /* primary surface */
+  --color-surface-1:    #111c18;   /* elevated card */
+  --color-surface-2:    #162119;   /* hover / selected */
+  --color-surface-3:    #1d2b24;   /* active / pressed */
+
+  /* Borders */
+  --color-border-subtle:  #213029;
+  --color-border-default: #2d4339;
+  --color-border-strong:  #3d5c4e;
+
+  /* Text */
+  --color-text-primary:   #ddebd4;   /* near-white with green cast */
+  --color-text-secondary: #8aaa98;   /* mid-tone muted */
+  --color-text-tertiary:  #5a7a6a;   /* dim labels */
+  --color-text-disabled:  #3a5045;
+
+  /* Accent — acid chartreuse, the one bright note */
+  --color-accent:         #c8f400;
+  --color-accent-dim:     #8ab000;
+  --color-accent-bg:      #1a2400;
+
+  /* Semantic status */
+  --color-pass:           #4ade80;   /* green-400 */
+  --color-pass-bg:        #052515;
+  --color-pass-border:    #166534;
+
+  --color-fail:           #f87171;   /* red-400 */
+  --color-fail-bg:        #2a0a0a;
+  --color-fail-border:    #7f1d1d;
+
+  --color-measured:       #7dd3fc;   /* sky-300 — measured only */
+  --color-measured-bg:    #0a1a2a;
+  --color-measured-border: #0c4a6e;
+
+  --color-warn:           #fbbf24;   /* amber-400 — blocked */
+  --color-warn-bg:        #271a04;
+  --color-warn-border:    #78350f;
+
+  /* ---------- Spacing scale ----------------------------------------------- */
+  --space-1:   0.25rem;   /*  4px */
+  --space-2:   0.5rem;    /*  8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+
+  /* ---------- Radii ------------------------------------------------------- */
+  --radius-sm:  2px;
+  --radius-md:  4px;
+  --radius-lg:  6px;
+
+  /* ---------- Shadows ----------------------------------------------------- */
+  --shadow-sm:  0 1px 2px rgba(0, 0, 0, .5);
+  --shadow-md:  0 4px 12px rgba(0, 0, 0, .6);
+  --shadow-lg:  0 8px 24px rgba(0, 0, 0, .7);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, .03);
+
+  /* ---------- Nav --------------------------------------------------------- */
+  --nav-height: 56px;
+
+  /* ---------- Transitions ------------------------------------------------- */
+  --transition-fast:   120ms ease;
+  --transition-base:   200ms ease;
+}
