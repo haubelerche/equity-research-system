@@ -38,6 +38,38 @@ from backend.evaluation.project_evaluator import (  # noqa: E402
 from backend.evaluation.runtime_evaluators import evaluate_plan  # noqa: E402
 
 
+def _sync_evaluation_packet(payload: dict) -> None:
+    """Patch the plan-02 entry in evaluation_packet.json so the dashboard (which reads
+    /eval/framework -> evaluation_packet.json) reflects this fresh run without needing a
+    full eight-plan re-run. No-op if the packet does not exist yet.
+    """
+    packet_path = DEFAULT_OUTPUT_DIR / "evaluation_packet.json"
+    if not packet_path.exists():
+        return
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    artifacts = packet.get("artifacts") or []
+    entry = next((a for a in artifacts if a.get("artifact") == "retrieval_eval.json"), None)
+    fields = {
+        "plan_id": payload["plan_id"],
+        "name": payload["plan_name"],
+        "artifact": "retrieval_eval.json",
+        "status": payload["status"],
+        "metrics": payload["metrics"],
+        "metric_results": payload["metric_results"],
+        "blocking_issues": payload["blocking_issues"],
+    }
+    if entry is None:
+        artifacts.append(fields)
+    else:
+        entry.update(fields)
+    packet["artifacts"] = artifacts
+    packet["summary"] = {
+        status: sum(a.get("status") == status for a in artifacts)
+        for status in ("pass", "fail", "blocked", "not_measured")
+    }
+    _write_json(packet_path, packet)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ticker", default="DBD")
@@ -88,6 +120,7 @@ def main() -> int:
         **domain_payload,
     }
     _write_json(DEFAULT_OUTPUT_DIR / plan.artifact, payload)
+    _sync_evaluation_packet(payload)
 
     summary = {m["id"]: {"value": m.get("value"), "status": m.get("status")}
                for m in metric_results if isinstance(m, dict)}

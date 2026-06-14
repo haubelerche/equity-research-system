@@ -9,7 +9,12 @@ describe("mock values", () => {
   });
   it("preserves missing runtime evidence as null", () => {
     expect(mockValuesForLayer("report_quality").report_quality_score).toBeNull();
-    expect(mockValuesForLayer("rag_evidence").context_precision).toBeNull();
+  });
+  it("exposes the live (pure-live) RAG/RAGAS values", () => {
+    // Benchmark 02 is now pure-live (real pgvector + real ragas), so these are
+    // measured numbers, not null.
+    expect(typeof mockValuesForLayer("rag_evidence").hit_rate_at_5).toBe("number");
+    expect(typeof mockValuesForLayer("rag_evidence").context_precision).toBe("number");
   });
   it("unknown layer yields empty map", () => {
     expect(mockValuesForLayer("nope")).toEqual({});
