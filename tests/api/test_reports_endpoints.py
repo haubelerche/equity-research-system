@@ -55,3 +55,12 @@ def test_get_report_file_rejects_unknown_ticker_and_bad_kind(tmp_path):
     assert client.get("/reports/DHG/file/secrets").status_code == 404  # bad kind
     # path traversal attempt in ticker must not escape output dir
     assert client.get("/reports/..%2f..%2fetc/file/report").status_code == 404
+
+
+def test_get_preview_png_ok_and_404(tmp_path):
+    client = _make_client(tmp_path)
+    ok = client.get("/reports/DHG/preview/1")
+    assert ok.status_code == 200
+    assert ok.headers["content-type"] == "image/png"
+    assert client.get("/reports/DHG/preview/999").status_code == 404
+    assert client.get("/reports/ZZZ/preview/1").status_code == 404

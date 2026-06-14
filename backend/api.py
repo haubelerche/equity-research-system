@@ -188,6 +188,17 @@ def create_app(
             headers={"Content-Disposition": f'inline; filename="{ticker}{suffix}"'},
         )
 
+    @app.get("/reports/{ticker}/preview/{page}")
+    def get_report_preview(ticker: str, page: int):
+        ticker = ticker.upper()
+        if ticker not in _universe_index():
+            raise HTTPException(status_code=404, detail="Unknown ticker")
+        path = (_output_dir() / "pdf_preview" / f"{ticker}_report_page_{page}.png").resolve()
+        out_root = (_output_dir() / "pdf_preview").resolve()
+        if out_root not in path.parents or not path.is_file():
+            raise HTTPException(status_code=404, detail="Preview not found")
+        return FileResponse(path, media_type="image/png")
+
     @app.get("/reports/{run_id}", response_model=ArtifactsResponse)
     def get_report(run_id: str) -> ArtifactsResponse:
         run = app.state.store.get_run(run_id)
