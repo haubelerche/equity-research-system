@@ -307,7 +307,7 @@ def _section_summary(valuation: Mapping[str, Any], blend: Mapping[str, Any], vm:
     ]
     rule = (
         "**Luật xếp hạng** (tổng tỷ suất sinh lời = mức tăng/giảm giá + lợi suất cổ tức): "
-        "> 20% → MUA; < −10% → BÁN; còn lại → NẮM GIỮ."
+        "> 20% → Mua; < −10% → Bán; còn lại → Giữ."
     )
     return f"## {SECTION_TITLES[1]}\n\n" + _kv_table(rows) + "\n\n" + rule
 

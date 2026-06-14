@@ -34,7 +34,7 @@ from backend.analytics.working_capital_schedule import (
     build_working_capital_schedule,
     WorkingCapitalSchedule,
 )
-from backend.analytics.share_rollforward import build_share_rollforward, ShareRollForward
+from backend.analytics.share_rollforward import CorporateAction, build_share_rollforward, ShareRollForward
 from backend.analytics.cash_sweep import (
     CashSweepArtifact,
     MinimumCashPolicy,
@@ -132,6 +132,9 @@ class ForecastAssumptions:
     cost_of_debt_override: float | None = None      # None → use historical implied CoD median
     manual_debt_path: dict[str, float] | None = None
     debt_schedule_approved: bool = False
+    debt_policy_method: str | None = None
+    corporate_actions: list[CorporateAction] | None = None
+    corporate_action_status: str | None = None
     assumption_status: str = "default_unapproved"   # or "analyst_approved"
 
 
@@ -437,14 +440,47 @@ def run_forecast(
     # tol=0.1 VND bn on ending_debt and interest_expense).
 
     # ── Build debt schedule (before main loop — determines interest expense) ──
+    manual_debt_path = assumptions.manual_debt_path
+    manual_debt_path_approved = assumptions.debt_schedule_approved
+    if (
+        manual_debt_path is None
+        and assumptions.debt_policy_method == "cfs_net_borrowing"
+        and assumptions.debt_schedule_approved
+    ):
+        has_cfs_borrowing = any(
+            _get(fact_table, "proceeds_from_borrowings.total", period) is not None
+            and _get(fact_table, "repayment_of_borrowings.total", period) is not None
+            for period in fy_periods
+        )
+        total_debt_latest = _get(fact_table, "total_debt.ending", latest_fy)
+        short_debt_latest = _get(fact_table, "short_term_debt.ending", latest_fy)
+        long_debt_latest = _get(fact_table, "long_term_debt.ending", latest_fy)
+        if total_debt_latest is not None:
+            latest_debt = total_debt_latest
+        elif short_debt_latest is not None or long_debt_latest is not None:
+            latest_debt = (short_debt_latest or 0.0) + (long_debt_latest or 0.0)
+        else:
+            latest_debt = None
+        if has_cfs_borrowing and latest_debt is not None:
+            manual_debt_path = {label: latest_debt for label in forecast_labels_order}
+            warnings.append(
+                "DebtPolicy: approved cfs_net_borrowing policy applied; forecast debt path "
+                "is anchored to latest reported interest-bearing debt."
+            )
+        else:
+            warnings.append(
+                "DebtPolicy: cfs_net_borrowing requested but historical borrowing/repayment "
+                "facts or latest debt balance are missing; FCFE remains draft-only."
+            )
+
     debt_sched = build_debt_schedule(
         ticker=ticker,
         fact_table=fact_table,
         fy_periods=fy_periods,
         forecast_labels=forecast_labels_order,
         forecast_years=forecast_years,
-        manual_debt_path=assumptions.manual_debt_path,
-        manual_debt_path_approved=assumptions.debt_schedule_approved,
+        manual_debt_path=manual_debt_path,
+        manual_debt_path_approved=manual_debt_path_approved,
     )
     # NOTE: An approval flag alone must NOT upgrade a model-generated debt path
     # (e.g. target_debt_ratio) into an "approved manual_override". Approval is only
@@ -636,7 +672,9 @@ def run_forecast(
         fact_table=fact_table,
         fy_periods=fy_periods,
         forecast_labels=forecast_labels_order,
+        corporate_actions=assumptions.corporate_actions,
         base_shares_override_mn=shares_mn,
+        no_action_recorded=assumptions.corporate_action_status == "no_action_recorded",
     )
     for w in sr.warnings:
         warnings.append(f"[ShareRollForward] {w}")

@@ -54,17 +54,29 @@ def _latest_report_run_ids(ticker: str, mode: str = "standard") -> list[str]:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT DISTINCT r.run_id
-                FROM research.runs r
-                JOIN research.run_artifacts a ON a.run_id = r.run_id
-                WHERE r.ticker = %s
-                  AND a.section_key IN (
-                    'publishable_final_report_model',
-                    'review_passed_report_model',
-                    'report_candidate_model',
-                    'valuation'
-                  )
-                ORDER BY r.run_id DESC
+                WITH run_sections AS (
+                    SELECT
+                        r.run_id,
+                        r.created_at,
+                        BOOL_OR(a.section_key IN (
+                            'publishable_final_report_model',
+                            'review_passed_report_model',
+                            'report_candidate_model'
+                        )) AS has_final_model,
+                        BOOL_OR(a.section_key = 'facts' AND a.storage_path IS NOT NULL) AS has_facts,
+                        BOOL_OR(a.section_key = 'valuation' AND a.storage_path IS NOT NULL) AS has_valuation,
+                        BOOL_OR(a.section_key = 'manifest' AND a.storage_path IS NOT NULL) AS has_manifest
+                    FROM research.runs r
+                    JOIN research.run_artifacts a ON a.run_id = r.run_id
+                    WHERE r.ticker = %s
+                    GROUP BY r.run_id, r.created_at
+                )
+                SELECT run_id
+                FROM run_sections
+                WHERE has_final_model OR (has_facts AND has_valuation AND has_manifest)
+                ORDER BY
+                    CASE WHEN has_final_model THEN 0 ELSE 1 END,
+                    created_at DESC
                 """,
                 (ticker.upper(),),
             )

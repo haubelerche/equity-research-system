@@ -64,7 +64,7 @@ make audit
 | Storage 404 khi đọc artifact | Artifact chưa được upload hoặc key không thuộc contract | Kiểm tra run manifest và `run_artifacts` |
 | `publishable_final_report_model_missing` | Export gates không promote model | Đọc `quality_gate` và gate results |
 | `client_final_render_blocked:*` | Thiếu approval, package validation, Report-quality allow_export, locked model hoặc snapshot match | Đọc `publication_readiness` và artifacts `report_quality_evaluation`, `quality_gate`, `publishable_final_report_model`, `valuation` |
-| Eval dashboard chỉ hiện dữ liệu mẫu | Frontend `/eval` hiện dùng `frontend/src/mock/`; backend chưa có evaluation API | Không diễn giải dashboard như runtime truth; dùng project/run evaluation artifacts trực tiếp |
+| Eval dashboard không tải live data | Backend evaluation endpoint, proxy hoặc artifact path lỗi | Kiểm tra `/eval/framework`, `/eval/artifacts/{artifact_name}`, network proxy và run evaluation artifacts |
 | Fast report không tìm thấy run | Chưa có locked publishable model hoặc mode yêu cầu approved | Chạy full pipeline hoặc approval flow phù hợp |
 | PDF mojibake | Font/renderer issue | Kiểm tra WeasyPrint, fallback renderer và Unicode fonts |
 
@@ -87,8 +87,8 @@ Backend FastAPI nên deploy ở runtime khác, không ghép chung vào Vercel st
 
 | Ưu tiên | Hành động |
 |---|---|
-| P0 | Thêm CI chạy import smoke, unit tests, gates tests và migration dry-run |
+| Done | Test environment đã chuẩn hóa cho nghiệm thu 9/10; duy trì import smoke, unit tests, gates tests và migration dry-run như regression baseline |
 | P0 | Chạy PDF render smoke trong container thật nếu PDF là deliverable bắt buộc |
 | P1 | Tách Docker command cho `worker`, `api` và `one-shot research job` |
-| P1 | Chuẩn hóa dependency manifest để môi trường sạch không phụ thuộc máy dev |
+| Done | Dependency manifest đã khai báo trực tiếp crawler, vnstock, PDF fallback, pypdf và evaluation stack cần cho nghiệm thu |
 | P2 | Thêm dashboard trạng thái run/gate/artifact nếu vận hành nhiều ticker |

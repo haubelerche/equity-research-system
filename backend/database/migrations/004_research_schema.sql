@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS research.run_artifacts (
     run_id             VARCHAR(64)  NOT NULL REFERENCES research.runs(run_id) ON DELETE CASCADE,
     artifact_type      VARCHAR(64)  NOT NULL CHECK (
         artifact_type IN (
-            'data_inventory', 'metric_table', 'valuation_result_json', 'source_manifest_json',
+            'data_inventory', 'metric_table', 'valuation_input_pack_json', 'valuation_result_json', 'source_manifest_json',
             'claim_ledger_json', 'eval_result_json', 'run_log_json', 'report_md',
             'report_html', 'report_pdf', 'other'
         )

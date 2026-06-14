@@ -242,10 +242,16 @@ def run_valuation(
     from backend.analytics.approval_gate import build_gate_from_artifacts
     from backend.analytics.valuation_confidence import build_valuation_confidence
     from backend.analytics.core_pe_net_cash import compute_core_pe_net_cash
+    from backend.valuation.input_pack_builder import (
+        apply_market_inputs_to_fact_table,
+        build_valuation_input_pack,
+    )
+    from backend.valuation.manual_packs import corporate_actions_to_share_rollforward
 
     ticker = ticker.strip().upper()
     generated_at = datetime.now(UTC)
     assumption_status = "analyst_approved" if auto_approve_assumptions else "default_unapproved"
+    _run_id_context = os.environ.get("RUN_ID", "manual_run")
 
     print(f"[run_valuation] {ticker} — creating/loading research snapshot")
     snap = create_snapshot(ticker=ticker, from_year=from_year, to_year=to_year, created_by="run_valuation")
@@ -280,6 +286,24 @@ def run_valuation(
     # absent from snapshot facts. Without it FCFF/FCFE block the target price AND the
     # WACC×g / Re×g sensitivity matrices come back all-null. Source it from the vnstock
     # VCI overview (MarketSnapshot) with provenance.
+    _market_price_fallback = _get_current_price(ticker)
+    valuation_input_pack = build_valuation_input_pack(
+        ticker=ticker,
+        run_id=_run_id_context,
+        as_of_date=generated_at.date(),
+        periods=fy_periods,
+        fact_table=full_table,
+        snapshot_id=snapshot_id,
+        from_year=from_year,
+        to_year=to_year,
+        current_price_vnd=_market_price_fallback,
+    )
+    apply_market_inputs_to_fact_table(
+        fact_table=full_table,
+        input_pack=valuation_input_pack,
+        latest_period=fy_periods[-1] if fy_periods else None,
+    )
+
     if fy_periods and "shares_outstanding.ending" not in full_table:
         try:
             from backend.reporting.market_snapshot import get_market_snapshot
@@ -304,14 +328,28 @@ def run_valuation(
     # data are present before any method runs. Attached to the artifact so a
     # blocked method (e.g. FCFE missing CFS financing lines) is explained upfront
     # instead of failing implicitly downstream.
+    valuation_input_pack = build_valuation_input_pack(
+        ticker=ticker,
+        run_id=_run_id_context,
+        as_of_date=generated_at.date(),
+        periods=fy_periods,
+        fact_table=full_table,
+        snapshot_id=snapshot_id,
+        from_year=from_year,
+        to_year=to_year,
+        current_price_vnd=_market_price_fallback,
+    )
+    _input_pack_dict = valuation_input_pack.to_dict()
+    _pack_price = valuation_input_pack.market.get("price")
+
     from backend.valuation.data_availability import run_valuation_preflight
-    _preflight_price = _get_current_price(ticker)
+    _preflight_price = _pack_price
     preflight = run_valuation_preflight(
         ticker=ticker,
         fact_table=full_table,
         fy_periods=fy_periods,
         current_price_vnd=_preflight_price,
-        peer_dataset_available=False,  # no peer dataset wired yet → P/E & EV/EBITDA stay cross-check
+        peer_dataset_available=valuation_input_pack.has_peer_dataset,
     )
     for _gap in preflight["data_gap_report"]["gaps"]:
         print(f"[run_valuation] DATA GAP {_gap['method']}: missing {_gap['field']} "
@@ -374,7 +412,7 @@ def run_valuation(
 
     # ── Current market price ──────────────────────────────────────────────────
     print(f"\n[run_valuation] {ticker} — fetching current market price")
-    current_price = _get_current_price(ticker)
+    current_price = _pack_price
     if current_price:
         print(f"[run_valuation] {ticker} current price: {current_price:,.0f} VND")
     else:
@@ -382,13 +420,21 @@ def run_valuation(
 
     # ── Multiples valuation ───────────────────────────────────────────────────
     print(f"[run_valuation] {ticker} — computing multiples")
+    _peer_data_source = None
+    if valuation_input_pack.has_peer_dataset:
+        _peer_data_source = (
+            f"manual peer_multiples.csv:{valuation_input_pack.peers.get('peer_group')}"
+        )
+    _target_pe = valuation_input_pack.peers.get("peer_pe_median") or target_pe
+    _target_ev_ebitda = valuation_input_pack.peers.get("peer_ev_ebitda_median") or target_ev_ebitda
     multiples = compute_multiples(
         ticker=ticker,
         fact_table=full_table,
         current_price_vnd=current_price,
-        target_pe=target_pe,
+        target_pe=_target_pe,
         target_pb=target_pb,
-        target_ev_ebitda=target_ev_ebitda,
+        target_ev_ebitda=_target_ev_ebitda,
+        peer_data_source=_peer_data_source,
     )
 
     m = multiples.to_dict()
@@ -407,12 +453,30 @@ def run_valuation(
 
     # ── Forecast (required for FCFF/FCFE) ────────────────────────────────────
     print(f"\n[run_valuation] {ticker} — running 5-year financial forecast")
+    _debt_policy = valuation_input_pack.debt_policy or {}
+    _debt_policy_method = _debt_policy.get("method")
+    _debt_policy_approved = bool(
+        _debt_policy.get("analyst_approved")
+        or (_debt_policy.get("publishable") and _debt_policy_method == "cfs_net_borrowing")
+        or auto_approve_assumptions
+    )
+    _manual_debt_path = _debt_policy.get("manual_debt_path") or _debt_policy.get("debt_path")
+    _tax_rate_override = valuation_input_pack.tax_policy.get("effective_tax_rate")
+    if _tax_rate_override is None:
+        _tax_rate_override = valuation_input_pack.tax_policy.get("tax_rate")
+    _corporate_action_events = (valuation_input_pack.corporate_actions or {}).get("events") or []
+    _corporate_action_status = (valuation_input_pack.corporate_actions or {}).get("status")
     forecast = run_forecast(
         ticker=ticker,
         fact_table=full_table,
         assumptions=ForecastAssumptions(
             assumption_status=assumption_status,
-            debt_schedule_approved=auto_approve_assumptions,
+            tax_rate_override=_tax_rate_override,
+            manual_debt_path=_manual_debt_path,
+            debt_schedule_approved=_debt_policy_approved,
+            debt_policy_method=_debt_policy_method,
+            corporate_actions=corporate_actions_to_share_rollforward(_corporate_action_events),
+            corporate_action_status=_corporate_action_status,
         ),
     )
     for w in forecast.warnings:
@@ -446,6 +510,8 @@ def run_valuation(
     # effective tax rate as the forecast P&L (avoids silent rate mismatch).
     wacc_assumptions = WACCAssumptions(
         assumption_status=assumption_status,
+        wacc_override=valuation_input_pack.wacc_assumptions.get("wacc")
+        or valuation_input_pack.wacc_assumptions.get("wacc_override"),
         tax_policy=forecast.tax_policy,
     )
     fcff_result = compute_fcff(
@@ -465,7 +531,11 @@ def run_valuation(
 
     # ── FCFE valuation (Net Income+D&A-CAPEX-DeltaNWC+NetBorrowing, discounted at Re) ──
     print(f"\n[run_valuation] {ticker} — FCFE valuation (NI+D&A-CAPEX-DeltaNWC+NetBorr, discounted at Re)")
-    coe_assumptions = CostOfEquityAssumptions(assumption_status=assumption_status)
+    coe_assumptions = CostOfEquityAssumptions(
+        assumption_status=assumption_status,
+        re_override=valuation_input_pack.wacc_assumptions.get("cost_of_equity")
+        or valuation_input_pack.wacc_assumptions.get("re_override"),
+    )
     fcfe_result = compute_fcfe(
         ticker=ticker,
         forecast=forecast,
@@ -485,19 +555,19 @@ def run_valuation(
     # ── P/E Forward price (supplementary cross-check, NOT in blend) ─────────────────────────────────
     _eps_fy1_early = forecast.forecast_years[0].eps if forecast.forecast_years else None
     price_pe_forward: float | None = (
-        _eps_fy1_early * target_pe if (_eps_fy1_early and _eps_fy1_early > 0) else None
+        _eps_fy1_early * _target_pe if (_eps_fy1_early and _eps_fy1_early > 0) else None
     )
     _DEFAULT_PE = 15.0
-    _pe_is_default = (target_pe == _DEFAULT_PE)
-    _peer_data_source = "analyst_default_pending_peers" if _pe_is_default else "analyst_override"
+    _pe_is_default = (_target_pe == _DEFAULT_PE and not valuation_input_pack.has_peer_dataset)
+    _pe_forward_source = _peer_data_source or ("analyst_default_pending_peers" if _pe_is_default else "analyst_override")
     _pe_default_warning = (
         "target_pe=15.0x is model default — validate with peer-median P/E before publishing"
         if _pe_is_default else None
     )
     if price_pe_forward:
-        print(f"\n[run_valuation] {ticker} — P/E Forward anchor: EPS_FY1={_eps_fy1_early:,.0f} × P/E={target_pe:.1f}x = {price_pe_forward:,.0f} VND/share")
+        print(f"\n[run_valuation] {ticker} — P/E Forward anchor: EPS_FY1={_eps_fy1_early:,.0f} × P/E={_target_pe:.1f}x = {price_pe_forward:,.0f} VND/share")
         if _pe_is_default:
-            print(f"  WARN [PEForward] target_pe = {target_pe:.1f}x is the model default — no peer dataset used. Validate with peer-median P/E before publishing.")
+            print(f"  WARN [PEForward] target_pe = {_target_pe:.1f}x is the model default — no peer dataset used. Validate with peer-median P/E before publishing.")
     else:
         print(f"\n[run_valuation] {ticker} — P/E Forward anchor unavailable (EPS_FY1 missing)")
 
@@ -723,9 +793,9 @@ def run_valuation(
         "wacc": wacc,
         "terminal_growth": terminal_growth,
         "forecast_years": forecast_years,
-        "target_pe": target_pe,
+        "target_pe": _target_pe,
         "target_pb": target_pb,
-        "target_ev_ebitda": target_ev_ebitda,
+        "target_ev_ebitda": _target_ev_ebitda,
         "auto_approve_assumptions": auto_approve_assumptions,
         "note": "Assumptions are defaults — must be reviewed and approved before use in final reports.",
     }
@@ -864,10 +934,10 @@ def run_valuation(
         "fcfe": fcfe_result.to_dict(),
         "blend_dcf": blend.to_dict(),
         "pe_forward": {
-            "target_pe": target_pe,
+            "target_pe": _target_pe,
             "eps_fy1_vnd": _eps_fy1_early,
             "price_pe_forward_vnd": price_pe_forward,
-            "peer_data_source": _peer_data_source,
+            "peer_data_source": _pe_forward_source,
             "warnings": ([_pe_default_warning] if _pe_default_warning else []),
         },
         "forecast": forecast.to_dict(),
@@ -881,6 +951,8 @@ def run_valuation(
         },
         "multiples": multiples.to_dict(),
         "current_price_vnd": current_price,
+        "valuation_input_pack": _input_pack_dict,
+        "module_readiness": valuation_input_pack.readiness,
         "data_completeness": preflight["data_completeness"],
         "data_gap_report": preflight["data_gap_report"],
         "assumption_gate": gate.to_dict(),
@@ -903,11 +975,14 @@ def run_valuation(
 
     VALUATION_DIR.mkdir(parents=True, exist_ok=True)
     ts = generated_at.strftime("%Y%m%dT%H%M%S")
+    input_pack_path = VALUATION_DIR / "valuation_input_pack.json"
+    input_pack_path.write_text(json.dumps(_input_pack_dict, indent=2, default=str), encoding="utf-8")
     out_path = VALUATION_DIR / "valuation.json"
     out_path.write_text(json.dumps(artifact, indent=2, default=str), encoding="utf-8")
     print(f"\n[run_valuation] Artifact saved: {out_path}")
 
     artifact["artifact_path"] = str(out_path)
+    artifact["valuation_input_pack_path"] = str(input_pack_path)
 
     return artifact
 

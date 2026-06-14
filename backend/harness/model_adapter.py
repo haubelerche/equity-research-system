@@ -178,7 +178,7 @@ class OpenAIModelAdapter:
         # Langfuse drop-in consumes name/metadata; plain openai would reject them,
         # so only attach when the traced client is active. langfuse_session_id groups
         # every agent of one run under a single Langfuse session.
-        if langfuse_active:
+        if _langfuse_configured():
             create_kwargs["name"] = agent_config.agent_id
             create_kwargs["metadata"] = {
                 "langfuse_session_id": state.get("run_id") or "",
@@ -188,6 +188,8 @@ class OpenAIModelAdapter:
                 "stage": stage,
                 "run_type": state.get("run_type"),
             }
+            if not langfuse_active:
+                create_kwargs["_strip_trace_kwargs_for_plain_openai"] = True
         _transient = _transient_exc_types()
         _fatal_exc: BaseException | None = None  # non-transient or exhausted-transient
         _response = None
@@ -302,7 +304,11 @@ class OpenAIModelAdapter:
 
     def _create_completion(self, client, create_kwargs: dict[str, Any]):
         """Single (non-retrying) call to the chat completion API — the retry seam."""
-        return client.chat.completions.create(**create_kwargs)
+        kwargs = dict(create_kwargs)
+        if kwargs.pop("_strip_trace_kwargs_for_plain_openai", False):
+            kwargs.pop("name", None)
+            kwargs.pop("metadata", None)
+        return client.chat.completions.create(**kwargs)
 
     @staticmethod
     def _parse_response_json(content: str) -> dict[str, Any] | None:

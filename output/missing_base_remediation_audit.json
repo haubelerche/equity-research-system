@@ -1,0 +1,98 @@
+[
+  {
+    "ticker": "PME",
+    "local_bctc": false,
+    "local_bctc_files": [],
+    "local_market_files": []
+  },
+  {
+    "ticker": "BVP",
+    "local_bctc": false,
+    "local_bctc_files": [],
+    "local_market_files": [
+      "BVP_overview.json"
+    ]
+  },
+  {
+    "ticker": "DRP",
+    "local_bctc": false,
+    "local_bctc_files": [],
+    "local_market_files": [
+      "DRP_overview.json"
+    ]
+  },
+  {
+    "ticker": "T32",
+    "local_bctc": false,
+    "local_bctc_files": [],
+    "local_market_files": [
+      "T32_overview.json"
+    ]
+  },
+  {
+    "ticker": "P29",
+    "local_bctc": false,
+    "local_bctc_files": [],
+    "local_market_files": []
+  },
+  {
+    "ticker": "DDS",
+    "local_bctc": false,
+    "local_bctc_files": [],
+    "local_market_files": []
+  },
+  {
+    "ticker": "BID",
+    "local_bctc": true,
+    "local_bctc_files": [
+      "balance_sheet_year.json",
+      "cash_flow_year.json",
+      "income_statement_year.json",
+      "ratio_year.json"
+    ],
+    "local_market_files": [
+      "BID_quote_history.json"
+    ],
+    "production_rows": 24,
+    "periods": 4,
+    "metrics": 6,
+    "price_rows": 273,
+    "latest_price_date": "2026-06-12",
+    "latest_close": 41.05
+  },
+  {
+    "ticker": "PDT",
+    "local_bctc": true,
+    "local_bctc_files": [
+      "balance_sheet_year.json",
+      "cash_flow_year.json",
+      "income_statement_year.json",
+      "ratio_year.json"
+    ],
+    "local_market_files": []
+  },
+  {
+    "ticker": "YT1",
+    "local_bctc": false,
+    "local_bctc_files": [],
+    "local_market_files": []
+  },
+  {
+    "ticker": "LNT",
+    "local_bctc": false,
+    "local_bctc_files": [],
+    "local_market_files": []
+  },
+  {
+    "ticker": "HGP",
+    "local_bctc": false,
+    "local_bctc_files": [],
+    "local_market_files": []
+  },
+  {
+    "ticker": "CON",
+    "local_bctc": false,
+    "local_bctc_files": [],
+    "local_market_files": []
+  }
+]

@@ -34,13 +34,13 @@ def _or_placeholder(text: str) -> str:
 
 
 _RATING_LABELS: dict[str, str] = {
-    "BUY": "MUA",
-    "ACCUMULATE": "TÍCH LŨY",
-    "HOLD": "NẮM GIỮ",
-    "REDUCE": "GIẢM",
-    "SELL": "BÁN",
-    "UNDER_REVIEW": "ĐANG XEM XÉT",
-    "ANALYST_REVIEW": "CHỜ ANALYST",
+    "BUY": "Mua",
+    "MUA": "Mua",
+    "HOLD": "Giữ",
+    "GIỮ": "Giữ",
+    "NẮM GIỮ": "Giữ",
+    "SELL": "Bán",
+    "BÁN": "Bán",
 }
 
 

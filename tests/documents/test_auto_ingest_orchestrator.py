@@ -54,6 +54,7 @@ def test_year_result_defaults():
     assert yr.promoted == 0
     assert yr.status == "pending"
     assert yr.errors == []
+    assert yr.notes == []
 
 
 def test_validate_pdf_rows_rejects_wrong_year_and_insufficient_coverage():
@@ -113,3 +114,86 @@ def test_sanitize_extracted_csv_removes_stale_years_and_duplicates(tmp_path):
         sanitized = list(csv.DictReader(fh))
     assert len(sanitized) == 1
     assert sanitized[0]["fiscal_year"] == "2022"
+
+
+def test_artifact_includes_error_details(tmp_path, monkeypatch):
+    from scripts import auto_ingest_official_documents as mod
+    from scripts.auto_ingest_official_documents import AutoIngestConfig, YearResult
+
+    monkeypatch.setattr(mod, "ARTIFACT_DIR", tmp_path)
+    result = YearResult(fiscal_year=2022)
+    result.errors.append("pdf: no source")
+
+    artifact = mod._write_artifact(
+        "DHG",
+        AutoIngestConfig(ticker="DHG", from_year=2022, to_year=2022),
+        [result],
+    )
+
+    text = artifact.read_text(encoding="utf-8")
+    assert "## Errors" in text
+    assert "FY2022: pdf: no source" in text
+
+
+def test_artifact_includes_dry_run_notes(tmp_path, monkeypatch):
+    from scripts import auto_ingest_official_documents as mod
+    from scripts.auto_ingest_official_documents import AutoIngestConfig, YearResult
+
+    monkeypatch.setattr(mod, "ARTIFACT_DIR", tmp_path)
+    result = YearResult(fiscal_year=2022)
+    result.notes.append("dry_run: would fetch https://issuer.example/report.pdf")
+
+    artifact = mod._write_artifact(
+        "DHG",
+        AutoIngestConfig(ticker="DHG", from_year=2022, to_year=2022, dry_run=True),
+        [result],
+    )
+
+    text = artifact.read_text(encoding="utf-8")
+    assert "## Notes" in text
+    assert "would fetch" in text
+
+
+def test_download_candidate_pdf_and_metadata_write_local_layout(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from scripts import auto_ingest_official_documents as mod
+
+    class FakeResponse:
+        headers = {"Content-Type": "application/pdf"}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def read(self):
+            return b"%PDF-1.4 official"
+
+    monkeypatch.setattr(mod.urllib.request, "urlopen", lambda req, timeout=60: FakeResponse())
+    candidate = SimpleNamespace(
+        source_url="https://issuer.example/report.pdf",
+        document_type="annual_report",
+        publisher="Issuer",
+        source_name="company_ir",
+        title="Annual report 2022",
+    )
+
+    doc_dir = tmp_path / "data" / "official_documents" / "DHG" / "2022"
+    pdf_path, file_hash, content_type = mod._download_candidate_pdf(candidate, doc_dir)
+    mod._write_pdf_metadata(
+        ticker="DHG",
+        fiscal_year=2022,
+        candidate=candidate,
+        doc_dir=doc_dir,
+        pdf_path=pdf_path,
+        file_hash=file_hash,
+    )
+
+    assert pdf_path == doc_dir / "source_document.pdf"
+    assert pdf_path.read_bytes().startswith(b"%PDF")
+    assert content_type == "application/pdf"
+    import json
+    meta = json.loads((doc_dir / "metadata.json").read_text(encoding="utf-8"))
+    assert meta["title"] == "Annual report 2022"
+    assert meta["local_path"] == str(pdf_path)

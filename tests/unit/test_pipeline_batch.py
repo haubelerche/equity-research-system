@@ -85,6 +85,36 @@ def test_dry_run_selects_bounded_universe_without_running_pipeline(capsys) -> No
     assert exit_code == 0
     assert "selected=2" in output
     assert "--ticker <TICKER> --draft" in output
+    assert "--mode analyst_draft" in output
+
+
+def test_all_uses_configured_universe_order(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(
+        run_research_batch,
+        "_configured_universe_tickers",
+        lambda: ["ZZZ", "AAA"],
+    )
+
+    exit_code = run_research_batch.main(["--all", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "tickers=ZZZ,AAA" in output
+
+
+def test_expected_count_mismatch_fails_before_paid_work(monkeypatch) -> None:
+    monkeypatch.setattr(
+        run_research_batch,
+        "_configured_universe_tickers",
+        lambda: ["DHG", "DBD"],
+    )
+
+    try:
+        run_research_batch.main(["--all", "--expected-count", "51", "--dry-run"])
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("expected argparse failure")
 
 
 def test_batch_cli_returns_nonzero_when_any_ticker_fails(monkeypatch) -> None:

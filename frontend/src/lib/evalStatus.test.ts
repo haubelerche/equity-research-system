@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { evalMetricStatus, formatFailCondition, formatPassCondition, type MetricDef } from "./evalStatus";
+import {
+  evalMetricStatus,
+  formatFailCondition,
+  formatPassCondition,
+  normalizeMetricStatus,
+  type MetricDef,
+} from "./evalStatus";
 
 const gte: MetricDef = {
   id: "coverage", label: "Coverage", unit: "%", comparator: "gte", threshold: 0.95,
@@ -20,6 +26,12 @@ describe("evalMetricStatus", () => {
 
   it("treats missing values as not evaluated", () => {
     expect(evalMetricStatus(gte, null)).toBe("not_evaluable");
+  });
+
+  it("preserves fail-closed runtime statuses", () => {
+    expect(normalizeMetricStatus("blocked")).toBe("blocked");
+    expect(normalizeMetricStatus("not_measured")).toBe("not_measured");
+    expect(normalizeMetricStatus("not_evaluable")).toBe("not_evaluable");
   });
 
   it("formats pass and fail conditions explicitly", () => {

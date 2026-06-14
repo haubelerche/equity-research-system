@@ -10,12 +10,12 @@ requests
 beautifulsoup4
 vnstock
 anthropic>=0.40
-openai  # still needed for chunk_pipeline.py embeddings (text-embedding-3-small)
+openai
 langfuse>=4.0
 pytest
 pytesseract
 pdf2image
-Pillow
+Pillow<12
 matplotlib>=3.8
 seaborn>=0.13
 jinja2>=3.1
@@ -26,8 +26,6 @@ pdfkit
 pypdf
 
 # Evaluation stack
-# Deterministic gates run today; these packages support the planned P1/P2
-# retrieval, schema, and judge layers described in eval/.
 ragas==0.4.3
 pandera==0.31.1
 deepeval==4.0.6

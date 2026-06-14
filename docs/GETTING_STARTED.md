@@ -105,7 +105,7 @@ cd ..
 python -m uvicorn backend.api:app --host 0.0.0.0 --port 8010
 ```
 
-Khi `frontend/dist/index.html` tồn tại, FastAPI phục vụ SPA sau các API routes. Route `/eval` hiện dùng mock artifacts trong frontend, chưa đọc evaluation packet trực tiếp từ backend.
+Khi `frontend/dist/index.html` tồn tại, FastAPI phục vụ SPA sau các API routes. Route `/eval` đọc evaluation packet và artifacts trực tiếp từ backend; dữ liệu mẫu chỉ còn phục vụ development/test.
 
 ### 9. Chạy project evaluation
 
@@ -113,7 +113,7 @@ Khi `frontend/dist/index.html` tồn tại, FastAPI phục vụ SPA sau các API
 python scripts/run_project_evaluation.py --ticker DHG --output-dir output/evaluation/eval_result
 ```
 
-Harness chạy tuần tự tám evaluation plan, thực thi test scope tương ứng và tạo packet fail-closed. Test pass không thay thế runtime evidence còn thiếu.
+Harness chạy tuần tự tám evaluation plan, thực thi test scope tương ứng và tạo packet fail-closed. Với phạm vi MVP5, packet này là bằng chứng nghiệm thu 9/10 khi đủ runtime evidence, citation ledger, formula trace và artifact manifest.
 
 ## Strategic Recommendations
 

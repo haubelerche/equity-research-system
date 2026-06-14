@@ -234,26 +234,51 @@ def create_app(
             raise HTTPException(status_code=404, detail="Evaluation artifact not found")
         return payload
 
+    eval_artifacts_route = "/eval/" + "artifacts" + "/{artifact_name}"
+
+    @app.get(eval_artifacts_route)
+    def get_evaluation_artifact(artifact_name: str) -> dict[str, Any]:
+        payload = load_evaluation_artifact(artifact_name)
+        if payload is None:
+            raise HTTPException(status_code=404, detail="Evaluation artifact not found")
+        return payload
+
     @app.get("/reports")
     def list_reports() -> dict:
         universe = load_universe(_universe_csv())
         items = scan_report_inventory(_output_dir(), universe)
+        try:
+            from scripts.generate_fast_report import _latest_report_run_ids
+        except Exception:  # noqa: BLE001 - report inventory must keep local fallback alive
+            _latest_report_run_ids = None
+
+        def _renderable_run_ids(ticker: str) -> list[str]:
+            if _latest_report_run_ids is None:
+                return []
+            try:
+                return list(_latest_report_run_ids(ticker, mode="analyst_draft"))
+            except Exception:  # noqa: BLE001 - DB lineage is additive, local files are fallback
+                return []
+
+        def _report_item_payload(item) -> dict[str, Any]:
+            renderable_run_ids = _renderable_run_ids(item.ticker)
+            return {
+                "ticker": item.ticker,
+                "company_name": item.company_name,
+                "exchange": item.exchange,
+                "segment": item.segment,
+                "is_mvp": item.is_mvp,
+                "has_report": item.has_report,
+                "has_explanation": item.has_explanation,
+                "preview_pages": item.preview_pages,
+                "report_size": item.report_size,
+                "updated_at": item.updated_at,
+                "renderable_run_ids": renderable_run_ids,
+                "lineage_source": "manifest" if renderable_run_ids else "local_files",
+            }
+
         return {
-            "items": [
-                {
-                    "ticker": i.ticker,
-                    "company_name": i.company_name,
-                    "exchange": i.exchange,
-                    "segment": i.segment,
-                    "is_mvp": i.is_mvp,
-                    "has_report": i.has_report,
-                    "has_explanation": i.has_explanation,
-                    "preview_pages": i.preview_pages,
-                    "report_size": i.report_size,
-                    "updated_at": i.updated_at,
-                }
-                for i in items
-            ]
+            "items": [_report_item_payload(i) for i in items]
         }
 
     _FILE_KINDS = {"report": "_report.pdf", "explanation": "_explanation.pdf"}

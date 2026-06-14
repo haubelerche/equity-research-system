@@ -3,9 +3,9 @@
   "benchmark_suite_version": "benchmark_standards_v1",
   "plan_id": "04",
   "plan_name": "Citation and source provenance",
-  "ticker": "DBD",
-  "run_id": "benchmark-02-rag-restored-DBD",
-  "generated_at": "2026-06-14T11:42:07.938612+00:00",
+  "ticker": "DHG",
+  "run_id": "phase1-dhg-nondbd-baseline",
+  "generated_at": "2026-06-14T16:28:52.781840+00:00",
   "status": "blocked",
   "test_execution": {
     "status": "pass",
@@ -18,14 +18,14 @@
       "tests/unit/test_claim_ledger.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.559,
+    "duration_seconds": 0.521,
     "summary": {
       "passed": 142
     },
     "output_tail": [
       "........................................................................ [ 50%]",
       "......................................................................   [100%]",
-      "142 passed in 0.23s"
+      "142 passed in 0.20s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -109,7 +109,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "citation_key_resolution",
@@ -170,7 +170,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "source_id_validity",
@@ -231,7 +231,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "official_source_coverage",
@@ -292,12 +292,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "generic_citations",
       "label": "Generic citation labels",
-      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DBD_report.pdf",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DHG_report.pdf",
       "detail": "",
       "metric_id": "generic_citations",
       "metric_name": "Generic citation labels",
@@ -348,12 +348,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "pdf_source_mentions",
       "label": "PDF source labels",
-      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DBD_report.pdf",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DHG_report.pdf",
       "detail": "",
       "metric_id": "pdf_source_mentions",
       "metric_name": "PDF source labels",
@@ -404,11 +404,11 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     }
   ],
   "claim_count": null,
-  "quantitative_claim_count": 96,
+  "quantitative_claim_count": 102,
   "citation_coverage_ratio": null,
   "source_tier_counts": {},
   "official_source_coverage": null,
@@ -416,7 +416,7 @@
   "generic_citations": 0,
   "citation_markers": 0,
   "report": {
-    "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DBD_report.pdf",
+    "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\DHG_report.pdf",
     "exists": true,
     "pages": 13
   },

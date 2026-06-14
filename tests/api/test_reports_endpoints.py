@@ -34,6 +34,8 @@ def test_get_reports_lists_universe_with_status(tmp_path):
     assert items[0]["has_report"] is True
     assert items[0]["has_explanation"] is True
     assert items[0]["preview_pages"] == [1]
+    assert items[0]["renderable_run_ids"] == []
+    assert items[0]["lineage_source"] == "local_files"
     assert items[1]["has_report"] is False
 
 

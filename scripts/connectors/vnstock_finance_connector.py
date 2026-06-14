@@ -15,7 +15,6 @@ if "" in sys.path:
 import unicodedata
 
 import pandas as pd
-from vnstock.api.financial import Finance
 
 from backend.dataset.config_io import ROOT, load_financial_taxonomy, load_universe_tickers
 from backend.dataset.dqf import validate_financial_fact
@@ -310,6 +309,14 @@ def _resolve_fact_collisions(facts: list[FinancialFact]) -> list[FinancialFact]:
 
 
 def _finance_frames(ticker: str, source: str, period: str) -> dict[str, pd.DataFrame]:
+    try:
+        from vnstock.api.financial import Finance
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "vnstock finance API is unavailable. Install a vnstock release that "
+            "provides vnstock.api.financial before running live finance ingestion."
+        ) from exc
+
     client = Finance(source=source, symbol=ticker, period=period)
     return {
         "income_statement": client.income_statement(period=period, lang="vi"),

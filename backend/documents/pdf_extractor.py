@@ -483,6 +483,14 @@ def detect_pdf_type(pdf_path: Path, sample_pages: int = 5) -> PdfType:
 # OCR fallback (requires pytesseract + pdf2image + tesseract binary)
 # ---------------------------------------------------------------------------
 
+def _tesseract_config() -> str:
+    """Return local tessdata config when the project-managed language pack exists."""
+    tessdata_dir = Path(__file__).resolve().parents[2] / "storage" / "tessdata"
+    if tessdata_dir.is_dir():
+        return f'--tessdata-dir "{tessdata_dir}"'
+    return ""
+
+
 def extract_from_pdf_ocr(
     pdf_path: Path,
     ticker: str,
@@ -532,10 +540,11 @@ def extract_from_pdf_ocr(
         extraction_method="ocr_tesseract",
     )
     results: list[ExtractedRow] = []
+    tess_config = _tesseract_config()
 
     for page_num, image in enumerate(images, start=1):
         try:
-            ocr_text = pytesseract.image_to_string(image, lang=lang)
+            ocr_text = pytesseract.image_to_string(image, lang=lang, config=tess_config)
             if page_text_callback is not None:
                 page_text_callback(page_num, ocr_text)
             slug_text = _slug_label(ocr_text)

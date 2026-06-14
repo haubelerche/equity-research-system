@@ -33,7 +33,7 @@ def test_methodology_page_is_the_final_client_section(monkeypatch):
 
 def test_methodology_page_explains_data_calculation_and_decision_without_warnings():
     vm = SimpleNamespace(
-        recommendation="NẮM GIỮ",
+        recommendation="Giữ",
         publication_status="analyst_review_only",
         current_price=SimpleNamespace(amount=93_700),
         target_price=SimpleNamespace(amount=106_752),
@@ -55,8 +55,8 @@ def test_methodology_page_explains_data_calculation_and_decision_without_warning
     assert "FCFF/FCFE" in html
     assert "WACC" in html or "chi phí vốn bình quân" in html
     # Decision rule + the actual conclusion are stated.
-    assert "MUA nếu &gt;20%, BÁN nếu &lt;-10%, còn lại là NẮM GIỮ" in html
-    assert "khuyến nghị: NẮM GIỮ" in html
+    assert "Mua nếu &gt;20%, Bán nếu &lt;-10%, còn lại là Giữ" in html
+    assert "khuyến nghị: Giữ" in html
     # Citation legend: real, always-present sources are numbered.
     assert "<strong>[1]</strong>" in html
     assert "<strong>[2]</strong>" in html

@@ -515,6 +515,8 @@ def _chart_with_commentary(vm: ClientReportViewModel, chart_id: str) -> str:
 
 _REC_CSS: dict[str, str] = {
     "MUA": "buy",
+    "GIỮ": "hold",
+    "NẮM GIỮ": "hold", 
     "KHẢ QUAN": "outperform",
     "TRUNG LẬP": "neutral",
     "KÉM KHẢ QUAN": "underperform",
@@ -861,7 +863,7 @@ def _render_report_status(vm: ClientReportViewModel) -> str:
         (
             "Cách ra khuyến nghị",
             "Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. "
-            "MUA nếu >20%, BÁN nếu <-10%, còn lại là NẮM GIỮ.",
+            "Mua nếu >20%, Bán nếu <-10%, còn lại là Giữ.",
         ),
         (
             "Kết quả hiện tại",

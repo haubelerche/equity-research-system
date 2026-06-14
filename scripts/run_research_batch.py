@@ -1,4 +1,4 @@
-"""Batch entrypoint: run the full research pipeline across many tickers (scale to 53).
+"""Batch entrypoint: run the full research pipeline across the configured universe.
 
 Each ticker runs as an ISOLATED subprocess (scripts/run_research.py), so a crash in one
 ticker's heavy pipeline (OCR / agents / valuation) cannot take down the batch. Failure-
@@ -53,13 +53,20 @@ def _make_run_one(passthrough: list[str]):
     return run_one
 
 
-def _make_should_skip():
+def _configured_universe_tickers() -> list[str]:
+    """Load the canonical ticker universe from config/dataset/universe."""
+    from backend.dataset.config_io import load_universe_tickers
+
+    return load_universe_tickers()
+
+
+def _make_should_skip(mode: str):
     """Skip tickers that already have a built (locked) report run."""
     from scripts.generate_fast_report import _latest_report_run_ids
 
     def should_skip(ticker: str) -> bool:
         try:
-            return bool(_latest_report_run_ids(ticker, mode="analyst_draft"))
+            return bool(_latest_report_run_ids(ticker, mode=mode))
         except Exception:  # noqa: BLE001 — if the check fails, don't skip (safer to attempt)
             return False
 
@@ -72,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
 
     parser = argparse.ArgumentParser(description="Run the full research pipeline for many tickers.")
     parser.add_argument("--tickers", nargs="*", default=[], help="Tickers (space/comma).")
-    parser.add_argument("--all", action="store_true", help="Run the full 53-ticker universe.")
+    parser.add_argument("--all", action="store_true", help="Run the full configured universe CSV.")
     parser.add_argument("--resume", action="store_true", help="Skip tickers with a built report.")
     parser.add_argument(
         "--dry-run",
@@ -84,16 +91,25 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         help="Cap this invocation after ticker selection; use for staged rollout.",
     )
+    parser.add_argument(
+        "--expected-count",
+        type=int,
+        help="Fail before paid work if selected ticker count differs from this value.",
+    )
     parser.add_argument("--from-year", type=int, help="Passthrough to run_research.")
     parser.add_argument("--to-year", type=int, help="Passthrough to run_research.")
     parser.add_argument("--ocr", action="store_true", help="Passthrough: enable OCR.")
     parser.add_argument("--draft", action="store_true", help="Passthrough: draft auto-approve mode.")
+    parser.add_argument(
+        "--export-mode",
+        default="analyst_draft",
+        choices=("standard", "analyst_draft", "client_final", "internal_debug"),
+        help="Render mode passed to generate_fast_report after each successful/resumed ticker.",
+    )
     args = parser.parse_args(argv)
 
     if args.all:
-        from backend.reporting.report_data_loader import _COMPANIES
-
-        tickers = sorted(_COMPANIES)
+        tickers = _configured_universe_tickers()
     else:
         tickers = [t.strip().upper() for e in args.tickers for t in str(e).split(",") if t.strip()]
     if not tickers:
@@ -101,6 +117,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.max_tickers is not None:
         if args.max_tickers < 1:
             parser.error("--max-tickers must be at least 1")
+    if args.expected_count is not None and len(tickers) != args.expected_count:
+        parser.error(
+            f"selected ticker count mismatch: expected {args.expected_count}, got {len(tickers)}"
+        )
 
     passthrough: list[str] = []
     if args.from_year is not None:
@@ -122,10 +142,13 @@ def main(argv: list[str] | None = None) -> int:
             f"tickers={','.join(preview_tickers)}"
         )
         print(f"[batch] per-ticker command: {command}")
-        print("[batch] export command: python scripts/generate_fast_report.py --ticker <TICKER>")
+        print(
+            "[batch] export command: "
+            f"python scripts/generate_fast_report.py --ticker <TICKER> --mode {args.export_mode}"
+        )
         return 0
 
-    should_skip = _make_should_skip() if args.resume else None
+    should_skip = _make_should_skip(args.export_mode) if args.resume else None
     results = run_pipeline_for_tickers(
         tickers,
         run_one=_make_run_one(passthrough),
@@ -144,7 +167,7 @@ def main(argv: list[str] | None = None) -> int:
         ticker = str(result["ticker"])
         print(f"[batch] >>> export {ticker}: report PDF + explanation PDF", flush=True)
         proc = subprocess.run(
-            [sys.executable, export_script, "--ticker", ticker],
+            [sys.executable, export_script, "--ticker", ticker, "--mode", args.export_mode],
             cwd=str(ROOT),
         )
         if proc.returncode != 0:

@@ -4,7 +4,7 @@ Cập nhật: 2026-06-14
 
 ## Context
 
-Reporting chuyển artifacts đã qua gate thành report model, sau đó render HTML/PDF khi có lệnh phù hợp. Runtime `PUBLISH` không xuất PDF trực tiếp; nó chỉ xác nhận model có thể publish và ghi manifest. `scripts/generate_fast_report.py` là đường render nhanh từ artifact đã có.
+Reporting chuyển artifacts đã qua gate thành report model, sau đó render HTML/PDF khi có lệnh phù hợp. Runtime `PUBLISH` không xuất PDF trực tiếp; nó xác nhận model có thể publish, ghi manifest và phát hành trạng thái `DRAFT_PUBLISHABLE`. `scripts/generate_fast_report.py` là đường render nhanh từ artifact đã có.
 
 ## Problem Statement
 
@@ -67,7 +67,16 @@ Report model phải có claim ledger và source refs cho claim trọng yếu. `C
 
 ### 6. Report inventory cho frontend
 
-Trang `/reports` không đọc trực tiếp publishable model hoặc Supabase manifest. Backend quét convention local `output/{TICKER}_report.pdf`, `output/{TICKER}_explanation.pdf` và `output/pdf_preview/{TICKER}_report_page_{n}.png`, sau đó merge với 53 ticker trong universe. Đây là đường duyệt artifact MVP; client-final governance vẫn thuộc renderer/authorization path.
+Trang `/reports` đọc universe, run manifest, artifact metadata và local preview cache để tạo inventory. Backend ưu tiên manifest và storage lineage khi có; convention local `output/{TICKER}_report.pdf`, `output/{TICKER}_explanation.pdf` và `output/pdf_preview/{TICKER}_report_page_{n}.png` chỉ còn là fallback hiển thị. Client-final governance vẫn thuộc renderer/authorization path.
+
+### 7. Trạng thái publishable sau nghiệm thu
+
+| Phạm vi | Kết quả |
+|---|---|
+| MVP5 | DHG, IMP, DMC, TRA và DBD đều đạt `DRAFT_PUBLISHABLE` theo financial, citation, package, report-quality và snapshot-consistency gates |
+| Report quality | Draft publishable report đạt score tối thiểu 85/100, không có blocker về valuation transparency hoặc citation quality |
+| Evidence | Report model liên kết tới evidence packet, formula trace, claim ledger và source refs |
+| Client-final | Vẫn yêu cầu approval fail-closed; không tự động biến draft thành final |
 
 ## Strategic Recommendations
 

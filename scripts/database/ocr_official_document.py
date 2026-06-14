@@ -39,6 +39,13 @@ def _find_poppler_bin() -> str:
     raise RuntimeError("pdftoppm executable not found")
 
 
+def _tesseract_config() -> str:
+    tessdata_dir = ROOT / "storage" / "tessdata"
+    if tessdata_dir.is_dir():
+        return f'--tessdata-dir "{tessdata_dir}"'
+    return ""
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pdf", required=True, type=Path)
@@ -70,9 +77,10 @@ def main() -> int:
     images = convert_from_path(str(pdf_path), dpi=args.dpi, poppler_path=_find_poppler_bin())
     failures: list[str] = []
     processed = 0
+    tess_config = _tesseract_config()
     for page_number, image in enumerate(images, start=1):
         try:
-            text = pytesseract.image_to_string(image, lang=args.lang)
+            text = pytesseract.image_to_string(image, lang=args.lang, config=tess_config)
             save_page_text(run_dir, page_number, text)
             processed += 1
             print(f"OCR page={page_number} chars={len(text)}")

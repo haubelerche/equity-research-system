@@ -149,7 +149,12 @@ def sync_price_for_universe(days_back: int, tickers: Iterable[str] | None = None
     registry = SourceRegistry(store=store)
     result: dict[str, int] = {}
     for ticker in tickers:
-        inserted = sync_ticker_price(ticker=ticker, start=start, end=end, store=store, registry=registry)
+        try:
+            inserted = sync_ticker_price(ticker=ticker, start=start, end=end, store=store, registry=registry)
+        except Exception as exc:  # noqa: BLE001 - one illiquid/unavailable ticker must not stop the universe sync
+            result[ticker] = -1
+            print(f"[price] {ticker}: failed: {exc}")
+            continue
         result[ticker] = inserted
         print(f"[price] {ticker}: upserted {inserted} rows")
     return result

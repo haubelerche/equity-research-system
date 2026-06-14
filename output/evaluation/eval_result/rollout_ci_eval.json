@@ -3,9 +3,9 @@
   "benchmark_suite_version": "benchmark_standards_v1",
   "plan_id": "08",
   "plan_name": "Rollout and CI",
-  "ticker": "DBD",
-  "run_id": "benchmark-02-rag-restored-DBD",
-  "generated_at": "2026-06-14T11:42:07.938612+00:00",
+  "ticker": "DHG",
+  "run_id": "phase1-dhg-nondbd-baseline",
+  "generated_at": "2026-06-14T16:28:52.781840+00:00",
   "status": "blocked",
   "test_execution": {
     "status": "pass",
@@ -17,14 +17,14 @@
       "tests/reconciliation"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.534,
+    "duration_seconds": 0.524,
     "summary": {
       "passed": 110
     },
     "output_tail": [
       "........................................................................ [ 65%]",
       "......................................                                   [100%]",
-      "110 passed in 0.20s"
+      "110 passed in 0.21s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -95,7 +95,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "deterministic_fail_closed",
@@ -151,7 +151,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "rag_golden_ci",
@@ -207,7 +207,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "llm_judge_offline",
@@ -268,7 +268,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     }
   ],
   "ci_gate_matrix": {

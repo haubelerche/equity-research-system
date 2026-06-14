@@ -57,8 +57,9 @@ storage/runs/
 storage/exports/
 storage/archive/
 
-
-
+/.venv/
+/data/raw/
+/data
 # Font binaries — provisioned locally via scripts/setup_fonts.py
 assets/fonts/*.ttf
 assets/fonts/*.otf

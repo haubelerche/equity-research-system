@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS v2_research.run_artifacts (
     run_id         VARCHAR(64)  NOT NULL REFERENCES v2_research.runs(run_id) ON DELETE CASCADE,
     artifact_type  VARCHAR(64)  NOT NULL CHECK (
         artifact_type IN (
-            'facts_json', 'valuation_fcff_json', 'valuation_fcfe_json',
+            'facts_json', 'valuation_input_pack_json', 'valuation_fcff_json', 'valuation_fcfe_json',
             'valuation_blend_json', 'valuation_pe_json', 'citation_json',
             'report_html', 'report_pdf', 'dq_report_json', 'other'
         )

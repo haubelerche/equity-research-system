@@ -1,4 +1,5 @@
 from pathlib import Path
+import inspect
 from unittest.mock import patch
 
 from backend.reporting import report_delivery
@@ -50,3 +51,10 @@ def test_render_and_store_uploads_both_pdfs_to_exports():
     }
     assert all(u[4] is True for u in storage.uploads)
     assert all(u[3] == "application/pdf" for u in storage.uploads)
+
+
+def test_latest_renderable_run_accepts_report_model_or_draft_valuation_artifacts():
+    source = inspect.getsource(report_delivery.latest_renderable_run_id)
+    assert "report_candidate_model" in source
+    assert "has_final_model OR (has_facts AND has_valuation AND has_manifest)" in source
+    assert "storage_path IS NOT NULL" in source

@@ -3,12 +3,12 @@
   "benchmark_suite_version": "benchmark_standards_v1",
   "plan_id": "05",
   "plan_name": "Agent workflow and LLM judge",
-  "ticker": "DBD",
-  "run_id": "benchmark-02-rag-restored-DBD",
-  "generated_at": "2026-06-14T11:42:07.938612+00:00",
+  "ticker": "DHG",
+  "run_id": "phase1-dhg-nondbd-baseline",
+  "generated_at": "2026-06-14T16:28:52.781840+00:00",
   "status": "fail",
   "test_execution": {
-    "status": "fail",
+    "status": "pass",
     "targets": [
       "tests/harness",
       "tests/unit/test_six_agent_workflow.py",
@@ -16,42 +16,14 @@
       "tests/unit/test_agent_lineage_injection.py",
       "tests/unit/test_package_validation_gate.py"
     ],
-    "exit_code": 1,
-    "duration_seconds": 8.99,
+    "exit_code": 0,
+    "duration_seconds": 15.623,
     "summary": {
-      "failed": 1,
-      "passed": 41
+      "passed": 42
     },
     "output_tail": [
-      ".....F....................................                               [100%]",
-      "================================== FAILURES ===================================",
-      "____________ test_tracing_kwargs_present_when_langfuse_configured _____________",
-      "",
-      "monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000027DDF6FA8B0>",
-      "",
-      "    def test_tracing_kwargs_present_when_langfuse_configured(monkeypatch):",
-      "        monkeypatch.setenv(\"LANGFUSE_PUBLIC_KEY\", \"pk-lf-test\")",
-      "        monkeypatch.setenv(\"LANGFUSE_SECRET_KEY\", \"sk-lf-test\")",
-      "    ",
-      "        kwargs = _run_capturing_kwargs(monkeypatch)",
-      "    ",
-      ">       assert kwargs.get(\"name\") == \"test_agent\"",
-      "E       assert None == 'test_agent'",
-      "E        +  where None = <built-in method get of dict object at 0x0000027DDF7A0C80>('name')",
-      "E        +    where <built-in method get of dict object at 0x0000027DDF7A0C80> = {'max_completion_tokens': 32768, 'messages': [{'content': '# Objective\\nTest agent.\\n# Allowed Inputs\\nstate dict.\\n# ...ings\": [], \"next_action\": null}}', 'role': 'user'}], 'model': 'gpt-5-mini', 'response_format': {'type': 'json_object'}}.get",
-      "",
-      "tests\\harness\\test_model_adapter_langfuse.py:86: AssertionError",
-      "---------------------------- Captured stderr call -----------------------------",
-      "18:42:13 harness.model_adapter Langfuse OpenAI drop-in unavailable, tracing disabled: [Errno 13] Permission denied: 'C:\\\\Python314\\\\Lib\\\\site-packages\\\\psutil\\\\__init__.py'",
-      "18:42:13 harness.model_adapter [TEST] LLM_CALL agent=test_agent model=gpt-5-mini est_input_tokens=234 max_output_tokens=32768 timeout=30s compact_ms=0",
-      "18:42:13 harness.model_adapter [TEST] LLM_OK agent=test_agent latency=817ms prompt_tokens=10 completion_tokens=5 finish_reason=stop",
-      "------------------------------ Captured log call ------------------------------",
-      "WARNING  harness.model_adapter:model_adapter.py:80 Langfuse OpenAI drop-in unavailable, tracing disabled: [Errno 13] Permission denied: 'C:\\\\Python314\\\\Lib\\\\site-packages\\\\psutil\\\\__init__.py'",
-      "INFO     harness.model_adapter:model_adapter.py:160 [TEST] LLM_CALL agent=test_agent model=gpt-5-mini est_input_tokens=234 max_output_tokens=32768 timeout=30s compact_ms=0",
-      "INFO     harness.model_adapter:model_adapter.py:242 [TEST] LLM_OK agent=test_agent latency=817ms prompt_tokens=10 completion_tokens=5 finish_reason=stop",
-      "=========================== short test summary info ===========================",
-      "FAILED tests/harness/test_model_adapter_langfuse.py::test_tracing_kwargs_present_when_langfuse_configured",
-      "1 failed, 41 passed in 8.24s"
+      "..........................................                               [100%]",
+      "42 passed in 14.87s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -70,19 +42,19 @@
     "status": "blocked"
   },
   "blocking_issues": [
-    "plan_test_suite_failed"
+    "schema_validity:additional_property_not_allowed"
   ],
   "metrics": {
-    "test_suite_status": "fail",
-    "tests_passed": 41,
-    "tests_failed": 1,
+    "test_suite_status": "pass",
+    "tests_passed": 42,
+    "tests_failed": 0,
     "runtime_evidence_coverage": 0.0
   },
   "metric_results": [
     {
       "id": "tool_permission_compliance",
       "label": "Tool permission compliance",
-      "source": "missing",
+      "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\evidence_packets\\run1_evidence_packet.json",
       "detail": "",
       "metric_id": "tool_permission_compliance",
       "metric_name": "Tool permission compliance",
@@ -92,40 +64,35 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": null,
+      "value": 1.0,
       "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
-      "status": "not_evaluable",
-      "legacy_status": "not_evaluable",
-      "sample_size": 0,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "reason": "evaluation_evidence_missing",
-          "source": "missing"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Reject or repair tool calls that lack explicit permission metadata.",
       "evaluator": {
         "id": "tool_permission_compliance",
         "framework": "agent_tool_permission_gate",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": "permitted_tool_calls / total_tool_calls",
         "inputs": {},
         "parameters": {},
         "aggregation": "coverage",
-        "numerator": 0,
-        "denominator": 0,
+        "numerator": 1,
+        "denominator": 1,
         "per_sample_results": []
       },
       "threshold_policy": {
@@ -138,13 +105,69 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+    },
+    {
+      "id": "artifact_manifest_compliance",
+      "label": "Artifact manifest compliance",
+      "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\evidence_packets\\run1_evidence_packet.json",
+      "detail": "",
+      "metric_id": "artifact_manifest_compliance",
+      "metric_name": "Artifact manifest compliance",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Attach storage paths for facts, index, ratios, valuation, report, and evidence packet artifacts.",
+      "evaluator": {
+        "id": "artifact_manifest_compliance",
+        "framework": "artifact_manifest_gate",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "stored_required_artifacts / required_artifacts",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Agent-produced artifacts must have governed storage lineage before export.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "schema_validity",
       "label": "Output schema validity",
-      "source": "schema validation artifact missing",
-      "detail": "file existence is not schema validation",
+      "source": "config/harness/*.schema.json",
+      "detail": "additional_property_not_allowed",
       "metric_id": "schema_validity",
       "metric_name": "Output schema validity",
       "category": "agent_llm",
@@ -153,13 +176,13 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": null,
+      "value": 0.5,
       "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
-      "status": "not_evaluable",
-      "legacy_status": "not_evaluable",
-      "sample_size": 0,
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 2,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -168,25 +191,26 @@
       "owner": "platform",
       "failed_examples": [
         {
-          "reason": "file existence is not schema validation",
-          "source": "schema validation artifact missing"
+          "field": "agent_handoffs",
+          "reason": "additional_property_not_allowed",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\harness\\evidence_packet_schema.json"
         }
       ],
       "remediation_hint": "Validate required agent outputs against JSON schemas before downstream use.",
       "evaluator": {
         "id": "schema_validity",
-        "framework": "json_schema",
+        "framework": "json_schema_required_contract",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": "valid_required_outputs / required_outputs",
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
+        "aggregation": "coverage",
+        "numerator": 1,
+        "denominator": 2,
         "per_sample_results": []
       },
       "threshold_policy": {
@@ -199,7 +223,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "role_adherence",
@@ -260,7 +284,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "groundedness",
@@ -321,13 +345,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "no_unauthorized_calc",
       "label": "No unauthorized financial calculation",
-      "source": "agent trace classifier missing",
-      "detail": "agent trace classifier missing",
+      "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\audits\\run1_agent_effectiveness_audit.json",
+      "detail": "",
       "metric_id": "no_unauthorized_calc",
       "metric_name": "No unauthorized financial calculation",
       "category": "agent_llm",
@@ -336,41 +360,70 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": null,
+      "value": 1.0,
       "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
-      "status": "not_evaluable",
-      "legacy_status": "not_evaluable",
-      "sample_size": 0,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "valuation",
-      "failed_examples": [
-        {
-          "reason": "agent trace classifier missing",
-          "source": "agent trace classifier missing"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Move financial calculations from LLM narrative into deterministic code paths.",
       "evaluator": {
         "id": "no_unauthorized_calc",
-        "framework": "agent_governance_gate",
+        "framework": "deterministic_agent_trace_classifier",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": "compliant_financial_calculation_events / checked_financial_calculation_events",
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "coverage",
+        "numerator": 3,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "origin": "audit.agent_execution",
+            "agent_id": "report_writer_critic",
+            "action": "Review draft report for grounded narrative, citations, numeric consistency, and final readiness.",
+            "status": "completed",
+            "latency_ms": null,
+            "cost_estimate": null,
+            "confidence": 0.9,
+            "warnings": [],
+            "requires_human": false,
+            "output_summary": {}
+          },
+          {
+            "origin": "audit.tool_execution",
+            "tool_name": "REPORT_GENERATION",
+            "agent_role": "ReportWriterCriticAgent",
+            "output_hash": null,
+            "output_summary": {
+              "report_path": "reports/DHG.md",
+              "snapshot_id": "snap1",
+              "claims_count": 0,
+              "citation_count": 0
+            }
+          },
+          {
+            "origin": "audit.tool_execution",
+            "tool_name": "QUALITY_EVALUATION",
+            "agent_role": "ReportWriterCriticAgent",
+            "output_hash": null,
+            "output_summary": {
+              "overall_status": "PASS"
+            }
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
@@ -382,12 +435,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "task_completion",
       "label": "Task completion",
-      "source": "missing",
+      "source": "storage\\archive\\failed_runs\\unregistered\\legacy_unscoped_run1\\legacy\\audits\\run1_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "task_completion",
       "metric_name": "Task completion",
@@ -397,40 +450,35 @@
       "scope": "report_run",
       "severity": "P2",
       "blocks_publish": false,
-      "value": null,
+      "value": 1.0,
       "threshold": ">= 0.85",
       "threshold_operator": ">=",
       "unit": "score",
-      "status": "not_evaluable",
-      "legacy_status": "not_evaluable",
-      "sample_size": 0,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "reason": "evaluation_evidence_missing",
-          "source": "missing"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Review incomplete agent trace events and retry policy.",
       "evaluator": {
         "id": "task_completion",
         "framework": "deepeval",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": "deepeval_task_completion_mean",
         "inputs": {},
         "parameters": {},
         "aggregation": "coverage",
-        "numerator": 0,
-        "denominator": 0,
+        "numerator": 1,
+        "denominator": 1,
         "per_sample_results": []
       },
       "threshold_policy": {
@@ -443,7 +491,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "plan_adherence",
@@ -504,7 +552,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "critic_issue_recall",
@@ -565,19 +613,20 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     }
   ],
   "advisory_findings": [
     "critic_issue_recall:calibrated_llm_judge_pending"
   ],
   "judge_status": "not_executed",
-  "tool_permission_compliance": null,
-  "schema_validity": null,
+  "tool_permission_compliance": 1.0,
+  "artifact_manifest_compliance": 1.0,
+  "schema_validity": 0.5,
   "role_adherence": null,
   "groundedness": null,
-  "no_unauthorized_calc": null,
-  "task_completion": null,
+  "no_unauthorized_calc": 1.0,
+  "task_completion": 1.0,
   "plan_adherence": null,
   "critic_issue_recall": null,
   "rubric_scores": {},

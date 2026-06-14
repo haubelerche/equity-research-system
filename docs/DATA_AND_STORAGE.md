@@ -1,6 +1,6 @@
 # Dữ liệu, database và storage
 
-Cập nhật: 2026-06-13
+Cập nhật: 2026-06-15
 
 ## Context
 
@@ -20,7 +20,7 @@ Research report có rủi ro cao nếu dùng dữ liệu sống hoặc file mớ
 | Driver | `psycopg2` qua `connect_with_retry` |
 | Migration runner | `python -m backend.database.migrate` |
 | Migration table | `public.schema_migrations` |
-| Current schema | `036_seed_missing_line_items` trong migration runner |
+| Current schema | `043_cafef_financial_source_type` trong migration runner |
 | Runtime minimum | `035_runs_status_auto_exported` trong `RuntimeStore` |
 
 ### 2. Schema logic
@@ -34,6 +34,9 @@ Research report có rủi ro cao nếu dùng dữ liệu sống hoặc file mớ
 | `valuation` | Assumptions, valuation outputs, summaries |
 | `report` | Claims, citations, gates, approvals |
 | `audit` | Cost ledger và governance events |
+| `news` | Whitelisted news research runs, raw articles, extracted evidence, editor outputs |
+
+Sơ đồ ER chi tiết theo từng schema nằm ở [DATA_ARCHITECTURE_ER.md](DATA_ARCHITECTURE_ER.md). File đó là nguồn nên dùng trực tiếp cho mục 3.3 của đồ án vì nó ánh xạ các bảng Supabase vào mô hình dữ liệu chuẩn hóa, kho tài liệu, snapshot, artifact và truy vết claim.
 
 ### 3. Run state tables
 
@@ -61,11 +64,11 @@ Research report có rủi ro cao nếu dùng dữ liệu sống hoặc file mớ
 
 ### 6. Snapshot và canonical facts
 
-Pipeline `build_facts` chuẩn hóa raw observations thành facts có metric id, period, unit, source tier và provenance. Snapshot id là input quan trọng cho analysis, ratios, forecast và report. Nếu snapshot thiếu hoặc source/reconciliation gate fail, `DATA_QUALITY_GATE` phải block downstream.
+Pipeline `build_facts` chuẩn hóa raw observations thành facts có metric id, period, unit, source tier và provenance. Snapshot id là input quan trọng cho analysis, ratios, forecast và report. Nếu một dữ liệu nghiệp vụ không tồn tại hoặc không đối chiếu được, hệ thống không tự giả định; giá trị đó được biểu diễn là `null` trong artifact hoặc bản giải trình, còn các phần đủ dữ liệu vẫn tiếp tục được dùng cho phân tích.
 
 ### 7. Evidence packet
 
-Evidence packet được ghi ở `EXPORT_GATES` và trước manifest final. Nó gom artifact refs, formula traces, evidence refs và thông tin cần cho reviewer tái kiểm tra claim/report. Gate `EVIDENCE_PACKET_GATE` fail nếu packet thiếu hoặc valuation có formula nhưng packet không chứa trace cần thiết.
+Evidence packet được ghi ở `EXPORT_GATES` và trước manifest final. Nó gom artifact refs, formula traces, evidence refs và thông tin cần cho reviewer tái kiểm tra claim/report. Nếu packet thiếu hoặc valuation có formula nhưng packet không chứa trace cần thiết, `EVIDENCE_PACKET_GATE` ghi cảnh báo và thiếu sót để đưa vào bản giải trình.
 
 ## Strategic Recommendations
 

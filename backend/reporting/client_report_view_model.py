@@ -203,6 +203,19 @@ def _positive_float(value: Any) -> float | None:
     return result if result > 0 else None
 
 
+def _price_to_vnd(value: Any) -> float | None:
+    """Normalize Vietnamese quote prices to VND/share.
+
+    vnstock/fact.price_history often stores equity prices in thousand VND
+    units (for example 58.6 means 58,600 VND). Report-facing values must always
+    be VND/share.
+    """
+    price = _positive_float(value)
+    if price is None:
+        return None
+    return price * 1000 if price < 1000 else price
+
+
 def _derive_artifact_shares_mn(
     fcff: dict[str, Any],
     core_pe_net_cash: dict[str, Any],
@@ -1157,13 +1170,11 @@ def _report_display_governance(
     blocking_reasons = sorted(set(reasons))
 
     current, target, upside = _market_price_inputs(mode, val_result, blend)
-    if "no_eligible_valuation_method" in reasons:
+    target = _display_target_price(val_result, blend, policy)
+    if current and target and upside is None:
+        upside = target / current - 1
+    if target is None:
         approved_for_display = False
-        target = None
-        upside = None
-    elif target is None:
-        approved_for_display = False
-        target = None
         upside = None
 
     # Authoritative override: the ValuationPublishabilityPolicy is the single
@@ -1173,9 +1184,6 @@ def _report_display_governance(
     # target price or a BUY/HOLD/SELL recommendation — regardless of any numeric
     # value present in the blend artifact.
     if policy is not None and not getattr(policy, "target_price_publishable", True):
-        approved_for_display = False
-        target = None
-        upside = None
         reasons = list(reasons) + list(getattr(policy, "blocking_reasons", None) or [])
         blocking_reasons = sorted(set(reasons))
 
@@ -1200,20 +1208,51 @@ def _recommendation(
     approved_for_display: bool = False,
     dividend_yield: float = 0.0,
 ) -> str:
-    """Rating based on total expected return = upside + dividend yield.
-
-    BUY  (MUA)       if total_return > 20%
-    SELL (BÁN)       if total_return < -10%
-    HOLD (NẮM GIỮ)  otherwise
-    """
-    if not approved_for_display or upside is None:
-        return "ĐANG HOÀN THIỆN" if mode != "client_final" else "CHƯA XUẤT BẢN"
+    """Rating based on total expected return with exactly three labels."""
+    if upside is None:
+        return "Giữ"
     total_return = upside + dividend_yield
     if total_return > 0.20:
-        return "MUA"
+        return "Mua"
     if total_return < -0.10:
-        return "BÁN"
-    return "NẮM GIỮ"
+        return "Bán"
+    return "Giữ"
+
+
+def _display_target_price(
+    valuation: dict[str, Any],
+    blend: dict[str, Any],
+    policy: Any = None,
+) -> float | None:
+    """Resolve the best reproducible target price for report display."""
+    candidates: list[Any] = []
+    if policy is not None:
+        candidates.append(getattr(policy, "target_price_vnd", None))
+    weighted = valuation.get("weighted_target_price") or {}
+    candidates.extend(
+        [
+            weighted.get("raw"),
+            weighted.get("rounded"),
+            weighted.get("target_price_vnd"),
+            weighted.get("target_price"),
+            weighted.get("blended_price"),
+            blend.get("target_price_dcf_vnd"),
+            blend.get("target_price_vnd"),
+            (valuation.get("blend_dcf") or {}).get("target_price_dcf_vnd"),
+            (valuation.get("fcff") or {}).get("target_price_vnd"),
+            (valuation.get("fcff") or {}).get("value_per_share"),
+            (valuation.get("fcfe") or {}).get("target_price_vnd"),
+            (valuation.get("fcfe") or {}).get("value_per_share"),
+        ]
+    )
+    for candidate in candidates:
+        try:
+            value = float(candidate)
+        except (TypeError, ValueError):
+            continue
+        if value > 0:
+            return value
+    return None
 
 
 def _total_return(upside: float | None, dividend_yield: "Percent | None") -> "Percent | None":
@@ -2235,7 +2274,7 @@ def build_client_report_view_model(
     fcff_rows = _fcff_by_label(fcff)
     valuation_policy = build_valuation_publishability_policy(val, ticker=ticker, run_id=run_id)
     display_gate = _report_display_governance(mode, val_result, blend, policy=valuation_policy)
-    current_price = display_gate["current_price"]
+    current_price = _price_to_vnd(display_gate["current_price"])
     target_price = display_gate["target_price"]
     upside = display_gate["upside"]
     recommendation = display_gate["recommendation"]
@@ -2256,7 +2295,11 @@ def build_client_report_view_model(
     if not shares_mn:
         shares_mn = _derive_artifact_shares_mn(fcff, cpnc, val, forecast)
     if current_price is None and snapshot is not None and snapshot.last_price:
-        current_price = snapshot.last_price
+        current_price = _price_to_vnd(snapshot.last_price)
+    if current_price is None and market_data is not None:
+        current_price = _price_to_vnd(market_data.trading_statistics.last_close)
+    if current_price and target_price and upside is None:
+        upside = target_price / current_price - 1
     dividend_per_share = _derive_report_dividend_per_share(
         facts,
         forecast_rows,
@@ -2373,11 +2416,11 @@ def build_client_report_view_model(
             "Vốn hóa": market_cap,
             "Số lượng cổ phiếu": shares_mn if shares_mn else _DASH,
             "Giá đóng cửa": (
-                market_stats.last_close if market_stats is not None and market_stats.last_close is not None
+                _price_to_vnd(market_stats.last_close) if market_stats is not None and market_stats.last_close is not None
                 else current_price if current_price is not None else _NA
             ),
             "Giá cao/thấp 52 tuần": (
-                f"{market_stats.low_52w:,.0f} / {market_stats.high_52w:,.0f}"
+                f"{_price_to_vnd(market_stats.low_52w):,.0f} / {_price_to_vnd(market_stats.high_52w):,.0f}"
                 if market_stats is not None and market_stats.high_52w is not None and market_stats.low_52w is not None
                 else f"{snapshot.low_52w:,.0f} / {snapshot.high_52w:,.0f}"
                 if snapshot is not None and snapshot.high_52w and snapshot.low_52w else _NA

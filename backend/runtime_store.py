@@ -427,19 +427,67 @@ class RuntimeStore:
             with connection.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT artifact_id
-                    FROM research.run_artifacts
+                    UPDATE research.run_artifacts
+                    SET payload_json       = %s,
+                        evidence_refs_json = %s,
+                        confidence         = %s,
+                        created_by_agent   = %s,
+                        storage_path       = %s,
+                        storage_bucket     = %s,
+                        checksum           = %s,
+                        content_type       = %s,
+                        file_size_bytes    = %s,
+                        is_locked          = %s
                     WHERE run_id = %s
                       AND artifact_type = %s
                       AND COALESCE(section_key, '') = COALESCE(%s, '')
                       AND version = %s
-                    LIMIT 1
+                    RETURNING artifact_id
                     """,
-                    (run_id, artifact_type, section_key, version),
+                    (
+                        Json(payload),
+                        Json(evidence_refs or []),
+                        confidence,
+                        created_by_agent,
+                        storage_path,
+                        storage_bucket,
+                        checksum,
+                        content_type,
+                        file_size_bytes,
+                        is_locked,
+                        run_id,
+                        artifact_type,
+                        section_key,
+                        version,
+                    ),
                 )
                 existing = cur.fetchone()
                 if existing:
                     artifact_id = existing[0]
+                    return
+                insert_version = version
+                cur.execute(
+                    """
+                    SELECT 1
+                    FROM research.run_artifacts
+                    WHERE run_id = %s
+                      AND artifact_type = %s
+                      AND version = %s
+                    LIMIT 1
+                    """,
+                    (run_id, artifact_type, version),
+                )
+                if cur.fetchone():
+                    cur.execute(
+                        """
+                        SELECT COALESCE(MAX(version), 0) + 1
+                        FROM research.run_artifacts
+                        WHERE run_id = %s
+                          AND artifact_type = %s
+                        """,
+                        (run_id, artifact_type),
+                    )
+                    insert_version = int(cur.fetchone()[0])
                 cur.execute(
                     """
                     INSERT INTO research.run_artifacts
@@ -464,7 +512,7 @@ class RuntimeStore:
                         run_id,
                         artifact_type,
                         section_key,
-                        version,
+                        insert_version,
                         Json(payload),
                         Json(evidence_refs or []),
                         confidence,

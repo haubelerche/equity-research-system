@@ -84,27 +84,8 @@ export const EVAL_LAYERS: EvalLayer[] = [
     ],
   },
   {
-    id: "citation",
-    title: "4 · Trích dẫn và nguồn bằng chứng",
-    subtitle: "Kiểm tra độ bao phủ, tính hợp lệ và độ chính xác của trích dẫn",
-    artifact: "citation_eval.json",
-    metrics: [
-      metric("quant_citation_coverage", "Độ bao phủ trích dẫn cho claim định lượng", "Quantitative citation coverage", "%", "gte", 1, "Citation Coverage Evaluator", "Số claim định lượng có citation / Tổng claim định lượng", { aliases: ["quantitative_citation_coverage"], thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("citation_key_resolution", "Tỷ lệ khóa trích dẫn phân giải thành công", "Citation resolver success", "%", "gte", 1, "Citation Resolver", "Số khóa citation phân giải được / Tổng khóa citation trong final report", { thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("source_id_validity", "Tỷ lệ source_id hợp lệ", "Valid source ID rate", "%", "gte", 1, "Source Registry Validator", "Số source_id hợp lệ / Tổng source_id được dùng", { thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("numeric_citation_mismatch", "Số sai lệch số liệu trích dẫn trọng yếu", "Material numeric citation mismatch", "", "lte", 0, "Numeric Citation Reconciliation", "Số số liệu trích dẫn không khớp bằng chứng", { aliases: ["numeric_mismatch_rate"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("tier3_only_material_claims", "Số luận điểm trọng yếu chỉ dựa vào nguồn cấp thấp", "Low-tier only material claims", "", "lte", 0, "Source Tier Policy", "Số luận điểm trọng yếu chỉ có nguồn cấp 3 hoặc nguồn không đủ tin cậy", { thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P1", blocksPublish: true }),
-      metric("generic_citations", "Số nhãn trích dẫn chung chung", "Generic citation labels", "", "lte", 0, "Citation Label Validator", "Số citation không xác định được tài liệu cụ thể", { thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("catalyst_without_evidence", "Số catalyst thiếu đoạn bằng chứng", "Catalysts without evidence span", "", "lte", 0, "Catalyst Evidence Gate", "Số catalyst được dùng trong thesis nhưng không có evidence span", { thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
-    ],
-    methodology: [
-      "Mọi luận điểm định lượng và luận điểm trọng yếu phải truy xuất được tới bằng chứng cụ thể.",
-      "Nguồn cấp 3 không đủ điều kiện làm nguồn duy nhất cho luận điểm trọng yếu.",
-    ],
-  },
-  {
     id: "agent",
-    title: "5 · Hiệu quả Agent và LLM Judge",
+    title: "4 · Hiệu quả Agent và LLM Judge",
     subtitle: "Đánh giá tuân thủ vai trò, quyền công cụ, cấu trúc đầu ra và chất lượng lập luận",
     artifact: "agent_eval.json",
     metrics: [
@@ -123,25 +104,8 @@ export const EVAL_LAYERS: EvalLayer[] = [
     ],
   },
   {
-    id: "report_quality",
-    title: "6 · Chất lượng báo cáo đầu tư",
-    subtitle: "Đánh giá mức hoàn thiện, tính nhất quán và điều kiện xuất bản báo cáo",
-    artifact: "report_eval.json",
-    metrics: [
-      metric("report_quality_score", "Điểm chất lượng báo cáo tổng", "Overall report quality", "", "gte", 85, "Report Quality Rubric", "Điểm rubric tổng hợp", { thresholdLabel: "≥ 85/100", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
-      metric("report_completeness", "Độ đầy đủ các phần bắt buộc", "Report completeness", "%", "gte", 0.9, "Report Structure Gate", "Số phần bắt buộc có nội dung đủ / Tổng phần bắt buộc", { thresholdLabel: "≥ 90%", metricType: "coverage", scope: "report_run", severity: "P1", blocksPublish: true }),
-      metric("financial_analysis_depth", "Điểm chiều sâu phân tích tài chính", "Financial analysis depth", "", "gte", 80, "Report Quality Rubric", "Điểm phân tích tài chính", { thresholdLabel: "≥ 80/100", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
-      metric("forecast_rationale", "Điểm giải trình dự phóng", "Forecast rationale", "", "gte", 80, "Report Quality Rubric", "Điểm giải trình forecast", { thresholdLabel: "≥ 80/100", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
-      metric("valuation_transparency", "Điểm minh bạch định giá", "Valuation transparency", "", "gte", 85, "Report Quality Rubric", "Điểm minh bạch định giá", { thresholdLabel: "≥ 85/100", metricType: "score", scope: "report_run", severity: "P0", blocksPublish: true }),
-    ],
-    methodology: [
-      "Báo cáo phải đạt tối thiểu 85/100 và vượt qua toàn bộ cổng tài chính, trích dẫn và xuất bản.",
-      "Báo cáo không được công bố nếu snapshot định giá không khớp hoặc chưa có phê duyệt cuối.",
-    ],
-  },
-  {
     id: "observability",
-    title: "7 · Vận hành, chi phí và độ trễ",
+    title: "5 · Vận hành, chi phí và độ trễ",
     subtitle: "Theo dõi độ ổn định, phương án dự phòng và lỗi trong quá trình tạo báo cáo",
     artifact: "observability_eval.json",
     metrics: [

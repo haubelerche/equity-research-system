@@ -56,7 +56,9 @@ def test_project_evaluation_endpoints_use_allowlisted_loader(monkeypatch) -> Non
 
     assert client.get("/eval/framework").json()["publication_status"] == "BLOCKED_BY_P0"
     assert client.get("/eval/results/financial_eval.json").json()["artifact"] == "financial_eval.json"
+    assert client.get("/eval/artifacts/financial_eval.json").json()["artifact"] == "financial_eval.json"
     assert client.get("/eval/results/..%2f.env").status_code == 404
+    assert client.get("/eval/artifacts/..%2f.env").status_code == 404
 
 
 def test_run_evaluation_endpoints_read_eval_result_artifacts() -> None:

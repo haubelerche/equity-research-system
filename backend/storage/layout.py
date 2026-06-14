@@ -18,6 +18,7 @@ _RUN_ARTIFACT_NAMES = {
     "facts_report.pdf",
     "forecast.json",
     "valuation.json",
+    "valuation_input_pack.json",
     "evidence_pack.json",
     "review_packet.json",
     "quality_gate.json",

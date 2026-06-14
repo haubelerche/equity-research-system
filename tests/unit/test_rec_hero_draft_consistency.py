@@ -15,7 +15,7 @@ def _vm(publication_status: str) -> SimpleNamespace:
     return SimpleNamespace(
         ticker="DHG",
         exchange="HOSE",
-        recommendation="NẮM GIỮ",
+        recommendation="Giữ",
         target_price=SimpleNamespace(amount=91476.0),
         upside_downside=SimpleNamespace(value=-0.024),
         report_date="2026-06-12",
@@ -30,7 +30,7 @@ def test_cover_hero_has_no_warning_or_draft_note():
     assert "Dự thảo" not in html
     assert "chưa được công bố chính thức" not in html
     # The conclusion itself is still shown.
-    assert "NẮM GIỮ" in html
+    assert "Giữ" in html
     assert "91,476" in html
 
 
@@ -38,4 +38,4 @@ def test_cover_hero_clean_when_client_exportable():
     html = _rec_hero(_vm("client_exportable"))
 
     assert "rec-draft-note" not in html
-    assert "NẮM GIỮ" in html
+    assert "Giữ" in html

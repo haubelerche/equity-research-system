@@ -175,7 +175,12 @@ def build_gate_from_artifacts(
     wacc_approved = wacc_assumption_status == "analyst_approved"
     coe_approved = cost_of_equity_status == "analyst_approved"
     forecast_approved = forecast_assumption_status == "analyst_approved"
-    debt_approved = debt_schedule_method in ("zero_debt_policy", "analyst_approved", "manual_override")
+    debt_approved = debt_schedule_method in (
+        "zero_debt_policy",
+        "direct_cash_flow",
+        "analyst_approved",
+        "manual_override",
+    )
 
     gate = AssumptionGate(
         data_quality_passed=data_quality_passed,

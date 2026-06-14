@@ -69,6 +69,31 @@ _COMPANIES: dict[str, CompanyRecord] = {
     ),
 }
 
+try:
+    from backend.dataset.config_io import load_universe_rows
+
+    for _row in load_universe_rows():
+        _ticker = (_row.get("ticker") or "").strip().upper()
+        if not _ticker:
+            continue
+        _COMPANIES.setdefault(
+            _ticker,
+            CompanyRecord(
+                ticker=_ticker,
+                company_name_vi=(_row.get("company_name") or _ticker).strip(),
+                company_name_en=(_row.get("company_name") or _ticker).strip(),
+                exchange=(_row.get("exchange") or "").strip().upper(),
+                official_website="",
+                ir_urls=[],
+                aliases=[],
+                issuer_code=_ticker,
+                cafef_id=_ticker,
+            ),
+        )
+except Exception:
+    # Registry import must stay resilient for offline unit tests and early bootstrap.
+    pass
+
 
 def get_company(ticker: str) -> CompanyRecord:
     t = ticker.strip().upper()

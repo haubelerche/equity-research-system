@@ -3,9 +3,9 @@
   "benchmark_suite_version": "benchmark_standards_v1",
   "plan_id": "01",
   "plan_name": "Data reliability",
-  "ticker": "DBD",
-  "run_id": "benchmark-02-rag-restored-DBD",
-  "generated_at": "2026-06-14T11:42:07.938612+00:00",
+  "ticker": "DHG",
+  "run_id": "phase1-dhg-nondbd-baseline",
+  "generated_at": "2026-06-14T16:28:52.781840+00:00",
   "status": "fail",
   "test_execution": {
     "status": "pass",
@@ -20,13 +20,13 @@
       "tests/unit/test_source_provenance_gate.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.552,
+    "duration_seconds": 0.562,
     "summary": {
       "passed": 70
     },
     "output_tail": [
       "......................................................................   [100%]",
-      "70 passed in 0.23s"
+      "70 passed in 0.24s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -43,9 +43,7 @@
   },
   "blocking_issues": [
     "core_metric_coverage:threshold_not_met",
-    "ocr_unresolved_rate:threshold_not_met",
-    "official_reconciliation_rate:threshold_not_met",
-    "valuation_method_data_readiness:low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical"
+    "valuation_method_data_readiness:low_confidence_primary_method,valuation_method_divergence_critical"
   ],
   "metrics": {
     "test_suite_status": "pass",
@@ -57,7 +55,7 @@
     {
       "id": "core_metric_coverage",
       "label": "Core metric coverage",
-      "source": "config\\dataset\\golden\\financials\\DBD.csv",
+      "source": "config\\dataset\\golden\\financials\\DHG.csv",
       "detail": "",
       "metric_id": "core_metric_coverage",
       "metric_name": "Core metric coverage",
@@ -67,7 +65,7 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0.42857142857142855,
+      "value": 0.38461538461538464,
       "threshold": ">= 95%",
       "threshold_operator": ">=",
       "unit": "percent",
@@ -76,35 +74,14 @@
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": "DBD.csv",
+      "dataset_version": "DHG.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
       "failed_examples": [
         {
           "sample_origin": "valuation_requirement",
-          "canonical_key": "capex.total",
-          "present": false,
-          "accepted_periods": [],
-          "source_titles": [],
-          "required_by_methods": [
-            "fcfe_dcf",
-            "fcff_dcf"
-          ]
-        },
-        {
-          "sample_origin": "valuation_requirement",
-          "canonical_key": "change_in_working_capital.total",
-          "present": false,
-          "accepted_periods": [],
-          "source_titles": [],
-          "required_by_methods": [
-            "fcff_dcf"
-          ]
-        },
-        {
-          "sample_origin": "valuation_requirement",
-          "canonical_key": "da.total",
+          "canonical_key": "depreciation.total",
           "present": false,
           "accepted_periods": [],
           "source_titles": [],
@@ -115,22 +92,13 @@
         },
         {
           "sample_origin": "valuation_requirement",
-          "canonical_key": "eps.basic",
+          "canonical_key": "long_term_debt.ending",
           "present": false,
           "accepted_periods": [],
           "source_titles": [],
           "required_by_methods": [
-            "pe"
-          ]
-        },
-        {
-          "sample_origin": "valuation_requirement",
-          "canonical_key": "operating_cash_flow.total",
-          "present": false,
-          "accepted_periods": [],
-          "source_titles": [],
-          "required_by_methods": [
-            "fcfe_dcf"
+            "ev_ebitda",
+            "fcff_dcf"
           ]
         },
         {
@@ -145,12 +113,47 @@
         },
         {
           "sample_origin": "valuation_requirement",
+          "canonical_key": "profit_before_tax.total",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "ev_ebitda",
+            "fcff_dcf"
+          ]
+        },
+        {
+          "sample_origin": "valuation_requirement",
           "canonical_key": "repayment_of_borrowings.total",
           "present": false,
           "accepted_periods": [],
           "source_titles": [],
           "required_by_methods": [
             "fcfe_dcf"
+          ]
+        },
+        {
+          "sample_origin": "valuation_requirement",
+          "canonical_key": "shares_outstanding.ending",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "ev_ebitda",
+            "fcfe_dcf",
+            "fcff_dcf",
+            "pe"
+          ]
+        },
+        {
+          "sample_origin": "valuation_requirement",
+          "canonical_key": "short_term_debt.ending",
+          "present": false,
+          "accepted_periods": [],
+          "source_titles": [],
+          "required_by_methods": [
+            "ev_ebitda",
+            "fcff_dcf"
           ]
         },
         {
@@ -175,11 +178,11 @@
       "calculation": {
         "formula": "valid_required_core_metrics / required_core_metrics",
         "inputs": {
-          "ticker": "DBD",
-          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
-          "record_count": 15,
-          "accepted_record_count": 15
+          "ticker": "DHG",
+          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
+          "record_count": 13,
+          "accepted_record_count": 13
         },
         "parameters": {
           "requirement_registry": "backend/valuation/data_requirements.py",
@@ -191,15 +194,19 @@
           ]
         },
         "aggregation": "coverage",
-        "numerator": 6,
-        "denominator": 14,
+        "numerator": 5,
+        "denominator": 13,
         "per_sample_results": [
           {
             "sample_origin": "valuation_requirement",
             "canonical_key": "capex.total",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
             "required_by_methods": [
               "fcfe_dcf",
               "fcff_dcf"
@@ -212,10 +219,10 @@
             "canonical_key": "cash_and_equivalents.ending",
             "present": true,
             "accepted_periods": [
-              "2025FY"
+              "2021FY"
             ],
             "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
+              "DHG Annual Report 2021"
             ],
             "required_by_methods": [
               "ev_ebitda",
@@ -226,19 +233,7 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "change_in_working_capital.total",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
-            "required_by_methods": [
-              "fcff_dcf"
-            ],
-            "metric_id": "core_metric_coverage",
-            "sample_index": 3
-          },
-          {
-            "sample_origin": "valuation_requirement",
-            "canonical_key": "da.total",
+            "canonical_key": "depreciation.total",
             "present": false,
             "accepted_periods": [],
             "source_titles": [],
@@ -247,18 +242,30 @@
               "fcff_dcf"
             ],
             "metric_id": "core_metric_coverage",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "eps.basic",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "pe"
+            ],
+            "metric_id": "core_metric_coverage",
             "sample_index": 4
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "ebit.total",
-            "present": true,
-            "accepted_periods": [
-              "2025FY"
-            ],
-            "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
-            ],
+            "canonical_key": "long_term_debt.ending",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
             "required_by_methods": [
               "ev_ebitda",
               "fcff_dcf"
@@ -268,44 +275,19 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "eps.basic",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
-            "required_by_methods": [
-              "pe"
-            ],
-            "metric_id": "core_metric_coverage",
-            "sample_index": 6
-          },
-          {
-            "sample_origin": "valuation_requirement",
-            "canonical_key": "long_term_debt.ending",
+            "canonical_key": "operating_cash_flow.total",
             "present": true,
             "accepted_periods": [
-              "2025FY"
+              "2021FY"
             ],
             "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
+              "DHG Annual Report 2021"
             ],
-            "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
-            ],
-            "metric_id": "core_metric_coverage",
-            "sample_index": 7
-          },
-          {
-            "sample_origin": "valuation_requirement",
-            "canonical_key": "operating_cash_flow.total",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
             "required_by_methods": [
               "fcfe_dcf"
             ],
             "metric_id": "core_metric_coverage",
-            "sample_index": 8
+            "sample_index": 6
           },
           {
             "sample_origin": "valuation_requirement",
@@ -317,7 +299,20 @@
               "fcfe_dcf"
             ],
             "metric_id": "core_metric_coverage",
-            "sample_index": 9
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "profit_before_tax.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "core_metric_coverage",
+            "sample_index": 8
           },
           {
             "sample_origin": "valuation_requirement",
@@ -329,34 +324,30 @@
               "fcfe_dcf"
             ],
             "metric_id": "core_metric_coverage",
-            "sample_index": 10
+            "sample_index": 9
           },
           {
             "sample_origin": "valuation_requirement",
             "canonical_key": "revenue.net",
             "present": true,
             "accepted_periods": [
-              "2025FY"
+              "2021FY"
             ],
             "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
+              "DHG Annual Report 2021"
             ],
             "required_by_methods": [
               "fcff_dcf"
             ],
             "metric_id": "core_metric_coverage",
-            "sample_index": 11
+            "sample_index": 10
           },
           {
             "sample_origin": "valuation_requirement",
             "canonical_key": "shares_outstanding.ending",
-            "present": true,
-            "accepted_periods": [
-              "2025FY"
-            ],
-            "source_titles": [
-              "Tai lieu DHDCD 2026 Bidiphar"
-            ],
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
             "required_by_methods": [
               "ev_ebitda",
               "fcfe_dcf",
@@ -364,24 +355,20 @@
               "pe"
             ],
             "metric_id": "core_metric_coverage",
-            "sample_index": 12
+            "sample_index": 11
           },
           {
             "sample_origin": "valuation_requirement",
             "canonical_key": "short_term_debt.ending",
-            "present": true,
-            "accepted_periods": [
-              "2025FY"
-            ],
-            "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
-            ],
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
             "required_by_methods": [
               "ev_ebitda",
               "fcff_dcf"
             ],
             "metric_id": "core_metric_coverage",
-            "sample_index": 13
+            "sample_index": 12
           },
           {
             "sample_origin": "valuation_requirement",
@@ -393,17 +380,17 @@
               "fcff_dcf"
             ],
             "metric_id": "core_metric_coverage",
-            "sample_index": 14
+            "sample_index": 13
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "revenue.net",
-            "value": "1865.380",
+            "value": "4127.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 1,
@@ -411,17 +398,17 @@
             "accepted": true,
             "has_complete_provenance": true,
             "metric_id": "core_metric_coverage",
-            "sample_index": 15
+            "sample_index": 14
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "cogs.total",
-            "value": "-981.001",
+            "value": "-2293.0",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 2,
@@ -429,17 +416,17 @@
             "accepted": true,
             "has_complete_provenance": true,
             "metric_id": "core_metric_coverage",
-            "sample_index": 16
+            "sample_index": 15
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "gross_profit.total",
-            "value": "884.379",
+            "value": "1834.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 3,
@@ -447,17 +434,17 @@
             "accepted": true,
             "has_complete_provenance": true,
             "metric_id": "core_metric_coverage",
-            "sample_index": 17
+            "sample_index": 16
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "selling_expense.total",
-            "value": "-418.308",
+            "canonical_key": "sga.total",
+            "value": "-806.2",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 4,
@@ -465,17 +452,17 @@
             "accepted": true,
             "has_complete_provenance": true,
             "metric_id": "core_metric_coverage",
-            "sample_index": 18
+            "sample_index": 17
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "admin_expense.total",
-            "value": "-139.794",
+            "canonical_key": "net_income.parent",
+            "value": "803.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 5,
@@ -483,20 +470,38 @@
             "accepted": true,
             "has_complete_provenance": true,
             "metric_id": "core_metric_coverage",
-            "sample_index": 19
+            "sample_index": 18
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "ebit.total",
-            "value": "349.128",
-            "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "canonical_key": "eps.basic",
+            "value": "5939.0",
+            "unit": "vnd",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 6,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "core_metric_coverage",
+            "sample_index": 19
+          },
+          {
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "36.1",
+            "unit": "vnd_bn",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 7,
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
@@ -512,15 +517,15 @@
       },
       "evidence": {
         "artifact_ids": [],
-        "dataset_version": "DBD.csv",
+        "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "period_completeness",
       "label": "Statement completeness",
-      "source": "config\\dataset\\golden\\financials\\DBD.csv",
+      "source": "config\\dataset\\golden\\financials\\DHG.csv",
       "detail": "",
       "metric_id": "period_completeness",
       "metric_name": "Statement completeness",
@@ -539,7 +544,7 @@
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": "DBD.csv",
+      "dataset_version": "DHG.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
@@ -555,11 +560,11 @@
       "calculation": {
         "formula": "complete_required_statements / required_statements",
         "inputs": {
-          "ticker": "DBD",
-          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
-          "record_count": 15,
-          "accepted_record_count": 15
+          "ticker": "DHG",
+          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
+          "record_count": 13,
+          "accepted_record_count": 13
         },
         "parameters": {
           "required_period_source": "golden_provenance_and_csv"
@@ -570,21 +575,21 @@
         "per_sample_results": [
           {
             "sample_origin": "required_period",
-            "period": "2025FY",
-            "accepted_fact_count": 15,
+            "period": "2021FY",
+            "accepted_fact_count": 13,
             "complete": true,
             "metric_id": "period_completeness",
             "sample_index": 1
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "revenue.net",
-            "value": "1865.380",
+            "value": "4127.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 1,
@@ -595,14 +600,14 @@
             "sample_index": 2
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "cogs.total",
-            "value": "-981.001",
+            "value": "-2293.0",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 2,
@@ -613,14 +618,14 @@
             "sample_index": 3
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "gross_profit.total",
-            "value": "884.379",
+            "value": "1834.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 3,
@@ -631,14 +636,14 @@
             "sample_index": 4
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "selling_expense.total",
-            "value": "-418.308",
+            "canonical_key": "sga.total",
+            "value": "-806.2",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 4,
@@ -649,14 +654,14 @@
             "sample_index": 5
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "admin_expense.total",
-            "value": "-139.794",
+            "canonical_key": "net_income.parent",
+            "value": "803.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 5,
@@ -667,14 +672,14 @@
             "sample_index": 6
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "ebit.total",
-            "value": "349.128",
-            "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "canonical_key": "eps.basic",
+            "value": "5939.0",
+            "unit": "vnd",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 6,
@@ -685,14 +690,14 @@
             "sample_index": 7
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "income_statement",
-            "canonical_key": "profit_before_tax.total",
-            "value": "346.082",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "36.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 7,
@@ -703,14 +708,14 @@
             "sample_index": 8
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "income_statement",
-            "canonical_key": "net_income.parent",
-            "value": "291.940",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "inventory.ending",
+            "value": "1042.9",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 8,
@@ -721,14 +726,14 @@
             "sample_index": 9
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "cash_and_equivalents.ending",
-            "value": "202.784",
+            "canonical_key": "total_assets.ending",
+            "value": "4741.8",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 9,
@@ -739,14 +744,14 @@
             "sample_index": 10
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "short_term_investments.ending",
-            "value": "409.201",
+            "canonical_key": "equity.parent",
+            "value": "3963.2",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 10,
@@ -757,14 +762,14 @@
             "sample_index": 11
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "balance_sheet",
-            "canonical_key": "short_term_debt.ending",
-            "value": "43.215",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "operating_cash_flow.total",
+            "value": "811.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 11,
@@ -775,14 +780,14 @@
             "sample_index": 12
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "balance_sheet",
-            "canonical_key": "long_term_debt.ending",
-            "value": "132.000",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "capex.total",
+            "value": "-273.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 12,
@@ -793,14 +798,14 @@
             "sample_index": 13
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "equity.parent",
-            "value": "1736.000",
+            "canonical_key": "total_liabilities.ending",
+            "value": "778.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "row_number": 13,
@@ -811,49 +816,47 @@
             "sample_index": 14
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "capital_structure",
-            "canonical_key": "shares_outstanding.ending",
-            "value": "94400000",
-            "unit": "shares",
-            "source_type": "disclosure",
-            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
-            "validation_status": "accepted",
-            "sample_origin": "source_row",
-            "row_number": 14,
-            "has_value": true,
-            "accepted": true,
-            "has_complete_provenance": true,
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "capex.total",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "fcfe_dcf",
+              "fcff_dcf"
+            ],
             "metric_id": "period_completeness",
             "sample_index": 15
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "capital_structure",
-            "canonical_key": "dividends_per_share.cash",
-            "value": "2000",
-            "unit": "vnd",
-            "source_type": "disclosure",
-            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
-            "validation_status": "accepted",
-            "sample_origin": "source_row",
-            "row_number": 15,
-            "has_value": true,
-            "accepted": true,
-            "has_complete_provenance": true,
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "cash_and_equivalents.ending",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
             "metric_id": "period_completeness",
             "sample_index": 16
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "capex.total",
+            "canonical_key": "depreciation.total",
             "present": false,
             "accepted_periods": [],
             "source_titles": [],
             "required_by_methods": [
-              "fcfe_dcf",
+              "ev_ebitda",
               "fcff_dcf"
             ],
             "metric_id": "period_completeness",
@@ -861,28 +864,28 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "cash_and_equivalents.ending",
+            "canonical_key": "eps.basic",
             "present": true,
             "accepted_periods": [
-              "2025FY"
+              "2021FY"
             ],
             "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
+              "DHG Annual Report 2021"
             ],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "pe"
             ],
             "metric_id": "period_completeness",
             "sample_index": 18
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "change_in_working_capital.total",
+            "canonical_key": "long_term_debt.ending",
             "present": false,
             "accepted_periods": [],
             "source_titles": [],
             "required_by_methods": [
+              "ev_ebitda",
               "fcff_dcf"
             ],
             "metric_id": "period_completeness",
@@ -890,13 +893,16 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "da.total",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
+            "canonical_key": "operating_cash_flow.total",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "fcfe_dcf"
             ],
             "metric_id": "period_completeness",
             "sample_index": 20
@@ -910,15 +916,15 @@
       },
       "evidence": {
         "artifact_ids": [],
-        "dataset_version": "DBD.csv",
+        "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "provenance_coverage",
       "label": "Source provenance coverage",
-      "source": "config\\dataset\\golden\\financials\\DBD.csv",
+      "source": "config\\dataset\\golden\\financials\\DHG.csv",
       "detail": "",
       "metric_id": "provenance_coverage",
       "metric_name": "Source provenance coverage",
@@ -937,7 +943,7 @@
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": "DBD.csv",
+      "dataset_version": "DHG.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
@@ -953,11 +959,11 @@
       "calculation": {
         "formula": "facts_with_complete_provenance / evaluated_facts",
         "inputs": {
-          "ticker": "DBD",
-          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
-          "record_count": 15,
-          "accepted_record_count": 15
+          "ticker": "DHG",
+          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
+          "record_count": 13,
+          "accepted_record_count": 13
         },
         "parameters": {
           "required_fields": [
@@ -967,18 +973,18 @@
           ]
         },
         "aggregation": "coverage",
-        "numerator": 15,
-        "denominator": 15,
+        "numerator": 13,
+        "denominator": 13,
         "per_sample_results": [
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "revenue.net",
-            "value": "1865.380",
+            "value": "4127.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -986,14 +992,14 @@
             "sample_index": 1
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "cogs.total",
-            "value": "-981.001",
+            "value": "-2293.0",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1001,14 +1007,14 @@
             "sample_index": 2
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "gross_profit.total",
-            "value": "884.379",
+            "value": "1834.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1016,14 +1022,14 @@
             "sample_index": 3
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "selling_expense.total",
-            "value": "-418.308",
+            "canonical_key": "sga.total",
+            "value": "-806.2",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1031,14 +1037,14 @@
             "sample_index": 4
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "admin_expense.total",
-            "value": "-139.794",
+            "canonical_key": "net_income.parent",
+            "value": "803.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1046,14 +1052,14 @@
             "sample_index": 5
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "ebit.total",
-            "value": "349.128",
-            "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "canonical_key": "eps.basic",
+            "value": "5939.0",
+            "unit": "vnd",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1061,14 +1067,14 @@
             "sample_index": 6
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "income_statement",
-            "canonical_key": "profit_before_tax.total",
-            "value": "346.082",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "36.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1076,14 +1082,14 @@
             "sample_index": 7
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "income_statement",
-            "canonical_key": "net_income.parent",
-            "value": "291.940",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "inventory.ending",
+            "value": "1042.9",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1091,14 +1097,14 @@
             "sample_index": 8
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "cash_and_equivalents.ending",
-            "value": "202.784",
+            "canonical_key": "total_assets.ending",
+            "value": "4741.8",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1106,14 +1112,14 @@
             "sample_index": 9
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "short_term_investments.ending",
-            "value": "409.201",
+            "canonical_key": "equity.parent",
+            "value": "3963.2",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1121,14 +1127,14 @@
             "sample_index": 10
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "balance_sheet",
-            "canonical_key": "short_term_debt.ending",
-            "value": "43.215",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "operating_cash_flow.total",
+            "value": "811.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1136,14 +1142,14 @@
             "sample_index": 11
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "balance_sheet",
-            "canonical_key": "long_term_debt.ending",
-            "value": "132.000",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "capex.total",
+            "value": "-273.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1151,14 +1157,14 @@
             "sample_index": 12
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "equity.parent",
-            "value": "1736.000",
+            "canonical_key": "total_liabilities.ending",
+            "value": "778.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
@@ -1166,43 +1172,47 @@
             "sample_index": 13
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "capital_structure",
-            "canonical_key": "shares_outstanding.ending",
-            "value": "94400000",
-            "unit": "shares",
-            "source_type": "disclosure",
-            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
-            "validation_status": "accepted",
-            "sample_origin": "source_row",
-            "has_complete_provenance": true,
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "capex.total",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "fcfe_dcf",
+              "fcff_dcf"
+            ],
             "metric_id": "provenance_coverage",
             "sample_index": 14
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "capital_structure",
-            "canonical_key": "dividends_per_share.cash",
-            "value": "2000",
-            "unit": "vnd",
-            "source_type": "disclosure",
-            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
-            "validation_status": "accepted",
-            "sample_origin": "source_row",
-            "has_complete_provenance": true,
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "cash_and_equivalents.ending",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
             "metric_id": "provenance_coverage",
             "sample_index": 15
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "capex.total",
+            "canonical_key": "depreciation.total",
             "present": false,
             "accepted_periods": [],
             "source_titles": [],
             "required_by_methods": [
-              "fcfe_dcf",
+              "ev_ebitda",
               "fcff_dcf"
             ],
             "metric_id": "provenance_coverage",
@@ -1210,28 +1220,28 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "cash_and_equivalents.ending",
+            "canonical_key": "eps.basic",
             "present": true,
             "accepted_periods": [
-              "2025FY"
+              "2021FY"
             ],
             "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
+              "DHG Annual Report 2021"
             ],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "pe"
             ],
             "metric_id": "provenance_coverage",
             "sample_index": 17
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "change_in_working_capital.total",
+            "canonical_key": "long_term_debt.ending",
             "present": false,
             "accepted_periods": [],
             "source_titles": [],
             "required_by_methods": [
+              "ev_ebitda",
               "fcff_dcf"
             ],
             "metric_id": "provenance_coverage",
@@ -1239,30 +1249,28 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "da.total",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
+            "canonical_key": "operating_cash_flow.total",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "fcfe_dcf"
             ],
             "metric_id": "provenance_coverage",
             "sample_index": 19
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "ebit.total",
-            "present": true,
-            "accepted_periods": [
-              "2025FY"
-            ],
-            "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
-            ],
+            "canonical_key": "proceeds_from_borrowings.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "fcfe_dcf"
             ],
             "metric_id": "provenance_coverage",
             "sample_index": 20
@@ -1276,15 +1284,15 @@
       },
       "evidence": {
         "artifact_ids": [],
-        "dataset_version": "DBD.csv",
+        "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "official_reconciliation_rate",
       "label": "Accepted official reconciliation",
-      "source": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
+      "source": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
       "detail": "",
       "metric_id": "official_reconciliation_rate",
       "metric_name": "Accepted official reconciliation",
@@ -1294,35 +1302,20 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0.9,
+      "value": 1.0,
       "threshold": ">= 95%",
       "threshold_operator": ">=",
       "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
+      "status": "pass",
+      "legacy_status": "pass",
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": "DBD.csv",
+      "dataset_version": "DHG.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
-      "failed_examples": [
-        {
-          "ticker": "DBD",
-          "period": "2025FY",
-          "statement_type": "balance_sheet",
-          "canonical_key": "equity.parent",
-          "value": "1736.000",
-          "unit": "vnd_bn",
-          "source_type": "financial_statement",
-          "source_title": "BCTC hop nhat 2025 sau kiem toan",
-          "validation_status": "accepted",
-          "verified": false,
-          "official_source": true,
-          "reconciled": false
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Inspect source provenance, period coverage, OCR promotion, and canonical fact deduplication.",
       "evaluator": {
         "id": "official_reconciliation_rate",
@@ -1334,30 +1327,30 @@
       "calculation": {
         "formula": "officially_reconciled_material_facts / material_facts",
         "inputs": {
-          "ticker": "DBD",
-          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
-          "record_count": 15,
-          "accepted_record_count": 15,
-          "provenance_metrics_verified": 14
+          "ticker": "DHG",
+          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
+          "record_count": 13,
+          "accepted_record_count": 13,
+          "provenance_metrics_verified": 13
         },
         "parameters": {
           "material_only": true,
           "accepted_only": true
         },
         "aggregation": "coverage",
-        "numerator": 9,
+        "numerator": 10,
         "denominator": 10,
         "per_sample_results": [
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "revenue.net",
-            "value": "1865.380",
+            "value": "4127.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "verified": true,
             "official_source": true,
@@ -1367,14 +1360,14 @@
             "sample_index": 1
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "gross_profit.total",
-            "value": "884.379",
+            "value": "1834.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "verified": true,
             "official_source": true,
@@ -1384,14 +1377,14 @@
             "sample_index": 2
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "net_income.parent",
-            "value": "291.940",
+            "value": "803.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "verified": true,
             "official_source": true,
@@ -1401,14 +1394,14 @@
             "sample_index": 3
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "balance_sheet",
-            "canonical_key": "cash_and_equivalents.ending",
-            "value": "202.784",
-            "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "income_statement",
+            "canonical_key": "eps.basic",
+            "value": "5939.0",
+            "unit": "vnd",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "verified": true,
             "official_source": true,
@@ -1418,14 +1411,14 @@
             "sample_index": 4
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "short_term_investments.ending",
-            "value": "409.201",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "36.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "verified": true,
             "official_source": true,
@@ -1435,14 +1428,14 @@
             "sample_index": 5
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "short_term_debt.ending",
-            "value": "43.215",
+            "canonical_key": "total_assets.ending",
+            "value": "4741.8",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "verified": true,
             "official_source": true,
@@ -1452,14 +1445,14 @@
             "sample_index": 6
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "long_term_debt.ending",
-            "value": "132.000",
+            "canonical_key": "equity.parent",
+            "value": "3963.2",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "verified": true,
             "official_source": true,
@@ -1469,31 +1462,31 @@
             "sample_index": 7
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "balance_sheet",
-            "canonical_key": "equity.parent",
-            "value": "1736.000",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "operating_cash_flow.total",
+            "value": "811.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
-            "verified": false,
+            "verified": true,
             "official_source": true,
-            "reconciled": false,
+            "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 8
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "capital_structure",
-            "canonical_key": "shares_outstanding.ending",
-            "value": "94400000",
-            "unit": "shares",
-            "source_type": "disclosure",
-            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "capex.total",
+            "value": "-273.6",
+            "unit": "vnd_bn",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "verified": true,
             "official_source": true,
@@ -1503,14 +1496,14 @@
             "sample_index": 9
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "capital_structure",
-            "canonical_key": "dividends_per_share.cash",
-            "value": "2000",
-            "unit": "vnd",
-            "source_type": "disclosure",
-            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "total_liabilities.ending",
+            "value": "778.6",
+            "unit": "vnd_bn",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "verified": true,
             "official_source": true,
@@ -1522,9 +1515,13 @@
           {
             "sample_origin": "valuation_requirement",
             "canonical_key": "capex.total",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
             "required_by_methods": [
               "fcfe_dcf",
               "fcff_dcf"
@@ -1537,10 +1534,10 @@
             "canonical_key": "cash_and_equivalents.ending",
             "present": true,
             "accepted_periods": [
-              "2025FY"
+              "2021FY"
             ],
             "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
+              "DHG Annual Report 2021"
             ],
             "required_by_methods": [
               "ev_ebitda",
@@ -1551,19 +1548,7 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "change_in_working_capital.total",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
-            "required_by_methods": [
-              "fcff_dcf"
-            ],
-            "metric_id": "official_reconciliation_rate",
-            "sample_index": 13
-          },
-          {
-            "sample_origin": "valuation_requirement",
-            "canonical_key": "da.total",
+            "canonical_key": "depreciation.total",
             "present": false,
             "accepted_periods": [],
             "source_titles": [],
@@ -1572,18 +1557,30 @@
               "fcff_dcf"
             ],
             "metric_id": "official_reconciliation_rate",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "eps.basic",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "pe"
+            ],
+            "metric_id": "official_reconciliation_rate",
             "sample_index": 14
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "ebit.total",
-            "present": true,
-            "accepted_periods": [
-              "2025FY"
-            ],
-            "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
-            ],
+            "canonical_key": "long_term_debt.ending",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
             "required_by_methods": [
               "ev_ebitda",
               "fcff_dcf"
@@ -1593,44 +1590,19 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "eps.basic",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
-            "required_by_methods": [
-              "pe"
-            ],
-            "metric_id": "official_reconciliation_rate",
-            "sample_index": 16
-          },
-          {
-            "sample_origin": "valuation_requirement",
-            "canonical_key": "long_term_debt.ending",
+            "canonical_key": "operating_cash_flow.total",
             "present": true,
             "accepted_periods": [
-              "2025FY"
+              "2021FY"
             ],
             "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
+              "DHG Annual Report 2021"
             ],
-            "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
-            ],
-            "metric_id": "official_reconciliation_rate",
-            "sample_index": 17
-          },
-          {
-            "sample_origin": "valuation_requirement",
-            "canonical_key": "operating_cash_flow.total",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
             "required_by_methods": [
               "fcfe_dcf"
             ],
             "metric_id": "official_reconciliation_rate",
-            "sample_index": 18
+            "sample_index": 16
           },
           {
             "sample_origin": "valuation_requirement",
@@ -1642,7 +1614,20 @@
               "fcfe_dcf"
             ],
             "metric_id": "official_reconciliation_rate",
-            "sample_index": 19
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "profit_before_tax.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 18
           },
           {
             "sample_origin": "valuation_requirement",
@@ -1652,6 +1637,22 @@
             "source_titles": [],
             "required_by_methods": [
               "fcfe_dcf"
+            ],
+            "metric_id": "official_reconciliation_rate",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "revenue.net",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "fcff_dcf"
             ],
             "metric_id": "official_reconciliation_rate",
             "sample_index": 20
@@ -1665,15 +1666,15 @@
       },
       "evidence": {
         "artifact_ids": [],
-        "dataset_version": "DBD.csv",
+        "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "material_ocr_error_count",
       "label": "Material OCR error count",
-      "source": "config\\dataset\\golden\\financials\\DBD.csv",
+      "source": "config\\dataset\\golden\\financials\\DHG.csv",
       "detail": "",
       "metric_id": "material_ocr_error_count",
       "metric_name": "Material OCR error count",
@@ -1692,7 +1693,7 @@
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": "DBD.csv",
+      "dataset_version": "DHG.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
@@ -1708,11 +1709,11 @@
       "calculation": {
         "formula": "material_numeric_ocr_errors_used_in_report",
         "inputs": {
-          "ticker": "DBD",
-          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
-          "record_count": 15,
-          "accepted_record_count": 15
+          "ticker": "DHG",
+          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
+          "record_count": 13,
+          "accepted_record_count": 13
         },
         "parameters": {
           "material_metric_config": "config/material_metrics.yml"
@@ -1722,14 +1723,14 @@
         "denominator": 10,
         "per_sample_results": [
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "revenue.net",
-            "value": "1865.380",
+            "value": "4127.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
@@ -1738,14 +1739,14 @@
             "sample_index": 1
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "gross_profit.total",
-            "value": "884.379",
+            "value": "1834.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
@@ -1754,14 +1755,14 @@
             "sample_index": 2
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "net_income.parent",
-            "value": "291.940",
+            "value": "803.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
@@ -1770,14 +1771,14 @@
             "sample_index": 3
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "balance_sheet",
-            "canonical_key": "cash_and_equivalents.ending",
-            "value": "202.784",
-            "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "income_statement",
+            "canonical_key": "eps.basic",
+            "value": "5939.0",
+            "unit": "vnd",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
@@ -1786,14 +1787,14 @@
             "sample_index": 4
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "short_term_investments.ending",
-            "value": "409.201",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "36.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
@@ -1802,14 +1803,14 @@
             "sample_index": 5
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "short_term_debt.ending",
-            "value": "43.215",
+            "canonical_key": "total_assets.ending",
+            "value": "4741.8",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
@@ -1818,14 +1819,14 @@
             "sample_index": 6
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "long_term_debt.ending",
-            "value": "132.000",
+            "canonical_key": "equity.parent",
+            "value": "3963.2",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
@@ -1834,14 +1835,14 @@
             "sample_index": 7
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "balance_sheet",
-            "canonical_key": "equity.parent",
-            "value": "1736.000",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "operating_cash_flow.total",
+            "value": "811.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
@@ -1850,14 +1851,14 @@
             "sample_index": 8
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "capital_structure",
-            "canonical_key": "shares_outstanding.ending",
-            "value": "94400000",
-            "unit": "shares",
-            "source_type": "disclosure",
-            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "capex.total",
+            "value": "-273.6",
+            "unit": "vnd_bn",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
@@ -1866,14 +1867,14 @@
             "sample_index": 9
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "capital_structure",
-            "canonical_key": "dividends_per_share.cash",
-            "value": "2000",
-            "unit": "vnd",
-            "source_type": "disclosure",
-            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "total_liabilities.ending",
+            "value": "778.6",
+            "unit": "vnd_bn",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
@@ -1883,111 +1884,151 @@
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 1,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "material_ocr_error_count",
             "sample_index": 11
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 2,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "material_ocr_error_count",
             "sample_index": 12
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 3,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "material_ocr_error_count",
             "sample_index": 13
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 4,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "material_ocr_error_count",
             "sample_index": 14
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 5,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "material_ocr_error_count",
             "sample_index": 15
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 6,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "material_ocr_error_count",
             "sample_index": 16
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 7,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "material_ocr_error_count",
             "sample_index": 17
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 8,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "material_ocr_error_count",
             "sample_index": 18
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 9,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "material_ocr_error_count",
             "sample_index": 19
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 10,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "material_ocr_error_count",
             "sample_index": 20
           }
@@ -2000,10 +2041,10 @@
       },
       "evidence": {
         "artifact_ids": [],
-        "dataset_version": "DBD.csv",
+        "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "ocr_unresolved_rate",
@@ -2018,12 +2059,12 @@
       "scope": "benchmark_suite",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 1.0,
+      "value": 0.0,
       "threshold": "<= 5%",
       "threshold_operator": "<=",
       "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
+      "status": "pass",
+      "legacy_status": "pass",
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
@@ -2031,228 +2072,7 @@
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
-      "failed_examples": [
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 1,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 1
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 2,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 2
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 3,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 3
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 4,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 4
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 5,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 5
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 6,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 6
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 7,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 7
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 8,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 8
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 9,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 9
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 10,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 10
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 11,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 11
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 12,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 12
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 13,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 13
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 14,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 14
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 15,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 15
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 16,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 16
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 17,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 17
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 18,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 18
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 19,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 19
-        },
-        {
-          "sample_origin": "ocr_audit_unit",
-          "ticker": "DBD",
-          "unit_index": 20,
-          "unit_type": "expected_ocr_corpus_unit",
-          "status": "metadata_missing",
-          "evidence_available": false,
-          "reason": "ocr_metadata_missing_for_ticker",
-          "metric_id": "ocr_unresolved_rate",
-          "sample_index": 20
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Reduce unresolved OCR corpus errors and keep material OCR errors out of final artifacts.",
       "evaluator": {
         "id": "ocr_unresolved_rate",
@@ -2263,231 +2083,334 @@
       },
       "calculation": {
         "formula": "unresolved_ocr_candidates / ocr_units_checked",
-        "inputs": {},
+        "inputs": {
+          "metadata": {
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "ticker": "DHG",
+            "fiscal_year": 2025,
+            "source_uri": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\storage\\sources\\official_documents\\DHG\\2025\\00c16423bad04feaab36f8cb998ef22511550cabeaddb12a6fe152450aad5b5e.pdf",
+            "source_checksum": "abaaac8d3813329db1987e769f325fbee7b8c4776b4205b26a4673f95b589973",
+            "pdf_type": "scanned",
+            "ocr_engine": "tesseract",
+            "ocr_lang": "eng",
+            "dpi": 200,
+            "parser_version": "1.0.0",
+            "started_at": "2026-06-10T03:49:04.202634+00:00",
+            "completed_at": "2026-06-10T03:50:02.815960+00:00",
+            "status": "completed",
+            "pages_processed": 40,
+            "pages_failed": 0,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "warnings": [
+              "english_only_ocr"
+            ],
+            "errors": []
+          }
+        },
         "parameters": {
           "unit": "candidate_rows_or_processed_pages"
         },
         "aggregation": "error_rate",
-        "numerator": 20,
-        "denominator": 20,
+        "numerator": 0,
+        "denominator": 40,
         "per_sample_results": [
           {
-            "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 1,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "status": "completed",
+            "pages_processed": 40,
+            "pages_failed": 0,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
             "metric_id": "ocr_unresolved_rate",
+            "sample_origin": "fallback_1",
             "sample_index": 1
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 2,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 1,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 2
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 3,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 2,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 3
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 4,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 3,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 4
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 5,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 4,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 5
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 6,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 5,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 6
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 7,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 6,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 7
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 8,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 7,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 8
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 9,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 8,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 9
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 10,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 9,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 10
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 11,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 10,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 11
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 12,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 11,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 12
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 13,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 12,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 13
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 14,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 13,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 14
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 15,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 14,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 15
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 16,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 15,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 16
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 17,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 16,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 17
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 18,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 17,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 18
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 19,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 18,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 19
           },
           {
             "sample_origin": "ocr_audit_unit",
-            "ticker": "DBD",
-            "unit_index": 20,
-            "unit_type": "expected_ocr_corpus_unit",
-            "status": "metadata_missing",
-            "evidence_available": false,
-            "reason": "ocr_metadata_missing_for_ticker",
+            "ticker": "DHG",
+            "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+            "document_id": "DHG_2025_abaaac8d3813",
+            "unit_index": 19,
+            "unit_type": "page",
+            "status": "checked",
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
+            "unresolved_candidate_count": 0,
+            "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 20
           }
@@ -2503,12 +2426,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "duplicate_fact_count",
       "label": "Duplicate canonical fact count",
-      "source": "config\\dataset\\golden\\financials\\DBD.csv",
+      "source": "config\\dataset\\golden\\financials\\DHG.csv",
       "detail": "",
       "metric_id": "duplicate_fact_count",
       "metric_name": "Duplicate canonical fact count",
@@ -2527,7 +2450,7 @@
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": "DBD.csv",
+      "dataset_version": "DHG.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
@@ -2543,11 +2466,11 @@
       "calculation": {
         "formula": "duplicate_canonical_keys",
         "inputs": {
-          "ticker": "DBD",
-          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
-          "record_count": 15,
-          "accepted_record_count": 15
+          "ticker": "DHG",
+          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
+          "record_count": 13,
+          "accepted_record_count": 13
         },
         "parameters": {
           "dedupe_key": [
@@ -2559,13 +2482,13 @@
         },
         "aggregation": "error_count",
         "numerator": 0,
-        "denominator": 15,
+        "denominator": 13,
         "per_sample_results": [
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "admin_expense.total",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "capex.total",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2574,8 +2497,8 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "canonical_key": "cash_and_equivalents.ending",
             "source_priority": "official",
             "duplicate_count": 1,
@@ -2585,8 +2508,8 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "canonical_key": "cogs.total",
             "source_priority": "official",
             "duplicate_count": 1,
@@ -2596,9 +2519,9 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "dividends_per_share.cash",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "eps.basic",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2607,9 +2530,9 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "ebit.total",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "equity.parent",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2618,9 +2541,9 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "equity.parent",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "gross_profit.total",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2629,9 +2552,9 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "gross_profit.total",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "inventory.ending",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2640,9 +2563,9 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "long_term_debt.ending",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "net_income.parent",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2651,9 +2574,9 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "net_income.parent",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "operating_cash_flow.total",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2662,9 +2585,9 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "profit_before_tax.total",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "revenue.net",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2673,9 +2596,9 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "revenue.net",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "sga.total",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2684,9 +2607,9 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "selling_expense.total",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "total_assets.ending",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2695,9 +2618,9 @@
           },
           {
             "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "shares_outstanding.ending",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "canonical_key": "total_liabilities.ending",
             "source_priority": "official",
             "duplicate_count": 1,
             "is_duplicate": false,
@@ -2705,35 +2628,47 @@
             "sample_index": 13
           },
           {
-            "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "short_term_debt.ending",
-            "source_priority": "official",
-            "duplicate_count": 1,
-            "is_duplicate": false,
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "capex.total",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "fcfe_dcf",
+              "fcff_dcf"
+            ],
             "metric_id": "duplicate_fact_count",
             "sample_index": 14
           },
           {
-            "sample_origin": "canonical_dedupe_key",
-            "ticker": "DBD",
-            "period": "2025FY",
-            "canonical_key": "short_term_investments.ending",
-            "source_priority": "official",
-            "duplicate_count": 1,
-            "is_duplicate": false,
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "cash_and_equivalents.ending",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
             "metric_id": "duplicate_fact_count",
             "sample_index": 15
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "capex.total",
+            "canonical_key": "depreciation.total",
             "present": false,
             "accepted_periods": [],
             "source_titles": [],
             "required_by_methods": [
-              "fcfe_dcf",
+              "ev_ebitda",
               "fcff_dcf"
             ],
             "metric_id": "duplicate_fact_count",
@@ -2741,28 +2676,28 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "cash_and_equivalents.ending",
+            "canonical_key": "eps.basic",
             "present": true,
             "accepted_periods": [
-              "2025FY"
+              "2021FY"
             ],
             "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
+              "DHG Annual Report 2021"
             ],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "pe"
             ],
             "metric_id": "duplicate_fact_count",
             "sample_index": 17
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "change_in_working_capital.total",
+            "canonical_key": "long_term_debt.ending",
             "present": false,
             "accepted_periods": [],
             "source_titles": [],
             "required_by_methods": [
+              "ev_ebitda",
               "fcff_dcf"
             ],
             "metric_id": "duplicate_fact_count",
@@ -2770,30 +2705,28 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "da.total",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
+            "canonical_key": "operating_cash_flow.total",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "fcfe_dcf"
             ],
             "metric_id": "duplicate_fact_count",
             "sample_index": 19
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "ebit.total",
-            "present": true,
-            "accepted_periods": [
-              "2025FY"
-            ],
-            "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
-            ],
+            "canonical_key": "proceeds_from_borrowings.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "fcfe_dcf"
             ],
             "metric_id": "duplicate_fact_count",
             "sample_index": 20
@@ -2807,16 +2740,16 @@
       },
       "evidence": {
         "artifact_ids": [],
-        "dataset_version": "DBD.csv",
+        "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "valuation_method_data_readiness",
       "label": "Valuation method data readiness",
-      "source": "output\\DBD_valuation_read_audit.json",
-      "detail": "low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical",
+      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "detail": "low_confidence_primary_method,valuation_method_divergence_critical",
       "metric_id": "valuation_method_data_readiness",
       "metric_name": "Valuation method data readiness",
       "category": "data_quality",
@@ -2846,7 +2779,7 @@
           "publishable": false,
           "confidence": "low",
           "role": "scenario_only",
-          "target_price_vnd": 27207.0,
+          "target_price_vnd": 106752.0,
           "blocking_reasons": [
             "fcfe_unavailable_for_blend",
             "blend_sensitivity_missing_or_constant",
@@ -2865,7 +2798,7 @@
           "publishable": false,
           "confidence": "medium",
           "role": "cross_check",
-          "target_price_vnd": 63246.0,
+          "target_price_vnd": 207097.0,
           "blocking_reasons": [
             "cross_check_only_not_primary"
           ],
@@ -2899,7 +2832,7 @@
           "publishable": false,
           "confidence": "low",
           "role": "scenario_only",
-          "target_price_vnd": 27207.0,
+          "target_price_vnd": 106752.0,
           "blocking_reasons": [
             "formula_trace_missing",
             "fcff_wacc_or_ev_to_equity_bridge_missing",
@@ -2940,7 +2873,7 @@
       "calculation": {
         "formula": "final_report_publishable and recommendation_publishable",
         "inputs": {
-          "valuation_artifact": "output\\DBD_valuation_read_audit.json",
+          "valuation_artifact": "storage\\runs\\validation_dhg2\\valuation.json",
           "computed_methods": [
             "FCFF",
             "BLEND",
@@ -2965,7 +2898,7 @@
             "publishable": false,
             "confidence": "low",
             "role": "scenario_only",
-            "target_price_vnd": 27207.0,
+            "target_price_vnd": 106752.0,
             "blocking_reasons": [
               "fcfe_unavailable_for_blend",
               "blend_sensitivity_missing_or_constant",
@@ -2986,7 +2919,7 @@
             "publishable": false,
             "confidence": "medium",
             "role": "cross_check",
-            "target_price_vnd": 63246.0,
+            "target_price_vnd": 207097.0,
             "blocking_reasons": [
               "cross_check_only_not_primary"
             ],
@@ -3024,7 +2957,7 @@
             "publishable": false,
             "confidence": "low",
             "role": "scenario_only",
-            "target_price_vnd": 27207.0,
+            "target_price_vnd": 106752.0,
             "blocking_reasons": [
               "formula_trace_missing",
               "fcff_wacc_or_ev_to_equity_bridge_missing",
@@ -3282,12 +3215,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "dataframe_schema_validity",
       "label": "Pandera DataFrame schema validity",
-      "source": "config\\dataset\\golden\\financials\\DBD.csv",
+      "source": "config\\dataset\\golden\\financials\\DHG.csv",
       "detail": "",
       "metric_id": "dataframe_schema_validity",
       "metric_name": "Pandera DataFrame schema validity",
@@ -3306,7 +3239,7 @@
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
-      "dataset_version": "DBD.csv",
+      "dataset_version": "DHG.csv",
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
@@ -3322,11 +3255,11 @@
       "calculation": {
         "formula": "pandera_dataframe_schema_validation",
         "inputs": {
-          "ticker": "DBD",
-          "golden_csv": "config\\dataset\\golden\\financials\\DBD.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DBD_golden_provenance.json",
-          "record_count": 15,
-          "accepted_record_count": 15
+          "ticker": "DHG",
+          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
+          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
+          "record_count": 13,
+          "accepted_record_count": 13
         },
         "parameters": {
           "strict": false,
@@ -3351,14 +3284,14 @@
         "denominator": null,
         "per_sample_results": [
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "revenue.net",
-            "value": "1865.380",
+            "value": "4127.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3366,14 +3299,14 @@
             "sample_index": 1
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "cogs.total",
-            "value": "-981.001",
+            "value": "-2293.0",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3381,14 +3314,14 @@
             "sample_index": 2
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
             "canonical_key": "gross_profit.total",
-            "value": "884.379",
+            "value": "1834.4",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3396,14 +3329,14 @@
             "sample_index": 3
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "selling_expense.total",
-            "value": "-418.308",
+            "canonical_key": "sga.total",
+            "value": "-806.2",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3411,14 +3344,14 @@
             "sample_index": 4
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "admin_expense.total",
-            "value": "-139.794",
+            "canonical_key": "net_income.parent",
+            "value": "803.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3426,14 +3359,14 @@
             "sample_index": 5
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "income_statement",
-            "canonical_key": "ebit.total",
-            "value": "349.128",
-            "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "canonical_key": "eps.basic",
+            "value": "5939.0",
+            "unit": "vnd",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3441,14 +3374,14 @@
             "sample_index": 6
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "income_statement",
-            "canonical_key": "profit_before_tax.total",
-            "value": "346.082",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "36.1",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3456,14 +3389,14 @@
             "sample_index": 7
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "income_statement",
-            "canonical_key": "net_income.parent",
-            "value": "291.940",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "inventory.ending",
+            "value": "1042.9",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3471,14 +3404,14 @@
             "sample_index": 8
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "cash_and_equivalents.ending",
-            "value": "202.784",
+            "canonical_key": "total_assets.ending",
+            "value": "4741.8",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3486,14 +3419,14 @@
             "sample_index": 9
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "short_term_investments.ending",
-            "value": "409.201",
+            "canonical_key": "equity.parent",
+            "value": "3963.2",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3501,14 +3434,14 @@
             "sample_index": 10
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "balance_sheet",
-            "canonical_key": "short_term_debt.ending",
-            "value": "43.215",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "operating_cash_flow.total",
+            "value": "811.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3516,14 +3449,14 @@
             "sample_index": 11
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "balance_sheet",
-            "canonical_key": "long_term_debt.ending",
-            "value": "132.000",
+            "ticker": "DHG",
+            "period": "2021FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "capex.total",
+            "value": "-273.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3531,14 +3464,14 @@
             "sample_index": 12
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
+            "ticker": "DHG",
+            "period": "2021FY",
             "statement_type": "balance_sheet",
-            "canonical_key": "equity.parent",
-            "value": "1736.000",
+            "canonical_key": "total_liabilities.ending",
+            "value": "778.6",
             "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "BCTC hop nhat 2025 sau kiem toan",
+            "source_type": "annual_report",
+            "source_title": "DHG Annual Report 2021",
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
@@ -3546,43 +3479,47 @@
             "sample_index": 13
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "capital_structure",
-            "canonical_key": "shares_outstanding.ending",
-            "value": "94400000",
-            "unit": "shares",
-            "source_type": "disclosure",
-            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
-            "validation_status": "accepted",
-            "sample_origin": "source_row",
-            "schema_valid": true,
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "capex.total",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "fcfe_dcf",
+              "fcff_dcf"
+            ],
             "metric_id": "dataframe_schema_validity",
             "sample_index": 14
           },
           {
-            "ticker": "DBD",
-            "period": "2025FY",
-            "statement_type": "capital_structure",
-            "canonical_key": "dividends_per_share.cash",
-            "value": "2000",
-            "unit": "vnd",
-            "source_type": "disclosure",
-            "source_title": "Tai lieu DHDCD 2026 Bidiphar",
-            "validation_status": "accepted",
-            "sample_origin": "source_row",
-            "schema_valid": true,
+            "sample_origin": "valuation_requirement",
+            "canonical_key": "cash_and_equivalents.ending",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
+            "required_by_methods": [
+              "ev_ebitda",
+              "fcff_dcf"
+            ],
             "metric_id": "dataframe_schema_validity",
             "sample_index": 15
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "capex.total",
+            "canonical_key": "depreciation.total",
             "present": false,
             "accepted_periods": [],
             "source_titles": [],
             "required_by_methods": [
-              "fcfe_dcf",
+              "ev_ebitda",
               "fcff_dcf"
             ],
             "metric_id": "dataframe_schema_validity",
@@ -3590,28 +3527,28 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "cash_and_equivalents.ending",
+            "canonical_key": "eps.basic",
             "present": true,
             "accepted_periods": [
-              "2025FY"
+              "2021FY"
             ],
             "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
+              "DHG Annual Report 2021"
             ],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "pe"
             ],
             "metric_id": "dataframe_schema_validity",
             "sample_index": 17
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "change_in_working_capital.total",
+            "canonical_key": "long_term_debt.ending",
             "present": false,
             "accepted_periods": [],
             "source_titles": [],
             "required_by_methods": [
+              "ev_ebitda",
               "fcff_dcf"
             ],
             "metric_id": "dataframe_schema_validity",
@@ -3619,30 +3556,28 @@
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "da.total",
-            "present": false,
-            "accepted_periods": [],
-            "source_titles": [],
+            "canonical_key": "operating_cash_flow.total",
+            "present": true,
+            "accepted_periods": [
+              "2021FY"
+            ],
+            "source_titles": [
+              "DHG Annual Report 2021"
+            ],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "fcfe_dcf"
             ],
             "metric_id": "dataframe_schema_validity",
             "sample_index": 19
           },
           {
             "sample_origin": "valuation_requirement",
-            "canonical_key": "ebit.total",
-            "present": true,
-            "accepted_periods": [
-              "2025FY"
-            ],
-            "source_titles": [
-              "BCTC hop nhat 2025 sau kiem toan"
-            ],
+            "canonical_key": "proceeds_from_borrowings.total",
+            "present": false,
+            "accepted_periods": [],
+            "source_titles": [],
             "required_by_methods": [
-              "ev_ebitda",
-              "fcff_dcf"
+              "fcfe_dcf"
             ],
             "metric_id": "dataframe_schema_validity",
             "sample_index": 20
@@ -3656,25 +3591,25 @@
       },
       "evidence": {
         "artifact_ids": [],
-        "dataset_version": "DBD.csv",
+        "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     }
   ],
-  "core_metric_coverage": 0.42857142857142855,
+  "core_metric_coverage": 0.38461538461538464,
   "period_completeness": 1.0,
   "provenance_coverage": 1.0,
-  "official_reconciliation_rate": 0.9,
+  "official_reconciliation_rate": 1.0,
   "material_ocr_error_count": 0,
-  "ocr_unresolved_rate": 1.0,
+  "ocr_unresolved_rate": 0.0,
   "duplicate_fact_count": 0,
   "duplicate_fact_rate": 0.0,
   "valuation_method_data_readiness": false,
   "valuation_policy": {
-    "ticker": "DBD",
+    "ticker": "DHG",
     "run_id": null,
-    "valuation_artifact_path": "output\\DBD_valuation_read_audit.json",
+    "valuation_artifact_path": "storage\\runs\\validation_dhg2\\valuation.json",
     "computed_methods": [
       "FCFF",
       "BLEND",
@@ -3711,18 +3646,17 @@
     "severity": "critical",
     "blocking_reasons": [
       "low_confidence_primary_method",
-      "market_sanity_bridge_missing",
       "valuation_method_divergence_critical"
     ],
     "warnings": [],
-    "divergence_pct": 1.3246223398390122,
+    "divergence_pct": 0.9399823890887291,
     "target_price_vnd": null,
     "method_diagnostics": {
       "FCFF": {
         "method_name": "FCFF",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 27207.0,
+        "target_price_vnd": 106752.0,
         "confidence": "low",
         "role": "scenario_only",
         "blocking_reasons": [
@@ -3762,7 +3696,7 @@
         "method_name": "BLEND",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 27207.0,
+        "target_price_vnd": 106752.0,
         "confidence": "low",
         "role": "scenario_only",
         "blocking_reasons": [
@@ -3802,7 +3736,7 @@
         "method_name": "CORE_PE_NET_CASH",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 63246.0,
+        "target_price_vnd": 207097.0,
         "confidence": "medium",
         "role": "cross_check",
         "blocking_reasons": [
@@ -3819,51 +3753,72 @@
       }
     }
   },
-  "ocr": {},
+  "ocr": {
+    "ocr_run_id": "7039da1268254f1fbf71d3ecd6d04b88",
+    "document_id": "DHG_2025_abaaac8d3813",
+    "ticker": "DHG",
+    "fiscal_year": 2025,
+    "source_uri": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\storage\\sources\\official_documents\\DHG\\2025\\00c16423bad04feaab36f8cb998ef22511550cabeaddb12a6fe152450aad5b5e.pdf",
+    "source_checksum": "abaaac8d3813329db1987e769f325fbee7b8c4776b4205b26a4673f95b589973",
+    "pdf_type": "scanned",
+    "ocr_engine": "tesseract",
+    "ocr_lang": "eng",
+    "dpi": 200,
+    "parser_version": "1.0.0",
+    "started_at": "2026-06-10T03:49:04.202634+00:00",
+    "completed_at": "2026-06-10T03:50:02.815960+00:00",
+    "status": "completed",
+    "pages_processed": 40,
+    "pages_failed": 0,
+    "candidate_row_count": 0,
+    "mapped_fact_count": 0,
+    "warnings": [
+      "english_only_ocr"
+    ],
+    "errors": []
+  },
   "pandera": {
     "execution_status": "executed",
     "framework": "pandera",
     "framework_version": "0.31.1",
-    "sample_size": 15,
+    "sample_size": 13,
     "passed": true,
     "failure_cases": [],
     "reason": null
   },
   "golden_provenance": {
-    "ticker": "DBD",
+    "ticker": "DHG",
     "verified_by": "haubelerche",
-    "verification_date": "2026-06-03",
-    "source_tier": 0,
-    "source_document_type": "financial_statement",
-    "fiscal_year": 2025,
+    "verification_date": "2026-05-30",
+    "source_tier": 1,
+    "source_document_type": "annual_report",
+    "fiscal_year": 2021,
     "fiscal_period": "FY",
-    "publisher": "Bidiphar (Cong ty CP Duoc - Trang thiet bi Y te Binh Dinh)",
-    "published_at": "2026-03-25",
+    "publisher": "DHG Pharma (Dược Hậu Giang)",
+    "published_at": "2022-04-15",
     "source_documents_used": [
-      "BCTC hop nhat nam 2025 sau kiem toan (Bidiphar)",
-      "Tai lieu / tin DHDCD 2026 Bidiphar (co tuc tien mat 20%, so co phieu luu hanh)"
+      "DHG Annual Report 2021 — Báo cáo thường niên",
+      "DHG Audited Financial Statements 2021 — BCTC kiểm toán năm 2021"
     ],
     "source_urls": [
-      "https://bidiphar.com/wp-content/uploads/2026/03/bao-cao-tai-chinh-hop-nhat-nam-2025-sau-kiem-toan-1774620839.pdf",
-      "https://bidiphar.com/bidiphar-dbd-to-chuc-thanh-cong-dhdcd-2026/",
-      "https://bidiphar.com/category/quan-he-co-dong/bao-cao-tai-chinh/"
+      "https://dhg.com.vn/bao-cao-thuong-nien",
+      "https://dhg.com.vn/investor-relations"
     ],
-    "notes": "Official audited 2025FY figures injected to fix audit items NUMERIC-02 (selling vs admin expense split: SG&A = 418.308 + 139.794 = 558.102), NUMERIC-04 (net debt bridge: long_term_debt 132.0 + short_term_investments 409.201 -> net debt approx -436.77), NUMERIC-01/DATA-03 (shares_outstanding ~94.4m and cash dividend 2,000 VND/cp). Values in VND billion unless unit states otherwise (shares in absolute count; dividend in VND/share). Only 2025FY is injected here: the audit verified the official 2025 split and balance-sheet components; 2021-2024 admin-expense / long-term-debt / short-term-investments official breakdown was NOT independently verified and remains from the provider (vnstock/VCI) pending official sourcing. equity.parent 2025 carried at provider value (confidence 0.85) pending exact audited figure. Q1/2026, 2026 management guidance (revenue 2,090 / PBT 375), private placement (23.3m) and ESOP (1.5m) are NOT canonical FY facts and are deliberately excluded per FY-only scope; they belong to ManagementGuidance / CorporateAction artifacts (follow-up).",
+    "notes": "Key financial figures for 2021FY extracted from DHG Annual Report 2021 and cross-checked against audited financial statements. Values in VND billion unless stated. EPS in VND per share. Revenue, gross profit, net income, total assets, equity, OCF, capex verified against BCTC kiểm toán page references.",
     "metrics_verified": [
       "revenue.net",
       "cogs.total",
       "gross_profit.total",
-      "selling_expense.total",
-      "admin_expense.total",
-      "ebit.total",
-      "profit_before_tax.total",
+      "sga.total",
       "net_income.parent",
+      "eps.basic",
       "cash_and_equivalents.ending",
-      "short_term_investments.ending",
-      "short_term_debt.ending",
-      "long_term_debt.ending",
-      "shares_outstanding.ending",
-      "dividends_per_share.cash"
+      "inventory.ending",
+      "total_assets.ending",
+      "equity.parent",
+      "operating_cash_flow.total",
+      "capex.total",
+      "total_liabilities.ending"
     ],
     "checksum": "sha256:pending"
   }

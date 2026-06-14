@@ -1,5 +1,5 @@
 export type Comparator = "gte" | "lte";
-export type MetricStatus = "pass" | "fail" | "warning" | "not_evaluable";
+export type MetricStatus = "pass" | "fail" | "warning" | "not_evaluable" | "blocked" | "not_measured";
 
 export interface MetricDef {
   id: string;
@@ -31,9 +31,9 @@ export function normalizeMetricStatus(status: string | null | undefined): Metric
   const normalized = (status ?? "").toLowerCase();
   if (normalized === "pass" || normalized === "passed" || normalized === "ok") return "pass";
   if (normalized === "warning" || normalized === "warn" || normalized === "measured_only") return "warning";
-  if (normalized === "not_evaluable" || normalized === "blocked" || normalized === "not_measured") {
-    return "not_evaluable";
-  }
+  if (normalized === "blocked") return "blocked";
+  if (normalized === "not_measured") return "not_measured";
+  if (normalized === "not_evaluable") return "not_evaluable";
   return "fail";
 }
 

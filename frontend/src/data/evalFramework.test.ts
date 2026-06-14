@@ -3,8 +3,10 @@ import { ACCEPTANCE_EXPLANATION, EVAL_LAYERS, PIPELINE_ORDER } from "./evalFrame
 
 describe("evalFramework", () => {
   it("contains only benchmarkable evaluation groups", () => {
-    expect(EVAL_LAYERS.length).toBe(7);
+    expect(EVAL_LAYERS.length).toBe(5);
     expect(EVAL_LAYERS.some((layer) => layer.id === "rollout_ci")).toBe(false);
+    expect(EVAL_LAYERS.some((layer) => layer.id === "citation")).toBe(false);
+    expect(EVAL_LAYERS.some((layer) => layer.id === "report_quality")).toBe(false);
   });
   it("defines one threshold, technology and formula for every metric", () => {
     for (const layer of EVAL_LAYERS) {

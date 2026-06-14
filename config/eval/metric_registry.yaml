@@ -187,6 +187,11 @@ metrics:
     framework: agent_governance_gate
     formula: compliant_financial_calculation_events / checked_financial_calculation_events
     rationale: Financial calculations belong in deterministic code paths, not free-form LLM reasoning.
+  artifact_manifest_compliance:
+    threshold: "= 100%"
+    framework: artifact_manifest_gate
+    formula: stored_required_artifacts / required_artifacts
+    rationale: Agent-produced artifacts must have governed storage lineage before export.
   role_adherence:
     threshold: ">= 0.85"
     framework: deepeval

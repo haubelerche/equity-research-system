@@ -11,6 +11,8 @@ from backend.evaluation.project_evaluator import (
 from backend.evaluation import runtime_evaluators
 from backend.evaluation.runtime_evaluators import (
     evaluate_data_reliability,
+    evaluate_agent,
+    evaluate_financial,
     evaluate_retrieval,
     _matrix_varies,
     _run_local_retrieval_benchmark,
@@ -378,3 +380,196 @@ def test_data_reliability_fails_closed_when_ocr_metadata_is_missing(tmp_path) ->
         sample["reason"] == "ocr_metadata_missing_for_ticker"
         for sample in metric["failed_examples"]
     )
+
+
+def test_financial_evaluator_enforces_fcfe_formula_and_publishability(tmp_path) -> None:
+    valuation_dir = tmp_path / "storage" / "runs" / "run_aaa"
+    valuation_dir.mkdir(parents=True)
+    (valuation_dir / "valuation.json").write_text(
+        json.dumps({
+            "ticker": "AAA",
+            "current_price_vnd": 100,
+            "valuation_confidence": {"fcff_dcf": "high", "fcfe_dcf": "high"},
+            "fcff": {
+                "wacc": 0.11,
+                "terminal_growth": 0.03,
+                "wacc_breakdown": {"wacc": 0.11},
+                "fcff_table": [{
+                    "ebit_after_tax": 10,
+                    "depreciation": 2,
+                    "capex": 3,
+                    "delta_nwc": 1,
+                    "fcff": 8,
+                }],
+                "enterprise_value": 100,
+                "equity_value": 110,
+                "shares_mn": 1,
+                "target_price_vnd": 110000,
+                "net_debt_bridge": {
+                    "total_debt": 5,
+                    "cash": 10,
+                    "short_term_investments": 5,
+                    "net_debt": -10,
+                },
+                "ev_to_equity_bridge": {"equity_value": 110},
+            },
+            "fcfe": {
+                "cost_of_equity_breakdown": {"cost_of_equity": 0.12},
+                "fcfe_table": [{
+                    "net_income": 10,
+                    "depreciation": 2,
+                    "capex": 3,
+                    "delta_nwc": 1,
+                    "net_borrowing": 4,
+                    "fcfe": 99,
+                }],
+                "equity_value": 120,
+                "target_price_vnd": 120000,
+            },
+            "blend_dcf": {
+                "target_price_dcf_vnd": 114000,
+                "price_fcff_vnd": 110000,
+                "price_fcfe_vnd": 120000,
+                "is_draft_only": False,
+            },
+            "sensitivity": {
+                "fcff_wacc_g": {"base_wacc": 0.11, "base_terminal_growth": 0.03, "0.11": {"0.03": 110000, "0.04": 120000}},
+                "fcfe_re_g": {"base_re": 0.12, "base_terminal_growth": 0.03, "0.12": {"0.03": 120000, "0.04": 130000}},
+                "blend_grid": {"base_weight": "60/40", "60/40": {"base": 114000, "alt": 115000}},
+            },
+            "formula_traces": [{"method": "fcff"}, {"method": "fcfe"}],
+        }),
+        encoding="utf-8",
+    )
+
+    result = evaluate_financial(tmp_path, "AAA")
+    metrics = {metric["id"]: metric for metric in result["metrics"]}
+
+    assert metrics["fcff"]["status"] == "pass"
+    assert metrics["fcfe"]["status"] == "fail"
+    assert metrics["accounting_invariant_violations"]["value"] >= 1
+    assert result["decision"] == "block"
+
+
+def test_financial_evaluator_passes_complete_formula_fixture(tmp_path) -> None:
+    valuation_dir = tmp_path / "storage" / "runs" / "run_aaa"
+    valuation_dir.mkdir(parents=True)
+    (valuation_dir / "valuation.json").write_text(
+        json.dumps({
+            "ticker": "AAA",
+            "current_price_vnd": 100000,
+            "valuation_confidence": {"fcff_dcf": "high", "fcfe_dcf": "high"},
+            "fcff": {
+                "wacc": 0.11,
+                "terminal_growth": 0.03,
+                "wacc_breakdown": {"wacc": 0.11},
+                "fcff_table": [{
+                    "ebit_after_tax": 10,
+                    "depreciation": 2,
+                    "capex": 3,
+                    "delta_nwc": 1,
+                    "fcff": 8,
+                }],
+                "enterprise_value": 100,
+                "equity_value": 110,
+                "shares_mn": 1,
+                "target_price_vnd": 110000,
+                "net_debt_bridge": {
+                    "total_debt": 5,
+                    "cash": 10,
+                    "short_term_investments": 5,
+                    "net_debt": -10,
+                },
+                "ev_to_equity_bridge": {"equity_value": 110},
+            },
+            "fcfe": {
+                "cost_of_equity_breakdown": {"cost_of_equity": 0.12},
+                "fcfe_table": [{
+                    "net_income": 10,
+                    "depreciation": 2,
+                    "capex": 3,
+                    "delta_nwc": 1,
+                    "net_borrowing": 4,
+                    "fcfe": 12,
+                }],
+                "equity_value": 120,
+                "target_price_vnd": 120000,
+            },
+            "blend_dcf": {
+                "target_price_dcf_vnd": 114000,
+                "price_fcff_vnd": 110000,
+                "price_fcfe_vnd": 120000,
+                "is_draft_only": False,
+            },
+            "sensitivity": {
+                "fcff_wacc_g": {"base_wacc": 0.11, "base_terminal_growth": 0.03, "0.11": {"0.03": 110000, "0.04": 120000}},
+                "fcfe_re_g": {"base_re": 0.12, "base_terminal_growth": 0.03, "0.12": {"0.03": 120000, "0.04": 130000}},
+                "blend_grid": {"base_weight": "60/40", "60/40": {"base": 114000, "alt": 115000}},
+            },
+            "formula_traces": [{"method": "fcff"}, {"method": "fcfe"}],
+        }),
+        encoding="utf-8",
+    )
+
+    result = evaluate_financial(tmp_path, "AAA")
+    metrics = {metric["id"]: metric for metric in result["metrics"]}
+
+    assert metrics["fcfe"]["status"] == "pass"
+    assert metrics["sensitivity_base_cell"]["status"] == "pass"
+    assert metrics["valuation_publishable"]["status"] == "pass"
+    assert result["decision"] == "pass"
+
+
+def test_agent_evaluator_validates_schema_manifest_and_unauthorized_calc(tmp_path) -> None:
+    schema_dir = tmp_path / "config" / "harness"
+    schema_dir.mkdir(parents=True)
+    schema_dir.joinpath("evidence_packet_schema.json").write_text(
+        json.dumps({
+            "required": ["schema_version", "run_id", "ticker", "gate_results", "packet_hash"],
+            "properties": {
+                "schema_version": {"type": "integer", "const": 1},
+                "run_id": {"type": "string"},
+                "ticker": {"type": "string"},
+                "gate_results": {"type": "object"},
+                "packet_hash": {"type": "string"},
+            },
+            "additionalProperties": True,
+        }),
+        encoding="utf-8",
+    )
+    archive = tmp_path / "storage" / "archive" / "run_aaa"
+    archive.mkdir(parents=True)
+    archive.joinpath("run1_evidence_packet.json").write_text(
+        json.dumps({
+            "schema_version": 1,
+            "run_id": "run_aaa",
+            "ticker": "AAA",
+            "gate_results": {
+                "TOOL_PERMISSION_GATE": {"passed": True},
+                "ARTIFACT_MANIFEST_GATE": {"passed": False, "blocking_reasons": ["artifact_storage_path_missing:valuation"]},
+            },
+            "tool_execution_summary": [{"tool_name": "lookup", "status": "completed"}],
+            "packet_hash": "a" * 64,
+        }),
+        encoding="utf-8",
+    )
+    archive.joinpath("run1_agent_effectiveness_audit.json").write_text(
+        json.dumps({
+            "ticker": "AAA",
+            "agent_execution": [{
+                "agent_id": "financial_analysis",
+                "status": "completed",
+                "output_summary": {"commentary": "target price = equity value / shares = 120000"},
+            }],
+        }),
+        encoding="utf-8",
+    )
+
+    result = evaluate_agent(tmp_path, "AAA")
+    metrics = {metric["id"]: metric for metric in result["metrics"]}
+
+    assert metrics["tool_permission_compliance"]["status"] == "pass"
+    assert metrics["artifact_manifest_compliance"]["status"] == "fail"
+    assert metrics["schema_validity"]["status"] == "pass"
+    assert metrics["no_unauthorized_calc"]["status"] == "fail"
+    assert result["status"] == "fail"

@@ -37,10 +37,14 @@
   <!-- ── Rating → CSS class mapping ───────────────────────── -->
   {% set _rating_class_map = {
     "BUY":          "recommendation-buy",
+    "MUA":          "recommendation-buy",
     "ACCUMULATE":   "recommendation-accumulate",
     "HOLD":         "recommendation-hold",
+    "GIỮ":          "recommendation-hold",
+    "NẮM GIỮ":      "recommendation-hold",
     "REDUCE":       "recommendation-reduce",
-    "SELL":         "recommendation-sell"
+    "SELL":         "recommendation-sell",
+    "BÁN":          "recommendation-sell"
   } %}
   {% set rec_class = _rating_class_map.get((rating or "") | upper, "recommendation-review") %}
 

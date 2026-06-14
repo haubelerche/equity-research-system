@@ -3,9 +3,9 @@
   "benchmark_suite_version": "benchmark_standards_v1",
   "plan_id": "07",
   "plan_name": "Observability, cost, and latency",
-  "ticker": "DBD",
-  "run_id": "benchmark-02-rag-restored-DBD",
-  "generated_at": "2026-06-14T11:42:07.938612+00:00",
+  "ticker": "DHG",
+  "run_id": "phase1-dhg-nondbd-baseline",
+  "generated_at": "2026-06-14T16:28:52.781840+00:00",
   "status": "blocked",
   "test_execution": {
     "status": "pass",
@@ -16,7 +16,7 @@
       "tests/unit/test_run_status_semantics.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.586,
+    "duration_seconds": 0.579,
     "summary": {
       "passed": 26
     },
@@ -104,7 +104,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "llm_retry_rate",
@@ -165,7 +165,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "retrieval_fallback_rate",
@@ -226,7 +226,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "ocr_failure_rate",
@@ -241,32 +241,27 @@
       "scope": "system_window",
       "severity": "P3",
       "blocks_publish": false,
-      "value": null,
+      "value": 0.0,
       "threshold": "<= 5%",
       "threshold_operator": "<=",
       "unit": "percent",
-      "status": "not_evaluable",
-      "legacy_status": "not_evaluable",
-      "sample_size": 0,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "reason": "evaluation_evidence_missing",
-          "source": "latest OCR metadata"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
       "evaluator": {
         "id": "ocr_failure_rate",
         "framework": "ocr_runtime_metrics",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": "failed_material_ocr_documents / material_ocr_documents",
@@ -287,12 +282,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "pdf_render_failures",
       "label": "PDF render failures",
-      "source": "output/DBD_report.pdf",
+      "source": "output/DHG_report.pdf",
       "detail": "",
       "metric_id": "pdf_render_failures",
       "metric_name": "PDF render failures",
@@ -343,7 +338,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     },
     {
       "id": "cost_per_report",
@@ -404,7 +399,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T11:42:07.938612+00:00"
+      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
     }
   ],
   "duration_seconds": null,
@@ -422,8 +417,8 @@
     "fallback_rate": null
   },
   "ocr": {
-    "pages_processed": 0,
-    "failure_rate": null
+    "pages_processed": 40,
+    "failure_rate": 0.0
   },
   "publication": {
     "readiness_passed": false,

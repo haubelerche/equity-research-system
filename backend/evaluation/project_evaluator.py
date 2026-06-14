@@ -451,6 +451,8 @@ def load_evaluation_artifact(
 
 
 def main() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="Run the eight project evaluation plans.")
     parser.add_argument("--ticker", default="DHG")
     parser.add_argument("--run-id")

@@ -225,6 +225,7 @@ def test_autoingest_config_ocr_default_false():
 
     cfg = AutoIngestConfig(ticker="DHG", from_year=2021, to_year=2025)
     assert cfg.ocr is False
+    assert cfg.promote_official_only is False
 
 
 def test_autoingest_config_ocr_can_be_enabled():

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from unittest.mock import patch
+import inspect
 
 import pytest
 
@@ -109,3 +110,12 @@ def test_tries_next_candidate_when_latest_render_fails(
     out = fast.generate_fast_report("DHG")
 
     assert out["run_id"] == "run_good"
+
+
+def test_report_run_discovery_accepts_report_model_or_draft_valuation_artifacts() -> None:
+    import scripts.generate_fast_report as fast
+
+    source = inspect.getsource(fast._latest_report_run_ids)
+    assert "report_candidate_model" in source
+    assert "has_final_model OR (has_facts AND has_valuation AND has_manifest)" in source
+    assert "storage_path IS NOT NULL" in source

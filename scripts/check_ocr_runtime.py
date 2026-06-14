@@ -25,6 +25,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+LOCAL_TESSDATA = ROOT / "storage" / "tessdata"
+
 
 def _check_tesseract_binary() -> tuple[bool, str]:
     """Check if tesseract binary is installed and accessible."""
@@ -80,8 +83,12 @@ def _check_vietnamese_language() -> tuple[bool, str]:
         if not tess_path:
             return False, "Cannot check languages: tesseract binary not found"
 
+        cmd = [tess_path, "--list-langs"]
+        if (LOCAL_TESSDATA / "vie.traineddata").is_file():
+            cmd.extend(["--tessdata-dir", str(LOCAL_TESSDATA)])
+
         result = subprocess.run(
-            [tess_path, "--list-langs"],
+            cmd,
             capture_output=True,
             text=True,
             timeout=5,
@@ -108,7 +115,8 @@ def _check_vietnamese_language() -> tuple[bool, str]:
                 f"  containing vie.traineddata"
             )
 
-        return True, "language: vie found"
+        source = f"local tessdata ({LOCAL_TESSDATA})" if "--tessdata-dir" in cmd else "system tessdata"
+        return True, f"language: vie found via {source}"
 
     except subprocess.TimeoutExpired:
         return False, "tesseract --list-langs timed out"
@@ -171,18 +179,24 @@ def _check_python_packages() -> tuple[bool, str]:
         import pytesseract  # noqa: F401
     except ImportError:
         missing.append("pytesseract")
+    except Exception as exc:
+        missing.append(f"pytesseract ({type(exc).__name__}: {exc})")
 
     # Check pdf2image
     try:
         import pdf2image  # noqa: F401
     except ImportError:
         missing.append("pdf2image")
+    except Exception as exc:
+        missing.append(f"pdf2image ({type(exc).__name__}: {exc})")
 
     # Check PIL/Pillow
     try:
         from PIL import Image  # noqa: F401
     except ImportError:
         missing.append("Pillow (PIL)")
+    except Exception as exc:
+        missing.append(f"Pillow/PIL ({type(exc).__name__}: {exc})")
 
     if missing:
         return False, (

@@ -234,7 +234,9 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
     "blend_sensitivity": PLAN_DEFAULTS["03"],
     "formula_trace": PLAN_DEFAULTS["03"],
     "valuation_artifact": PLAN_DEFAULTS["03"],
+    "valuation_publishable": PLAN_DEFAULTS["03"],
     "critical_failures": PLAN_DEFAULTS["03"],
+    "sensitivity_base_cell": PLAN_DEFAULTS["03"],
     "golden_drift_out_of_tolerance": PLAN_DEFAULTS["03"],
     "accounting_invariant_violations": PLAN_DEFAULTS["03"],
     "valuation_regression_failures": PLAN_DEFAULTS["03"],
@@ -280,6 +282,10 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
     "tool_permission_compliance": MetricMetadata(
         "agent_llm", "release_gate", "coverage", "report_run", "P0", True,
         "percent", "platform", "Reject or repair tool calls that lack explicit permission metadata.",
+    ),
+    "artifact_manifest_compliance": MetricMetadata(
+        "agent_llm", "release_gate", "coverage", "report_run", "P0", True,
+        "percent", "platform", "Attach storage paths for facts, index, ratios, valuation, report, and evidence packet artifacts.",
     ),
     "schema_validity": MetricMetadata(
         "agent_llm", "release_gate", "coverage", "report_run", "P0", True,

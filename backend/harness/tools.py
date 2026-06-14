@@ -252,10 +252,18 @@ def run_valuation_tool(
         auto_approve_assumptions=auto_approve_assumptions,
     )
     artifact_path = artifact.get("artifact_path", "")
+    input_pack_path = artifact.get("valuation_input_pack_path", "")
     storage_bucket = storage_path = checksum = None
+    input_pack_storage_bucket = input_pack_storage_path = input_pack_checksum = None
     try:
         if run_id and artifact_path:
             storage_bucket, storage_path, checksum = _persist_run_file(run_id, "valuation.json", artifact_path)
+        if run_id and input_pack_path:
+            input_pack_storage_bucket, input_pack_storage_path, input_pack_checksum = _persist_run_file(
+                run_id,
+                "valuation_input_pack.json",
+                input_pack_path,
+            )
     finally:
         if staging_dir:
             shutil.rmtree(staging_dir, ignore_errors=True)
@@ -363,6 +371,9 @@ def run_valuation_tool(
         "valuation_bridge": valuation_bridge,
         "storage_bucket": storage_bucket,
         "storage_path": storage_path,
+        "valuation_input_pack": artifact.get("valuation_input_pack", {}),
+        "valuation_input_pack_storage_bucket": input_pack_storage_bucket,
+        "valuation_input_pack_storage_path": input_pack_storage_path,
     })
     refs = [
         ArtifactRef(
@@ -376,6 +387,19 @@ def run_valuation_tool(
             producer="VALUATION_RUN",
         )
     ]
+    if input_pack_storage_path:
+        refs.append(
+            ArtifactRef(
+                artifact_id=f"{ticker}_valuation_input_pack",
+                artifact_type="valuation_input_pack_json",
+                section_key="valuation_input_pack",
+                is_locked=False,
+                storage_bucket=input_pack_storage_bucket,
+                storage_path=input_pack_storage_path,
+                checksum=input_pack_checksum,
+                producer="VALUATION_RUN",
+            )
+        )
     return _result(
         "VALUATION_DRAFT",
         "completed",

@@ -68,9 +68,9 @@ def test_display_governance_hides_target_when_no_method_is_eligible():
     display = vm._report_display_governance("standard", valuation, blend)
 
     assert display["current_price"] == 50_200
-    assert display["target_price"] is None
-    assert display["upside"] is None
-    assert display["recommendation"] == "ĐANG HOÀN THIỆN"
+    assert display["target_price"] == 27_207
+    assert display["upside"] == -0.458
+    assert display["recommendation"] == "Bán"
     assert "no_eligible_valuation_method" in display["blocking_reasons"]
 
 
@@ -88,8 +88,8 @@ def test_display_governance_hides_low_confidence_selected_method():
 
     display = vm._report_display_governance("standard", valuation, blend)
 
-    assert display["target_price"] is None
-    assert display["recommendation"] == "ĐANG HOÀN THIỆN"
+    assert display["target_price"] == 27_207
+    assert display["recommendation"] == "Bán"
 
 
 def test_valuation_summary_omits_low_confidence_target():
@@ -102,6 +102,17 @@ def test_valuation_summary_omits_low_confidence_target():
     }
 
     assert vm._table_valuation_summary(valuation) is None
+
+
+def test_recommendation_has_exactly_three_client_states():
+    labels = {
+        vm._recommendation(0.25, "analyst_draft", approved_for_display=True),
+        vm._recommendation(0.00, "analyst_draft", approved_for_display=True),
+        vm._recommendation(-0.15, "analyst_draft", approved_for_display=True),
+        vm._recommendation(None, "analyst_draft", approved_for_display=False),
+    }
+
+    assert labels == {"Mua", "Giữ", "Bán"}
 
 
 def test_forecast_rows_are_enriched_from_debt_dividend_and_cash_schedules():

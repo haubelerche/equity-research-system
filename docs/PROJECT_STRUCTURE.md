@@ -53,7 +53,7 @@ Một repo agentic finance có nhiều lớp dễ gây nhầm lẫn: connector, 
 | Sửa export readiness | `backend/harness/gates.py`, `backend/evaluation/report_quality.py`, `config/harness/export_gate_policy.yml` |
 | Sửa evaluation project-level | `backend/evaluation/project_evaluator.py`, `backend/evaluation/runtime_evaluators.py`, `eval/` |
 | Sửa report inventory UI | `frontend/src/pages/ReportsPage.tsx`, `backend/api.py`, `backend/reporting/output_inventory.py` |
-| Sửa evaluation dashboard | `frontend/src/pages/EvalDashboardPage.tsx`, `frontend/src/data/evalFramework.ts`, `frontend/src/mock/` |
+| Sửa evaluation dashboard | `frontend/src/pages/EvalDashboardPage.tsx`, `frontend/src/data/evalFramework.ts`, backend evaluation endpoints; `frontend/src/mock/` chỉ là fixture test/dev |
 
 ## Strategic Recommendations
 

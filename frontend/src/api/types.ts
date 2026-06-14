@@ -9,6 +9,8 @@ export interface ReportItem {
   preview_pages: number[];
   report_size: number | null;
   updated_at: string | null;
+  renderable_run_ids?: string[];
+  lineage_source?: "manifest" | "local_files" | string;
 }
 
 export interface ReportsResponse {

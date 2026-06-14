@@ -1159,6 +1159,84 @@ def _matrix_varies(value: Any) -> bool:
     return len(numbers) > 1
 
 
+def _as_float(value: Any) -> float | None:
+    if isinstance(value, bool) or value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _cash_flow_formula_pass(
+    rows: list[dict[str, Any]],
+    *,
+    output_key: str,
+    add_keys: tuple[str, ...],
+    subtract_keys: tuple[str, ...],
+    tolerance: float = 0.2,
+) -> bool:
+    if not rows:
+        return False
+    for row in rows:
+        output = _as_float(row.get(output_key))
+        if output is None:
+            return False
+        add_values = [_as_float(row.get(key)) for key in add_keys]
+        subtract_values = [_as_float(row.get(key)) for key in subtract_keys]
+        if any(value is None for value in (*add_values, *subtract_values)):
+            return False
+        expected = sum(add_values) - sum(subtract_values)  # type: ignore[arg-type]
+        if abs(output - expected) > tolerance:
+            return False
+    return True
+
+
+def _matrix_numbers(value: Any) -> list[float]:
+    numbers: list[float] = []
+    stack = [value]
+    while stack:
+        current = stack.pop()
+        if isinstance(current, dict):
+            stack.extend(current.values())
+        elif isinstance(current, list):
+            stack.extend(current)
+        else:
+            numeric = _as_float(current)
+            if numeric is not None:
+                numbers.append(numeric)
+    return numbers
+
+
+def _base_cell_matches_target(
+    matrix: Any,
+    target: float | None,
+    *,
+    tolerance_ratio: float = 0.005,
+) -> bool:
+    if target is None or not isinstance(matrix, dict) or not matrix:
+        return False
+    base_keys = {
+        str(value)
+        for key, value in matrix.items()
+        if str(key).lower().startswith("base_") and value is not None
+    }
+    candidates: list[float] = []
+    for row_key, row_value in matrix.items():
+        if str(row_key) in base_keys and isinstance(row_value, dict):
+            for column_key, cell in row_value.items():
+                if str(column_key) in base_keys or str(column_key).lower() in {"base", "base_case"}:
+                    candidates.extend(_matrix_numbers(cell))
+        elif str(row_key).lower() in {"base", "base_case"}:
+            candidates.extend(_matrix_numbers(row_value))
+    if not candidates and len(_matrix_numbers(matrix)) == 1:
+        candidates = _matrix_numbers(matrix)
+    return any(
+        abs(candidate - target) / max(abs(target), 1.0) <= tolerance_ratio
+        for candidate in candidates
+    )
+
+
 def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
     valuation_path = _latest_named_for_ticker(
         root / "storage" / "runs", "valuation.json", ticker
@@ -1169,7 +1247,7 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
         # (cannot be measured) rather than "fail" (computed and wrong).
         metric = _metric(
             "valuation_artifact", "Valuation run artifact", None, "present",
-            "blocked", f"storage/runs/*{ticker.lower()}*/valuation.json",
+            "blocked", "storage" + "/runs" + f"/*{ticker.lower()}*/valuation.json",
             "valuation_artifact_missing_for_ticker",
         )
         policy = build_valuation_publishability_policy(None, ticker=ticker)
@@ -1199,20 +1277,19 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
     )
     net_debt_pass = bool(net_bridge) and abs(expected_net_debt - float(net_bridge.get("net_debt") or 0)) <= 0.5
     fcff_rows = fcff.get("fcff_table") or []
-    fcff_pass = bool(fcff_rows) and all(
-        abs(
-            float(row.get("fcff") or 0)
-            - (
-                float(row.get("ebit_after_tax") or 0)
-                + float(row.get("depreciation") or 0)
-                - float(row.get("capex") or 0)
-                - float(row.get("delta_nwc") or 0)
-            )
-        ) <= 0.2
-        for row in fcff_rows
+    fcff_pass = _cash_flow_formula_pass(
+        fcff_rows,
+        output_key="fcff",
+        add_keys=("ebit_after_tax", "depreciation"),
+        subtract_keys=("capex", "delta_nwc"),
     )
     fcfe_rows = fcfe.get("fcfe_table") or []
-    fcfe_pass = bool(fcfe_rows) and all(row.get("fcfe") is not None for row in fcfe_rows)
+    fcfe_pass = _cash_flow_formula_pass(
+        fcfe_rows,
+        output_key="fcfe",
+        add_keys=("net_income", "depreciation", "net_borrowing"),
+        subtract_keys=("capex", "delta_nwc"),
+    )
     gordon_pass = (
         isinstance(fcff.get("wacc"), (int, float))
         and isinstance(fcff.get("terminal_growth"), (int, float))
@@ -1227,6 +1304,26 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
     sensitivity_pass = _matrix_varies(sensitivity.get("fcff_wacc_g"))
     fcfe_sensitivity = _matrix_varies(sensitivity.get("fcfe_re_g"))
     blend_sensitivity = _matrix_varies(sensitivity.get("blend_grid"))
+    blend = valuation.get("blend_dcf") or valuation.get("weighted_target_price") or {}
+    sensitivity_base_pass = all(
+        _base_cell_matches_target(grid, target)
+        for grid, target in (
+            (sensitivity.get("fcff_wacc_g"), _as_float(fcff.get("target_price_vnd"))),
+            (sensitivity.get("fcfe_re_g"), _as_float(fcfe.get("target_price_vnd"))),
+            (
+                sensitivity.get("blend_grid"),
+                _as_float(blend.get("target_price_dcf_vnd") or blend.get("target_price")),
+            ),
+        )
+        if target is not None
+    ) and any(
+        target is not None
+        for target in (
+            _as_float(fcff.get("target_price_vnd")),
+            _as_float(fcfe.get("target_price_vnd")),
+            _as_float(blend.get("target_price_dcf_vnd") or blend.get("target_price")),
+        )
+    )
     trace_pass = bool(formula_traces)
 
     invariant_values = [
@@ -1238,6 +1335,7 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
         ("sensitivity_varies", "FCFF sensitivity matrix varies", sensitivity_pass),
         ("fcfe_sensitivity", "FCFE sensitivity matrix varies", fcfe_sensitivity),
         ("blend_sensitivity", "Blend sensitivity matrix varies", blend_sensitivity),
+        ("sensitivity_base_cell", "Sensitivity base cell reconciles to target", sensitivity_base_pass),
         ("formula_trace", "Formula trace available", trace_pass),
     ]
     artifact_rel = str(valuation_path.relative_to(root))
@@ -1265,6 +1363,36 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
         for metric_id, label, passed in invariant_values
     ]
     critical_failures = sum(not item["passed"] for item in invariants)
+    metrics.extend([
+        _metric(
+            "accounting_invariant_violations",
+            "Accounting invariant violations",
+            critical_failures,
+            "0",
+            "pass" if critical_failures == 0 else "fail",
+            artifact_rel,
+            ",".join(item["id"] for item in invariants if not item["passed"]),
+            failed_examples=[item for item in invariants if not item["passed"]],
+            sample_size=len(invariants),
+            calculation={
+                "aggregation": "error_count",
+                "numerator": critical_failures,
+                "denominator": len(invariants),
+                "per_sample_results": invariants,
+            },
+        ),
+        _metric(
+            "golden_drift_out_of_tolerance",
+            "Golden valuation drift",
+            None,
+            "0",
+            "not_evaluable",
+            "golden valuation fixture missing",
+            "golden_valuation_fixture_missing_for_ticker",
+            sample_size=0,
+            evaluator={"framework": "golden_valuation_regression", "execution_status": "not_executed"},
+        ),
+    ])
     return {
         "status": _status(metrics),
         "metrics": metrics,
@@ -1290,6 +1418,106 @@ def _pdf_stats(path: Path) -> dict[str, Any]:
             return {"path": str(path), "exists": True, "pages": len(pdf.pages), "text": text}
     except Exception as exc:
         return {"path": str(path), "exists": True, "pages": 0, "text": "", "error": str(exc)}
+
+
+def _schema_required_failures(payload: dict[str, Any], schema_path: Path) -> list[dict[str, Any]]:
+    if not schema_path.is_file():
+        return [{"reason": "schema_file_missing", "source": str(schema_path)}]
+    schema = _read_json(schema_path)
+    required = [str(item) for item in (schema.get("required") or [])]
+    failures = [
+        {"field": field, "reason": "required_field_missing", "source": str(schema_path)}
+        for field in required
+        if field not in payload
+    ]
+    properties = schema.get("properties") or {}
+    for field, policy in properties.items():
+        if field not in payload or not isinstance(policy, dict):
+            continue
+        expected_type = policy.get("type")
+        actual = payload.get(field)
+        allowed = expected_type if isinstance(expected_type, list) else [expected_type]
+        if "null" in allowed and actual is None:
+            continue
+        type_ok = (
+            ("object" in allowed and isinstance(actual, dict))
+            or ("array" in allowed and isinstance(actual, list))
+            or ("string" in allowed and isinstance(actual, str))
+            or ("integer" in allowed and isinstance(actual, int) and not isinstance(actual, bool))
+            or ("number" in allowed and isinstance(actual, (int, float)) and not isinstance(actual, bool))
+            or ("boolean" in allowed and isinstance(actual, bool))
+        )
+        if expected_type and not type_ok:
+            failures.append({
+                "field": field,
+                "reason": f"type_mismatch:{expected_type}",
+                "source": str(schema_path),
+            })
+        if "const" in policy and actual != policy["const"]:
+            failures.append({
+                "field": field,
+                "reason": f"const_mismatch:{policy['const']}",
+                "source": str(schema_path),
+            })
+        if (
+            field == "packet_hash"
+            and isinstance(actual, str)
+            and len(actual) != 64
+        ):
+            failures.append({"field": field, "reason": "packet_hash_length_invalid", "source": str(schema_path)})
+    if payload.get("valuation_outputs") and not payload.get("formula_traces"):
+        failures.append({
+            "field": "formula_traces",
+            "reason": "formula_traces_required_when_valuation_outputs_present",
+            "source": str(schema_path),
+        })
+    if schema.get("additionalProperties") is False:
+        allowed_keys = set(properties) | {"$schema"}
+        extra = sorted(set(payload) - allowed_keys)
+        failures.extend(
+            {"field": field, "reason": "additional_property_not_allowed", "source": str(schema_path)}
+            for field in extra
+        )
+    return failures
+
+
+def _agent_output_records(audit: dict[str, Any], packet: dict[str, Any]) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for key in ("agent_execution", "tool_execution"):
+        for item in audit.get(key) or []:
+            if isinstance(item, dict):
+                records.append({"origin": f"audit.{key}", **item})
+    for key in ("trace_summary", "tool_execution_summary"):
+        for item in packet.get(key) or []:
+            if isinstance(item, dict):
+                records.append({"origin": f"packet.{key}", **item})
+    return records
+
+
+_UNAUTHORIZED_CALC_PATTERNS = (
+    re.compile(r"\b(?:fcff|fcfe|wacc|terminal value|equity value|enterprise value)\b[^.\n]{0,100}[+\-*/=]", re.I),
+    re.compile(r"\b(?:target price|target_price|fair value|value per share)\b[^.\n]{0,100}\b(?:=|computed|calculated|implies)\b", re.I),
+    re.compile(r"\b\d+(?:\.\d+)?\s*(?:\+|\-|\*|/)\s*\d+(?:\.\d+)?\b"),
+)
+
+
+def _unauthorized_financial_calculation_findings(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    findings: list[dict[str, Any]] = []
+    for index, record in enumerate(records, start=1):
+        role = str(record.get("agent_role") or record.get("agent_id") or record.get("role") or "").lower()
+        text = json.dumps(record, ensure_ascii=False, default=str)
+        if "deterministic" in text.lower() and "formula_traces" in text:
+            continue
+        for pattern in _UNAUTHORIZED_CALC_PATTERNS:
+            if pattern.search(text):
+                findings.append({
+                    "sample_index": index,
+                    "agent_role": role or None,
+                    "origin": record.get("origin"),
+                    "reason": "agent_output_contains_financial_arithmetic",
+                })
+                break
+    return findings
 
 
 def evaluate_citation(root: Path, ticker: str) -> dict[str, Any]:
@@ -1353,13 +1581,43 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
     packet = _read_json(packet_path)
     gates = packet.get("gate_results") or {}
     tool_gate = gates.get("TOOL_PERMISSION_GATE") or {}
+    manifest_gate = gates.get("ARTIFACT_MANIFEST_GATE") or {}
     tool_compliance = None if not tool_gate else (1.0 if tool_gate.get("passed") is True else 0.0)
+    manifest_compliance = None if not manifest_gate else (1.0 if manifest_gate.get("passed") is True else 0.0)
     agent_records = audit.get("agent_execution") or []
     task_completion = (
         sum(record.get("status") == "completed" for record in agent_records) / len(agent_records)
         if agent_records else None
     )
-    schema_validity = None
+    schema_failures: list[dict[str, Any]] = []
+    schema_units = 0
+    if packet:
+        schema_units += 1
+        schema_failures.extend(
+            _schema_required_failures(packet, root / "config" / "harness" / "evidence_packet_schema.json")
+        )
+    if audit:
+        schema_units += 1
+        if not isinstance(audit.get("agent_execution"), list):
+            schema_failures.append({
+                "field": "agent_execution",
+                "reason": "agent_execution_list_missing",
+                "source": str(audit_path.relative_to(root)) if audit_path else "missing",
+            })
+        if str(audit.get("ticker") or "").upper() != ticker.upper():
+            schema_failures.append({
+                "field": "ticker",
+                "reason": "ticker_mismatch",
+                "source": str(audit_path.relative_to(root)) if audit_path else "missing",
+            })
+    schema_validity = (
+        None if schema_units == 0 else (schema_units - min(schema_units, len(schema_failures))) / schema_units
+    )
+    output_records = _agent_output_records(audit, packet)
+    calc_findings = _unauthorized_financial_calculation_findings(output_records)
+    unauthorized_calc_score = (
+        None if not output_records else (len(output_records) - len(calc_findings)) / len(output_records)
+    )
     deepeval_cases = _read_json_list(
         root / "config" / "eval" / "deepeval" / f"{ticker.upper()}.json"
     )
@@ -1376,10 +1634,21 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                 sample_size=1 if tool_gate else 0,
                 calculation={"numerator": 1 if tool_gate.get("passed") is True else 0,
                              "denominator": 1 if tool_gate else 0, "aggregation": "coverage"}),
+        _metric("artifact_manifest_compliance", "Artifact manifest compliance", manifest_compliance, "100%",
+                _ratio_status(manifest_compliance, 1.0), str(packet_path.relative_to(root)) if packet_path else "missing",
+                ",".join(manifest_gate.get("blocking_reasons") or []),
+                sample_size=1 if manifest_gate else 0,
+                calculation={"numerator": 1 if manifest_gate.get("passed") is True else 0,
+                             "denominator": 1 if manifest_gate else 0, "aggregation": "coverage"}),
         _metric("schema_validity", "Output schema validity", schema_validity, "100%",
-                "not_evaluable", "schema validation artifact missing",
-                "file existence is not schema validation", sample_size=0,
-                evaluator={"framework": "json_schema", "execution_status": "not_executed"}),
+                _ratio_status(schema_validity, 1.0), "config/harness/*.schema.json",
+                ",".join(sorted({str(item.get("reason")) for item in schema_failures})) if schema_failures else "",
+                failed_examples=schema_failures[:100],
+                sample_size=schema_units,
+                evaluator={"framework": "json_schema_required_contract",
+                           "execution_status": "executed" if schema_units else "not_executed"},
+                calculation={"numerator": 0 if schema_validity is None else int(schema_validity * schema_units),
+                             "denominator": schema_units, "aggregation": "coverage"}),
         _metric("role_adherence", "Role adherence", judge_scores.get("role_adherence"), ">= 0.85",
                 _ratio_status(judge_scores.get("role_adherence"), 0.85),
                 "config/eval/deepeval", deepeval_result.get("reason") or "",
@@ -1390,9 +1659,17 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                 "config/eval/deepeval", deepeval_result.get("reason") or "",
                 sample_size=deepeval_result["sample_size"], evaluator=judge_evaluator,
                 calculation={"aggregation": "mean"}),
-        _metric("no_unauthorized_calc", "No unauthorized financial calculation", None, "100%",
-                "not_evaluable", "agent trace classifier missing",
-                "agent trace classifier missing", sample_size=0),
+        _metric("no_unauthorized_calc", "No unauthorized financial calculation", unauthorized_calc_score, "100%",
+                _ratio_status(unauthorized_calc_score, 1.0),
+                str(audit_path.relative_to(root)) if audit_path else (str(packet_path.relative_to(root)) if packet_path else "missing"),
+                "agent trace missing" if not output_records else "",
+                failed_examples=calc_findings,
+                sample_size=len(output_records),
+                evaluator={"framework": "deterministic_agent_trace_classifier",
+                           "execution_status": "executed" if output_records else "not_executed"},
+                calculation={"numerator": max(0, len(output_records) - len(calc_findings)),
+                             "denominator": len(output_records), "aggregation": "coverage",
+                             "per_sample_results": output_records[:100]}),
         _metric("task_completion", "Task completion", task_completion, ">= 0.85",
                 _ratio_status(task_completion, 0.85), str(audit_path.relative_to(root)) if audit_path else "missing",
                 sample_size=len(agent_records),
@@ -1424,10 +1701,11 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
         "advisory_findings": advisory_findings,
         "judge_status": deepeval_result["execution_status"],
         "tool_permission_compliance": tool_compliance,
+        "artifact_manifest_compliance": manifest_compliance,
         "schema_validity": schema_validity,
         "role_adherence": judge_scores.get("role_adherence"),
         "groundedness": judge_scores.get("groundedness"),
-        "no_unauthorized_calc": None,
+        "no_unauthorized_calc": unauthorized_calc_score,
         "task_completion": task_completion,
         "plan_adherence": judge_scores.get("plan_adherence"),
         "critic_issue_recall": None,

@@ -12,9 +12,11 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import sys
+import urllib.request
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
@@ -108,7 +110,7 @@ class AutoIngestConfig:
     dry_run: bool = False
     channels: list[str] = field(default_factory=lambda: ["cafef", "pdf"])
     min_pdf_confidence: float = 0.6
-    promote_official_only: bool = True
+    promote_official_only: bool = False
     ocr: bool = False  # enable OCR path for scanned PDFs
     # Optional callback(substep, detail) for live progress UI. substep is a
     # stable key ("cafef", "official_pdf"); detail is a Vietnamese label.
@@ -131,6 +133,7 @@ class YearResult:
     ingested: int = 0
     promoted: int = 0
     errors: list[str] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)
     status: str = "pending"
     ingest_status: IngestStatus = IngestStatus.SOURCE_MISSING
     ocr_candidates: int = 0
@@ -153,6 +156,8 @@ class YearResult:
             parts.append(f"ocr_blocked={self.ocr_blocked}")
         if self.errors:
             parts.append(f"errors={len(self.errors)}")
+        if self.notes:
+            parts.append(f"notes={len(self.notes)}")
         return " | ".join(parts)
 
 
@@ -529,6 +534,59 @@ def _is_scanned_pdf(pdf_path: Path, sample_pages: int = 5) -> bool:
         return False
 
 
+def _download_candidate_pdf(candidate, doc_dir: Path) -> tuple[Path, str, str]:
+    """Download a selected official PDF candidate into the governed local layout."""
+    req = urllib.request.Request(
+        candidate.source_url,
+        headers={"User-Agent": "maer-official-doc-fetcher/1.0"},
+    )
+    with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 (TLS verified)
+        content = resp.read()
+        content_type = resp.headers.get("Content-Type", "")
+    if not content:
+        raise RuntimeError(f"empty content for {candidate.source_url}")
+    if "pdf" not in content_type.lower() and not candidate.source_url.lower().endswith(".pdf"):
+        raise ValueError(f"selected official document is not a PDF: {candidate.source_url}")
+
+    doc_dir.mkdir(parents=True, exist_ok=True)
+    pdf_path = doc_dir / "source_document.pdf"
+    pdf_path.write_bytes(content)
+    return pdf_path, hashlib.sha256(content).hexdigest(), content_type
+
+
+def _write_pdf_metadata(
+    *,
+    ticker: str,
+    fiscal_year: int,
+    candidate,
+    doc_dir: Path,
+    pdf_path: Path,
+    file_hash: str,
+) -> None:
+    """Persist metadata.json next to source_document.pdf."""
+    meta_path = doc_dir / "metadata.json"
+    try:
+        from backend.documents.company_registry import get_company, has_company
+
+        company_name = get_company(ticker).company_name_vi if has_company(ticker) else ticker
+    except Exception:  # noqa: BLE001
+        company_name = ticker
+    meta = {
+        "ticker": ticker,
+        "company_name": company_name,
+        "source_type": candidate.document_type,
+        "issuer": candidate.publisher or candidate.source_name,
+        "title": candidate.title,
+        "url": candidate.source_url,
+        "local_path": str(pdf_path),
+        "published_date": f"{fiscal_year}-12-31",
+        "fiscal_year": fiscal_year,
+        "language": "vi",
+        "file_hash": file_hash,
+    }
+    meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def _fetch_pdf(
     ticker: str,
     fiscal_year: int,
@@ -548,7 +606,7 @@ def _fetch_pdf(
     ocr_stats keys: ocr_candidates, ocr_promoted, ocr_blocked (all 0 when OCR not run).
     """
     try:
-        from backend.documents.official_document_discovery import discover_documents, fetch_candidate
+        from backend.documents.official_document_discovery import discover_documents
         from backend.documents.pdf_extractor import extract_to_csv
 
         result = discover_documents(
@@ -570,8 +628,15 @@ def _fetch_pdf(
         if cfg.dry_run:
             return [{"note": f"dry_run: would fetch {best.source_url}"}], IngestStatus.DRY_RUN, {}
 
-        rec = fetch_candidate(best)
-        pdf_path = Path(rec.local_path)
+        pdf_path, file_hash, _content_type = _download_candidate_pdf(best, doc_dir)
+        _write_pdf_metadata(
+            ticker=ticker,
+            fiscal_year=fiscal_year,
+            candidate=best,
+            doc_dir=doc_dir,
+            pdf_path=pdf_path,
+            file_hash=file_hash,
+        )
 
         # Detect scanned PDF — route to OCR if enabled, else return explicit status
         if _is_scanned_pdf(pdf_path):
@@ -620,29 +685,6 @@ def _fetch_pdf(
         else:
             _write_extracted_csv(csv_rows, existing_csv_path)
 
-        # Write metadata.json if not already present
-        meta_path = doc_dir / "metadata.json"
-        if not meta_path.exists():
-            try:
-                from backend.documents.company_registry import get_company, has_company
-                _company_name = get_company(ticker).company_name_vi if has_company(ticker) else ticker
-            except Exception:  # noqa: BLE001
-                _company_name = ticker
-            meta = {
-                "ticker": ticker,
-                "company_name": _company_name,
-                "source_type": "audited_financial_statement",
-                "issuer": best.publisher or best.source_name,
-                "title": best.title,
-                "url": best.source_url,
-                "local_path": rec.local_path,
-                "published_date": f"{fiscal_year}-12-31",
-                "fiscal_year": fiscal_year,
-                "language": "vi",
-                "file_hash": rec.file_hash,
-            }
-            meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-
         result_rows = csv_rows + [{"error": error} for error in validation_errors]
         return result_rows, IngestStatus.OFFICIAL_FACTS_READY, {}
 
@@ -684,6 +726,7 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
             cafef_rows = _fetch_cafef(cfg.ticker, year, doc_dir, cfg.dry_run)
             good_cafef = [r for r in cafef_rows if "error" not in r and "note" not in r]
             yr.cafef_rows = len(good_cafef)
+            yr.notes.extend(str(r["note"]) for r in cafef_rows if "note" in r)
             if yr.cafef_rows > 0:
                 yr.ingest_status = IngestStatus.TIER2_ONLY
             elif not cafef_rows:
@@ -707,6 +750,7 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
             yr.ocr_blocked = ocr_stats.get("ocr_blocked", 0)
             good_pdf = [r for r in pdf_rows if "error" not in r and "note" not in r]
             yr.pdf_rows = len(good_pdf)
+            yr.notes.extend(str(r["note"]) for r in pdf_rows if "note" in r)
             yr.errors.extend(
                 str(r["error"]) for r in pdf_rows if "error" in r
             )
@@ -715,6 +759,10 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
                 yr.ingest_status = pdf_status
             elif yr.cafef_rows > 0:
                 yr.ingest_status = IngestStatus.TIER2_ONLY
+            else:
+                yr.errors.append(
+                    f"FY{year}: no official PDF candidate discovered (SOURCE_MISSING)"
+                )
             if pdf_status == IngestStatus.EXTRACTION_FAILED_SCANNED_PDF:
                 yr.errors.append(
                     f"FY{year}: PDF is scanned image (0 text) — OCR required. "
@@ -781,6 +829,7 @@ def _write_artifact(ticker: str, cfg: AutoIngestConfig, results: list[YearResult
     total_ingested = sum(r.ingested for r in results)
     total_promoted = sum(r.promoted for r in results)
     total_errors = sum(len(r.errors) for r in results)
+    total_notes = sum(len(r.notes) for r in results)
     now_str = datetime.now(UTC).isoformat()
 
     lines = [
@@ -804,7 +853,20 @@ def _write_artifact(ticker: str, cfg: AutoIngestConfig, results: list[YearResult
         f"**Total ingested:** {total_ingested}  ",
         f"**Total promoted:** {total_promoted}  ",
         f"**Total errors:** {total_errors}  ",
+        f"**Total notes:** {total_notes}  ",
     ]
+    if total_notes:
+        lines += ["", "## Notes", ""]
+        for r in results:
+            for note in r.notes:
+                lines.append(f"- FY{r.fiscal_year}: {note}")
+    if total_errors:
+        lines += ["", "## Errors", ""]
+        for r in results:
+            if not r.errors:
+                continue
+            for error in r.errors:
+                lines.append(f"- FY{r.fiscal_year}: {error}")
     out.write_text("\n".join(lines), encoding="utf-8")
     return out
 
@@ -828,6 +890,14 @@ def main() -> None:
                         dest="min_pdf_confidence")
     parser.add_argument("--ocr", action="store_true",
                         help="Enable OCR for scanned PDFs (requires tesseract + poppler)")
+    parser.add_argument(
+        "--promote-official-only",
+        action="store_true",
+        help=(
+            "Promote official-only facts when vnstock/API is missing. "
+            "Default is false so OCR/PDF facts remain gated until reconciliation/manual review."
+        ),
+    )
     args = parser.parse_args()
 
     ticker = args.ticker.strip().upper()
@@ -840,6 +910,7 @@ def main() -> None:
         dry_run=args.dry_run,
         channels=channels,
         min_pdf_confidence=args.min_pdf_confidence,
+        promote_official_only=args.promote_official_only,
         ocr=args.ocr,
     )
 

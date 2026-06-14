@@ -35,7 +35,10 @@ def _get_shares(table: FactTable, key: str, period: str) -> float | None:
     entry = table.get(key, {}).get(period)
     if entry is None:
         return None
-    value = entry.get("value") if isinstance(entry, dict) else entry
+    if isinstance(entry, dict):
+        value = entry.get("value")
+    else:
+        value = getattr(entry, "value", entry)
     try:
         v = float(value) if value is not None else None
     except (TypeError, ValueError):
@@ -118,6 +121,7 @@ def build_share_rollforward(
     forecast_labels: list[str],
     corporate_actions: list[CorporateAction] | None = None,
     base_shares_override_mn: float | None = None,
+    no_action_recorded: bool = False,
 ) -> ShareRollForward:
     """Build a share roll-forward schedule for forecast years.
 
@@ -159,7 +163,7 @@ def build_share_rollforward(
         ]
         return ShareRollForward(ticker=ticker, base_shares_mn=None, forecast_rows=rows, warnings=warnings)
 
-    if not ca_by_label:
+    if not ca_by_label and not no_action_recorded:
         warnings.append(
             f"{ticker}: no corporate action data provided — shares held constant at {base_shares:.3f}mn. "
             "Private placement / ESOP dilution is NOT modelled. Diluted EPS and target price/share may be overstated."
@@ -177,7 +181,7 @@ def build_share_rollforward(
         ending   = current_shares + issuance - buyback
         diluted  = ending + unvested
 
-        method = "corporate_action" if ca else "stable"
+        method = "corporate_action" if ca else ("no_action_recorded" if no_action_recorded else "stable")
         w = None
         if ca and (issuance > 0 or buyback > 0):
             w = (

@@ -1,0 +1,25 @@
+{
+  "summary": {
+    "processed": 1,
+    "rendered": 1,
+    "backfilled": 0,
+    "failed": 0,
+    "missing_price_history": []
+  },
+  "results": [
+    {
+      "ticker": "TRA",
+      "run_id": "run_tra_20260614T205708_72c053abf9",
+      "status": "rendered",
+      "has_price_history": true,
+      "manifest_path": "run_tra_20260614T205708_72c053abf9/manifest.json",
+      "warnings": [],
+      "rendered": {
+        "ticker": "TRA",
+        "run_id": "run_tra_20260614T205708_72c053abf9",
+        "report_key": "client_reports/TRA/report.pdf",
+        "explanation_key": "client_reports/TRA/explanation.pdf"
+      }
+    }
+  ]
+}
