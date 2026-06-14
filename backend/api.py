@@ -6,6 +6,12 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.requests import Request
+from backend.evaluation.project_evaluator import (
+    load_evaluation_artifact,
+    load_latest_evaluation,
+)
 from backend.reporting.output_inventory import scan_report_inventory, load_universe
 
 from backend.executor import RunExecutor
@@ -134,6 +140,67 @@ def create_app(
             raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
         return ArtifactsResponse(run_id=run_id, artifacts=app.state.store.list_artifacts(run_id))
 
+    @app.get("/research/{run_id}/evaluation")
+    def get_run_evaluation(run_id: str) -> dict[str, Any]:
+        run = app.state.store.get_run(run_id)
+        if run is None:
+            raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
+        packets = [
+            artifact
+            for artifact in app.state.store.list_artifacts(run_id)
+            if artifact.get("section_key") == "evaluation_packet"
+        ]
+        if not packets:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Evaluation packet for run {run_id} not found",
+            )
+        payload = packets[-1].get("payload")
+        if not isinstance(payload, dict):
+            raise HTTPException(status_code=500, detail="Evaluation packet payload is invalid")
+        return payload
+
+    @app.get("/research/{run_id}/evaluation/{artifact_name}")
+    def get_run_evaluation_artifact(run_id: str, artifact_name: str) -> dict[str, Any]:
+        allowed = {
+            "data_quality.json",
+            "retrieval_eval.json",
+            "financial_eval.json",
+            "citation_eval.json",
+            "agent_eval.json",
+            "report_eval.json",
+            "publication_readiness.json",
+            "observability_eval.json",
+            "evaluation_packet.json",
+        }
+        if artifact_name not in allowed:
+            raise HTTPException(status_code=404, detail="Unknown evaluation artifact")
+        section_key = artifact_name.removesuffix(".json")
+        artifacts = [
+            artifact
+            for artifact in app.state.store.list_artifacts(run_id)
+            if artifact.get("section_key") == section_key
+        ]
+        if not artifacts:
+            raise HTTPException(status_code=404, detail="Evaluation artifact not found")
+        payload = artifacts[-1].get("payload")
+        if not isinstance(payload, dict):
+            raise HTTPException(status_code=500, detail="Evaluation artifact payload is invalid")
+        return payload
+
+    @app.get("/eval/framework")
+    def get_evaluation_framework(run_id: str | None = None) -> dict[str, Any]:
+        if run_id:
+            return get_run_evaluation(run_id)
+        return load_latest_evaluation()
+
+    @app.get("/eval/results/{artifact_name}")
+    def get_evaluation_result(artifact_name: str) -> dict[str, Any]:
+        payload = load_evaluation_artifact(artifact_name)
+        if payload is None:
+            raise HTTPException(status_code=404, detail="Evaluation artifact not found")
+        return payload
+
     def _output_dir() -> Path:
         return Path(getattr(app.state, "report_output_dir", None) or "output")
 
@@ -213,5 +280,24 @@ def create_app(
     return app
 
 
+def mount_frontend(app: FastAPI, dist_dir: Path) -> None:
+    """Serve a built Vite SPA. Call AFTER all API routes are registered."""
+    dist_dir = Path(dist_dir)
+    if not (dist_dir / "index.html").is_file():
+        return
+    assets = dist_dir / "assets"
+    if assets.is_dir():
+        app.mount("/assets", StaticFiles(directory=assets), name="assets")
+
+    @app.get("/{full_path:path}")
+    def spa_fallback(full_path: str, request: Request):
+        candidate = (dist_dir / full_path).resolve()
+        if candidate.is_file() and dist_dir.resolve() in candidate.parents:
+            return FileResponse(candidate)
+        return FileResponse(dist_dir / "index.html")
+
+
 app = create_app(check_schema_on_startup=False)
+if (Path("frontend/dist") / "index.html").is_file():
+    mount_frontend(app, Path("frontend/dist"))
 
