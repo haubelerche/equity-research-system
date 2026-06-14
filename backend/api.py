@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from backend.reporting.output_inventory import scan_report_inventory, load_universe
 
 from backend.executor import RunExecutor
 from backend.orchestrator import FullReportOrchestrator, RunContext
@@ -19,6 +22,10 @@ from backend.settings import settings
 from backend.universe_registration import ensure_ticker_registered_from_universe
 from backend.utils import deterministic_id
 from backend.runtime_store import to_public_status
+from backend.evaluation.project_evaluator import (
+    load_evaluation_artifact,
+    load_latest_evaluation,
+)
 
 
 def _to_status_response(run: dict[str, Any]) -> RunStatusResponse:
@@ -57,10 +64,23 @@ def create_app(
     app.state.store = runtime_store
     app.state.orchestrator = run_orchestrator
     app.state.executor = run_executor
+    app.state.report_output_dir = None
+    app.state.report_universe_csv = None
 
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/eval/framework")
+    def get_evaluation_framework() -> dict[str, Any]:
+        return load_latest_evaluation()
+
+    @app.get("/eval/results/{artifact_name}")
+    def get_evaluation_artifact(artifact_name: str) -> dict[str, Any]:
+        artifact = load_evaluation_artifact(artifact_name)
+        if artifact is None:
+            raise HTTPException(status_code=404, detail="Evaluation artifact not found")
+        return artifact
 
     @app.post("/research/start", response_model=StartRunResponse)
     def start_research(request: StartRunRequest) -> StartRunResponse:
@@ -129,6 +149,37 @@ def create_app(
             raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
         return ArtifactsResponse(run_id=run_id, artifacts=app.state.store.list_artifacts(run_id))
 
+    def _output_dir() -> Path:
+        return Path(getattr(app.state, "report_output_dir", None) or "output")
+
+    def _universe_csv() -> Path:
+        return Path(
+            getattr(app.state, "report_universe_csv", None)
+            or "config/dataset/universe/pharma_vn_universe.csv"
+        )
+
+    @app.get("/reports")
+    def list_reports() -> dict:
+        universe = load_universe(_universe_csv())
+        items = scan_report_inventory(_output_dir(), universe)
+        return {
+            "items": [
+                {
+                    "ticker": i.ticker,
+                    "company_name": i.company_name,
+                    "exchange": i.exchange,
+                    "segment": i.segment,
+                    "is_mvp": i.is_mvp,
+                    "has_report": i.has_report,
+                    "has_explanation": i.has_explanation,
+                    "preview_pages": i.preview_pages,
+                    "report_size": i.report_size,
+                    "updated_at": i.updated_at,
+                }
+                for i in items
+            ]
+        }
+
     @app.get("/reports/{run_id}", response_model=ArtifactsResponse)
     def get_report(run_id: str) -> ArtifactsResponse:
         run = app.state.store.get_run(run_id)
@@ -139,6 +190,10 @@ def create_app(
             if a["artifact_type"] in {"report_md", "eval_result_json", "run_log_json"}
         ]
         return ArtifactsResponse(run_id=run_id, artifacts=artifacts)
+
+    frontend_dist = Path(__file__).resolve().parents[1] / "frontend" / "dist"
+    if frontend_dist.is_dir():
+        app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
 
     return app
 
