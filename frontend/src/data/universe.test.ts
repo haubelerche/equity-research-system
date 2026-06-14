@@ -5,9 +5,9 @@ describe("universe", () => {
   it("has 53 tickers", () => {
     expect(UNIVERSE.length).toBe(53);
   });
-  it("segment breakdown matches the readiness matrix", () => {
+  it("segment breakdown matches the universe CSV", () => {
     const c = segmentCounts();
-    expect(c.pharma).toBe(43);
+    expect(c.pharma).toBe(44);
     expect(c.healthcare_services).toBe(3);
     expect(c.medical_equipment).toBe(3);
     expect(c.medical_distribution).toBe(3);
