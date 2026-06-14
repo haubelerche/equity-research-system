@@ -32,23 +32,25 @@ export function ReportRow({ item, onPreview, onGenerated }: Props) {
           {statusLabel}
         </span>
       </td>
-      <td className="row-actions">
-        {item.has_report ? (
-          <>
-            <button onClick={() => onPreview(item.ticker)}>Xem trước</button>
-            <a href={fileUrl(item.ticker, "report")} target="_blank" rel="noreferrer">
-              Tải báo cáo
-            </a>
-            {item.has_explanation && (
-              <a href={fileUrl(item.ticker, "explanation")} target="_blank" rel="noreferrer">
-                Tải giải thích
+      <td>
+        <div className="row-actions">
+          {item.has_report ? (
+            <>
+              <button onClick={() => onPreview(item.ticker)}>Xem trước</button>
+              <a href={fileUrl(item.ticker, "report")} target="_blank" rel="noreferrer">
+                Tải báo cáo
               </a>
-            )}
-            <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Cập nhật" />
-          </>
-        ) : (
-          <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Sinh báo cáo" />
-        )}
+              {item.has_explanation && (
+                <a href={fileUrl(item.ticker, "explanation")} target="_blank" rel="noreferrer">
+                  Tải giải thích
+                </a>
+              )}
+              <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Cập nhật" />
+            </>
+          ) : (
+            <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Sinh báo cáo" />
+          )}
+        </div>
       </td>
     </tr>
   );

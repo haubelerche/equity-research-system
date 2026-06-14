@@ -8,6 +8,14 @@ import { TickerSearch } from "../components/reports/TickerSearch";
 import { ReportRow } from "../components/reports/ReportRow";
 import { PreviewPanel } from "../components/reports/PreviewPanel";
 
+const REPORT_UNIVERSE = [...UNIVERSE].sort((a, b) => {
+  if (a.ticker === "DHG") return -1;
+  if (b.ticker === "DHG") return 1;
+  if (a.ticker === "DBD") return 1;
+  if (b.ticker === "DBD") return -1;
+  return 0;
+});
+
 export function ReportsPage() {
   const [apiItems, setApiItems] = useState<ReportItem[]>([]);
   const [query, setQuery] = useState("");
@@ -22,7 +30,7 @@ export function ReportsPage() {
   };
   useEffect(load, []);
 
-  const rows = useMemo(() => mergeUniverseWithReports(UNIVERSE, apiItems), [apiItems]);
+  const rows = useMemo(() => mergeUniverseWithReports(REPORT_UNIVERSE, apiItems), [apiItems]);
   const filtered = useMemo(() => filterByQuery(rows, query), [rows, query]);
   const previewItem = rows.find((i) => i.ticker === previewTicker) ?? null;
   const withReport = rows.filter((i) => i.has_report).length;
@@ -36,9 +44,13 @@ export function ReportsPage() {
         </p>
       </header>
 
-      <TickerSearch value={query} onChange={setQuery} options={UNIVERSE} />
+      <TickerSearch value={query} onChange={setQuery} options={REPORT_UNIVERSE} />
 
-      <table>
+      <p className="reports-result-count" aria-live="polite">
+        Đang hiển thị {filtered.length} / {rows.length} mã.
+      </p>
+
+      <table className="reports-table">
         <thead>
           <tr>
             <th>Mã</th>

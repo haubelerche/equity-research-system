@@ -772,14 +772,20 @@ div[role="search"] select {
 }
 
 /* Reports table — override base with tighter padding for data density */
-section > table {
+.reports-result-count {
+  margin: calc(-1 * var(--space-2)) 0 var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.reports-table {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
 /* Ticker column — monospace, accent colour */
-section > table tbody td:first-child {
+.reports-table tbody td:first-child {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   font-weight: 700;
@@ -788,19 +794,19 @@ section > table tbody td:first-child {
 }
 
 /* Action cell buttons + links — inline flex */
-section > table tbody td:last-child {
+.reports-table .row-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   align-items: center;
 }
 
-section > table tbody td:last-child button {
+.reports-table .row-actions button {
   font-size: var(--text-xs);
   padding: 4px 10px;
 }
 
-section > table tbody td:last-child a {
+.reports-table .row-actions a {
   font-size: var(--text-xs);
   padding: 4px 10px;
   border: 1px solid var(--color-border-default);
@@ -812,7 +818,7 @@ section > table tbody td:last-child a {
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-section > table tbody td:last-child a:hover {
+.reports-table .row-actions a:hover {
   background: var(--color-surface-3);
   color: var(--color-text-primary);
   text-decoration: none;
@@ -967,13 +973,13 @@ aside[aria-label="preview"] > iframe {
     min-width: unset;
   }
 
-  section > table {
+  .reports-table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
   }
 
-  section > table tbody td:last-child {
+  .reports-table .row-actions {
     flex-direction: row;
   }
 
@@ -1070,4 +1076,10 @@ aside[aria-label="preview"] > iframe {
 }
 .status-cell--pending {
   color: var(--color-text-tertiary, #8aaa98);
+}
+
+.reports-table thead {
+  position: static;
+  top: auto;
+  z-index: auto;
 }

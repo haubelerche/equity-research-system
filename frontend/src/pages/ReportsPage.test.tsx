@@ -29,4 +29,28 @@ describe("ReportsPage", () => {
     expect(await screen.findByText("DHG")).toBeInTheDocument();
     expect(screen.getByText("IMP")).toBeInTheDocument();
   });
+
+  it("shows the selected ticker row when the API has no completed reports", async () => {
+    vi.spyOn(client, "fetchReports").mockResolvedValue({ items: [] });
+    render(<ReportsPage />);
+
+    await screen.findByText("DHG");
+    await userEvent.selectOptions(screen.getByLabelText("search"), "DHG");
+
+    expect(screen.getByText("Đang hiển thị 1 / 53 mã.")).toBeInTheDocument();
+    expect(screen.getByText("DHG")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Sinh/ })).toBeInTheDocument();
+    expect(screen.queryByText("IMP")).toBeNull();
+  });
+
+  it("renders DHG first and pushes DBD to the end of the reports table", async () => {
+    vi.spyOn(client, "fetchReports").mockResolvedValue({ items: [] });
+    render(<ReportsPage />);
+
+    await screen.findByText("DHG");
+    const dataRows = screen.getAllByRole("row").slice(1);
+
+    expect(dataRows[0]).toHaveTextContent(/^DHG/);
+    expect(dataRows[dataRows.length - 1]).toHaveTextContent(/^DBD/);
+  });
 });
