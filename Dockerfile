@@ -98,5 +98,5 @@ CMD ["sh", "-c", \
      echo \"[boot] running migrate\"; \
      timeout 120s python -m backend.database.migrate || echo \"[boot] migrate failed/timed out, continuing\"; \
      echo \"[boot] starting uvicorn\"; \
-     exec python -m uvicorn backend.api:app --host :: --port ${PORT:-8010} --proxy-headers; \
+     exec python -m uvicorn backend.api:app --host 0.0.0.0 --port ${PORT:-8010} --proxy-headers; \
    fi"]
