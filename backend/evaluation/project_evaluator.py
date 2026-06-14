@@ -18,6 +18,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from backend.evaluation.benchmark_standards import (
+    STANDARD_SCHEMA_VERSION,
+    metric_blocks_publish,
+    publication_status_from_metrics,
+)
 from backend.evaluation.runtime_evaluators import evaluate_plan
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -247,7 +252,8 @@ def _artifact_payload(
         "blocked" if runtime_blocked else test_execution["status"]
     )
     return {
-        "schema_version": "1.0",
+        "schema_version": STANDARD_SCHEMA_VERSION,
+        "benchmark_suite_version": "benchmark_standards_v1",
         "plan_id": plan.id,
         "plan_name": plan.name,
         "ticker": ticker,
@@ -333,8 +339,13 @@ def evaluate_project(
             for key, value in runtime_result.items()
             if key not in {"status", "blocking_issues", "metrics"}
         }
+        metric_results = runtime_result.get("metrics", [])
+        for metric in metric_results:
+            if isinstance(metric, dict):
+                metric["evaluated_at"] = generated_at
         payload = {
-            "schema_version": "2.0",
+            "schema_version": STANDARD_SCHEMA_VERSION,
+            "benchmark_suite_version": "benchmark_standards_v1",
             "plan_id": plan.id,
             "plan_name": plan.name,
             "ticker": ticker.upper(),
@@ -345,7 +356,7 @@ def evaluate_project(
             "runtime_evidence_inventory": evidence,
             "blocking_issues": sorted(set(blocking_issues)),
             "metrics": metrics,
-            "metric_results": runtime_result.get("metrics", []),
+            "metric_results": metric_results,
             **domain_payload,
         }
         _write_json(output_dir / plan.artifact, payload)
@@ -362,17 +373,45 @@ def evaluate_project(
             }
         )
 
-    deterministic_failures = [
-        item for item in artifacts if item["status"] in {"fail", "blocked"}
+    all_metrics = [
+        metric
+        for item in artifacts
+        for metric in item.get("metric_results", [])
+        if isinstance(metric, dict)
     ]
+    deterministic_failures = [
+        metric for metric in all_metrics if metric_blocks_publish(metric)
+    ]
+    explicit_p0_failure = any(
+        metric_blocks_publish(metric)
+        and metric.get("severity") == "P0"
+        and metric.get("status") == "fail"
+        for metric in all_metrics
+    )
+    missing_required_artifacts = any(
+        metric.get("status") == "not_evaluable"
+        and metric.get("layer") == "release_gate"
+        for metric in all_metrics
+    ) and not explicit_p0_failure
+    report_score = prior_results.get("06", {}).get("score")
+    publication_status = publication_status_from_metrics(
+        all_metrics,
+        missing_required_artifacts=missing_required_artifacts,
+        report_quality_score=(
+            float(report_score) if isinstance(report_score, (int, float)) else None
+        ),
+        human_approved=False,
+    )
     manifest = {
-        "schema_version": "2.0",
+        "schema_version": STANDARD_SCHEMA_VERSION,
+        "benchmark_suite_version": "benchmark_standards_v1",
         "run_id": run_id,
         "ticker": ticker.upper(),
         "generated_at": generated_at,
         "evaluation_order": [plan.id for plan in PLANS],
         "fail_closed": True,
         "overall_status": "blocked" if deterministic_failures else "pass",
+        "publication_status": publication_status,
         "client_final_authorized": False if deterministic_failures else None,
         "artifacts": artifacts,
         "summary": {

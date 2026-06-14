@@ -80,6 +80,9 @@ Docker image chạy migrations rồi chạy pipeline. Điều này phù hợp ba
 python -m uvicorn backend.api:app --host 0.0.0.0 --port 8010
 ```
 
+Nếu deploy frontend lên Vercel, hãy đặt `Root Directory` = `frontend/` để Vercel dùng đúng `frontend/vercel.json`.
+Backend FastAPI nên deploy ở runtime khác, không ghép chung vào Vercel static hosting của SPA.
+
 ## Strategic Recommendations
 
 | Ưu tiên | Hành động |

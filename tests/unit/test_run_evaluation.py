@@ -16,8 +16,35 @@ def test_run_evaluation_writes_all_required_artifacts_and_fails_closed() -> None
 
     assert set(artifacts) == set(RUNTIME_EVALUATION_ARTIFACTS)
     assert packet["overall_status"] == "blocked"
+    assert packet["publication_status"] == "NOT_EVALUATED"
     assert packet["client_final_authorized"] is False
     assert packet["summary"]["blocked"] > 0
+
+
+def test_runtime_metrics_follow_benchmark_standards_schema() -> None:
+    state = ResearchGraphState(run_id="run-schema-eval", ticker="DHG", objective="test")
+
+    artifacts, packet = build_run_evaluation_artifacts(state)
+    metric = artifacts["data_quality.json"]["metric_results"][0]
+
+    assert packet["schema_version"] == "2.1"
+    for required in (
+        "metric_id",
+        "metric_name",
+        "category",
+        "layer",
+        "metric_type",
+        "scope",
+        "severity",
+        "blocks_publish",
+        "threshold_operator",
+        "unit",
+        "sample_size",
+        "failed_examples",
+        "remediation_hint",
+        "evaluated_at",
+    ):
+        assert required in metric
 
 
 def test_runtime_evaluation_preserves_failed_deterministic_gate() -> None:
@@ -38,6 +65,7 @@ def test_runtime_evaluation_preserves_failed_deterministic_gate() -> None:
 
     assert artifacts["data_quality.json"]["status"] == "fail"
     assert packet["overall_status"] == "blocked"
+    assert packet["publication_status"] == "BLOCKED_BY_P0"
 
 
 def test_runtime_evaluation_exposes_frontend_metric_shape() -> None:

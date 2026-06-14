@@ -6,9 +6,8 @@ from backend.api import app
 def main() -> None:
     import uvicorn
 
-    uvicorn.run("backend.api:app", host="0.0.0.0", port=8010, reload=False)
+    uvicorn.run("main:app", host="0.0.0.0", port=8010, reload=False)
 
 
 if __name__ == "__main__":
     main()
-

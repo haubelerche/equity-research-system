@@ -29,6 +29,7 @@ def test_missing_runtime_evidence_blocks_plan() -> None:
             "missing": ["data_quality.json"],
         },
     )
+    assert payload["schema_version"] == "2.1"
     assert payload["status"] == "blocked"
     assert payload["metrics"]["runtime_evidence_coverage"] == 0
 

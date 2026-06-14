@@ -4,6 +4,12 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 
+from backend.evaluation.benchmark_standards import (
+    STANDARD_SCHEMA_VERSION,
+    metric_blocks_publish,
+    publication_status_from_metrics,
+    standard_metric,
+)
 from backend.harness.state import ResearchGraphState
 
 RUNTIME_EVALUATION_ARTIFACTS = (
@@ -26,16 +32,21 @@ def _metric(
     status: str,
     source: str,
     detail: str = "",
+    *,
+    plan_id: str | None = None,
+    sample_size: int | None = None,
 ) -> dict[str, Any]:
-    return {
-        "id": metric_id,
-        "label": label,
-        "value": value,
-        "threshold": threshold,
-        "status": status,
-        "source": source,
-        "detail": detail,
-    }
+    return standard_metric(
+        metric_id=metric_id,
+        metric_name=label,
+        value=value,
+        threshold=threshold,
+        status=status,
+        source=source,
+        detail=detail,
+        plan_id=plan_id,
+        sample_size=sample_size,
+    )
 
 
 def _gate(state: ResearchGraphState, name: str) -> dict[str, Any]:
@@ -45,7 +56,7 @@ def _gate(state: ResearchGraphState, name: str) -> dict[str, Any]:
 
 def _gate_status(gate: dict[str, Any]) -> str:
     if not gate:
-        return "blocked"
+        return "not_evaluable"
     return "pass" if gate.get("passed") is True else "fail"
 
 
@@ -53,9 +64,9 @@ def _status(metrics: list[dict[str, Any]]) -> str:
     statuses = {str(metric.get("status")) for metric in metrics}
     if "fail" in statuses:
         return "fail"
-    if "blocked" in statuses:
+    if "blocked" in statuses or "not_evaluable" in statuses:
         return "blocked"
-    if statuses and statuses <= {"measured_only"}:
+    if statuses and statuses <= {"measured_only", "warning"}:
         return "measured_only"
     return "pass"
 
@@ -65,7 +76,7 @@ def _blocking_issues(metrics: list[dict[str, Any]]) -> list[str]:
         {
             f"{metric['id']}:{metric.get('detail') or 'threshold_not_met'}"
             for metric in metrics
-            if metric.get("status") in {"fail", "blocked"}
+            if metric.get("status") in {"fail", "blocked", "not_evaluable"}
         }
     )
 
@@ -78,8 +89,11 @@ def _base(
     generated_at: str,
     **domain: Any,
 ) -> dict[str, Any]:
+    for metric in metrics:
+        metric["evaluated_at"] = generated_at
     return {
-        "schema_version": "1.0",
+        "schema_version": STANDARD_SCHEMA_VERSION,
+        "benchmark_suite_version": "benchmark_standards_v1",
         "plan_id": plan_id,
         "plan_name": plan_name,
         "run_id": state.run_id,
@@ -521,20 +535,48 @@ def build_run_evaluation_artifacts(
         }
         for name, payload in artifacts.items()
     ]
+    all_metrics = [
+        metric
+        for payload in artifacts.values()
+        for metric in payload.get("metric_results", [])
+    ]
+    publication_payload = artifacts["publication_readiness.json"]
+    report_score = artifacts["report_eval.json"].get("score")
+    human_approved = publication_payload["client_final_authorized"] is True
+    explicit_p0_failure = any(
+        metric_blocks_publish(metric)
+        and metric.get("severity") == "P0"
+        and metric.get("status") == "fail"
+        for metric in all_metrics
+    )
+    missing_required_artifacts = any(
+        metric.get("status") == "not_evaluable"
+        and metric.get("layer") == "release_gate"
+        for metric in all_metrics
+    ) and not explicit_p0_failure
+    publication_status = publication_status_from_metrics(
+        all_metrics,
+        benchmark_not_run=not bool(state.gate_results),
+        missing_required_artifacts=missing_required_artifacts,
+        report_quality_score=(
+            float(report_score) if isinstance(report_score, (int, float)) else None
+        ),
+        human_approved=human_approved,
+    )
     blocking = [
-        item for item in summaries if item["status"] in {"fail", "blocked"}
+        metric for metric in all_metrics if metric_blocks_publish(metric)
     ]
     packet = {
-        "schema_version": "1.0",
+        "schema_version": STANDARD_SCHEMA_VERSION,
+        "benchmark_suite_version": "benchmark_standards_v1",
         "source": "runtime",
         "run_id": state.run_id,
         "ticker": state.ticker,
         "generated_at": generated_at,
         "fail_closed": True,
         "overall_status": "blocked" if blocking else "pass",
-        "client_final_authorized": artifacts["publication_readiness.json"][
-            "client_final_authorized"
-        ],
+        "publication_status": publication_status,
+        "client_final_authorized": human_approved,
         "artifacts": summaries,
         "summary": {
             status: sum(item["status"] == status for item in summaries)

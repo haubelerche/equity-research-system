@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from backend.evaluation.benchmark_standards import standard_metric
+
 
 def _read_json(path: Path | None) -> dict[str, Any]:
     if path is None or not path.is_file():
@@ -60,15 +62,15 @@ def _metric(
     source: str,
     detail: str = "",
 ) -> dict[str, Any]:
-    return {
-        "id": metric_id,
-        "label": label,
-        "value": value,
-        "threshold": threshold,
-        "status": status,
-        "source": source,
-        "detail": detail,
-    }
+    return standard_metric(
+        metric_id=metric_id,
+        metric_name=label,
+        value=value,
+        threshold=threshold,
+        status=status,
+        source=source,
+        detail=detail,
+    )
 
 
 def _ratio_status(value: float | None, target: float, comparator: str = "gte") -> str:
@@ -83,7 +85,7 @@ def _status(metrics: list[dict[str, Any]], *, blocked: bool = False) -> str:
         return "fail"
     if blocked:
         return "blocked"
-    if metrics and all(item["status"] == "measured_only" for item in metrics):
+    if metrics and all(item["status"] in {"measured_only", "warning"} for item in metrics):
         return "measured_only"
     return "pass"
 
@@ -494,7 +496,7 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
     advisory_findings = [
         f"{item['id']}:calibrated_llm_judge_pending"
         for item in metrics
-        if item["status"] == "measured_only"
+        if item.get("legacy_status") == "measured_only" or item["status"] == "warning"
     ]
     return {
         "status": _status(metrics),

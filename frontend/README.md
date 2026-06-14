@@ -39,6 +39,8 @@ Client gọi thẳng đường dẫn backend — **không có tiền tố `/api`
   rewrite path).
 - **Prod:** chạy `npm run build` rồi khởi động FastAPI; backend tự phục vụ `frontend/dist/` (SPA
   fallback, các route API được ưu tiên trước catch-all). Cùng origin nên không cần proxy.
+- **Vercel:** đặt `Root Directory` = `frontend/`, để `frontend/vercel.json` điều khiển `npm ci`,
+  `npm run build`, `dist/`, và SPA rewrite.
 
 ## Cấu trúc
 
