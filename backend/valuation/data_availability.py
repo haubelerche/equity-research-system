@@ -116,3 +116,56 @@ def build_data_availability_matrix(
             "status": "ready" if not missing else "blocked",
         }
     return matrix
+
+
+# Specific remediation hints keyed by canonical field; fall back to classification.
+RECOMMENDED_FIXES: dict[str, str] = {
+    "proceeds_from_borrowings.total": (
+        "Ingest CFS financing line 'Tiền thu từ đi vay' via the vnstock finance "
+        "connector (taxonomy alias + migration 041 registered)."
+    ),
+    "repayment_of_borrowings.total": (
+        "Ingest CFS financing line 'Tiền trả nợ gốc vay' via the vnstock finance "
+        "connector (taxonomy alias + migration 041 registered)."
+    ),
+    "peer_pe_median": "Supply a peer P/E dataset; until then P/E stays cross-check only.",
+    "peer_ev_ebitda_median": "Supply a peer EV/EBITDA dataset; EV/EBITDA stays cross-check only.",
+    "peer_group": "Define the peer group taxonomy for relative valuation.",
+    "market_price": "Provide a current market price (vnstock VCI overview / price history).",
+}
+
+_CLASSIFICATION_FIXES: dict[str, str] = {
+    "canonical_mapping_missing": (
+        "Register the canonical key in metric_metadata.METRIC_METADATA and add a "
+        "taxonomy alias + ref.line_items seed so it survives ingestion."
+    ),
+    "ingestion_or_source_absence": (
+        "Verify the connector emits this metric for the latest period and the "
+        "source actually publishes it; if absent at source, the method stays blocked."
+    ),
+    "missing_assumption": "Supply the assumption (analyst-approved or model default).",
+    "missing_market_data": "Supply the market-data input from a market source.",
+}
+
+
+def build_data_gap_report(matrix: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Flatten a matrix into an actionable gap report (improvement.md §P9)."""
+    gaps: list[dict[str, Any]] = []
+    ready_methods: list[str] = []
+    for method, avail in matrix.items():
+        if avail["status"] == "ready":
+            ready_methods.append(method)
+            continue
+        detail_by_field = {d["canonical_field"]: d for d in avail["field_details"]}
+        for field_name in avail["missing_fields"]:
+            classification = detail_by_field[field_name]["classification"]
+            recommended = RECOMMENDED_FIXES.get(
+                field_name, _CLASSIFICATION_FIXES.get(classification, "Investigate and source this input.")
+            )
+            gaps.append({
+                "method": method,
+                "field": field_name,
+                "classification": classification,
+                "recommended_fix": recommended,
+            })
+    return {"ready_methods": ready_methods, "gaps": gaps}
