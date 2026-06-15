@@ -45,6 +45,56 @@ const packet = {
         rationale: "MVP coverage threshold.",
       },
     }],
+  }, {
+    plan_id: "03",
+    name: "Financial calculation",
+    artifact: "financial_eval.json",
+    status: "fail",
+    metric_results: [{
+      metric_id: "fcff",
+      metric_name: "FCFF formula",
+      metric_type: "coverage",
+      value: 10,
+      threshold: "pass",
+      status: "pass",
+      unit: "count",
+      evaluator: { framework: "deterministic_finance_gates" },
+    }, {
+      metric_id: "valuation_publishable",
+      metric_name: "Valuation publishability policy",
+      metric_type: "coverage",
+      value: 0,
+      threshold: "pass",
+      status: "fail",
+      unit: "count",
+      evaluator: { framework: "valuation_publishability_policy" },
+    }, {
+      metric_id: "new_backend_metric",
+      metric_name: "New backend metric",
+      metric_type: "score",
+      value: 0.73,
+      threshold: ">= 0.70",
+      status: "pass",
+      evaluator: { framework: "future_evaluator" },
+    }],
+  }, {
+    plan_id: "07",
+    name: "Observability, cost, and latency",
+    artifact: "observability_eval.json",
+    status: "pass",
+    metric_results: [{
+      metric_id: "llm_retry_rate",
+      metric_name: "LLM retry rate",
+      value: 0,
+      threshold: "<= 5%",
+      status: "pass",
+    }, {
+      metric_id: "artifact_upload_failures",
+      metric_name: "Artifact upload failures",
+      value: 0,
+      threshold: "= 0",
+      status: "pass",
+    }],
   }],
 };
 
@@ -60,8 +110,12 @@ describe("EvalDashboardPage", () => {
   it("renders the live benchmark packet with publication status", async () => {
     render(<EvalDashboardPage />);
     expect(await screen.findByText(/BLOCKED_BY_P0/)).toBeInTheDocument();
-    expect(screen.queryByText(/project-eval-test/)).not.toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith("/eval/framework", { cache: "no-store" });
     expect(screen.getAllByText("Core metric coverage").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("50.0%").length).toBeGreaterThan(0);
+    expect(screen.getByText("Số mã đạt công thức FCFF")).toBeInTheDocument();
+    expect(screen.getByText("Số mã đủ điều kiện publish valuation")).toBeInTheDocument();
+    expect(screen.getAllByText("New backend metric").length).toBeGreaterThan(0);
   });
 
   it("opens a layer benchmark dialog", async () => {

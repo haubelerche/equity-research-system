@@ -47,6 +47,43 @@ function resultsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): Met
   return results;
 }
 
+function metricFromResult(result: BenchmarkMetricResult): MetricDef {
+  const id = resultKey(result);
+  const threshold = typeof result.threshold === "number" ? result.threshold : 0;
+  const operator = String(result.threshold_operator ?? result.threshold ?? "");
+  return {
+    id,
+    label: String(result.metric_name ?? result.label ?? id),
+    englishLabel: String(result.metric_name ?? result.label ?? id),
+    unit: result.unit === "%" ? "%" : "",
+    comparator: operator.includes("<=") || operator.trim() === "<" ? "lte" : "gte",
+    threshold,
+    thresholdLabel: result.threshold === null || result.threshold === undefined
+      ? undefined
+      : String(result.threshold),
+    technology: String(result.evaluator?.framework ?? result.category ?? result.source ?? "Benchmark artifact"),
+    formula: String(result.calculation?.formula ?? result.detail ?? "Runtime benchmark metric emitted by evaluator."),
+    metricType: result.metric_type,
+    scope: result.scope,
+    severity: result.severity,
+    blocksPublish: result.blocks_publish,
+  };
+}
+
+function metricsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): MetricDef[] {
+  const results = resultsForLayer(packet, layer);
+  const configured = layer.metrics;
+  const configuredIds = new Set(configured.map((metric) => metric.id));
+  const dynamic = Object.entries(results)
+    .filter(([id]) => id && !configuredIds.has(id))
+    .map(([, result]) => metricFromResult(result));
+  return [...configured, ...dynamic];
+}
+
+function layerWithRuntimeMetrics(packet: EvaluationPacket | null, layer: EvalLayer): EvalLayer {
+  return { ...layer, metrics: metricsForLayer(packet, layer) };
+}
+
 function valuesForLayer(packet: EvaluationPacket | null, layer: EvalLayer): Record<string, number | null> {
   const values = packet ? {} as Record<string, number | null> : { ...mockValuesForLayer(layer.id) };
   const results = resultsForLayer(packet, layer);
@@ -99,7 +136,7 @@ export function EvalDashboardPage() {
   }, []);
 
   const allMetricsPassed = useMemo(
-    () => EVAL_LAYERS.every((layer) => layerMetricsPassed(packet, layer)),
+    () => EVAL_LAYERS.every((layer) => layerMetricsPassed(packet, layerWithRuntimeMetrics(packet, layer))),
     [packet],
   );
   const publicationStatus = packet?.publication_status ?? (allMetricsPassed ? "DRAFT_PUBLISHABLE" : "NOT_EVALUATED");
@@ -123,22 +160,25 @@ export function EvalDashboardPage() {
       )}
 
       <div className="layer-grid">
-        {EVAL_LAYERS.map((layer) => (
-          <LayerCard
-            key={layer.id}
-            layer={layer}
-            values={valuesForLayer(packet, layer)}
-            results={resultsForLayer(packet, layer)}
-            onViewBenchmark={(selected) => setModal({ kind: "benchmark", layer: selected })}
-            onExplain={(selected) => setModal({ kind: "explanation", layer: selected })}
-            onSelectMetric={(selectedLayer, metric, result) => setModal({
-              kind: "metric",
-              layer: selectedLayer,
-              metric,
-              result,
-            })}
-          />
-        ))}
+        {EVAL_LAYERS.map((layer) => {
+          const displayLayer = layerWithRuntimeMetrics(packet, layer);
+          return (
+            <LayerCard
+              key={layer.id}
+              layer={displayLayer}
+              values={valuesForLayer(packet, displayLayer)}
+              results={resultsForLayer(packet, displayLayer)}
+              onViewBenchmark={(selected) => setModal({ kind: "benchmark", layer: selected })}
+              onExplain={(selected) => setModal({ kind: "explanation", layer: selected })}
+              onSelectMetric={(selectedLayer, metric, result) => setModal({
+                kind: "metric",
+                layer: selectedLayer,
+                metric,
+                result,
+              })}
+            />
+          );
+        })}
       </div>
 
       {modal?.kind === "benchmark" && (

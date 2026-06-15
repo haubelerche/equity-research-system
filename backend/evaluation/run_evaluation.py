@@ -81,6 +81,62 @@ def _blocking_issues(metrics: list[dict[str, Any]]) -> list[str]:
     )
 
 
+def _number(value: Any) -> float | None:
+    return float(value) if isinstance(value, (int, float)) else None
+
+
+def _p95(values: list[float]) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    index = max(0, min(len(ordered) - 1, int(round((len(ordered) - 1) * 0.95))))
+    return ordered[index]
+
+
+def _trace_stage(event: dict[str, Any]) -> str:
+    input_summary = event.get("input_summary") if isinstance(event.get("input_summary"), dict) else {}
+    return str(
+        event.get("stage")
+        or input_summary.get("state_stage")
+        or event.get("current_stage")
+        or event.get("agent_id")
+        or "unknown"
+    )
+
+
+def _event_retry_count(event: dict[str, Any]) -> int:
+    retry_count = event.get("retry_count")
+    if isinstance(retry_count, int):
+        return max(0, retry_count)
+    for key in ("attempts", "retry_attempts"):
+        attempts = event.get(key)
+        if isinstance(attempts, int):
+            return max(0, attempts - 1)
+    return 0
+
+
+def _token_count(event: dict[str, Any], *keys: str) -> int:
+    for key in keys:
+        value = event.get(key)
+        if isinstance(value, int):
+            return value
+    usage = event.get("usage")
+    if isinstance(usage, dict):
+        for key in keys:
+            value = usage.get(key)
+            if isinstance(value, int):
+                return value
+    return 0
+
+
+def _trace_url(state: ResearchGraphState) -> str | None:
+    for event in state.trace:
+        if isinstance(event, dict) and event.get("trace_url"):
+            return str(event["trace_url"])
+    configured = state.artifacts.get("trace_url")
+    return str(configured) if configured else None
+
+
 def _base(
     state: ResearchGraphState,
     plan_id: str,
@@ -443,18 +499,46 @@ def _publication(state: ResearchGraphState, generated_at: str) -> dict[str, Any]
 
 def _observability(state: ResearchGraphState, generated_at: str) -> dict[str, Any]:
     agent_calls = [item for item in state.trace if item.get("kind") == "agent_message"]
-    latencies = [
-        float(item["latency_ms"])
-        for item in agent_calls
-        if isinstance(item.get("latency_ms"), (int, float))
+    retrieval_events = [
+        item for item in state.trace
+        if item.get("kind") in {"retrieval_query", "retrieval"}
+        or str(item.get("tool_name") or "").lower() in {"retrieve", "retrieval", "retrieval_service"}
     ]
-    costs = [
-        float(item["cost_estimate"])
-        for item in agent_calls
-        if isinstance(item.get("cost_estimate"), (int, float))
+    upload_events = [
+        item for item in state.trace
+        if item.get("kind") == "artifact_upload" or item.get("action") == "artifact_upload"
     ]
+    render_events = [
+        item for item in state.trace
+        if item.get("kind") == "pdf_render" or item.get("action") == "pdf_render"
+    ]
+    latencies = [value for value in (_number(item.get("latency_ms")) for item in agent_calls) if value is not None]
+    retrieval_latencies = [
+        value for value in (_number(item.get("latency_ms")) for item in retrieval_events) if value is not None
+    ]
+    costs = [value for value in (_number(item.get("cost_estimate")) for item in agent_calls) if value is not None]
+    retries = sum(_event_retry_count(item) for item in agent_calls)
     fallbacks = sum(bool(item.get("fallback_triggered")) for item in agent_calls)
     fallback_rate = fallbacks / len(agent_calls) if agent_calls else None
+    retry_rate = retries / len(agent_calls) if agent_calls else None
+    retrieval_fallbacks = sum(bool(item.get("fallback_triggered")) for item in retrieval_events)
+    retrieval_fallback_rate = retrieval_fallbacks / len(retrieval_events) if retrieval_events else None
+    stage_durations: dict[str, float] = {}
+    for event in state.trace:
+        latency = _number(event.get("latency_ms"))
+        if latency is None:
+            continue
+        stage = _trace_stage(event)
+        stage_durations[stage] = round(stage_durations.get(stage, 0.0) + latency / 1000, 6)
+    duration_seconds = round(sum(stage_durations.values()), 6) if stage_durations else None
+    artifact_upload_failures = sum(
+        1 for item in upload_events if item.get("status") in {"failed", "error"}
+    )
+    pdf_render_failures = sum(
+        1 for item in render_events if item.get("status") in {"failed", "error"}
+    )
+    if not render_events and state.artifacts.get("report_render_error"):
+        pdf_render_failures = 1
     metrics = [
         _metric(
             "trace_coverage",
@@ -475,13 +559,49 @@ def _observability(state: ResearchGraphState, generated_at: str) -> dict[str, An
             "agent_trace_missing",
         ),
         _metric(
+            "llm_retry_rate",
+            "LLM retry rate",
+            retry_rate,
+            "<= 5%",
+            "measured_only" if retry_rate is None else ("pass" if retry_rate <= 0.05 else "fail"),
+            "agent trace",
+            "agent_retry_trace_missing",
+        ),
+        _metric(
+            "retrieval_fallback_rate",
+            "Retrieval fallback rate",
+            retrieval_fallback_rate,
+            "<= 20%",
+            "measured_only" if retrieval_fallback_rate is None else (
+                "pass" if retrieval_fallback_rate <= 0.20 else "fail"
+            ),
+            "retrieval trace",
+            "retrieval_trace_missing",
+        ),
+        _metric(
             "full_run_duration",
             "Full run duration",
-            None,
+            duration_seconds,
             "<= baseline p95 + 30%",
             "measured_only",
-            "stage duration telemetry unavailable",
-            "duration_baseline_missing",
+            "runtime trace",
+            "duration_baseline_missing" if duration_seconds is not None else "stage duration telemetry unavailable",
+        ),
+        _metric(
+            "artifact_upload_failures",
+            "Artifact upload failures",
+            artifact_upload_failures,
+            "0",
+            "pass" if artifact_upload_failures == 0 else "fail",
+            "artifact upload trace",
+        ),
+        _metric(
+            "pdf_render_failures",
+            "PDF render failures",
+            pdf_render_failures,
+            "0",
+            "pass" if pdf_render_failures == 0 else "fail",
+            "pdf render trace",
         ),
     ]
     return _base(
@@ -490,16 +610,42 @@ def _observability(state: ResearchGraphState, generated_at: str) -> dict[str, An
         "Observability, cost, and latency",
         metrics,
         generated_at,
+        trace_url=_trace_url(state),
+        duration_seconds=duration_seconds,
+        stage_durations=stage_durations,
         llm={
             "calls": len(agent_calls),
+            "tokens_input": sum(
+                _token_count(item, "tokens_input", "input_tokens", "prompt_tokens")
+                for item in agent_calls
+            ),
+            "tokens_output": sum(
+                _token_count(item, "tokens_output", "output_tokens", "completion_tokens")
+                for item in agent_calls
+            ),
             "latency_ms_total": sum(latencies) if latencies else None,
             "estimated_cost_usd": sum(costs) if costs else None,
+            "retry_rate": retry_rate,
             "fallback_rate": fallback_rate,
+        },
+        retrieval={
+            "queries": len(retrieval_events),
+            "p95_latency_ms": _p95(retrieval_latencies),
+            "fallback_rate": retrieval_fallback_rate,
         },
         blocking_gate_categories=sorted(
             name for name, gate in state.gate_results.items()
             if isinstance(gate, dict) and gate.get("passed") is False
         ),
+        publication={
+            "readiness_passed": state.status in {"approved", "auto_exported"},
+            "authorization_blockers": [
+                f"{name}:{','.join(gate.get('blocking_reasons') or []) or 'gate_failed'}"
+                for name, gate in sorted(state.gate_results.items())
+                if isinstance(gate, dict) and gate.get("passed") is False
+            ],
+            "render_mode": state.artifacts.get("render_mode") or "analyst_draft",
+        },
     )
 
 

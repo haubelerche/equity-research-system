@@ -16,10 +16,11 @@ const SEGMENT_LABEL: Record<string, string> = {
 };
 
 export function ReportRow({ item, onPreview, onGenerated }: Props) {
+  const cacheToken = item.updated_at ?? item.report_size ?? null;
   const statusLabel = item.has_report
     ? item.has_explanation
       ? "✓ Đầy đủ"
-      : "◑ Chỉ báo cáo"
+      : "◐ Chỉ báo cáo"
     : "⏳ Chưa có";
   return (
     <tr>
@@ -37,11 +38,11 @@ export function ReportRow({ item, onPreview, onGenerated }: Props) {
           {item.has_report ? (
             <>
               <button onClick={() => onPreview(item.ticker)}>Xem trước</button>
-              <a href={fileUrl(item.ticker, "report")} target="_blank" rel="noreferrer">
+              <a href={fileUrl(item.ticker, "report", cacheToken)} target="_blank" rel="noreferrer">
                 Tải báo cáo
               </a>
               {item.has_explanation && (
-                <a href={fileUrl(item.ticker, "explanation")} target="_blank" rel="noreferrer">
+                <a href={fileUrl(item.ticker, "explanation", cacheToken)} target="_blank" rel="noreferrer">
                   Tải giải thích
                 </a>
               )}

@@ -87,7 +87,7 @@ def test_batch_expected_count_mismatch_fails(monkeypatch) -> None:
     monkeypatch.setattr(batch, "_configured_universe_tickers", lambda: ["DHG", "MKP"])
 
     try:
-        batch.main(["--all", "--from-year", "2022", "--to-year", "2025", "--expected-count", "53"])
+        batch.main(["--all", "--from-year", "2022", "--to-year", "2025", "--expected-count", "42"])
     except SystemExit as exc:
         assert exc.code == 2
     else:

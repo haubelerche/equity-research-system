@@ -48,7 +48,7 @@ if _env_file.exists():
 
 ROOT = Path(__file__).resolve().parents[1]
 FACTS_DIR = ROOT / "artifacts" / "facts"
-GOLDEN_DIR = ROOT / "config" / "dataset" / "golden" / "financials"
+GOLDEN_DIR = ROOT / "config" / "dataset" / "benchmarks" / "shared" / "golden_financials"
 REPORTS_DIR = ROOT / "reports"
 
 _ALLOWED_FY_RE = re.compile(r"^(20\d{2})FY$")

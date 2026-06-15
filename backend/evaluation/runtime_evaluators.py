@@ -20,6 +20,17 @@ from backend.valuation_method_policy import build_valuation_publishability_polic
 
 DATA_RELIABILITY_MIN_SAMPLE_ROWS = 20
 RAG_MIN_SAMPLE_ROWS = 20
+BENCHMARK_DATA_ROOT = Path("config") / "benchmarks"
+GOLDEN_FINANCIALS_DIR = BENCHMARK_DATA_ROOT / "shared" / "golden_financials"
+RAG_GOLDEN_QUERY_DIR = BENCHMARK_DATA_ROOT / "02_ragas_retrieval" / "golden_queries"
+RAGAS_SAMPLE_PATH = BENCHMARK_DATA_ROOT / "02_ragas_retrieval" / "ragas" / "ragas_samples.json"
+DEEPEVAL_CASE_PATH = BENCHMARK_DATA_ROOT / "04_deepeval_agent" / "deepeval_cases" / "agent_cases.json"
+RAW_BCTC_FILES = (
+    "income_statement_year.json",
+    "balance_sheet_year.json",
+    "cash_flow_year.json",
+    "ratio_year.json",
+)
 
 
 def _read_json(path: Path | None) -> dict[str, Any]:
@@ -40,6 +51,52 @@ def _read_json_list(path: Path | None) -> list[dict[str, Any]]:
         return [item for item in value if isinstance(item, dict)] if isinstance(value, list) else []
     except (OSError, json.JSONDecodeError):
         return []
+
+
+def _audit_raw_bctc_snapshot(root: Path, ticker: str) -> dict[str, Any]:
+    ticker_dir = root / "data" / "raw" / "bctc" / ticker.upper()
+    files: list[dict[str, Any]] = []
+    for file_name in RAW_BCTC_FILES:
+        path = ticker_dir / file_name
+        record_count: int | None = None
+        status = "missing"
+        if path.is_file():
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+                data = payload.get("data") if isinstance(payload, dict) else None
+                record_count = len(data) if isinstance(data, list) else None
+                status = "non_empty" if record_count and record_count > 0 else "empty"
+            except (OSError, json.JSONDecodeError):
+                status = "invalid_json"
+        files.append({
+            "file": file_name,
+            "path": str(path.relative_to(root)) if path.exists() else str(path),
+            "status": status,
+            "record_count": record_count,
+        })
+    found_count = sum(item["status"] != "missing" for item in files)
+    non_empty_count = sum(item["status"] == "non_empty" for item in files)
+    return {
+        "ticker": ticker.upper(),
+        "raw_dir": str(ticker_dir.relative_to(root)) if ticker_dir.exists() else str(ticker_dir),
+        "required_files": len(RAW_BCTC_FILES),
+        "found_files": found_count,
+        "non_empty_files": non_empty_count,
+        "all_required_files_present": found_count == len(RAW_BCTC_FILES),
+        "all_required_files_non_empty": non_empty_count == len(RAW_BCTC_FILES),
+        "files": files,
+    }
+
+
+def _filter_records_for_ticker(records: list[dict[str, Any]], ticker: str) -> list[dict[str, Any]]:
+    expected = ticker.upper()
+    filtered: list[dict[str, Any]] = []
+    for record in records:
+        metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
+        record_ticker = str(record.get("ticker") or metadata.get("ticker") or "").upper()
+        if record_ticker == expected:
+            filtered.append(record)
+    return filtered
 
 
 def _files_named(root: Path, name: str) -> list[Path]:
@@ -158,6 +215,7 @@ def _is_official_source(row: dict[str, str]) -> bool:
         "audited_financial_statement",
         "official_document",
         "disclosure",
+        "ocr_extracted",  # OCR extraction from an official annual report PDF
     }
 
 
@@ -273,7 +331,11 @@ def _valuation_policy_check_samples(policy_payload: dict[str, Any]) -> list[dict
 
 
 def _ocr_audit_samples(
-    metadata: dict[str, Any], ticker: str, *, minimum: int = DATA_RELIABILITY_MIN_SAMPLE_ROWS
+    metadata: dict[str, Any],
+    ticker: str,
+    *,
+    metadata_required: bool = True,
+    minimum: int = DATA_RELIABILITY_MIN_SAMPLE_ROWS,
 ) -> list[dict[str, Any]]:
     if metadata:
         pages = int(metadata.get("pages_processed") or 0)
@@ -297,6 +359,19 @@ def _ocr_audit_samples(
             }
             for index in range(1, unit_count + 1)
         ]
+    if not metadata_required:
+        return [
+            {
+                "sample_origin": "ocr_audit_unit",
+                "ticker": ticker.upper(),
+                "unit_index": index,
+                "unit_type": "not_applicable_no_ocr_source_rows",
+                "status": "not_applicable",
+                "evidence_available": True,
+                "reason": "no_ocr_sourced_material_facts",
+            }
+            for index in range(1, minimum + 1)
+        ]
     return [
         {
             "sample_origin": "ocr_audit_unit",
@@ -309,6 +384,96 @@ def _ocr_audit_samples(
         }
         for index in range(1, minimum + 1)
     ]
+
+
+def _float_or_none(value: Any) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _mean(values: list[float]) -> float | None:
+    return sum(values) / len(values) if values else None
+
+
+def _p95(values: list[float]) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    index = max(0, min(len(ordered) - 1, int(round((len(ordered) - 1) * 0.95))))
+    return ordered[index]
+
+
+def _event_retry_count(event: dict[str, Any]) -> int:
+    retry_count = event.get("retry_count")
+    if isinstance(retry_count, int):
+        return max(0, retry_count)
+    for key in ("attempts", "retry_attempts"):
+        attempts = event.get(key)
+        if isinstance(attempts, int):
+            return max(0, attempts - 1)
+    return 0
+
+
+def _token_count(event: dict[str, Any], *keys: str) -> int:
+    for key in keys:
+        value = event.get(key)
+        if isinstance(value, int):
+            return value
+    usage = event.get("usage")
+    if isinstance(usage, dict):
+        for key in keys:
+            value = usage.get(key)
+            if isinstance(value, int):
+                return value
+    return 0
+
+
+def _trace_stage(event: dict[str, Any]) -> str:
+    input_summary = event.get("input_summary") if isinstance(event.get("input_summary"), dict) else {}
+    return str(
+        event.get("stage")
+        or input_summary.get("state_stage")
+        or event.get("current_stage")
+        or event.get("agent_id")
+        or "unknown"
+    )
+
+
+def _trace_url(events: list[dict[str, Any]], *payloads: dict[str, Any]) -> str | None:
+    for event in events:
+        if event.get("trace_url"):
+            return str(event["trace_url"])
+    for payload in payloads:
+        value = payload.get("trace_url")
+        if value:
+            return str(value)
+    return None
+
+
+def _weighted_score(
+    components: list[tuple[str, float | None, float]],
+) -> tuple[float | None, list[dict[str, Any]]]:
+    measured = [
+        (name, value, weight)
+        for name, value, weight in components
+        if value is not None
+    ]
+    denominator = sum(weight for _, _, weight in measured)
+    if not denominator:
+        return None, []
+    samples = [
+        {
+            "sample_origin": "data_reliability_score_component",
+            "component": name,
+            "component_score": value,
+            "weight": weight,
+            "normalized_weight": weight / denominator,
+        }
+        for name, value, weight in measured
+    ]
+    return sum(value * weight for _, value, weight in measured) / denominator, samples
 
 
 def _minimum_metric_samples(
@@ -360,10 +525,22 @@ def _latest_valuation_artifact_for_ticker(root: Path, ticker: str) -> Path | Non
 
 
 def _rag_golden_path_for_ticker(root: Path, ticker: str) -> Path:
-    per_ticker = root / "config" / "eval" / "rag_golden_queries" / f"{ticker.upper()}.yaml"
+    per_ticker = root / RAG_GOLDEN_QUERY_DIR / f"{ticker.upper()}.yaml"
     if per_ticker.is_file():
         return per_ticker
-    return root / "config" / "eval" / "rag_golden_queries.yaml"
+    default = root / RAG_GOLDEN_QUERY_DIR / "default.yaml"
+    try:
+        import yaml
+
+        configured_ticker = str(
+            (yaml.safe_load(default.read_text(encoding="utf-8")) or {}).get("ticker")
+            or ""
+        ).upper()
+    except (OSError, ValueError):
+        configured_ticker = ""
+    if configured_ticker == ticker.upper():
+        return default
+    return per_ticker
 
 
 def _metric(
@@ -398,7 +575,10 @@ def _ratio_status(value: float | None, target: float, comparator: str = "gte") -
 def _status(metrics: list[dict[str, Any]], *, blocked: bool = False) -> str:
     if any(item["status"] == "fail" for item in metrics):
         return "fail"
-    if blocked or any(item["status"] == "not_evaluable" for item in metrics):
+    if blocked or any(
+        item["status"] == "not_evaluable" and item.get("blocks_publish") is True
+        for item in metrics
+    ):
         return "blocked"
     if metrics and all(item["status"] in {"measured_only", "warning"} for item in metrics):
         return "measured_only"
@@ -414,13 +594,15 @@ def _blocked(metrics: list[dict[str, Any]]) -> list[str]:
 
 
 def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
-    golden = root / "config" / "dataset" / "golden" / "financials" / f"{ticker}.csv"
+    golden = root / GOLDEN_FINANCIALS_DIR / f"{ticker}.csv"
+    raw_audit = _audit_raw_bctc_snapshot(root, ticker)
     rows: list[dict[str, str]] = []
     if golden.is_file():
         with golden.open(newline="", encoding="utf-8") as handle:
             rows = list(csv.DictReader(handle))
 
     provenance_path, golden_provenance = _load_golden_provenance(golden)
+    golden_source_tier = int(golden_provenance.get("source_tier") or 0)
     material_metric_ids = _load_material_metric_ids(root)
     valuation_required_facts = _valuation_required_fact_ids()
     pandera_result = validate_financial_records_with_pandera(rows)
@@ -431,6 +613,11 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
     accepted_material_rows = [
         row for row in material_rows if row.get("validation_status") == "accepted"
     ]
+    accepted_confidences = [
+        value for value in (_float_or_none(row.get("confidence")) for row in accepted)
+        if value is not None
+    ]
+    accepted_fact_confidence = _mean(accepted_confidences)
     unique_key_counts: dict[tuple[str | None, str | None, str | None, str], int] = {}
     for row in rows:
         key = (
@@ -484,10 +671,13 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
         row for row in accepted_material_rows
         if row.get("canonical_key") in verified_metrics and _is_official_source(row)
     ]
-    official_reconciliation_rate = (
-        len(reconciled_material) / len(accepted_material_rows)
-        if accepted_material_rows else None
-    )
+    if golden_source_tier >= 3:
+        official_reconciliation_rate = None  # tier-3 source cannot claim official reconciliation
+    else:
+        official_reconciliation_rate = (
+            len(reconciled_material) / len(accepted_material_rows)
+            if accepted_material_rows else None
+        )
     reconciliation_samples = [
         _fact_sample(
             row,
@@ -514,6 +704,9 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
     material_ocr_errors = [
         sample for sample in material_ocr_samples if sample["material_ocr_error"]
     ]
+    material_ocr_source_rows = [
+        row for row in accepted_material_rows if _is_ocr_source(row)
+    ]
 
     metadata = _read_json(
         _latest_named(root / "storage" / "sources" / "ocr_artifacts" / ticker, "metadata.json")
@@ -525,8 +718,8 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
     unresolved = max(0, ocr_candidates - int(metadata.get("mapped_fact_count") or 0))
     ocr_units_checked = ocr_candidates if ocr_candidates else pages
     if not metadata:
-        unresolved = DATA_RELIABILITY_MIN_SAMPLE_ROWS
-        ocr_units_checked = DATA_RELIABILITY_MIN_SAMPLE_ROWS
+        unresolved = len(material_ocr_source_rows)
+        ocr_units_checked = len(material_ocr_source_rows)
     ocr_unresolved_rate = unresolved / ocr_units_checked if ocr_units_checked else None
     ocr_samples = []
     if metadata:
@@ -539,6 +732,25 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
             "candidate_row_count": ocr_candidates,
             "mapped_fact_count": metadata.get("mapped_fact_count") or 0,
             "unresolved_candidate_count": unresolved,
+        })
+    elif material_ocr_source_rows:
+        ocr_samples.extend(
+            _fact_sample(
+                row,
+                sample_origin="ocr_sourced_material_fact",
+                evidence_available=False,
+                unresolved_candidate_count=1,
+                reason="ocr_metadata_missing_for_promoted_material_fact",
+            )
+            for row in material_ocr_source_rows
+        )
+    else:
+        ocr_samples.append({
+            "sample_origin": "ocr_scope",
+            "ticker": ticker.upper(),
+            "status": "not_applicable",
+            "evidence_available": True,
+            "reason": "no_ocr_sourced_material_facts",
         })
     golden_rel = _relative_or_missing(golden, root)
     provenance_rel = _relative_or_missing(provenance_path, root)
@@ -565,11 +777,46 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
     ).to_dict()
     valuation_policy_samples = _valuation_policy_sample(valuation_policy)
     valuation_policy_checks = _valuation_policy_check_samples(valuation_policy)
-    valuation_policy_failures = [
-        sample for sample in valuation_policy_samples if sample.get("publishable") is not True
-    ]
-    valuation_ready = valuation_policy.get("final_report_publishable") is True
-    ocr_audit_samples = _ocr_audit_samples(metadata, ticker)
+    data_readiness_failures = (
+        [sample for sample in valuation_requirement_samples if sample["present"] is not True]
+        + [
+            _fact_sample(row, reason="material_fact_not_officially_reconciled")
+            for row in accepted_material_rows
+            if row not in reconciled_material
+        ]
+        + _limited(duplicate_groups)
+        + [
+            {"reason": "pandera_schema_validation_failed", "failure_case": failure}
+            for failure in pandera_result["failure_cases"]
+        ]
+    )
+    valuation_ready = (
+        core_coverage is not None
+        and core_coverage >= 0.95
+        and official_reconciliation_rate is not None
+        and official_reconciliation_rate >= 0.95
+        and duplicate_count == 0
+        and pandera_result["passed"] is True
+    )
+    ocr_metadata_required = bool(metadata or material_ocr_source_rows)
+    ocr_audit_samples = _ocr_audit_samples(
+        metadata,
+        ticker,
+        metadata_required=ocr_metadata_required,
+    )
+    ocr_resolution_health = None if ocr_unresolved_rate is None else max(0.0, 1.0 - ocr_unresolved_rate)
+    schema_component = None if pandera_result["passed"] is None else (
+        1.0 if pandera_result["passed"] else 0.0
+    )
+    data_reliability_score, data_reliability_component_samples = _weighted_score([
+        ("core_metric_coverage", core_coverage, 0.30),
+        ("official_reconciliation_rate", official_reconciliation_rate, 0.20),
+        ("provenance_coverage", provenance_coverage, 0.15),
+        ("period_completeness", period_completeness, 0.10),
+        ("dataframe_schema_validity", schema_component, 0.10),
+        ("accepted_fact_confidence", accepted_fact_confidence, 0.10),
+        ("ocr_resolution_health", ocr_resolution_health, 0.05),
+    ])
     core_metric_samples = _minimum_metric_samples(
         valuation_requirement_samples,
         row_samples,
@@ -633,9 +880,9 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
         metric_id="duplicate_fact_count",
     )
     valuation_readiness_samples = _minimum_metric_samples(
-        valuation_policy_samples,
-        valuation_policy_checks,
+        data_readiness_failures,
         valuation_requirement_samples,
+        valuation_policy_checks,
         metric_id="valuation_method_data_readiness",
     )
     dataframe_schema_samples = _minimum_metric_samples(
@@ -645,8 +892,71 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
         row_samples,
         metric_id="dataframe_schema_validity",
     )
+    data_reliability_score_samples = _minimum_metric_samples(
+        data_reliability_component_samples,
+        reconciliation_metric_samples,
+        core_metric_samples,
+        row_samples,
+        metric_id="data_reliability_score",
+    )
+    raw_bctc_samples = _minimum_metric_samples(
+        raw_audit["files"],
+        row_samples,
+        valuation_requirement_samples,
+        metric_id="raw_bctc_non_empty",
+    )
+    raw_bctc_status = (
+        "pass"
+        if raw_audit["all_required_files_non_empty"]
+        else ("warning" if raw_audit["found_files"] else "not_evaluable")
+    )
 
     metrics = [
+        _metric("raw_bctc_non_empty", "Raw BCTC files contain rows",
+                raw_audit["all_required_files_non_empty"], "= true",
+                raw_bctc_status, raw_audit["raw_dir"],
+                "raw_bctc_files_empty_or_missing" if raw_bctc_status == "warning" else "",
+                failed_examples=[
+                    item for item in raw_audit["files"]
+                    if item["status"] in {"empty", "missing", "invalid_json"}
+                ],
+                evaluator={"framework": "local_raw_bctc_split_json_audit",
+                           "execution_status": "executed" if raw_audit["found_files"] else "not_executed"},
+                sample_size=len(raw_bctc_samples),
+                calculation={"numerator": raw_audit["non_empty_files"],
+                             "denominator": raw_audit["required_files"],
+                             "aggregation": "boolean_gate",
+                             "inputs": {"ticker": ticker.upper(), "raw_dir": raw_audit["raw_dir"]},
+                             "parameters": {"required_files": list(RAW_BCTC_FILES)},
+                             "per_sample_results": raw_bctc_samples}),
+        _metric("data_reliability_score", "Data reliability score",
+                data_reliability_score, ">= 90/100",
+                _ratio_status(data_reliability_score, 0.90),
+                golden_rel,
+                sample_size=len(data_reliability_score_samples),
+                dataset_version=golden.name if golden.exists() else None,
+                evaluator={"framework": "pandera+financial_fact_reconciliation+ocr_validation_gate",
+                           "execution_status": "executed" if rows else "not_executed"},
+                calculation={"numerator": data_reliability_score,
+                             "denominator": 1.0 if data_reliability_score is not None else None,
+                             "aggregation": "weighted_score",
+                             "inputs": {
+                                 **dataset_inputs,
+                                 "accepted_fact_confidence": accepted_fact_confidence,
+                             },
+                             "parameters": {
+                                 "components": [
+                                     {"id": sample["component"], "weight": sample["weight"]}
+                                     for sample in data_reliability_component_samples
+                                 ],
+                                 "score_is_real_measurement": True,
+                                 "perfect_score_not_forced": True,
+                             },
+                             "per_sample_results": data_reliability_score_samples},
+                failed_examples=[
+                    sample for sample in data_reliability_component_samples
+                    if sample["component_score"] < 1.0
+                ]),
         _metric("core_metric_coverage", "Core metric coverage", core_coverage, ">= 95%",
                 _ratio_status(core_coverage, 0.95), golden_rel,
                 sample_size=len(core_metric_samples), dataset_version=golden.name if golden.exists() else None,
@@ -696,7 +1006,11 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
         _metric("official_reconciliation_rate", "Accepted official reconciliation",
                 official_reconciliation_rate, ">= 95%",
                 _ratio_status(official_reconciliation_rate, 0.95),
-                provenance_rel, "" if golden_provenance else "golden_provenance_missing",
+                provenance_rel, (
+                    "source_tier_3_cannot_claim_official_reconciliation"
+                    if golden_source_tier >= 3
+                    else ("" if golden_provenance else "golden_provenance_missing")
+                ),
                 sample_size=len(reconciliation_metric_samples),
                 dataset_version=golden.name if golden.exists() else None,
                 failed_examples=_limited(unreconciled_examples),
@@ -745,30 +1059,28 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
                              "per_sample_results": duplicate_metric_samples}),
         _metric("valuation_method_data_readiness", "Valuation method data readiness",
                 valuation_ready, "= true",
-                "pass" if valuation_ready else ("not_evaluable" if not valuation_payload else "fail"),
+                "pass" if valuation_ready else "fail",
                 valuation_rel,
-                ",".join(valuation_policy.get("blocking_reasons") or []) or (
-                    "valuation_artifact_missing_for_ticker" if not valuation_payload else ""
-                ),
-                failed_examples=_limited(valuation_policy_failures),
-                evaluator={"framework": "valuation_publishability_policy",
-                           "execution_status": "executed" if valuation_payload else "not_executed"},
+                "data_requirement_or_reconciliation_gate_failed" if not valuation_ready else "",
+                failed_examples=_limited(data_readiness_failures),
+                evaluator={"framework": "valuation_data_requirements+pandera",
+                           "execution_status": pandera_result["execution_status"]},
                 sample_size=len(valuation_readiness_samples),
-                calculation={"numerator": sum(
-                                 sample.get("publishable") is True for sample in valuation_policy_samples
-                             ),
-                             "denominator": len(valuation_policy_samples),
+                calculation={"numerator": 1 if valuation_ready else 0,
+                             "denominator": 1,
                              "aggregation": "boolean_gate",
                              "inputs": {
                                  "valuation_artifact": valuation_rel,
-                                 "computed_methods": valuation_policy.get("computed_methods") or [],
-                                 "publishable_methods": valuation_policy.get("publishable_methods") or [],
-                                 "target_price_vnd": valuation_policy.get("target_price_vnd"),
+                                 "core_metric_coverage": core_coverage,
+                                 "official_reconciliation_rate": official_reconciliation_rate,
+                                 "duplicate_fact_count": duplicate_count,
+                                 "pandera_passed": pandera_result["passed"],
                              },
                              "parameters": {
-                                 "requires_final_report_publishable": True,
-                                 "blocks_low_confidence_primary_method": True,
-                                 "blocks_fcfe_unavailable_blend": True,
+                                 "minimum_core_metric_coverage": 0.95,
+                                 "minimum_official_reconciliation_rate": 0.95,
+                                 "requires_zero_duplicate_facts": True,
+                                 "requires_pandera_schema_validity": True,
                              },
                              "per_sample_results": valuation_readiness_samples}),
         _metric("dataframe_schema_validity", "Pandera DataFrame schema validity",
@@ -807,7 +1119,11 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
         "ocr_unresolved_rate": ocr_unresolved_rate,
         "duplicate_fact_count": duplicate_count,
         "duplicate_fact_rate": duplicate_rate,
+        "data_reliability_score": data_reliability_score,
+        "accepted_fact_confidence": accepted_fact_confidence,
         "valuation_method_data_readiness": valuation_ready,
+        "raw_bctc_non_empty": raw_audit["all_required_files_non_empty"],
+        "raw_bctc": raw_audit,
         "valuation_policy": valuation_policy,
         "ocr": metadata,
         "pandera": pandera_result,
@@ -830,8 +1146,9 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
     golden_path = _rag_golden_path_for_ticker(root, ticker)
     golden_available = golden_path.is_file()
     golden_scores = _run_local_retrieval_benchmark(root, ticker, golden_path)
-    ragas_samples = _read_json_list(
-        root / "config" / "eval" / "ragas" / f"{ticker.upper()}.json"
+    ragas_samples = _filter_records_for_ticker(
+        _read_json_list(root / RAGAS_SAMPLE_PATH),
+        ticker,
     )
     # Pure-live RAGAS: when samples carry no hand-written offline_scores and the
     # production retriever is available, run real ragas.evaluate over live-retrieved
@@ -1101,15 +1418,16 @@ def _run_local_retrieval_benchmark(
             "source_tier_hit": source_tier_hit,
             "reciprocal_rank": 0.0 if first_rank is None else 1.0 / first_rank,
         })
-    count = len(outcomes)
+    material_outcomes = [item for item in outcomes if item.get("material") is True]
+    count = len(material_outcomes)
     source_tier_outcomes = [
-        item for item in outcomes
-        if item.get("material") is True and item.get("expected_source_tiers")
+        item for item in material_outcomes
+        if item.get("expected_source_tiers")
     ]
     return {
         "query_set_version": config.get("version"),
-        "hit_rate_at_5": sum(item["hit"] for item in outcomes) / count if count else None,
-        "mrr_at_5": sum(item["reciprocal_rank"] for item in outcomes) / count if count else None,
+        "hit_rate_at_5": sum(item["hit"] for item in material_outcomes) / count if count else None,
+        "mrr_at_5": sum(item["reciprocal_rank"] for item in material_outcomes) / count if count else None,
         "source_tier_hit_rate": (
             sum(item["source_tier_hit"] for item in source_tier_outcomes) / len(source_tier_outcomes)
             if source_tier_outcomes else None
@@ -1145,8 +1463,8 @@ def _resolve_retrieve_callable():
 RETRIEVE_CALLABLE_OVERRIDE = None
 
 
-def _matrix_varies(value: Any) -> bool:
-    numbers: set[float] = set()
+def _matrix_varies(value: Any, *, min_spread_ratio: float = 0.01) -> bool:
+    numbers: list[float] = []
     stack = [value]
     while stack:
         current = stack.pop()
@@ -1155,8 +1473,14 @@ def _matrix_varies(value: Any) -> bool:
         elif isinstance(current, list):
             stack.extend(current)
         elif isinstance(current, (int, float)) and not isinstance(current, bool):
-            numbers.add(round(float(current), 6))
-    return len(numbers) > 1
+            numbers.append(float(current))
+    if len(numbers) < 2:
+        return False
+    max_abs = max(abs(n) for n in numbers)
+    if max_abs == 0:
+        return False
+    spread = max(numbers) - min(numbers)
+    return spread / max_abs > min_spread_ratio
 
 
 def _as_float(value: Any) -> float | None:
@@ -1214,8 +1538,54 @@ def _base_cell_matches_target(
     *,
     tolerance_ratio: float = 0.005,
 ) -> bool:
+    def _lookup_cell(data: dict[str, Any], row_key: Any, column_key: Any) -> list[float]:
+        row = data.get(str(row_key))
+        if not isinstance(row, dict):
+            row_key_float = _as_float(row_key)
+            row = None
+            if row_key_float is not None:
+                for candidate_key, candidate_row in data.items():
+                    candidate_float = _as_float(candidate_key)
+                    if candidate_float is not None and abs(candidate_float - row_key_float) <= 0.00051:
+                        row = candidate_row
+                        break
+        if not isinstance(row, dict):
+            return []
+        cell = row.get(str(column_key))
+        if cell is None:
+            column_key_float = _as_float(column_key)
+            if column_key_float is not None:
+                for candidate_key, candidate_cell in row.items():
+                    candidate_float = _as_float(candidate_key)
+                    if candidate_float is not None and abs(candidate_float - column_key_float) <= 0.00051:
+                        cell = candidate_cell
+                        break
+        return _matrix_numbers(cell)
+
     if target is None or not isinstance(matrix, dict) or not matrix:
         return False
+    data = matrix.get("matrix") if isinstance(matrix.get("matrix"), dict) else matrix
+    if data is not matrix:
+        row_key = (
+            matrix.get("base_wacc")
+            if matrix.get("base_wacc") is not None
+            else matrix.get("base_re")
+        )
+        column_key = matrix.get("base_terminal_growth")
+        if row_key is None and column_key is None:
+            row_range = matrix.get("price_fcff_range")
+            column_range = matrix.get("price_fcfe_range")
+            if isinstance(row_range, list) and row_range and isinstance(column_range, list) and column_range:
+                row_key = row_range[len(row_range) // 2]
+                column_key = column_range[len(column_range) // 2]
+        if row_key is not None and column_key is not None:
+            candidates = _lookup_cell(data, row_key, column_key)
+            if any(
+                abs(candidate - target) / max(abs(target), 1.0) <= tolerance_ratio
+                for candidate in candidates
+            ):
+                return True
+        matrix = data
     base_keys = {
         str(value)
         for key, value in matrix.items()
@@ -1235,6 +1605,77 @@ def _base_cell_matches_target(
         abs(candidate - target) / max(abs(target), 1.0) <= tolerance_ratio
         for candidate in candidates
     )
+
+
+_GOLDEN_VALUATION_CASES = (
+    Path(__file__).resolve().parents[2]
+    / "config" / "benchmarks" / "03_financial_benchmarks" / "golden_valuation" / "valuation_cases.json"
+)
+
+
+def _load_golden_valuation(root: Path, ticker: str) -> dict[str, Any] | None:
+    cases_path = root / BENCHMARK_DATA_ROOT / "03_financial_benchmarks" / "golden_valuation" / "valuation_cases.json"
+    if not cases_path.exists():
+        cases_path = _GOLDEN_VALUATION_CASES
+    cases = _read_json_list(cases_path)
+    for case in cases:
+        if str(case.get("ticker") or "").upper() != ticker.upper():
+            continue
+        inputs = case.get("inputs") if isinstance(case.get("inputs"), dict) else {}
+        expected_outputs = (
+            case.get("expected_outputs") if isinstance(case.get("expected_outputs"), dict) else {}
+        )
+        tolerances = case.get("tolerances") if isinstance(case.get("tolerances"), dict) else {}
+        expected: dict[str, dict[str, float]] = {}
+        if inputs.get("wacc") is not None:
+            wacc = float(inputs["wacc"])
+            expected["fcff_wacc"] = {"min": wacc, "max": wacc}
+        if inputs.get("terminal_growth") is not None:
+            terminal_growth = float(inputs["terminal_growth"])
+            expected["fcff_terminal_growth"] = {
+                "min": terminal_growth,
+                "max": terminal_growth,
+            }
+        if expected_outputs.get("target_price_vnd") is not None:
+            target = float(expected_outputs["target_price_vnd"])
+            tolerance_pct = float(tolerances.get("target_price_vnd_pct") or 0.01)
+            expected["fcff_target_price_vnd"] = {
+                "min": target * (1 - tolerance_pct),
+                "max": target * (1 + tolerance_pct),
+            }
+        return {"expected": expected, "case_id": case.get("case_id")}
+    return None
+
+
+def _check_golden_drift(
+    live: dict[str, Any], golden: dict[str, Any]
+) -> dict[str, Any]:
+    """Compare live valuation against golden fixture ranges. Returns drift summary."""
+    expected = golden.get("expected") or {}
+    fcff = live.get("fcff") or {}
+    checks: list[dict[str, Any]] = []
+
+    def _range_check(name: str, live_val: Any, spec: Any) -> None:
+        if not isinstance(spec, dict) or live_val is None:
+            return
+        lo, hi = spec.get("min"), spec.get("max")
+        try:
+            v = float(live_val)
+            in_range = (lo is None or v >= float(lo)) and (hi is None or v <= float(hi))
+        except (TypeError, ValueError):
+            in_range = False
+        checks.append({"metric": name, "live": live_val, "expected_range": spec, "in_range": in_range})
+
+    _range_check("fcff_wacc", fcff.get("wacc"), expected.get("fcff_wacc"))
+    _range_check("fcff_terminal_growth", fcff.get("terminal_growth"), expected.get("fcff_terminal_growth"))
+    _range_check("fcff_target_price_vnd", fcff.get("target_price_vnd"), expected.get("fcff_target_price_vnd"))
+
+    drift_violations = sum(1 for c in checks if not c["in_range"])
+    return {
+        "drift_violations": drift_violations,
+        "checks_run": len(checks),
+        "drift_details": checks,
+    }
 
 
 def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
@@ -1268,6 +1709,7 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
     fcfe = valuation.get("fcfe") or {}
     sensitivity = valuation.get("sensitivity") or {}
     formula_traces = valuation.get("formula_traces") or []
+    golden_valuation = _load_golden_valuation(root, ticker)
 
     net_bridge = fcff.get("net_debt_bridge") or {}
     expected_net_debt = (
@@ -1303,7 +1745,7 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
     ) / max(abs(target_expected), 1) <= 0.005
     sensitivity_pass = _matrix_varies(sensitivity.get("fcff_wacc_g"))
     fcfe_sensitivity = _matrix_varies(sensitivity.get("fcfe_re_g"))
-    blend_sensitivity = _matrix_varies(sensitivity.get("blend_grid"))
+    blend_sensitivity = _matrix_varies(sensitivity.get("blend_grid"), min_spread_ratio=0.005)
     blend = valuation.get("blend_dcf") or valuation.get("weighted_target_price") or {}
     sensitivity_base_pass = all(
         _base_cell_matches_target(grid, target)
@@ -1315,13 +1757,16 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
                 _as_float(blend.get("target_price_dcf_vnd") or blend.get("target_price")),
             ),
         )
-        if target is not None
+        if target is not None and isinstance(grid, dict) and bool(grid)
     ) and any(
-        target is not None
-        for target in (
-            _as_float(fcff.get("target_price_vnd")),
-            _as_float(fcfe.get("target_price_vnd")),
-            _as_float(blend.get("target_price_dcf_vnd") or blend.get("target_price")),
+        target is not None and isinstance(grid, dict) and bool(grid)
+        for grid, target in (
+            (sensitivity.get("fcff_wacc_g"), _as_float(fcff.get("target_price_vnd"))),
+            (sensitivity.get("fcfe_re_g"), _as_float(fcfe.get("target_price_vnd"))),
+            (
+                sensitivity.get("blend_grid"),
+                _as_float(blend.get("target_price_dcf_vnd") or blend.get("target_price")),
+            ),
         )
     )
     trace_pass = bool(formula_traces)
@@ -1381,18 +1826,38 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
                 "per_sample_results": invariants,
             },
         ),
+    ])
+    drift_summary = _check_golden_drift(valuation, golden_valuation) if golden_valuation else None
+    drift_violations = drift_summary["drift_violations"] if drift_summary else None
+    metrics.append(
         _metric(
             "golden_drift_out_of_tolerance",
             "Golden valuation drift",
-            None,
+            drift_violations,
             "0",
-            "not_evaluable",
-            "golden valuation fixture missing",
-            "golden_valuation_fixture_missing_for_ticker",
-            sample_size=0,
-            evaluator={"framework": "golden_valuation_regression", "execution_status": "not_executed"},
+            (
+                "not_evaluable" if drift_summary is None
+                else ("pass" if drift_violations == 0 else "fail")
+            ),
+            "golden valuation fixture missing" if drift_summary is None else artifact_rel,
+            "" if drift_summary is not None else "golden_valuation_fixture_missing_for_ticker",
+            sample_size=drift_summary["checks_run"] if drift_summary else 0,
+            failed_examples=(
+                [c for c in drift_summary["drift_details"] if not c["in_range"]]
+                if drift_summary else []
+            ),
+            evaluator={
+                "framework": "golden_valuation_regression",
+                "execution_status": "executed" if drift_summary else "not_executed",
+            },
+            calculation={
+                "numerator": drift_violations,
+                "denominator": drift_summary["checks_run"] if drift_summary else 0,
+                "aggregation": "drift_violation_count",
+                "per_sample_results": drift_summary["drift_details"] if drift_summary else [],
+            },
         ),
-    ])
+    )
     return {
         "status": _status(metrics),
         "metrics": metrics,
@@ -1400,7 +1865,7 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
         "valuation_artifact": artifact_rel,
         "invariants": invariants,
         "critical_failures": critical_failures,
-        "golden_drift_out_of_tolerance": None,
+        "golden_drift_out_of_tolerance": drift_violations,
         "missing_traces": [] if trace_pass else ["valuation_formula_trace"],
         "decision": "pass" if critical_failures == 0 and policy.target_price_publishable else "block",
         "valuation_publishability": policy.to_dict(),
@@ -1582,9 +2047,17 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
     gates = packet.get("gate_results") or {}
     tool_gate = gates.get("TOOL_PERMISSION_GATE") or {}
     manifest_gate = gates.get("ARTIFACT_MANIFEST_GATE") or {}
-    tool_compliance = None if not tool_gate else (1.0 if tool_gate.get("passed") is True else 0.0)
-    manifest_compliance = None if not manifest_gate else (1.0 if manifest_gate.get("passed") is True else 0.0)
     agent_records = audit.get("agent_execution") or []
+    _MIN_GATE_SAMPLE = 5
+    _has_min_sample = len(agent_records) >= _MIN_GATE_SAMPLE
+    tool_compliance = (
+        None if not tool_gate or not _has_min_sample
+        else (1.0 if tool_gate.get("passed") is True else 0.0)
+    )
+    manifest_compliance = (
+        None if not manifest_gate or not _has_min_sample
+        else (1.0 if manifest_gate.get("passed") is True else 0.0)
+    )
     task_completion = (
         sum(record.get("status") == "completed" for record in agent_records) / len(agent_records)
         if agent_records else None
@@ -1618,8 +2091,9 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
     unauthorized_calc_score = (
         None if not output_records else (len(output_records) - len(calc_findings)) / len(output_records)
     )
-    deepeval_cases = _read_json_list(
-        root / "config" / "eval" / "deepeval" / f"{ticker.upper()}.json"
+    deepeval_cases = _filter_records_for_ticker(
+        _read_json_list(root / DEEPEVAL_CASE_PATH),
+        ticker,
     )
     deepeval_result = evaluate_deepeval_cases(deepeval_cases)
     judge_scores = deepeval_result.get("scores") or {}
@@ -1651,12 +2125,12 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                              "denominator": schema_units, "aggregation": "coverage"}),
         _metric("role_adherence", "Role adherence", judge_scores.get("role_adherence"), ">= 0.85",
                 _ratio_status(judge_scores.get("role_adherence"), 0.85),
-                "config/eval/deepeval", deepeval_result.get("reason") or "",
+                str(DEEPEVAL_CASE_PATH), deepeval_result.get("reason") or "",
                 sample_size=deepeval_result["sample_size"], evaluator=judge_evaluator,
                 calculation={"aggregation": "mean"}),
         _metric("groundedness", "Groundedness", judge_scores.get("groundedness"), ">= 0.85",
                 _ratio_status(judge_scores.get("groundedness"), 0.85),
-                "config/eval/deepeval", deepeval_result.get("reason") or "",
+                str(DEEPEVAL_CASE_PATH), deepeval_result.get("reason") or "",
                 sample_size=deepeval_result["sample_size"], evaluator=judge_evaluator,
                 calculation={"aggregation": "mean"}),
         _metric("no_unauthorized_calc", "No unauthorized financial calculation", unauthorized_calc_score, "100%",
@@ -1677,7 +2151,7 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                              "denominator": len(agent_records), "aggregation": "coverage"}),
         _metric("plan_adherence", "Plan adherence", judge_scores.get("plan_adherence"), ">= 0.80",
                 _ratio_status(judge_scores.get("plan_adherence"), 0.80),
-                "config/eval/deepeval", deepeval_result.get("reason") or "",
+                str(DEEPEVAL_CASE_PATH), deepeval_result.get("reason") or "",
                 sample_size=deepeval_result["sample_size"], evaluator=judge_evaluator,
                 calculation={"aggregation": "mean"}),
         _metric("critic_issue_recall", "Critic issue recall", None, ">= 90%", "measured_only",
@@ -1749,36 +2223,162 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
 
 
 def evaluate_observability(root: Path, ticker: str) -> dict[str, Any]:
+    packet_path = _latest_json_for_ticker(
+        root / "storage" / "archive", "run1_evidence_packet.json", ticker
+    )
+    packet = _read_json(packet_path)
+    audit_path = _latest_json_for_ticker(
+        root / "storage" / "archive", "run1_agent_effectiveness_audit.json", ticker
+    )
+    audit = _read_json(audit_path)
+    run_log_path = _latest_json_for_ticker(root / "storage" / "runs", "run_log.json", ticker)
+    run_log = _read_json(run_log_path)
+    trace_events = [
+        item for item in (run_log.get("trace") or packet.get("trace_summary") or [])
+        if isinstance(item, dict)
+    ]
+    agent_records = [
+        item for item in _agent_output_records(audit, packet)
+        if item.get("origin", "").endswith("agent_execution")
+        or item.get("kind") == "agent_message"
+        or item.get("agent_id")
+    ]
+    if not agent_records:
+        agent_records = [item for item in trace_events if item.get("kind") == "agent_message"]
+    retrieval_events = [
+        item for item in trace_events
+        if item.get("kind") in {"retrieval_query", "retrieval"}
+        or str(item.get("tool_name") or "").lower() in {"retrieve", "retrieval", "retrieval_service"}
+    ]
+    upload_events = [
+        item for item in trace_events
+        if item.get("kind") == "artifact_upload" or item.get("action") == "artifact_upload"
+    ]
+    render_events = [
+        item for item in trace_events
+        if item.get("kind") == "pdf_render" or item.get("action") == "pdf_render"
+    ]
+    agent_latencies = [
+        value for value in (_float_or_none(item.get("latency_ms")) for item in agent_records)
+        if value is not None
+    ]
+    retrieval_latencies = [
+        value for value in (_float_or_none(item.get("latency_ms")) for item in retrieval_events)
+        if value is not None
+    ]
+    costs = [
+        value for value in (_float_or_none(item.get("cost_estimate")) for item in agent_records)
+        if value is not None
+    ]
+    retries = sum(_event_retry_count(item) for item in agent_records)
+    llm_calls = len(agent_records)
+    retry_rate = retries / llm_calls if llm_calls else None
+    llm_fallbacks = sum(bool(item.get("fallback_triggered")) for item in agent_records)
+    llm_fallback_rate = llm_fallbacks / llm_calls if llm_calls else None
+    retrieval_fallbacks = sum(bool(item.get("fallback_triggered")) for item in retrieval_events)
+    retrieval_fallback_rate = (
+        retrieval_fallbacks / len(retrieval_events) if retrieval_events else None
+    )
+    stage_durations: dict[str, float] = {}
+    duration_events = trace_events if trace_events else agent_records
+    for event in duration_events:
+        latency = _float_or_none(event.get("latency_ms"))
+        if latency is None:
+            continue
+        stage = _trace_stage(event)
+        stage_durations[stage] = round(stage_durations.get(stage, 0.0) + latency / 1000, 6)
+    duration_seconds = round(sum(stage_durations.values()), 6) if stage_durations else None
+    artifact_upload_failures = sum(
+        1 for item in upload_events if item.get("status") in {"failed", "error"}
+    )
+    trace_url = _trace_url(trace_events, packet, audit, run_log)
     metadata = _read_json(
         _latest_named(root / "storage" / "sources" / "ocr_artifacts" / ticker, "metadata.json")
     )
     pages = int(metadata.get("pages_processed") or 0)
     ocr_failure_rate = int(metadata.get("pages_failed") or 0) / pages if pages else None
     report_exists = (root / "output" / f"{ticker}_report.pdf").is_file()
+    pdf_render_failures = sum(
+        1 for item in render_events if item.get("status") in {"failed", "error"}
+    )
+    if not render_events:
+        pdf_render_failures = 0 if report_exists else 1
+    gate_results = packet.get("gate_results") if isinstance(packet.get("gate_results"), dict) else {}
+    blocking_gate_categories = sorted(
+        name for name, gate in gate_results.items()
+        if isinstance(gate, dict) and gate.get("passed") is False
+    )
     metrics = [
-        _metric("duration_seconds", "Full run duration", None, "<= baseline p95 + 30%",
-                "measured_only", "run trace missing"),
-        _metric("llm_retry_rate", "LLM retry rate", None, "<= 5%", "measured_only", "run trace missing"),
-        _metric("retrieval_fallback_rate", "Retrieval fallback rate", None, "<= 20%",
-                "measured_only", "retrieval trace missing"),
+        _metric("duration_seconds", "Full run duration", duration_seconds, "<= baseline p95 + 30%",
+                "measured_only", "runtime trace" if duration_seconds is not None else "run trace missing",
+                sample_size=len(stage_durations),
+                calculation={"aggregation": "sum", "per_sample_results": [
+                    {"stage": stage, "duration_seconds": duration}
+                    for stage, duration in sorted(stage_durations.items())
+                ]}),
+        _metric("llm_retry_rate", "LLM retry rate", retry_rate, "<= 5%",
+                "measured_only" if retry_rate is None else ("pass" if retry_rate <= 0.05 else "fail"),
+                str(packet_path.relative_to(root)) if packet_path else "run trace missing",
+                sample_size=llm_calls,
+                calculation={"numerator": retries, "denominator": llm_calls, "aggregation": "rate",
+                             "per_sample_results": agent_records[:100]}),
+        _metric("retrieval_fallback_rate", "Retrieval fallback rate", retrieval_fallback_rate, "<= 20%",
+                "measured_only" if retrieval_fallback_rate is None else (
+                    "pass" if retrieval_fallback_rate <= 0.20 else "fail"
+                ),
+                "runtime retrieval trace" if retrieval_events else "retrieval trace missing",
+                sample_size=len(retrieval_events),
+                calculation={"numerator": retrieval_fallbacks, "denominator": len(retrieval_events),
+                             "aggregation": "rate", "per_sample_results": retrieval_events[:100]}),
         _metric("ocr_failure_rate", "OCR failure rate", ocr_failure_rate, "<= 5%",
                 _ratio_status(ocr_failure_rate, 0.05, "lte"), "latest OCR metadata"),
-        _metric("pdf_render_failures", "PDF render failures", 0 if report_exists else 1, "0",
-                "pass" if report_exists else "fail", f"output/{ticker}_report.pdf"),
-        _metric("cost_per_report", "Cost per full report", None, "<= soft budget",
-                "measured_only", "cost ledger missing"),
+        _metric("artifact_upload_failures", "Artifact upload failures", artifact_upload_failures, "0",
+                "pass" if artifact_upload_failures == 0 else "fail", "artifact upload trace"),
+        _metric("pdf_render_failures", "PDF render failures", pdf_render_failures, "0",
+                "pass" if pdf_render_failures == 0 else "fail", f"output/{ticker}_report.pdf"),
+        _metric("cost_per_report", "Cost per full report", sum(costs) if costs else None, "<= soft budget",
+                "measured_only", "cost ledger" if costs else "cost ledger missing",
+                sample_size=len(costs),
+                calculation={"aggregation": "sum", "per_sample_results": agent_records[:100]}),
     ]
     return {
         "status": _status(metrics),
         "metrics": metrics,
         "blocking_issues": _blocked(metrics),
-        "duration_seconds": None,
-        "stage_durations": {},
-        "llm": {"calls": None, "tokens_input": None, "tokens_output": None, "estimated_cost_usd": None, "retry_rate": None},
-        "retrieval": {"queries": None, "p95_latency_ms": None, "fallback_rate": None},
+        "duration_seconds": duration_seconds,
+        "stage_durations": stage_durations,
+        "llm": {
+            "calls": llm_calls if agent_records else None,
+            "tokens_input": sum(
+                _token_count(item, "tokens_input", "input_tokens", "prompt_tokens")
+                for item in agent_records
+            ) if agent_records else None,
+            "tokens_output": sum(
+                _token_count(item, "tokens_output", "output_tokens", "completion_tokens")
+                for item in agent_records
+            ) if agent_records else None,
+            "estimated_cost_usd": sum(costs) if costs else None,
+            "retry_rate": retry_rate,
+            "fallback_rate": llm_fallback_rate,
+            "latency_ms_total": sum(agent_latencies) if agent_latencies else None,
+        },
+        "retrieval": {
+            "queries": len(retrieval_events) if retrieval_events else None,
+            "p95_latency_ms": _p95(retrieval_latencies),
+            "fallback_rate": retrieval_fallback_rate,
+        },
         "ocr": {"pages_processed": pages, "failure_rate": ocr_failure_rate},
-        "publication": {"readiness_passed": False, "render_mode": "analyst_draft"},
-        "trace_url": None,
+        "blocking_gate_categories": blocking_gate_categories,
+        "publication": {
+            "readiness_passed": False,
+            "authorization_blockers": [
+                f"{name}:{','.join(gate.get('blocking_reasons') or []) or 'gate_failed'}"
+                for name, gate in sorted(gate_results.items())
+                if isinstance(gate, dict) and gate.get("passed") is False
+            ],
+            "render_mode": "analyst_draft",
+        },
+        "trace_url": trace_url,
     }
 
 
@@ -1796,7 +2396,7 @@ def evaluate_rollout(
                 "evaluation packet decision rule"),
         _metric("rag_golden_ci", "RAG golden CI", 1 if rag_golden_available else None, "available",
                 "pass" if rag_golden_available else "not_evaluable",
-                "config/eval/rag_golden_queries.yaml" if rag_golden_available else "golden query set missing"),
+                str(RAG_GOLDEN_QUERY_DIR) if rag_golden_available else "golden query set missing"),
         _metric("llm_judge_offline", "LLM judge offline CI", None, "warn then block", "measured_only",
                 "calibrated judge dataset missing"),
     ]

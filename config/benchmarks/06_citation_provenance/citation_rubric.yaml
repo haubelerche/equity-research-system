@@ -1,0 +1,19 @@
+version: 20260615_v3
+required_claim_fields:
+  - claim_id
+  - claim_text
+  - claim_type
+  - materiality
+  - source_id
+  - source_tier
+  - source_doc_id
+  - page_or_section
+  - evidence_span
+  - match_status
+hard_blockers:
+  - missing citation for quantitative material claim
+  - citation resolver failure
+  - numeric citation mismatch
+  - tier3-only material claim
+  - generic citation label
+  - catalyst without evidence span

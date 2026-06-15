@@ -88,6 +88,71 @@ def test_runtime_evaluation_exposes_frontend_metric_shape() -> None:
     assert all("blocking_issues" in artifact for artifact in packet["artifacts"])
 
 
+def test_observability_artifact_measures_cost_latency_retry_and_publication_blockers() -> None:
+    state = ResearchGraphState(
+        run_id="run-obs-eval",
+        ticker="DHG",
+        objective="test",
+        status="blocked",
+        artifacts={"trace_url": "https://trace.test/run-obs-eval", "render_mode": "client_final"},
+    )
+    state.trace = [
+        {
+            "kind": "agent_message",
+            "agent_id": "research_manager",
+            "input_summary": {"state_stage": "PLAN"},
+            "latency_ms": 1000,
+            "cost_estimate": 0.01,
+            "prompt_tokens": 100,
+            "completion_tokens": 20,
+            "attempts": 1,
+        },
+        {
+            "kind": "agent_message",
+            "agent_id": "financial_analysis",
+            "input_summary": {"state_stage": "ANALYZE"},
+            "latency_ms": 2000,
+            "cost_estimate": 0.02,
+            "prompt_tokens": 200,
+            "completion_tokens": 40,
+            "attempts": 2,
+        },
+        {
+            "kind": "retrieval_query",
+            "stage": "INGEST_AND_VALIDATE",
+            "latency_ms": 250,
+            "fallback_triggered": True,
+        },
+        {"kind": "artifact_upload", "status": "completed", "latency_ms": 50},
+        {"kind": "pdf_render", "status": "completed", "latency_ms": 500},
+    ]
+    state.gate_results["PACKAGE_VALIDATION_GATE"] = {
+        "passed": False,
+        "blocking_reasons": ["artifact_missing:report"],
+    }
+
+    artifacts, _ = build_run_evaluation_artifacts(state)
+    observability = artifacts["observability_eval.json"]
+    metrics = {metric["id"]: metric for metric in observability["metric_results"]}
+
+    assert observability["trace_url"] == "https://trace.test/run-obs-eval"
+    assert observability["duration_seconds"] == 3.8
+    assert observability["stage_durations"]["PLAN"] == 1.0
+    assert observability["llm"]["calls"] == 2
+    assert observability["llm"]["tokens_input"] == 300
+    assert observability["llm"]["tokens_output"] == 60
+    assert observability["llm"]["estimated_cost_usd"] == 0.03
+    assert observability["llm"]["retry_rate"] == 0.5
+    assert observability["retrieval"]["queries"] == 1
+    assert observability["retrieval"]["fallback_rate"] == 1.0
+    assert observability["publication"]["authorization_blockers"] == [
+        "PACKAGE_VALIDATION_GATE:artifact_missing:report"
+    ]
+    assert metrics["llm_retry_rate"]["status"] == "fail"
+    assert metrics["artifact_upload_failures"]["status"] == "pass"
+    assert metrics["pdf_render_failures"]["status"] == "pass"
+
+
 def test_runner_persists_run_scoped_evaluation_artifacts(monkeypatch) -> None:
     uploads: list[str] = []
 

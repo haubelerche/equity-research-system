@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { fetchReports } from "../api/client";
 import type { ReportItem } from "../api/types";
 import { UNIVERSE } from "../data/universe";
@@ -16,22 +16,43 @@ const REPORT_UNIVERSE = [...UNIVERSE].sort((a, b) => {
   return 0;
 });
 
+const REPORTS_CACHE_KEY = "reports.inventory.v1";
+
+function loadCachedReports(): ReportItem[] {
+  try {
+    const raw = window.localStorage.getItem(REPORTS_CACHE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { items?: unknown };
+    return Array.isArray(parsed.items) ? (parsed.items as ReportItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function cacheReports(items: ReportItem[]): void {
+  try {
+    window.localStorage.setItem(REPORTS_CACHE_KEY, JSON.stringify({ items }));
+  } catch {
+    // Cache is a UX optimization only; API data remains the source of truth.
+  }
+}
+
 export function ReportsPage() {
-  const [apiItems, setApiItems] = useState<ReportItem[]>([]);
+  const [apiItems, setApiItems] = useState<ReportItem[]>(loadCachedReports);
   const [apiError, setApiError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [previewTicker, setPreviewTicker] = useState<string | null>(null);
 
   // Always render the full universe; enrich with live report status when the
-  // backend is reachable. On failure, fall back to universe-only (all "chưa có").
+  // backend is reachable. On failure, keep the last known report status.
   const load = () => {
     fetchReports()
       .then((r) => {
         setApiItems(r.items);
+        cacheReports(r.items);
         setApiError(null);
       })
       .catch((err: unknown) => {
-        setApiItems([]);
         setApiError(err instanceof Error ? err.message : "Cannot reach reports API");
       });
   };
@@ -55,7 +76,7 @@ export function ReportsPage() {
 
       {apiError && (
         <p className="reports-api-warning" role="status">
-          Khong the dong bo trang thai bao cao tu API. Kiem tra VITE_API_BASE tren Vercel.
+          Không thể đồng bộ trạng thái báo cáo từ API. Kiểm tra VITE_API_BASE trên Vercel.
         </p>
       )}
 

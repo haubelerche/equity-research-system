@@ -4,8 +4,8 @@
   "plan_id": "04",
   "plan_name": "Citation and source provenance",
   "ticker": "DHG",
-  "run_id": "phase1-dhg-nondbd-baseline",
-  "generated_at": "2026-06-14T16:28:52.781840+00:00",
+  "run_id": "project-eval-20260615T033550Z",
+  "generated_at": "2026-06-15T03:35:50.606179+00:00",
   "status": "blocked",
   "test_execution": {
     "status": "pass",
@@ -18,14 +18,20 @@
       "tests/unit/test_claim_ledger.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.521,
+    "duration_seconds": 0.493,
     "summary": {
       "passed": 142
     },
     "output_tail": [
       "........................................................................ [ 50%]",
       "......................................................................   [100%]",
-      "142 passed in 0.20s"
+      "============================== warnings summary ===============================",
+      "..\\..\\..\\..\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475",
+      "  C:\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475: PytestCacheWarning: could not create cache path C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\.pytest_cache\\v\\cache\\nodeids: [WinError 183] Cannot create a file when that file already exists: 'C:\\\\Users\\\\Admin\\\\Desktop\\\\multi-agent-equity-research\\\\.pytest_cache\\\\v\\\\cache'",
+      "    config.cache.set(\"cache/nodeids\", sorted(self.cached_nodeids))",
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "142 passed, 1 warning in 0.21s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -109,7 +115,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "citation_key_resolution",
@@ -170,7 +176,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "source_id_validity",
@@ -231,7 +237,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "official_source_coverage",
@@ -292,7 +298,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "generic_citations",
@@ -348,7 +354,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "pdf_source_mentions",
@@ -404,7 +410,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     }
   ],
   "claim_count": null,

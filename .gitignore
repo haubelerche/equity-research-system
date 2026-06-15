@@ -3,11 +3,13 @@
 
 # Private / generated - never commit
 .md
-reports/
-plans/
-fin_data/
+
 .claude/
 .claude/EXECUTION_STATE.md
+.vnstock/
+.vnstock_runtime/
+.deepeval/
+tmp/
 
 docs/superpowers/
 
@@ -58,22 +60,65 @@ storage/exports/
 storage/archive/
 
 /.venv/
-/data/raw/
-/data
+#/data/raw/
+#/data
 # Font binaries — provisioned locally via scripts/setup_fonts.py
 assets/fonts/*.ttf
 assets/fonts/*.otf
 
-# Run-scoped artifacts (production output — not source)
-artifacts/runs/
-artifacts/reports_pdf/.chrome-profile-*/
-artifacts/dev/
 
 # Runtime storage-migration dumps — reproducible audit output, not source
 audits/storage_migrations/
 
 # Reproducible runtime output — never source (reports, logs, dumps, debug traces)
 artifacts/
+output/*.log
+
+# Removed no-data ticker raw directories. Keep them out if local tools recreate them.
+data/raw/bctc/BVP/
+data/raw/bctc/CON/
+data/raw/bctc/DDS/
+data/raw/bctc/DRP/
+data/raw/bctc/HGP/
+data/raw/bctc/LNT/
+data/raw/bctc/P29/
+data/raw/bctc/PDT/
+data/raw/bctc/PME/
+data/raw/bctc/T32/
+data/raw/bctc/YT1/
+output/evaluation/eval_result/benchmark_suite/BVP/
+output/evaluation/eval_result/benchmark_suite/CON/
+output/evaluation/eval_result/benchmark_suite/DDS/
+output/evaluation/eval_result/benchmark_suite/DRP/
+output/evaluation/eval_result/benchmark_suite/HGP/
+output/evaluation/eval_result/benchmark_suite/LNT/
+output/evaluation/eval_result/benchmark_suite/P29/
+output/evaluation/eval_result/benchmark_suite/PDT/
+output/evaluation/eval_result/benchmark_suite/PME/
+output/evaluation/eval_result/benchmark_suite/T32/
+output/evaluation/eval_result/benchmark_suite/YT1/
+output/evaluation/eval_result/benchmark_01_BVP/
+output/evaluation/eval_result/benchmark_01_CON/
+output/evaluation/eval_result/benchmark_01_DDS/
+output/evaluation/eval_result/benchmark_01_DRP/
+output/evaluation/eval_result/benchmark_01_HGP/
+output/evaluation/eval_result/benchmark_01_LNT/
+output/evaluation/eval_result/benchmark_01_P29/
+output/evaluation/eval_result/benchmark_01_PDT/
+output/evaluation/eval_result/benchmark_01_PME/
+output/evaluation/eval_result/benchmark_01_T32/
+output/evaluation/eval_result/benchmark_01_YT1/
+output/tmp_golden_BVP*
+output/tmp_golden_CON*
+output/tmp_golden_DDS*
+output/tmp_golden_DRP*
+output/tmp_golden_HGP*
+output/tmp_golden_LNT*
+output/tmp_golden_P29*
+output/tmp_golden_PDT*
+output/tmp_golden_PME*
+output/tmp_golden_T32*
+output/tmp_golden_YT1*
 
 
 

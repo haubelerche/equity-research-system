@@ -1,0 +1,434 @@
+version: rag_golden_20260615_v2
+ticker: TW3
+schema: chunk_id_ground_truth_v2
+queries:
+- id: tw3_revenue_2022
+  query: TW3 doanh thu thuần năm 2022 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - TW3_2022_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 317.497744
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_gross_profit_2022
+  query: TW3 lợi nhuận gộp năm 2022 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - TW3_2022_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 40.522404
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: tw3_net_income_2022
+  query: TW3 lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2022 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - TW3_2022_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: 3.149925
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_total_assets_2022
+  query: TW3 tổng tài sản cuối kỳ năm 2022 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - TW3_2022_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 228.845157
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_equity_2022
+  query: TW3 vốn chủ sở hữu năm 2022 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - TW3_2022_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 27.412952
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_operating_cash_flow_2022
+  query: TW3 lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2022 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - TW3_2022_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: -0.482664
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_capex_2022
+  query: TW3 CAPEX / chi mua sắm tài sản cố định năm 2022 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - TW3_2022_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -3.889739
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_shares_2022
+  query: TW3 số cổ phiếu lưu hành năm 2022 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - TW3_2022_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 1979840.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_revenue_2023
+  query: TW3 doanh thu thuần năm 2023 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - TW3_2023_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 347.728877
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_gross_profit_2023
+  query: TW3 lợi nhuận gộp năm 2023 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - TW3_2023_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 39.680979
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: tw3_net_income_2023
+  query: TW3 lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2023 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - TW3_2023_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: 3.289112
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_total_assets_2023
+  query: TW3 tổng tài sản cuối kỳ năm 2023 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - TW3_2023_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 210.176069
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_equity_2023
+  query: TW3 vốn chủ sở hữu năm 2023 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - TW3_2023_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 29.911072
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_operating_cash_flow_2023
+  query: TW3 lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2023 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - TW3_2023_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: -4.452374
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_capex_2023
+  query: TW3 CAPEX / chi mua sắm tài sản cố định năm 2023 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - TW3_2023_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -1.431267
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_shares_2023
+  query: TW3 số cổ phiếu lưu hành năm 2023 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - TW3_2023_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 1891381.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_revenue_2024
+  query: TW3 doanh thu thuần năm 2024 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - TW3_2024_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 255.746469
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_gross_profit_2024
+  query: TW3 lợi nhuận gộp năm 2024 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - TW3_2024_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 40.239698
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: tw3_net_income_2024
+  query: TW3 lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2024 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - TW3_2024_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: 4.678253
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_total_assets_2024
+  query: TW3 tổng tài sản cuối kỳ năm 2024 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - TW3_2024_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 174.304067
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_equity_2024
+  query: TW3 vốn chủ sở hữu năm 2024 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - TW3_2024_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 33.244202
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_operating_cash_flow_2024
+  query: TW3 lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2024 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - TW3_2024_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: 5.2105
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_capex_2024
+  query: TW3 CAPEX / chi mua sắm tài sản cố định năm 2024 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - TW3_2024_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -2.702852
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_shares_2024
+  query: TW3 số cổ phiếu lưu hành năm 2024 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - TW3_2024_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 1840383.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_revenue_2025
+  query: TW3 doanh thu thuần năm 2025 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - TW3_2025_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 216.066581
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_gross_profit_2025
+  query: TW3 lợi nhuận gộp năm 2025 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - TW3_2025_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 42.655333
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: tw3_net_income_2025
+  query: TW3 lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2025 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - TW3_2025_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: 3.818096
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_total_assets_2025
+  query: TW3 tổng tài sản cuối kỳ năm 2025 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - TW3_2025_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 113.532744
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_equity_2025
+  query: TW3 vốn chủ sở hữu năm 2025 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - TW3_2025_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 34.540135
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_operating_cash_flow_2025
+  query: TW3 lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2025 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - TW3_2025_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: 11.698936
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_capex_2025
+  query: TW3 CAPEX / chi mua sắm tài sản cố định năm 2025 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - TW3_2025_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -3.020388
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_shares_2025
+  query: TW3 số cổ phiếu lưu hành năm 2025 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - TW3_2025_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 1910959.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: tw3_guidance_2026_unanswerable
+  query: TW3 kế hoạch lợi nhuận trước thuế năm 2026 là bao nhiêu?
+  ticker: TW3
+  fiscal_year: 2026
+  expected_chunk_ids: []
+  expected_answer_policy: insufficient_evidence_or_not_ingested
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true

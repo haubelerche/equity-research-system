@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BenchmarkMetricResultV3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metric_id",
+    "metric_name",
+    "category",
+    "layer",
+    "metric_type",
+    "scope",
+    "severity",
+    "blocks_publish",
+    "value",
+    "threshold",
+    "threshold_operator",
+    "unit",
+    "status",
+    "sample_size",
+    "failed_examples",
+    "remediation_hint",
+    "evaluated_at"
+  ],
+  "properties": {
+    "metric_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "metric_name": {
+      "type": "string"
+    },
+    "category": {
+      "enum": [
+        "data_quality",
+        "rag",
+        "financial_model",
+        "citation",
+        "agent_llm",
+        "report_quality",
+        "operations",
+        "publication_readiness"
+      ]
+    },
+    "layer": {
+      "enum": [
+        "release_gate",
+        "diagnostic",
+        "observability"
+      ]
+    },
+    "metric_type": {
+      "enum": [
+        "coverage",
+        "error_rate",
+        "error_count",
+        "score",
+        "latency_percentile",
+        "boolean",
+        "cost"
+      ]
+    },
+    "scope": {
+      "enum": [
+        "report_run",
+        "ticker",
+        "benchmark_suite",
+        "system_window"
+      ]
+    },
+    "severity": {
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    "blocks_publish": {
+      "type": "boolean"
+    },
+    "value": {},
+    "threshold": {},
+    "threshold_operator": {
+      "enum": [
+        ">=",
+        "<=",
+        "=",
+        ">",
+        "<",
+        "pass"
+      ]
+    },
+    "unit": {
+      "enum": [
+        "percent",
+        "count",
+        "score",
+        "seconds",
+        "minutes",
+        "boolean",
+        "usd",
+        "ratio"
+      ]
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "fail",
+        "warning",
+        "not_evaluable"
+      ]
+    },
+    "sample_size": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "artifact_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "artifact_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dataset_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "benchmark_suite_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "owner": {
+      "enum": [
+        "data",
+        "retrieval",
+        "valuation",
+        "report",
+        "platform",
+        "reviewer",
+        "governance"
+      ]
+    },
+    "failed_examples": {
+      "type": "array"
+    },
+    "remediation_hint": {
+      "type": "string"
+    },
+    "evaluated_at": {
+      "type": "string"
+    }
+  }
+}

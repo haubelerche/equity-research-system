@@ -1,0 +1,2291 @@
+{
+  "summary": {
+    "universe_count": 53,
+    "sources": [
+      "vci",
+      "kbs"
+    ],
+    "name_match_threshold": 0.42,
+    "listing_master_ticker_count": 1744,
+    "provider_errors": [],
+    "status_counts": {
+      "identity_mismatch": 12,
+      "missing_from_listing_master": 10,
+      "validated": 31
+    },
+    "status_tickers": {
+      "identity_mismatch": [
+        "BCR",
+        "BID",
+        "DNM",
+        "DPP",
+        "DRG",
+        "HBH",
+        "NDT",
+        "PDT",
+        "PVD",
+        "TMP",
+        "TNT",
+        "VMC"
+      ],
+      "missing_from_listing_master": [
+        "BVP",
+        "CON",
+        "DDS",
+        "DRP",
+        "HGP",
+        "LNT",
+        "P29",
+        "PME",
+        "T32",
+        "YT1"
+      ],
+      "validated": [
+        "AMV",
+        "CPC",
+        "DBD",
+        "DBT",
+        "DCL",
+        "DGW",
+        "DHG",
+        "DHT",
+        "DMC",
+        "DP1",
+        "DP3",
+        "DTP",
+        "DVN",
+        "HDA",
+        "IMP",
+        "JVC",
+        "LDP",
+        "MED",
+        "MKP",
+        "OPC",
+        "PMC",
+        "PPP",
+        "SPM",
+        "TNH",
+        "TRA",
+        "TW3",
+        "VDP",
+        "VHE",
+        "VMD",
+        "VNP",
+        "YTC"
+      ]
+    }
+  },
+  "records": [
+    {
+      "ticker": "DHG",
+      "configured_company_name": "Cong ty Co phan Duoc Hau Giang",
+      "exchange": "HOSE",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược Hậu Giang",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DHG",
+          "organ_name": "Công ty Cổ phần Dược Hậu Giang",
+          "raw": {
+            "symbol": "DHG",
+            "organ_name": "Công ty Cổ phần Dược Hậu Giang"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "DHG",
+          "organ_name": "CTCP Dược Hậu Giang",
+          "raw": {
+            "symbol": "DHG",
+            "organ_name": "CTCP Dược Hậu Giang"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "IMP",
+      "configured_company_name": "Cong ty Co phan Duoc pham Imexpharm",
+      "exchange": "HOSE",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược phẩm Imexpharm",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "IMP",
+          "organ_name": "Công ty Cổ phần Dược phẩm Imexpharm",
+          "raw": {
+            "symbol": "IMP",
+            "organ_name": "Công ty Cổ phần Dược phẩm Imexpharm"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "IMP",
+          "organ_name": "CTCP Dược phẩm Imexpharm",
+          "raw": {
+            "symbol": "IMP",
+            "organ_name": "CTCP Dược phẩm Imexpharm"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "DMC",
+      "configured_company_name": "Cong ty Co phan Xuat nhap khau Y te Domesco",
+      "exchange": "HOSE",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Xuất nhập khẩu Y tế DOMESCO",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DMC",
+          "organ_name": "Công ty Cổ phần Xuất nhập khẩu Y tế DOMESCO",
+          "raw": {
+            "symbol": "DMC",
+            "organ_name": "Công ty Cổ phần Xuất nhập khẩu Y tế DOMESCO"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "DMC",
+          "organ_name": "CTCP Xuất nhập khẩu Y Tế DOMESCO",
+          "raw": {
+            "symbol": "DMC",
+            "organ_name": "CTCP Xuất nhập khẩu Y Tế DOMESCO"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "TRA",
+      "configured_company_name": "Cong ty Co phan Traphaco",
+      "exchange": "HOSE",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Traphaco",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "TRA",
+          "organ_name": "Công ty Cổ phần Traphaco",
+          "raw": {
+            "symbol": "TRA",
+            "organ_name": "Công ty Cổ phần Traphaco"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "TRA",
+          "organ_name": "CTCP Traphaco",
+          "raw": {
+            "symbol": "TRA",
+            "organ_name": "CTCP Traphaco"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "DBD",
+      "configured_company_name": "Cong ty Co phan Duoc - Trang thiet bi Y te Binh Dinh",
+      "exchange": "HOSE",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 0.8831,
+      "best_listing_name": "Công ty Cổ phần Dược - Trang thiết bị y tế Bình Định (BIDIPHAR)",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DBD",
+          "organ_name": "Công ty Cổ phần Dược - Trang thiết bị y tế Bình Định (BIDIPHAR)",
+          "raw": {
+            "symbol": "DBD",
+            "organ_name": "Công ty Cổ phần Dược - Trang thiết bị y tế Bình Định (BIDIPHAR)"
+          },
+          "name_score": 0.8831
+        },
+        {
+          "source": "kbs",
+          "ticker": "DBD",
+          "organ_name": "CTCP Dược - Trang thiết bị Y tế Bình Định (Bidiphar)",
+          "raw": {
+            "symbol": "DBD",
+            "organ_name": "CTCP Dược - Trang thiết bị Y tế Bình Định (Bidiphar)"
+          },
+          "name_score": 0.8831
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "OPC",
+      "configured_company_name": "Cong ty Co phan Duoc pham OPC",
+      "exchange": "HOSE",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược Phẩm OPC",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "OPC",
+          "organ_name": "Công ty Cổ phần Dược Phẩm OPC",
+          "raw": {
+            "symbol": "OPC",
+            "organ_name": "Công ty Cổ phần Dược Phẩm OPC"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "OPC",
+          "organ_name": "CTCP Dược phẩm OPC",
+          "raw": {
+            "symbol": "OPC",
+            "organ_name": "CTCP Dược phẩm OPC"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "PME",
+      "configured_company_name": "Cong ty Co phan Pymepharco",
+      "exchange": "HOSE",
+      "segment": "pharma",
+      "status": "missing_from_listing_master",
+      "best_name_score": null,
+      "best_listing_name": null,
+      "best_listing_source": null,
+      "listing_matches": [],
+      "replacement_candidates": [
+        {
+          "ticker": "AMP",
+          "organ_name": "Công ty Cổ phần Armephaco",
+          "source": "vci",
+          "name_score": 0.7368
+        },
+        {
+          "ticker": "AMP",
+          "organ_name": "CTCP Armephaco",
+          "source": "kbs",
+          "name_score": 0.7368
+        },
+        {
+          "ticker": "MTP",
+          "organ_name": "Công ty Cổ phần Dược Medipharco",
+          "source": "vci",
+          "name_score": 0.64
+        },
+        {
+          "ticker": "MTP",
+          "organ_name": "CTCP Dược Medipharco",
+          "source": "kbs",
+          "name_score": 0.64
+        },
+        {
+          "ticker": "DTG",
+          "organ_name": "Công ty Cổ phần Dược phẩm Tipharco",
+          "source": "vci",
+          "name_score": 0.5714
+        }
+      ]
+    },
+    {
+      "ticker": "MKP",
+      "configured_company_name": "Cong ty Co phan Hoa - Duoc pham Mekophar",
+      "exchange": "HOSE",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Hóa - Dược phẩm Mekophar",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "MKP",
+          "organ_name": "Công ty Cổ phần Hóa - Dược phẩm Mekophar",
+          "raw": {
+            "symbol": "MKP",
+            "organ_name": "Công ty Cổ phần Hóa - Dược phẩm Mekophar"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "MKP",
+          "organ_name": "CTCP Hoá - Dược phẩm Mekophar",
+          "raw": {
+            "symbol": "MKP",
+            "organ_name": "CTCP Hoá - Dược phẩm Mekophar"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "TNH",
+      "configured_company_name": "Cong ty Co phan Benh vien Quoc te Thai Nguyen",
+      "exchange": "HOSE",
+      "segment": "healthcare_services",
+      "status": "validated",
+      "best_name_score": 0.5714,
+      "best_listing_name": "Công ty Cổ phần Tập đoàn Bệnh viện TNH",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "TNH",
+          "organ_name": "Công ty Cổ phần Tập đoàn Bệnh viện TNH",
+          "raw": {
+            "symbol": "TNH",
+            "organ_name": "Công ty Cổ phần Tập đoàn Bệnh viện TNH"
+          },
+          "name_score": 0.5714
+        },
+        {
+          "source": "kbs",
+          "ticker": "TNH",
+          "organ_name": "CTCP Tập đoàn Bệnh viện TNH",
+          "raw": {
+            "symbol": "TNH",
+            "organ_name": "CTCP Tập đoàn Bệnh viện TNH"
+          },
+          "name_score": 0.5714
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "JVC",
+      "configured_company_name": "Cong ty Co phan Thiet bi Y te Viet Nhat",
+      "exchange": "HOSE",
+      "segment": "medical_equipment",
+      "status": "validated",
+      "best_name_score": 0.5283,
+      "best_listing_name": "Công ty Cổ phần Đầu tư Y tế - Dược phẩm Việt Nam",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "JVC",
+          "organ_name": "Công ty Cổ phần Đầu tư Y tế - Dược phẩm Việt Nam",
+          "raw": {
+            "symbol": "JVC",
+            "organ_name": "Công ty Cổ phần Đầu tư Y tế - Dược phẩm Việt Nam"
+          },
+          "name_score": 0.5283
+        },
+        {
+          "source": "kbs",
+          "ticker": "JVC",
+          "organ_name": "CTCP Đầu tư Y tế - Dược phẩm Việt Nam",
+          "raw": {
+            "symbol": "JVC",
+            "organ_name": "CTCP Đầu tư Y tế - Dược phẩm Việt Nam"
+          },
+          "name_score": 0.5283
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "DVN",
+      "configured_company_name": "Tong Cong ty Duoc Viet Nam - CTCP",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Tổng Công ty Dược Việt Nam - CTCP",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DVN",
+          "organ_name": "Tổng Công ty Dược Việt Nam - CTCP",
+          "raw": {
+            "symbol": "DVN",
+            "organ_name": "Tổng Công ty Dược Việt Nam - CTCP"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "DVN",
+          "organ_name": "Tổng Công ty Dược Việt Nam - CTCP",
+          "raw": {
+            "symbol": "DVN",
+            "organ_name": "Tổng Công ty Dược Việt Nam - CTCP"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "DHT",
+      "configured_company_name": "Cong ty Co phan Duoc pham Ha Tay",
+      "exchange": "HNX",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược phẩm Hà Tây",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DHT",
+          "organ_name": "Công ty Cổ phần Dược phẩm Hà Tây",
+          "raw": {
+            "symbol": "DHT",
+            "organ_name": "Công ty Cổ phần Dược phẩm Hà Tây"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "DHT",
+          "organ_name": "CTCP Dược phẩm Hà Tây",
+          "raw": {
+            "symbol": "DHT",
+            "organ_name": "CTCP Dược phẩm Hà Tây"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "LDP",
+      "configured_company_name": "Cong ty Co phan Duoc Lam Dong - Ladophar",
+      "exchange": "HNX",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược Lâm Đồng - Ladophar",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "LDP",
+          "organ_name": "Công ty Cổ phần Dược Lâm Đồng - Ladophar",
+          "raw": {
+            "symbol": "LDP",
+            "organ_name": "Công ty Cổ phần Dược Lâm Đồng - Ladophar"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "LDP",
+          "organ_name": "CTCP Dược Lâm Đồng (Ladophar)",
+          "raw": {
+            "symbol": "LDP",
+            "organ_name": "CTCP Dược Lâm Đồng (Ladophar)"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "PPP",
+      "configured_company_name": "Cong ty Co phan Duoc pham Phong Phu",
+      "exchange": "HNX",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược phẩm Phong Phú",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "PPP",
+          "organ_name": "Công ty Cổ phần Dược phẩm Phong Phú",
+          "raw": {
+            "symbol": "PPP",
+            "organ_name": "Công ty Cổ phần Dược phẩm Phong Phú"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "PPP",
+          "organ_name": "CTCP Dược phẩm Phong Phú",
+          "raw": {
+            "symbol": "PPP",
+            "organ_name": "CTCP Dược phẩm Phong Phú"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "DP3",
+      "configured_company_name": "Cong ty Co phan Duoc pham Trung uong 3",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ Phần Dược Phẩm Trung Ương 3",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DP3",
+          "organ_name": "Công ty Cổ Phần Dược Phẩm Trung Ương 3",
+          "raw": {
+            "symbol": "DP3",
+            "organ_name": "Công ty Cổ Phần Dược Phẩm Trung Ương 3"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "DP3",
+          "organ_name": "CTCP Dược phẩm Trung ương 3",
+          "raw": {
+            "symbol": "DP3",
+            "organ_name": "CTCP Dược phẩm Trung ương 3"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "DP1",
+      "configured_company_name": "Cong ty Co phan Duoc pham Trung uong CPC1",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược phẩm Trung ương CPC1",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DP1",
+          "organ_name": "Công ty Cổ phần Dược phẩm Trung ương CPC1",
+          "raw": {
+            "symbol": "DP1",
+            "organ_name": "Công ty Cổ phần Dược phẩm Trung ương CPC1"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "DP1",
+          "organ_name": "CTCP Dược phẩm Trung ương CPC1",
+          "raw": {
+            "symbol": "DP1",
+            "organ_name": "CTCP Dược phẩm Trung ương CPC1"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "TW3",
+      "configured_company_name": "Cong ty Co phan Duoc - Trang thiet bi Y te Da Nang",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 0.4898,
+      "best_listing_name": "Công ty Cổ phần Dược Trung Ương 3",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "TW3",
+          "organ_name": "Công ty Cổ phần Dược Trung Ương 3",
+          "raw": {
+            "symbol": "TW3",
+            "organ_name": "Công ty Cổ phần Dược Trung Ương 3"
+          },
+          "name_score": 0.4898
+        },
+        {
+          "source": "kbs",
+          "ticker": "TW3",
+          "organ_name": "CTCP Dược Trung ương 3",
+          "raw": {
+            "symbol": "TW3",
+            "organ_name": "CTCP Dược Trung ương 3"
+          },
+          "name_score": 0.4898
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "MED",
+      "configured_company_name": "Cong ty Co phan Duoc Trung uong Mediplantex",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược Trung ương Mediplantex",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "MED",
+          "organ_name": "Công ty Cổ phần Dược Trung ương Mediplantex",
+          "raw": {
+            "symbol": "MED",
+            "organ_name": "Công ty Cổ phần Dược Trung ương Mediplantex"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "MED",
+          "organ_name": "CTCP Dược Trung ương Mediplantex",
+          "raw": {
+            "symbol": "MED",
+            "organ_name": "CTCP Dược Trung ương Mediplantex"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "PMC",
+      "configured_company_name": "Cong ty Co phan Duoc pham Duoc lieu Pharmedic",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược phẩm Dược liệu Pharmedic",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "PMC",
+          "organ_name": "Công ty Cổ phần Dược phẩm Dược liệu Pharmedic",
+          "raw": {
+            "symbol": "PMC",
+            "organ_name": "Công ty Cổ phần Dược phẩm Dược liệu Pharmedic"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "PMC",
+          "organ_name": "CTCP Dược phẩm Dược liệu Pharmedic",
+          "raw": {
+            "symbol": "PMC",
+            "organ_name": "CTCP Dược phẩm Dược liệu Pharmedic"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "AMV",
+      "configured_company_name": "Cong ty Co phan San xuat Kinh doanh Duoc va Trang thiet bi Y te Viet My",
+      "exchange": "HNX",
+      "segment": "medical_equipment",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Sản xuất Kinh doanh Dược và Trang thiết bị Y tế Việt Mỹ",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "AMV",
+          "organ_name": "Công ty Cổ phần Sản xuất Kinh doanh Dược và Trang thiết bị Y tế Việt Mỹ",
+          "raw": {
+            "symbol": "AMV",
+            "organ_name": "Công ty Cổ phần Sản xuất Kinh doanh Dược và Trang thiết bị Y tế Việt Mỹ"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "AMV",
+          "organ_name": "CTCP Sản xuất Kinh doanh Dược và Trang thiết bị Y tế Việt Mỹ",
+          "raw": {
+            "symbol": "AMV",
+            "organ_name": "CTCP Sản xuất Kinh doanh Dược và Trang thiết bị Y tế Việt Mỹ"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "YTC",
+      "configured_company_name": "Cong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh",
+      "exchange": "UPCOM",
+      "segment": "medical_distribution",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Xuất nhập khẩu Y tế Thành phố Hồ Chí Minh",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "YTC",
+          "organ_name": "Công ty Cổ phần Xuất nhập khẩu Y tế Thành phố Hồ Chí Minh",
+          "raw": {
+            "symbol": "YTC",
+            "organ_name": "Công ty Cổ phần Xuất nhập khẩu Y tế Thành phố Hồ Chí Minh"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "YTC",
+          "organ_name": "CTCP Xuất nhập khẩu Y tế Thành phố Hồ Chí Minh",
+          "raw": {
+            "symbol": "YTC",
+            "organ_name": "CTCP Xuất nhập khẩu Y tế Thành phố Hồ Chí Minh"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "VHE",
+      "configured_company_name": "Cong ty Co phan Duoc lieu Viet Nam",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 0.7347,
+      "best_listing_name": "Công ty Cổ phần Dược liệu và Thực phẩm Việt Nam",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "VHE",
+          "organ_name": "Công ty Cổ phần Dược liệu và Thực phẩm Việt Nam",
+          "raw": {
+            "symbol": "VHE",
+            "organ_name": "Công ty Cổ phần Dược liệu và Thực phẩm Việt Nam"
+          },
+          "name_score": 0.7347
+        },
+        {
+          "source": "kbs",
+          "ticker": "VHE",
+          "organ_name": "CTCP Dược liệu và Thực phẩm Việt Nam",
+          "raw": {
+            "symbol": "VHE",
+            "organ_name": "CTCP Dược liệu và Thực phẩm Việt Nam"
+          },
+          "name_score": 0.7347
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "VDP",
+      "configured_company_name": "Cong ty Co phan Duoc pham Trung uong Vidipha",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược phẩm Trung ương VIDIPHA",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "VDP",
+          "organ_name": "Công ty Cổ phần Dược phẩm Trung ương VIDIPHA",
+          "raw": {
+            "symbol": "VDP",
+            "organ_name": "Công ty Cổ phần Dược phẩm Trung ương VIDIPHA"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "VDP",
+          "organ_name": "CTCP Dược phẩm Trung ương VIDIPHA",
+          "raw": {
+            "symbol": "VDP",
+            "organ_name": "CTCP Dược phẩm Trung ương VIDIPHA"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "DCL",
+      "configured_company_name": "Cong ty Co phan Duoc pham Cuu Long",
+      "exchange": "HOSE",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Dược phẩm Cửu Long",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DCL",
+          "organ_name": "Công ty Cổ phần Dược phẩm Cửu Long",
+          "raw": {
+            "symbol": "DCL",
+            "organ_name": "Công ty Cổ phần Dược phẩm Cửu Long"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "DCL",
+          "organ_name": "CTCP Dược phẩm Cửu Long",
+          "raw": {
+            "symbol": "DCL",
+            "organ_name": "CTCP Dược phẩm Cửu Long"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "SPM",
+      "configured_company_name": "Cong ty Co phan S.P.M",
+      "exchange": "HOSE",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần S.P.M",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "SPM",
+          "organ_name": "Công ty Cổ phần S.P.M",
+          "raw": {
+            "symbol": "SPM",
+            "organ_name": "Công ty Cổ phần S.P.M"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "SPM",
+          "organ_name": "CTCP SPM",
+          "raw": {
+            "symbol": "SPM",
+            "organ_name": "CTCP SPM"
+          },
+          "name_score": 0.75
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "VMD",
+      "configured_company_name": "Cong ty Co phan Y Duoc pham Vimedimex",
+      "exchange": "HNX",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Y Dược phẩm Vimedimex",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "VMD",
+          "organ_name": "Công ty Cổ phần Y Dược phẩm Vimedimex",
+          "raw": {
+            "symbol": "VMD",
+            "organ_name": "Công ty Cổ phần Y Dược phẩm Vimedimex"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "VMD",
+          "organ_name": "CTCP Y Dược phẩm Vimedimex",
+          "raw": {
+            "symbol": "VMD",
+            "organ_name": "CTCP Y Dược phẩm Vimedimex"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "BVP",
+      "configured_company_name": "Cong ty Co phan Duoc pham Binh Viet",
+      "exchange": "HNX",
+      "segment": "pharma",
+      "status": "missing_from_listing_master",
+      "best_name_score": null,
+      "best_listing_name": null,
+      "best_listing_source": null,
+      "listing_matches": [],
+      "replacement_candidates": [
+        {
+          "ticker": "DBT",
+          "organ_name": "Công ty Cổ phần Dược phẩm Bến Tre",
+          "source": "vci",
+          "name_score": 0.7778
+        },
+        {
+          "ticker": "DBT",
+          "organ_name": "CTCP Dược phẩm Bến Tre",
+          "source": "kbs",
+          "name_score": 0.7778
+        },
+        {
+          "ticker": "DHT",
+          "organ_name": "Công ty Cổ phần Dược phẩm Hà Tây",
+          "source": "vci",
+          "name_score": 0.7429
+        },
+        {
+          "ticker": "DHT",
+          "organ_name": "CTCP Dược phẩm Hà Tây",
+          "source": "kbs",
+          "name_score": 0.7429
+        },
+        {
+          "ticker": "HDP",
+          "organ_name": "Công ty Cổ phần Dược Hà Tĩnh",
+          "source": "vci",
+          "name_score": 0.7097
+        }
+      ]
+    },
+    {
+      "ticker": "HBH",
+      "configured_company_name": "Cong ty Co phan Chuoi Nha thuoc An Khang",
+      "exchange": "HOSE",
+      "segment": "medical_distribution",
+      "status": "identity_mismatch",
+      "best_name_score": 0.4,
+      "best_listing_name": "Công ty Cổ phần HABECO - Hải Phòng",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "HBH",
+          "organ_name": "Công ty Cổ phần HABECO - Hải Phòng",
+          "raw": {
+            "symbol": "HBH",
+            "organ_name": "Công ty Cổ phần HABECO - Hải Phòng"
+          },
+          "name_score": 0.4
+        },
+        {
+          "source": "kbs",
+          "ticker": "HBH",
+          "organ_name": "CTCP Habeco - Hải Phòng",
+          "raw": {
+            "symbol": "HBH",
+            "organ_name": "CTCP Habeco - Hải Phòng"
+          },
+          "name_score": 0.4
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "AAN",
+          "organ_name": "Công ty Cổ phần Lương thực A An",
+          "source": "vci",
+          "name_score": 0.6667
+        },
+        {
+          "ticker": "AAN",
+          "organ_name": "CTCP Lương thực A An",
+          "source": "kbs",
+          "name_score": 0.6667
+        },
+        {
+          "ticker": "AGM",
+          "organ_name": "Công ty Cổ phần Xuất nhập khẩu An Giang",
+          "source": "vci",
+          "name_score": 0.6383
+        },
+        {
+          "ticker": "AGM",
+          "organ_name": "CTCP Xuất Nhập khẩu An Giang",
+          "source": "kbs",
+          "name_score": 0.6383
+        },
+        {
+          "ticker": "DNA",
+          "organ_name": "Công ty Cổ phần Điện nước An Giang",
+          "source": "vci",
+          "name_score": 0.619
+        }
+      ]
+    },
+    {
+      "ticker": "DNM",
+      "configured_company_name": "Cong ty Co phan Dieu Duong Minh Hai",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "identity_mismatch",
+      "best_name_score": 0.25,
+      "best_listing_name": "Tổng Công ty Cổ phần Y tế Danameco",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DNM",
+          "organ_name": "Tổng Công ty Cổ phần Y tế Danameco",
+          "raw": {
+            "symbol": "DNM",
+            "organ_name": "Tổng Công ty Cổ phần Y tế Danameco"
+          },
+          "name_score": 0.25
+        },
+        {
+          "source": "kbs",
+          "ticker": "DNM",
+          "organ_name": "Tổng Công ty cổ phần Y tế DANAMECO",
+          "raw": {
+            "symbol": "DNM",
+            "organ_name": "Tổng Công ty cổ phần Y tế DANAMECO"
+          },
+          "name_score": 0.25
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "DPP",
+          "organ_name": "Công ty Cổ phần Dược Đồng Nai",
+          "source": "vci",
+          "name_score": 0.6875
+        },
+        {
+          "ticker": "DPP",
+          "organ_name": "CTCP Dược Đồng Nai",
+          "source": "kbs",
+          "name_score": 0.6875
+        },
+        {
+          "ticker": "SHN",
+          "organ_name": "Công ty Cổ phần Đầu tư Tổng hợp Hà Nội",
+          "source": "vci",
+          "name_score": 0.6341
+        },
+        {
+          "ticker": "SHN",
+          "organ_name": "CTCP Đầu tư Tổng hợp Hà Nội",
+          "source": "kbs",
+          "name_score": 0.6341
+        },
+        {
+          "ticker": "VBH",
+          "organ_name": "Công ty Cổ phần Điện tử Bình Hòa",
+          "source": "vci",
+          "name_score": 0.6286
+        }
+      ]
+    },
+    {
+      "ticker": "DBT",
+      "configured_company_name": "Cong ty Co phan Duoc pham Trung Viet",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 0.7027,
+      "best_listing_name": "Công ty Cổ phần Dược phẩm Bến Tre",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DBT",
+          "organ_name": "Công ty Cổ phần Dược phẩm Bến Tre",
+          "raw": {
+            "symbol": "DBT",
+            "organ_name": "Công ty Cổ phần Dược phẩm Bến Tre"
+          },
+          "name_score": 0.7027
+        },
+        {
+          "source": "kbs",
+          "ticker": "DBT",
+          "organ_name": "CTCP Dược phẩm Bến Tre",
+          "raw": {
+            "symbol": "DBT",
+            "organ_name": "CTCP Dược phẩm Bến Tre"
+          },
+          "name_score": 0.7027
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "DPP",
+      "configured_company_name": "Cong ty Co phan Duoc pham Phuc Thanh",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "identity_mismatch",
+      "best_name_score": 0.3636,
+      "best_listing_name": "Công ty Cổ phần Dược Đồng Nai",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DPP",
+          "organ_name": "Công ty Cổ phần Dược Đồng Nai",
+          "raw": {
+            "symbol": "DPP",
+            "organ_name": "Công ty Cổ phần Dược Đồng Nai"
+          },
+          "name_score": 0.3636
+        },
+        {
+          "source": "kbs",
+          "ticker": "DPP",
+          "organ_name": "CTCP Dược Đồng Nai",
+          "raw": {
+            "symbol": "DPP",
+            "organ_name": "CTCP Dược Đồng Nai"
+          },
+          "name_score": 0.3636
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "DTP",
+          "organ_name": "Công ty Cổ phần Dược phẩm CPC1 Hà Nội",
+          "source": "vci",
+          "name_score": 0.7805
+        },
+        {
+          "ticker": "DTP",
+          "organ_name": "CTCP Dược phẩm CPC1 Hà Nội",
+          "source": "kbs",
+          "name_score": 0.7805
+        },
+        {
+          "ticker": "DHT",
+          "organ_name": "Công ty Cổ phần Dược phẩm Hà Tây",
+          "source": "vci",
+          "name_score": 0.7778
+        },
+        {
+          "ticker": "DHT",
+          "organ_name": "CTCP Dược phẩm Hà Tây",
+          "source": "kbs",
+          "name_score": 0.7778
+        },
+        {
+          "ticker": "OPC",
+          "organ_name": "Công ty Cổ phần Dược Phẩm OPC",
+          "source": "vci",
+          "name_score": 0.7273
+        }
+      ]
+    },
+    {
+      "ticker": "DRP",
+      "configured_company_name": "Cong ty Co phan Duoc Rarapharm",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "missing_from_listing_master",
+      "best_name_score": null,
+      "best_listing_name": null,
+      "best_listing_source": null,
+      "listing_matches": [],
+      "replacement_candidates": [
+        {
+          "ticker": "DAN",
+          "organ_name": "Công ty Cổ phần Dược Danapha",
+          "source": "vci",
+          "name_score": 0.7692
+        },
+        {
+          "ticker": "DAN",
+          "organ_name": "CTCP Dược Danapha",
+          "source": "kbs",
+          "name_score": 0.7692
+        },
+        {
+          "ticker": "TVP",
+          "organ_name": "Công ty Cổ phần Dược phẩm TV.Pharm",
+          "source": "vci",
+          "name_score": 0.6875
+        },
+        {
+          "ticker": "AGP",
+          "organ_name": "Công ty Cổ phần Dược phẩm AGIMEXPHARM",
+          "source": "vci",
+          "name_score": 0.6857
+        },
+        {
+          "ticker": "AGP",
+          "organ_name": "CTCP Dược phẩm Agimexpharm",
+          "source": "kbs",
+          "name_score": 0.6857
+        }
+      ]
+    },
+    {
+      "ticker": "T32",
+      "configured_company_name": "Cong ty Co phan Y te Ha Tay",
+      "exchange": "UPCOM",
+      "segment": "healthcare_services",
+      "status": "missing_from_listing_master",
+      "best_name_score": null,
+      "best_listing_name": null,
+      "best_listing_source": null,
+      "listing_matches": [],
+      "replacement_candidates": [
+        {
+          "ticker": "VDT",
+          "organ_name": "Công ty Cổ phần Lưới thép Bình Tây",
+          "source": "vci",
+          "name_score": 0.6207
+        },
+        {
+          "ticker": "VDT",
+          "organ_name": "CTCP Lưới thép Bình Tây",
+          "source": "kbs",
+          "name_score": 0.6207
+        },
+        {
+          "ticker": "HNA",
+          "organ_name": "Công ty Cổ phần Thủy điện Hủa Na",
+          "source": "vci",
+          "name_score": 0.5926
+        },
+        {
+          "ticker": "HNA",
+          "organ_name": "CTCP Thủy điện Hủa Na",
+          "source": "kbs",
+          "name_score": 0.5926
+        },
+        {
+          "ticker": "DHT",
+          "organ_name": "Công ty Cổ phần Dược phẩm Hà Tây",
+          "source": "vci",
+          "name_score": 0.5926
+        }
+      ]
+    },
+    {
+      "ticker": "DTP",
+      "configured_company_name": "Cong ty Co phan Duoc Tay Ninh",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 0.5294,
+      "best_listing_name": "Công ty Cổ phần Dược phẩm CPC1 Hà Nội",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DTP",
+          "organ_name": "Công ty Cổ phần Dược phẩm CPC1 Hà Nội",
+          "raw": {
+            "symbol": "DTP",
+            "organ_name": "Công ty Cổ phần Dược phẩm CPC1 Hà Nội"
+          },
+          "name_score": 0.5294
+        },
+        {
+          "source": "kbs",
+          "ticker": "DTP",
+          "organ_name": "CTCP Dược phẩm CPC1 Hà Nội",
+          "raw": {
+            "symbol": "DTP",
+            "organ_name": "CTCP Dược phẩm CPC1 Hà Nội"
+          },
+          "name_score": 0.5294
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "VMC",
+      "configured_company_name": "Cong ty Co phan Y Duoc Viet Nam",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "identity_mismatch",
+      "best_name_score": 0.2857,
+      "best_listing_name": "Công ty Cổ phần VIMECO",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "VMC",
+          "organ_name": "Công ty Cổ phần VIMECO",
+          "raw": {
+            "symbol": "VMC",
+            "organ_name": "Công ty Cổ phần VIMECO"
+          },
+          "name_score": 0.2857
+        },
+        {
+          "source": "kbs",
+          "ticker": "VMC",
+          "organ_name": "CTCP Vimeco",
+          "raw": {
+            "symbol": "VMC",
+            "organ_name": "CTCP Vimeco"
+          },
+          "name_score": 0.2857
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "DVN",
+          "organ_name": "Tổng Công ty Dược Việt Nam - CTCP",
+          "source": "vci",
+          "name_score": 0.9286
+        },
+        {
+          "ticker": "OIL",
+          "organ_name": "Tổng Công ty Dầu Việt Nam - Công ty Cổ phần",
+          "source": "vci",
+          "name_score": 0.8148
+        },
+        {
+          "ticker": "OIL",
+          "organ_name": "Tổng Công ty Dầu Việt Nam - CTCP",
+          "source": "kbs",
+          "name_score": 0.8148
+        },
+        {
+          "ticker": "VNS",
+          "organ_name": "Công ty Cổ phần Ánh Dương Việt Nam",
+          "source": "vci",
+          "name_score": 0.7879
+        },
+        {
+          "ticker": "VNS",
+          "organ_name": "CTCP Ánh Dương Việt Nam",
+          "source": "kbs",
+          "name_score": 0.7879
+        }
+      ]
+    },
+    {
+      "ticker": "NDT",
+      "configured_company_name": "Cong ty Co phan Benh vien Da khoa tinh Ninh Binh",
+      "exchange": "UPCOM",
+      "segment": "healthcare_services",
+      "status": "identity_mismatch",
+      "best_name_score": 0.2917,
+      "best_listing_name": "Tổng Công ty Cổ phần Dệt may Nam Định",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "NDT",
+          "organ_name": "Tổng Công ty Cổ phần Dệt may Nam Định",
+          "raw": {
+            "symbol": "NDT",
+            "organ_name": "Tổng Công ty Cổ phần Dệt may Nam Định"
+          },
+          "name_score": 0.2917
+        },
+        {
+          "source": "kbs",
+          "ticker": "NDT",
+          "organ_name": "Tổng Công ty cổ phần Dệt May Nam Định",
+          "raw": {
+            "symbol": "NDT",
+            "organ_name": "Tổng Công ty cổ phần Dệt May Nam Định"
+          },
+          "name_score": 0.2917
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "NBP",
+          "organ_name": "Công ty Cổ phần Nhiệt Điện Ninh Bình",
+          "source": "vci",
+          "name_score": 0.6154
+        },
+        {
+          "ticker": "NBP",
+          "organ_name": "CTCP Nhiệt điện Ninh Bình",
+          "source": "kbs",
+          "name_score": 0.6154
+        },
+        {
+          "ticker": "NFC",
+          "organ_name": "Công ty Cổ phần Phân lân Ninh Bình",
+          "source": "vci",
+          "name_score": 0.6
+        },
+        {
+          "ticker": "NFC",
+          "organ_name": "CTCP Phân lân Ninh Bình",
+          "source": "kbs",
+          "name_score": 0.6
+        },
+        {
+          "ticker": "TDB",
+          "organ_name": "Công ty Cổ phần Thủy điện Định Bình",
+          "source": "vci",
+          "name_score": 0.5882
+        }
+      ]
+    },
+    {
+      "ticker": "P29",
+      "configured_company_name": "Cong ty Co phan Duoc pham Trung uong 29",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "missing_from_listing_master",
+      "best_name_score": null,
+      "best_listing_name": null,
+      "best_listing_source": null,
+      "listing_matches": [],
+      "replacement_candidates": [
+        {
+          "ticker": "DP2",
+          "organ_name": "Công ty Cổ phần Dược phẩm Trung ương 2",
+          "source": "vci",
+          "name_score": 0.9778
+        },
+        {
+          "ticker": "DP2",
+          "organ_name": "CTCP Dược phẩm Trung ương 2",
+          "source": "kbs",
+          "name_score": 0.9778
+        },
+        {
+          "ticker": "DP3",
+          "organ_name": "Công ty Cổ Phần Dược Phẩm Trung Ương 3",
+          "source": "vci",
+          "name_score": 0.9333
+        },
+        {
+          "ticker": "DP3",
+          "organ_name": "CTCP Dược phẩm Trung ương 3",
+          "source": "kbs",
+          "name_score": 0.9333
+        },
+        {
+          "ticker": "DP1",
+          "organ_name": "Công ty Cổ phần Dược phẩm Trung ương CPC1",
+          "source": "vci",
+          "name_score": 0.875
+        }
+      ]
+    },
+    {
+      "ticker": "DDS",
+      "configured_company_name": "Cong ty Co phan Diagnostics",
+      "exchange": "UPCOM",
+      "segment": "medical_equipment",
+      "status": "missing_from_listing_master",
+      "best_name_score": null,
+      "best_listing_name": null,
+      "best_listing_source": null,
+      "listing_matches": [],
+      "replacement_candidates": [
+        {
+          "ticker": "VLG",
+          "organ_name": "Công ty Cổ phần VIMC Logistics",
+          "source": "vci",
+          "name_score": 0.56
+        },
+        {
+          "ticker": "VLG",
+          "organ_name": "CTCP VIMC Logistics",
+          "source": "kbs",
+          "name_score": 0.56
+        },
+        {
+          "ticker": "SLD",
+          "organ_name": "Công ty Cổ phần Địa Ốc Sacom",
+          "source": "vci",
+          "name_score": 0.5217
+        },
+        {
+          "ticker": "SLD",
+          "organ_name": "CTCP Địa ốc Sacom",
+          "source": "kbs",
+          "name_score": 0.5217
+        },
+        {
+          "ticker": "D11",
+          "organ_name": "Công ty Cổ phần Địa ốc 11",
+          "source": "vci",
+          "name_score": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "BID",
+      "configured_company_name": "Cong ty Co phan Duoc Binh Duong",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "identity_mismatch",
+      "best_name_score": 0.2154,
+      "best_listing_name": "Ngân hàng Thương mại Cổ phần Đầu tư và Phát triển Việt Nam",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "BID",
+          "organ_name": "Ngân hàng Thương mại Cổ phần Đầu tư và Phát triển Việt Nam",
+          "raw": {
+            "symbol": "BID",
+            "organ_name": "Ngân hàng Thương mại Cổ phần Đầu tư và Phát triển Việt Nam"
+          },
+          "name_score": 0.2154
+        },
+        {
+          "source": "kbs",
+          "ticker": "BID",
+          "organ_name": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam",
+          "raw": {
+            "symbol": "BID",
+            "organ_name": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam"
+          },
+          "name_score": 0.1695
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "BDG",
+          "organ_name": "Công ty Cổ phần May mặc Bình Dương",
+          "source": "vci",
+          "name_score": 0.7273
+        },
+        {
+          "ticker": "BDG",
+          "organ_name": "CTCP May mặc Bình Dương",
+          "source": "kbs",
+          "name_score": 0.7273
+        },
+        {
+          "ticker": "TW3",
+          "organ_name": "Công ty Cổ phần Dược Trung Ương 3",
+          "source": "vci",
+          "name_score": 0.6875
+        },
+        {
+          "ticker": "TW3",
+          "organ_name": "CTCP Dược Trung ương 3",
+          "source": "kbs",
+          "name_score": 0.6875
+        },
+        {
+          "ticker": "HBD",
+          "organ_name": "Công ty Cổ phần Bao bì PP Bình Dương",
+          "source": "vci",
+          "name_score": 0.6857
+        }
+      ]
+    },
+    {
+      "ticker": "PDT",
+      "configured_company_name": "Cong ty Co phan Duoc pham Dong Thap",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "identity_mismatch",
+      "best_name_score": 0.0,
+      "best_listing_name": "",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "PDT",
+          "organ_name": "",
+          "raw": {
+            "symbol": "PDT",
+            "organ_name": null
+          },
+          "name_score": 0.0
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "NHD",
+          "organ_name": "CTCP Dược phẩm Nam Hà",
+          "source": "kbs",
+          "name_score": 0.8
+        },
+        {
+          "ticker": "PPP",
+          "organ_name": "Công ty Cổ phần Dược phẩm Phong Phú",
+          "source": "vci",
+          "name_score": 0.7895
+        },
+        {
+          "ticker": "PPP",
+          "organ_name": "CTCP Dược phẩm Phong Phú",
+          "source": "kbs",
+          "name_score": 0.7895
+        },
+        {
+          "ticker": "OPC",
+          "organ_name": "Công ty Cổ phần Dược Phẩm OPC",
+          "source": "vci",
+          "name_score": 0.75
+        },
+        {
+          "ticker": "OPC",
+          "organ_name": "CTCP Dược phẩm OPC",
+          "source": "kbs",
+          "name_score": 0.75
+        }
+      ]
+    },
+    {
+      "ticker": "BCR",
+      "configured_company_name": "Cong ty Co phan Bio-Pharmachemie",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "identity_mismatch",
+      "best_name_score": 0.25,
+      "best_listing_name": "Công ty Cổ phần BCG Land",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "BCR",
+          "organ_name": "Công ty Cổ phần BCG Land",
+          "raw": {
+            "symbol": "BCR",
+            "organ_name": "Công ty Cổ phần BCG Land"
+          },
+          "name_score": 0.25
+        },
+        {
+          "source": "kbs",
+          "ticker": "BCR",
+          "organ_name": "CTCP BCG Land",
+          "raw": {
+            "symbol": "BCR",
+            "organ_name": "CTCP BCG Land"
+          },
+          "name_score": 0.25
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "TET",
+          "organ_name": "Công ty Cổ phần Vải sợi May mặc Miền Bắc",
+          "source": "vci",
+          "name_score": 0.5
+        },
+        {
+          "ticker": "TET",
+          "organ_name": "CTCP Vải sợi May mặc Miền Bắc",
+          "source": "kbs",
+          "name_score": 0.5
+        },
+        {
+          "ticker": "NHD",
+          "organ_name": "CTCP Dược phẩm Nam Hà",
+          "source": "kbs",
+          "name_score": 0.5
+        },
+        {
+          "ticker": "DHN",
+          "organ_name": "Công ty Cổ phần Dược phẩm Hà Nội",
+          "source": "vci",
+          "name_score": 0.5
+        },
+        {
+          "ticker": "DHN",
+          "organ_name": "CTCP Dược phẩm Hà Nội",
+          "source": "kbs",
+          "name_score": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "VNP",
+      "configured_company_name": "Cong ty Co phan Duoc Viet Nhon",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 0.5926,
+      "best_listing_name": "Công ty Cổ phần Nhựa Việt Nam",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "VNP",
+          "organ_name": "Công ty Cổ phần Nhựa Việt Nam",
+          "raw": {
+            "symbol": "VNP",
+            "organ_name": "Công ty Cổ phần Nhựa Việt Nam"
+          },
+          "name_score": 0.5926
+        },
+        {
+          "source": "kbs",
+          "ticker": "VNP",
+          "organ_name": "CTCP Nhựa Việt Nam",
+          "raw": {
+            "symbol": "VNP",
+            "organ_name": "CTCP Nhựa Việt Nam"
+          },
+          "name_score": 0.5926
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "YT1",
+      "configured_company_name": "Cong ty Co phan Duoc pham Y te 1",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "missing_from_listing_master",
+      "best_name_score": null,
+      "best_listing_name": null,
+      "best_listing_source": null,
+      "listing_matches": [],
+      "replacement_candidates": [
+        {
+          "ticker": "DBT",
+          "organ_name": "Công ty Cổ phần Dược phẩm Bến Tre",
+          "source": "vci",
+          "name_score": 0.7879
+        },
+        {
+          "ticker": "DBT",
+          "organ_name": "CTCP Dược phẩm Bến Tre",
+          "source": "kbs",
+          "name_score": 0.7879
+        },
+        {
+          "ticker": "NDP",
+          "organ_name": "Công ty Cổ phần Dược phẩm 2/9",
+          "source": "vci",
+          "name_score": 0.7586
+        },
+        {
+          "ticker": "NDP",
+          "organ_name": "CTCP Dược phẩm 2/9",
+          "source": "kbs",
+          "name_score": 0.7586
+        },
+        {
+          "ticker": "DHT",
+          "organ_name": "Công ty Cổ phần Dược phẩm Hà Tây",
+          "source": "vci",
+          "name_score": 0.75
+        }
+      ]
+    },
+    {
+      "ticker": "CPC",
+      "configured_company_name": "Cong ty Co phan Duoc pham CPC1 Ha Noi",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 0.4545,
+      "best_listing_name": "Công ty Cổ phần Thuốc sát trùng Cần Thơ",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "CPC",
+          "organ_name": "Công ty Cổ phần Thuốc sát trùng Cần Thơ",
+          "raw": {
+            "symbol": "CPC",
+            "organ_name": "Công ty Cổ phần Thuốc sát trùng Cần Thơ"
+          },
+          "name_score": 0.4545
+        },
+        {
+          "source": "kbs",
+          "ticker": "CPC",
+          "organ_name": "CTCP Thuốc sát trùng Cần Thơ",
+          "raw": {
+            "symbol": "CPC",
+            "organ_name": "CTCP Thuốc sát trùng Cần Thơ"
+          },
+          "name_score": 0.4545
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "HDA",
+      "configured_company_name": "Cong ty Co phan Duoc Ha Dong",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "validated",
+      "best_name_score": 0.5185,
+      "best_listing_name": "Công ty Cổ phần Hãng sơn Đông Á",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "HDA",
+          "organ_name": "Công ty Cổ phần Hãng sơn Đông Á",
+          "raw": {
+            "symbol": "HDA",
+            "organ_name": "Công ty Cổ phần Hãng sơn Đông Á"
+          },
+          "name_score": 0.5185
+        },
+        {
+          "source": "kbs",
+          "ticker": "HDA",
+          "organ_name": "CTCP Hãng sơn Đông Á",
+          "raw": {
+            "symbol": "HDA",
+            "organ_name": "CTCP Hãng sơn Đông Á"
+          },
+          "name_score": 0.5185
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "TMP",
+      "configured_company_name": "Cong ty Co phan Duoc pham Tam Phuc",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "identity_mismatch",
+      "best_name_score": 0.2286,
+      "best_listing_name": "Công ty Cổ phần Thủy điện Thác Mơ",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "TMP",
+          "organ_name": "Công ty Cổ phần Thủy điện Thác Mơ",
+          "raw": {
+            "symbol": "TMP",
+            "organ_name": "Công ty Cổ phần Thủy điện Thác Mơ"
+          },
+          "name_score": 0.2286
+        },
+        {
+          "source": "kbs",
+          "ticker": "TMP",
+          "organ_name": "CTCP Thủy điện Thác Mơ",
+          "raw": {
+            "symbol": "TMP",
+            "organ_name": "CTCP Thủy điện Thác Mơ"
+          },
+          "name_score": 0.2286
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "NHD",
+          "organ_name": "CTCP Dược phẩm Nam Hà",
+          "source": "kbs",
+          "name_score": 0.8235
+        },
+        {
+          "ticker": "TVP",
+          "organ_name": "Công ty Cổ phần Dược phẩm TV.Pharm",
+          "source": "vci",
+          "name_score": 0.7778
+        },
+        {
+          "ticker": "DTG",
+          "organ_name": "Công ty Cổ phần Dược phẩm Tipharco",
+          "source": "vci",
+          "name_score": 0.7778
+        },
+        {
+          "ticker": "DTG",
+          "organ_name": "CTCP Dược phẩm Tipharco",
+          "source": "kbs",
+          "name_score": 0.7778
+        },
+        {
+          "ticker": "OPC",
+          "organ_name": "Công ty Cổ phần Dược Phẩm OPC",
+          "source": "vci",
+          "name_score": 0.7742
+        }
+      ]
+    },
+    {
+      "ticker": "DRG",
+      "configured_company_name": "Cong ty Co phan Duoc Re Giang",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "identity_mismatch",
+      "best_name_score": 0.2222,
+      "best_listing_name": "Công ty Cổ phần Cao su Đắk Lắk",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DRG",
+          "organ_name": "Công ty Cổ phần Cao su Đắk Lắk",
+          "raw": {
+            "symbol": "DRG",
+            "organ_name": "Công ty Cổ phần Cao su Đắk Lắk"
+          },
+          "name_score": 0.2222
+        },
+        {
+          "source": "kbs",
+          "ticker": "DRG",
+          "organ_name": "CTCP Cao su Đắk Lắk",
+          "raw": {
+            "symbol": "DRG",
+            "organ_name": "CTCP Cao su Đắk Lắk"
+          },
+          "name_score": 0.2222
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "MGG",
+          "organ_name": "Tổng Công ty Đức Giang - Công ty Cổ phần",
+          "source": "vci",
+          "name_score": 0.8182
+        },
+        {
+          "ticker": "MGG",
+          "organ_name": "Tổng Công ty Đức Giang - CTCP",
+          "source": "kbs",
+          "name_score": 0.8182
+        },
+        {
+          "ticker": "DHG",
+          "organ_name": "Công ty Cổ phần Dược Hậu Giang",
+          "source": "vci",
+          "name_score": 0.8148
+        },
+        {
+          "ticker": "DHG",
+          "organ_name": "CTCP Dược Hậu Giang",
+          "source": "kbs",
+          "name_score": 0.8148
+        },
+        {
+          "ticker": "DNA",
+          "organ_name": "Công ty Cổ phần Điện nước An Giang",
+          "source": "vci",
+          "name_score": 0.7097
+        }
+      ]
+    },
+    {
+      "ticker": "LNT",
+      "configured_company_name": "Cong ty Co phan Duoc Lien",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "missing_from_listing_master",
+      "best_name_score": null,
+      "best_listing_name": null,
+      "best_listing_source": null,
+      "listing_matches": [],
+      "replacement_candidates": [
+        {
+          "ticker": "BCP",
+          "organ_name": "Công ty Cổ phần Dược Enlie",
+          "source": "vci",
+          "name_score": 0.8421
+        },
+        {
+          "ticker": "BCP",
+          "organ_name": "CTCP Dược ENLIE",
+          "source": "kbs",
+          "name_score": 0.8421
+        },
+        {
+          "ticker": "DVN",
+          "organ_name": "Tổng Công ty Dược Việt Nam - CTCP",
+          "source": "vci",
+          "name_score": 0.7273
+        },
+        {
+          "ticker": "MGG",
+          "organ_name": "Tổng Công ty Đức Giang - Công ty Cổ phần",
+          "source": "vci",
+          "name_score": 0.6667
+        },
+        {
+          "ticker": "MGG",
+          "organ_name": "Tổng Công ty Đức Giang - CTCP",
+          "source": "kbs",
+          "name_score": 0.6667
+        }
+      ]
+    },
+    {
+      "ticker": "HGP",
+      "configured_company_name": "Cong ty Co phan Duoc pham Hung Gia",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "missing_from_listing_master",
+      "best_name_score": null,
+      "best_listing_name": null,
+      "best_listing_source": null,
+      "listing_matches": [],
+      "replacement_candidates": [
+        {
+          "ticker": "DHT",
+          "organ_name": "Công ty Cổ phần Dược phẩm Hà Tây",
+          "source": "vci",
+          "name_score": 0.7647
+        },
+        {
+          "ticker": "DHT",
+          "organ_name": "CTCP Dược phẩm Hà Tây",
+          "source": "kbs",
+          "name_score": 0.7647
+        },
+        {
+          "ticker": "DHN",
+          "organ_name": "Công ty Cổ phần Dược phẩm Hà Nội",
+          "source": "vci",
+          "name_score": 0.7647
+        },
+        {
+          "ticker": "DHN",
+          "organ_name": "CTCP Dược phẩm Hà Nội",
+          "source": "kbs",
+          "name_score": 0.7647
+        },
+        {
+          "ticker": "PPP",
+          "organ_name": "Công ty Cổ phần Dược phẩm Phong Phú",
+          "source": "vci",
+          "name_score": 0.7568
+        }
+      ]
+    },
+    {
+      "ticker": "PVD",
+      "configured_company_name": "Cong ty Co phan Duoc pham Viet Duc",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "identity_mismatch",
+      "best_name_score": 0.2917,
+      "best_listing_name": "Tổng Công ty Cổ phần Khoan và Dịch vụ khoan Dầu khí",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "PVD",
+          "organ_name": "Tổng Công ty Cổ phần Khoan và Dịch vụ khoan Dầu khí",
+          "raw": {
+            "symbol": "PVD",
+            "organ_name": "Tổng Công ty Cổ phần Khoan và Dịch vụ khoan Dầu khí"
+          },
+          "name_score": 0.2917
+        },
+        {
+          "source": "kbs",
+          "ticker": "PVD",
+          "organ_name": "Tổng Công ty cổ phần Khoan và Dịch vụ khoan Dầu khí",
+          "raw": {
+            "symbol": "PVD",
+            "organ_name": "Tổng Công ty cổ phần Khoan và Dịch vụ khoan Dầu khí"
+          },
+          "name_score": 0.2917
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "UPH",
+          "organ_name": "CTCP Dược phẩm TW 25",
+          "source": "kbs",
+          "name_score": 0.7273
+        },
+        {
+          "ticker": "VMD",
+          "organ_name": "Công ty Cổ phần Y Dược phẩm Vimedimex",
+          "source": "vci",
+          "name_score": 0.7179
+        },
+        {
+          "ticker": "VMD",
+          "organ_name": "CTCP Y Dược phẩm Vimedimex",
+          "source": "kbs",
+          "name_score": 0.7179
+        },
+        {
+          "ticker": "OPC",
+          "organ_name": "Công ty Cổ phần Dược Phẩm OPC",
+          "source": "vci",
+          "name_score": 0.7097
+        },
+        {
+          "ticker": "OPC",
+          "organ_name": "CTCP Dược phẩm OPC",
+          "source": "kbs",
+          "name_score": 0.7097
+        }
+      ]
+    },
+    {
+      "ticker": "DGW",
+      "configured_company_name": "Cong ty Co phan The gioi So",
+      "exchange": "HOSE",
+      "segment": "medical_distribution",
+      "status": "validated",
+      "best_name_score": 1.0,
+      "best_listing_name": "Công ty Cổ phần Thế Giới Số",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "DGW",
+          "organ_name": "Công ty Cổ phần Thế Giới Số",
+          "raw": {
+            "symbol": "DGW",
+            "organ_name": "Công ty Cổ phần Thế Giới Số"
+          },
+          "name_score": 1.0
+        },
+        {
+          "source": "kbs",
+          "ticker": "DGW",
+          "organ_name": "CTCP Thế Giới Số",
+          "raw": {
+            "symbol": "DGW",
+            "organ_name": "CTCP Thế Giới Số"
+          },
+          "name_score": 1.0
+        }
+      ],
+      "replacement_candidates": []
+    },
+    {
+      "ticker": "CON",
+      "configured_company_name": "Cong ty Co phan Duoc pham Con Khi",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "missing_from_listing_master",
+      "best_name_score": null,
+      "best_listing_name": null,
+      "best_listing_source": null,
+      "listing_matches": [],
+      "replacement_candidates": [
+        {
+          "ticker": "NHD",
+          "organ_name": "CTCP Dược phẩm Nam Hà",
+          "source": "kbs",
+          "name_score": 0.7879
+        },
+        {
+          "ticker": "PPP",
+          "organ_name": "Công ty Cổ phần Dược phẩm Phong Phú",
+          "source": "vci",
+          "name_score": 0.7778
+        },
+        {
+          "ticker": "PPP",
+          "organ_name": "CTCP Dược phẩm Phong Phú",
+          "source": "kbs",
+          "name_score": 0.7778
+        },
+        {
+          "ticker": "DCL",
+          "organ_name": "Công ty Cổ phần Dược phẩm Cửu Long",
+          "source": "vci",
+          "name_score": 0.7429
+        },
+        {
+          "ticker": "DCL",
+          "organ_name": "CTCP Dược phẩm Cửu Long",
+          "source": "kbs",
+          "name_score": 0.7429
+        }
+      ]
+    },
+    {
+      "ticker": "TNT",
+      "configured_company_name": "Cong ty Co phan Duoc pham Tan Nhon Tay",
+      "exchange": "UPCOM",
+      "segment": "pharma",
+      "status": "identity_mismatch",
+      "best_name_score": 0.24,
+      "best_listing_name": "Công ty Cổ phần Tập đoàn TNT",
+      "best_listing_source": "vci",
+      "listing_matches": [
+        {
+          "source": "vci",
+          "ticker": "TNT",
+          "organ_name": "Công ty Cổ phần Tập đoàn TNT",
+          "raw": {
+            "symbol": "TNT",
+            "organ_name": "Công ty Cổ phần Tập đoàn TNT"
+          },
+          "name_score": 0.24
+        },
+        {
+          "source": "kbs",
+          "ticker": "TNT",
+          "organ_name": "CTCP Tập đoàn TNT",
+          "raw": {
+            "symbol": "TNT",
+            "organ_name": "CTCP Tập đoàn TNT"
+          },
+          "name_score": 0.24
+        }
+      ],
+      "replacement_candidates": [
+        {
+          "ticker": "DHT",
+          "organ_name": "Công ty Cổ phần Dược phẩm Hà Tây",
+          "source": "vci",
+          "name_score": 0.7895
+        },
+        {
+          "ticker": "DHT",
+          "organ_name": "CTCP Dược phẩm Hà Tây",
+          "source": "kbs",
+          "name_score": 0.7895
+        },
+        {
+          "ticker": "NHD",
+          "organ_name": "CTCP Dược phẩm Nam Hà",
+          "source": "kbs",
+          "name_score": 0.7368
+        },
+        {
+          "ticker": "DHN",
+          "organ_name": "Công ty Cổ phần Dược phẩm Hà Nội",
+          "source": "vci",
+          "name_score": 0.7368
+        },
+        {
+          "ticker": "DHN",
+          "organ_name": "CTCP Dược phẩm Hà Nội",
+          "source": "kbs",
+          "name_score": 0.7368
+        }
+      ]
+    }
+  ]
+}

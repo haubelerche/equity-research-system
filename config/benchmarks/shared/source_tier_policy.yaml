@@ -1,0 +1,34 @@
+version: source_tier_policy_20260615_v2
+tiers:
+  1:
+    label: official_or_audited
+    examples:
+    - annual_report
+    - audited_financial_statement
+    - exchange_disclosure
+    - company_IR
+    allowed_for_material_claim: true
+  2:
+    label: structured_aggregator_or_market_data
+    examples:
+    - vnstock
+    - exchange_price_feed
+    - licensed_market_data
+    allowed_for_material_claim: true
+    requires_reconciliation: true
+  3:
+    label: weak_context_or_unverified_news
+    examples:
+    - general_news
+    - blog
+    - forum
+    allowed_for_material_claim: false
+rules:
+- id: material_quant_claim_requires_tier_1_or_2
+  severity: critical
+- id: tier3_only_material_claim_blocks_export
+  severity: critical
+- id: generic_citation_is_invalid
+  severity: critical
+- id: source_uri_checksum_required_for_official_docs
+  severity: major

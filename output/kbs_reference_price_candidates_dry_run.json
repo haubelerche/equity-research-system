@@ -1,0 +1,631 @@
+{
+  "dry_run": true,
+  "trade_date": "2026-06-14",
+  "requested_tickers": [
+    "AGP",
+    "AMP",
+    "AMV",
+    "APC",
+    "BCP",
+    "BIO",
+    "CDP",
+    "CNC",
+    "CVN",
+    "DAN",
+    "DBD",
+    "DBM",
+    "DBT",
+    "DCL",
+    "DDN",
+    "DHD",
+    "DHG",
+    "DHN",
+    "DHT",
+    "DMC",
+    "DNM",
+    "DP1",
+    "DP2",
+    "DP3",
+    "DPH",
+    "DPP",
+    "DTG",
+    "DTH",
+    "DTP",
+    "DVM",
+    "DVN",
+    "FIT",
+    "GPC",
+    "HDP",
+    "IMP",
+    "JVC",
+    "LDP",
+    "MED",
+    "MEF",
+    "MKP",
+    "MKV",
+    "MRF",
+    "MTP",
+    "NDC",
+    "NDP",
+    "NHD",
+    "NTF",
+    "OPC",
+    "PBC",
+    "PMC",
+    "PPP",
+    "SPM",
+    "SRA",
+    "TNH",
+    "TRA",
+    "TTD",
+    "TW3",
+    "UPH",
+    "VDP",
+    "VHE",
+    "VMD",
+    "YTC"
+  ],
+  "requested_missing_from_kbs": [],
+  "ready_rows": 62,
+  "inserted_rows": 0,
+  "results": [
+    {
+      "ticker": "DPP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 26500.0,
+      "listing_name": "CTCP Dược Đồng Nai",
+      "exchange": "UPCOM",
+      "name_score": 0.3636
+    },
+    {
+      "ticker": "DBT",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 11250.0,
+      "listing_name": "CTCP Dược phẩm Bến Tre",
+      "exchange": "HOSE",
+      "name_score": 0.7027
+    },
+    {
+      "ticker": "DPH",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 51000.0,
+      "listing_name": "CTCP Dược phẩm Hải Phòng",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "NDC",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 157000.0,
+      "listing_name": "CTCP Nam Dược",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "IMP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 46150.0,
+      "listing_name": "CTCP Dược phẩm Imexpharm",
+      "exchange": "HOSE",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "TTD",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 102500.0,
+      "listing_name": "CTCP Bệnh viện tim Tâm Đức",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "TNH",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 9220.0,
+      "listing_name": "CTCP Tập đoàn Bệnh viện TNH",
+      "exchange": "HOSE",
+      "name_score": 0.5714
+    },
+    {
+      "ticker": "VHE",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 3100.0,
+      "listing_name": "CTCP Dược liệu và Thực phẩm Việt Nam",
+      "exchange": "HNX",
+      "name_score": 0.7347
+    },
+    {
+      "ticker": "HDP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 25000.0,
+      "listing_name": "CTCP Dược Hà Tĩnh",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "DP1",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 29600.0,
+      "listing_name": "CTCP Dược phẩm Trung ương CPC1",
+      "exchange": "UPCOM",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "DHT",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 66000.0,
+      "listing_name": "CTCP Dược phẩm Hà Tây",
+      "exchange": "HNX",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "GPC",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 1900.0,
+      "listing_name": "CTCP Tập đoàn Green+",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "AMV",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 1500.0,
+      "listing_name": "CTCP Sản xuất Kinh doanh Dược và Trang thiết bị Y tế Việt Mỹ",
+      "exchange": "HNX",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "YTC",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 24000.0,
+      "listing_name": "CTCP Xuất nhập khẩu Y tế Thành phố Hồ Chí Minh",
+      "exchange": "UPCOM",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "MRF",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 23500.0,
+      "listing_name": "CTCP Merufa",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "MTP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 13500.0,
+      "listing_name": "CTCP Dược Medipharco",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "DTG",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 15500.0,
+      "listing_name": "CTCP Dược phẩm Tipharco",
+      "exchange": "HNX",
+      "name_score": null
+    },
+    {
+      "ticker": "DHN",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 18300.0,
+      "listing_name": "CTCP Dược phẩm Hà Nội",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "CVN",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 1000.0,
+      "listing_name": "CTCP Vinam",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "VDP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 50300.0,
+      "listing_name": "CTCP Dược phẩm Trung ương VIDIPHA",
+      "exchange": "HOSE",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "DNM",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 6000.0,
+      "listing_name": "Tổng Công ty cổ phần Y tế DANAMECO",
+      "exchange": "UPCOM",
+      "name_score": 0.25
+    },
+    {
+      "ticker": "BIO",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 13500.0,
+      "listing_name": "CTCP Vắc xin và Sinh phẩm Nha Trang",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "DBM",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 27000.0,
+      "listing_name": "CTCP Dược - Vật tư Y Tế Đăk Lăk",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "PBC",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 5900.0,
+      "listing_name": "CTCP Dược phẩm Trung ương I - Pharbaco",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "PPP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 18200.0,
+      "listing_name": "CTCP Dược phẩm Phong Phú",
+      "exchange": "HNX",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "BCP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 10600.0,
+      "listing_name": "CTCP Dược ENLIE",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "APC",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 5500.0,
+      "listing_name": "CTCP Chiếu xạ An Phú",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "SRA",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 1700.0,
+      "listing_name": "CTCP Sara Việt Nam",
+      "exchange": "HNX",
+      "name_score": null
+    },
+    {
+      "ticker": "DHD",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 28100.0,
+      "listing_name": "CTCP Dược Vật tư Y tế Hải Dương",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "DBD",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 49350.0,
+      "listing_name": "CTCP Dược - Trang thiết bị Y tế Bình Định (Bidiphar)",
+      "exchange": "HOSE",
+      "name_score": 0.8831
+    },
+    {
+      "ticker": "UPH",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 6500.0,
+      "listing_name": "CTCP Dược phẩm TW 25",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "SPM",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 8500.0,
+      "listing_name": "CTCP SPM",
+      "exchange": "HOSE",
+      "name_score": 0.75
+    },
+    {
+      "ticker": "CNC",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 32600.0,
+      "listing_name": "CTCP Công nghệ Cao Traphaco",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "DTH",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 12600.0,
+      "listing_name": "CTCP Dược - Vật tư Y Tế Thanh Hóa",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "VMD",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 14600.0,
+      "listing_name": "CTCP Y Dược phẩm Vimedimex",
+      "exchange": "HOSE",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "DP2",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 4000.0,
+      "listing_name": "CTCP Dược phẩm Trung ương 2",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "MED",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 18400.0,
+      "listing_name": "CTCP Dược Trung ương Mediplantex",
+      "exchange": "HNX",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "DVM",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 6900.0,
+      "listing_name": "CTCP Dược liệu Việt Nam",
+      "exchange": "HNX",
+      "name_score": null
+    },
+    {
+      "ticker": "TW3",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 13000.0,
+      "listing_name": "CTCP Dược Trung ương 3",
+      "exchange": "UPCOM",
+      "name_score": 0.4898
+    },
+    {
+      "ticker": "AGP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 34200.0,
+      "listing_name": "CTCP Dược phẩm Agimexpharm",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "DDN",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 8000.0,
+      "listing_name": "CTCP Dược và Thiết bị Y tế Đà Nẵng",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "OPC",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 23900.0,
+      "listing_name": "CTCP Dược phẩm OPC",
+      "exchange": "HOSE",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "LDP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 9300.0,
+      "listing_name": "CTCP Dược Lâm Đồng (Ladophar)",
+      "exchange": "HNX",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "JVC",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 3870.0,
+      "listing_name": "CTCP Đầu tư Y tế - Dược phẩm Việt Nam",
+      "exchange": "HOSE",
+      "name_score": 0.5283
+    },
+    {
+      "ticker": "MKV",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 19300.0,
+      "listing_name": "CTCP Dược thú Y Cai Lậy",
+      "exchange": "HNX",
+      "name_score": null
+    },
+    {
+      "ticker": "PMC",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 130000.0,
+      "listing_name": "CTCP Dược phẩm Dược liệu Pharmedic",
+      "exchange": "HNX",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "NDP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 22500.0,
+      "listing_name": "CTCP Dược phẩm 2/9",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "AMP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 13300.0,
+      "listing_name": "CTCP Armephaco",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "MKP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 26500.0,
+      "listing_name": "CTCP Hoá - Dược phẩm Mekophar",
+      "exchange": "UPCOM",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "DVN",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 20900.0,
+      "listing_name": "Tổng Công ty Dược Việt Nam - CTCP",
+      "exchange": "UPCOM",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "NHD",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 80500.0,
+      "listing_name": "CTCP Dược phẩm Nam Hà",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "DP3",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 62400.0,
+      "listing_name": "CTCP Dược phẩm Trung ương 3",
+      "exchange": "HNX",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "MEF",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 2100.0,
+      "listing_name": "CTCP MEINFA",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "DCL",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 38300.0,
+      "listing_name": "CTCP Dược phẩm Cửu Long",
+      "exchange": "HOSE",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "DMC",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 59800.0,
+      "listing_name": "CTCP Xuất nhập khẩu Y Tế DOMESCO",
+      "exchange": "HOSE",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "DTP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 79800.0,
+      "listing_name": "CTCP Dược phẩm CPC1 Hà Nội",
+      "exchange": "UPCOM",
+      "name_score": 0.5294
+    },
+    {
+      "ticker": "FIT",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 3890.0,
+      "listing_name": "CTCP Tập đoàn F.I.T",
+      "exchange": "HOSE",
+      "name_score": null
+    },
+    {
+      "ticker": "NTF",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 12000.0,
+      "listing_name": "CTCP Dược - Vật tư Y tế Nghệ An",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "CDP",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 12500.0,
+      "listing_name": "CTCP Dược phẩm Trung ương Codupha",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "TRA",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 79900.0,
+      "listing_name": "CTCP Traphaco",
+      "exchange": "HOSE",
+      "name_score": 1.0
+    },
+    {
+      "ticker": "DAN",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 23000.0,
+      "listing_name": "CTCP Dược Danapha",
+      "exchange": "UPCOM",
+      "name_score": null
+    },
+    {
+      "ticker": "DHG",
+      "status": "ready",
+      "trade_date": "2026-06-14",
+      "reference_price_vnd": 93200.0,
+      "listing_name": "CTCP Dược Hậu Giang",
+      "exchange": "HOSE",
+      "name_score": 1.0
+    }
+  ]
+}

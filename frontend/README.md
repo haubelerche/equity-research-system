@@ -2,7 +2,7 @@
 
 Giao diện web (100% tiếng Việt) gồm 2 trang, đặt trên backend FastAPI sẵn có:
 
-1. **Báo cáo** (`/reports`) — duyệt 53 ticker dược, xem trước (ảnh trang PDF), tải `report.pdf` +
+1. **Báo cáo** (`/reports`) — duyệt universe ticker dược/y tế đang cấu hình, xem trước (ảnh trang PDF), tải `report.pdf` +
    `explanation.pdf`, và yêu cầu sinh báo cáo cho ticker chưa có.
 2. **Khung đánh giá** (`/eval`) — dashboard 8 lớp đánh giá fail-closed (data → RAG → financial →
    citation → agent → FPTS → observability → rollout/CI), với metrics, ngưỡng P0/P1/P2, trạng thái
@@ -49,7 +49,7 @@ Client gọi thẳng đường dẫn backend — **không có tiền tố `/api`
 ```
 src/
   api/          client.ts (fetch typed), types.ts, runStatus.ts (map RunStatus enum thật)
-  data/         universe.ts (53 ticker), evalFramework.ts (8 lớp × metrics × ngưỡng)
+  data/         universe.ts (active configured universe), evalFramework.ts (8 lớp × metrics × ngưỡng)
   lib/          reportFilter.ts, evalStatus.ts (logic thuần, có test)
   mock/         8 file JSON artifact + index.ts (loader giá trị mock cho dashboard)
   components/   reports/* (row, filters, preview, generate), eval/* (pill, metric row, layer card, pipeline, toggle)

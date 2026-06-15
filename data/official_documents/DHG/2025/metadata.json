@@ -1,0 +1,13 @@
+{
+  "ticker": "DHG",
+  "company_name": "Công ty Cổ phần Dược Hậu Giang",
+  "source_type": "audited_financial_statement",
+  "issuer": "Công ty Cổ phần Dược Hậu Giang",
+  "title": "DHG-Audited-FS-2025-VN.pdf",
+  "url": "https://dhgpharma.com.vn/sites/default/files/2026-03/DHG-Audited-FS-2025-VN.pdf",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHG\\2025\\source_document.pdf",
+  "published_date": "2025-12-31",
+  "fiscal_year": 2025,
+  "language": "vi",
+  "file_hash": "abaaac8d3813329db1987e769f325fbee7b8c4776b4205b26a4673f95b589973"
+}

@@ -112,3 +112,32 @@ def test_load_universe_reads_csv(tmp_path: Path):
     assert rows[0]["ticker"] == "DHG"
     assert rows[0]["is_mvp"] is True
     assert rows[1]["is_mvp"] is False
+
+
+def test_scan_reports_uses_export_storage_when_local_files_are_missing(tmp_path: Path):
+    class FakeStorage:
+        def list_objects(self, bucket: str, prefix: str = "", limit: int = 1000, offset: int = 0):
+            assert bucket == "exports"
+            assert prefix in {"client_reports/", "client_reports/DHG/", "client_reports/IMP/"}
+            if prefix == "client_reports/DHG/":
+                return [
+                    {
+                        "name": "report.pdf",
+                        "updated_at": "2026-06-15T00:00:00+00:00",
+                        "metadata": {"size": 2048},
+                    },
+                    {
+                        "name": "explanation.pdf",
+                        "updated_at": "2026-06-15T00:00:01+00:00",
+                    },
+                ]
+            return []
+
+    items = scan_report_inventory(tmp_path, _universe(), storage=FakeStorage())
+
+    dhg = items[0]
+    assert dhg.has_report is True
+    assert dhg.has_explanation is True
+    assert dhg.report_size == 2048
+    assert dhg.updated_at == "2026-06-15T00:00:01+00:00"
+    assert items[1].has_report is False

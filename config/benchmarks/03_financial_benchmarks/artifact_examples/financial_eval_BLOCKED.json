@@ -1,0 +1,106 @@
+{
+  "artifact_name": "financial_eval",
+  "schema_version": "20260615_v3",
+  "run_id": "RUN_DHG_20260615_V3",
+  "ticker": "DHG",
+  "snapshot_id": "SNAP_DHG_FY2022_2025_V3",
+  "status": "BLOCKED_BY_P0",
+  "summary": {
+    "metric_count": 3
+  },
+  "metrics": [
+    {
+      "metric_id": "finance.accounting_invariant_violations",
+      "metric_name": "Accounting invariant violations",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "threshold_operator": "=",
+      "threshold": 0,
+      "unit": "count",
+      "owner": "valuation",
+      "remediation_hint": "Fix balance sheet, cash flow, unit or sign convention.",
+      "value": 2,
+      "status": "fail",
+      "sample_size": 2,
+      "failed_examples": [
+        {
+          "issue": "assets != liabilities + equity"
+        }
+      ],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    },
+    {
+      "metric_id": "finance.fcfe_formula_pass_count",
+      "metric_name": "FCFE formula pass count",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "boolean",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "threshold_operator": "=",
+      "threshold": true,
+      "unit": "boolean",
+      "owner": "valuation",
+      "remediation_hint": "Do not publish FCFE without debt schedule/net borrowing.",
+      "value": false,
+      "status": "fail",
+      "sample_size": 1,
+      "failed_examples": [
+        {
+          "issue": "net borrowing missing"
+        }
+      ],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    },
+    {
+      "metric_id": "finance.valuation_publishability",
+      "metric_name": "Valuation publishability",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "boolean",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "threshold_operator": "=",
+      "threshold": true,
+      "unit": "boolean",
+      "owner": "valuation",
+      "remediation_hint": "Publish only selected methods with valid formula trace and inputs.",
+      "value": false,
+      "status": "fail",
+      "sample_size": 1,
+      "failed_examples": [
+        {
+          "issue": "FCFE/blend sensitivity missing"
+        }
+      ],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    }
+  ],
+  "top_blockers": [
+    {
+      "metric_id": "finance.accounting_invariant_violations",
+      "severity": "P0"
+    }
+  ],
+  "artifact_refs": {
+    "manifest": "runs/RUN_DHG_20260615_V3/manifest.json"
+  }
+}

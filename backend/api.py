@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.requests import Request
 
@@ -246,7 +246,7 @@ def create_app(
     @app.get("/reports")
     def list_reports() -> dict:
         universe = load_universe(_universe_csv())
-        items = scan_report_inventory(_output_dir(), universe)
+        items = scan_report_inventory(_output_dir(), universe, storage=_export_storage())
         try:
             from scripts.generate_fast_report import _latest_report_run_ids
         except Exception:  # noqa: BLE001 - report inventory must keep local fallback alive
@@ -277,9 +277,10 @@ def create_app(
                 "lineage_source": "manifest" if renderable_run_ids else "local_files",
             }
 
-        return {
-            "items": [_report_item_payload(i) for i in items]
-        }
+        return JSONResponse(
+            content={"items": [_report_item_payload(i) for i in items]},
+            headers={"Cache-Control": "no-store"},
+        )
 
     _FILE_KINDS = {"report": "_report.pdf", "explanation": "_explanation.pdf"}
     _EXPORT_NAMES = {"report": "report.pdf", "explanation": "explanation.pdf"}
@@ -310,7 +311,10 @@ def create_app(
         return Response(
             content=data,
             media_type="application/pdf",
-            headers={"Content-Disposition": f'inline; filename="{ticker}_{export_name}"'},
+            headers={
+                "Content-Disposition": f'inline; filename="{ticker}_{export_name}"',
+                "Cache-Control": "no-store",
+            },
         )
 
     @app.get("/reports/{ticker}/file/{kind}")
@@ -333,7 +337,10 @@ def create_app(
         return FileResponse(
             path,
             media_type="application/pdf",
-            headers={"Content-Disposition": f'inline; filename="{ticker}{suffix}"'},
+            headers={
+                "Content-Disposition": f'inline; filename="{ticker}{suffix}"',
+                "Cache-Control": "no-store",
+            },
         )
 
     @app.get("/reports/{ticker}/preview/{page}")
@@ -345,7 +352,7 @@ def create_app(
         out_root = (_output_dir() / "pdf_preview").resolve()
         if out_root not in path.parents or not path.is_file():
             raise HTTPException(status_code=404, detail="Preview not found")
-        return FileResponse(path, media_type="image/png")
+        return FileResponse(path, media_type="image/png", headers={"Cache-Control": "no-store"})
 
     @app.post("/reports/{ticker}/generate", response_model=GenerateReportResponse)
     def generate_report(ticker: str) -> GenerateReportResponse:
@@ -444,4 +451,3 @@ def mount_frontend(app: FastAPI, dist_dir: Path) -> None:
 app = create_app(check_schema_on_startup=False)
 if (Path("frontend/dist") / "index.html").is_file():
     mount_frontend(app, Path("frontend/dist"))
-

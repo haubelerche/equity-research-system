@@ -4,8 +4,8 @@
   "plan_id": "03",
   "plan_name": "Financial calculation",
   "ticker": "DHG",
-  "run_id": "phase1-dhg-nondbd-baseline",
-  "generated_at": "2026-06-14T16:28:52.781840+00:00",
+  "run_id": "project-eval-20260615T033550Z",
+  "generated_at": "2026-06-15T03:35:50.606179+00:00",
   "status": "fail",
   "test_execution": {
     "status": "pass",
@@ -22,14 +22,20 @@
       "tests/evaluation/test_client_final_governance.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 0.569,
+    "duration_seconds": 0.534,
     "summary": {
-      "passed": 124
+      "passed": 126
     },
     "output_tail": [
-      "........................................................................ [ 58%]",
-      "....................................................                     [100%]",
-      "124 passed in 0.26s"
+      "........................................................................ [ 57%]",
+      "......................................................                   [100%]",
+      "============================== warnings summary ===============================",
+      "..\\..\\..\\..\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475",
+      "  C:\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475: PytestCacheWarning: could not create cache path C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\.pytest_cache\\v\\cache\\nodeids: [WinError 183] Cannot create a file when that file already exists: 'C:\\\\Users\\\\Admin\\\\Desktop\\\\multi-agent-equity-research\\\\.pytest_cache\\\\v\\\\cache'",
+      "    config.cache.set(\"cache/nodeids\", sorted(self.cached_nodeids))",
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "126 passed, 1 warning in 0.25s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -42,10 +48,19 @@
       "financial_eval.json": [],
       "valuation.json": [
         "storage\\runs\\dhg_verify_stinv\\valuation.json",
+        "storage\\runs\\missing_run_id\\valuation.json",
         "storage\\runs\\run_dbd_eval_20260614T211400\\valuation.json",
+        "storage\\runs\\validation_amv\\valuation.json",
         "storage\\runs\\validation_dbd\\valuation.json",
+        "storage\\runs\\validation_dgw\\valuation.json",
         "storage\\runs\\validation_dhg2\\valuation.json",
-        "storage\\runs\\validation_dhg\\valuation.json"
+        "storage\\runs\\validation_dhg\\valuation.json",
+        "storage\\runs\\validation_dmc\\valuation.json",
+        "storage\\runs\\validation_imp\\valuation.json",
+        "storage\\runs\\validation_jvc\\valuation.json",
+        "storage\\runs\\validation_opc\\valuation.json",
+        "storage\\runs\\validation_tnh\\valuation.json",
+        "storage\\runs\\validation_tra\\valuation.json"
       ],
       "formula_trace.json": []
     },
@@ -56,15 +71,14 @@
     "status": "blocked"
   },
   "blocking_issues": [
-    "accounting_invariant_violations:fcfe,blend_sensitivity,sensitivity_base_cell",
+    "accounting_invariant_violations:fcfe,blend_sensitivity",
     "blend_sensitivity:threshold_not_met",
     "fcfe:threshold_not_met",
-    "sensitivity_base_cell:threshold_not_met",
     "valuation_publishable:low_confidence_primary_method,valuation_method_divergence_critical"
   ],
   "metrics": {
     "test_suite_status": "pass",
-    "tests_passed": 124,
+    "tests_passed": 126,
     "tests_failed": 0,
     "runtime_evidence_coverage": 0.3333333333333333
   },
@@ -72,7 +86,7 @@
     {
       "id": "net_debt",
       "label": "Net debt reconciliation",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "",
       "metric_id": "net_debt",
       "metric_name": "Net debt reconciliation",
@@ -123,12 +137,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "fcff",
       "label": "FCFF formula",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "",
       "metric_id": "fcff",
       "metric_name": "FCFF formula",
@@ -179,12 +193,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "fcfe",
       "label": "FCFE formula",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "",
       "metric_id": "fcfe",
       "metric_name": "FCFE formula",
@@ -210,7 +224,7 @@
       "failed_examples": [
         {
           "reason": "threshold_not_met",
-          "source": "storage\\runs\\validation_dhg2\\valuation.json"
+          "source": "storage\\runs\\validation_dhg\\valuation.json"
         }
       ],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
@@ -240,12 +254,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "target_price",
       "label": "Target price reproduction",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "",
       "metric_id": "target_price",
       "metric_name": "Target price reproduction",
@@ -296,12 +310,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "gordon_growth",
       "label": "Discount rate exceeds terminal growth",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "",
       "metric_id": "gordon_growth",
       "metric_name": "Discount rate exceeds terminal growth",
@@ -352,12 +366,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "sensitivity_varies",
       "label": "FCFF sensitivity matrix varies",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "",
       "metric_id": "sensitivity_varies",
       "metric_name": "FCFF sensitivity matrix varies",
@@ -408,12 +422,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "fcfe_sensitivity",
       "label": "FCFE sensitivity matrix varies",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "",
       "metric_id": "fcfe_sensitivity",
       "metric_name": "FCFE sensitivity matrix varies",
@@ -464,12 +478,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "blend_sensitivity",
       "label": "Blend sensitivity matrix varies",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "",
       "metric_id": "blend_sensitivity",
       "metric_name": "Blend sensitivity matrix varies",
@@ -495,7 +509,7 @@
       "failed_examples": [
         {
           "reason": "threshold_not_met",
-          "source": "storage\\runs\\validation_dhg2\\valuation.json"
+          "source": "storage\\runs\\validation_dhg\\valuation.json"
         }
       ],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
@@ -525,12 +539,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "sensitivity_base_cell",
       "label": "Sensitivity base cell reconciles to target",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "",
       "metric_id": "sensitivity_base_cell",
       "metric_name": "Sensitivity base cell reconciles to target",
@@ -540,12 +554,12 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0,
+      "value": 1,
       "threshold": "pass",
       "threshold_operator": "=",
       "unit": "count",
-      "status": "fail",
-      "legacy_status": "fail",
+      "status": "pass",
+      "legacy_status": "pass",
       "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
@@ -553,12 +567,7 @@
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "valuation",
-      "failed_examples": [
-        {
-          "reason": "threshold_not_met",
-          "source": "storage\\runs\\validation_dhg2\\valuation.json"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "sensitivity_base_cell",
@@ -586,12 +595,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "formula_trace",
       "label": "Formula trace available",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "",
       "metric_id": "formula_trace",
       "metric_name": "Formula trace available",
@@ -642,12 +651,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "valuation_publishable",
       "label": "Valuation publishability policy",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
       "detail": "low_confidence_primary_method,valuation_method_divergence_critical",
       "metric_id": "valuation_publishable",
       "metric_name": "Valuation publishability policy",
@@ -673,7 +682,7 @@
       "failed_examples": [
         {
           "reason": "low_confidence_primary_method,valuation_method_divergence_critical",
-          "source": "storage\\runs\\validation_dhg2\\valuation.json"
+          "source": "storage\\runs\\validation_dhg\\valuation.json"
         }
       ],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
@@ -703,13 +712,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "accounting_invariant_violations",
       "label": "Accounting invariant violations",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
-      "detail": "fcfe,blend_sensitivity,sensitivity_base_cell",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
+      "detail": "fcfe,blend_sensitivity",
       "metric_id": "accounting_invariant_violations",
       "metric_name": "Accounting invariant violations",
       "category": "financial_model",
@@ -718,7 +727,7 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 3,
+      "value": 2,
       "threshold": "= 0",
       "threshold_operator": "=",
       "unit": "count",
@@ -743,12 +752,6 @@
           "severity": "critical",
           "passed": false,
           "detail": "Blend sensitivity matrix varies"
-        },
-        {
-          "id": "sensitivity_base_cell",
-          "severity": "critical",
-          "passed": false,
-          "detail": "Sensitivity base cell reconciles to target"
         }
       ],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
@@ -764,7 +767,7 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "error_count",
-        "numerator": 3,
+        "numerator": 2,
         "denominator": 10,
         "per_sample_results": [
           {
@@ -818,7 +821,7 @@
           {
             "id": "sensitivity_base_cell",
             "severity": "critical",
-            "passed": false,
+            "passed": true,
             "detail": "Sensitivity base cell reconciles to target"
           },
           {
@@ -839,7 +842,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "golden_drift_out_of_tolerance",
@@ -900,10 +903,10 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     }
   ],
-  "valuation_artifact": "storage\\runs\\validation_dhg2\\valuation.json",
+  "valuation_artifact": "storage\\runs\\validation_dhg\\valuation.json",
   "invariants": [
     {
       "id": "net_debt",
@@ -956,7 +959,7 @@
     {
       "id": "sensitivity_base_cell",
       "severity": "critical",
-      "passed": false,
+      "passed": true,
       "detail": "Sensitivity base cell reconciles to target"
     },
     {
@@ -966,14 +969,14 @@
       "detail": "Formula trace available"
     }
   ],
-  "critical_failures": 3,
+  "critical_failures": 2,
   "golden_drift_out_of_tolerance": null,
   "missing_traces": [],
   "decision": "block",
   "valuation_publishability": {
     "ticker": "DHG",
     "run_id": null,
-    "valuation_artifact_path": "storage\\runs\\validation_dhg2\\valuation.json",
+    "valuation_artifact_path": "storage\\runs\\validation_dhg\\valuation.json",
     "computed_methods": [
       "FCFF",
       "BLEND",
@@ -1013,14 +1016,14 @@
       "valuation_method_divergence_critical"
     ],
     "warnings": [],
-    "divergence_pct": 0.9399823890887291,
+    "divergence_pct": 0.9399868336979882,
     "target_price_vnd": null,
     "method_diagnostics": {
       "FCFF": {
         "method_name": "FCFF",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 106752.0,
+        "target_price_vnd": 103294.0,
         "confidence": "low",
         "role": "scenario_only",
         "blocking_reasons": [
@@ -1060,7 +1063,7 @@
         "method_name": "BLEND",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 106752.0,
+        "target_price_vnd": 103294.0,
         "confidence": "low",
         "role": "scenario_only",
         "blocking_reasons": [
@@ -1100,7 +1103,7 @@
         "method_name": "CORE_PE_NET_CASH",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 207097.0,
+        "target_price_vnd": 200389.0,
         "confidence": "medium",
         "role": "cross_check",
         "blocking_reasons": [

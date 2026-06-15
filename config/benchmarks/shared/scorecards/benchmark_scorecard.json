@@ -1,0 +1,119 @@
+{
+  "suite": "vn_pharma_benchmark_suite_20260615",
+  "score": 100,
+  "status": "PASS",
+  "checks": {
+    "01_pandera_data_quality": true,
+    "02_ragas_retrieval_dataset_shape": true,
+    "03_financial_cases": true,
+    "04_deepeval_case_inventory": true,
+    "05_ops_cost_latency": true
+  },
+  "coverage_by_ticker": [
+    {
+      "ticker": "AMV",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "DBD",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "DCL",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "DHG",
+      "rows": 130,
+      "years": 4,
+      "keys": 34,
+      "min_conf": 0.7
+    },
+    {
+      "ticker": "DMC",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "DP1",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "DP3",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "DVN",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "IMP",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "MED",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "OPC",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "PMC",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "TRA",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    },
+    {
+      "ticker": "TW3",
+      "rows": 128,
+      "years": 4,
+      "keys": 32,
+      "min_conf": 0.85
+    }
+  ],
+  "counts": {
+    "facts": 1794,
+    "ragas_samples": 462,
+    "valuation_cases": 14,
+    "agent_cases": 75,
+    "run_traces": 10
+  }
+}

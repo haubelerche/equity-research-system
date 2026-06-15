@@ -1,0 +1,51 @@
+{
+  "suite": "vn_pharma_benchmark_suite_20260615_v3",
+  "created_at": "2026-06-15",
+  "base_suite": "vn_pharma_benchmark_suite_20260615",
+  "tickers": [
+    "DHG",
+    "IMP",
+    "DMC",
+    "TRA",
+    "DP3",
+    "DP1",
+    "TW3",
+    "MED",
+    "PMC",
+    "AMV",
+    "DBD",
+    "OPC",
+    "DVN",
+    "DCL"
+  ],
+  "domains": [
+    "data_quality",
+    "rag",
+    "financial_model",
+    "agent_llm",
+    "operations",
+    "citation",
+    "report_quality",
+    "publication_readiness"
+  ],
+  "metric_count": 69,
+  "files_added_v3": [
+    "shared/metric_registry_v3.yaml",
+    "shared/schemas/metric_result.schema.json",
+    "06_citation_provenance/",
+    "07_report_quality/",
+    "08_publication_readiness/",
+    "docs_reference/"
+  ],
+  "run_scoped_eval_artifacts": [
+    "data_quality_eval.json",
+    "rag_eval.json",
+    "financial_eval.json",
+    "citation_eval.json",
+    "agent_eval.json",
+    "report_quality_eval.json",
+    "observability_eval.json",
+    "publication_readiness_eval.json",
+    "evaluation_packet.json"
+  ]
+}

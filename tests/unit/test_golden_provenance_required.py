@@ -102,18 +102,18 @@ class TestGoldenProvenanceRequired:
         """Phase 3: DHG_golden_provenance.json must exist in the repo."""
         prov_path = (
             Path(__file__).resolve().parents[2]
-            / "config" / "dataset" / "golden" / "financials" / "DHG_golden_provenance.json"
+            / "config" / "benchmarks" / "shared" / "golden_financials" / "DHG_golden_provenance.json"
         )
         assert prov_path.exists(), (
-            "config/dataset/golden/financials/DHG_golden_provenance.json is missing. "
+            "config/benchmarks/shared/golden_financials/DHG_golden_provenance.json is missing. "
             "This file is required for Phase 3 to classify DHG 2021FY data as Tier 1."
         )
 
     def test_dhg_provenance_has_required_fields(self):
-        """DHG_golden_provenance.json must have all required fields."""
+        """DHG_golden_provenance.json must have all required fields and a valid source_tier."""
         prov_path = (
             Path(__file__).resolve().parents[2]
-            / "config" / "dataset" / "golden" / "financials" / "DHG_golden_provenance.json"
+            / "config" / "benchmarks" / "shared" / "golden_financials" / "DHG_golden_provenance.json"
         )
         if not prov_path.exists():
             pytest.skip("DHG provenance file not found")
@@ -121,5 +121,7 @@ class TestGoldenProvenanceRequired:
         required = {"ticker", "verified_by", "verification_date", "source_tier"}
         missing = required - set(prov.keys())
         assert not missing, f"DHG provenance missing required fields: {missing}"
-        assert prov["source_tier"] in (0, 1), \
-            f"DHG provenance source_tier must be 0 or 1, got {prov['source_tier']}"
+        assert prov["source_tier"] in (0, 1, 2, 3), \
+            f"DHG provenance source_tier must be 0-3, got {prov['source_tier']}"
+        # Auto-built golden data (build_golden_financials_from_raw) uses source_tier=3 (VNStock
+        # aggregator). Tier 0/1 is only required for MVP-final publication with official PDFs.

@@ -1,0 +1,20 @@
+generated_at: '2026-06-15'
+suite: vn_pharma_benchmark_suite_20260615
+default_cohort: requested10
+benchmark:
+  id: 02_ragas_retrieval
+  title: RAGAS retrieval and evidence grounding
+primary_tool: ragas
+datasets:
+  golden_queries: golden_queries/*.yaml
+  golden_chunks: golden_chunks/*.jsonl
+  ragas_samples: ragas/ragas_samples.jsonl
+  source_tier_policy: ../shared/source_tier_policy.yaml
+metrics:
+- hit_rate_at_5
+- mrr_at_5
+- context_precision
+- context_recall
+- faithfulness
+- response_relevancy
+- source_tier_hit_rate

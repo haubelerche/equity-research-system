@@ -1,0 +1,2304 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "source": "benchmark_suite",
+  "cohort": "agent_llm_judge_top10",
+  "tickers": [
+    "DHG",
+    "DBD",
+    "IMP",
+    "DMC",
+    "TRA",
+    "OPC",
+    "TNH",
+    "JVC",
+    "DGW",
+    "AMV"
+  ],
+  "generated_at": "2026-06-14T23:27:04.069525+00:00",
+  "plan_id": "05",
+  "name": "Agent workflow and LLM judge",
+  "artifact": "agent_eval.json",
+  "status": "fail",
+  "metrics": {
+    "cohort_tickers": 10,
+    "ticker_status_counts": {
+      "pass": 0,
+      "fail": 1,
+      "blocked": 9,
+      "not_measured": 0
+    }
+  },
+  "metric_results": [
+    {
+      "id": "artifact_manifest_compliance",
+      "label": "Artifact manifest compliance",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=10",
+      "metric_id": "artifact_manifest_compliance",
+      "metric_name": "Artifact manifest compliance",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0.1,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "ticker": "DBD",
+          "metric_id": "artifact_manifest_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "metric_id": "artifact_manifest_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "metric_id": "artifact_manifest_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "TRA",
+          "metric_id": "artifact_manifest_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "OPC",
+          "metric_id": "artifact_manifest_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "TNH",
+          "metric_id": "artifact_manifest_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "JVC",
+          "metric_id": "artifact_manifest_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DGW",
+          "metric_id": "artifact_manifest_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "AMV",
+          "metric_id": "artifact_manifest_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Attach storage paths for facts, index, ratios, valuation, report, and evidence packet artifacts.",
+      "evaluator": {
+        "id": "artifact_manifest_compliance",
+        "framework": "artifact_manifest_gate",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "stored_required_artifacts / required_artifacts",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "pass",
+            "value": 1.0,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "IMP",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DMC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "TRA",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "OPC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "TNH",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "JVC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DGW",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "AMV",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Agent-produced artifacts must have governed storage lineage before export.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T23:27:04.069525+00:00"
+    },
+    {
+      "id": "critic_issue_recall",
+      "label": "Critic issue recall",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=10",
+      "metric_id": "critic_issue_recall",
+      "metric_name": "Critic issue recall",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "reviewer",
+      "failed_examples": [
+        {
+          "ticker": "DHG",
+          "metric_id": "critic_issue_recall",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "seeded failure dataset missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DBD",
+          "metric_id": "critic_issue_recall",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "seeded failure dataset missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "metric_id": "critic_issue_recall",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "seeded failure dataset missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "metric_id": "critic_issue_recall",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "seeded failure dataset missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ]
+        },
+        {
+          "ticker": "TRA",
+          "metric_id": "critic_issue_recall",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "seeded failure dataset missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ]
+        },
+        {
+          "ticker": "OPC",
+          "metric_id": "critic_issue_recall",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "seeded failure dataset missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ]
+        },
+        {
+          "ticker": "TNH",
+          "metric_id": "critic_issue_recall",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "seeded failure dataset missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ]
+        },
+        {
+          "ticker": "JVC",
+          "metric_id": "critic_issue_recall",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "seeded failure dataset missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DGW",
+          "metric_id": "critic_issue_recall",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "seeded failure dataset missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ]
+        },
+        {
+          "ticker": "AMV",
+          "metric_id": "critic_issue_recall",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "seeded failure dataset missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Expand seeded issue fixtures and compare critic recall against expected labels.",
+      "evaluator": {
+        "id": "critic_issue_recall",
+        "framework": "seeded_issue_evaluation",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "detected_seeded_issues / seeded_issues",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_pass_rate",
+        "numerator": 0,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "IMP",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DMC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "TRA",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "OPC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "TNH",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "JVC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DGW",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "AMV",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP diagnostic threshold for critic regression.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T23:27:04.069525+00:00"
+    },
+    {
+      "id": "groundedness",
+      "label": "Groundedness",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=10",
+      "metric_id": "groundedness",
+      "metric_name": "Groundedness",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": ">= 0.85",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "ticker": "DHG",
+          "metric_id": "groundedness",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "DBD",
+          "metric_id": "groundedness",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "metric_id": "groundedness",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "metric_id": "groundedness",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "TRA",
+          "metric_id": "groundedness",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "OPC",
+          "metric_id": "groundedness",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "TNH",
+          "metric_id": "groundedness",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "JVC",
+          "metric_id": "groundedness",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "DGW",
+          "metric_id": "groundedness",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "AMV",
+          "metric_id": "groundedness",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Review agent traces, tool permissions, schema validation, and calibrated judge results.",
+      "evaluator": {
+        "id": "groundedness",
+        "framework": "deepeval",
+        "framework_version": "4.0.6",
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "deepeval_groundedness_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_pass_rate",
+        "numerator": 0,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "IMP",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "DMC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "TRA",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "OPC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "TNH",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "JVC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "DGW",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "AMV",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Provisional diagnostic threshold from BENCHMARK_STANDARDS.md.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T23:27:04.069525+00:00"
+    },
+    {
+      "id": "no_unauthorized_calc",
+      "label": "No unauthorized financial calculation",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=10",
+      "metric_id": "no_unauthorized_calc",
+      "metric_name": "No unauthorized financial calculation",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0.1,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [
+        {
+          "ticker": "DBD",
+          "metric_id": "no_unauthorized_calc",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "agent trace missing",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "agent trace missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "metric_id": "no_unauthorized_calc",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "agent trace missing",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "agent trace missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "metric_id": "no_unauthorized_calc",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "agent trace missing",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "agent trace missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "TRA",
+          "metric_id": "no_unauthorized_calc",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "agent trace missing",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "agent trace missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "OPC",
+          "metric_id": "no_unauthorized_calc",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "agent trace missing",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "agent trace missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "TNH",
+          "metric_id": "no_unauthorized_calc",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "agent trace missing",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "agent trace missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "JVC",
+          "metric_id": "no_unauthorized_calc",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "agent trace missing",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "agent trace missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DGW",
+          "metric_id": "no_unauthorized_calc",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "agent trace missing",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "agent trace missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "AMV",
+          "metric_id": "no_unauthorized_calc",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "agent trace missing",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "agent trace missing",
+              "source": "missing"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Move financial calculations from LLM narrative into deterministic code paths.",
+      "evaluator": {
+        "id": "no_unauthorized_calc",
+        "framework": "deterministic_agent_trace_classifier",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "compliant_financial_calculation_events / checked_financial_calculation_events",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "pass",
+            "value": 1.0,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "agent trace missing"
+          },
+          {
+            "ticker": "IMP",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "agent trace missing"
+          },
+          {
+            "ticker": "DMC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "agent trace missing"
+          },
+          {
+            "ticker": "TRA",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "agent trace missing"
+          },
+          {
+            "ticker": "OPC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "agent trace missing"
+          },
+          {
+            "ticker": "TNH",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "agent trace missing"
+          },
+          {
+            "ticker": "JVC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "agent trace missing"
+          },
+          {
+            "ticker": "DGW",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "agent trace missing"
+          },
+          {
+            "ticker": "AMV",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "agent trace missing"
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Financial calculations belong in deterministic code paths, not free-form LLM reasoning.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T23:27:04.069525+00:00"
+    },
+    {
+      "id": "plan_adherence",
+      "label": "Plan adherence",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=10",
+      "metric_id": "plan_adherence",
+      "metric_name": "Plan adherence",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": ">= 0.80",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "ticker": "DHG",
+          "metric_id": "plan_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "DBD",
+          "metric_id": "plan_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "metric_id": "plan_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "metric_id": "plan_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "TRA",
+          "metric_id": "plan_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "OPC",
+          "metric_id": "plan_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "TNH",
+          "metric_id": "plan_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "JVC",
+          "metric_id": "plan_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "DGW",
+          "metric_id": "plan_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "AMV",
+          "metric_id": "plan_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Review agent traces, tool permissions, schema validation, and calibrated judge results.",
+      "evaluator": {
+        "id": "plan_adherence",
+        "framework": "deepeval",
+        "framework_version": "4.0.6",
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "deepeval_plan_adherence_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_pass_rate",
+        "numerator": 0,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "IMP",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "DMC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "TRA",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "OPC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "TNH",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "JVC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "DGW",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "AMV",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Provisional diagnostic threshold from BENCHMARK_STANDARDS.md.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T23:27:04.069525+00:00"
+    },
+    {
+      "id": "role_adherence",
+      "label": "Role adherence",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=10",
+      "metric_id": "role_adherence",
+      "metric_name": "Role adherence",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": ">= 0.85",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "ticker": "DHG",
+          "metric_id": "role_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "DBD",
+          "metric_id": "role_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "metric_id": "role_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "metric_id": "role_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "TRA",
+          "metric_id": "role_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "OPC",
+          "metric_id": "role_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "TNH",
+          "metric_id": "role_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "JVC",
+          "metric_id": "role_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "DGW",
+          "metric_id": "role_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        },
+        {
+          "ticker": "AMV",
+          "metric_id": "role_adherence",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "deepeval_dataset_missing",
+          "source": "config/eval/deepeval",
+          "failed_examples": [
+            {
+              "reason": "deepeval_dataset_missing",
+              "source": "config/eval/deepeval"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Review agent traces, tool permissions, schema validation, and calibrated judge results.",
+      "evaluator": {
+        "id": "role_adherence",
+        "framework": "deepeval",
+        "framework_version": "4.0.6",
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "deepeval_role_adherence_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_pass_rate",
+        "numerator": 0,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "IMP",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "DMC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "TRA",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "OPC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "TNH",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "JVC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "DGW",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          },
+          {
+            "ticker": "AMV",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": "deepeval_dataset_missing"
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Provisional diagnostic threshold from BENCHMARK_STANDARDS.md.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T23:27:04.069525+00:00"
+    },
+    {
+      "id": "schema_validity",
+      "label": "Output schema validity",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=10",
+      "metric_id": "schema_validity",
+      "metric_name": "Output schema validity",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "ticker": "DHG",
+          "metric_id": "schema_validity",
+          "status": "fail",
+          "value": 0.5,
+          "detail": "additional_property_not_allowed",
+          "source": "config/harness/*.schema.json",
+          "failed_examples": [
+            {
+              "field": "agent_handoffs",
+              "reason": "additional_property_not_allowed",
+              "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\harness\\evidence_packet_schema.json"
+            }
+          ]
+        },
+        {
+          "ticker": "DBD",
+          "metric_id": "schema_validity",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "config/harness/*.schema.json",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "config/harness/*.schema.json"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "metric_id": "schema_validity",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "config/harness/*.schema.json",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "config/harness/*.schema.json"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "metric_id": "schema_validity",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "config/harness/*.schema.json",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "config/harness/*.schema.json"
+            }
+          ]
+        },
+        {
+          "ticker": "TRA",
+          "metric_id": "schema_validity",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "config/harness/*.schema.json",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "config/harness/*.schema.json"
+            }
+          ]
+        },
+        {
+          "ticker": "OPC",
+          "metric_id": "schema_validity",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "config/harness/*.schema.json",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "config/harness/*.schema.json"
+            }
+          ]
+        },
+        {
+          "ticker": "TNH",
+          "metric_id": "schema_validity",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "config/harness/*.schema.json",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "config/harness/*.schema.json"
+            }
+          ]
+        },
+        {
+          "ticker": "JVC",
+          "metric_id": "schema_validity",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "config/harness/*.schema.json",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "config/harness/*.schema.json"
+            }
+          ]
+        },
+        {
+          "ticker": "DGW",
+          "metric_id": "schema_validity",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "config/harness/*.schema.json",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "config/harness/*.schema.json"
+            }
+          ]
+        },
+        {
+          "ticker": "AMV",
+          "metric_id": "schema_validity",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "config/harness/*.schema.json",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "config/harness/*.schema.json"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Validate required agent outputs against JSON schemas before downstream use.",
+      "evaluator": {
+        "id": "schema_validity",
+        "framework": "json_schema_required_contract",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "valid_required_outputs / required_outputs",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_pass_rate",
+        "numerator": 0,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "fail",
+            "value": 0.5,
+            "detail": "additional_property_not_allowed"
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "IMP",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DMC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "TRA",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "OPC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "TNH",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "JVC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DGW",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "AMV",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Required agent outputs must satisfy their JSON schemas.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T23:27:04.069525+00:00"
+    },
+    {
+      "id": "task_completion",
+      "label": "Task completion",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=10",
+      "metric_id": "task_completion",
+      "metric_name": "Task completion",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.1,
+      "threshold": ">= 0.85",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "ticker": "DBD",
+          "metric_id": "task_completion",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "metric_id": "task_completion",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "metric_id": "task_completion",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "TRA",
+          "metric_id": "task_completion",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "OPC",
+          "metric_id": "task_completion",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "TNH",
+          "metric_id": "task_completion",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "JVC",
+          "metric_id": "task_completion",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DGW",
+          "metric_id": "task_completion",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "AMV",
+          "metric_id": "task_completion",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Review incomplete agent trace events and retry policy.",
+      "evaluator": {
+        "id": "task_completion",
+        "framework": "deepeval",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "deepeval_task_completion_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "pass",
+            "value": 1.0,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "IMP",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DMC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "TRA",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "OPC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "TNH",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "JVC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DGW",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "AMV",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Required tasks must be materially completed.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T23:27:04.069525+00:00"
+    },
+    {
+      "id": "tool_permission_compliance",
+      "label": "Tool permission compliance",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=10",
+      "metric_id": "tool_permission_compliance",
+      "metric_name": "Tool permission compliance",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0.1,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "ticker": "DBD",
+          "metric_id": "tool_permission_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "metric_id": "tool_permission_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "metric_id": "tool_permission_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "TRA",
+          "metric_id": "tool_permission_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "OPC",
+          "metric_id": "tool_permission_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "TNH",
+          "metric_id": "tool_permission_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "JVC",
+          "metric_id": "tool_permission_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "DGW",
+          "metric_id": "tool_permission_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        },
+        {
+          "ticker": "AMV",
+          "metric_id": "tool_permission_compliance",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "",
+          "source": "missing",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "missing"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Reject or repair tool calls that lack explicit permission metadata.",
+      "evaluator": {
+        "id": "tool_permission_compliance",
+        "framework": "agent_tool_permission_gate",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "permitted_tool_calls / total_tool_calls",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "pass",
+            "value": 1.0,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "IMP",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DMC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "TRA",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "OPC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "TNH",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "JVC",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DGW",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "AMV",
+            "status": "not_evaluable",
+            "value": null,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Tool calls must comply with governed permissions.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-14T23:27:04.069525+00:00"
+    }
+  ],
+  "blocking_issues": [
+    "schema_validity:additional_property_not_allowed"
+  ]
+}

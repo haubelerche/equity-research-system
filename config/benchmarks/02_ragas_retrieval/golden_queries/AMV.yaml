@@ -1,0 +1,434 @@
+version: rag_golden_20260615_v2
+ticker: AMV
+schema: chunk_id_ground_truth_v2
+queries:
+- id: amv_revenue_2022
+  query: AMV doanh thu thuần năm 2022 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - AMV_2022_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 284.844513
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_gross_profit_2022
+  query: AMV lợi nhuận gộp năm 2022 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - AMV_2022_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 83.390387
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: amv_net_income_2022
+  query: AMV lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2022 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - AMV_2022_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: 56.413003
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_total_assets_2022
+  query: AMV tổng tài sản cuối kỳ năm 2022 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - AMV_2022_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 2001.913072
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_equity_2022
+  query: AMV vốn chủ sở hữu năm 2022 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - AMV_2022_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 1676.780087
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_operating_cash_flow_2022
+  query: AMV lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2022 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - AMV_2022_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: -353.379528
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_capex_2022
+  query: AMV CAPEX / chi mua sắm tài sản cố định năm 2022 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - AMV_2022_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -3.855739
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_shares_2022
+  query: AMV số cổ phiếu lưu hành năm 2022 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - AMV_2022_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 117527090.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: amv_revenue_2023
+  query: AMV doanh thu thuần năm 2023 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - AMV_2023_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 196.570129
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_gross_profit_2023
+  query: AMV lợi nhuận gộp năm 2023 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - AMV_2023_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 49.592254
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: amv_net_income_2023
+  query: AMV lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2023 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - AMV_2023_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: 13.850571
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_total_assets_2023
+  query: AMV tổng tài sản cuối kỳ năm 2023 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - AMV_2023_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 1972.918305
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_equity_2023
+  query: AMV vốn chủ sở hữu năm 2023 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - AMV_2023_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 1690.082836
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_operating_cash_flow_2023
+  query: AMV lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2023 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - AMV_2023_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: -137.858312
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_capex_2023
+  query: AMV CAPEX / chi mua sắm tài sản cố định năm 2023 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - AMV_2023_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -6.934009
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_shares_2023
+  query: AMV số cổ phiếu lưu hành năm 2023 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - AMV_2023_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 131910200.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: amv_revenue_2024
+  query: AMV doanh thu thuần năm 2024 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - AMV_2024_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 310.354604
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_gross_profit_2024
+  query: AMV lợi nhuận gộp năm 2024 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - AMV_2024_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 31.26142
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: amv_net_income_2024
+  query: AMV lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2024 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - AMV_2024_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: -13.065198
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_total_assets_2024
+  query: AMV tổng tài sản cuối kỳ năm 2024 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - AMV_2024_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 1955.640635
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_equity_2024
+  query: AMV vốn chủ sở hữu năm 2024 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - AMV_2024_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 1672.70981
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_operating_cash_flow_2024
+  query: AMV lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2024 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - AMV_2024_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: 674.904921
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_capex_2024
+  query: AMV CAPEX / chi mua sắm tài sản cố định năm 2024 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - AMV_2024_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -46.375271
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_shares_2024
+  query: AMV số cổ phiếu lưu hành năm 2024 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - AMV_2024_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 153708212.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: amv_revenue_2025
+  query: AMV doanh thu thuần năm 2025 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - AMV_2025_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 154.066565
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_gross_profit_2025
+  query: AMV lợi nhuận gộp năm 2025 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - AMV_2025_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 21.696033
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: amv_net_income_2025
+  query: AMV lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2025 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - AMV_2025_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: -54.503719
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_total_assets_2025
+  query: AMV tổng tài sản cuối kỳ năm 2025 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - AMV_2025_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 1905.760204
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_equity_2025
+  query: AMV vốn chủ sở hữu năm 2025 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - AMV_2025_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 1619.38079
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_operating_cash_flow_2025
+  query: AMV lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2025 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - AMV_2025_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: 258.793177
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_capex_2025
+  query: AMV CAPEX / chi mua sắm tài sản cố định năm 2025 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - AMV_2025_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -12.166895
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: amv_shares_2025
+  query: AMV số cổ phiếu lưu hành năm 2025 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - AMV_2025_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 134577084.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: amv_guidance_2026_unanswerable
+  query: AMV kế hoạch lợi nhuận trước thuế năm 2026 là bao nhiêu?
+  ticker: AMV
+  fiscal_year: 2026
+  expected_chunk_ids: []
+  expected_answer_policy: insufficient_evidence_or_not_ingested
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true

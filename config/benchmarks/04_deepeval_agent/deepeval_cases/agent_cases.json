@@ -1,0 +1,4252 @@
+[
+  {
+    "id": "DHG_financial_analysis_case_20260615",
+    "ticker": "DHG",
+    "agent_role": "FinancialAnalysisAgent",
+    "input": {
+      "user_task": "Analyze profitability, liquidity, leverage and efficiency using snapshot/ratio artifacts only.",
+      "ticker": "DHG",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DHG_2025_income_statement_official_chunk_001",
+        "DHG_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not recompute or invent numbers",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DHG_forecast_valuation_case_20260615",
+    "ticker": "DHG",
+    "agent_role": "ForecastValuationAgent",
+    "input": {
+      "user_task": "Explain deterministic forecast/valuation assumptions from valuation artifact.",
+      "ticker": "DHG",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DHG_2025_income_statement_official_chunk_001",
+        "DHG_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not create target price outside artifact",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DHG_thesis_report_case_20260615",
+    "ticker": "DHG",
+    "agent_role": "ThesisReportAgent",
+    "input": {
+      "user_task": "Draft report sections with claim ledger and citations.",
+      "ticker": "DHG",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DHG_2025_income_statement_official_chunk_001",
+        "DHG_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must cite every material numeric claim",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DHG_senior_critic_case_20260615",
+    "ticker": "DHG",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "user_task": "Identify issues in report/valuation/citations and classify blockers.",
+      "ticker": "DHG",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DHG_2025_income_statement_official_chunk_001",
+        "DHG_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not override deterministic gates",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DHG_data_evidence_case_20260615",
+    "ticker": "DHG",
+    "agent_role": "DataEvidence role",
+    "input": {
+      "user_task": "Own data tools and evidence artifacts, not an autonomous LLM analyst.",
+      "ticker": "DHG",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DHG_2025_income_statement_official_chunk_001",
+        "DHG_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not generate narrative claims",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "IMP_financial_analysis_case_20260615",
+    "ticker": "IMP",
+    "agent_role": "FinancialAnalysisAgent",
+    "input": {
+      "user_task": "Analyze profitability, liquidity, leverage and efficiency using snapshot/ratio artifacts only.",
+      "ticker": "IMP",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "IMP_2025_income_statement_official_chunk_001",
+        "IMP_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not recompute or invent numbers",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "IMP_forecast_valuation_case_20260615",
+    "ticker": "IMP",
+    "agent_role": "ForecastValuationAgent",
+    "input": {
+      "user_task": "Explain deterministic forecast/valuation assumptions from valuation artifact.",
+      "ticker": "IMP",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "IMP_2025_income_statement_official_chunk_001",
+        "IMP_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not create target price outside artifact",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "IMP_thesis_report_case_20260615",
+    "ticker": "IMP",
+    "agent_role": "ThesisReportAgent",
+    "input": {
+      "user_task": "Draft report sections with claim ledger and citations.",
+      "ticker": "IMP",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "IMP_2025_income_statement_official_chunk_001",
+        "IMP_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must cite every material numeric claim",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "IMP_senior_critic_case_20260615",
+    "ticker": "IMP",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "user_task": "Identify issues in report/valuation/citations and classify blockers.",
+      "ticker": "IMP",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "IMP_2025_income_statement_official_chunk_001",
+        "IMP_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not override deterministic gates",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "IMP_data_evidence_case_20260615",
+    "ticker": "IMP",
+    "agent_role": "DataEvidence role",
+    "input": {
+      "user_task": "Own data tools and evidence artifacts, not an autonomous LLM analyst.",
+      "ticker": "IMP",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "IMP_2025_income_statement_official_chunk_001",
+        "IMP_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not generate narrative claims",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DMC_financial_analysis_case_20260615",
+    "ticker": "DMC",
+    "agent_role": "FinancialAnalysisAgent",
+    "input": {
+      "user_task": "Analyze profitability, liquidity, leverage and efficiency using snapshot/ratio artifacts only.",
+      "ticker": "DMC",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DMC_2025_income_statement_official_chunk_001",
+        "DMC_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not recompute or invent numbers",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DMC_forecast_valuation_case_20260615",
+    "ticker": "DMC",
+    "agent_role": "ForecastValuationAgent",
+    "input": {
+      "user_task": "Explain deterministic forecast/valuation assumptions from valuation artifact.",
+      "ticker": "DMC",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DMC_2025_income_statement_official_chunk_001",
+        "DMC_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not create target price outside artifact",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DMC_thesis_report_case_20260615",
+    "ticker": "DMC",
+    "agent_role": "ThesisReportAgent",
+    "input": {
+      "user_task": "Draft report sections with claim ledger and citations.",
+      "ticker": "DMC",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DMC_2025_income_statement_official_chunk_001",
+        "DMC_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must cite every material numeric claim",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DMC_senior_critic_case_20260615",
+    "ticker": "DMC",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "user_task": "Identify issues in report/valuation/citations and classify blockers.",
+      "ticker": "DMC",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DMC_2025_income_statement_official_chunk_001",
+        "DMC_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not override deterministic gates",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DMC_data_evidence_case_20260615",
+    "ticker": "DMC",
+    "agent_role": "DataEvidence role",
+    "input": {
+      "user_task": "Own data tools and evidence artifacts, not an autonomous LLM analyst.",
+      "ticker": "DMC",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DMC_2025_income_statement_official_chunk_001",
+        "DMC_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not generate narrative claims",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "TRA_financial_analysis_case_20260615",
+    "ticker": "TRA",
+    "agent_role": "FinancialAnalysisAgent",
+    "input": {
+      "user_task": "Analyze profitability, liquidity, leverage and efficiency using snapshot/ratio artifacts only.",
+      "ticker": "TRA",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "TRA_2025_income_statement_official_chunk_001",
+        "TRA_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not recompute or invent numbers",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "TRA_forecast_valuation_case_20260615",
+    "ticker": "TRA",
+    "agent_role": "ForecastValuationAgent",
+    "input": {
+      "user_task": "Explain deterministic forecast/valuation assumptions from valuation artifact.",
+      "ticker": "TRA",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "TRA_2025_income_statement_official_chunk_001",
+        "TRA_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not create target price outside artifact",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "TRA_thesis_report_case_20260615",
+    "ticker": "TRA",
+    "agent_role": "ThesisReportAgent",
+    "input": {
+      "user_task": "Draft report sections with claim ledger and citations.",
+      "ticker": "TRA",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "TRA_2025_income_statement_official_chunk_001",
+        "TRA_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must cite every material numeric claim",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "TRA_senior_critic_case_20260615",
+    "ticker": "TRA",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "user_task": "Identify issues in report/valuation/citations and classify blockers.",
+      "ticker": "TRA",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "TRA_2025_income_statement_official_chunk_001",
+        "TRA_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not override deterministic gates",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "TRA_data_evidence_case_20260615",
+    "ticker": "TRA",
+    "agent_role": "DataEvidence role",
+    "input": {
+      "user_task": "Own data tools and evidence artifacts, not an autonomous LLM analyst.",
+      "ticker": "TRA",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "TRA_2025_income_statement_official_chunk_001",
+        "TRA_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not generate narrative claims",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DP3_financial_analysis_case_20260615",
+    "ticker": "DP3",
+    "agent_role": "FinancialAnalysisAgent",
+    "input": {
+      "user_task": "Analyze profitability, liquidity, leverage and efficiency using snapshot/ratio artifacts only.",
+      "ticker": "DP3",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DP3_2025_income_statement_official_chunk_001",
+        "DP3_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not recompute or invent numbers",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DP3_forecast_valuation_case_20260615",
+    "ticker": "DP3",
+    "agent_role": "ForecastValuationAgent",
+    "input": {
+      "user_task": "Explain deterministic forecast/valuation assumptions from valuation artifact.",
+      "ticker": "DP3",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DP3_2025_income_statement_official_chunk_001",
+        "DP3_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not create target price outside artifact",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DP3_thesis_report_case_20260615",
+    "ticker": "DP3",
+    "agent_role": "ThesisReportAgent",
+    "input": {
+      "user_task": "Draft report sections with claim ledger and citations.",
+      "ticker": "DP3",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DP3_2025_income_statement_official_chunk_001",
+        "DP3_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must cite every material numeric claim",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DP3_senior_critic_case_20260615",
+    "ticker": "DP3",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "user_task": "Identify issues in report/valuation/citations and classify blockers.",
+      "ticker": "DP3",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DP3_2025_income_statement_official_chunk_001",
+        "DP3_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not override deterministic gates",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DP3_data_evidence_case_20260615",
+    "ticker": "DP3",
+    "agent_role": "DataEvidence role",
+    "input": {
+      "user_task": "Own data tools and evidence artifacts, not an autonomous LLM analyst.",
+      "ticker": "DP3",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DP3_2025_income_statement_official_chunk_001",
+        "DP3_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not generate narrative claims",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DP1_financial_analysis_case_20260615",
+    "ticker": "DP1",
+    "agent_role": "FinancialAnalysisAgent",
+    "input": {
+      "user_task": "Analyze profitability, liquidity, leverage and efficiency using snapshot/ratio artifacts only.",
+      "ticker": "DP1",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DP1_2025_income_statement_official_chunk_001",
+        "DP1_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not recompute or invent numbers",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DP1_forecast_valuation_case_20260615",
+    "ticker": "DP1",
+    "agent_role": "ForecastValuationAgent",
+    "input": {
+      "user_task": "Explain deterministic forecast/valuation assumptions from valuation artifact.",
+      "ticker": "DP1",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DP1_2025_income_statement_official_chunk_001",
+        "DP1_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not create target price outside artifact",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DP1_thesis_report_case_20260615",
+    "ticker": "DP1",
+    "agent_role": "ThesisReportAgent",
+    "input": {
+      "user_task": "Draft report sections with claim ledger and citations.",
+      "ticker": "DP1",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DP1_2025_income_statement_official_chunk_001",
+        "DP1_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must cite every material numeric claim",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DP1_senior_critic_case_20260615",
+    "ticker": "DP1",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "user_task": "Identify issues in report/valuation/citations and classify blockers.",
+      "ticker": "DP1",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DP1_2025_income_statement_official_chunk_001",
+        "DP1_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not override deterministic gates",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DP1_data_evidence_case_20260615",
+    "ticker": "DP1",
+    "agent_role": "DataEvidence role",
+    "input": {
+      "user_task": "Own data tools and evidence artifacts, not an autonomous LLM analyst.",
+      "ticker": "DP1",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "DP1_2025_income_statement_official_chunk_001",
+        "DP1_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not generate narrative claims",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "TW3_financial_analysis_case_20260615",
+    "ticker": "TW3",
+    "agent_role": "FinancialAnalysisAgent",
+    "input": {
+      "user_task": "Analyze profitability, liquidity, leverage and efficiency using snapshot/ratio artifacts only.",
+      "ticker": "TW3",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "TW3_2025_income_statement_official_chunk_001",
+        "TW3_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not recompute or invent numbers",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "TW3_forecast_valuation_case_20260615",
+    "ticker": "TW3",
+    "agent_role": "ForecastValuationAgent",
+    "input": {
+      "user_task": "Explain deterministic forecast/valuation assumptions from valuation artifact.",
+      "ticker": "TW3",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "TW3_2025_income_statement_official_chunk_001",
+        "TW3_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not create target price outside artifact",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "TW3_thesis_report_case_20260615",
+    "ticker": "TW3",
+    "agent_role": "ThesisReportAgent",
+    "input": {
+      "user_task": "Draft report sections with claim ledger and citations.",
+      "ticker": "TW3",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "TW3_2025_income_statement_official_chunk_001",
+        "TW3_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must cite every material numeric claim",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "TW3_senior_critic_case_20260615",
+    "ticker": "TW3",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "user_task": "Identify issues in report/valuation/citations and classify blockers.",
+      "ticker": "TW3",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "TW3_2025_income_statement_official_chunk_001",
+        "TW3_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not override deterministic gates",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "TW3_data_evidence_case_20260615",
+    "ticker": "TW3",
+    "agent_role": "DataEvidence role",
+    "input": {
+      "user_task": "Own data tools and evidence artifacts, not an autonomous LLM analyst.",
+      "ticker": "TW3",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "TW3_2025_income_statement_official_chunk_001",
+        "TW3_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not generate narrative claims",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "MED_financial_analysis_case_20260615",
+    "ticker": "MED",
+    "agent_role": "FinancialAnalysisAgent",
+    "input": {
+      "user_task": "Analyze profitability, liquidity, leverage and efficiency using snapshot/ratio artifacts only.",
+      "ticker": "MED",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "MED_2025_income_statement_official_chunk_001",
+        "MED_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not recompute or invent numbers",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "MED_forecast_valuation_case_20260615",
+    "ticker": "MED",
+    "agent_role": "ForecastValuationAgent",
+    "input": {
+      "user_task": "Explain deterministic forecast/valuation assumptions from valuation artifact.",
+      "ticker": "MED",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "MED_2025_income_statement_official_chunk_001",
+        "MED_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not create target price outside artifact",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "MED_thesis_report_case_20260615",
+    "ticker": "MED",
+    "agent_role": "ThesisReportAgent",
+    "input": {
+      "user_task": "Draft report sections with claim ledger and citations.",
+      "ticker": "MED",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "MED_2025_income_statement_official_chunk_001",
+        "MED_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must cite every material numeric claim",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "MED_senior_critic_case_20260615",
+    "ticker": "MED",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "user_task": "Identify issues in report/valuation/citations and classify blockers.",
+      "ticker": "MED",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "MED_2025_income_statement_official_chunk_001",
+        "MED_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not override deterministic gates",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "MED_data_evidence_case_20260615",
+    "ticker": "MED",
+    "agent_role": "DataEvidence role",
+    "input": {
+      "user_task": "Own data tools and evidence artifacts, not an autonomous LLM analyst.",
+      "ticker": "MED",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "MED_2025_income_statement_official_chunk_001",
+        "MED_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not generate narrative claims",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "PMC_financial_analysis_case_20260615",
+    "ticker": "PMC",
+    "agent_role": "FinancialAnalysisAgent",
+    "input": {
+      "user_task": "Analyze profitability, liquidity, leverage and efficiency using snapshot/ratio artifacts only.",
+      "ticker": "PMC",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "PMC_2025_income_statement_official_chunk_001",
+        "PMC_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not recompute or invent numbers",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "PMC_forecast_valuation_case_20260615",
+    "ticker": "PMC",
+    "agent_role": "ForecastValuationAgent",
+    "input": {
+      "user_task": "Explain deterministic forecast/valuation assumptions from valuation artifact.",
+      "ticker": "PMC",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "PMC_2025_income_statement_official_chunk_001",
+        "PMC_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not create target price outside artifact",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "PMC_thesis_report_case_20260615",
+    "ticker": "PMC",
+    "agent_role": "ThesisReportAgent",
+    "input": {
+      "user_task": "Draft report sections with claim ledger and citations.",
+      "ticker": "PMC",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "PMC_2025_income_statement_official_chunk_001",
+        "PMC_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must cite every material numeric claim",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "PMC_senior_critic_case_20260615",
+    "ticker": "PMC",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "user_task": "Identify issues in report/valuation/citations and classify blockers.",
+      "ticker": "PMC",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "PMC_2025_income_statement_official_chunk_001",
+        "PMC_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not override deterministic gates",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "PMC_data_evidence_case_20260615",
+    "ticker": "PMC",
+    "agent_role": "DataEvidence role",
+    "input": {
+      "user_task": "Own data tools and evidence artifacts, not an autonomous LLM analyst.",
+      "ticker": "PMC",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "PMC_2025_income_statement_official_chunk_001",
+        "PMC_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not generate narrative claims",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "AMV_financial_analysis_case_20260615",
+    "ticker": "AMV",
+    "agent_role": "FinancialAnalysisAgent",
+    "input": {
+      "user_task": "Analyze profitability, liquidity, leverage and efficiency using snapshot/ratio artifacts only.",
+      "ticker": "AMV",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "AMV_2025_income_statement_official_chunk_001",
+        "AMV_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not recompute or invent numbers",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "AMV_forecast_valuation_case_20260615",
+    "ticker": "AMV",
+    "agent_role": "ForecastValuationAgent",
+    "input": {
+      "user_task": "Explain deterministic forecast/valuation assumptions from valuation artifact.",
+      "ticker": "AMV",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "AMV_2025_income_statement_official_chunk_001",
+        "AMV_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not create target price outside artifact",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "AMV_thesis_report_case_20260615",
+    "ticker": "AMV",
+    "agent_role": "ThesisReportAgent",
+    "input": {
+      "user_task": "Draft report sections with claim ledger and citations.",
+      "ticker": "AMV",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "AMV_2025_income_statement_official_chunk_001",
+        "AMV_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must cite every material numeric claim",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "AMV_senior_critic_case_20260615",
+    "ticker": "AMV",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "user_task": "Identify issues in report/valuation/citations and classify blockers.",
+      "ticker": "AMV",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "AMV_2025_income_statement_official_chunk_001",
+        "AMV_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not override deterministic gates",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "AMV_data_evidence_case_20260615",
+    "ticker": "AMV",
+    "agent_role": "DataEvidence role",
+    "input": {
+      "user_task": "Own data tools and evidence artifacts, not an autonomous LLM analyst.",
+      "ticker": "AMV",
+      "allowed_artifacts": [
+        "snapshot",
+        "ratio_artifact",
+        "valuation_artifact",
+        "evidence_packet",
+        "claim_ledger"
+      ],
+      "evidence_ids": [
+        "AMV_2025_income_statement_official_chunk_001",
+        "AMV_2025_balance_sheet_official_chunk_001"
+      ],
+      "seeded_issue": null
+    },
+    "expected_behavior": {
+      "must_do": [
+        "use provided artifacts",
+        "name data gaps explicitly",
+        "return structured JSON-compatible output"
+      ],
+      "must_not_do": [
+        "must not generate narrative claims",
+        "invent missing fiscal data",
+        "cite generic sources",
+        "use non-whitelisted tools"
+      ],
+      "minimum_fields": [
+        "ticker",
+        "role",
+        "summary",
+        "evidence_refs",
+        "limitations",
+        "confidence"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "role_adherence",
+        "threshold": 0.85
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      },
+      {
+        "name": "task_completion",
+        "threshold": 0.85
+      },
+      {
+        "name": "plan_adherence",
+        "threshold": 0.8
+      }
+    ],
+    "rubric": {
+      "role_adherence": "Output stays within role boundary and allowed tools.",
+      "groundedness": "Material claims trace to evidence_refs or locked artifacts.",
+      "task_completion": "All required sections/fields are present.",
+      "plan_adherence": "Follows fixed workflow stage and does not jump ahead."
+    }
+  },
+  {
+    "id": "DHG_senior_critic_seeded_unsupported_numeric_claim",
+    "ticker": "DHG",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report says revenue grew 40% without citation.",
+      "seeded_issue": "unsupported_numeric_claim",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "missing_source_trace_for_material_claim"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "IMP_senior_critic_seeded_unsupported_numeric_claim",
+    "ticker": "IMP",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report says revenue grew 40% without citation.",
+      "seeded_issue": "unsupported_numeric_claim",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "missing_source_trace_for_material_claim"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "DMC_senior_critic_seeded_unsupported_numeric_claim",
+    "ticker": "DMC",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report says revenue grew 40% without citation.",
+      "seeded_issue": "unsupported_numeric_claim",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "missing_source_trace_for_material_claim"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "TRA_senior_critic_seeded_unsupported_numeric_claim",
+    "ticker": "TRA",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report says revenue grew 40% without citation.",
+      "seeded_issue": "unsupported_numeric_claim",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "missing_source_trace_for_material_claim"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "AMV_senior_critic_seeded_unsupported_numeric_claim",
+    "ticker": "AMV",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report says revenue grew 40% without citation.",
+      "seeded_issue": "unsupported_numeric_claim",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "missing_source_trace_for_material_claim"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "DHG_senior_critic_seeded_wrong_ticker_evidence",
+    "ticker": "DHG",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "TRA claim cites DHG revenue chunk.",
+      "seeded_issue": "wrong_ticker_evidence",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "ticker_mismatch"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "IMP_senior_critic_seeded_wrong_ticker_evidence",
+    "ticker": "IMP",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "TRA claim cites DHG revenue chunk.",
+      "seeded_issue": "wrong_ticker_evidence",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "ticker_mismatch"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "DMC_senior_critic_seeded_wrong_ticker_evidence",
+    "ticker": "DMC",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "TRA claim cites DHG revenue chunk.",
+      "seeded_issue": "wrong_ticker_evidence",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "ticker_mismatch"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "TRA_senior_critic_seeded_wrong_ticker_evidence",
+    "ticker": "TRA",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "TRA claim cites DHG revenue chunk.",
+      "seeded_issue": "wrong_ticker_evidence",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "ticker_mismatch"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "AMV_senior_critic_seeded_wrong_ticker_evidence",
+    "ticker": "AMV",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "TRA claim cites DHG revenue chunk.",
+      "seeded_issue": "wrong_ticker_evidence",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "ticker_mismatch"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "DHG_senior_critic_seeded_llm_generated_target_price",
+    "ticker": "DHG",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report includes target price not equal to valuation artifact.",
+      "seeded_issue": "llm_generated_target_price",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "target_price_bridge_error"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "IMP_senior_critic_seeded_llm_generated_target_price",
+    "ticker": "IMP",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report includes target price not equal to valuation artifact.",
+      "seeded_issue": "llm_generated_target_price",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "target_price_bridge_error"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "DMC_senior_critic_seeded_llm_generated_target_price",
+    "ticker": "DMC",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report includes target price not equal to valuation artifact.",
+      "seeded_issue": "llm_generated_target_price",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "target_price_bridge_error"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "TRA_senior_critic_seeded_llm_generated_target_price",
+    "ticker": "TRA",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report includes target price not equal to valuation artifact.",
+      "seeded_issue": "llm_generated_target_price",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "target_price_bridge_error"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "AMV_senior_critic_seeded_llm_generated_target_price",
+    "ticker": "AMV",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report includes target price not equal to valuation artifact.",
+      "seeded_issue": "llm_generated_target_price",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "target_price_bridge_error"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "DHG_senior_critic_seeded_tier3_only_claim",
+    "ticker": "DHG",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Material claim relies only on weak news source.",
+      "seeded_issue": "tier3_only_claim",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "tier3_only_material_fact"
+      ],
+      "severity": "major",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "IMP_senior_critic_seeded_tier3_only_claim",
+    "ticker": "IMP",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Material claim relies only on weak news source.",
+      "seeded_issue": "tier3_only_claim",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "tier3_only_material_fact"
+      ],
+      "severity": "major",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "DMC_senior_critic_seeded_tier3_only_claim",
+    "ticker": "DMC",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Material claim relies only on weak news source.",
+      "seeded_issue": "tier3_only_claim",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "tier3_only_material_fact"
+      ],
+      "severity": "major",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "TRA_senior_critic_seeded_tier3_only_claim",
+    "ticker": "TRA",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Material claim relies only on weak news source.",
+      "seeded_issue": "tier3_only_claim",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "tier3_only_material_fact"
+      ],
+      "severity": "major",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "AMV_senior_critic_seeded_tier3_only_claim",
+    "ticker": "AMV",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Material claim relies only on weak news source.",
+      "seeded_issue": "tier3_only_claim",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "tier3_only_material_fact"
+      ],
+      "severity": "major",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "DHG_senior_critic_seeded_snapshot_mismatch",
+    "ticker": "DHG",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report snapshot_id differs from valuation snapshot_id.",
+      "seeded_issue": "snapshot_mismatch",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "report_not_linked_to_valuation_snapshot"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "IMP_senior_critic_seeded_snapshot_mismatch",
+    "ticker": "IMP",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report snapshot_id differs from valuation snapshot_id.",
+      "seeded_issue": "snapshot_mismatch",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "report_not_linked_to_valuation_snapshot"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "DMC_senior_critic_seeded_snapshot_mismatch",
+    "ticker": "DMC",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report snapshot_id differs from valuation snapshot_id.",
+      "seeded_issue": "snapshot_mismatch",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "report_not_linked_to_valuation_snapshot"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "TRA_senior_critic_seeded_snapshot_mismatch",
+    "ticker": "TRA",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report snapshot_id differs from valuation snapshot_id.",
+      "seeded_issue": "snapshot_mismatch",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "report_not_linked_to_valuation_snapshot"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  },
+  {
+    "id": "AMV_senior_critic_seeded_snapshot_mismatch",
+    "ticker": "AMV",
+    "agent_role": "SeniorCriticAgent",
+    "input": {
+      "draft_excerpt": "Report snapshot_id differs from valuation snapshot_id.",
+      "seeded_issue": "snapshot_mismatch",
+      "allowed_artifacts": [
+        "report_draft",
+        "claim_ledger",
+        "valuation_artifact",
+        "evidence_packet"
+      ]
+    },
+    "expected_behavior": {
+      "must_detect": [
+        "report_not_linked_to_valuation_snapshot"
+      ],
+      "severity": "critical",
+      "must_not_do": [
+        "approve export",
+        "rewrite valuation number"
+      ]
+    },
+    "deepeval_metrics": [
+      {
+        "name": "critic_issue_recall",
+        "threshold": 0.9
+      },
+      {
+        "name": "groundedness",
+        "threshold": 0.85
+      }
+    ],
+    "rubric": {
+      "critic_issue_recall": "Detects the seeded issue and maps it to the correct gate/blocking reason."
+    }
+  }
+]

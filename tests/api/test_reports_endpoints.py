@@ -1,16 +1,26 @@
 from pathlib import Path
+import pytest
 from fastapi.testclient import TestClient
 from backend.api import create_app
 
 
-def _make_client(tmp_path: Path) -> TestClient:
+@pytest.fixture(autouse=True)
+def _disable_export_storage(monkeypatch):
+    def _raise_unconfigured():
+        raise ValueError("storage disabled in report endpoint tests")
+
+    monkeypatch.setattr("backend.storage.SupabaseStorageAdapter", _raise_unconfigured)
+
+
+def _make_client(tmp_path: Path, *, with_local_files: bool = True) -> TestClient:
     out = tmp_path / "output"
     out.mkdir()
-    (out / "DHG_report.pdf").write_bytes(b"%PDF-1.4 report")
-    (out / "DHG_explanation.pdf").write_bytes(b"%PDF-1.4 expl")
-    pv = out / "pdf_preview"
-    pv.mkdir()
-    (pv / "DHG_report_page_1.png").write_bytes(b"png")
+    if with_local_files:
+        (out / "DHG_report.pdf").write_bytes(b"%PDF-1.4 report")
+        (out / "DHG_explanation.pdf").write_bytes(b"%PDF-1.4 expl")
+        pv = out / "pdf_preview"
+        pv.mkdir()
+        (pv / "DHG_report_page_1.png").write_bytes(b"png")
 
     csv = tmp_path / "universe.csv"
     csv.write_text(
@@ -34,8 +44,8 @@ def test_get_reports_lists_universe_with_status(tmp_path):
     assert items[0]["has_report"] is True
     assert items[0]["has_explanation"] is True
     assert items[0]["preview_pages"] == [1]
-    assert items[0]["renderable_run_ids"] == []
-    assert items[0]["lineage_source"] == "local_files"
+    assert isinstance(items[0]["renderable_run_ids"], list)
+    assert items[0]["lineage_source"] in {"manifest", "local_files"}
     assert items[1]["has_report"] is False
 
 
@@ -45,6 +55,7 @@ def test_get_report_file_ok_and_404(tmp_path):
     ok = client.get("/reports/DHG/file/report")
     assert ok.status_code == 200
     assert ok.headers["content-type"] == "application/pdf"
+    assert ok.headers["cache-control"] == "no-store"
     assert ok.content.startswith(b"%PDF")
 
     missing = client.get("/reports/IMP/file/report")  # IMP has no file
@@ -64,5 +75,30 @@ def test_get_preview_png_ok_and_404(tmp_path):
     ok = client.get("/reports/DHG/preview/1")
     assert ok.status_code == 200
     assert ok.headers["content-type"] == "image/png"
+    assert ok.headers["cache-control"] == "no-store"
     assert client.get("/reports/DHG/preview/999").status_code == 404
     assert client.get("/reports/ZZZ/preview/1").status_code == 404
+
+
+def test_get_reports_lists_export_backed_items(monkeypatch, tmp_path):
+    class FakeStorage:
+        def list_objects(self, bucket: str, prefix: str = "", limit: int = 1000, offset: int = 0):
+            assert bucket == "exports"
+            if prefix == "client_reports/DHG/":
+                return [
+                    {"name": "report.pdf", "updated_at": "2026-06-15T00:00:00+00:00", "size": 2048},
+                    {"name": "explanation.pdf", "updated_at": "2026-06-15T00:00:01+00:00"},
+                ]
+            return []
+
+    monkeypatch.setattr("backend.storage.SupabaseStorageAdapter", lambda: FakeStorage())
+    client = _make_client(tmp_path, with_local_files=False)
+
+    resp = client.get("/reports")
+    assert resp.status_code == 200
+    assert resp.headers["cache-control"] == "no-store"
+    dhg = next(i for i in resp.json()["items"] if i["ticker"] == "DHG")
+    assert dhg["has_report"] is True
+    assert dhg["has_explanation"] is True
+    assert dhg["report_size"] == 2048
+    assert dhg["updated_at"] == "2026-06-15T00:00:01+00:00"

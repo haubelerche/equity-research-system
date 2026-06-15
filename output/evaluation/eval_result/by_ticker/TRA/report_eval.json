@@ -1,0 +1,408 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "plan_id": "06",
+  "plan_name": "Report quality",
+  "ticker": "TRA",
+  "run_id": "benchmark-01-cohort-20260615",
+  "generated_at": "2026-06-15T04:11:55.975264+00:00",
+  "status": "fail",
+  "test_execution": {
+    "status": "pass",
+    "targets": [
+      "tests/evaluation/test_report_quality.py",
+      "tests/unit/test_publication_readiness.py",
+      "tests/unit/test_post_render_audit.py",
+      "tests/unit/test_report_assembler.py",
+      "tests/unit/test_report_export_blocks_unresolved_facts.py",
+      "tests/unit/test_package_validation_gate.py"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 5.762,
+    "summary": {
+      "passed": 38
+    },
+    "output_tail": [
+      "......................................                                   [100%]",
+      "============================== warnings summary ===============================",
+      "..\\..\\..\\..\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475",
+      "  C:\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475: PytestCacheWarning: could not create cache path C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\.pytest_cache\\v\\cache\\nodeids: [WinError 183] Cannot create a file when that file already exists: 'C:\\\\Users\\\\Admin\\\\Desktop\\\\multi-agent-equity-research\\\\.pytest_cache\\\\v\\\\cache'",
+      "    config.cache.set(\"cache/nodeids\", sorted(self.cached_nodeids))",
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "38 passed, 1 warning in 5.36s"
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [
+      "report_eval.json",
+      "publication_readiness.json"
+    ],
+    "found": {
+      "report_eval.json": [
+        "output\\evaluation\\eval_result\\by_ticker\\DHG\\report_eval.json",
+        "output\\evaluation\\eval_result\\by_ticker\\DMC\\report_eval.json",
+        "output\\evaluation\\eval_result\\by_ticker\\IMP\\report_eval.json",
+        "output\\evaluation\\eval_result\\report_eval.json"
+      ],
+      "publication_readiness.json": []
+    },
+    "missing": [
+      "publication_readiness.json"
+    ],
+    "status": "blocked"
+  },
+  "blocking_issues": [
+    "explanation_pdf_rendered:threshold_not_met",
+    "final_report_approval_missing",
+    "financial_gate_passed:threshold_not_met",
+    "publication_readiness:threshold_not_met",
+    "publishable_final_report_model_missing",
+    "report_pdf_rendered:threshold_not_met"
+  ],
+  "metrics": {
+    "test_suite_status": "pass",
+    "tests_passed": 38,
+    "tests_failed": 0,
+    "runtime_evidence_coverage": 0.5
+  },
+  "metric_results": [
+    {
+      "id": "report_pdf_rendered",
+      "label": "Report PDF rendered",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\TRA_report.pdf",
+      "detail": "",
+      "metric_id": "report_pdf_rendered",
+      "metric_name": "Report PDF rendered",
+      "category": "report_quality",
+      "layer": "release_gate",
+      "metric_type": "boolean",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "boolean",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "report",
+      "failed_examples": [
+        {
+          "reason": "threshold_not_met",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\TRA_report.pdf"
+        }
+      ],
+      "remediation_hint": "Render the analyst draft and client-final artifacts from a validated report model.",
+      "evaluator": {
+        "id": "report_pdf_rendered",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-15T04:11:55.975264+00:00"
+    },
+    {
+      "id": "explanation_pdf_rendered",
+      "label": "Explanation PDF rendered",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\TRA_explanation.pdf",
+      "detail": "",
+      "metric_id": "explanation_pdf_rendered",
+      "metric_name": "Explanation PDF rendered",
+      "category": "report_quality",
+      "layer": "release_gate",
+      "metric_type": "boolean",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "boolean",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "report",
+      "failed_examples": [
+        {
+          "reason": "threshold_not_met",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\TRA_explanation.pdf"
+        }
+      ],
+      "remediation_hint": "Render the explanation artifact from a validated report model.",
+      "evaluator": {
+        "id": "explanation_pdf_rendered",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-15T04:11:55.975264+00:00"
+    },
+    {
+      "id": "financial_gate_passed",
+      "label": "Deterministic finance gate",
+      "source": "financial_eval.json",
+      "detail": "",
+      "metric_id": "financial_gate_passed",
+      "metric_name": "Deterministic finance gate",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [
+        {
+          "reason": "threshold_not_met",
+          "source": "financial_eval.json"
+        }
+      ],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "financial_gate_passed",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-15T04:11:55.975264+00:00"
+    },
+    {
+      "id": "report_quality_score",
+      "label": "Report quality score",
+      "source": "publishable report model missing",
+      "detail": "",
+      "metric_id": "report_quality_score",
+      "metric_name": "Report quality score",
+      "category": "report_quality",
+      "layer": "release_gate",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P1",
+      "blocks_publish": true,
+      "value": null,
+      "threshold": ">= 85/100",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "measured_only",
+      "sample_size": 0,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "reviewer",
+      "failed_examples": [
+        {
+          "reason": "evaluation_evidence_missing",
+          "source": "publishable report model missing"
+        }
+      ],
+      "remediation_hint": "Improve required sections, forecast rationale, valuation transparency, and presentation quality.",
+      "evaluator": {
+        "id": "report_quality_score",
+        "framework": "report_quality_rubric",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "weighted_report_quality_score",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP report-quality threshold before human review.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-15T04:11:55.975264+00:00"
+    },
+    {
+      "id": "publication_readiness",
+      "label": "Publication readiness",
+      "source": "final approval and locked publishable model missing",
+      "detail": "",
+      "metric_id": "publication_readiness",
+      "metric_name": "Publication readiness",
+      "category": "report_quality",
+      "layer": "release_gate",
+      "metric_type": "boolean",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "boolean",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "reviewer",
+      "failed_examples": [
+        {
+          "reason": "threshold_not_met",
+          "source": "final approval and locked publishable model missing"
+        }
+      ],
+      "remediation_hint": "Complete final approval, lock publishable artifacts, and align package validation with snapshot IDs.",
+      "evaluator": {
+        "id": "publication_readiness",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-15T04:11:55.975264+00:00"
+    }
+  ],
+  "rubric": "report_quality_v1",
+  "score": null,
+  "decision": "block_export",
+  "failed_gates": [
+    "financial_gate"
+  ],
+  "section_scores": {},
+  "report_artifacts": {
+    "pdf": {
+      "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\TRA_report.pdf",
+      "exists": false,
+      "pages": 0,
+      "text": ""
+    },
+    "explanation_pdf": {
+      "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\TRA_explanation.pdf",
+      "exists": false,
+      "pages": 0,
+      "text": ""
+    }
+  },
+  "publication_readiness": {
+    "passed": false,
+    "blocking_reasons": [
+      "explanation_pdf_rendered:threshold_not_met",
+      "final_report_approval_missing",
+      "financial_gate_passed:threshold_not_met",
+      "publication_readiness:threshold_not_met",
+      "publishable_final_report_model_missing",
+      "report_pdf_rendered:threshold_not_met"
+    ]
+  }
+}

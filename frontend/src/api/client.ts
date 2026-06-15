@@ -24,7 +24,7 @@ function assertApiBaseConfigured(): void {
 
 async function getJSON<T>(path: string): Promise<T> {
   assertApiBaseConfigured();
-  const res = await fetch(`${API_BASE}${path}`);
+  const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
   if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`);
   const contentType = res.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
@@ -44,6 +44,7 @@ export async function startRun(ticker: string): Promise<GenerateReportResponse> 
   const res = await fetch(`${API_BASE}/reports/${encodeURIComponent(ticker)}/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`startRun failed: ${res.status}`);
   const contentType = res.headers.get("content-type") ?? "";
@@ -65,8 +66,16 @@ export async function fetchEvaluationPacket(runId?: string): Promise<EvaluationP
   );
 }
 
-export const fileUrl = (ticker: string, kind: "report" | "explanation") =>
-  `${API_BASE}/reports/${ticker}/file/${kind}`;
+function withCacheToken(url: string, token?: string | number | null): string {
+  if (token === undefined || token === null || token === "") {
+    return url;
+  }
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}v=${encodeURIComponent(String(token))}`;
+}
 
-export const previewUrl = (ticker: string, page: number) =>
-  `${API_BASE}/reports/${ticker}/preview/${page}`;
+export const fileUrl = (ticker: string, kind: "report" | "explanation", token?: string | number | null) =>
+  withCacheToken(`${API_BASE}/reports/${ticker}/file/${kind}`, token);
+
+export const previewUrl = (ticker: string, page: number, token?: string | number | null) =>
+  withCacheToken(`${API_BASE}/reports/${ticker}/preview/${page}`, token);

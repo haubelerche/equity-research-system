@@ -1,0 +1,134 @@
+{
+  "artifact_name": "citation_eval",
+  "schema_version": "20260615_v3",
+  "run_id": "RUN_DHG_20260615_V3",
+  "ticker": "DHG",
+  "snapshot_id": "SNAP_DHG_FY2022_2025_V3",
+  "status": "BLOCKED_BY_P0",
+  "summary": {
+    "metric_count": 4
+  },
+  "metrics": [
+    {
+      "metric_id": "citation.quant_coverage",
+      "metric_name": "Quantitative claim citation coverage",
+      "category": "citation",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "threshold_operator": "=",
+      "threshold": 100,
+      "unit": "percent",
+      "owner": "report",
+      "remediation_hint": "Attach citation to every material numeric claim.",
+      "value": 92,
+      "status": "fail",
+      "sample_size": 25,
+      "failed_examples": [
+        {
+          "claim_id": "NEG_CIT_NO_SOURCE"
+        }
+      ],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    },
+    {
+      "metric_id": "citation.resolver_success",
+      "metric_name": "Citation resolver success",
+      "category": "citation",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "threshold_operator": "=",
+      "threshold": 100,
+      "unit": "percent",
+      "owner": "report",
+      "remediation_hint": "Fix invalid citation keys and artifact refs.",
+      "value": 96,
+      "status": "fail",
+      "sample_size": 25,
+      "failed_examples": [
+        {
+          "citation_key": "generic_company_report"
+        }
+      ],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    },
+    {
+      "metric_id": "citation.numeric_mismatch",
+      "metric_name": "Numeric citation mismatch",
+      "category": "citation",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "threshold_operator": "=",
+      "threshold": 0,
+      "unit": "count",
+      "owner": "report",
+      "remediation_hint": "Correct reported value or citation evidence.",
+      "value": 1,
+      "status": "fail",
+      "sample_size": 1,
+      "failed_examples": [
+        {
+          "claim_id": "NEG_CIT_NUMERIC_MISMATCH"
+        }
+      ],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    },
+    {
+      "metric_id": "citation.tier3_only_material_claim",
+      "metric_name": "Tier-3-only material claim",
+      "category": "citation",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "threshold_operator": "=",
+      "threshold": 0,
+      "unit": "count",
+      "owner": "report",
+      "remediation_hint": "Replace weak source with official/reputable source or remove claim.",
+      "value": 1,
+      "status": "fail",
+      "sample_size": 1,
+      "failed_examples": [
+        {
+          "claim_id": "NEG_CIT_TIER3_ONLY"
+        }
+      ],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    }
+  ],
+  "top_blockers": [
+    {
+      "metric_id": "citation.numeric_mismatch",
+      "severity": "P0"
+    }
+  ],
+  "artifact_refs": {
+    "manifest": "runs/RUN_DHG_20260615_V3/manifest.json"
+  }
+}

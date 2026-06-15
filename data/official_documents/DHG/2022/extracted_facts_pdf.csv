@@ -1,0 +1,2 @@
+ticker,fiscal_year,period_type,statement_type,metric_id,value,unit,document_title,page_number,table_name,extracted_text,extraction_method,verified_by,verified_at
+DHG,2021,FY,income_statement,revenue.net,3756.0,vnd_bn,Bao-cao-thuong-nien-2022.pdf,14,,Doanh thu thuần,pdf_table,,

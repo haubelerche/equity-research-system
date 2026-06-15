@@ -167,6 +167,24 @@ class TestRunDcf:
         assert result.terminal_value_vnd_bn > 0
         assert result.pv_terminal_value_vnd_bn > 0
 
+    def test_sign_flipped_fcf_history_does_not_create_complex_cagr(self):
+        table = _minimal_table()
+        table["operating_cash_flow.total"] = {
+            "2021FY": 300.0,
+            "2022FY": 200.0,
+            "2023FY": -100.0,
+        }
+        table["capex.total"] = {
+            "2021FY": -50.0,
+            "2022FY": -60.0,
+            "2023FY": -70.0,
+        }
+
+        result = run_dcf("JVC", table, DCFAssumptions())
+
+        assert result.fcf_cagr is None
+        assert any("start or end value <= 0" in warning for warning in result.warnings)
+
 
 class TestRunThreeScenarios:
     def test_returns_three_scenarios(self):
@@ -198,3 +216,21 @@ class TestRunThreeScenarios:
     def test_no_base_uses_defaults(self):
         scenarios = run_three_scenarios("DHG", _minimal_table())
         assert scenarios["base"].assumptions.wacc == pytest.approx(0.10)
+
+    def test_negative_or_sign_flipped_fcf_history_uses_fallback_growth(self):
+        table = _minimal_table()
+        table["operating_cash_flow.total"] = {
+            "2021FY": -100.0,
+            "2022FY": 200.0,
+            "2023FY": 300.0,
+        }
+        table["capex.total"] = {
+            "2021FY": -50.0,
+            "2022FY": -60.0,
+            "2023FY": -70.0,
+        }
+
+        scenarios = run_three_scenarios("JVC", table)
+
+        assert scenarios["bear"].assumptions.fcf_growth_override == pytest.approx(0.02)
+        assert scenarios["bull"].assumptions.fcf_growth_override == pytest.approx(0.08)

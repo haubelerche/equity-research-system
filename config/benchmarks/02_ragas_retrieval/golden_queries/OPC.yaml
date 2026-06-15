@@ -1,0 +1,434 @@
+version: rag_golden_20260615_v2
+ticker: OPC
+schema: chunk_id_ground_truth_v2
+queries:
+- id: opc_revenue_2022
+  query: OPC doanh thu thuần năm 2022 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - OPC_2022_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 1171.614108
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_gross_profit_2022
+  query: OPC lợi nhuận gộp năm 2022 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - OPC_2022_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 484.850781
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: opc_net_income_2022
+  query: OPC lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2022 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - OPC_2022_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: 142.394151
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_total_assets_2022
+  query: OPC tổng tài sản cuối kỳ năm 2022 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - OPC_2022_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 1246.224737
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_equity_2022
+  query: OPC vốn chủ sở hữu năm 2022 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - OPC_2022_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 871.964279
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_operating_cash_flow_2022
+  query: OPC lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2022 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - OPC_2022_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: 36.087811
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_capex_2022
+  query: OPC CAPEX / chi mua sắm tài sản cố định năm 2022 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - OPC_2022_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -7.399445
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_shares_2022
+  query: OPC số cổ phiếu lưu hành năm 2022 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2022
+  expected_chunk_ids:
+  - OPC_2022_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 71197076.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: opc_revenue_2023
+  query: OPC doanh thu thuần năm 2023 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - OPC_2023_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 1004.886979
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_gross_profit_2023
+  query: OPC lợi nhuận gộp năm 2023 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - OPC_2023_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 427.08868
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: opc_net_income_2023
+  query: OPC lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2023 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - OPC_2023_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: 122.318809
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_total_assets_2023
+  query: OPC tổng tài sản cuối kỳ năm 2023 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - OPC_2023_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 1260.821165
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_equity_2023
+  query: OPC vốn chủ sở hữu năm 2023 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - OPC_2023_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 884.163704
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_operating_cash_flow_2023
+  query: OPC lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2023 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - OPC_2023_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: 255.358947
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_capex_2023
+  query: OPC CAPEX / chi mua sắm tài sản cố định năm 2023 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - OPC_2023_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -12.042425
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_shares_2023
+  query: OPC số cổ phiếu lưu hành năm 2023 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2023
+  expected_chunk_ids:
+  - OPC_2023_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 74858512.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: opc_revenue_2024
+  query: OPC doanh thu thuần năm 2024 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - OPC_2024_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 968.575979
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_gross_profit_2024
+  query: OPC lợi nhuận gộp năm 2024 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - OPC_2024_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 402.816455
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: opc_net_income_2024
+  query: OPC lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2024 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - OPC_2024_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: 109.45395
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_total_assets_2024
+  query: OPC tổng tài sản cuối kỳ năm 2024 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - OPC_2024_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 1221.572138
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_equity_2024
+  query: OPC vốn chủ sở hữu năm 2024 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - OPC_2024_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 876.818386
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_operating_cash_flow_2024
+  query: OPC lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2024 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - OPC_2024_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: 23.724869
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_capex_2024
+  query: OPC CAPEX / chi mua sắm tài sản cố định năm 2024 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - OPC_2024_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -11.577889
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_shares_2024
+  query: OPC số cổ phiếu lưu hành năm 2024 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2024
+  expected_chunk_ids:
+  - OPC_2024_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 77026003.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: opc_revenue_2025
+  query: OPC doanh thu thuần năm 2025 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - OPC_2025_income_statement_official_chunk_001
+  expected_canonical_key: revenue.net
+  expected_value: 1122.987245
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_gross_profit_2025
+  query: OPC lợi nhuận gộp năm 2025 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - OPC_2025_income_statement_official_chunk_001
+  expected_canonical_key: gross_profit.total
+  expected_value: 464.943873
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: false
+  must_not_answer_without_context: true
+- id: opc_net_income_2025
+  query: OPC lợi nhuận sau thuế thuộc cổ đông công ty mẹ năm 2025 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - OPC_2025_income_statement_official_chunk_001
+  expected_canonical_key: net_income.parent
+  expected_value: 116.420295
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_total_assets_2025
+  query: OPC tổng tài sản cuối kỳ năm 2025 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - OPC_2025_balance_sheet_official_chunk_001
+  expected_canonical_key: total_assets.ending
+  expected_value: 1371.69516
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_equity_2025
+  query: OPC vốn chủ sở hữu năm 2025 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - OPC_2025_balance_sheet_official_chunk_001
+  expected_canonical_key: equity.parent
+  expected_value: 975.507903
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_operating_cash_flow_2025
+  query: OPC lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2025 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - OPC_2025_cash_flow_official_chunk_001
+  expected_canonical_key: operating_cash_flow.total
+  expected_value: 59.928454
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_capex_2025
+  query: OPC CAPEX / chi mua sắm tài sản cố định năm 2025 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - OPC_2025_cash_flow_official_chunk_001
+  expected_canonical_key: capex.total
+  expected_value: -18.253365
+  expected_unit: vnd_bn
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true
+- id: opc_shares_2025
+  query: OPC số cổ phiếu lưu hành năm 2025 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2025
+  expected_chunk_ids:
+  - OPC_2025_capital_structure_official_chunk_001
+  expected_canonical_key: shares_outstanding.ending
+  expected_value: 75695901.0
+  expected_unit: shares
+  expected_source_tiers:
+  - 1
+  - 2
+  material: true
+  must_not_answer_without_context: true
+- id: opc_guidance_2026_unanswerable
+  query: OPC kế hoạch lợi nhuận trước thuế năm 2026 là bao nhiêu?
+  ticker: OPC
+  fiscal_year: 2026
+  expected_chunk_ids: []
+  expected_answer_policy: insufficient_evidence_or_not_ingested
+  expected_source_tiers:
+  - 1
+  material: true
+  must_not_answer_without_context: true

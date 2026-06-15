@@ -1,0 +1,20 @@
+generated_at: '2026-06-15'
+suite: vn_pharma_benchmark_suite_20260615
+default_cohort: requested10
+benchmark:
+  id: 01_pandera_data_quality
+  title: Pandera data quality and canonical fact reliability
+primary_tool: pandera
+datasets:
+  golden_financial_facts: ../shared/golden_financials/all_benchmark10_plus_recommended_facts.csv
+  material_metrics: ../shared/material_metrics.yaml
+  fact_schema: ../shared/fact_schema.json
+  negative_fixtures: negative_fixtures/*.csv
+metrics:
+- dataframe_schema_validity
+- core_metric_coverage
+- period_completeness
+- duplicate_fact_count
+- provenance_coverage
+- official_reconciliation_rate
+- accepted_fact_confidence

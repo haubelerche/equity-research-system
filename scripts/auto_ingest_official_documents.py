@@ -871,6 +871,41 @@ def _write_artifact(ticker: str, cfg: AutoIngestConfig, results: list[YearResult
     return out
 
 
+def serialize_year_results(results: list[YearResult]) -> list[dict]:
+    """Serialize YearResults into the flat shape consumed by ocr_coverage.aggregate_ticker.
+
+    ``errors`` is emitted as an integer count (the cohort report only needs the count;
+    full error text remains in the per-ticker .md artifact).
+    """
+    rows: list[dict] = []
+    for r in results:
+        status_val = r.ingest_status.value if isinstance(r.ingest_status, IngestStatus) else str(r.ingest_status)
+        rows.append({
+            "fiscal_year": r.fiscal_year,
+            "ingest_status": status_val,
+            "ocr_candidates": r.ocr_candidates,
+            "ocr_promoted": r.ocr_promoted,
+            "ocr_blocked": r.ocr_blocked,
+            "errors": len(r.errors),
+        })
+    return rows
+
+
+def write_ticker_json_artifact(
+    ticker: str, results: list[YearResult], *, base_dir: Path = ARTIFACT_DIR
+) -> Path:
+    """Write a machine-readable per-ticker result the batch can aggregate into a cohort report."""
+    base_dir.mkdir(parents=True, exist_ok=True)
+    out = base_dir / f"{ticker}_auto_ingest_result.json"
+    payload = {
+        "ticker": ticker,
+        "generated_at": datetime.now(UTC).isoformat(),
+        "years": serialize_year_results(results),
+    }
+    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return out
+
+
 # ---------------------------------------------------------------------------
 # CLI entry point
 # ---------------------------------------------------------------------------
@@ -926,6 +961,9 @@ def main() -> None:
 
     artifact = _write_artifact(ticker, cfg, results)
     print(f"[auto_ingest] artifact: {artifact}")
+
+    json_artifact = write_ticker_json_artifact(ticker, results)
+    print(f"[auto_ingest] json: {json_artifact}")
 
 
 if __name__ == "__main__":

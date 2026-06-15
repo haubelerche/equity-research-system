@@ -449,7 +449,14 @@ def load_golden_csv_supplement(ticker: str, from_year: int, to_year: int) -> lis
 
     _FY_RE = _re.compile(r"^(\d{4})FY$")
     root = _os.path.normpath(_os.path.join(_os.path.dirname(__file__), "..", ".."))
-    golden_path = _os.path.join(root, "config", "dataset", "golden", "financials", f"{ticker.upper()}.csv")
+    golden_path = _os.path.join(
+        root,
+        "config",
+        "benchmarks",
+        "shared",
+        "golden_financials",
+        f"{ticker.upper()}.csv",
+    )
     if not _os.path.exists(golden_path):
         return []
 

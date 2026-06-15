@@ -3,7 +3,7 @@ import type { ReportItem } from "../api/types";
 
 /**
  * Build the full per-ticker list the Reports page renders: one row for EVERY
- * universe ticker (so all 53 always show, even offline), enriched with live
+ * universe ticker (so the full configured universe always shows, even offline), enriched with live
  * report-availability status from the `/reports` API where present.
  *
  * Identity fields (name/exchange/segment/is_mvp) come from the static universe;

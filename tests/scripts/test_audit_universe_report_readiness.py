@@ -82,7 +82,7 @@ def test_expected_count_mismatch_returns_distinct_code(monkeypatch) -> None:
         "audit_universe",
         lambda **kwargs: {
             "summary": {
-                "universe_count": 53,
+                "universe_count": 42,
                 "raw_bctc_complete_count": 0,
                 "local_pdf_ready_count": 0,
                 "exportable_count": 0,
@@ -94,4 +94,4 @@ def test_expected_count_mismatch_returns_distinct_code(monkeypatch) -> None:
         },
     )
 
-    assert audit.main(["--expected-count", "51"]) == 2
+    assert audit.main(["--expected-count", "41"]) == 2

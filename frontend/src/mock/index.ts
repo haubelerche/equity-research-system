@@ -22,6 +22,7 @@ export const MOCK_ARTIFACTS = {
 // Null means the evaluator could not prove the metric from runtime evidence.
 const LAYER_VALUE_MAP: Record<string, Record<string, number | null>> = {
   data_reliability: {
+    data_reliability_score: (dataQuality as unknown as Record<string, number | undefined>).data_reliability_score ?? null,
     core_metric_coverage: dataQuality.core_metric_coverage,
     valuation_method_data_readiness: dataQuality.valuation_method_data_readiness ?? null,
     period_completeness: dataQuality.period_completeness,

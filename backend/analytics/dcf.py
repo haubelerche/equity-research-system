@@ -90,7 +90,7 @@ def _get(table: FactTable, key: str, period: str) -> float | None:
 
 
 def _cagr(start: float, end: float, years: int) -> float | None:
-    if start is None or end is None or years <= 0 or start <= 0:
+    if start is None or end is None or years <= 0 or start <= 0 or end <= 0:
         return None
     return (end / start) ** (1.0 / years) - 1.0
 
@@ -180,7 +180,7 @@ def run_dcf(
         if cagr is None:
             # Start value ≤ 0 — CAGR undefined; fall back to conservative default
             fcf_growth = 0.05
-            warnings.append("FCF CAGR unavailable (start value ≤ 0); assuming 5% FCF growth")
+            warnings.append("FCF CAGR unavailable (start or end value <= 0); assuming 5% FCF growth")
         else:
             fcf_growth = max(-0.10, min(0.25, cagr))
             if cagr != fcf_growth:
@@ -287,6 +287,8 @@ def _derive_base_fcf_growth(fact_table: FactTable) -> float:
             fcf_hist[p] = ocf + c
     fcf_vals = [fcf_hist[p] for p in sorted(fcf_hist)]
     if len(fcf_vals) >= 2:
+        if fcf_vals[0] <= 0 or fcf_vals[-1] <= 0:
+            return 0.05
         cagr = _cagr(fcf_vals[0], fcf_vals[-1], len(fcf_vals) - 1)
         return max(-0.10, min(0.25, cagr)) if cagr is not None else 0.05
     return 0.05

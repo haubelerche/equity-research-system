@@ -3,6 +3,9 @@
 The harness evaluates repository controls and available run evidence. It never
 converts a passing test suite into a passing run-specific metric: unavailable
 runtime evidence remains ``not_measured`` and blocks final readiness.
+
+Supports single-ticker mode (--ticker) and cohort mode (--cohort <name>) where
+all tickers in the cohort are evaluated and results are aggregated fail-closed.
 """
 from __future__ import annotations
 
@@ -27,6 +30,7 @@ from backend.evaluation.runtime_evaluators import evaluate_plan
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT_DIR = ROOT / "output" / "evaluation" / "eval_result"
+_COHORTS_PATH = ROOT / "config" / "dataset" / "benchmarks" / "shared" / "benchmark_cohorts.yaml"
 SUMMARY_RE = re.compile(
     r"(?P<count>\d+)\s+(?P<kind>passed|failed|error|errors|skipped|xfailed|xpassed)"
 )
@@ -427,6 +431,9 @@ def evaluate_project(
 
 
 def load_latest_evaluation(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
+    benchmark_manifest = output_dir / "benchmark_suite" / "benchmark_suite.json"
+    if benchmark_manifest.exists():
+        return json.loads(benchmark_manifest.read_text(encoding="utf-8"))
     manifest_path = output_dir / "evaluation_packet.json"
     if not manifest_path.exists():
         return {
@@ -446,23 +453,148 @@ def load_evaluation_artifact(
     allowed = {plan.artifact for plan in PLANS} | {"evaluation_packet.json"}
     if artifact_name not in allowed:
         return None
+    benchmark_path = output_dir / "benchmark_suite" / artifact_name
+    if benchmark_path.exists():
+        return json.loads(benchmark_path.read_text(encoding="utf-8"))
     path = output_dir / artifact_name
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+
+def _load_cohort_config() -> dict[str, Any]:
+    try:
+        import yaml  # type: ignore
+        return yaml.safe_load(_COHORTS_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _cohort_tickers(cohort_name: str) -> list[str]:
+    config = _load_cohort_config()
+    cohorts = config.get("cohorts", {})
+    cohort = cohorts.get(cohort_name)
+    if cohort is None:
+        available = list(cohorts.keys())
+        raise ValueError(f"Cohort '{cohort_name}' not found. Available: {available}")
+    tickers = cohort.get("tickers")
+    if tickers:
+        return [str(t).upper() for t in tickers]
+    if cohort.get("source") == "universe":
+        from backend.dataset.config_io import load_universe_rows  # noqa: PLC0415
+        return [
+            str(r.get("ticker") or "").strip().upper()
+            for r in load_universe_rows()
+            if r.get("ticker")
+        ]
+    raise ValueError(f"Cohort '{cohort_name}' has neither 'tickers' nor 'source: universe'.")
+
+
+def evaluate_cohort(
+    cohort_name: str,
+    *,
+    root: Path = ROOT,
+    output_dir: Path = DEFAULT_OUTPUT_DIR,
+    run_id: str | None = None,
+) -> dict[str, Any]:
+    """Run evaluate_project for each ticker in the cohort and aggregate fail-closed.
+
+    Per-ticker packets are written to output_dir/by_ticker/<TICKER>/.
+    The aggregate cohort packet is written to output_dir/cohort_<name>_packet.json.
+    The main evaluation_packet.json is also updated to reflect the worst-case ticker
+    so the frontend always has a valid packet to display.
+    """
+    generated_at = _utc_now()
+    slug = cohort_name.replace(" ", "_").lower()
+    run_id = run_id or f"cohort-{slug}-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}"
+    tickers = _cohort_tickers(cohort_name)
+    print(f"[cohort:{cohort_name}] tickers={tickers}", flush=True)
+
+    by_ticker_dir = output_dir / "by_ticker"
+    ticker_packets: list[dict[str, Any]] = []
+
+    for ticker in tickers:
+        ticker_out = by_ticker_dir / ticker
+        ticker_out.mkdir(parents=True, exist_ok=True)
+        print(f"[cohort:{cohort_name}] evaluating {ticker} …", flush=True)
+        packet = evaluate_project(root=root, output_dir=ticker_out, ticker=ticker, run_id=run_id)
+        ticker_packets.append(packet)
+
+    # Fail-closed aggregate: take worst-case counts across all tickers
+    def _max_status(status: str) -> int:
+        return {"pass": 0, "not_measured": 1, "blocked": 2, "fail": 3}.get(status, 1)
+
+    worst_ticker = max(ticker_packets, key=lambda p: _max_status(p.get("overall_status", "")))
+    cohort_status = worst_ticker.get("overall_status", "blocked")
+    cohort_publication_status = worst_ticker.get("publication_status", "NOT_EVALUATED")
+
+    ticker_summary = {}
+    for packet in ticker_packets:
+        t = packet.get("ticker", "UNKNOWN")
+        ticker_summary[t] = {
+            "overall_status": packet.get("overall_status"),
+            "publication_status": packet.get("publication_status"),
+            "summary": packet.get("summary", {}),
+            "blocking_issues": sorted({
+                issue
+                for artifact in packet.get("artifacts", [])
+                for issue in (artifact.get("blocking_issues") or [])
+            }),
+        }
+
+    aggregate_summary = {
+        "pass": min((p.get("summary", {}).get("pass", 0) for p in ticker_packets), default=0),
+        "fail": max((p.get("summary", {}).get("fail", 0) for p in ticker_packets), default=0),
+        "blocked": max((p.get("summary", {}).get("blocked", 0) for p in ticker_packets), default=0),
+        "not_measured": max((p.get("summary", {}).get("not_measured", 0) for p in ticker_packets), default=0),
+    }
+
+    cohort_manifest: dict[str, Any] = {
+        "schema_version": STANDARD_SCHEMA_VERSION,
+        "benchmark_suite_version": "benchmark_standards_v1",
+        "source": "cohort_audit",
+        "run_id": run_id,
+        "cohort": cohort_name,
+        "tickers": tickers,
+        "ticker_count": len(tickers),
+        "generated_at": generated_at,
+        "fail_closed": True,
+        "overall_status": cohort_status,
+        "publication_status": cohort_publication_status,
+        "aggregate_summary": aggregate_summary,
+        "ticker_results": ticker_summary,
+        "worst_ticker": worst_ticker.get("ticker"),
+    }
+    _write_json(output_dir / f"cohort_{slug}_packet.json", cohort_manifest)
+
+    # Keep evaluation_packet.json pointing to worst-case ticker result for dashboard compatibility
+    _write_json(output_dir / "evaluation_packet.json", worst_ticker)
+    print(
+        f"[cohort:{cohort_name}] done. status={cohort_status} worst={worst_ticker.get('ticker')}",
+        flush=True,
+    )
+    return cohort_manifest
 
 
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="Run the eight project evaluation plans.")
-    parser.add_argument("--ticker", default="DHG")
+    parser.add_argument("--ticker", default="DHG", help="Single ticker to evaluate (default: DHG)")
+    parser.add_argument("--cohort", default=None, help="Cohort name from benchmark_cohorts.yaml (e.g. diversified_core)")
     parser.add_argument("--run-id")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     args = parser.parse_args()
-    result = evaluate_project(
-        output_dir=args.output_dir,
-        ticker=args.ticker,
-        run_id=args.run_id,
-    )
+    if args.cohort:
+        result = evaluate_cohort(
+            cohort_name=args.cohort,
+            output_dir=args.output_dir,
+            run_id=args.run_id,
+        )
+    else:
+        result = evaluate_project(
+            output_dir=args.output_dir,
+            ticker=args.ticker,
+            run_id=args.run_id,
+        )
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

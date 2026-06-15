@@ -64,13 +64,23 @@ def validate_financial_records_with_pandera(
             "currency": pa.Column(str, nullable=False),
             "source_uri": pa.Column(str, pa.Check.str_length(min_value=1), nullable=False),
             "source_title": pa.Column(str, pa.Check.str_length(min_value=1), nullable=False),
-            "confidence": pa.Column(float, pa.Check.in_range(0, 1), nullable=False, coerce=True),
+            "confidence": pa.Column(float, pa.Check.in_range(0.0, 1.0), nullable=False, coerce=True),
             "validation_status": pa.Column(str, pa.Check.isin(
                 ["accepted", "rejected", "manual_review"]
             ), nullable=False),
         },
         strict=False,
         coerce=True,
+        checks=[
+            pa.Check(
+                lambda df: ~(
+                    (df["canonical_key"] == "revenue.net")
+                    & (df["validation_status"] == "accepted")
+                    & (df["value"] <= 0)
+                ),
+                error="accepted_revenue_net_must_be_positive",
+            )
+        ],
     )
     try:
         schema.validate(pd.DataFrame.from_records(records), lazy=True)

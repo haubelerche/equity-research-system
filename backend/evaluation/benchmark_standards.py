@@ -24,7 +24,11 @@ PUBLICATION_STATUSES = (
 STANDARD_SCHEMA_VERSION = "2.1"
 BENCHMARK_SUITE_VERSION = "benchmark_standards_v1"
 METRIC_REGISTRY_PATH = (
-    Path(__file__).resolve().parents[2] / "config" / "eval" / "metric_registry.yaml"
+    Path(__file__).resolve().parents[2]
+    / "config"
+    / "benchmarks"
+    / "shared"
+    / "metric_registry_base_from_existing.yaml"
 )
 
 
@@ -163,6 +167,10 @@ PLAN_DEFAULTS: dict[str, MetricMetadata] = {
 
 METRIC_OVERRIDES: dict[str, MetricMetadata] = {
     "data_quality_gate": PLAN_DEFAULTS["01"],
+    "data_reliability_score": MetricMetadata(
+        "data_quality", "release_gate", "score", "report_run", "P0", True,
+        "score", "data", "Inspect weighted data reliability components and repair the weakest measured gate.",
+    ),
     "snapshot_id": MetricMetadata(
         "data_quality", "release_gate", "boolean", "report_run", "P0", True,
         "boolean", "data", "Create or attach an immutable snapshot before evaluation.",
@@ -194,10 +202,14 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
         "data_quality", "release_gate", "boolean", "report_run", "P0", True,
         "boolean", "data", "Repair the connector DataFrame rows reported by Pandera before normalization.",
     ),
+    "raw_bctc_non_empty": MetricMetadata(
+        "data_quality", "diagnostic", "boolean", "benchmark_suite", "P2", False,
+        "boolean", "data", "Refresh local raw BCTC snapshots before building canonical golden facts.",
+    ),
     "valuation_method_data_readiness": MetricMetadata(
         "data_quality", "release_gate", "boolean", "report_run", "P0", True,
-        "boolean", "valuation",
-        "Block headline target price and recommendation until valuation methods are publishable from high-confidence inputs.",
+        "boolean", "data",
+        "Complete valuation input facts, Pandera schema validation, deduplication, and official reconciliation before valuation.",
     ),
     "hit_rate_at_5": MetricMetadata(
         "rag", "diagnostic", "coverage", "benchmark_suite", "P2", False,

@@ -1,4 +1,4 @@
-"""Manual Upload Connector — Phase 1B.
+﻿"""Manual Upload Connector â€” Phase 1B.
 
 Registers analyst-uploaded documents (audited BCTC PDFs, annual reports,
 HOSE filing PDFs) as Tier 0 or Tier 1 source records in ingest.sources.
@@ -27,11 +27,11 @@ Provenance JSON schema:
 
 Usage:
     python scripts/connectors/manual_upload_connector.py \\
-        --file config/dataset/golden/docs/DHG_BCTC_2023.pdf \\
+        --file config/benchmarks/shared/manual_docs/DHG_BCTC_2023.pdf \\
         --ticker DHG
 
     python scripts/connectors/manual_upload_connector.py \\
-        --dir config/dataset/golden/docs/DHG/ \\
+        --dir config/benchmarks/shared/manual_docs/DHG/ \\
         --ticker DHG
 """
 from __future__ import annotations
@@ -106,9 +106,9 @@ def register_file(
     verified_by = prov.get("verified_by", "") if prov else ""
 
     source_title = (
-        f"{source_type.replace('_', ' ').title()} — {ticker} {fiscal_year or ''}"
+        f"{source_type.replace('_', ' ').title()} â€” {ticker} {fiscal_year or ''}"
         if not publisher
-        else f"{publisher} — {source_type.replace('_', ' ').title()} {fiscal_year or ''}"
+        else f"{publisher} â€” {source_type.replace('_', ' ').title()} {fiscal_year or ''}"
     )
 
     source_uri = f"file://{file_path.resolve()}"
@@ -152,7 +152,7 @@ def register_file(
     tier_label = {0: "Tier 0 (audited filing)", 1: "Tier 1 (company IR)", 3: "Tier 3 (unverified)"}.get(
         source_tier, f"Tier {source_tier}"
     )
-    print(f"[manual_upload] Registered {file_path.name} → {source_id[:12]}... [{tier_label}]")
+    print(f"[manual_upload] Registered {file_path.name} â†’ {source_id[:12]}... [{tier_label}]")
     return source_id, source_tier
 
 
@@ -209,7 +209,7 @@ def main() -> None:
     tier0 = sum(1 for r in results if r["source_tier"] == 0)
     tier1 = sum(1 for r in results if r["source_tier"] == 1)
     tier3 = sum(1 for r in results if r["source_tier"] == 3)
-    print(f"\n[manual_upload] Done: {len(results)} files — Tier 0: {tier0}, Tier 1: {tier1}, Tier 3 (no provenance): {tier3}")
+    print(f"\n[manual_upload] Done: {len(results)} files â€” Tier 0: {tier0}, Tier 1: {tier1}, Tier 3 (no provenance): {tier3}")
 
 
 if __name__ == "__main__":

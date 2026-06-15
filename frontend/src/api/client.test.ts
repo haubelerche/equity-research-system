@@ -21,7 +21,9 @@ describe("api client", () => {
     const items = [{ ticker: "DHG" }];
     vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ items }, { status: 200 })));
     const res = await fetchReports();
-    expect((globalThis.fetch as any).mock.calls[0][0]).toBe("/reports");
+    const [url, opts] = (globalThis.fetch as any).mock.calls[0];
+    expect(url).toBe("/reports");
+    expect(opts.cache).toBe("no-store");
     expect(res.items).toEqual(items);
   });
 
@@ -32,6 +34,7 @@ describe("api client", () => {
     const [url, opts] = (globalThis.fetch as any).mock.calls[0];
     expect(url).toBe("/reports/DHG/generate");
     expect(opts.method).toBe("POST");
+    expect(opts.cache).toBe("no-store");
     expect(res.run_id).toBe("r1");
     expect(res.mode).toBe("full_pipeline");
   });
@@ -54,7 +57,9 @@ describe("api client", () => {
 
   it("builds file and preview urls", () => {
     expect(fileUrl("DHG", "report")).toBe("/reports/DHG/file/report");
+    expect(fileUrl("DHG", "report", "2026-06-15T00:00:00Z")).toBe("/reports/DHG/file/report?v=2026-06-15T00%3A00%3A00Z");
     expect(previewUrl("DHG", 3)).toBe("/reports/DHG/preview/3");
+    expect(previewUrl("DHG", 3, "2026-06-15T00:00:00Z")).toBe("/reports/DHG/preview/3?v=2026-06-15T00%3A00%3A00Z");
   });
 
   it("throws on non-ok", async () => {

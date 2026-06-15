@@ -1,8 +1,19 @@
 {
-  "ticker": "DHG", "run_id": "project-eval-20260614T033415Z",
-  "core_metric_coverage": 1.0, "valuation_method_data_readiness": null,
-  "period_completeness": 1.0,
-  "provenance_coverage": 1.0, "official_reconciliation_rate": 1.0,
-  "ocr_unresolved_rate": 0.0, "duplicate_fact_rate": 0.0,
-  "freshness_days": 12, "blocking_issues": []
+  "ticker": "CON",
+  "run_id": "benchmark-suite:ad-hoc-CON:2026-06-15",
+  "data_reliability_score": 0.0,
+  "core_metric_coverage": 0.0,
+  "valuation_method_data_readiness": false,
+  "period_completeness": null,
+  "provenance_coverage": null,
+  "official_reconciliation_rate": null,
+  "ocr_unresolved_rate": null,
+  "duplicate_fact_rate": 0.0,
+  "raw_bctc_non_empty": false,
+  "freshness_days": null,
+  "blocking_issues": [
+    "core_metric_coverage:threshold_not_met",
+    "data_reliability_score:threshold_not_met",
+    "valuation_method_data_readiness:data_requirement_or_reconciliation_gate_failed"
+  ]
 }

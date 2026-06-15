@@ -4,8 +4,8 @@
   "plan_id": "06",
   "plan_name": "Report quality",
   "ticker": "DHG",
-  "run_id": "phase1-dhg-nondbd-baseline",
-  "generated_at": "2026-06-14T16:28:52.781840+00:00",
+  "run_id": "project-eval-20260615T033550Z",
+  "generated_at": "2026-06-15T03:35:50.606179+00:00",
   "status": "fail",
   "test_execution": {
     "status": "pass",
@@ -18,13 +18,19 @@
       "tests/unit/test_package_validation_gate.py"
     ],
     "exit_code": 0,
-    "duration_seconds": 3.901,
+    "duration_seconds": 3.849,
     "summary": {
       "passed": 38
     },
     "output_tail": [
       "......................................                                   [100%]",
-      "38 passed in 3.43s"
+      "============================== warnings summary ===============================",
+      "..\\..\\..\\..\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475",
+      "  C:\\Python314\\Lib\\site-packages\\_pytest\\cacheprovider.py:475: PytestCacheWarning: could not create cache path C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\.pytest_cache\\v\\cache\\nodeids: [WinError 183] Cannot create a file when that file already exists: 'C:\\\\Users\\\\Admin\\\\Desktop\\\\multi-agent-equity-research\\\\.pytest_cache\\\\v\\\\cache'",
+      "    config.cache.set(\"cache/nodeids\", sorted(self.cached_nodeids))",
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "38 passed, 1 warning in 3.46s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -109,7 +115,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "explanation_pdf_rendered",
@@ -165,7 +171,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "financial_gate_passed",
@@ -226,7 +232,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "report_quality_score",
@@ -287,7 +293,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     },
     {
       "id": "publication_readiness",
@@ -348,7 +354,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T16:28:52.781840+00:00"
+      "evaluated_at": "2026-06-15T03:35:50.606179+00:00"
     }
   ],
   "rubric": "report_quality_v1",

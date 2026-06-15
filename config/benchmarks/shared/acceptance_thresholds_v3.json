@@ -1,0 +1,581 @@
+{
+  "suite_version": "20260615_v3",
+  "publication_statuses": [
+    "NOT_EVALUATED",
+    "BLOCKED_BY_P0",
+    "NEEDS_HUMAN_REVIEW",
+    "DRAFT_PUBLISHABLE",
+    "APPROVED_FOR_EXPORT"
+  ],
+  "metric_count": 69,
+  "groups": {
+    "data_quality": [
+      {
+        "metric_id": "data.required_periods_completeness",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "data.accepted_facts_source_coverage",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "data.material_official_reconciliation_rate",
+        "threshold_operator": ">=",
+        "threshold": 95,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "data.material_ocr_error_count",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "data.corpus_ocr_unresolved_rate",
+        "threshold_operator": "<=",
+        "threshold": 5,
+        "unit": "percent",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "data.duplicate_canonical_fact_count",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "data.pandera_dataframe_schema_validity",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "data.valuation_method_data_readiness",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "data.snapshot_id_presence",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "data.source_doc_id_presence",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "data.freshness_sla_pass",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      }
+    ],
+    "rag": [
+      {
+        "metric_id": "rag.hit_rate_at_5",
+        "threshold_operator": ">=",
+        "threshold": 90,
+        "unit": "percent",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "rag.mrr_at_5",
+        "threshold_operator": ">=",
+        "threshold": 0.75,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "rag.context_precision",
+        "threshold_operator": ">=",
+        "threshold": 0.8,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "rag.context_recall",
+        "threshold_operator": ">=",
+        "threshold": 0.8,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "rag.faithfulness",
+        "threshold_operator": ">=",
+        "threshold": 0.85,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "rag.response_relevancy",
+        "threshold_operator": ">=",
+        "threshold": 0.85,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "rag.source_tier_hit_rate",
+        "threshold_operator": ">=",
+        "threshold": 90,
+        "unit": "percent",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "rag.unsupported_claim_rate",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      }
+    ],
+    "financial_model": [
+      {
+        "metric_id": "finance.accounting_invariant_violations",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "finance.valuation_regression_failures",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "finance.share_count_mismatch",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "finance.target_price_bridge_error",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "finance.wacc_terminal_growth_violation",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "finance.net_debt_reconciliation_error",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "finance.forecast_anomaly_unexplained",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P1",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "finance.recommendation_inconsistency",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "finance.fcff_formula_pass_count",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "finance.fcfe_formula_pass_count",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "finance.blend_sensitivity_variation",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "finance.valuation_publishability",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      }
+    ],
+    "citation": [
+      {
+        "metric_id": "citation.quant_coverage",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "citation.resolver_success",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "citation.source_id_validity",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "citation.numeric_mismatch",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "citation.tier3_only_material_claim",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "citation.generic_citation_label",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "citation.catalyst_evidence_span_missing",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      }
+    ],
+    "agent_llm": [
+      {
+        "metric_id": "agent.tool_permission_compliance",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "agent.json_schema_validity",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "agent.no_unauthorized_financial_calculation",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "agent.role_adherence",
+        "threshold_operator": ">=",
+        "threshold": 0.9,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "agent.groundedness_judge_score",
+        "threshold_operator": ">=",
+        "threshold": 0.9,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "agent.task_completion",
+        "threshold_operator": ">=",
+        "threshold": 0.85,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "agent.plan_compliance",
+        "threshold_operator": ">=",
+        "threshold": 0.85,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "agent.seeded_issue_detection",
+        "threshold_operator": ">=",
+        "threshold": 90,
+        "unit": "percent",
+        "severity": "P1",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "agent.artifact_manifest_compliance",
+        "threshold_operator": "=",
+        "threshold": 100,
+        "unit": "percent",
+        "severity": "P0",
+        "blocks_publish": true
+      }
+    ],
+    "report_quality": [
+      {
+        "metric_id": "report.quality_total",
+        "threshold_operator": ">=",
+        "threshold": 85,
+        "unit": "score",
+        "severity": "P1",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "report.completeness",
+        "threshold_operator": ">=",
+        "threshold": 90,
+        "unit": "percent",
+        "severity": "P1",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "report.financial_analysis_depth",
+        "threshold_operator": ">=",
+        "threshold": 80,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "report.forecast_rationale",
+        "threshold_operator": ">=",
+        "threshold": 80,
+        "unit": "score",
+        "severity": "P1",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "report.valuation_transparency",
+        "threshold_operator": ">=",
+        "threshold": 85,
+        "unit": "score",
+        "severity": "P1",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "report.evidence_integration",
+        "threshold_operator": ">=",
+        "threshold": 80,
+        "unit": "score",
+        "severity": "P2",
+        "blocks_publish": false
+      }
+    ],
+    "operations": [
+      {
+        "metric_id": "ops.llm_retry_rate",
+        "threshold_operator": "<=",
+        "threshold": 5,
+        "unit": "percent",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "ops.retrieval_fallback_rate",
+        "threshold_operator": "<=",
+        "threshold": 20,
+        "unit": "percent",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "ops.material_ocr_failure_rate",
+        "threshold_operator": "<=",
+        "threshold": 5,
+        "unit": "percent",
+        "severity": "P1",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "ops.final_ocr_error_count",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "ops.artifact_upload_failure",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "ops.pdf_render_failure",
+        "threshold_operator": "=",
+        "threshold": 0,
+        "unit": "count",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "ops.full_report_p95_warm_seconds",
+        "threshold_operator": "<=",
+        "threshold": 600,
+        "unit": "seconds",
+        "severity": "P3",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "ops.full_report_p95_cold_seconds",
+        "threshold_operator": "<=",
+        "threshold": 1800,
+        "unit": "seconds",
+        "severity": "P3",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "ops.render_only_p95_seconds",
+        "threshold_operator": "<=",
+        "threshold": 120,
+        "unit": "seconds",
+        "severity": "P1",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "ops.latency_regression_ratio",
+        "threshold_operator": "<=",
+        "threshold": 1.25,
+        "unit": "ratio",
+        "severity": "P2",
+        "blocks_publish": false
+      },
+      {
+        "metric_id": "ops.cost_per_full_report_usd",
+        "threshold_operator": "<=",
+        "threshold": 2.0,
+        "unit": "usd",
+        "severity": "P2",
+        "blocks_publish": false
+      }
+    ],
+    "publication_readiness": [
+      {
+        "metric_id": "publication.package_validation_passed",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "publication.report_quality_allow_export",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "publication.publishable_model_locked",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "publication.snapshot_match",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      },
+      {
+        "metric_id": "publication.final_approval_present",
+        "threshold_operator": "=",
+        "threshold": true,
+        "unit": "boolean",
+        "severity": "P0",
+        "blocks_publish": true
+      }
+    ]
+  }
+}

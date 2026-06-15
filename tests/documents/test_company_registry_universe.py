@@ -12,4 +12,4 @@ def test_company_registry_includes_non_mvp_universe_ticker() -> None:
 
 
 def test_company_registry_covers_configured_universe_size() -> None:
-    assert len(all_tickers()) >= 53
+    assert len(all_tickers()) >= 42

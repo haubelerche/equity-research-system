@@ -55,7 +55,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--all",
         action="store_true",
-        help="Collect the full ticker universe from the company registry (all 53).",
+        help="Collect the full configured ticker universe from the company registry.",
     )
     parser.add_argument(
         "--limit",

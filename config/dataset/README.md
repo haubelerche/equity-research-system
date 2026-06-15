@@ -8,8 +8,9 @@ This directory contains source-controlled dataset configuration for the Vietnam 
 - `sources/`: source catalog with update frequency, legal notes, and keys.
 - `contracts/`: JSON schemas for source, fact, catalyst, chunk, citation, agent-message, and tool-call records.
 - `taxonomy/`: financial and catalyst taxonomy for normalization.
-- `mvp/`: templates for MVP fact ingestion and golden dataset checks.
-- `golden/`: verified fallback fixtures and provenance metadata.
+- `benchmarks/`: canonical evaluation benchmark datasets, manifests, cohorts,
+  metric registry, golden financial facts, golden RAG queries, Ragas cases, and
+  legacy MVP benchmark templates.
 
 ## Operating Principles
 
