@@ -22,6 +22,11 @@ class FakeExistingStorage:
         return bucket == "exports" and path == "client_reports/TRA/report.pdf"
 
 
+class FakeMissingStorage:
+    def exists(self, bucket, path):
+        return False
+
+
 def _fake_render_client(*, run_id, ticker, mode, output_dir):
     pdf = Path(output_dir) / f"{ticker}_report.pdf"
     pdf.write_bytes(b"%PDF-1.4 report")
@@ -71,7 +76,7 @@ def test_existing_client_report_available_uses_local_output(tmp_path):
 
     assert report_delivery.existing_client_report_available(
         "tra",
-        storage=None,
+        storage=FakeMissingStorage(),
         output_dir=tmp_path,
     )
 
