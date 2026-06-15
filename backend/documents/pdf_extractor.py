@@ -64,6 +64,44 @@ def _parse_eps_raw(raw: str) -> Optional[float]:
     return -value if negative else value
 
 
+_OCR_DOT_THOUSANDS_RE = re.compile(r"\d{1,3}(?:\.\d{3})+")
+
+
+def _parse_ocr_vnd_bn(raw: str) -> Optional[float]:
+    """Parse an OCR'd Vietnamese BCTC number to tỷ VND (billions).
+
+    Scanned BCTC report full đồng with dot thousands-separators, e.g.
+    "4.343.720.860.197" = 4,343.72 tỷ. The generic _parse_vnd_bn assumes
+    comma-grouped triệu and mis-scales these by 1e6, so OCR uses this parser.
+
+    Handles:
+    - dot-thousands full đồng: "4.343.720.860.197" → ÷1e9
+    - negatives in parentheses: "(2.060.673.782.276)"
+    - comma-grouped triệu fallback: "4,127,400" → ÷1e3
+    """
+    s = raw.strip()
+    if not s or s.lower() in _NULL_VALUES:
+        return None
+    negative = s.startswith("(") and s.endswith(")")
+    if negative:
+        s = s[1:-1].strip()
+
+    # Dot-thousands grouping is full đồng → convert to tỷ.
+    if _OCR_DOT_THOUSANDS_RE.fullmatch(s):
+        value = float(s.replace(".", "")) / 1_000_000_000
+        return round(-value if negative else value, 6)
+
+    has_commas = "," in s
+    s = s.replace(",", "")
+    try:
+        value = float(s)
+    except ValueError:
+        return None
+    if has_commas and abs(value) > 500:  # comma-grouped triệu → tỷ
+        value = value / 1_000.0
+    return round(-value if negative else value, 6)
+
+
 def _parse_vnd_bn(raw: str) -> Optional[float]:
     """Parse a raw Vietnamese financial string to tỷ VND (billions VND).
 
@@ -268,6 +306,7 @@ class VietnameseBCTCExtractor:
         statement_type: str,
         fiscal_years: list[int],
         table_name: str = "",
+        vnd_parser=None,
     ) -> list[ExtractedRow]:
         """Extract financial facts from a list of table rows.
 
@@ -305,7 +344,7 @@ class VietnameseBCTCExtractor:
                 if is_per_share:
                     parsed = _parse_eps_raw(raw_value)
                 else:
-                    parsed = _parse_vnd_bn(raw_value)
+                    parsed = (vnd_parser or _parse_vnd_bn)(raw_value)
                 if parsed is None:
                     continue
 
@@ -533,66 +572,135 @@ def extract_from_pdf_ocr(
         print(f"[pdf_extractor] pdf2image conversion failed: {exc}")
         return []
 
-    extractor = VietnameseBCTCExtractor(
+    tess_config = _tesseract_config()
+
+    # OCR every page first (saving page text via the callback), then extract with
+    # statement-type carry-forward — values live on pages that re-declare no header.
+    page_texts: list[tuple[int, str]] = []
+    for page_num, image in enumerate(images, start=1):
+        try:
+            ocr_text = pytesseract.image_to_string(image, lang=lang, config=tess_config)
+        except Exception:  # noqa: BLE001
+            continue
+        if page_text_callback is not None:
+            page_text_callback(page_num, ocr_text)
+        page_texts.append((page_num, ocr_text))
+
+    return extract_rows_from_ocr_pages(
+        page_texts,
         ticker=ticker,
         fiscal_year=fiscal_year,
         document_title=document_title,
         extraction_method="ocr_tesseract",
     )
-    results: list[ExtractedRow] = []
-    tess_config = _tesseract_config()
 
-    for page_num, image in enumerate(images, start=1):
-        try:
-            ocr_text = pytesseract.image_to_string(image, lang=lang, config=tess_config)
-            if page_text_callback is not None:
-                page_text_callback(page_num, ocr_text)
-            slug_text = _slug_label(ocr_text)
-            statement_type = _detect_statement_type(slug_text)
-            if statement_type is None:
-                continue
 
-            # Parse lines as pseudo-table rows (label | value | value ...)
-            rows = _parse_ocr_text_to_rows(ocr_text)
-            if not rows:
-                continue
+_OCR_SAME_LINE_RE = re.compile(r"^(.{5,80}?)\s{2,}([\d,.()\-—]+)\s*$")
+_OCR_NUMERIC_RE = re.compile(r"^[\d,.()\-—]+$")
+# A standalone 1–3 digit integer (no thousands separator) is a Vietnamese "Mã số"
+# template code (100, 110, 200, …) or a thuyết-minh note reference — never a value.
+_OCR_MA_SO_RE = re.compile(r"^\(?\d{1,3}\)?$")
 
-            extractor.page_number = page_num
-            extracted = extractor.extract_from_table_rows(
-                rows=rows,
-                statement_type=statement_type,
-                fiscal_years=[fiscal_year],
-                table_name="ocr_page",
-            )
-            results.extend(extracted)
-        except Exception:  # noqa: BLE001
-            continue
 
-    return results
+def _is_ocr_value_candidate(line: str) -> bool:
+    """True if a line is a numeric value (and not a bare Mã-số / note code)."""
+    s = line.strip()
+    if not s or not _OCR_NUMERIC_RE.match(s):
+        return False
+    return not _OCR_MA_SO_RE.match(s)
+
+
+def _is_mappable_label(line: str) -> bool:
+    """True if a line slugs to a known BCTC metric — used to gate label candidates.
+
+    Gating on mappability is what keeps the consecutive-line pass from pairing
+    arbitrary prose (or a Mã-số code) with the next number it happens to see.
+    """
+    return len(line) >= 5 and _map_label_to_metric(_slug_label(line)) is not None
 
 
 def _parse_ocr_text_to_rows(ocr_text: str) -> list[list[str]]:
-    """Convert raw OCR text into pseudo table rows [label, value, ...].
+    """Convert raw OCR text into pseudo table rows [label, value].
 
-    Heuristic: lines with a numeric value at the end are candidate rows.
-    Pattern: '<label text>  <number>' where number may have commas/parens.
+    Two passes, because scanned BCTC OCR loses table structure:
+      Pass 1 (well-structured text): '<label>␣␣<number>' on the same line.
+      Pass 2 (scanned columnar layout): label on one line, value on the next.
+
+    Only labels that map to a known metric are considered, and standalone Mã-số
+    codes (100/110/200…) are skipped, so a label is paired with the real value
+    rather than the template code printed beside it.
     """
-    rows: list[list[str]] = []
-    # Match: label (non-digit text) followed by a numeric value at end of line
-    _row_re = re.compile(
-        r"^(.{5,80}?)\s{2,}([\d,.()\-—]+)\s*$"
-    )
-    for line in ocr_text.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        m = _row_re.match(line)
+    lines = [ln.strip() for ln in ocr_text.splitlines() if ln.strip()]
+
+    # Pass 1: same-line label + value, restricted to mappable labels. If it finds
+    # anything the page is well-structured and we trust it over the looser pass.
+    same_line: list[list[str]] = []
+    for line in lines:
+        m = _OCR_SAME_LINE_RE.match(line)
         if m:
-            label = m.group(1).strip()
-            value = m.group(2).strip()
-            if label and value:
-                rows.append([label, value])
+            label, value = m.group(1).strip(), m.group(2).strip()
+            if label and value and _is_mappable_label(label):
+                same_line.append([label, value])
+    if same_line:
+        return same_line
+
+    # Pass 2: pair a mappable label line with the first real value line after it.
+    rows: list[list[str]] = []
+    last_label: str | None = None
+    for line in lines:
+        if _is_ocr_value_candidate(line):
+            if last_label is not None:
+                rows.append([last_label, line])
+                last_label = None  # consume the label
+        elif _OCR_MA_SO_RE.match(line):
+            continue  # skip bare Mã-số/note codes; keep the pending label
+        elif _is_mappable_label(line):
+            last_label = line  # newest mappable label wins until a value appears
     return rows
+
+
+def extract_rows_from_ocr_pages(
+    pages: list[tuple[int, str]],
+    ticker: str,
+    fiscal_year: int,
+    document_title: str,
+    extraction_method: str = "ocr_tesseract",
+) -> list[ExtractedRow]:
+    """Extract BCTC facts from already-OCR'd page texts.
+
+    ``pages`` is a list of (page_number, ocr_text). The statement type is carried
+    forward across pages: once a statement section header is seen, later pages
+    (which hold the actual numbers but often re-declare no header) inherit it.
+    Pages before any statement header are skipped.
+    """
+    extractor = VietnameseBCTCExtractor(
+        ticker=ticker,
+        fiscal_year=fiscal_year,
+        document_title=document_title,
+        extraction_method=extraction_method,
+    )
+    results: list[ExtractedRow] = []
+    current_statement: Optional[str] = None
+    for page_num, ocr_text in pages:
+        detected = _detect_statement_type(_slug_label(ocr_text))
+        if detected:
+            current_statement = detected
+        if current_statement is None:
+            continue
+        rows = _parse_ocr_text_to_rows(ocr_text)
+        if not rows:
+            continue
+        extractor.page_number = page_num
+        results.extend(
+            extractor.extract_from_table_rows(
+                rows=rows,
+                statement_type=current_statement,
+                fiscal_years=[fiscal_year],
+                table_name="ocr_page",
+                vnd_parser=_parse_ocr_vnd_bn,
+            )
+        )
+    return results
 
 
 # ---------------------------------------------------------------------------

@@ -360,6 +360,63 @@ def _build_secondary_source_from_cafef(
     return secondary
 
 
+def db_facts_to_secondary_source(
+    fact_rows: list[dict],
+    ticker: str,
+    fiscal_year: int,
+) -> dict[tuple[str, int, str, str], float]:
+    """Convert DB/vnstock production facts to an OCR reconciliation lookup.
+
+    Key: (ticker, fiscal_year, "FY", metric_id). Value: float (vnd_bn or vnd).
+    Only FY rows for the requested year with a non-null value are included.
+    """
+    secondary: dict[tuple[str, int, str, str], float] = {}
+    for row in fact_rows:
+        period = str(row.get("period") or "")
+        if not period.endswith("FY") or period[:4] != str(fiscal_year):
+            continue
+        metric = str(row.get("metric") or "").strip()
+        value = row.get("value")
+        if not metric or value is None:
+            continue
+        try:
+            secondary[(ticker, fiscal_year, "FY", metric)] = float(value)
+        except (TypeError, ValueError):
+            continue
+    return secondary
+
+
+def boost_confidence_for_matched(facts: list, matched_confidence: float = 0.90) -> None:
+    """Raise confidence of reconciliation-matched OCR facts above the promotion gate.
+
+    A match against the trusted structured source (vnstock) independently corroborates
+    the OCR extraction, so the fact is reliable enough to promote. Conflicted and
+    uncorroborated (missing_secondary_source) facts keep their low OCR confidence and
+    fall to needs_review. Mutates facts in place.
+    """
+    for fact in facts:
+        if getattr(fact, "reconciliation_status", None) == "matched":
+            fact.confidence = max(fact.confidence, matched_confidence)
+
+
+def _build_secondary_source_from_db(
+    ticker: str,
+    fiscal_year: int,
+) -> dict[tuple[str, int, str, str], float]:
+    """Load vnstock/canonical production facts as an OCR reconciliation source.
+
+    Best-effort: returns {} if the DB is unavailable so OCR still runs offline.
+    """
+    try:
+        from backend.database.canonical.fact_dal import get_production_facts
+
+        rows = get_production_facts(ticker=ticker, from_year=fiscal_year, to_year=fiscal_year)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[auto_ingest] vnstock reconciliation source unavailable: {exc}")
+        return {}
+    return db_facts_to_secondary_source(rows, ticker, fiscal_year)
+
+
 def _run_ocr_pipeline(
     pdf_path: Path,
     ticker: str,
@@ -449,10 +506,19 @@ def _run_ocr_pipeline(
     known_metrics = load_known_metric_ids()
     validate_candidate_facts(candidate_facts, known_metrics)
 
-    # 7. Reconcile against CafeF
-    recon_records = reconcile_candidate_facts(candidate_facts, secondary_source, "cafef")
+    # 7. Reconcile against trusted structured sources. vnstock (canonical/DB) is the
+    #    primary trusted source and overrides CafeF where both have a metric — raw OCR
+    #    pairing is noisy, so only OCR values that match a trusted source promote.
+    db_secondary = _build_secondary_source_from_db(ticker, fiscal_year)
+    merged_secondary = {**(secondary_source or {}), **db_secondary}
+    source_name = "vnstock" if db_secondary else "cafef"
+    recon_records = reconcile_candidate_facts(candidate_facts, merged_secondary, source_name)
     recon_dir = ROOT / "data" / "reconciliation"
     save_reconciliation_report(recon_records, ticker, fiscal_year, recon_dir)
+
+    # 7b. Corroborated (matched) OCR facts are reliable enough to clear the
+    #     confidence gate; conflicted/uncorroborated facts stay low → needs_review.
+    boost_confidence_for_matched(candidate_facts)
 
     # 8. Promote
     fact_table, promo_results = promote_candidate_facts(candidate_facts)
