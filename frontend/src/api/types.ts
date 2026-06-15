@@ -115,7 +115,7 @@ export interface EvaluationArtifactSummary {
   name: string;
   artifact: string;
   status: string;
-  metrics?: Record<string, unknown>;
+  metrics?: Record<string, unknown> | BenchmarkMetricResult[];
   metric_results?: BenchmarkMetricResult[];
   blocking_issues?: string[];
 }

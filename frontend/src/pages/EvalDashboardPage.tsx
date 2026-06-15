@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { BenchmarkMetricResult, EvaluationPacket } from "../api/types";
 import { fetchEvaluationPacket } from "../api/client";
 import { EVAL_LAYERS, type EvalLayer } from "../data/evalFramework";
-import { mockRunIdForLayer, mockValuesForLayer } from "../mock";
 import {
   evalMetricStatus,
   formatFailCondition,
@@ -26,7 +25,8 @@ type ModalState =
 type MetricResultMap = Record<string, BenchmarkMetricResult>;
 
 function artifactFor(packet: EvaluationPacket | null, layer: EvalLayer) {
-  return packet?.artifacts?.find((artifact) => artifact.artifact === layer.artifact);
+  const accepted = new Set([layer.artifact, ...(layer.artifactAliases ?? [])]);
+  return packet?.artifacts?.find((artifact) => accepted.has(artifact.artifact));
 }
 
 function resultKey(result: BenchmarkMetricResult): string {
@@ -35,7 +35,9 @@ function resultKey(result: BenchmarkMetricResult): string {
 
 function resultsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): MetricResultMap {
   const artifact = artifactFor(packet, layer);
-  const entries = (artifact?.metric_results ?? [])
+  const metricResults = artifact?.metric_results
+    ?? (Array.isArray(artifact?.metrics) ? artifact.metrics as BenchmarkMetricResult[] : []);
+  const entries = metricResults
     .map((result) => [resultKey(result), result] as const)
     .filter(([key]) => key.length > 0);
   const results = Object.fromEntries(entries);
@@ -51,11 +53,12 @@ function metricFromResult(result: BenchmarkMetricResult): MetricDef {
   const id = resultKey(result);
   const threshold = typeof result.threshold === "number" ? result.threshold : 0;
   const operator = String(result.threshold_operator ?? result.threshold ?? "");
+  const unit = result.unit === "%" || result.unit === "percent" ? "%" : "";
   return {
     id,
     label: String(result.metric_name ?? result.label ?? id),
     englishLabel: String(result.metric_name ?? result.label ?? id),
-    unit: result.unit === "%" ? "%" : "",
+    unit,
     comparator: operator.includes("<=") || operator.trim() === "<" ? "lte" : "gte",
     threshold,
     thresholdLabel: result.threshold === null || result.threshold === undefined
@@ -73,7 +76,7 @@ function metricFromResult(result: BenchmarkMetricResult): MetricDef {
 function metricsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): MetricDef[] {
   const results = resultsForLayer(packet, layer);
   const configured = layer.metrics;
-  const configuredIds = new Set(configured.map((metric) => metric.id));
+  const configuredIds = new Set(configured.flatMap((metric) => [metric.id, ...(metric.aliases ?? [])]));
   const dynamic = Object.entries(results)
     .filter(([id]) => id && !configuredIds.has(id))
     .map(([, result]) => metricFromResult(result));
@@ -85,7 +88,7 @@ function layerWithRuntimeMetrics(packet: EvaluationPacket | null, layer: EvalLay
 }
 
 function valuesForLayer(packet: EvaluationPacket | null, layer: EvalLayer): Record<string, number | null> {
-  const values = packet ? {} as Record<string, number | null> : { ...mockValuesForLayer(layer.id) };
+  const values = {} as Record<string, number | null>;
   const results = resultsForLayer(packet, layer);
   for (const metric of layer.metrics) {
     const value = results[metric.id]?.value;
@@ -95,18 +98,17 @@ function valuesForLayer(packet: EvaluationPacket | null, layer: EvalLayer): Reco
   return values;
 }
 
-function layerMetricsPassed(packet: EvaluationPacket | null, layer: EvalLayer): boolean {
-  const values = valuesForLayer(packet, layer);
-  const results = resultsForLayer(packet, layer);
-  return layer.metrics.every((metric) => {
-    const result = results[metric.id];
-    if (result?.status) return normalizeMetricStatus(String(result.status)) === "pass";
-    return evalMetricStatus(metric, values[metric.id]) === "pass";
-  });
+function packetRunId(packet: EvaluationPacket | null, layer: EvalLayer): string {
+  return packet?.run_id ?? artifactFor(packet, layer)?.name ?? "not_evaluated";
 }
 
-function packetRunId(packet: EvaluationPacket | null, layer: EvalLayer): string {
-  return packet?.run_id ?? mockRunIdForLayer(layer.id);
+function packetAllowsPublication(packet: EvaluationPacket | null): boolean {
+  if (!packet) return false;
+  if (packet.client_final_authorized === true) return true;
+  const publicationStatus = String(packet.publication_status ?? "").toUpperCase();
+  if (publicationStatus.includes("BLOCKED") || publicationStatus.includes("NOT_EVALUATED")) return false;
+  if (publicationStatus.includes("AUTHORIZED") || publicationStatus.includes("PUBLISHABLE")) return true;
+  return String(packet.overall_status ?? "").toLowerCase() === "pass";
 }
 
 function displayMetricValue(layer: EvalLayer, metricId: string, result: BenchmarkMetricResult | undefined, value: number | null | undefined): string {
@@ -135,11 +137,8 @@ export function EvalDashboardPage() {
       });
   }, []);
 
-  const allMetricsPassed = useMemo(
-    () => EVAL_LAYERS.every((layer) => layerMetricsPassed(packet, layerWithRuntimeMetrics(packet, layer))),
-    [packet],
-  );
-  const publicationStatus = packet?.publication_status ?? (allMetricsPassed ? "DRAFT_PUBLISHABLE" : "NOT_EVALUATED");
+  const allMetricsPassed = useMemo(() => packetAllowsPublication(packet), [packet]);
+  const publicationStatus = packet?.publication_status ?? "NOT_EVALUATED";
 
   return (
     <section>
@@ -155,7 +154,7 @@ export function EvalDashboardPage() {
       </div>
       {loadError && (
         <div className="eval-note" role="note">
-          Chưa tải được evaluation packet trực tiếp; dashboard đang hiển thị snapshot benchmark nội bộ. Chi tiết: {loadError}
+          Chua tai duoc evaluation packet truc tiep; dashboard khong hien thi so lieu thay the. Hay chay benchmark suite va refresh lai packet. Chi tiet: {loadError}
         </div>
       )}
 

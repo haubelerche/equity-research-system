@@ -2,11 +2,14 @@ import { describe, it, expect } from "vitest";
 import { ACCEPTANCE_EXPLANATION, EVAL_LAYERS, PIPELINE_ORDER } from "./evalFramework";
 
 describe("evalFramework", () => {
-  it("contains only benchmarkable evaluation groups", () => {
-    expect(EVAL_LAYERS.length).toBe(5);
+  it("contains the benchmark evaluation groups exposed by the dashboard", () => {
+    expect(EVAL_LAYERS.length).toBe(8);
     expect(EVAL_LAYERS.some((layer) => layer.id === "rollout_ci")).toBe(false);
-    expect(EVAL_LAYERS.some((layer) => layer.id === "citation")).toBe(false);
-    expect(EVAL_LAYERS.some((layer) => layer.id === "report_quality")).toBe(false);
+    expect(EVAL_LAYERS.some((layer) => layer.id === "citation")).toBe(true);
+    expect(EVAL_LAYERS.some((layer) => layer.id === "report_quality")).toBe(true);
+    expect(EVAL_LAYERS.some((layer) => layer.id === "publication_readiness")).toBe(true);
+    expect(EVAL_LAYERS.find((layer) => layer.id === "report_quality")?.artifactAliases)
+      .toContain("report_quality_eval.json");
   });
   it("defines one threshold, technology and formula for every metric", () => {
     for (const layer of EVAL_LAYERS) {
