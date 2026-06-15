@@ -38,7 +38,10 @@ export function normalizeMetricStatus(status: string | null | undefined): Metric
 }
 
 export function formatMetricNumber(def: MetricDef, value: number): string {
-  return def.unit === "%" ? `${(value * 100).toFixed(value === def.threshold ? 0 : 1)}%` : `${value}`;
+  if (def.unit !== "%") return `${value}`;
+  const displayValue = Math.abs(value) <= 1 ? value * 100 : value;
+  const displayThreshold = Math.abs(def.threshold) <= 1 ? def.threshold * 100 : def.threshold;
+  return `${displayValue.toFixed(displayValue === displayThreshold ? 0 : 1)}%`;
 }
 
 export function formatPassCondition(def: MetricDef): string {

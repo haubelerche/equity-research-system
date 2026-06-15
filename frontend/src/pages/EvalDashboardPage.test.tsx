@@ -139,4 +139,14 @@ describe("EvalDashboardPage", () => {
     expect(screen.queryByText("Owner")).not.toBeInTheDocument();
     expect(screen.queryByText("Chặn xuất bản")).not.toBeInTheDocument();
   });
+
+  it("does not fall back to mock benchmark values when the packet cannot load", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("missing", { status: 404 })));
+
+    render(<EvalDashboardPage />);
+
+    expect(await screen.findByText(/khong hien thi so lieu thay the/i)).toBeInTheDocument();
+    expect(screen.getByText(/NOT_EVALUATED/)).toBeInTheDocument();
+    expect(screen.queryByText("70.0%")).not.toBeInTheDocument();
+  });
 });

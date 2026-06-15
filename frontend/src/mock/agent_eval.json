@@ -1,8 +1,0 @@
-{
-  "ticker": "DHG", "run_id": "project-eval-20260614T033415Z",
-  "tool_permission_compliance": 1.0, "schema_validity": 1.0,
-  "no_unauthorized_calc": null, "role_adherence": null, "groundedness": null,
-  "task_completion": 1.0, "plan_adherence": null, "critic_issue_recall": null,
-  "rubric_scores": {},
-  "blocking_failures": []
-}
