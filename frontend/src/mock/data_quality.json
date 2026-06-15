@@ -1,6 +1,6 @@
 {
-  "ticker": "CON",
-  "run_id": "benchmark-suite:ad-hoc-CON:2026-06-15",
+  "ticker": "ZZZ",
+  "run_id": "benchmark-suite:ad-hoc-ZZZ:2026-06-15",
   "data_reliability_score": 0.0,
   "core_metric_coverage": 0.0,
   "valuation_method_data_readiness": false,

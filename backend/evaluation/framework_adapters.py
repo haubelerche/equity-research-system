@@ -5,7 +5,9 @@ model credential is ``not_executed`` rather than a fabricated score.
 """
 from __future__ import annotations
 
+import importlib.util
 from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 from typing import Any
 
 RAGAS_METRICS = (
@@ -21,6 +23,22 @@ def _version(package: str) -> str | None:
         return version(package)
     except PackageNotFoundError:
         return None
+
+
+def _load_benchmark_01_validator() -> Any:
+    schema_path = (
+        Path(__file__).resolve().parents[2]
+        / "config"
+        / "benchmarks"
+        / "01_pandera_data_quality"
+        / "pandera_schema.py"
+    )
+    spec = importlib.util.spec_from_file_location("benchmark_01_pandera_schema", schema_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"could not load benchmark schema from {schema_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.validate_facts
 
 
 def validate_financial_records_with_pandera(
@@ -50,40 +68,9 @@ def validate_financial_records_with_pandera(
             "reason": str(exc),
         }
 
-    schema = pa.DataFrameSchema(
-        {
-            "ticker": pa.Column(str, nullable=False),
-            "fiscal_year": pa.Column(int, pa.Check.in_range(2000, 2100), nullable=False),
-            "period": pa.Column(str, pa.Check.str_matches(r"^\d{4}(FY|Q[1-4])$"), nullable=False),
-            "statement_type": pa.Column(str, pa.Check.isin(
-                ["income_statement", "balance_sheet", "cash_flow", "capital_structure"]
-            ), nullable=False),
-            "canonical_key": pa.Column(str, pa.Check.str_length(min_value=1), nullable=False),
-            "value": pa.Column(float, nullable=False, coerce=True),
-            "unit": pa.Column(str, pa.Check.str_length(min_value=1), nullable=False),
-            "currency": pa.Column(str, nullable=False),
-            "source_uri": pa.Column(str, pa.Check.str_length(min_value=1), nullable=False),
-            "source_title": pa.Column(str, pa.Check.str_length(min_value=1), nullable=False),
-            "confidence": pa.Column(float, pa.Check.in_range(0.0, 1.0), nullable=False, coerce=True),
-            "validation_status": pa.Column(str, pa.Check.isin(
-                ["accepted", "rejected", "manual_review"]
-            ), nullable=False),
-        },
-        strict=False,
-        coerce=True,
-        checks=[
-            pa.Check(
-                lambda df: ~(
-                    (df["canonical_key"] == "revenue.net")
-                    & (df["validation_status"] == "accepted")
-                    & (df["value"] <= 0)
-                ),
-                error="accepted_revenue_net_must_be_positive",
-            )
-        ],
-    )
     try:
-        schema.validate(pd.DataFrame.from_records(records), lazy=True)
+        validate_facts = _load_benchmark_01_validator()
+        validate_facts(pd.DataFrame.from_records(records))
         return {
             "execution_status": "executed",
             "framework": "pandera",

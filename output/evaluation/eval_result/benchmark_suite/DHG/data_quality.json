@@ -4,10 +4,10 @@
   "plan_id": "01",
   "plan_name": "Data reliability",
   "ticker": "DHG",
-  "generated_at": "2026-06-14T22:52:42.529829+00:00",
-  "status": "pass",
+  "generated_at": "2026-06-15T05:47:04.744130+00:00",
+  "status": "fail",
   "test_execution": {
-    "status": "not_measured",
+    "status": "pass",
     "targets": [
       "tests/reconciliation",
       "tests/official_sources",
@@ -18,11 +18,14 @@
       "tests/unit/test_ocr_reconciliation_gate.py",
       "tests/unit/test_source_provenance_gate.py"
     ],
-    "exit_code": null,
-    "duration_seconds": 0.0,
-    "summary": {},
+    "exit_code": 0,
+    "duration_seconds": 0.63,
+    "summary": {
+      "passed": 70
+    },
     "output_tail": [
-      "Skipped by --skip-tests."
+      "......................................................................   [100%]",
+      "70 passed in 0.27s"
     ]
   },
   "runtime_evidence_inventory": {
@@ -30,43 +33,420 @@
       "data_quality.json"
     ],
     "found": {
-      "data_quality.json": [
-        "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\BCR\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\BID\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\BVP\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\CON\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\CPC\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DBT\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DCL\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DDS\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DGW\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DNM\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DP3\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DPP\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DRG\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DRP\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DTP\\data_quality.json"
-      ]
+      "data_quality.json": []
     },
-    "missing": [],
-    "status": "pass"
+    "missing": [
+      "data_quality.json"
+    ],
+    "status": "blocked"
   },
-  "blocking_issues": [],
+  "blocking_issues": [
+    "data_reliability_score:threshold_not_met",
+    "dataframe_schema_validity:pandera_schema_validation_failed",
+    "ocr_unresolved_rate:threshold_not_met",
+    "valuation_method_data_readiness:data_requirement_or_reconciliation_gate_failed"
+  ],
   "metrics": {
-    "test_suite_status": "not_measured",
-    "tests_passed": 0,
+    "test_suite_status": "pass",
+    "tests_passed": 70,
     "tests_failed": 0
   },
   "metric_results": [
     {
+      "id": "raw_bctc_non_empty",
+      "label": "Raw BCTC files contain rows",
+      "source": "data\\raw\\bctc\\DHG",
+      "detail": "",
+      "metric_id": "raw_bctc_non_empty",
+      "metric_name": "Raw BCTC files contain rows",
+      "category": "data_quality",
+      "layer": "diagnostic",
+      "metric_type": "boolean",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": true,
+      "threshold": "= true",
+      "threshold_operator": "=",
+      "unit": "boolean",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "data",
+      "failed_examples": [],
+      "remediation_hint": "Refresh local raw BCTC snapshots before building canonical golden facts.",
+      "evaluator": {
+        "id": "raw_bctc_non_empty",
+        "framework": "local_raw_bctc_split_json_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "ticker": "DHG",
+          "raw_dir": "data\\raw\\bctc\\DHG"
+        },
+        "parameters": {
+          "required_files": [
+            "income_statement_year.json",
+            "balance_sheet_year.json",
+            "cash_flow_year.json",
+            "ratio_year.json"
+          ]
+        },
+        "aggregation": "boolean_gate",
+        "numerator": 4,
+        "denominator": 4,
+        "per_sample_results": [
+          {
+            "file": "income_statement_year.json",
+            "path": "data\\raw\\bctc\\DHG\\income_statement_year.json",
+            "status": "non_empty",
+            "record_count": 25,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_origin": "fallback_1",
+            "sample_index": 1
+          },
+          {
+            "file": "balance_sheet_year.json",
+            "path": "data\\raw\\bctc\\DHG\\balance_sheet_year.json",
+            "status": "non_empty",
+            "record_count": 122,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_origin": "fallback_1",
+            "sample_index": 2
+          },
+          {
+            "file": "cash_flow_year.json",
+            "path": "data\\raw\\bctc\\DHG\\cash_flow_year.json",
+            "status": "non_empty",
+            "record_count": 41,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_origin": "fallback_1",
+            "sample_index": 3
+          },
+          {
+            "file": "ratio_year.json",
+            "path": "data\\raw\\bctc\\DHG\\ratio_year.json",
+            "status": "non_empty",
+            "record_count": 54,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_origin": "fallback_1",
+            "sample_index": 4
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "accounts_payable.ending",
+            "value": "364.379191",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 1,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 5
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "accounts_receivable.ending",
+            "value": "320.497731",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 2,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 6
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "cash_and_equivalents.ending",
+            "value": "34.017814",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 3,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 7
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "current_assets.ending",
+            "value": "4218.772328",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 4,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 8
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "current_liabilities.ending",
+            "value": "811.536702",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 5,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 9
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "equity.parent",
+            "value": "4291.536903",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 6,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 10
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "inventory.ending",
+            "value": "1251.9133",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 7,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 11
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "long_term_debt.ending",
+            "value": "0",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 8,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 12
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "non_current_liabilities.ending",
+            "value": "65.112897",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 9,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 13
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_debt.ending",
+            "value": "114.723409",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 10,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 14
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "short_term_investments.ending",
+            "value": "2355",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 11,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 15
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "total_assets.ending",
+            "value": "5168.186503",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 12,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 16
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "balance_sheet",
+            "canonical_key": "total_liabilities.ending",
+            "value": "876.649599",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 13,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 17
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "capital_structure",
+            "canonical_key": "shares_outstanding.ending",
+            "value": "135071693",
+            "unit": "shares",
+            "source_type": "financial_statement",
+            "source_title": "Derived shares from local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 14,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 18
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "capex.total",
+            "value": "-233.991633",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 15,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 19
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "cash_flow",
+            "canonical_key": "depreciation.total",
+            "value": "81.001087",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "sample_origin": "source_row",
+            "row_number": 16,
+            "has_value": true,
+            "accepted": true,
+            "has_complete_provenance": true,
+            "metric_id": "raw_bctc_non_empty",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+    },
+    {
       "id": "data_reliability_score",
       "label": "Data reliability score",
-      "source": "config\\dataset\\golden\\financials\\DHG.csv",
+      "source": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
       "detail": "",
       "metric_id": "data_reliability_score",
       "metric_name": "Data reliability score",
@@ -76,12 +456,12 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0.9913486842105264,
+      "value": 0.8767944055944056,
       "threshold": ">= 90/100",
       "threshold_operator": ">=",
       "unit": "score",
-      "status": "pass",
-      "legacy_status": "pass",
+      "status": "fail",
+      "legacy_status": "fail",
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
@@ -92,10 +472,24 @@
       "failed_examples": [
         {
           "sample_origin": "data_reliability_score_component",
-          "component": "accepted_fact_confidence",
-          "component_score": 0.9178125,
+          "component": "dataframe_schema_validity",
+          "component_score": 0.0,
           "weight": 0.1,
-          "normalized_weight": 0.10526315789473685
+          "normalized_weight": 0.1
+        },
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "accepted_fact_confidence",
+          "component_score": 0.9043076923076924,
+          "weight": 0.1,
+          "normalized_weight": 0.1
+        },
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "ocr_resolution_health",
+          "component_score": 0.7272727272727273,
+          "weight": 0.05,
+          "normalized_weight": 0.05
         }
       ],
       "remediation_hint": "Inspect weighted data reliability components and repair the weakest measured gate.",
@@ -110,11 +504,11 @@
         "formula": "weighted(core_metric_coverage, official_reconciliation_rate, provenance_coverage, period_completeness, dataframe_schema_validity, accepted_fact_confidence, ocr_resolution_health)",
         "inputs": {
           "ticker": "DHG",
-          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
-          "record_count": 128,
-          "accepted_record_count": 128,
-          "accepted_fact_confidence": 0.9178125
+          "golden_csv": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+          "golden_provenance": "config\\benchmarks\\shared\\golden_financials\\DHG_golden_provenance.json",
+          "record_count": 130,
+          "accepted_record_count": 130,
+          "accepted_fact_confidence": 0.9043076923076924
         },
         "parameters": {
           "components": [
@@ -141,13 +535,17 @@
             {
               "id": "accepted_fact_confidence",
               "weight": 0.1
+            },
+            {
+              "id": "ocr_resolution_health",
+              "weight": 0.05
             }
           ],
           "score_is_real_measurement": true,
           "perfect_score_not_forced": true
         },
         "aggregation": "weighted_score",
-        "numerator": 0.9913486842105264,
+        "numerator": 0.8767944055944056,
         "denominator": 1.0,
         "per_sample_results": [
           {
@@ -155,7 +553,7 @@
             "component": "core_metric_coverage",
             "component_score": 1.0,
             "weight": 0.3,
-            "normalized_weight": 0.3157894736842105,
+            "normalized_weight": 0.3,
             "metric_id": "data_reliability_score",
             "sample_index": 1
           },
@@ -164,7 +562,7 @@
             "component": "official_reconciliation_rate",
             "component_score": 1.0,
             "weight": 0.2,
-            "normalized_weight": 0.2105263157894737,
+            "normalized_weight": 0.2,
             "metric_id": "data_reliability_score",
             "sample_index": 2
           },
@@ -173,7 +571,7 @@
             "component": "provenance_coverage",
             "component_score": 1.0,
             "weight": 0.15,
-            "normalized_weight": 0.15789473684210525,
+            "normalized_weight": 0.15,
             "metric_id": "data_reliability_score",
             "sample_index": 3
           },
@@ -182,27 +580,36 @@
             "component": "period_completeness",
             "component_score": 1.0,
             "weight": 0.1,
-            "normalized_weight": 0.10526315789473685,
+            "normalized_weight": 0.1,
             "metric_id": "data_reliability_score",
             "sample_index": 4
           },
           {
             "sample_origin": "data_reliability_score_component",
             "component": "dataframe_schema_validity",
-            "component_score": 1.0,
+            "component_score": 0.0,
             "weight": 0.1,
-            "normalized_weight": 0.10526315789473685,
+            "normalized_weight": 0.1,
             "metric_id": "data_reliability_score",
             "sample_index": 5
           },
           {
             "sample_origin": "data_reliability_score_component",
             "component": "accepted_fact_confidence",
-            "component_score": 0.9178125,
+            "component_score": 0.9043076923076924,
             "weight": 0.1,
-            "normalized_weight": 0.10526315789473685,
+            "normalized_weight": 0.1,
             "metric_id": "data_reliability_score",
             "sample_index": 6
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "ocr_resolution_health",
+            "component_score": 0.7272727272727273,
+            "weight": 0.05,
+            "normalized_weight": 0.05,
+            "metric_id": "data_reliability_score",
+            "sample_index": 7
           },
           {
             "ticker": "DHG",
@@ -219,7 +626,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 7
+            "sample_index": 8
           },
           {
             "ticker": "DHG",
@@ -236,7 +643,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 8
+            "sample_index": 9
           },
           {
             "ticker": "DHG",
@@ -253,7 +660,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 9
+            "sample_index": 10
           },
           {
             "ticker": "DHG",
@@ -270,7 +677,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 10
+            "sample_index": 11
           },
           {
             "ticker": "DHG",
@@ -287,7 +694,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 11
+            "sample_index": 12
           },
           {
             "ticker": "DHG",
@@ -304,7 +711,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 12
+            "sample_index": 13
           },
           {
             "ticker": "DHG",
@@ -321,7 +728,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 13
+            "sample_index": 14
           },
           {
             "ticker": "DHG",
@@ -338,7 +745,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 14
+            "sample_index": 15
           },
           {
             "ticker": "DHG",
@@ -355,7 +762,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 15
+            "sample_index": 16
           },
           {
             "ticker": "DHG",
@@ -372,7 +779,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 16
+            "sample_index": 17
           },
           {
             "ticker": "DHG",
@@ -389,7 +796,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 17
+            "sample_index": 18
           },
           {
             "ticker": "DHG",
@@ -406,7 +813,7 @@
             "reconciled": true,
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 18
+            "sample_index": 19
           },
           {
             "ticker": "DHG",
@@ -414,23 +821,6 @@
             "statement_type": "income_statement",
             "canonical_key": "gross_profit.total",
             "value": "2257.494943",
-            "unit": "vnd_bn",
-            "source_type": "financial_statement",
-            "source_title": "Local raw BCTC cache DHG 2022FY",
-            "validation_status": "accepted",
-            "verified": true,
-            "official_source": true,
-            "reconciled": true,
-            "metric_id": "official_reconciliation_rate",
-            "sample_origin": "fallback_1",
-            "sample_index": 19
-          },
-          {
-            "ticker": "DHG",
-            "period": "2022FY",
-            "statement_type": "income_statement",
-            "canonical_key": "net_income.parent",
-            "value": "988.454646",
             "unit": "vnd_bn",
             "source_type": "financial_statement",
             "source_title": "Local raw BCTC cache DHG 2022FY",
@@ -454,12 +844,12 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T22:52:42.529829+00:00"
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
     },
     {
       "id": "core_metric_coverage",
       "label": "Core metric coverage",
-      "source": "config\\dataset\\golden\\financials\\DHG.csv",
+      "source": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
       "detail": "",
       "metric_id": "core_metric_coverage",
       "metric_name": "Core metric coverage",
@@ -495,10 +885,10 @@
         "formula": "valid_required_core_metrics / required_core_metrics",
         "inputs": {
           "ticker": "DHG",
-          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
-          "record_count": 128,
-          "accepted_record_count": 128
+          "golden_csv": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+          "golden_provenance": "config\\benchmarks\\shared\\golden_financials\\DHG_golden_provenance.json",
+          "record_count": 130,
+          "accepted_record_count": 130
         },
         "parameters": {
           "requirement_registry": "backend/valuation/data_requirements.py",
@@ -596,7 +986,7 @@
               "Local raw BCTC cache DHG 2022FY",
               "Local raw BCTC cache DHG 2023FY",
               "Local raw BCTC cache DHG 2024FY",
-              "Local raw BCTC cache DHG 2025FY"
+              "OCR DHG FY2025 p36"
             ],
             "required_by_methods": [
               "pe"
@@ -730,7 +1120,7 @@
               "Local raw BCTC cache DHG 2022FY",
               "Local raw BCTC cache DHG 2023FY",
               "Local raw BCTC cache DHG 2024FY",
-              "Local raw BCTC cache DHG 2025FY"
+              "OCR DHG FY2025 p32"
             ],
             "required_by_methods": [
               "fcff_dcf"
@@ -777,7 +1167,7 @@
               "Local raw BCTC cache DHG 2022FY",
               "Local raw BCTC cache DHG 2023FY",
               "Local raw BCTC cache DHG 2024FY",
-              "Local raw BCTC cache DHG 2025FY"
+              "OCR DHG FY2025 p22"
             ],
             "required_by_methods": [
               "ev_ebitda",
@@ -800,7 +1190,7 @@
               "Local raw BCTC cache DHG 2022FY",
               "Local raw BCTC cache DHG 2023FY",
               "Local raw BCTC cache DHG 2024FY",
-              "Local raw BCTC cache DHG 2025FY"
+              "OCR DHG FY2025 p27"
             ],
             "required_by_methods": [
               "fcff_dcf"
@@ -946,12 +1336,12 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T22:52:42.529829+00:00"
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
     },
     {
       "id": "period_completeness",
       "label": "Statement completeness",
-      "source": "config\\dataset\\golden\\financials\\DHG.csv",
+      "source": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
       "detail": "",
       "metric_id": "period_completeness",
       "metric_name": "Statement completeness",
@@ -987,10 +1377,10 @@
         "formula": "complete_required_statements / required_statements",
         "inputs": {
           "ticker": "DHG",
-          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
-          "record_count": 128,
-          "accepted_record_count": 128
+          "golden_csv": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+          "golden_provenance": "config\\benchmarks\\shared\\golden_financials\\DHG_golden_provenance.json",
+          "record_count": 130,
+          "accepted_record_count": 130
         },
         "parameters": {
           "required_period_source": "golden_provenance_and_csv"
@@ -1026,7 +1416,7 @@
           {
             "sample_origin": "required_period",
             "period": "2025FY",
-            "accepted_fact_count": 32,
+            "accepted_fact_count": 34,
             "complete": true,
             "metric_id": "period_completeness",
             "sample_index": 4
@@ -1331,12 +1721,12 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T22:52:42.529829+00:00"
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
     },
     {
       "id": "provenance_coverage",
       "label": "Source provenance coverage",
-      "source": "config\\dataset\\golden\\financials\\DHG.csv",
+      "source": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
       "detail": "",
       "metric_id": "provenance_coverage",
       "metric_name": "Source provenance coverage",
@@ -1372,10 +1762,10 @@
         "formula": "facts_with_complete_provenance / evaluated_facts",
         "inputs": {
           "ticker": "DHG",
-          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
-          "record_count": 128,
-          "accepted_record_count": 128
+          "golden_csv": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+          "golden_provenance": "config\\benchmarks\\shared\\golden_financials\\DHG_golden_provenance.json",
+          "record_count": 130,
+          "accepted_record_count": 130
         },
         "parameters": {
           "required_fields": [
@@ -1385,8 +1775,8 @@
           ]
         },
         "aggregation": "coverage",
-        "numerator": 128,
-        "denominator": 128,
+        "numerator": 130,
+        "denominator": 130,
         "per_sample_results": [
           {
             "ticker": "DHG",
@@ -1700,12 +2090,12 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T22:52:42.529829+00:00"
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
     },
     {
       "id": "official_reconciliation_rate",
       "label": "Accepted official reconciliation",
-      "source": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
+      "source": "config\\benchmarks\\shared\\golden_financials\\DHG_golden_provenance.json",
       "detail": "",
       "metric_id": "official_reconciliation_rate",
       "metric_name": "Accepted official reconciliation",
@@ -1741,11 +2131,11 @@
         "formula": "officially_reconciled_material_facts / material_facts",
         "inputs": {
           "ticker": "DHG",
-          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
-          "record_count": 128,
-          "accepted_record_count": 128,
-          "provenance_metrics_verified": 32
+          "golden_csv": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+          "golden_provenance": "config\\benchmarks\\shared\\golden_financials\\DHG_golden_provenance.json",
+          "record_count": 130,
+          "accepted_record_count": 130,
+          "provenance_metrics_verified": 34
         },
         "parameters": {
           "material_only": true,
@@ -2107,12 +2497,12 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T22:52:42.529829+00:00"
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
     },
     {
       "id": "material_ocr_error_count",
       "label": "Material OCR error count",
-      "source": "config\\dataset\\golden\\financials\\DHG.csv",
+      "source": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
       "detail": "",
       "metric_id": "material_ocr_error_count",
       "metric_name": "Material OCR error count",
@@ -2148,10 +2538,10 @@
         "formula": "material_numeric_ocr_errors_used_in_report",
         "inputs": {
           "ticker": "DHG",
-          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
-          "record_count": 128,
-          "accepted_record_count": 128
+          "golden_csv": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+          "golden_provenance": "config\\benchmarks\\shared\\golden_financials\\DHG_golden_provenance.json",
+          "record_count": 130,
+          "accepted_record_count": 130
         },
         "parameters": {
           "material_metric_config": "config/material_metrics.yml"
@@ -2492,7 +2882,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T22:52:42.529829+00:00"
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
     },
     {
       "id": "ocr_unresolved_rate",
@@ -2507,12 +2897,12 @@
       "scope": "benchmark_suite",
       "severity": "P2",
       "blocks_publish": false,
-      "value": null,
+      "value": 0.2727272727272727,
       "threshold": "<= 5%",
       "threshold_operator": "<=",
       "unit": "percent",
-      "status": "not_evaluable",
-      "legacy_status": "not_evaluable",
+      "status": "fail",
+      "legacy_status": "fail",
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
@@ -2522,8 +2912,302 @@
       "owner": "data",
       "failed_examples": [
         {
-          "reason": "evaluation_evidence_missing",
-          "source": "latest OCR metadata"
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "status": "completed",
+          "pages_processed": 0,
+          "pages_failed": 0,
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_origin": "fallback_1",
+          "sample_index": 1
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 1,
+          "unit_type": "page",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 2
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 2,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 3
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 3,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 4
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 4,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 5
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 5,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 6
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 6,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 7
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 7,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 8
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 8,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 9
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 9,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 10
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 10,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 11
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 11,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 12
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 12,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 13
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 13,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 14
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 14,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 15
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 15,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 16
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 16,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 17
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 17,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 18
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 18,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 19
+        },
+        {
+          "sample_origin": "ocr_audit_unit",
+          "ticker": "DHG",
+          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "document_id": "DHG_2025_abaaac8d3813",
+          "unit_index": 19,
+          "unit_type": "benchmark_control",
+          "status": "checked",
+          "candidate_row_count": 11,
+          "mapped_fact_count": 8,
+          "unresolved_candidate_count": 3,
+          "evidence_available": true,
+          "metric_id": "ocr_unresolved_rate",
+          "sample_index": 20
         }
       ],
       "remediation_hint": "Reduce unresolved OCR corpus errors and keep material OCR errors out of final artifacts.",
@@ -2532,7 +3216,7 @@
         "framework": "ocr_validation_gate",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": "unresolved_ocr_candidates / ocr_units_checked",
@@ -2554,11 +3238,9 @@
             "status": "completed",
             "pages_processed": 0,
             "pages_failed": 0,
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "warnings": [
-              "no_facts_extracted"
-            ],
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "warnings": [],
             "errors": []
           }
         },
@@ -2566,8 +3248,8 @@
           "unit": "candidate_rows_or_processed_pages"
         },
         "aggregation": "error_rate",
-        "numerator": 0,
-        "denominator": 0,
+        "numerator": 3,
+        "denominator": 11,
         "per_sample_results": [
           {
             "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
@@ -2575,9 +3257,9 @@
             "status": "completed",
             "pages_processed": 0,
             "pages_failed": 0,
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "metric_id": "ocr_unresolved_rate",
             "sample_origin": "fallback_1",
             "sample_index": 1
@@ -2590,9 +3272,9 @@
             "unit_index": 1,
             "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 2
@@ -2605,9 +3287,9 @@
             "unit_index": 2,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 3
@@ -2620,9 +3302,9 @@
             "unit_index": 3,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 4
@@ -2635,9 +3317,9 @@
             "unit_index": 4,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 5
@@ -2650,9 +3332,9 @@
             "unit_index": 5,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 6
@@ -2665,9 +3347,9 @@
             "unit_index": 6,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 7
@@ -2680,9 +3362,9 @@
             "unit_index": 7,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 8
@@ -2695,9 +3377,9 @@
             "unit_index": 8,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 9
@@ -2710,9 +3392,9 @@
             "unit_index": 9,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 10
@@ -2725,9 +3407,9 @@
             "unit_index": 10,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 11
@@ -2740,9 +3422,9 @@
             "unit_index": 11,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 12
@@ -2755,9 +3437,9 @@
             "unit_index": 12,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 13
@@ -2770,9 +3452,9 @@
             "unit_index": 13,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 14
@@ -2785,9 +3467,9 @@
             "unit_index": 14,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 15
@@ -2800,9 +3482,9 @@
             "unit_index": 15,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 16
@@ -2815,9 +3497,9 @@
             "unit_index": 16,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 17
@@ -2830,9 +3512,9 @@
             "unit_index": 17,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 18
@@ -2845,9 +3527,9 @@
             "unit_index": 18,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 19
@@ -2860,9 +3542,9 @@
             "unit_index": 19,
             "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 0,
-            "mapped_fact_count": 0,
-            "unresolved_candidate_count": 0,
+            "candidate_row_count": 11,
+            "mapped_fact_count": 8,
+            "unresolved_candidate_count": 3,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 20
@@ -2879,12 +3561,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T22:52:42.529829+00:00"
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
     },
     {
       "id": "duplicate_fact_count",
       "label": "Duplicate canonical fact count",
-      "source": "config\\dataset\\golden\\financials\\DHG.csv",
+      "source": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
       "detail": "",
       "metric_id": "duplicate_fact_count",
       "metric_name": "Duplicate canonical fact count",
@@ -2920,10 +3602,10 @@
         "formula": "duplicate_canonical_keys",
         "inputs": {
           "ticker": "DHG",
-          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
-          "record_count": 128,
-          "accepted_record_count": 128
+          "golden_csv": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+          "golden_provenance": "config\\benchmarks\\shared\\golden_financials\\DHG_golden_provenance.json",
+          "record_count": 130,
+          "accepted_record_count": 130
         },
         "parameters": {
           "dedupe_key": [
@@ -2935,7 +3617,7 @@
         },
         "aggregation": "error_count",
         "numerator": 0,
-        "denominator": 128,
+        "denominator": 130,
         "per_sample_results": [
           {
             "sample_origin": "canonical_dedupe_key",
@@ -3169,13 +3851,13 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T22:52:42.529829+00:00"
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
     },
     {
       "id": "valuation_method_data_readiness",
       "label": "Valuation method data readiness",
-      "source": "storage\\runs\\validation_dhg2\\valuation.json",
-      "detail": "",
+      "source": "storage\\runs\\validation_dhg\\valuation.json",
+      "detail": "data_requirement_or_reconciliation_gate_failed",
       "metric_id": "valuation_method_data_readiness",
       "metric_name": "Valuation method data readiness",
       "category": "data_quality",
@@ -3184,12 +3866,12 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": true,
+      "value": false,
       "threshold": "= true",
       "threshold_operator": "=",
       "unit": "boolean",
-      "status": "pass",
-      "legacy_status": "pass",
+      "status": "fail",
+      "legacy_status": "fail",
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
@@ -3197,7 +3879,19 @@
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "reason": "pandera_schema_validation_failed",
+          "failure_case": {
+            "column": "",
+            "failure_case": false,
+            "index": "",
+            "schema_context": "DataFrameSchema",
+            "check": "accepted_fact_confidence_min",
+            "check_number": 2
+          }
+        }
+      ],
       "remediation_hint": "Complete valuation input facts, Pandera schema validation, deduplication, and official reconciliation before valuation.",
       "evaluator": {
         "id": "valuation_method_data_readiness",
@@ -3209,11 +3903,11 @@
       "calculation": {
         "formula": "core_metric_coverage >= 95% and official_reconciliation_rate >= 95% and duplicate_fact_count = 0 and dataframe_schema_validity = true",
         "inputs": {
-          "valuation_artifact": "storage\\runs\\validation_dhg2\\valuation.json",
+          "valuation_artifact": "storage\\runs\\validation_dhg\\valuation.json",
           "core_metric_coverage": 1.0,
           "official_reconciliation_rate": 1.0,
           "duplicate_fact_count": 0,
-          "pandera_passed": true
+          "pandera_passed": false
         },
         "parameters": {
           "minimum_core_metric_coverage": 0.95,
@@ -3222,9 +3916,23 @@
           "requires_pandera_schema_validity": true
         },
         "aggregation": "boolean_gate",
-        "numerator": 1,
+        "numerator": 0,
         "denominator": 1,
         "per_sample_results": [
+          {
+            "reason": "pandera_schema_validation_failed",
+            "failure_case": {
+              "column": "",
+              "failure_case": false,
+              "index": "",
+              "schema_context": "DataFrameSchema",
+              "check": "accepted_fact_confidence_min",
+              "check_number": 2
+            },
+            "metric_id": "valuation_method_data_readiness",
+            "sample_origin": "fallback_1",
+            "sample_index": 1
+          },
           {
             "sample_origin": "valuation_requirement",
             "canonical_key": "capex.total",
@@ -3246,7 +3954,7 @@
               "fcff_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 1
+            "sample_index": 2
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3269,7 +3977,7 @@
               "fcff_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 2
+            "sample_index": 3
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3292,7 +4000,7 @@
               "fcff_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 3
+            "sample_index": 4
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3308,13 +4016,13 @@
               "Local raw BCTC cache DHG 2022FY",
               "Local raw BCTC cache DHG 2023FY",
               "Local raw BCTC cache DHG 2024FY",
-              "Local raw BCTC cache DHG 2025FY"
+              "OCR DHG FY2025 p36"
             ],
             "required_by_methods": [
               "pe"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 4
+            "sample_index": 5
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3337,7 +4045,7 @@
               "fcff_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 5
+            "sample_index": 6
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3359,7 +4067,7 @@
               "fcfe_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 6
+            "sample_index": 7
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3381,7 +4089,7 @@
               "fcfe_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 7
+            "sample_index": 8
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3404,7 +4112,7 @@
               "fcff_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 8
+            "sample_index": 9
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3426,7 +4134,7 @@
               "fcfe_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 9
+            "sample_index": 10
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3442,13 +4150,13 @@
               "Local raw BCTC cache DHG 2022FY",
               "Local raw BCTC cache DHG 2023FY",
               "Local raw BCTC cache DHG 2024FY",
-              "Local raw BCTC cache DHG 2025FY"
+              "OCR DHG FY2025 p32"
             ],
             "required_by_methods": [
               "fcff_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 10
+            "sample_index": 11
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3473,7 +4181,7 @@
               "pe"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 11
+            "sample_index": 12
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3489,14 +4197,14 @@
               "Local raw BCTC cache DHG 2022FY",
               "Local raw BCTC cache DHG 2023FY",
               "Local raw BCTC cache DHG 2024FY",
-              "Local raw BCTC cache DHG 2025FY"
+              "OCR DHG FY2025 p22"
             ],
             "required_by_methods": [
               "ev_ebitda",
               "fcff_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 12
+            "sample_index": 13
           },
           {
             "sample_origin": "valuation_requirement",
@@ -3512,13 +4220,13 @@
               "Local raw BCTC cache DHG 2022FY",
               "Local raw BCTC cache DHG 2023FY",
               "Local raw BCTC cache DHG 2024FY",
-              "Local raw BCTC cache DHG 2025FY"
+              "OCR DHG FY2025 p27"
             ],
             "required_by_methods": [
               "fcff_dcf"
             ],
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 13
+            "sample_index": 14
           },
           {
             "sample_origin": "valuation_policy_check",
@@ -3533,7 +4241,7 @@
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 14
+            "sample_index": 15
           },
           {
             "sample_origin": "valuation_policy_check",
@@ -3548,7 +4256,7 @@
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 15
+            "sample_index": 16
           },
           {
             "sample_origin": "valuation_policy_check",
@@ -3563,7 +4271,7 @@
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 16
+            "sample_index": 17
           },
           {
             "sample_origin": "valuation_policy_check",
@@ -3578,7 +4286,7 @@
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 17
+            "sample_index": 18
           },
           {
             "sample_origin": "valuation_policy_check",
@@ -3593,27 +4301,12 @@
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
-            "sample_index": 18
-          },
-          {
-            "sample_origin": "valuation_policy_check",
-            "method": "BLEND",
-            "check": "sensitivity_present",
-            "passed": false,
-            "value": false,
-            "blocking_reasons": [
-              "fcfe_unavailable_for_blend",
-              "blend_sensitivity_missing_or_constant",
-              "blend_is_draft_only"
-            ],
-            "confidence": "low",
-            "metric_id": "valuation_method_data_readiness",
             "sample_index": 19
           },
           {
             "sample_origin": "valuation_policy_check",
             "method": "BLEND",
-            "check": "sensitivity_varies",
+            "check": "sensitivity_present",
             "passed": false,
             "value": false,
             "blocking_reasons": [
@@ -3637,13 +4330,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T22:52:42.529829+00:00"
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
     },
     {
       "id": "dataframe_schema_validity",
       "label": "Pandera DataFrame schema validity",
-      "source": "config\\dataset\\golden\\financials\\DHG.csv",
-      "detail": "",
+      "source": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+      "detail": "pandera_schema_validation_failed",
       "metric_id": "dataframe_schema_validity",
       "metric_name": "Pandera DataFrame schema validity",
       "category": "data_quality",
@@ -3652,12 +4345,12 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": true,
+      "value": false,
       "threshold": "= true",
       "threshold_operator": "=",
       "unit": "boolean",
-      "status": "pass",
-      "legacy_status": "pass",
+      "status": "fail",
+      "legacy_status": "fail",
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
@@ -3665,7 +4358,16 @@
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "benchmark_metric_registry_v1",
       "owner": "data",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "column": "",
+          "failure_case": false,
+          "index": "",
+          "schema_context": "DataFrameSchema",
+          "check": "accepted_fact_confidence_min",
+          "check_number": 2
+        }
+      ],
       "remediation_hint": "Repair the connector DataFrame rows reported by Pandera before normalization.",
       "evaluator": {
         "id": "dataframe_schema_validity",
@@ -3678,10 +4380,10 @@
         "formula": "pandera_dataframe_schema_validation",
         "inputs": {
           "ticker": "DHG",
-          "golden_csv": "config\\dataset\\golden\\financials\\DHG.csv",
-          "golden_provenance": "config\\dataset\\golden\\financials\\DHG_golden_provenance.json",
-          "record_count": 128,
-          "accepted_record_count": 128
+          "golden_csv": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+          "golden_provenance": "config\\benchmarks\\shared\\golden_financials\\DHG_golden_provenance.json",
+          "record_count": 130,
+          "accepted_record_count": 130
         },
         "parameters": {
           "strict": false,
@@ -3692,11 +4394,14 @@
             "period",
             "statement_type",
             "canonical_key",
+            "raw_label",
             "value",
             "unit",
             "currency",
+            "source_type",
             "source_uri",
             "source_title",
+            "provider",
             "confidence",
             "validation_status"
           ]
@@ -3716,7 +4421,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 1
           },
@@ -3731,7 +4436,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 2
           },
@@ -3746,7 +4451,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 3
           },
@@ -3761,7 +4466,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 4
           },
@@ -3776,7 +4481,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 5
           },
@@ -3791,7 +4496,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 6
           },
@@ -3806,7 +4511,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 7
           },
@@ -3821,7 +4526,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 8
           },
@@ -3836,7 +4541,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 9
           },
@@ -3851,7 +4556,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 10
           },
@@ -3866,7 +4571,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 11
           },
@@ -3881,7 +4586,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 12
           },
@@ -3896,7 +4601,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 13
           },
@@ -3911,7 +4616,7 @@
             "source_title": "Derived shares from local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 14
           },
@@ -3926,7 +4631,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 15
           },
@@ -3941,7 +4646,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 16
           },
@@ -3956,7 +4661,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 17
           },
@@ -3971,7 +4676,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 18
           },
@@ -3986,7 +4691,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 19
           },
@@ -4001,7 +4706,7 @@
             "source_title": "Local raw BCTC cache DHG 2022FY",
             "validation_status": "accepted",
             "sample_origin": "source_row",
-            "schema_valid": true,
+            "schema_valid": false,
             "metric_id": "dataframe_schema_validity",
             "sample_index": 20
           }
@@ -4017,7 +4722,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-14T22:52:42.529829+00:00"
+      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
     }
   ],
   "core_metric_coverage": 1.0,
@@ -4025,16 +4730,52 @@
   "provenance_coverage": 1.0,
   "official_reconciliation_rate": 1.0,
   "material_ocr_error_count": 0,
-  "ocr_unresolved_rate": null,
+  "ocr_unresolved_rate": 0.2727272727272727,
   "duplicate_fact_count": 0,
   "duplicate_fact_rate": 0.0,
-  "data_reliability_score": 0.9913486842105264,
-  "accepted_fact_confidence": 0.9178125,
-  "valuation_method_data_readiness": true,
+  "data_reliability_score": 0.8767944055944056,
+  "accepted_fact_confidence": 0.9043076923076924,
+  "valuation_method_data_readiness": false,
+  "raw_bctc_non_empty": true,
+  "raw_bctc": {
+    "ticker": "DHG",
+    "raw_dir": "data\\raw\\bctc\\DHG",
+    "required_files": 4,
+    "found_files": 4,
+    "non_empty_files": 4,
+    "all_required_files_present": true,
+    "all_required_files_non_empty": true,
+    "files": [
+      {
+        "file": "income_statement_year.json",
+        "path": "data\\raw\\bctc\\DHG\\income_statement_year.json",
+        "status": "non_empty",
+        "record_count": 25
+      },
+      {
+        "file": "balance_sheet_year.json",
+        "path": "data\\raw\\bctc\\DHG\\balance_sheet_year.json",
+        "status": "non_empty",
+        "record_count": 122
+      },
+      {
+        "file": "cash_flow_year.json",
+        "path": "data\\raw\\bctc\\DHG\\cash_flow_year.json",
+        "status": "non_empty",
+        "record_count": 41
+      },
+      {
+        "file": "ratio_year.json",
+        "path": "data\\raw\\bctc\\DHG\\ratio_year.json",
+        "status": "non_empty",
+        "record_count": 54
+      }
+    ]
+  },
   "valuation_policy": {
     "ticker": "DHG",
     "run_id": null,
-    "valuation_artifact_path": "storage\\runs\\validation_dhg2\\valuation.json",
+    "valuation_artifact_path": "storage\\runs\\validation_dhg\\valuation.json",
     "computed_methods": [
       "FCFF",
       "BLEND",
@@ -4074,14 +4815,14 @@
       "valuation_method_divergence_critical"
     ],
     "warnings": [],
-    "divergence_pct": 0.9399823890887291,
+    "divergence_pct": 0.9399868336979882,
     "target_price_vnd": null,
     "method_diagnostics": {
       "FCFF": {
         "method_name": "FCFF",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 106752.0,
+        "target_price_vnd": 103294.0,
         "confidence": "low",
         "role": "scenario_only",
         "blocking_reasons": [
@@ -4121,7 +4862,7 @@
         "method_name": "BLEND",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 106752.0,
+        "target_price_vnd": 103294.0,
         "confidence": "low",
         "role": "scenario_only",
         "blocking_reasons": [
@@ -4161,7 +4902,7 @@
         "method_name": "CORE_PE_NET_CASH",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 207097.0,
+        "target_price_vnd": 200389.0,
         "confidence": "medium",
         "role": "cross_check",
         "blocking_reasons": [
@@ -4195,27 +4936,34 @@
     "status": "completed",
     "pages_processed": 0,
     "pages_failed": 0,
-    "candidate_row_count": 0,
-    "mapped_fact_count": 0,
-    "warnings": [
-      "no_facts_extracted"
-    ],
+    "candidate_row_count": 11,
+    "mapped_fact_count": 8,
+    "warnings": [],
     "errors": []
   },
   "pandera": {
     "execution_status": "executed",
     "framework": "pandera",
     "framework_version": "0.31.1",
-    "sample_size": 128,
-    "passed": true,
-    "failure_cases": [],
-    "reason": null
+    "sample_size": 130,
+    "passed": false,
+    "failure_cases": [
+      {
+        "column": "",
+        "failure_case": false,
+        "index": "",
+        "schema_context": "DataFrameSchema",
+        "check": "accepted_fact_confidence_min",
+        "check_number": 2
+      }
+    ],
+    "reason": "pandera_schema_validation_failed"
   },
   "golden_provenance": {
     "ticker": "DHG",
     "verified_by": "build_golden_financials_from_raw",
     "verification_date": "2026-06-14",
-    "source_tier": 3,
+    "source_tier": 2,
     "source_document_type": "financial_statement",
     "fiscal_year": 2025,
     "fiscal_period": "FY",
@@ -4234,8 +4982,10 @@
     "metrics_verified": [
       "accounts_payable.ending",
       "accounts_receivable.ending",
+      "admin_expense.total",
       "capex.total",
       "cash_and_equivalents.ending",
+      "charter_capital.ending",
       "cogs.total",
       "current_assets.ending",
       "current_liabilities.ending",
@@ -4265,6 +5015,8 @@
       "total_assets.ending",
       "total_liabilities.ending"
     ],
-    "checksum": "sha256:pending"
+    "checksum": "sha256:pending",
+    "ocr_export_at": "2026-06-15T03:45:32.666535+00:00",
+    "ocr_facts_added": 8
   }
 }

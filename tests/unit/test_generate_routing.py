@@ -48,11 +48,26 @@ def test_fast_render_marks_failed_with_blocking_reason(monkeypatch):
         raise RuntimeError("render exploded")
 
     monkeypatch.setattr(rd, "render_and_store", boom)
+    monkeypatch.setattr(rd, "existing_client_report_available", lambda ticker: False)
     store = FakeStore()
     _orchestrator(store)._fast_render(_ctx({"generate_mode": "fast_render", "source_run_id": "src1"}))
 
     assert store.states[-1] == ("failed", "PUBLISH", True)
     assert any("blocking_reason" in p for p in store.progress)
+
+
+def test_fast_render_uses_existing_export_when_rerender_fails(monkeypatch):
+    def boom(ticker, run_id, **kw):
+        raise RuntimeError("run artifacts unavailable")
+
+    monkeypatch.setattr(rd, "render_and_store", boom)
+    monkeypatch.setattr(rd, "existing_client_report_available", lambda ticker: True)
+    store = FakeStore()
+    _orchestrator(store)._fast_render(_ctx({"generate_mode": "fast_render", "source_run_id": "src1"}))
+
+    assert store.states[-1] == ("auto_exported", "PUBLISH", True)
+    assert any(p.get("substep") == "export_available" for p in store.progress)
+    assert not any("blocking_reason" in p for p in store.progress)
 
 
 def test_render_after_run_renders_only_when_renderable(monkeypatch):

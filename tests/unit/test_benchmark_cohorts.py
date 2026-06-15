@@ -17,7 +17,6 @@ def test_default_benchmark_cohort_is_diverse_and_not_single_ticker() -> None:
     assert len(set(tickers)) == len(tickers)
     assert tickers != ["DBD"]
     assert "DBD" in tickers
-    assert "CON" not in tickers
 
 
 def test_available_benchmark_cohorts_expose_more_than_one_archetype() -> None:
@@ -49,11 +48,11 @@ def test_resolve_benchmark_tickers_deduplicates_and_normalizes_explicit_inputs()
 
 def test_resolve_benchmark_tickers_allows_ad_hoc_dataset_when_requested() -> None:
     tickers = resolve_benchmark_tickers(
-        tickers=[" con "],
+        tickers=[" zzz "],
         validate_against_universe=False,
     )
 
-    assert tickers == ["CON"]
+    assert tickers == ["ZZZ"]
 
 
 def test_benchmark_suite_aggregate_counts_statuses() -> None:

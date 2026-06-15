@@ -443,7 +443,7 @@ def test_data_reliability_flags_unverified_material_reconciliation(tmp_path) -> 
 
 
 def test_data_reliability_explains_empty_raw_bctc_when_golden_missing(tmp_path) -> None:
-    raw_dir = tmp_path / "data" / "raw" / "bctc" / "CON"
+    raw_dir = tmp_path / "data" / "raw" / "bctc" / "ZZZ"
     raw_dir.mkdir(parents=True)
     for name in (
         "income_statement_year.json",
@@ -456,7 +456,7 @@ def test_data_reliability_explains_empty_raw_bctc_when_golden_missing(tmp_path) 
             encoding="utf-8",
         )
 
-    result = evaluate_data_reliability(tmp_path, "CON")
+    result = evaluate_data_reliability(tmp_path, "ZZZ")
     metrics = {metric["id"]: metric for metric in result["metrics"]}
     metric = metrics["raw_bctc_non_empty"]
 

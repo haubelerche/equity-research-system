@@ -65,11 +65,14 @@ def test_pandera_adapter_reports_dependency_or_executes_schema() -> None:
         "period": "2025FY",
         "statement_type": "income_statement",
         "canonical_key": "revenue.net",
+        "raw_label": "Revenue",
         "value": "100",
         "unit": "vnd_bn",
         "currency": "VND",
+        "source_type": "financial_statement",
         "source_uri": "https://example.com/report.pdf",
         "source_title": "Annual report",
+        "provider": "golden_csv",
         "confidence": "0.95",
         "validation_status": "accepted",
     }])
@@ -87,11 +90,14 @@ def _base_row(**overrides):
         "period": "2025FY",
         "statement_type": "income_statement",
         "canonical_key": "revenue.net",
+        "raw_label": "Revenue",
         "value": "100",
         "unit": "vnd_bn",
         "currency": "VND",
+        "source_type": "financial_statement",
         "source_uri": "https://example.com/report.pdf",
         "source_title": "Annual report",
+        "provider": "golden_csv",
         "confidence": "0.95",
         "validation_status": "accepted",
     }
@@ -135,14 +141,15 @@ def test_pandera_rejects_confidence_outside_range() -> None:
         assert result["failure_cases"]
 
 
-def test_pandera_accepts_rejected_revenue_net_with_negative_value() -> None:
+def test_pandera_rejects_revenue_net_with_negative_value_even_when_rejected() -> None:
     result = validate_financial_records_with_pandera([
         _base_row(validation_status="rejected", value="-50")
     ])
 
     assert result["framework"] == "pandera"
     if result["execution_status"] == "executed":
-        assert result["passed"] is True
+        assert result["passed"] is False
+        assert result["failure_cases"]
 
 
 def test_pandera_rejects_schema_negative_fixtures() -> None:

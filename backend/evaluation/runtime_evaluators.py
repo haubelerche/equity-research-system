@@ -1099,9 +1099,9 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
                                  "coerce": True,
                                  "required_columns": [
                                      "ticker", "fiscal_year", "period",
-                                     "statement_type", "canonical_key", "value",
-                                     "unit", "currency", "source_uri",
-                                     "source_title", "confidence",
+                                     "statement_type", "canonical_key", "raw_label",
+                                     "value", "unit", "currency", "source_type",
+                                     "source_uri", "source_title", "provider", "confidence",
                                      "validation_status",
                                  ],
                              },

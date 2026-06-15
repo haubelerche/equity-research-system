@@ -17,6 +17,11 @@ class FakeStorage:
         return {}
 
 
+class FakeExistingStorage:
+    def exists(self, bucket, path):
+        return bucket == "exports" and path == "client_reports/TRA/report.pdf"
+
+
 def _fake_render_client(*, run_id, ticker, mode, output_dir):
     pdf = Path(output_dir) / f"{ticker}_report.pdf"
     pdf.write_bytes(b"%PDF-1.4 report")
@@ -51,6 +56,24 @@ def test_render_and_store_uploads_both_pdfs_to_exports():
     }
     assert all(u[4] is True for u in storage.uploads)
     assert all(u[3] == "application/pdf" for u in storage.uploads)
+
+
+def test_existing_client_report_available_uses_export_storage(tmp_path):
+    assert report_delivery.existing_client_report_available(
+        "tra",
+        storage=FakeExistingStorage(),
+        output_dir=tmp_path,
+    )
+
+
+def test_existing_client_report_available_uses_local_output(tmp_path):
+    (tmp_path / "TRA_report.pdf").write_bytes(b"%PDF-1.4 report")
+
+    assert report_delivery.existing_client_report_available(
+        "tra",
+        storage=None,
+        output_dir=tmp_path,
+    )
 
 
 def test_latest_renderable_run_accepts_report_model_or_draft_valuation_artifacts():

@@ -62,6 +62,22 @@ class FullReportOrchestrator:
 
             render_and_store(context.ticker, source_run_id)
         except Exception as exc:  # noqa: BLE001
+            from backend.reporting.report_delivery import existing_client_report_available
+
+            if existing_client_report_available(context.ticker):
+                self.store.update_run_progress(
+                    context.run_id,
+                    substep="export_available",
+                    detail="Existing report export is still available; skipped failed re-render.",
+                )
+                self.store.update_run_state(context.run_id, "auto_exported", "PUBLISH", finished=True)
+                _log.warning(
+                    "fast render failed for %s run=%s, using existing export: %s",
+                    context.ticker,
+                    context.run_id,
+                    exc,
+                )
+                return None
             self.store.update_run_progress(
                 context.run_id,
                 blocking_reason=f"Không dựng được file báo cáo cho {context.ticker}.",

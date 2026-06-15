@@ -20,6 +20,31 @@ from backend.reporting.final_report_renderer import (
 from backend.storage import EXPORTS_BUCKET, SupabaseStorageAdapter, client_report_key
 
 
+def existing_client_report_available(
+    ticker: str,
+    *,
+    storage: SupabaseStorageAdapter | None = None,
+    output_dir: str | Path = "output",
+) -> bool:
+    """Return True when a downloadable report already exists for *ticker*.
+
+    Fast-render is an optimization over an existing renderable run. If re-rendering
+    fails because the run-scoped artifacts are unavailable locally, an existing
+    ticker-stable export should remain downloadable instead of turning the UI run
+    into a hard failure.
+    """
+    ticker = ticker.upper()
+    try:
+        adapter = storage or SupabaseStorageAdapter()
+        if adapter.exists(EXPORTS_BUCKET, client_report_key(ticker, "report.pdf")):
+            return True
+    except Exception:
+        pass
+
+    local_report = Path(output_dir) / f"{ticker}_report.pdf"
+    return local_report.is_file()
+
+
 def latest_renderable_run_id(ticker: str) -> str | None:
     """Newest run for *ticker* that has artifacts a report can be rendered from.
 
