@@ -51,11 +51,11 @@ export const EVAL_LAYERS: EvalLayer[] = [
     artifact: "retrieval_eval.json",
     metrics: [
       metric("hit_rate_at_5", "Tỷ lệ truy vấn có bằng chứng đúng trong top 5", "Hit-rate@5", "%", "gte", 0.9, "Golden Retrieval Set", "Số truy vấn có ít nhất một evidence đúng trong top 5 / Tổng số truy vấn", { thresholdLabel: "≥ 90%", metricType: "coverage", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
-      metric("mrr_at_5", "Thứ hạng nghịch đảo trung bình trong top 5", "MRR@5", "", "gte", 0.75, "Golden Retrieval Set", "Trung bình nghịch đảo thứ hạng của evidence đúng đầu tiên trong top 5", { thresholdLabel: "≥ 0.75", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
-      metric("context_precision", "Độ chính xác của ngữ cảnh truy xuất", "Context Precision", "", "gte", 0.8, "Ragas", "Tỷ lệ context retrieved thực sự liên quan", { thresholdLabel: "≥ 0.80", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
-      metric("context_recall", "Độ bao phủ bằng chứng cần thiết", "Context Recall", "", "gte", 0.8, "Ragas", "Tỷ lệ bằng chứng cần thiết được retrieve", { thresholdLabel: "≥ 0.80", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
-      metric("faithfulness", "Mức độ bám sát bằng chứng", "Faithfulness", "", "gte", 0.85, "Ragas", "Điểm nội dung bám evidence", { thresholdLabel: "≥ 0.85", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
-      metric("response_relevancy", "Mức độ đúng trọng tâm câu trả lời", "Response Relevancy", "", "gte", 0.85, "Ragas", "Điểm câu trả lời đúng trọng tâm truy vấn", { thresholdLabel: "≥ 0.85", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
+      metric("mrr_at_5", "Thứ hạng nghịch đảo trung bình trong top 5", "MRR@5", "%", "gte", 0.75, "Golden Retrieval Set", "Trung bình nghịch đảo thứ hạng của evidence đúng đầu tiên trong top 5", { thresholdLabel: "≥ 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
+      metric("context_precision", "Độ chính xác của ngữ cảnh truy xuất", "Context Precision", "%", "gte", 0.8, "Ragas", "Tỷ lệ context retrieved thực sự liên quan", { thresholdLabel: "≥ 80%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
+      metric("context_recall", "Độ bao phủ bằng chứng cần thiết", "Context Recall", "%", "gte", 0.8, "Ragas", "Tỷ lệ bằng chứng cần thiết được retrieve", { thresholdLabel: "≥ 80%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
+      metric("faithfulness", "Mức độ bám sát bằng chứng", "Faithfulness", "%", "gte", 0.85, "Ragas", "Điểm nội dung bám evidence", { thresholdLabel: "≥ 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
+      metric("response_relevancy", "Mức độ đúng trọng tâm câu trả lời", "Response Relevancy", "%", "gte", 0.85, "Ragas", "Điểm câu trả lời đúng trọng tâm truy vấn", { thresholdLabel: "≥ 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("source_tier_hit_rate", "Tỷ lệ truy vấn trọng yếu có nguồn ưu tiên trong top-k", "Source-tier hit rate", "%", "gte", 0.9, "Source-tier Retrieval Audit", "Số truy vấn trọng yếu có nguồn cấp ưu tiên trong top-k / Tổng truy vấn trọng yếu", { thresholdLabel: "≥ 90%", metricType: "coverage", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
     ],
     methodology: [
@@ -94,27 +94,8 @@ export const EVAL_LAYERS: EvalLayer[] = [
     ],
   },
   {
-    id: "citation",
-    title: "4 - Citation va nguon bang chung",
-    subtitle: "Kiem tra citation coverage, resolver, numeric support va source tier cho cac claim trong bao cao",
-    artifact: "citation_eval.json",
-    metrics: [
-      metric("citation.quant_coverage", "Coverage citation cho claim dinh luong", "Quantitative claim citation coverage", "%", "gte", 1, "Citation Provenance Gate", "So claim dinh luong co citation hop le / Tong claim dinh luong", { aliases: ["quantitative_citation_coverage", "quant_citation_coverage"], thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("citation.resolver_success", "Ty le citation resolver thanh cong", "Citation resolver success", "%", "gte", 1, "Citation Resolver", "So citation key resolve duoc den artifact hop le / Tong citation key", { aliases: ["citation_key_resolution"], thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("citation.source_id_validity", "Tinh hop le cua source_id", "Source ID validity", "%", "gte", 1, "Source Registry", "So source_id hop le / Tong source_id duoc dung", { aliases: ["source_id_validity"], thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("citation.numeric_mismatch", "So sai lech so lieu giua claim va citation", "Numeric citation mismatch", "", "lte", 0, "Numeric Claim Gate", "So claim co gia tri khong khop bang chung citation", { aliases: ["numeric_mismatch_rate"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("citation.tier3_only_material_claim", "So claim trong yeu chi co nguon Tier 3", "Tier-3-only material claim", "", "lte", 0, "Source Tier Policy", "So claim trong yeu khong co nguon chinh thuc hoac uy tin hon Tier 3", { aliases: ["tier3_only_material_claims"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("citation.generic_citation_label", "So citation label chung chung", "Generic citation label", "", "lte", 0, "Citation Precision Gate", "So citation khong chi ro tai lieu, chunk, page hoac artifact cu the", { aliases: ["generic_citations"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("citation.catalyst_evidence_span_missing", "So catalyst thieu evidence span", "Catalyst evidence span missing", "", "lte", 0, "Catalyst Evidence Gate", "So catalyst claim thieu span-level evidence", { aliases: ["catalyst_without_evidence"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
-    ],
-    methodology: [
-      "Citation la release gate rieng, khong bi an trong panel RAG.",
-      "Claim trong yeu chi duoc phep vao final export khi citation resolve duoc, source tier phu hop va gia tri numeric khop bang chung.",
-    ],
-  },
-  {
     id: "agent",
-    title: "5 · Hiệu quả Agent và LLM Judge",
+    title: "4 · Hiệu quả Agent và LLM Judge",
     subtitle: "Đánh giá tuân thủ vai trò, quyền công cụ, cấu trúc đầu ra và chất lượng lập luận",
     artifact: "agent_eval.json",
     metrics: [
@@ -134,26 +115,26 @@ export const EVAL_LAYERS: EvalLayer[] = [
   },
   {
     id: "report_quality",
-    title: "6 - Chat luong bao cao",
-    subtitle: "Danh gia rubric bao cao, do day du section, forecast rationale va valuation transparency",
+    title: "5 · Chất lượng báo cáo",
+    subtitle: "Đánh giá rubric báo cáo, độ đầy đủ của section, lý giải forecast và tính minh bạch định giá",
     artifact: "report_eval.json",
     artifactAliases: ["report_quality_eval.json"],
     metrics: [
-      metric("report.quality_total", "Diem chat luong bao cao tong hop", "Report quality total", "", "gte", 85, "Report Quality Rubric", "Tong diem rubric report quality tren cac section bat buoc", { aliases: ["report_quality_score"], thresholdLabel: ">= 85", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
-      metric("report.completeness", "Do day du cua bao cao", "Report completeness", "%", "gte", 90, "Report Completeness Gate", "So section, bang va chart bat buoc da co / Tong yeu cau", { thresholdLabel: ">= 90%", metricType: "coverage", scope: "report_run", severity: "P1", blocksPublish: true }),
-      metric("report.financial_analysis_depth", "Do sau phan tich tai chinh", "Financial analysis depth", "", "gte", 80, "Report Quality Rubric", "Diem rubric cho driver tai chinh cu the theo cong ty", { thresholdLabel: ">= 80", metricType: "score", scope: "report_run", severity: "P2", blocksPublish: false }),
-      metric("report.forecast_rationale", "Chat luong ly giai forecast", "Forecast rationale", "", "gte", 80, "Report Quality Rubric", "Diem rubric cho revenue, margin, capex va NWC driver rationale", { thresholdLabel: ">= 80", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
-      metric("report.valuation_transparency", "Tinh minh bach dinh gia", "Valuation transparency", "", "gte", 85, "Valuation Transparency Gate", "Diem rubric cho method selection, assumptions, WACC, bridge va sensitivity", { thresholdLabel: ">= 85", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: true }),
-      metric("report.evidence_integration", "Muc do tich hop bang chung", "Evidence integration", "", "gte", 80, "Report Quality Rubric", "Diem rubric cho muc do gan claim voi evidence va formula trace", { thresholdLabel: ">= 80", metricType: "score", scope: "report_run", severity: "P2", blocksPublish: false }),
+      metric("report.quality_total", "Điểm chất lượng báo cáo tổng hợp", "Report quality total", "", "gte", 85, "Report Quality Rubric", "Tổng điểm rubric report quality trên các section bắt buộc", { aliases: ["report_quality_score"], thresholdLabel: ">= 85", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
+      metric("report.completeness", "Độ đầy đủ của báo cáo", "Report completeness", "%", "gte", 90, "Report Completeness Gate", "Số section, bảng và chart bắt buộc đã có / Tổng yêu cầu", { thresholdLabel: ">= 90%", metricType: "coverage", scope: "report_run", severity: "P1", blocksPublish: true }),
+      metric("report.financial_analysis_depth", "Độ sâu phân tích tài chính", "Financial analysis depth", "", "gte", 80, "Report Quality Rubric", "Điểm rubric cho driver tài chính cụ thể theo công ty", { thresholdLabel: ">= 80", metricType: "score", scope: "report_run", severity: "P2", blocksPublish: false }),
+      metric("report.forecast_rationale", "Chất lượng lý giải forecast", "Forecast rationale", "", "gte", 80, "Report Quality Rubric", "Điểm rubric cho revenue, margin, capex và NWC driver rationale", { thresholdLabel: ">= 80", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
+      metric("report.valuation_transparency", "Tính minh bạch định giá", "Valuation transparency", "", "gte", 85, "Valuation Transparency Gate", "Điểm rubric cho method selection, assumptions, WACC, bridge và sensitivity", { thresholdLabel: ">= 85", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: true }),
+      metric("report.evidence_integration", "Mức độ tích hợp bằng chứng", "Evidence integration", "", "gte", 80, "Report Quality Rubric", "Điểm rubric cho mức độ gắn claim với evidence và formula trace", { thresholdLabel: ">= 80", metricType: "score", scope: "report_run", severity: "P2", blocksPublish: false }),
     ],
     methodology: [
-      "Report quality la diagnostic va release gate rieng cho completeness va valuation transparency.",
-      "Rubric score khong duoc ghi de loi deterministic, citation hoac publication readiness.",
+      "Report quality là diagnostic và release gate riêng cho completeness và valuation transparency.",
+      "Rubric score không được ghi đè lỗi deterministic hoặc các cổng kiểm soát xuất bản khác.",
     ],
   },
   {
     id: "observability",
-    title: "7 · Vận hành, chi phí và độ trễ",
+    title: "6 · Vận hành, chi phí và độ trễ",
     subtitle: "Theo dõi độ ổn định, phương án dự phòng và lỗi trong quá trình tạo báo cáo",
     artifact: "observability_eval.json",
     metrics: [
@@ -175,35 +156,15 @@ export const EVAL_LAYERS: EvalLayer[] = [
       "Bản cuối chỉ được xuất khi không còn lỗi tải artifact hoặc lỗi render PDF.",
     ],
   },
-  {
-    id: "publication_readiness",
-    title: "8 - Publication readiness",
-    subtitle: "Kiem tra package validation, model lock, snapshot match va final approval boundary",
-    artifact: "publication_readiness.json",
-    artifactAliases: ["publication_readiness_eval.json", "rollout_ci_eval.json"],
-    metrics: [
-      metric("publication.package_validation_passed", "Package validation passed", "Package validation passed", "", "gte", 1, "Publication Package Gate", "Package artifact khong co blocker truoc khi export", { aliases: ["package_validation_passed"], thresholdLabel: "= true", metricType: "boolean", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("publication.report_quality_allow_export", "Report quality allow_export", "Report quality allow_export", "", "gte", 1, "Report Quality Gate", "Report quality decision phai cho phep export", { aliases: ["report_quality_allow_export"], thresholdLabel: "= true", metricType: "boolean", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("publication.publishable_model_locked", "Publishable model locked", "Publishable model locked", "", "gte", 1, "Model Lock Gate", "publishable_final_report_model da duoc promote va lock", { aliases: ["publishable_model_locked"], thresholdLabel: "= true", metricType: "boolean", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("publication.snapshot_match", "Report va valuation snapshot khop nhau", "Report and valuation snapshot match", "", "gte", 1, "Snapshot Consistency Gate", "Report artifact va valuation artifact cung snapshot_id", { aliases: ["snapshot_match"], thresholdLabel: "= true", metricType: "boolean", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("publication.final_approval_present", "Final approval present", "Final approval present", "", "gte", 1, "Human Approval Gate", "Da co final_report approval truoc client-final export", { aliases: ["final_approval_present"], thresholdLabel: "= true", metricType: "boolean", scope: "report_run", severity: "P0", blocksPublish: true }),
-    ],
-    methodology: [
-      "Publication readiness la lop cuoi cung va khong duoc suy dien tu diem dashboard.",
-      "Client-final chi hop le khi artifact benchmark xac nhan package, snapshot, model lock va human approval.",
-    ],
-  },
 ];
 
 export const PIPELINE_ORDER: string[] = [
   "Chất lượng dữ liệu",
   "RAG",
   "Mô hình tài chính",
-  "Trích dẫn",
   "Agent và LLM Judge",
   "Chất lượng báo cáo",
   "Vận hành",
-  "Kiểm soát xuất bản",
 ];
 
 export const ACCEPTANCE_EXPLANATION: string[] = [

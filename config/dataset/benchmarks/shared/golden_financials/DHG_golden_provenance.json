@@ -1,0 +1,19 @@
+{
+  "ticker": "DHG",
+  "source_tier": 2,
+  "verified_by": "ocr_extraction",
+  "verification_date": "2026-06-15",
+  "source_document_type": "ocr_extracted_annual_report",
+  "metrics_verified": [
+    "admin_expense.total",
+    "charter_capital.ending",
+    "eps.basic",
+    "gross_profit.total",
+    "inventory.ending",
+    "revenue.net",
+    "short_term_debt.ending",
+    "tax_expense.total"
+  ],
+  "ocr_export_at": "2026-06-15T06:23:43.593623+00:00",
+  "ocr_facts_added": 8
+}

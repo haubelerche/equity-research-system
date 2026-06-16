@@ -19,6 +19,17 @@ class FakeStore:
                 "created_at": "2026-06-14T00:00:00+00:00",
                 "updated_at": "2026-06-14T00:00:00+00:00",
                 "finished_at": "2026-06-14T00:00:00+00:00",
+            },
+            "run-no-eval": {
+                "run_id": "run-no-eval",
+                "ticker": "TRA",
+                "run_type": "full_report",
+                "status": "approved",
+                "current_stage": "done",
+                "flags_json": {},
+                "created_at": "2026-06-14T00:00:00+00:00",
+                "updated_at": "2026-06-14T00:00:00+00:00",
+                "finished_at": "2026-06-14T00:00:00+00:00",
             }
         }
         self.artifacts = [
@@ -38,7 +49,7 @@ class FakeStore:
         return self.runs.get(run_id)
 
     def list_artifacts(self, run_id: str):
-        return list(self.artifacts) if run_id in self.runs else []
+        return list(self.artifacts) if run_id == "run-1" else []
 
 
 def test_project_evaluation_endpoints_use_allowlisted_loader(monkeypatch) -> None:
@@ -74,3 +85,36 @@ def test_run_evaluation_endpoints_read_eval_result_artifacts() -> None:
 
     assert client.get("/research/run-1/evaluation/unknown.json").status_code == 404
     assert client.get("/research/missing/evaluation").status_code == 404
+
+
+def test_run_evaluation_falls_back_to_latest_benchmark_packet(monkeypatch) -> None:
+    monkeypatch.setattr(
+        api_module,
+        "load_latest_evaluation",
+        lambda: {
+            "source": "benchmark_suite",
+            "run_id": "benchmark-suite:default:test",
+            "publication_status": "BLOCKED_BY_P0",
+            "artifacts": [
+                {
+                    "artifact": "data_quality.json",
+                    "metric_results": [{"metric_id": "core_metric_coverage", "value": 0.5}],
+                }
+            ],
+        },
+    )
+    monkeypatch.setattr(
+        api_module,
+        "load_evaluation_artifact",
+        lambda name: {"artifact": name, "source": "benchmark_suite"} if name == "data_quality.json" else None,
+    )
+    client = TestClient(create_app(runtime_store=FakeStore(), check_schema_on_startup=False))
+
+    packet = client.get("/research/run-no-eval/evaluation")
+    assert packet.status_code == 200
+    assert packet.json()["source"] == "benchmark_suite"
+    assert packet.json()["artifacts"][0]["artifact"] == "data_quality.json"
+
+    artifact = client.get("/research/run-no-eval/evaluation/data_quality.json")
+    assert artifact.status_code == 200
+    assert artifact.json()["source"] == "benchmark_suite"

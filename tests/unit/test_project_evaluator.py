@@ -106,6 +106,100 @@ def test_loaders_prefer_benchmark_suite_snapshot_when_present(tmp_path) -> None:
     assert load_evaluation_artifact("financial_eval.json", tmp_path) == financial
 
 
+def test_latest_benchmark_suite_merges_sibling_plan_artifacts(tmp_path) -> None:
+    suite_dir = tmp_path / "benchmark_suite"
+    suite_dir.mkdir()
+    suite_packet = {
+        "source": "benchmark_suite",
+        "publication_status": "DRAFT_PUBLISHABLE",
+        "plan_ids": ["02"],
+        "artifacts": [{
+            "plan_id": "02",
+            "name": "RAG and evidence",
+            "artifact": "retrieval_eval.json",
+            "status": "pass",
+            "metric_results": [{
+                "id": "hit_rate_at_5",
+                "metric_id": "hit_rate_at_5",
+                "value": 1.0,
+                "status": "pass",
+                "blocks_publish": False,
+            }],
+        }],
+    }
+    data_quality = {
+        "source": "benchmark_suite",
+        "plan_id": "01",
+        "name": "Data reliability",
+        "artifact": "data_quality.json",
+        "status": "fail",
+        "metrics": {"cohort_tickers": 1},
+        "metric_results": [{
+            "id": "core_metric_coverage",
+            "metric_id": "core_metric_coverage",
+            "value": 0.5,
+            "status": "fail",
+            "severity": "P0",
+            "blocks_publish": True,
+        }],
+        "blocking_issues": ["core_metric_coverage:threshold_not_met"],
+    }
+    (suite_dir / "benchmark_suite.json").write_text(json.dumps(suite_packet), encoding="utf-8")
+    (suite_dir / "data_quality.json").write_text(json.dumps(data_quality), encoding="utf-8")
+
+    packet = load_latest_evaluation(tmp_path)
+    artifacts = {item["artifact"]: item for item in packet["artifacts"]}
+
+    assert set(artifacts) == {"retrieval_eval.json", "data_quality.json"}
+    assert artifacts["data_quality.json"]["metric_results"][0]["value"] == 0.5
+    assert packet["publication_status"] == "BLOCKED_BY_P0"
+    assert packet["overall_status"] == "blocked"
+    assert packet["plan_ids"] == ["02", "01"]
+    assert packet["merged_artifact_sources"] == {
+        "runtime_results": "output/evaluation/eval_result/benchmark_suite",
+        "benchmark_config": "config/benchmarks",
+    }
+
+
+def test_latest_benchmark_suite_normalizes_stale_metric_status(tmp_path) -> None:
+    suite_dir = tmp_path / "benchmark_suite"
+    suite_dir.mkdir()
+    suite_packet = {
+        "source": "benchmark_suite",
+        "publication_status": "BLOCKED_BY_P0",
+        "plan_ids": ["01"],
+        "artifacts": [{
+            "plan_id": "01",
+            "name": "Data reliability",
+            "artifact": "data_quality.json",
+            "status": "fail",
+            "metric_results": [{
+                "id": "core_metric_coverage",
+                "metric_id": "core_metric_coverage",
+                "metric_type": "coverage",
+                "unit": "percent",
+                "threshold": ">= 95%",
+                "threshold_operator": ">=",
+                "value": 0.98,
+                "status": "fail",
+                "severity": "P0",
+                "blocks_publish": True,
+            }],
+        }],
+    }
+    (suite_dir / "benchmark_suite.json").write_text(json.dumps(suite_packet), encoding="utf-8")
+
+    packet = load_latest_evaluation(tmp_path)
+    metric = packet["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 0.98
+    assert metric["status"] == "pass"
+    assert metric["legacy_status"] == "fail"
+    assert metric["threshold_status_source"] == "benchmark_threshold_contract"
+    assert packet["publication_status"] == "DRAFT_PUBLISHABLE"
+    assert packet["overall_status"] == "pass"
+
+
 def test_matrix_variation_requires_multiple_numeric_values() -> None:
     assert _matrix_varies({"a": {"x": 1, "y": 2}})
     assert not _matrix_varies({"a": {"x": 1, "y": 1}})
@@ -308,6 +402,51 @@ def test_retrieval_evaluator_fails_closed_when_no_evidence(tmp_path, monkeypatch
     assert metrics["hit_rate_at_5"]["value"] == 0.0
     assert metrics["hit_rate_at_5"]["status"] == "fail"
     assert metrics["source_tier_hit_rate"]["value"] == 0.0
+
+
+def test_retrieval_evaluator_rejects_live_ragas_samples_without_reference(tmp_path, monkeypatch) -> None:
+    golden_dir = _benchmark_golden_query_dir(tmp_path)
+    golden_dir.mkdir(parents=True)
+    (golden_dir / "DBD.yaml").write_text(
+        "version: dbd-test-v2\n"
+        "ticker: DBD\n"
+        "queries:\n"
+        "  - id: revenue\n"
+        "    query: DBD doanh thu 2025\n"
+        "    fiscal_year: 2025\n"
+        "    expected_terms: ['Doanh thu']\n"
+        "    expected_source_tiers: [1]\n"
+        "    material: true\n",
+        encoding="utf-8",
+    )
+    ragas_dir = _benchmark_ragas_dir(tmp_path)
+    ragas_dir.mkdir(parents=True)
+    (ragas_dir / "ragas_samples.json").write_text(
+        json.dumps([{
+            "id": "semantic-missing-reference",
+            "question": "DBD doanh thu 2025?",
+            "metadata": {"ticker": "DBD", "fiscal_year": 2025},
+        }]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        runtime_evaluators,
+        "RETRIEVE_CALLABLE_OVERRIDE",
+        _fake_retriever({
+            "doanh thu": [
+                _FakeChunk("Doanh thu DBD nam 2025", fiscal_year=2025, reliability_tier=1),
+            ],
+        }),
+    )
+
+    result = evaluate_retrieval(tmp_path, "DBD")
+    metrics = {metric["id"]: metric for metric in result["metrics"]}
+
+    assert result["ragas_execution"]["execution_status"] == "not_evaluable"
+    assert result["ragas_execution"]["reason"] == "ragas_sample_contract_invalid"
+    assert result["ragas_execution"]["samples"][0]["contract_errors"] == ["missing_reference"]
+    assert metrics["context_precision"]["status"] == "not_evaluable"
+    assert metrics["hit_rate_at_5"]["status"] == "pass"
 
 
 def test_data_reliability_does_not_treat_pandera_schema_as_system_readiness(tmp_path) -> None:

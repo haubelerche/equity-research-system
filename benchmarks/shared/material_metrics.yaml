@@ -1,0 +1,56 @@
+version: material_metrics_20260615_v2
+required_fiscal_years:
+- 2022
+- 2023
+- 2024
+- 2025
+material_metric_groups:
+  income_statement:
+  - revenue.net
+  - gross_profit.total
+  - cogs.total
+  - sga.total
+  - admin_expense.total
+  - financial_expense.total
+  - interest_expense.total
+  - profit_before_tax.total
+  - tax_expense.total
+  - net_income.parent
+  - eps.basic
+  balance_sheet:
+  - total_assets.ending
+  - current_assets.ending
+  - cash_and_equivalents.ending
+  - short_term_investments.ending
+  - accounts_receivable.ending
+  - inventory.ending
+  - total_liabilities.ending
+  - current_liabilities.ending
+  - short_term_debt.ending
+  - long_term_debt.ending
+  - equity.parent
+  cash_flow:
+  - operating_cash_flow.total
+  - capex.total
+  - depreciation.total
+  - proceeds_from_borrowings.total
+  - repayment_of_borrowings.total
+  - dividends_paid.total
+  capital_structure:
+  - shares_outstanding.ending
+critical_for_valuation:
+- revenue.net
+- net_income.parent
+- operating_cash_flow.total
+- capex.total
+- total_assets.ending
+- equity.parent
+- short_term_debt.ending
+- long_term_debt.ending
+- cash_and_equivalents.ending
+- shares_outstanding.ending
+policy:
+  material_fact_source_tier_max: 2
+  accepted_fact_min_confidence: 0.85
+  no_llm_fill_for_missing_numbers: true
+  null_is_valid_when_missing_with_reason: true

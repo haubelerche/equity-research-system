@@ -55,6 +55,22 @@ describe("api client", () => {
     expect((globalThis.fetch as any).mock.calls[1][0]).toBe("/research/run-1/evaluation");
   });
 
+  it("falls back to the project benchmark packet when run scoped evaluation is missing", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url === "/research/run-1/evaluation") {
+        return new Response("missing", { status: 404 });
+      }
+      return jsonResponse({ source: "benchmark_suite", artifacts: [{ artifact: "data_quality.json" }] }, { status: 200 });
+    }));
+
+    const packet = await fetchEvaluationPacket("run-1");
+
+    expect((globalThis.fetch as any).mock.calls[0][0]).toBe("/research/run-1/evaluation");
+    expect((globalThis.fetch as any).mock.calls[1][0]).toBe("/eval/framework");
+    expect(packet.source).toBe("benchmark_suite");
+    expect(packet.artifacts?.[0]?.artifact).toBe("data_quality.json");
+  });
+
   it("builds file and preview urls", () => {
     expect(fileUrl("DHG", "report")).toBe("/reports/DHG/file/report");
     expect(fileUrl("DHG", "report", "2026-06-15T00:00:00Z")).toBe("/reports/DHG/file/report?v=2026-06-15T00%3A00%3A00Z");

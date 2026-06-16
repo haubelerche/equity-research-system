@@ -136,3 +136,56 @@ def test_file_hash_mismatch_detected(docs_root):
     _write_document(yd, fiscal_year=2025, metrics=_MIN, declared_hash="0" * 64)
     summary = ing.ingest_year("DHG", 2025, dry_run=True)
     assert summary["status"] == "hash_mismatch"
+
+
+def test_non_dry_ingest_keeps_local_path_in_metadata(docs_root, monkeypatch):
+    import backend.database.official_documents as official_docs
+
+    captured = {}
+
+    class FakeRegistry:
+        def register_official_document(self, data):
+            captured["document"] = data
+            return "doc-1"
+
+        def add_official_observation(self, **kwargs):
+            captured.setdefault("observations", []).append(kwargs)
+            return len(captured["observations"])
+
+    monkeypatch.setattr(official_docs, "OfficialDocumentRegistry", FakeRegistry)
+    yd = docs_root / "DHG" / "2023"
+    _write_document(yd, fiscal_year=2023, metrics=["revenue.net"])
+
+    summary = ing.ingest_year("DHG", 2023, dry_run=False)
+
+    assert summary["facts_ingested"] == 1
+    assert "local_path" not in captured["document"].__dict__
+    assert captured["document"].metadata["local_path"].endswith("source_document.pdf")
+
+
+def test_non_dry_ingest_maps_ocr_method_to_db_enum(docs_root, monkeypatch):
+    import backend.database.official_documents as official_docs
+
+    captured = {}
+
+    class FakeRegistry:
+        def register_official_document(self, data):
+            return "doc-1"
+
+        def add_official_observation(self, **kwargs):
+            captured["observation"] = kwargs
+            return 1
+
+    monkeypatch.setattr(official_docs, "OfficialDocumentRegistry", FakeRegistry)
+    yd = docs_root / "DHG" / "2025"
+    _write_document(yd, fiscal_year=2025, metrics=["current_assets.ending"])
+    csv_path = yd / "extracted_facts.csv"
+    csv_path.write_text(
+        csv_path.read_text(encoding="utf-8").replace(",manual,analyst,", ",ocr_tesseract,analyst,"),
+        encoding="utf-8",
+    )
+
+    summary = ing.ingest_year("DHG", 2025, dry_run=False)
+
+    assert summary["facts_ingested"] == 1
+    assert captured["observation"]["extraction_method"] == "pdf_ocr"

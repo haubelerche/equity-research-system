@@ -1,0 +1,460 @@
+{
+  "ticker": "DPP",
+  "generated_at": "2026-06-16T03:33:40.114614+00:00",
+  "years": [
+    {
+      "fiscal_year": 2022,
+      "source_kind": "ocr",
+      "pages": 22,
+      "facts_extracted": 15,
+      "facts_written": 15,
+      "metrics": [
+        "accounts_payable.ending",
+        "accounts_receivable.ending",
+        "current_liabilities.ending",
+        "depreciation.total",
+        "net_income.parent",
+        "non_current_liabilities.ending",
+        "operating_profit.total",
+        "ppe.net",
+        "profit_before_tax.total",
+        "revenue.net",
+        "shares_outstanding.ending",
+        "shares_outstanding.weighted_avg",
+        "short_term_debt.ending",
+        "total_assets.ending",
+        "total_liabilities.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "accounts_payable.ending",
+          "value": 43.059190797,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Phải trả người bán",
+          "confidence": 0.99
+        },
+        {
+          "metric": "accounts_receivable.ending",
+          "value": 30.100122442,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Phải thu khách hàng",
+          "confidence": 0.99
+        },
+        {
+          "metric": "current_liabilities.ending",
+          "value": 69.869362006,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Nợ ngắn han",
+          "confidence": 0.85
+        },
+        {
+          "metric": "non_current_liabilities.ending",
+          "value": 0.1165,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Ng dai han: bao gồm 116.500.000",
+          "confidence": 0.9
+        },
+        {
+          "metric": "ppe.net",
+          "value": 16.43,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Giá tri TSCD còn lai cudi nam",
+          "confidence": 0.97
+        },
+        {
+          "metric": "short_term_debt.ending",
+          "value": 15.839895831,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Vay va ng ngắn han",
+          "confidence": 0.96
+        },
+        {
+          "metric": "total_assets.ending",
+          "value": 119.368016261,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Tong gid tri tai san",
+          "confidence": 0.92
+        },
+        {
+          "metric": "total_liabilities.ending",
+          "value": 69.985862006,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Tổng ng phai tra",
+          "confidence": 0.92
+        },
+        {
+          "metric": "depreciation.total",
+          "value": 2.5,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "khau hao trong nam",
+          "confidence": 0.96
+        },
+        {
+          "metric": "net_income.parent",
+          "value": 7.770223801,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Lợi nhuận sau thuế",
+          "confidence": 0.98
+        },
+        {
+          "metric": "operating_profit.total",
+          "value": 8.489638566,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Loi nhuận từ hoat động kinh doanh",
+          "confidence": 0.96
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 9.763060971,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Loi nhuận trước thuê",
+          "confidence": 0.95
+        },
+        {
+          "metric": "revenue.net",
+          "value": 408.47204127,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Doanh thu thuan",
+          "confidence": 0.99
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 3000010.0,
+          "unit": "shares",
+          "page": 10,
+          "label": "Số lượng cổ phiếu đang lưu hành",
+          "confidence": 0.99
+        },
+        {
+          "metric": "shares_outstanding.weighted_avg",
+          "value": 3000010.0,
+          "unit": "shares",
+          "page": 10,
+          "label": "Số lượng cổ phiếu đã phát hành",
+          "confidence": 0.6
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2023,
+      "source_kind": "ocr",
+      "pages": 22,
+      "facts_extracted": 10,
+      "facts_written": 10,
+      "metrics": [
+        "accounts_payable.ending",
+        "accounts_receivable.ending",
+        "current_liabilities.ending",
+        "depreciation.total",
+        "operating_profit.total",
+        "ppe.net",
+        "revenue.net",
+        "shares_outstanding.ending",
+        "short_term_debt.ending",
+        "total_liabilities.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "accounts_payable.ending",
+          "value": 31.015198762,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Phai tra người ban 31.015.198.762",
+          "confidence": 0.9
+        },
+        {
+          "metric": "accounts_receivable.ending",
+          "value": 31.74,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Trong khoản phải thu 31,74 tỷ đồng của nam 2023",
+          "confidence": 0.9
+        },
+        {
+          "metric": "current_liabilities.ending",
+          "value": 31.01,
+          "unit": "vnd_bn",
+          "page": 16,
+          "label": "tong ng phai tra 42,93 ty đồng gdm có 31,01 ty đồng ng ngan han",
+          "confidence": 0.7
+        },
+        {
+          "metric": "ppe.net",
+          "value": 13.48,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Giá trị TSCĐ còn lai cuối nim 13,48 ty đồng",
+          "confidence": 0.9
+        },
+        {
+          "metric": "short_term_debt.ending",
+          "value": 21.4,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Vay va ng ngắn han 21,40",
+          "confidence": 0.8
+        },
+        {
+          "metric": "total_liabilities.ending",
+          "value": 61.37,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Tổng ng phải r 61,37",
+          "confidence": 0.7
+        },
+        {
+          "metric": "depreciation.total",
+          "value": 2.8,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "khdu hao trong năm 2,8 tỷ dong",
+          "confidence": 0.85
+        },
+        {
+          "metric": "operating_profit.total",
+          "value": 9.766534855,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Loi nhuan tir hoat d6ng kinh doanh 9.766.534.855",
+          "confidence": 0.9
+        },
+        {
+          "metric": "revenue.net",
+          "value": 408.47204127,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Doanh thu thudn 408.472.041.270",
+          "confidence": 0.9
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 3000010.0,
+          "unit": "shares",
+          "page": 10,
+          "label": "Số lượng cổ phiếu đang lưu hành 3.000.010",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2024,
+      "source_kind": "ocr",
+      "pages": 22,
+      "facts_extracted": 6,
+      "facts_written": 6,
+      "metrics": [
+        "accounts_receivable.ending",
+        "current_liabilities.ending",
+        "ppe.net",
+        "revenue.net",
+        "shares_outstanding.ending",
+        "total_liabilities.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "accounts_receivable.ending",
+          "value": 53.532773885,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Phải thu ngắn hạn",
+          "confidence": 0.9
+        },
+        {
+          "metric": "current_liabilities.ending",
+          "value": 62.111011005,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Nợ ngắn hạn",
+          "confidence": 0.9
+        },
+        {
+          "metric": "ppe.net",
+          "value": 11.49,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Giá trị TSCĐ còn lại cuối năm",
+          "confidence": 0.95
+        },
+        {
+          "metric": "total_liabilities.ending",
+          "value": 62.235611005,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Tổng ng phai tra",
+          "confidence": 0.9
+        },
+        {
+          "metric": "revenue.net",
+          "value": 441.54521896,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Doanh thu thuần",
+          "confidence": 0.95
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 3000010.0,
+          "unit": "shares",
+          "page": 11,
+          "label": "Số lượng cổ phiếu đang lưu hành",
+          "confidence": 0.99
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2025,
+      "source_kind": "ocr",
+      "pages": 21,
+      "facts_extracted": 14,
+      "facts_written": 14,
+      "metrics": [
+        "accounts_payable.ending",
+        "accounts_receivable.ending",
+        "capex.total",
+        "current_liabilities.ending",
+        "depreciation.total",
+        "net_income.parent",
+        "non_current_liabilities.ending",
+        "operating_profit.total",
+        "ppe.net",
+        "profit_before_tax.total",
+        "revenue.net",
+        "shares_outstanding.ending",
+        "total_assets.ending",
+        "total_liabilities.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "accounts_payable.ending",
+          "value": 55.938330285,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Phải trả người bán",
+          "confidence": 0.95
+        },
+        {
+          "metric": "accounts_receivable.ending",
+          "value": 71.701901883,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Phải thu ngắn hạn",
+          "confidence": 0.9
+        },
+        {
+          "metric": "current_liabilities.ending",
+          "value": 70.653452327,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Nợ ngắn hạn (I. Nợ ngắn hạn: bao gồm ...)",
+          "confidence": 0.85
+        },
+        {
+          "metric": "non_current_liabilities.ending",
+          "value": 0.1246,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Nợ dài hạn",
+          "confidence": 0.95
+        },
+        {
+          "metric": "ppe.net",
+          "value": 11.28,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Giá trị TSCD còn lại cuối năm",
+          "confidence": 0.95
+        },
+        {
+          "metric": "total_assets.ending",
+          "value": 132.534329645,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Téng gia trị tai san",
+          "confidence": 0.95
+        },
+        {
+          "metric": "total_liabilities.ending",
+          "value": 70.778052327,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Tổng nợ phải trả",
+          "confidence": 0.95
+        },
+        {
+          "metric": "capex.total",
+          "value": 2.2,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "TSCD tăng do mua sắm 2,2 ty",
+          "confidence": 0.9
+        },
+        {
+          "metric": "depreciation.total",
+          "value": 2.43,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Khấu hao trong năm",
+          "confidence": 0.95
+        },
+        {
+          "metric": "net_income.parent",
+          "value": 10.949309501,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Lợi nhuận sau thuế",
+          "confidence": 0.95
+        },
+        {
+          "metric": "operating_profit.total",
+          "value": 14.138650902,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Lợi nhuận từ hoạt động kinh doanh",
+          "confidence": 0.95
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 13.836797385,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Lợi nhuận trước thuế",
+          "confidence": 0.95
+        },
+        {
+          "metric": "revenue.net",
+          "value": 419.130050214,
+          "unit": "vnd_bn",
+          "page": 10,
+          "label": "Doanh thu thuần",
+          "confidence": 0.95
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 3000010.0,
+          "unit": "shares",
+          "page": 11,
+          "label": "Số lượng cổ phiếu đang lưu hành",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "total_written": 45
+}

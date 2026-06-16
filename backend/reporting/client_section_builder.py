@@ -212,6 +212,16 @@ def _format_percent(percent: Any) -> str:
     return f"{percent.value * 100:+.1f}%"
 
 
+def _report_generated_at(vm: ClientReportViewModel) -> str:
+    value = str(getattr(vm, "report_generated_at", "") or getattr(vm, "report_date", "") or "").strip()
+    return value.replace("T", " ") if value else DASH
+
+
+def _market_price_as_of(vm: ClientReportViewModel) -> str:
+    value = str(getattr(vm, "market_price_as_of", "") or "").strip()
+    return value if value else DASH
+
+
 def _render_table(table: TableData, class_name: str = "financial-model-table") -> str:
     header = "".join(f"<th>{_e(_display_period(period))}</th>" for period in table.periods)
     body = []
@@ -546,7 +556,9 @@ def _rec_hero(vm: ClientReportViewModel) -> str:
     &nbsp;|&nbsp;
     Tiềm năng tăng/giảm: <strong>{_e(upside_display)}</strong>
     &nbsp;|&nbsp;
-    {_e(vm.report_date)}
+    Ngày giá: {_e(_market_price_as_of(vm))}
+    &nbsp;|&nbsp;
+    Tạo: {_e(_report_generated_at(vm))}
   </div>
 </div>
 """
@@ -556,6 +568,8 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
     sidebar_rows = [
         ("Giá mục tiêu (VND)", _format_price(vm.target_price)),
         ("Giá hiện tại (VND)", _format_price(vm.current_price)),
+        ("Ngày giá thị trường", _market_price_as_of(vm)),
+        ("Thời điểm tạo báo cáo", _report_generated_at(vm)),
         ("Tỷ lệ tăng/giảm", _format_percent(vm.upside_downside)),
         ("Tổng tỷ suất lợi nhuận", _format_percent(vm.total_return)),
     ]
@@ -872,6 +886,11 @@ def _render_report_status(vm: ClientReportViewModel) -> str:
             f"{vm.recommendation}.",
         ),
         (
+            "Thời điểm giá thị trường",
+            f"Giá hiện tại được ghi nhận tại ngày {_market_price_as_of(vm)}; báo cáo được tạo lúc "
+            f"{_report_generated_at(vm)}. Báo cáo chính thức yêu cầu ngày giá thị trường trùng ngày tạo báo cáo.",
+        ),
+        (
             "Người đọc tự kiểm chứng thế nào",
             "Mọi giả định đều hiển thị trong bảng dự phóng, mô hình định giá và ma trận độ nhạy. "
             "Nếu không đồng ý với giả định về chi phí vốn bình quân (WACC), tăng trưởng dài hạn, "
@@ -906,6 +925,8 @@ def _render_disclosed_limitations(vm: ClientReportViewModel) -> str:
         "forecast_debt": "lịch dự phóng nợ vay",
         "valuation_result": "kết quả định giá có thể kiểm tra lại",
         "current_price": "giá thị trường hiện tại",
+        "market_price_as_of": "ngày dữ liệu của giá thị trường",
+        "same_day_market_price": "giá thị trường cùng ngày tạo báo cáo",
         "target_price": "giá mục tiêu",
     }
     gaps = list(dict.fromkeys(labels.get(str(gap), str(gap)) for gap in (vm.missing_required_fields or [])))

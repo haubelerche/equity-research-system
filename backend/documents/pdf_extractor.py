@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import re
+import shutil
 import unicodedata
 from dataclasses import dataclass
 from enum import Enum
@@ -526,8 +527,19 @@ def _tesseract_config() -> str:
     """Return local tessdata config when the project-managed language pack exists."""
     tessdata_dir = Path(__file__).resolve().parents[2] / "storage" / "tessdata"
     if tessdata_dir.is_dir():
-        return f'--tessdata-dir "{tessdata_dir}"'
+        return f"--tessdata-dir {tessdata_dir}"
     return ""
+
+
+def _find_tesseract_cmd() -> Optional[str]:
+    """Return an explicit tesseract executable path when it is discoverable."""
+    found = shutil.which("tesseract")
+    if found:
+        return found
+    common = Path(r"C:\Program Files\Tesseract-OCR\tesseract.exe")
+    if common.exists():
+        return str(common)
+    return None
 
 
 def extract_from_pdf_ocr(
@@ -566,6 +578,10 @@ def extract_from_pdf_ocr(
         )
         return []
 
+    tesseract_cmd = _find_tesseract_cmd()
+    if tesseract_cmd:
+        pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
+
     try:
         images = convert_from_path(str(pdf_path), dpi=200)
     except Exception as exc:  # noqa: BLE001
@@ -577,14 +593,19 @@ def extract_from_pdf_ocr(
     # OCR every page first (saving page text via the callback), then extract with
     # statement-type carry-forward — values live on pages that re-declare no header.
     page_texts: list[tuple[int, str]] = []
+    page_errors: list[str] = []
     for page_num, image in enumerate(images, start=1):
         try:
             ocr_text = pytesseract.image_to_string(image, lang=lang, config=tess_config)
-        except Exception:  # noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
+            page_errors.append(f"page={page_num}: {type(exc).__name__}: {exc}")
             continue
         if page_text_callback is not None:
             page_text_callback(page_num, ocr_text)
         page_texts.append((page_num, ocr_text))
+
+    if not page_texts and page_errors:
+        print(f"[pdf_extractor] OCR failed for all pages; first error: {page_errors[0]}")
 
     return extract_rows_from_ocr_pages(
         page_texts,

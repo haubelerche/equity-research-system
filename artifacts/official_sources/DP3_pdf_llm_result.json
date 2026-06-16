@@ -1,0 +1,145 @@
+{
+  "ticker": "DP3",
+  "generated_at": "2026-06-16T03:10:51.158099+00:00",
+  "years": [
+    {
+      "fiscal_year": 2022,
+      "source_kind": "ocr",
+      "pages": 19,
+      "facts_extracted": 1,
+      "facts_written": 1,
+      "metrics": [
+        "shares_outstanding.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 8600000.0,
+          "unit": "shares",
+          "page": 8,
+          "label": "Tổng số cổ phần: 8.600.000 cổ phần",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2023,
+      "source_kind": "ocr",
+      "pages": 40,
+      "facts_extracted": 2,
+      "facts_written": 2,
+      "metrics": [
+        "revenue.net",
+        "shares_outstanding.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "revenue.net",
+          "value": 409.730823942,
+          "unit": "vnd_bn",
+          "page": 9,
+          "label": "Doanh thu thuan",
+          "confidence": 0.95
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 21499933.0,
+          "unit": "shares",
+          "page": 10,
+          "label": "Tổng số cổ phần: 21.499.933 cổ phan",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2024,
+      "source_kind": "ocr",
+      "pages": 35,
+      "facts_extracted": 4,
+      "facts_written": 4,
+      "metrics": [
+        "operating_profit.total",
+        "profit_before_tax.total",
+        "revenue.net",
+        "shares_outstanding.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "operating_profit.total",
+          "value": 151.849335627,
+          "unit": "vnd_bn",
+          "page": 9,
+          "label": "Loi nhuận từ hoat động kinh doanh",
+          "confidence": 0.85
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 151.915020429,
+          "unit": "vnd_bn",
+          "page": 9,
+          "label": "Loi nhuận trước thué",
+          "confidence": 0.85
+        },
+        {
+          "metric": "revenue.net",
+          "value": 417.485438238,
+          "unit": "vnd_bn",
+          "page": 9,
+          "label": "Doanh thu thuan",
+          "confidence": 0.9
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 21499933.0,
+          "unit": "shares",
+          "page": 10,
+          "label": "Tổng số cé phan",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2025,
+      "source_kind": "ocr",
+      "pages": 22,
+      "facts_extracted": 3,
+      "facts_written": 3,
+      "metrics": [
+        "profit_before_tax.total",
+        "revenue.net",
+        "shares_outstanding.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "profit_before_tax.total",
+          "value": 192.6,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Tổng lợi nhuận kế toán trước thuế",
+          "confidence": 0.9
+        },
+        {
+          "metric": "revenue.net",
+          "value": 437.9,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Tổng doanh thu",
+          "confidence": 0.85
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 21499933.0,
+          "unit": "shares",
+          "page": 10,
+          "label": "Tổng số cổ phan: 21.499.933 cổ phan",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "total_written": 10
+}

@@ -152,9 +152,14 @@ def auto_ingest_tool(
     optional hook for the live progress UI.
     """
     import logging
+    import os
     _logger = logging.getLogger(__name__)
     try:
-        from scripts.auto_ingest_official_documents import AutoIngestConfig, run_pipeline as _run
+        from scripts.auto_ingest_official_documents import (
+            AutoIngestConfig,
+            run_pipeline as _run,
+            _write_artifact,
+        )
         cfg = AutoIngestConfig(
             ticker=ticker,
             from_year=from_year,
@@ -174,6 +179,40 @@ def auto_ingest_tool(
             getattr(getattr(r, "ingest_status", ""), "value", str(getattr(r, "ingest_status", "")))
             for r in results
         ]
+        # Preserve the full per-year diagnostic detail. The status line only prints
+        # error/note COUNTS (errors=3); without this the strings are lost, leaving a
+        # run impossible to debug after the fact (the IngestStatus enum exists exactly
+        # to avoid silent "ingested=0" — don't reintroduce silence at the harness layer).
+        year_details = [
+            {
+                "fiscal_year": r.fiscal_year,
+                "ingest_status": getattr(getattr(r, "ingest_status", ""), "value", str(getattr(r, "ingest_status", ""))),
+                "ingested": r.ingested,
+                "promoted": r.promoted,
+                "errors": list(r.errors),
+                "notes": list(r.notes),
+            }
+            for r in results
+        ]
+        for d in year_details:
+            if d["errors"] or d["notes"]:
+                _logger.warning(
+                    "auto_ingest %s FY%s status=%s ingested=%s promoted=%s errors=%s notes=%s",
+                    ticker, d["fiscal_year"], d["ingest_status"], d["ingested"],
+                    d["promoted"], d["errors"], d["notes"],
+                )
+        # Opt-in verbose debug: persist the full .md error report and echo each line.
+        if os.environ.get("AUTO_INGEST_DEBUG", "").strip().lower() in ("1", "true", "yes", "on"):
+            try:
+                artifact = _write_artifact(ticker, cfg, results)
+                print(f"[auto_ingest][debug] full error report: {artifact}")
+            except Exception as art_exc:  # noqa: BLE001 — debug artifact is best-effort
+                _logger.warning("auto_ingest debug artifact write failed: %s", art_exc)
+            for d in year_details:
+                for err in d["errors"]:
+                    print(f"[auto_ingest][debug] FY{d['fiscal_year']} ERROR: {err}")
+                for note in d["notes"]:
+                    print(f"[auto_ingest][debug] FY{d['fiscal_year']} NOTE: {note}")
         official_ready = _official_facts_ready(results)
         summary: dict = {
             "ticker": ticker,
@@ -186,6 +225,7 @@ def auto_ingest_tool(
             "ocr_candidates": ocr_candidates,
             "ocr_promoted": ocr_promoted,
             "year_statuses": statuses,
+            "year_details": year_details,
             "official_ready": official_ready,
             "continued_with_tier2_or_tier3_fallback": not official_ready,
         }

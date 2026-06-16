@@ -321,6 +321,14 @@ class TestV2DalModuleExports:
         assert hasattr(source_dal, "get_source_documents_for_ticker")
         assert hasattr(source_dal, "compute_source_doc_id")
 
+    def test_source_document_upsert_uses_natural_document_key(self):
+        import inspect
+        from backend.database.canonical import source_dal
+
+        source = inspect.getsource(source_dal.upsert_source_document)
+        assert "ON CONFLICT (ticker, source_type, fiscal_year, checksum)" in source
+        assert "RETURNING source_doc_id" in source
+
     def test_observation_dal_exports(self):
         from backend.database.canonical import observation_dal
         assert hasattr(observation_dal, "insert_observations")

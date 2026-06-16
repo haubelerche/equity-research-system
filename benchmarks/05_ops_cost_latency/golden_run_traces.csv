@@ -1,0 +1,11 @@
+run_id,ticker,run_type,total_duration_seconds,total_tokens,estimated_cost_usd,retry_count,terminal_status,artifact_upload_failures,pdf_render_failures
+bench_dhg_20260615_01,DHG,cold,1009,43371,0.4339,0,auto_exported,0,0
+bench_imp_20260615_02,IMP,warm,530,27491,0.2749,0,auto_exported,0,0
+bench_dmc_20260615_03,DMC,warm,559,29388,0.2939,0,auto_exported,0,0
+bench_tra_20260615_04,TRA,warm,461,23700,0.237,0,auto_exported,0,0
+bench_dp3_20260615_05,DP3,warm,496,25596,0.256,0,auto_exported,0,0
+bench_dp1_20260615_06,DP1,cold,1053,45267,0.4526,0,auto_exported,0,0
+bench_tw3_20260615_07,TW3,warm,561,29388,0.2939,0,auto_exported,0,0
+bench_med_20260615_08,MED,warm,509,23700,0.237,3,auto_exported,0,0
+bench_pmc_20260615_09,PMC,warm,491,25596,0.256,0,auto_exported,0,0
+bench_amv_20260615_10,AMV,cold,1053,45267,0.4526,0,auto_exported,0,0

@@ -3,13 +3,34 @@ import { ACCEPTANCE_EXPLANATION, EVAL_LAYERS, PIPELINE_ORDER } from "./evalFrame
 
 describe("evalFramework", () => {
   it("contains the benchmark evaluation groups exposed by the dashboard", () => {
-    expect(EVAL_LAYERS.length).toBe(8);
+    expect(EVAL_LAYERS.length).toBe(6);
     expect(EVAL_LAYERS.some((layer) => layer.id === "rollout_ci")).toBe(false);
-    expect(EVAL_LAYERS.some((layer) => layer.id === "citation")).toBe(true);
+    expect(EVAL_LAYERS.some((layer) => layer.id === "citation")).toBe(false);
     expect(EVAL_LAYERS.some((layer) => layer.id === "report_quality")).toBe(true);
-    expect(EVAL_LAYERS.some((layer) => layer.id === "publication_readiness")).toBe(true);
+    expect(EVAL_LAYERS.some((layer) => layer.id === "publication_readiness")).toBe(false);
+    expect(EVAL_LAYERS.find((layer) => layer.id === "report_quality")?.title)
+      .toBe("5 · Chất lượng báo cáo");
     expect(EVAL_LAYERS.find((layer) => layer.id === "report_quality")?.artifactAliases)
       .toContain("report_quality_eval.json");
+  });
+  it("keeps visible layer numbering contiguous after removed dashboard groups", () => {
+    expect(EVAL_LAYERS.map((layer) => layer.title.split(" ")[0])).toEqual(["1", "2", "3", "4", "5", "6"]);
+    expect(EVAL_LAYERS.map((layer) => layer.id)).toEqual([
+      "data_reliability",
+      "rag_evidence",
+      "financial",
+      "agent",
+      "report_quality",
+      "observability",
+    ]);
+    expect(PIPELINE_ORDER).toEqual([
+      "Chất lượng dữ liệu",
+      "RAG",
+      "Mô hình tài chính",
+      "Agent và LLM Judge",
+      "Chất lượng báo cáo",
+      "Vận hành",
+    ]);
   });
   it("defines one threshold, technology and formula for every metric", () => {
     for (const layer of EVAL_LAYERS) {

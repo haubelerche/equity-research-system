@@ -15,7 +15,7 @@ Usage:
     python scripts/extract_facts_from_ocr.py --ticker DHG --dry-run
 
 Output:
-    candidate_rows.csv written to each OCR artifact directory
+    mapped_candidate_facts.csv written to each OCR artifact directory
     Facts appended to config/benchmarks/shared/golden_financials/<TICKER>.csv
     Provenance JSON updated with source_tier=2 (OCR-extracted, pre-audit cross-check needed)
 """
@@ -35,8 +35,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from backend.evaluation.benchmark_paths import GOLDEN_FINANCIALS_DIR
+
 OCR_BASE = ROOT / "storage" / "sources" / "ocr_artifacts"
-GOLDEN_DIR = ROOT / "config" / "dataset" / "benchmarks" / "shared" / "golden_financials"
+GOLDEN_DIR = GOLDEN_FINANCIALS_DIR
+MAPPED_FACT_ROWS_FILENAME = "mapped_candidate_facts.csv"
 
 GOLDEN_CSV_FIELDS = [
     "ticker", "fiscal_year", "period", "statement_type", "canonical_key",
@@ -267,8 +270,10 @@ def process_ocr_run(
     print(f"  Extracted {len(unique_rows)} unique facts from {len(page_files)} pages.")
 
     if not dry_run:
-        # Write candidate_rows.csv to the artifact dir
-        cand_path = run_dir / "candidate_rows.csv"
+        # Keep raw OCR parser artifacts and mapped fact exports separate. The
+        # backend OCR artifact contract owns candidate_rows.csv as raw
+        # page_number/raw_label/raw_value rows.
+        cand_path = run_dir / MAPPED_FACT_ROWS_FILENAME
         with cand_path.open("w", newline="", encoding="utf-8") as fh:
             writer = csv.DictWriter(fh, fieldnames=GOLDEN_CSV_FIELDS + ["page_number"])
             writer.writeheader()

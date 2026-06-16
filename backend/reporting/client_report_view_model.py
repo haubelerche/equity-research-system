@@ -124,6 +124,8 @@ class ClientReportViewModel:
     valuation_summary_table: TableData | None = None
     wacc_bridge_table: TableData | None = None
     valuation_bridge_table: TableData | None = None
+    report_generated_at: str = ""
+    market_price_as_of: str = ""
 
 
 _DASH = "—"
@@ -214,6 +216,32 @@ def _price_to_vnd(value: Any) -> float | None:
     if price is None:
         return None
     return price * 1000 if price < 1000 else price
+
+
+def _date_prefix(value: Any) -> str:
+    text = str(value or "").strip()
+    return text[:10] if len(text) >= 10 else text
+
+
+def _market_price_as_of(
+    current_price: float | None,
+    *,
+    valuation: dict[str, Any],
+    snapshot: Any = None,
+    market_data: MarketDataArtifact | None = None,
+) -> str:
+    """Resolve the as-of date for the current market price shown in the report."""
+    if current_price is None:
+        return ""
+    if market_data is not None and market_data.trading_statistics.last_close is not None:
+        return _date_prefix(market_data.as_of_date)
+    if snapshot is not None and getattr(snapshot, "last_price", None) is not None:
+        return _date_prefix(getattr(snapshot, "as_of_date", ""))
+    for key in ("market_price_as_of", "price_as_of_date", "market_data_as_of", "snapshot_as_of"):
+        value = valuation.get(key)
+        if value:
+            return _date_prefix(value)
+    return ""
 
 
 def _derive_artifact_shares_mn(
@@ -2258,6 +2286,8 @@ def build_client_report_view_model(
 ) -> ClientReportViewModel:
     ticker = ticker.upper()
     company_name, exchange = _COMPANIES.get(ticker, (ticker, "HOSE"))
+    generated_at = datetime.now().astimezone().isoformat(timespec="seconds")
+    report_date = generated_at[:10]
 
     manifest = None
     if run_id:
@@ -2298,6 +2328,12 @@ def build_client_report_view_model(
         current_price = _price_to_vnd(snapshot.last_price)
     if current_price is None and market_data is not None:
         current_price = _price_to_vnd(market_data.trading_statistics.last_close)
+    market_price_as_of = _market_price_as_of(
+        current_price,
+        valuation=val,
+        snapshot=snapshot,
+        market_data=market_data,
+    )
     if current_price and target_price and upside is None:
         upside = target_price / current_price - 1
     dividend_per_share = _derive_report_dividend_per_share(
@@ -2327,6 +2363,10 @@ def build_client_report_view_model(
     missing: list[str] = []
     if current_price is None:
         missing.append("current_price")
+    elif not market_price_as_of:
+        missing.append("market_price_as_of")
+    elif market_price_as_of != report_date:
+        missing.append("same_day_market_price")
     if target_price is None:
         missing.append("target_price")
     if upside is None:
@@ -2401,7 +2441,7 @@ def build_client_report_view_model(
         company_name=company_name,
         exchange=exchange,
         sector="Dược phẩm",
-        report_date=datetime.now().strftime("%Y-%m-%d"),
+        report_date=report_date,
         report_title=f"Cập nhật {ticker}",
         recommendation=recommendation,
         current_price=Money(current_price) if current_price is not None else None,
@@ -2519,6 +2559,8 @@ def build_client_report_view_model(
         valuation_summary_table=_table_valuation_summary(val),
         wacc_bridge_table=_table_wacc_bridge(val),
         valuation_bridge_table=_table_valuation_bridge(val),
+        report_generated_at=generated_at,
+        market_price_as_of=market_price_as_of,
     )
 
 

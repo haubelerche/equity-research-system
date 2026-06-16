@@ -1,0 +1,122 @@
+{
+  "artifact_name": "report_quality_eval",
+  "schema_version": "20260615_v3",
+  "run_id": "RUN_DHG_20260615_V3",
+  "ticker": "DHG",
+  "snapshot_id": "SNAP_DHG_FY2022_2025_V3",
+  "status": "NEEDS_HUMAN_REVIEW",
+  "summary": {
+    "metric_count": 4
+  },
+  "metrics": [
+    {
+      "metric_id": "report.quality_total",
+      "metric_name": "Report quality total",
+      "category": "report_quality",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P1",
+      "blocks_publish": false,
+      "threshold_operator": ">=",
+      "threshold": 85,
+      "unit": "score",
+      "owner": "report",
+      "remediation_hint": "Improve sections below rubric threshold.",
+      "value": 78,
+      "status": "warning",
+      "sample_size": 1,
+      "failed_examples": [],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    },
+    {
+      "metric_id": "report.completeness",
+      "metric_name": "Report completeness",
+      "category": "report_quality",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P1",
+      "blocks_publish": true,
+      "threshold_operator": ">=",
+      "threshold": 90,
+      "unit": "percent",
+      "owner": "report",
+      "remediation_hint": "Add missing required sections/tables/charts.",
+      "value": 86,
+      "status": "fail",
+      "sample_size": 9,
+      "failed_examples": [
+        {
+          "missing": "forecast_bridge"
+        }
+      ],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    },
+    {
+      "metric_id": "report.forecast_rationale",
+      "metric_name": "Forecast rationale",
+      "category": "report_quality",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P1",
+      "blocks_publish": false,
+      "threshold_operator": ">=",
+      "threshold": 80,
+      "unit": "score",
+      "owner": "report",
+      "remediation_hint": "Add explicit revenue/margin/capex/NWC driver rationale.",
+      "value": 62,
+      "status": "warning",
+      "sample_size": 1,
+      "failed_examples": [],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    },
+    {
+      "metric_id": "report.valuation_transparency",
+      "metric_name": "Valuation transparency",
+      "category": "report_quality",
+      "layer": "release_gate",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P1",
+      "blocks_publish": true,
+      "threshold_operator": ">=",
+      "threshold": 85,
+      "unit": "score",
+      "owner": "report",
+      "remediation_hint": "Show method selection, assumptions, WACC, bridge and sensitivity.",
+      "value": 82,
+      "status": "warning",
+      "sample_size": 1,
+      "failed_examples": [],
+      "artifact_id": null,
+      "artifact_version": "v3",
+      "dataset_version": "20260615_v3",
+      "benchmark_suite_version": "20260615_v3",
+      "evaluated_at": "2026-06-15T00:00:00Z"
+    }
+  ],
+  "top_blockers": [
+    {
+      "metric_id": "report.completeness",
+      "severity": "P1"
+    }
+  ],
+  "artifact_refs": {
+    "manifest": "runs/RUN_DHG_20260615_V3/manifest.json"
+  }
+}

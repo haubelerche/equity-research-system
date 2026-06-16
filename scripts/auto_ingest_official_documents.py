@@ -472,6 +472,13 @@ def _run_ocr_pipeline(
 
     # 3. Extract via OCR
     print(f"[auto_ingest] {ticker} {fiscal_year}: running OCR on scanned PDF...")
+    pages_processed = 0
+
+    def _save_ocr_page(page_number: int, text: str) -> None:
+        nonlocal pages_processed
+        save_page_text(run_dir, page_number, text)
+        pages_processed += 1
+
     try:
         extracted_rows = extract_from_pdf_ocr(
             pdf_path=pdf_path,
@@ -479,16 +486,18 @@ def _run_ocr_pipeline(
             fiscal_year=fiscal_year,
             document_title=document_title,
             lang="vie+eng",
-            page_text_callback=lambda page_number, text: save_page_text(run_dir, page_number, text),
+            page_text_callback=_save_ocr_page,
         )
     except Exception as exc:  # noqa: BLE001
         print(f"[auto_ingest] OCR extraction error: {exc}")
-        finalize_ocr_run(run_dir, meta, 0, 1, 0, 0, [], [str(exc)], status="failed")
+        finalize_ocr_run(run_dir, meta, pages_processed, 1, 0, 0, [], [str(exc)], status="failed")
         return [], IngestStatus.OCR_FAILED, 0, 0, 0
 
     if not extracted_rows:
         print(f"[auto_ingest] {ticker} {fiscal_year}: OCR produced no recognisable facts")
-        finalize_ocr_run(run_dir, meta, 0, 0, 0, 0, ["no_facts_extracted"], [], status="completed")
+        finalize_ocr_run(
+            run_dir, meta, pages_processed, 0, 0, 0, ["no_facts_extracted"], [], status="completed"
+        )
         return [], IngestStatus.OCR_FAILED, 0, 0, 0
 
     # 4. Save raw candidate rows to artifact
@@ -497,7 +506,9 @@ def _run_ocr_pipeline(
         for r in extracted_rows
     ]
     save_candidate_rows(run_dir, raw_rows)
-    finalize_ocr_run(run_dir, meta, len(extracted_rows), 0, len(extracted_rows), 0, [], [], status="completed")
+    finalize_ocr_run(
+        run_dir, meta, pages_processed, 0, len(extracted_rows), 0, [], [], status="completed"
+    )
 
     # 5. Stage as CandidateFact
     candidate_facts = from_extracted_rows(extracted_rows, ocr_run_id=meta.ocr_run_id, document_id=document_id)
@@ -536,6 +547,17 @@ def _run_ocr_pipeline(
     print(
         f"[auto_ingest] {ticker} {fiscal_year}: OCR candidates={n_candidates} "
         f"promoted={n_promoted} blocked={n_blocked}"
+    )
+    finalize_ocr_run(
+        run_dir,
+        meta,
+        pages_processed,
+        0,
+        n_candidates,
+        n_promoted,
+        ["blocked_candidates_pending_review"] if n_blocked else [],
+        [],
+        status="completed",
     )
 
     # 11. Convert promoted facts to CSV rows for downstream DB ingest
@@ -675,38 +697,51 @@ def _fetch_pdf(
         from backend.documents.official_document_discovery import discover_documents
         from backend.documents.pdf_extractor import extract_to_csv
 
-        result = discover_documents(
-            ticker, fiscal_year, fiscal_year,
-            min_confidence=cfg.min_pdf_confidence,
-        )
+        cached_pdf = doc_dir / "source_document.pdf"
+        if cached_pdf.is_file() and not cfg.dry_run:
+            pdf_path = cached_pdf
+            try:
+                metadata = json.loads((doc_dir / "metadata.json").read_text(encoding="utf-8"))
+            except Exception:  # noqa: BLE001
+                metadata = {}
+            document_title = str(
+                metadata.get("title")
+                or f"{ticker} FY{fiscal_year} cached official PDF"
+            )
+        else:
+            result = discover_documents(
+                ticker, fiscal_year, fiscal_year,
+                min_confidence=cfg.min_pdf_confidence,
+            )
 
-        # Filter to financial documents (not governance/sustainability)
-        annual_cands = [
-            c for c in result.ranking.selected
-            if c.document_type in ("annual_report", "audited_financial_statement",
-                                   "financial_statement")
-        ]
-        if not annual_cands:
-            return [], IngestStatus.SOURCE_MISSING, {}
+            # Filter to financial documents (not governance/sustainability)
+            annual_cands = [
+                c for c in result.ranking.selected
+                if c.document_type in ("annual_report", "audited_financial_statement",
+                                       "financial_statement")
+            ]
+            if not annual_cands:
+                return [], IngestStatus.SOURCE_MISSING, {}
 
-        best = annual_cands[0]
+            best = annual_cands[0]
 
-        if cfg.dry_run:
-            return [{"note": f"dry_run: would fetch {best.source_url}"}], IngestStatus.DRY_RUN, {}
+            if cfg.dry_run:
+                return [{"note": f"dry_run: would fetch {best.source_url}"}], IngestStatus.DRY_RUN, {}
 
-        pdf_path, file_hash, _content_type = _download_candidate_pdf(best, doc_dir)
-        _write_pdf_metadata(
-            ticker=ticker,
-            fiscal_year=fiscal_year,
-            candidate=best,
-            doc_dir=doc_dir,
-            pdf_path=pdf_path,
-            file_hash=file_hash,
-        )
+            pdf_path, file_hash, _content_type = _download_candidate_pdf(best, doc_dir)
+            _write_pdf_metadata(
+                ticker=ticker,
+                fiscal_year=fiscal_year,
+                candidate=best,
+                doc_dir=doc_dir,
+                pdf_path=pdf_path,
+                file_hash=file_hash,
+            )
+            document_title = best.title
 
         # Detect scanned PDF — route to OCR if enabled, else return explicit status
         if _is_scanned_pdf(pdf_path):
-            print(f"[auto_ingest] {ticker} {fiscal_year}: PDF is scanned ({best.title[:40]})")
+            print(f"[auto_ingest] {ticker} {fiscal_year}: PDF is scanned ({document_title[:40]})")
             if cfg.ocr:
                 secondary = _build_secondary_source_from_cafef(
                     cafef_rows or [], ticker, fiscal_year,
@@ -715,7 +750,7 @@ def _fetch_pdf(
                     pdf_path=pdf_path,
                     ticker=ticker,
                     fiscal_year=fiscal_year,
-                    document_title=best.title,
+                    document_title=document_title,
                     secondary_source=secondary,
                     doc_dir=doc_dir,
                 )
@@ -728,7 +763,7 @@ def _fetch_pdf(
             return [], IngestStatus.EXTRACTION_FAILED_SCANNED_PDF, {}
 
         pdf_csv_path = doc_dir / "extracted_facts_pdf.csv"
-        extracted_rows = extract_to_csv(pdf_path, ticker, fiscal_year, best.title, pdf_csv_path)
+        extracted_rows = extract_to_csv(pdf_path, ticker, fiscal_year, document_title, pdf_csv_path)
         raw_csv_rows = [r.to_csv_dict() for r in extracted_rows]
         csv_rows, validation_errors = _validate_pdf_rows(raw_csv_rows, fiscal_year)
 
@@ -756,6 +791,12 @@ def _fetch_pdf(
 
     except Exception as exc:  # noqa: BLE001
         return [{"error": str(exc)}], IngestStatus.SOURCE_MISSING, {}
+
+
+def _is_optional_reconcile_schema_error(exc: Exception) -> bool:
+    """True when the legacy official-fact reconciliation tables are unavailable."""
+    message = str(exc)
+    return "fact.fact_observations" in message and "does not exist" in message
 
 
 # ---------------------------------------------------------------------------
@@ -871,7 +912,12 @@ def run_pipeline(cfg: AutoIngestConfig) -> list[YearResult]:
                 )
                 yr.promoted = rec_sum.promoted
             except Exception as exc:  # noqa: BLE001
-                yr.errors.append(f"reconcile: {exc}")
+                if _is_optional_reconcile_schema_error(exc):
+                    yr.notes.append(
+                        "reconcile skipped: legacy fact.fact_observations table is unavailable"
+                    )
+                else:
+                    yr.errors.append(f"reconcile: {exc}")
 
         if yr.ingest_status == IngestStatus.OFFICIAL_FACTS_READY and (
             yr.ingested <= 0 or yr.promoted <= 0 or yr.errors

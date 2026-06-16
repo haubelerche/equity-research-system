@@ -1,0 +1,15 @@
+{
+  "ticker": "DBD",
+  "company_name": "DBD",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DBD FY2023 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DBD\\2023\\source_document.pdf",
+  "published_date": "2023-12-31",
+  "fiscal_year": 2023,
+  "language": "vi",
+  "file_hash": "d0e0f017e39e2d41869da082f9ba43e6fab85c8a2b73a756215156e063f593ac",
+  "staged_at": "2026-06-15T09:41:16.204210+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DBD\\DBD 2023.pdf"
+}

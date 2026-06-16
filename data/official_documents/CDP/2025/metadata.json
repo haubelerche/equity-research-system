@@ -1,0 +1,15 @@
+{
+  "ticker": "CDP",
+  "company_name": "CDP",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "CDP FY2025 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\CDP\\2025\\source_document.pdf",
+  "published_date": "2025-12-31",
+  "fiscal_year": 2025,
+  "language": "vi",
+  "file_hash": "7765eee3678d883fa54323ff904545000727c8967e859017ebd5dede251b1ea2",
+  "staged_at": "2026-06-15T09:41:15.841177+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\CDP\\CDP 2025.pdf"
+}

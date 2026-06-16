@@ -193,7 +193,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
         payload = _run_eval_artifact(run_id, "evaluation_packet.json")
         if payload is None:
-            raise HTTPException(status_code=404, detail="Run evaluation packet not found")
+            return load_latest_evaluation()
         return payload
 
     @app.get("/research/{run_id}/evaluation/{artifact_name}")
@@ -208,7 +208,9 @@ def create_app(
             raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
         payload = _run_eval_artifact(run_id, artifact_name)
         if payload is None:
-            raise HTTPException(status_code=404, detail="Run evaluation artifact not found")
+            payload = load_evaluation_artifact(artifact_name)
+        if payload is None:
+            raise HTTPException(status_code=404, detail="Evaluation artifact not found")
         return payload
 
     def _output_dir() -> Path:

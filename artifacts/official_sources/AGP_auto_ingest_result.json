@@ -1,0 +1,14 @@
+{
+  "ticker": "AGP",
+  "generated_at": "2026-06-15T09:54:08.716072+00:00",
+  "years": [
+    {
+      "fiscal_year": 2022,
+      "ingest_status": "LOW_CONFIDENCE",
+      "ocr_candidates": 0,
+      "ocr_promoted": 0,
+      "ocr_blocked": 0,
+      "errors": 3
+    }
+  ]
+}

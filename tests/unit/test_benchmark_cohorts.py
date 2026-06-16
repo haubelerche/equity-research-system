@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 from types import SimpleNamespace
 
+from backend.dataset.config_io import load_universe_tickers
 from backend.evaluation.benchmark_cohorts import (
     available_benchmark_cohorts,
     resolve_benchmark_tickers,
@@ -11,9 +13,10 @@ from scripts import run_benchmark_suite
 
 def test_default_benchmark_cohort_is_diverse_and_not_single_ticker() -> None:
     tickers = resolve_benchmark_tickers()
+    universe_tickers = load_universe_tickers()
 
     assert tickers[0] == "DHG"
-    assert len(tickers) == 42
+    assert len(tickers) == len(universe_tickers)
     assert len(set(tickers)) == len(tickers)
     assert tickers != ["DBD"]
     assert "DBD" in tickers
@@ -22,9 +25,10 @@ def test_default_benchmark_cohort_is_diverse_and_not_single_ticker() -> None:
 def test_available_benchmark_cohorts_expose_more_than_one_archetype() -> None:
     cohorts = available_benchmark_cohorts()
 
-    assert len(cohorts["full_universe"]) == 42
+    assert len(cohorts["full_universe"]) == len(load_universe_tickers())
     assert cohorts["diversified_core"] == ["DHG", "IMP", "DMC", "TRA", "TNH"]
     assert cohorts["diversified_healthcare"] == ["DHG", "IMP", "DMC", "TRA", "JVC", "DBD"]
+    assert cohorts["rag_representative_dhg"] == ["DHG"]
     assert cohorts["financial_model_top10"] == [
         "DHG",
         "DBD",
@@ -141,6 +145,291 @@ def test_benchmark_suite_aggregate_metric_exposes_numeric_cohort_rate() -> None:
     assert metric["failed_examples"][0]["ticker"] == "DBD"
 
 
+def test_benchmark_suite_boolean_metric_aggregates_as_percent_gate() -> None:
+    packets = [
+        {
+            "ticker": "DHG",
+            "artifacts": [{
+                "plan_id": "01",
+                "status": "pass",
+                "metric_results": [{
+                    "id": "raw_bctc_non_empty",
+                    "metric_id": "raw_bctc_non_empty",
+                    "metric_type": "boolean",
+                    "unit": "boolean",
+                    "threshold": "= true",
+                    "threshold_operator": "=",
+                    "status": "pass",
+                    "value": True,
+                    "calculation": {"aggregation": "boolean_gate"},
+                }],
+            }],
+        },
+        {
+            "ticker": "IMP",
+            "artifacts": [{
+                "plan_id": "01",
+                "status": "fail",
+                "metric_results": [{
+                    "id": "raw_bctc_non_empty",
+                    "metric_id": "raw_bctc_non_empty",
+                    "metric_type": "boolean",
+                    "unit": "boolean",
+                    "threshold": "= true",
+                    "threshold_operator": "=",
+                    "status": "warning",
+                    "value": False,
+                    "failed_examples": [{"file": "ratio_year.json", "status": "missing"}],
+                    "calculation": {"aggregation": "boolean_gate"},
+                }],
+            }],
+        },
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="data_quality",
+        tickers=["DHG", "IMP"],
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("01",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 0.5
+    assert metric["status"] == "fail"
+    assert metric["metric_type"] == "coverage"
+    assert metric["unit"] == "percent"
+    assert metric["threshold"] == "= 100%"
+    assert metric["calculation"]["aggregation"] == "cohort_pass_rate"
+    assert metric["calculation"]["numerator"] == 1
+    assert metric["calculation"]["denominator"] == 2
+
+
+def test_benchmark_suite_aggregate_metric_status_follows_displayed_threshold_value() -> None:
+    packets = [
+        {
+            "ticker": "DHG",
+            "artifacts": [{
+                "plan_id": "01",
+                "status": "pass",
+                "metric_results": [{
+                    "id": "data_reliability_score",
+                    "metric_id": "data_reliability_score",
+                    "metric_type": "score",
+                    "unit": "score",
+                    "threshold": ">= 90/100",
+                    "threshold_operator": ">=",
+                    "status": "pass",
+                    "value": 1.0,
+                    "calculation": {"aggregation": "weighted_score"},
+                }],
+            }],
+        },
+        {
+            "ticker": "IMP",
+            "artifacts": [{
+                "plan_id": "01",
+                "status": "fail",
+                "metric_results": [{
+                    "id": "data_reliability_score",
+                    "metric_id": "data_reliability_score",
+                    "metric_type": "score",
+                    "unit": "score",
+                    "threshold": ">= 90/100",
+                    "threshold_operator": ">=",
+                    "status": "fail",
+                    "value": 0.956,
+                    "failed_examples": [{"component": "ocr_resolution_health"}],
+                    "calculation": {"aggregation": "weighted_score"},
+                }],
+            }],
+        },
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="data_quality",
+        tickers=["DHG", "IMP"],
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("01",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 0.978
+    assert metric["threshold"] == ">= 90/100"
+    assert metric["status"] == "pass"
+    assert metric["failed_examples"][0]["ticker"] == "IMP"
+
+
+def test_benchmark_suite_error_rate_aggregates_observed_numeric_values() -> None:
+    packets = [
+        {
+            "ticker": "DHG",
+            "artifacts": [{
+                "plan_id": "01",
+                "status": "fail",
+                "metric_results": [{
+                    "id": "ocr_unresolved_rate",
+                    "metric_id": "ocr_unresolved_rate",
+                    "metric_type": "error_rate",
+                    "unit": "percent",
+                    "threshold": "<= 5%",
+                    "threshold_operator": "<=",
+                    "status": "fail",
+                    "value": 0.9444444444444444,
+                    "calculation": {"aggregation": "error_rate"},
+                }],
+            }],
+        },
+        {
+            "ticker": "IMP",
+            "artifacts": [{
+                "plan_id": "01",
+                "status": "blocked",
+                "metric_results": [{
+                    "id": "ocr_unresolved_rate",
+                    "metric_id": "ocr_unresolved_rate",
+                    "metric_type": "error_rate",
+                    "unit": "percent",
+                    "threshold": "<= 5%",
+                    "threshold_operator": "<=",
+                    "status": "not_evaluable",
+                    "value": None,
+                    "calculation": {"aggregation": "error_rate"},
+                }],
+            }],
+        },
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="data_quality",
+        tickers=["DHG", "IMP"],
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("01",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 0.9444444444444444
+    assert metric["status"] == "fail"
+    assert metric["calculation"]["aggregation"] == "cohort_mean_observed"
+    assert metric["calculation"]["numerator"] == 0.9444444444444444
+    assert metric["calculation"]["denominator"] == 1
+
+
+def test_benchmark_suite_finance_pass_count_aggregates_as_pass_rate() -> None:
+    packets = [
+        {
+            "ticker": "DHG",
+            "artifacts": [{
+                "plan_id": "03",
+                "status": "fail",
+                "metric_results": [{
+                    "id": "fcfe",
+                    "metric_id": "fcfe",
+                    "metric_type": "error_count",
+                    "unit": "count",
+                    "threshold": "pass",
+                    "threshold_operator": "=",
+                    "status": "pass",
+                    "value": 1,
+                }],
+            }],
+        },
+        {
+            "ticker": "IMP",
+            "artifacts": [{
+                "plan_id": "03",
+                "status": "fail",
+                "metric_results": [{
+                    "id": "fcfe",
+                    "metric_id": "fcfe",
+                    "metric_type": "error_count",
+                    "unit": "count",
+                    "threshold": "pass",
+                    "threshold_operator": "=",
+                    "status": "fail",
+                    "value": 0,
+                }],
+            }],
+        },
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="financial_model_top10",
+        tickers=["DHG", "IMP"],
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("03",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 0.5
+    assert metric["status"] == "fail"
+    assert metric["metric_type"] == "coverage"
+    assert metric["unit"] == "percent"
+    assert metric["threshold"] == "= 100%"
+    assert metric["calculation"]["aggregation"] == "cohort_pass_rate"
+    assert metric["calculation"]["numerator"] == 1
+    assert metric["calculation"]["denominator"] == 2
+
+
+def test_benchmark_suite_finance_error_count_keeps_error_semantics() -> None:
+    packets = [
+        {
+            "ticker": "DHG",
+            "artifacts": [{
+                "plan_id": "03",
+                "status": "fail",
+                "metric_results": [{
+                    "id": "accounting_invariant_violations",
+                    "metric_id": "accounting_invariant_violations",
+                    "metric_type": "error_count",
+                    "unit": "count",
+                    "threshold": "= 0",
+                    "threshold_operator": "=",
+                    "status": "fail",
+                    "value": 2,
+                }],
+            }],
+        },
+        {
+            "ticker": "IMP",
+            "artifacts": [{
+                "plan_id": "03",
+                "status": "fail",
+                "metric_results": [{
+                    "id": "accounting_invariant_violations",
+                    "metric_id": "accounting_invariant_violations",
+                    "metric_type": "error_count",
+                    "unit": "count",
+                    "threshold": "= 0",
+                    "threshold_operator": "=",
+                    "status": "fail",
+                    "value": 4,
+                }],
+            }],
+        },
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="financial_model_top10",
+        tickers=["DHG", "IMP"],
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("03",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 6
+    assert metric["status"] == "fail"
+    assert metric["metric_type"] == "error_count"
+    assert metric["unit"] == "count"
+    assert metric["calculation"]["aggregation"] == "cohort_sum"
+    assert metric["calculation"]["numerator"] == 6
+    assert metric["calculation"]["denominator"] == 2
+
+
 def test_benchmark_suite_writes_per_ticker_packets(monkeypatch, tmp_path) -> None:
     fake_plans = [
         SimpleNamespace(id="01", name="Data reliability", artifact="data_quality.json", test_targets=("tests/unit",)),
@@ -181,3 +470,51 @@ def test_benchmark_suite_writes_per_ticker_packets(monkeypatch, tmp_path) -> Non
     assert packet["ticker"] == "DHG"
     assert writes[0][0].endswith("DHG\\data_quality.json")
     assert writes[-1][0].endswith("DHG\\evaluation_packet.json")
+
+
+def test_benchmark_suite_reuses_existing_per_ticker_artifact_for_dashboard(monkeypatch, tmp_path) -> None:
+    fake_plans = [
+        SimpleNamespace(id="02", name="RAG and evidence", artifact="retrieval_eval.json"),
+    ]
+    ticker_dir = tmp_path / "DHG"
+    ticker_dir.mkdir()
+    ticker_dir.joinpath("retrieval_eval.json").write_text(
+        json.dumps({
+            "plan_id": "02",
+            "plan_name": "RAG and evidence",
+            "ticker": "DHG",
+            "status": "fail",
+            "metrics": {"test_suite_status": "not_measured"},
+            "metric_results": [{
+                "id": "hit_rate_at_5",
+                "metric_id": "hit_rate_at_5",
+                "value": 0.9655,
+                "status": "pass",
+                "blocks_publish": False,
+            }],
+            "blocking_issues": [],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(run_benchmark_suite, "_selected_plans", lambda *args, **kwargs: fake_plans)
+
+    packet = run_benchmark_suite._packet_from_existing_ticker(
+        ticker="DHG",
+        output_dir=tmp_path,
+        generated_at="2026-06-16T00:00:00+00:00",
+        plan_ids=("02",),
+    )
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="default",
+        tickers=["DHG"],
+        packets=[packet],
+        generated_at="2026-06-16T00:00:00+00:00",
+        plan_ids=("02",),
+    )
+
+    metric = summary["artifacts"][0]["metric_results"][0]
+    assert packet["reused_existing_artifacts"] is True
+    assert packet["artifacts"][0]["artifact"] == "retrieval_eval.json"
+    assert metric["metric_id"] == "hit_rate_at_5"
+    assert metric["value"] == 0.9655
+    assert metric["calculation"]["aggregation"] == "cohort_mean"

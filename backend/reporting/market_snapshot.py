@@ -39,6 +39,7 @@ class MarketSnapshot:
     retrieved_at: str
     source: str
     last_price: float | None = None          # VND/share
+    price_as_of: str | None = None           # trade date of last_price (ISO YYYY-MM-DD)
     market_cap: float | None = None          # VND (absolute)
     shares_outstanding: float | None = None  # absolute share count
     high_52w: float | None = None            # VND/share
@@ -87,7 +88,12 @@ def _fetch_overview_row(ticker: str) -> dict[str, Any]:
 
 
 def fetch_market_snapshot(ticker: str) -> MarketSnapshot:
-    """Build a MarketSnapshot from the live vnstock VCI overview. May raise."""
+    """Build a MarketSnapshot from the live vnstock VCI overview.
+
+    Raises when vnstock has no overview at all (so the caller can fall back to
+    cache). When vnstock returns a row but no current price (common for thin
+    UPCOM names), the price is back-filled from CafeF's daily price history.
+    """
     ticker = ticker.strip().upper()
     row = _fetch_overview_row(ticker)
     now = datetime.now(timezone.utc).isoformat()
@@ -102,6 +108,7 @@ def fetch_market_snapshot(ticker: str) -> MarketSnapshot:
         retrieved_at=now,
         source=SOURCE_VCI_OVERVIEW,
         last_price=last_price,
+        price_as_of=now[:10] if last_price is not None else None,
         market_cap=market_cap,
         shares_outstanding=shares,
         high_52w=_f(row.get("highest_price1_year")),
@@ -120,8 +127,30 @@ def fetch_market_snapshot(ticker: str) -> MarketSnapshot:
         if getattr(snap, key) is not None:
             snap.provenance[key] = SOURCE_VCI_OVERVIEW
 
+    # Hard-wired current-price fallback: CafeF daily price history (thin UPCOM names).
+    if snap.last_price is None:
+        _backfill_price_from_cafef(snap)
+
     _check_consistency(snap)
     return snap
+
+
+def _backfill_price_from_cafef(snap: MarketSnapshot) -> None:
+    """Fill last_price (+ volume) from CafeF when no vnstock price is available."""
+    from backend.documents.connectors.cafef_market_connector import fetch_latest_price
+
+    quote = fetch_latest_price(snap.ticker)
+    if quote.last_price is None:
+        snap.warnings.append("no current price from vnstock or CafeF")
+        return
+    snap.last_price = quote.last_price
+    snap.price_as_of = quote.as_of_date or snap.as_of_date
+    snap.provenance["last_price"] = quote.source
+    if snap.avg_volume_1m is None and quote.volume is not None:
+        snap.avg_volume_1m = quote.volume
+        snap.provenance["avg_volume_1m"] = quote.source
+    if snap.source == "none":
+        snap.source = quote.source
 
 
 def _check_consistency(snap: MarketSnapshot) -> None:

@@ -61,9 +61,12 @@ export async function fetchRunStatus(runId: string): Promise<RunStatusResponse> 
 }
 
 export async function fetchEvaluationPacket(runId?: string): Promise<EvaluationPacket> {
-  return getJSON<EvaluationPacket>(
-    runId ? `/research/${runId}/evaluation` : "/eval/framework",
-  );
+  if (!runId) return getJSON<EvaluationPacket>("/eval/framework");
+  try {
+    return await getJSON<EvaluationPacket>(`/research/${runId}/evaluation`);
+  } catch {
+    return getJSON<EvaluationPacket>("/eval/framework");
+  }
 }
 
 function withCacheToken(url: string, token?: string | number | null): string {

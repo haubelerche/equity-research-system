@@ -9,6 +9,20 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from backend.evaluation.benchmark_paths import (
+    BENCHMARK_CONFIG_ROOT,
+    DEEPEVAL_CASE_RELATIVE,
+    DEEPEVAL_CASE_PATH,
+    GOLDEN_FINANCIALS_RELATIVE,
+    GOLDEN_FINANCIALS_DIR,
+    GOLDEN_VALUATION_CASES_RELATIVE,
+    GOLDEN_VALUATION_CASES_PATH,
+    RAGAS_SAMPLE_RELATIVE,
+    RAGAS_SAMPLE_PATH,
+    RAG_GOLDEN_QUERY_RELATIVE,
+    RAG_GOLDEN_QUERY_DIR,
+    ROOT as REPO_ROOT,
+)
 from backend.evaluation.benchmark_standards import standard_metric
 from backend.evaluation.framework_adapters import (
     evaluate_deepeval_cases,
@@ -20,17 +34,23 @@ from backend.valuation_method_policy import build_valuation_publishability_polic
 
 DATA_RELIABILITY_MIN_SAMPLE_ROWS = 20
 RAG_MIN_SAMPLE_ROWS = 20
-BENCHMARK_DATA_ROOT = Path("config") / "benchmarks"
-GOLDEN_FINANCIALS_DIR = BENCHMARK_DATA_ROOT / "shared" / "golden_financials"
-RAG_GOLDEN_QUERY_DIR = BENCHMARK_DATA_ROOT / "02_ragas_retrieval" / "golden_queries"
-RAGAS_SAMPLE_PATH = BENCHMARK_DATA_ROOT / "02_ragas_retrieval" / "ragas" / "ragas_samples.json"
-DEEPEVAL_CASE_PATH = BENCHMARK_DATA_ROOT / "04_deepeval_agent" / "deepeval_cases" / "agent_cases.json"
+BENCHMARK_DATA_ROOT = BENCHMARK_CONFIG_ROOT
 RAW_BCTC_FILES = (
     "income_statement_year.json",
     "balance_sheet_year.json",
     "cash_flow_year.json",
     "ratio_year.json",
 )
+
+
+def _benchmark_scoped_path(root: Path, configured_path: Path, relative_path: Path) -> Path:
+    """Use configured benchmark roots for the real repo and root-local fixtures in tests."""
+    try:
+        if root.resolve() == REPO_ROOT.resolve():
+            return configured_path
+    except OSError:
+        pass
+    return root / relative_path
 
 
 def _read_json(path: Path | None) -> dict[str, Any]:
@@ -97,6 +117,61 @@ def _filter_records_for_ticker(records: list[dict[str, Any]], ticker: str) -> li
         if record_ticker == expected:
             filtered.append(record)
     return filtered
+
+
+def _ragas_reference(sample: dict[str, Any]) -> str:
+    for key in ("expected_answer", "reference", "answer", "ground_truth"):
+        text = str(sample.get(key) or "").strip()
+        if text:
+            return text
+    return ""
+
+
+def _ragas_sample_contract_errors(samples: list[dict[str, Any]], ticker: str) -> list[dict[str, Any]]:
+    expected = ticker.upper()
+    errors: list[dict[str, Any]] = []
+    for index, sample in enumerate(samples, start=1):
+        metadata = sample.get("metadata") if isinstance(sample.get("metadata"), dict) else {}
+        sample_id = sample.get("id") or f"sample_{index}"
+        sample_errors: list[str] = []
+        if not str(sample.get("question") or "").strip():
+            sample_errors.append("missing_question")
+        if not _ragas_reference(sample):
+            sample_errors.append("missing_reference")
+        record_ticker = str(sample.get("ticker") or metadata.get("ticker") or "").upper()
+        if not record_ticker:
+            sample_errors.append("missing_ticker")
+        elif record_ticker != expected:
+            sample_errors.append(f"ticker_mismatch:{record_ticker}:{expected}")
+        if "fiscal_year" not in sample and "fiscal_year" not in metadata:
+            sample_errors.append("missing_fiscal_year")
+        if sample_errors:
+            errors.append({
+                "sample_index": index,
+                "sample_origin": "ragas_contract_validation",
+                "id": sample_id,
+                "question": sample.get("question"),
+                "reference": _ragas_reference(sample),
+                "ticker": record_ticker or None,
+                "fiscal_year": sample.get("fiscal_year", metadata.get("fiscal_year")),
+                "contract_errors": sample_errors,
+            })
+    return errors
+
+
+def _invalid_ragas_contract_result(
+    samples: list[dict[str, Any]],
+    errors: list[dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "execution_status": "not_evaluable",
+        "framework": "ragas",
+        "framework_version": None,
+        "sample_size": len(samples),
+        "scores": {},
+        "samples": errors,
+        "reason": "ragas_sample_contract_invalid",
+    }
 
 
 def _files_named(root: Path, name: str) -> list[Path]:
@@ -525,10 +600,11 @@ def _latest_valuation_artifact_for_ticker(root: Path, ticker: str) -> Path | Non
 
 
 def _rag_golden_path_for_ticker(root: Path, ticker: str) -> Path:
-    per_ticker = root / RAG_GOLDEN_QUERY_DIR / f"{ticker.upper()}.yaml"
+    golden_dir = _benchmark_scoped_path(root, RAG_GOLDEN_QUERY_DIR, RAG_GOLDEN_QUERY_RELATIVE)
+    per_ticker = golden_dir / f"{ticker.upper()}.yaml"
     if per_ticker.is_file():
         return per_ticker
-    default = root / RAG_GOLDEN_QUERY_DIR / "default.yaml"
+    default = golden_dir / "default.yaml"
     try:
         import yaml
 
@@ -594,7 +670,7 @@ def _blocked(metrics: list[dict[str, Any]]) -> list[str]:
 
 
 def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
-    golden = root / GOLDEN_FINANCIALS_DIR / f"{ticker}.csv"
+    golden = _benchmark_scoped_path(root, GOLDEN_FINANCIALS_DIR, GOLDEN_FINANCIALS_RELATIVE) / f"{ticker}.csv"
     raw_audit = _audit_raw_bctc_snapshot(root, ticker)
     rows: list[dict[str, str]] = []
     if golden.is_file():
@@ -1147,7 +1223,7 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
     golden_available = golden_path.is_file()
     golden_scores = _run_local_retrieval_benchmark(root, ticker, golden_path)
     ragas_samples = _filter_records_for_ticker(
-        _read_json_list(root / RAGAS_SAMPLE_PATH),
+        _read_json_list(_benchmark_scoped_path(root, RAGAS_SAMPLE_PATH, RAGAS_SAMPLE_RELATIVE)),
         ticker,
     )
     # Pure-live RAGAS: when samples carry no hand-written offline_scores and the
@@ -1158,7 +1234,14 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
     _ragas_needs_live = bool(ragas_samples) and not all(
         isinstance(sample.get("offline_scores"), dict) for sample in ragas_samples
     )
-    if _ragas_needs_live and _ragas_retrieve is not None:
+    ragas_contract_errors = (
+        _ragas_sample_contract_errors(ragas_samples, ticker)
+        if _ragas_needs_live
+        else []
+    )
+    if ragas_contract_errors:
+        ragas_result = _invalid_ragas_contract_result(ragas_samples, ragas_contract_errors)
+    elif _ragas_needs_live and _ragas_retrieve is not None:
         from backend.evaluation.ragas_live import run_live_ragas
         ragas_result = run_live_ragas(ragas_samples, ticker, _ragas_retrieve)
     else:
@@ -1607,14 +1690,15 @@ def _base_cell_matches_target(
     )
 
 
-_GOLDEN_VALUATION_CASES = (
-    Path(__file__).resolve().parents[2]
-    / "config" / "benchmarks" / "03_financial_benchmarks" / "golden_valuation" / "valuation_cases.json"
-)
+_GOLDEN_VALUATION_CASES = GOLDEN_VALUATION_CASES_PATH
 
 
 def _load_golden_valuation(root: Path, ticker: str) -> dict[str, Any] | None:
-    cases_path = root / BENCHMARK_DATA_ROOT / "03_financial_benchmarks" / "golden_valuation" / "valuation_cases.json"
+    cases_path = _benchmark_scoped_path(
+        root,
+        GOLDEN_VALUATION_CASES_PATH,
+        GOLDEN_VALUATION_CASES_RELATIVE,
+    )
     if not cases_path.exists():
         cases_path = _GOLDEN_VALUATION_CASES
     cases = _read_json_list(cases_path)
@@ -2092,7 +2176,7 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
         None if not output_records else (len(output_records) - len(calc_findings)) / len(output_records)
     )
     deepeval_cases = _filter_records_for_ticker(
-        _read_json_list(root / DEEPEVAL_CASE_PATH),
+        _read_json_list(_benchmark_scoped_path(root, DEEPEVAL_CASE_PATH, DEEPEVAL_CASE_RELATIVE)),
         ticker,
     )
     deepeval_result = evaluate_deepeval_cases(deepeval_cases)

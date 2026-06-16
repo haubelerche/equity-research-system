@@ -54,6 +54,13 @@ _ARCHETYPE_TOPICS = {
 }
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    """Coerce to a mapping. Upstream LLM/evidence payloads occasionally return a
+    field as a list where a mapping is expected; `x or {}` lets such lists through
+    and the next `.get` blows up. Treat any non-dict as an empty mapping."""
+    return value if isinstance(value, dict) else {}
+
+
 def _first_mapping(*values: Any) -> dict[str, Any]:
     for value in values:
         if isinstance(value, dict) and value:
@@ -133,10 +140,10 @@ def build_company_research_pack(
     """Normalize available company evidence and explicitly expose coverage gaps."""
     evidence_pack = evidence_pack or {}
     financial_analysis = financial_analysis or {}
-    business = evidence_pack.get("business_evidence") or {}
-    catalysts = evidence_pack.get("pharma_catalyst_evidence") or {}
-    segments = financial_analysis.get("segment_channel_analysis") or {}
-    interpretation = financial_analysis.get("business_interpretation") or {}
+    business = _as_dict(evidence_pack.get("business_evidence"))
+    catalysts = _as_dict(evidence_pack.get("pharma_catalyst_evidence"))
+    segments = _as_dict(financial_analysis.get("segment_channel_analysis"))
+    interpretation = _as_dict(financial_analysis.get("business_interpretation"))
     resolved_archetype = str(
         archetype
         or business.get("archetype")

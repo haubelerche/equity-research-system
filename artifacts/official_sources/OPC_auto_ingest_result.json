@@ -1,0 +1,46 @@
+{
+  "ticker": "OPC",
+  "generated_at": "2026-06-15T06:25:43.996786+00:00",
+  "years": [
+    {
+      "fiscal_year": 2021,
+      "ingest_status": "SOURCE_MISSING",
+      "ocr_candidates": 0,
+      "ocr_promoted": 0,
+      "ocr_blocked": 0,
+      "errors": 2
+    },
+    {
+      "fiscal_year": 2022,
+      "ingest_status": "SOURCE_MISSING",
+      "ocr_candidates": 0,
+      "ocr_promoted": 0,
+      "ocr_blocked": 0,
+      "errors": 2
+    },
+    {
+      "fiscal_year": 2023,
+      "ingest_status": "SOURCE_MISSING",
+      "ocr_candidates": 0,
+      "ocr_promoted": 0,
+      "ocr_blocked": 0,
+      "errors": 2
+    },
+    {
+      "fiscal_year": 2024,
+      "ingest_status": "SOURCE_MISSING",
+      "ocr_candidates": 0,
+      "ocr_promoted": 0,
+      "ocr_blocked": 0,
+      "errors": 2
+    },
+    {
+      "fiscal_year": 2025,
+      "ingest_status": "SOURCE_MISSING",
+      "ocr_candidates": 0,
+      "ocr_promoted": 0,
+      "ocr_blocked": 0,
+      "errors": 2
+    }
+  ]
+}

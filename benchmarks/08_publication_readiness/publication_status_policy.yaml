@@ -1,0 +1,14 @@
+version: 20260615_v3
+logic:
+  - if missing_required_artifacts or benchmark_not_run => NOT_EVALUATED
+  - elif any P0 release gate fails => BLOCKED_BY_P0
+  - elif any P1 gate fails or report quality below threshold => NEEDS_HUMAN_REVIEW
+  - elif release gates passed and not human approved => DRAFT_PUBLISHABLE
+  - elif release gates passed and human approved => APPROVED_FOR_EXPORT
+client_final_requirements:
+  - run approved
+  - final_report approval approved
+  - publishable_final_report_model locked
+  - PACKAGE_VALIDATION_GATE passed
+  - report_quality decision allow_export and score >=85
+  - report and valuation snapshot match

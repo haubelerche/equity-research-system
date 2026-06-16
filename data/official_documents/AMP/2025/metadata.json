@@ -1,0 +1,15 @@
+{
+  "ticker": "AMP",
+  "company_name": "AMP",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "AMP FY2025 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\AMP\\2025\\source_document.pdf",
+  "published_date": "2025-12-31",
+  "fiscal_year": 2025,
+  "language": "vi",
+  "file_hash": "f0c7bc857b3c09a0805a6f10e801372040a51088ca3d091846a3e3185467b7c0",
+  "staged_at": "2026-06-15T09:41:14.811662+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\AMP\\AMP 2025.pdf"
+}

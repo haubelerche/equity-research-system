@@ -1,0 +1,11 @@
+ticker,company_name,exchange,sector,is_mvp_core,benchmark_role
+DHG,Cong ty Co phan Duoc Hau Giang,HOSE,pharma,True,primary reference
+IMP,Cong ty Co phan Duoc pham Imexpharm,HOSE,pharma,True,MVP peer
+DMC,Cong ty Co phan Xuat nhap khau Y te Domesco,HOSE,pharma,True,MVP peer
+TRA,Cong ty Co phan Traphaco,HOSE,pharma,True,MVP peer
+DBD,Cong ty Co phan Duoc - Trang thiet bi Y te Binh Dinh,HOSE,pharma,True,accepted stress case
+OPC,Cong ty Co phan Duoc pham OPC,HOSE,traditional_pharma,False,listed pharma peer
+DVN,Tong cong ty Duoc Viet Nam - CTCP,UPCOM,pharma_distribution,False,sector holding/distributor
+DCL,Cong ty Co phan Duoc pham Cuu Long,HOSE,pharma,False,pharma peer
+PMC,Cong ty Co phan Duoc pham Duoc lieu Pharmedic,HNX,pharma,False,small-cap pharma
+AMV,Cong ty Co phan San xuat Kinh doanh Duoc va Trang thiet bi Y te Viet My,HNX,medical_equipment,False,equipment stress

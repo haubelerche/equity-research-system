@@ -12,11 +12,8 @@ from typing import Any, Iterable
 import yaml
 
 from backend.dataset.config_io import load_universe_tickers
+from backend.evaluation.benchmark_paths import BENCHMARK_COHORTS_PATH
 
-ROOT = Path(__file__).resolve().parents[2]
-BENCHMARK_COHORTS_PATH = (
-    ROOT / "config" / "benchmarks" / "shared" / "benchmark_cohorts.yaml"
-)
 DEFAULT_BENCHMARK_COHORT = "full_universe"
 
 

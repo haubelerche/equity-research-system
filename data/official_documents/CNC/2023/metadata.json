@@ -1,0 +1,15 @@
+{
+  "ticker": "CNC",
+  "company_name": "CNC",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "CNC FY2023 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\CNC\\2023\\source_document.pdf",
+  "published_date": "2023-12-31",
+  "fiscal_year": 2023,
+  "language": "vi",
+  "file_hash": "7792217344f0ee8371cda2a311d39937160c8b3b131c037f862a3948fd532994",
+  "staged_at": "2026-06-15T09:41:15.927328+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\CNC\\CNC 2023.pdf"
+}

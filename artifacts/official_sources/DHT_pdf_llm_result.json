@@ -1,0 +1,253 @@
+{
+  "ticker": "DHT",
+  "generated_at": "2026-06-16T02:36:32.716893+00:00",
+  "years": [
+    {
+      "fiscal_year": 2022,
+      "source_kind": "ocr",
+      "pages": 33,
+      "facts_extracted": 6,
+      "facts_written": 6,
+      "metrics": [
+        "net_income.parent",
+        "operating_profit.total",
+        "profit_before_tax.total",
+        "revenue.net",
+        "tax_expense.total",
+        "total_assets.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "total_assets.ending",
+          "value": 1429.729,
+          "unit": "vnd_bn",
+          "page": 18,
+          "label": "Tổng tài sản",
+          "confidence": 0.9
+        },
+        {
+          "metric": "net_income.parent",
+          "value": 93.075,
+          "unit": "vnd_bn",
+          "page": 19,
+          "label": "Lợi nhuận sau thuế",
+          "confidence": 0.9
+        },
+        {
+          "metric": "operating_profit.total",
+          "value": 106.456,
+          "unit": "vnd_bn",
+          "page": 18,
+          "label": "Lợi nhuận thuần từ hoạt động kinh doanh",
+          "confidence": 0.9
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 115.743,
+          "unit": "vnd_bn",
+          "page": 19,
+          "label": "Lợi nhuận trước thuế",
+          "confidence": 0.9
+        },
+        {
+          "metric": "revenue.net",
+          "value": 1766.329,
+          "unit": "vnd_bn",
+          "page": 18,
+          "label": "Doanh thu thuần",
+          "confidence": 0.9
+        },
+        {
+          "metric": "tax_expense.total",
+          "value": 22.668,
+          "unit": "vnd_bn",
+          "page": 19,
+          "label": "Thuế thu nhập doanh",
+          "confidence": 0.8
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2023,
+      "source_kind": "ocr",
+      "pages": 39,
+      "facts_extracted": 3,
+      "facts_written": 3,
+      "metrics": [
+        "net_income.parent",
+        "revenue.net",
+        "total_assets.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "total_assets.ending",
+          "value": 1783.478765,
+          "unit": "vnd_bn",
+          "page": 23,
+          "label": "Tong tai san",
+          "confidence": 0.95
+        },
+        {
+          "metric": "net_income.parent",
+          "value": 79.313205,
+          "unit": "vnd_bn",
+          "page": 23,
+          "label": "Lợi nhuận sau thuế",
+          "confidence": 0.8
+        },
+        {
+          "metric": "revenue.net",
+          "value": 1914.823539,
+          "unit": "vnd_bn",
+          "page": 23,
+          "label": "Doanh thu thuan",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2024,
+      "source_kind": "ocr",
+      "pages": 35,
+      "facts_extracted": 6,
+      "facts_written": 6,
+      "metrics": [
+        "net_income.parent",
+        "operating_profit.total",
+        "profit_before_tax.total",
+        "revenue.net",
+        "tax_expense.total",
+        "total_assets.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "total_assets.ending",
+          "value": 1870.0773,
+          "unit": "vnd_bn",
+          "page": 20,
+          "label": "dng tai san",
+          "confidence": 0.9
+        },
+        {
+          "metric": "net_income.parent",
+          "value": 67.563189,
+          "unit": "vnd_bn",
+          "page": 20,
+          "label": "Loi nhuận sau thué",
+          "confidence": 0.95
+        },
+        {
+          "metric": "operating_profit.total",
+          "value": 72.98477,
+          "unit": "vnd_bn",
+          "page": 20,
+          "label": "Loi nhuận thuan tir hoat độ kinh doanh",
+          "confidence": 0.9
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 85.413127,
+          "unit": "vnd_bn",
+          "page": 20,
+          "label": "Loi nhuận trước thuế",
+          "confidence": 0.95
+        },
+        {
+          "metric": "revenue.net",
+          "value": 1955.95413,
+          "unit": "vnd_bn",
+          "page": 20,
+          "label": "Doanh thu thuần",
+          "confidence": 0.95
+        },
+        {
+          "metric": "tax_expense.total",
+          "value": 17.849937,
+          "unit": "vnd_bn",
+          "page": 20,
+          "label": "Thuế thu nhập doanh nghiệp",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2025,
+      "source_kind": "text",
+      "pages": 33,
+      "facts_extracted": 7,
+      "facts_written": 7,
+      "metrics": [
+        "cogs.total",
+        "net_income.parent",
+        "operating_profit.total",
+        "profit_before_tax.total",
+        "revenue.net",
+        "tax_expense.total",
+        "total_assets.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "total_assets.ending",
+          "value": 1873.634268,
+          "unit": "vnd_bn",
+          "page": 18,
+          "label": "Tổng tài sản",
+          "confidence": 0.95
+        },
+        {
+          "metric": "cogs.total",
+          "value": 2.098,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Giá vốn hàng bán",
+          "confidence": 0.9
+        },
+        {
+          "metric": "net_income.parent",
+          "value": 52.445587,
+          "unit": "vnd_bn",
+          "page": 18,
+          "label": "Lợi nhuận sau thuế",
+          "confidence": 0.95
+        },
+        {
+          "metric": "operating_profit.total",
+          "value": 49.890508,
+          "unit": "vnd_bn",
+          "page": 18,
+          "label": "Lợi nhuận thuần từ hoạt động kinh doanh",
+          "confidence": 0.95
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 64.898588,
+          "unit": "vnd_bn",
+          "page": 18,
+          "label": "Lợi nhuận trước thuế",
+          "confidence": 0.95
+        },
+        {
+          "metric": "revenue.net",
+          "value": 2293.877672,
+          "unit": "vnd_bn",
+          "page": 18,
+          "label": "Doanh thu thuần",
+          "confidence": 0.95
+        },
+        {
+          "metric": "tax_expense.total",
+          "value": 12.453,
+          "unit": "vnd_bn",
+          "page": 18,
+          "label": "Thuế thu nhập doanh nghiệp",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "total_written": 22
+}

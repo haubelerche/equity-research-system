@@ -1,0 +1,415 @@
+{
+  "ticker": "DHN",
+  "generated_at": "2026-06-16T02:25:08.160833+00:00",
+  "years": [
+    {
+      "fiscal_year": 2022,
+      "source_kind": "ocr",
+      "pages": 17,
+      "facts_extracted": 7,
+      "facts_written": 7,
+      "metrics": [
+        "accounts_payable.ending",
+        "depreciation.total",
+        "net_income.parent",
+        "ppe.net",
+        "profit_before_tax.total",
+        "shares_outstanding.ending",
+        "tax_expense.total"
+      ],
+      "facts_detail": [
+        {
+          "metric": "accounts_payable.ending",
+          "value": 1.375935816,
+          "unit": "vnd_bn",
+          "page": 8,
+          "label": "Phai tra cho người ban",
+          "confidence": 0.8
+        },
+        {
+          "metric": "ppe.net",
+          "value": 19.70939694,
+          "unit": "vnd_bn",
+          "page": 7,
+          "label": "Tài sản cố định hữu hình",
+          "confidence": 0.7
+        },
+        {
+          "metric": "depreciation.total",
+          "value": 3.756944464,
+          "unit": "vnd_bn",
+          "page": 7,
+          "label": "Hao mòn TSCĐ hữu hình; Hao mòn TSCĐ vô hình",
+          "confidence": 0.9
+        },
+        {
+          "metric": "net_income.parent",
+          "value": 12.885893561,
+          "unit": "vnd_bn",
+          "page": 12,
+          "label": "Lợi nhuận sau thuế thu nhập doanh nghiệp",
+          "confidence": 0.95
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 16.547115582,
+          "unit": "vnd_bn",
+          "page": 12,
+          "label": "Tổng lợi nhuận kế toán trước thuế",
+          "confidence": 0.9
+        },
+        {
+          "metric": "tax_expense.total",
+          "value": 3.661222021,
+          "unit": "vnd_bn",
+          "page": 12,
+          "label": "Chi phí thuế TNDN hiện hành",
+          "confidence": 0.9
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 6290900.0,
+          "unit": "shares",
+          "page": 4,
+          "label": "Tổng số cổ phan",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2023,
+      "source_kind": "ocr",
+      "pages": 23,
+      "facts_extracted": 12,
+      "facts_written": 12,
+      "metrics": [
+        "accounts_payable.ending",
+        "cogs.total",
+        "depreciation.total",
+        "financial_income.total",
+        "gross_profit.total",
+        "net_income.parent",
+        "operating_profit.total",
+        "profit_before_tax.total",
+        "revenue.net",
+        "shares_outstanding.ending",
+        "tax_expense.total",
+        "total_assets.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "accounts_payable.ending",
+          "value": 1.807017408,
+          "unit": "vnd_bn",
+          "page": 13,
+          "label": "Số dư nợ phải trả tại thời điểm cuối năm 2023",
+          "confidence": 0.9
+        },
+        {
+          "metric": "total_assets.ending",
+          "value": 95.540684544,
+          "unit": "vnd_bn",
+          "page": 7,
+          "label": "Tổng tài sản",
+          "confidence": 0.85
+        },
+        {
+          "metric": "depreciation.total",
+          "value": 3.60753064,
+          "unit": "vnd_bn",
+          "page": 13,
+          "label": "Khấu hao/Hao mòn - Trích trong năm",
+          "confidence": 0.8
+        },
+        {
+          "metric": "cogs.total",
+          "value": 56.179991397,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Giá vốn hàng bán",
+          "confidence": 0.95
+        },
+        {
+          "metric": "financial_income.total",
+          "value": 3.944890452,
+          "unit": "vnd_bn",
+          "page": 5,
+          "label": "Doanh thu hoạt động tài chính",
+          "confidence": 0.9
+        },
+        {
+          "metric": "gross_profit.total",
+          "value": 33.788725475,
+          "unit": "vnd_bn",
+          "page": 5,
+          "label": "Lợi nhuận gộp",
+          "confidence": 0.95
+        },
+        {
+          "metric": "net_income.parent",
+          "value": 15.355876732,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Lợi nhuận sau thuế thu nhập doanh nghiệp",
+          "confidence": 0.95
+        },
+        {
+          "metric": "operating_profit.total",
+          "value": 19.666666666,
+          "unit": "vnd_bn",
+          "page": 5,
+          "label": "Lợi nhuận thuần từ hoạt động sản xuất kinh doanh",
+          "confidence": 0.95
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 19.691637165,
+          "unit": "vnd_bn",
+          "page": 7,
+          "label": "Tổng lợi nhuận kế toán trước thuế",
+          "confidence": 0.95
+        },
+        {
+          "metric": "revenue.net",
+          "value": 89.968716872,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Doanh thu bán hàng và cung cấp dịch vụ",
+          "confidence": 0.95
+        },
+        {
+          "metric": "tax_expense.total",
+          "value": 3.822377778,
+          "unit": "vnd_bn",
+          "page": 5,
+          "label": "Thuế TNDN hiện hành",
+          "confidence": 0.85
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 6290900.0,
+          "unit": "shares",
+          "page": 8,
+          "label": "Tổng số cổ phần phát hành đang lưu hành",
+          "confidence": 0.98
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2024,
+      "source_kind": "ocr",
+      "pages": 23,
+      "facts_extracted": 8,
+      "facts_written": 8,
+      "metrics": [
+        "depreciation.total",
+        "financial_income.total",
+        "gross_profit.total",
+        "net_income.parent",
+        "operating_profit.total",
+        "profit_before_tax.total",
+        "revenue.net",
+        "total_assets.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "total_assets.ending",
+          "value": 104.662814428,
+          "unit": "vnd_bn",
+          "page": 7,
+          "label": "Tổng tài sản",
+          "confidence": 0.9
+        },
+        {
+          "metric": "depreciation.total",
+          "value": 2.982938308,
+          "unit": "vnd_bn",
+          "page": 13,
+          "label": "Trích khấu hao tài sản cố định (trích trong năm)",
+          "confidence": 0.8
+        },
+        {
+          "metric": "financial_income.total",
+          "value": 0.591683375,
+          "unit": "vnd_bn",
+          "page": 5,
+          "label": "Doanh thu hoạt động tài chính",
+          "confidence": 0.75
+        },
+        {
+          "metric": "gross_profit.total",
+          "value": 36.381943104,
+          "unit": "vnd_bn",
+          "page": 5,
+          "label": "Lợi nhuận gộp",
+          "confidence": 0.85
+        },
+        {
+          "metric": "net_income.parent",
+          "value": 16.081882818,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Lợi nhuận sau thuế thu nhập doanh nghiệp",
+          "confidence": 0.9
+        },
+        {
+          "metric": "operating_profit.total",
+          "value": 19.999999999,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Lợi nhuận thuân từ hoạt động sản xuât kinh doanh",
+          "confidence": 0.9
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 20.28445398,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Tổng lợi nhuận kế toán trước thuế / Lợi nhuận kế toán trước thuế",
+          "confidence": 0.9
+        },
+        {
+          "metric": "revenue.net",
+          "value": 85.648992541,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Doanh thu bán hàng và cung cấp dịch vụ",
+          "confidence": 0.9
+        }
+      ],
+      "errors": []
+    },
+    {
+      "fiscal_year": 2025,
+      "source_kind": "ocr",
+      "pages": 23,
+      "facts_extracted": 13,
+      "facts_written": 13,
+      "metrics": [
+        "accounts_payable.ending",
+        "cogs.total",
+        "depreciation.total",
+        "financial_income.total",
+        "gross_profit.total",
+        "net_income.parent",
+        "operating_profit.total",
+        "profit_before_tax.total",
+        "revenue.net",
+        "sga.total",
+        "shares_outstanding.ending",
+        "tax_expense.total",
+        "total_assets.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "accounts_payable.ending",
+          "value": 0.444862688,
+          "unit": "vnd_bn",
+          "page": 14,
+          "label": "Số dư nợ phải trả người bán",
+          "confidence": 0.95
+        },
+        {
+          "metric": "total_assets.ending",
+          "value": 107.2103133,
+          "unit": "vnd_bn",
+          "page": 7,
+          "label": "Tổng tài sản",
+          "confidence": 0.95
+        },
+        {
+          "metric": "depreciation.total",
+          "value": 2.372193683,
+          "unit": "vnd_bn",
+          "page": 13,
+          "label": "Trích trong (Khấu hao/Hao mòn lũy kế)",
+          "confidence": 0.9
+        },
+        {
+          "metric": "cogs.total",
+          "value": 36.206619746,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Giá vốn hàng bán",
+          "confidence": 0.9
+        },
+        {
+          "metric": "financial_income.total",
+          "value": 3.526753491,
+          "unit": "vnd_bn",
+          "page": 5,
+          "label": "Doanh thu hoạt động tài chính",
+          "confidence": 0.9
+        },
+        {
+          "metric": "gross_profit.total",
+          "value": 36.917773223,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Lợi nhuận gộp bán hàng và cung cấp dịch vụ",
+          "confidence": 0.9
+        },
+        {
+          "metric": "net_income.parent",
+          "value": 16.160377012,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Lợi nhuận sau thuế thu nhập doanh nghiệp",
+          "confidence": 0.9
+        },
+        {
+          "metric": "operating_profit.total",
+          "value": 20.494724054,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Lợi nhuận thuần từ hoạt động sản xuất kinh doanh",
+          "confidence": 0.9
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 20.409372201,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Tổng lợi nhuận kế toán trước thuế",
+          "confidence": 0.9
+        },
+        {
+          "metric": "revenue.net",
+          "value": 73.124392969,
+          "unit": "vnd_bn",
+          "page": 4,
+          "label": "Doanh thu thuan ban hang va cung cap dich vu",
+          "confidence": 0.9
+        },
+        {
+          "metric": "sga.total",
+          "value": 15.913886085,
+          "unit": "vnd_bn",
+          "page": 5,
+          "label": "Chi phí quản lý doanh nghiệp",
+          "confidence": 0.9
+        },
+        {
+          "metric": "tax_expense.total",
+          "value": 4.248995189,
+          "unit": "vnd_bn",
+          "page": 5,
+          "label": "Chi phí thuế TNDN hiện hành",
+          "confidence": 0.9
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 6290900.0,
+          "unit": "shares",
+          "page": 8,
+          "label": "Tổng số cổ phần phổ thông đang lưu hành",
+          "confidence": 0.95
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "total_written": 40
+}

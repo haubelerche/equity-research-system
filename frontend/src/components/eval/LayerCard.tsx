@@ -25,15 +25,22 @@ export function LayerCard({ layer, values, results = {}, onViewBenchmark, onExpl
       </header>
       <div className="layer-card__table-scroll">
         <table>
-          <thead><tr><th>Chỉ số và công cụ đánh giá</th><th>Đạt khi</th><th>Kết quả</th><th>Trạng thái</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Chỉ số và công cụ đánh giá</th>
+              <th>Ngưỡng đạt</th>
+              <th>Kết quả</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
           <tbody>
-            {layer.metrics.map((m) => (
+            {layer.metrics.map((metric) => (
               <MetricRow
-                key={m.id}
-                def={m}
-                value={values[m.id]}
-                result={results[m.id]}
-                onSelect={(metric, result) => onSelectMetric(layer, metric, result)}
+                key={metric.id}
+                def={metric}
+                value={values[metric.id]}
+                result={results[metric.id]}
+                onSelect={(selectedMetric, result) => onSelectMetric(layer, selectedMetric, result)}
               />
             ))}
           </tbody>

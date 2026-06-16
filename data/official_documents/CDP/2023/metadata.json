@@ -1,0 +1,15 @@
+{
+  "ticker": "CDP",
+  "company_name": "CDP",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "CDP FY2023 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\CDP\\2023\\source_document.pdf",
+  "published_date": "2023-12-31",
+  "fiscal_year": 2023,
+  "language": "vi",
+  "file_hash": "d6f830c7ceb0c0191ad9f1ef4c51eff5ad0e39b1c973478b8ada3811bc855f1a",
+  "staged_at": "2026-06-15T09:41:15.764284+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\CDP\\CDP 2023.pdf"
+}

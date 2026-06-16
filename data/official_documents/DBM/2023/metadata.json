@@ -1,0 +1,15 @@
+{
+  "ticker": "DBM",
+  "company_name": "DBM",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DBM FY2023 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DBM\\2023\\source_document.pdf",
+  "published_date": "2023-12-31",
+  "fiscal_year": 2023,
+  "language": "vi",
+  "file_hash": "b6ce2a736759a93c1d23b2600cfd0db3e900037c0684304912f9444160013193",
+  "staged_at": "2026-06-15T09:41:16.334280+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DBM\\DBM 2023.pdf"
+}

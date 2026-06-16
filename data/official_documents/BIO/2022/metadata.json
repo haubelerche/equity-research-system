@@ -1,0 +1,15 @@
+{
+  "ticker": "BIO",
+  "company_name": "BIO",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "BIO FY2022 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\BIO\\2022\\source_document.pdf",
+  "published_date": "2022-12-31",
+  "fiscal_year": 2022,
+  "language": "vi",
+  "file_hash": "22114f2d53a18217819c08883f289f8c0ec9e5c3dc3593ea8bd59ffb1067fecb",
+  "staged_at": "2026-06-15T09:41:15.593279+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\BIO\\BIO 2022.pdf"
+}

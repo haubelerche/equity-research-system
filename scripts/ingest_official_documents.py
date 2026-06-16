@@ -69,6 +69,12 @@ METRIC_ALIASES: dict[str, str] = {
     "capex": "capex.total",
 }
 
+EXTRACTION_METHOD_ALIASES: dict[str, str] = {
+    "ocr_tesseract": "pdf_ocr",
+    "pdf_table": "pdf_ocr",
+    "cafef_api": "api_structured",
+}
+
 REQUIRED_CSV_COLUMNS = {
     "ticker", "fiscal_year", "period_type", "statement_type", "metric_id",
     "value", "unit", "document_title", "page_number", "table_name",
@@ -78,6 +84,11 @@ REQUIRED_CSV_COLUMNS = {
 
 def canonical_metric(metric_id: str) -> str:
     return METRIC_ALIASES.get(metric_id.strip(), metric_id.strip())
+
+
+def canonical_extraction_method(method: str | None) -> str:
+    normalized = (method or "manual").strip()
+    return EXTRACTION_METHOD_ALIASES.get(normalized, normalized)
 
 
 def compute_file_hash(path: Path) -> str | None:
@@ -160,12 +171,14 @@ def ingest_year(ticker: str, year: int, *, dry_run: bool) -> dict:
             title=meta.get("title", f"{ticker} {year} official document"),
             issuer=meta.get("issuer"),
             url=meta.get("url"),
-            local_path=str(pdf_path) if pdf_path.exists() else meta.get("local_path"),
             published_date=meta.get("published_date") or None,
             fiscal_year=meta.get("fiscal_year", year),
             language=meta.get("language", "vi"),
             file_hash=actual_hash or declared_hash or None,
             status="extracted",
+            metadata={
+                "local_path": str(pdf_path) if pdf_path.exists() else meta.get("local_path"),
+            },
         ))
         for r in rows:
             metric = canonical_metric(r["metric_id"])
@@ -181,7 +194,7 @@ def ingest_year(ticker: str, year: int, *, dry_run: bool) -> dict:
                 page_number=int(r["page_number"]) if str(r.get("page_number", "")).strip().isdigit() else None,
                 table_name=r.get("table_name") or None,
                 extracted_text=r.get("extracted_text") or None,
-                extraction_method=r.get("extraction_method", "manual"),
+                extraction_method=canonical_extraction_method(r.get("extraction_method")),
             )
             ingested_metrics.append(metric)
 

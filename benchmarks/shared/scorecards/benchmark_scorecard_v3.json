@@ -1,0 +1,25 @@
+{
+  "suite": "vn_pharma_benchmark_suite_20260615_v3",
+  "score": 100.0,
+  "status": "PASS",
+  "checks": {
+    "has_8_domains": true,
+    "has_metric_registry": true,
+    "has_v3_fact_lineage": true,
+    "has_citation_report_publication": true,
+    "has_artifact_schemas": true,
+    "has_docs_reference": true
+  },
+  "counts": {
+    "metric_registry_entries": 69,
+    "v3_financial_facts": 1794,
+    "rag_v3_queries": 56,
+    "rag_v3_chunks": 168,
+    "finance_v3_cases": 20,
+    "agent_v3_trace_cases": 50,
+    "ops_v3_traces": 20,
+    "citation_claim_cases": 89,
+    "report_quality_cases": 17,
+    "publication_cases": 23
+  }
+}

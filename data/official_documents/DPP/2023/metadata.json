@@ -1,0 +1,15 @@
+{
+  "ticker": "DPP",
+  "company_name": "DPP",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DPP FY2023 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DPP\\2023\\source_document.pdf",
+  "published_date": "2023-12-31",
+  "fiscal_year": 2023,
+  "language": "vi",
+  "file_hash": "600708a9a95266c7da42cbcb68a14c5e01138f900db7bc9fcad4a2f98c43f6b3",
+  "staged_at": "2026-06-15T09:41:22.467196+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DPP\\DPP 2023.pdf"
+}

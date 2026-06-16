@@ -4,6 +4,7 @@ datasets:
   - golden_valuation/finance_cases_v3.jsonl
   - golden_ratios.csv
   - golden_valuation/sensitivity_grid.csv
+  - strict_metrics.yaml
 negative_cases: 6
 critical_invariants:
   - net_debt

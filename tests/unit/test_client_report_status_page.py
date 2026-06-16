@@ -45,6 +45,8 @@ def test_methodology_page_explains_data_calculation_and_decision_without_warning
         news_citations=[],
         disclaimer="Báo cáo này chỉ nhằm mục đích cung cấp thông tin.",
         critic_findings=["English reviewer note must not be copied into the client page."],
+        report_generated_at="2026-06-16T10:15:00+07:00",
+        market_price_as_of="2026-06-16",
     )
 
     html = csb._report_status_page(vm)
@@ -57,6 +59,8 @@ def test_methodology_page_explains_data_calculation_and_decision_without_warning
     # Decision rule + the actual conclusion are stated.
     assert "Mua nếu &gt;20%, Bán nếu &lt;-10%, còn lại là Giữ" in html
     assert "khuyến nghị: Giữ" in html
+    assert "2026-06-16" in html
+    assert "2026-06-16 10:15:00+07:00" in html
     # Citation legend: real, always-present sources are numbered.
     assert "<strong>[1]</strong>" in html
     assert "<strong>[2]</strong>" in html

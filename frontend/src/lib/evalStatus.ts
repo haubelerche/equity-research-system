@@ -18,6 +18,215 @@ export interface MetricDef {
   blocksPublish?: boolean;
 }
 
+interface RuntimeMetricFields {
+  value?: number | string | boolean | null;
+  status?: string | null;
+  threshold?: number | string | boolean | null;
+  threshold_operator?: string | null;
+  unit?: string | null;
+  metric_type?: string | null;
+  metric_id?: string | null;
+  id?: string | null;
+  sample_size?: number | null;
+  failed_examples?: unknown[] | null;
+  calculation?: {
+    aggregation?: string | null;
+    numerator?: number | null;
+    denominator?: number | null;
+  } | null;
+}
+
+export function coerceMetricValue(value: unknown): number | null {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "boolean") return value ? 1 : 0;
+  return null;
+}
+
+export function parseRuntimeThreshold(threshold: unknown, unit?: string | null): number | null {
+  if (typeof threshold === "number") return Number.isFinite(threshold) ? threshold : null;
+  if (typeof threshold === "boolean") return threshold ? 1 : 0;
+  if (typeof threshold !== "string") return null;
+
+  const match = threshold.match(/-?\d+(?:\.\d+)?/);
+  if (!match) return null;
+
+  const parsed = Number(match[0]);
+  if (!Number.isFinite(parsed)) return null;
+
+  const isPercent = threshold.includes("%") || unit === "%" || unit === "percent";
+  return isPercent && Math.abs(parsed) > 1 ? parsed / 100 : parsed;
+}
+
+export function inferRuntimeComparator(
+  threshold: unknown,
+  thresholdOperator?: string | null,
+  metricType?: string | null,
+  metricId?: string | null,
+): Comparator {
+  const operator = `${thresholdOperator ?? ""} ${typeof threshold === "string" ? threshold : ""}`.trim();
+  if (/[<≤]/.test(operator)) return "lte";
+  if (/[>≥]/.test(operator)) return "gte";
+
+  const lowerIsBetter = `${metricType ?? ""} ${metricId ?? ""}`.toLowerCase();
+  if (
+    lowerIsBetter.includes("error")
+    || lowerIsBetter.includes("failure")
+    || lowerIsBetter.includes("violation")
+    || lowerIsBetter.includes("mismatch")
+    || lowerIsBetter.includes("duplicate")
+    || lowerIsBetter.includes("latency")
+    || lowerIsBetter.includes("retry")
+    || lowerIsBetter.includes("fallback")
+  ) {
+    return "lte";
+  }
+
+  return "gte";
+}
+
+export function resolveMetricStatus(
+  def: MetricDef,
+  result?: RuntimeMetricFields,
+  fallbackValue?: number | null | undefined,
+): MetricStatus {
+  const rawValue = result && Object.prototype.hasOwnProperty.call(result, "value")
+    ? result.value
+    : fallbackValue;
+  const value = coerceMetricValue(rawValue);
+  if (value === null) {
+    return result?.status ? normalizeMetricStatus(String(result.status)) : "not_evaluable";
+  }
+
+  const threshold = parseRuntimeThreshold(result?.threshold, result?.unit) ?? def.threshold;
+  if (
+    result
+    && Object.prototype.hasOwnProperty.call(result, "threshold")
+    && parseRuntimeThreshold(result.threshold, result.unit) === null
+    && result.status
+  ) {
+    return normalizeMetricStatus(String(result.status));
+  }
+  const comparator = result?.threshold === undefined || result?.threshold === null
+    ? def.comparator
+    : inferRuntimeComparator(
+      result.threshold,
+      result.threshold_operator,
+      result.metric_type,
+      result.metric_id ?? result.id ?? def.id,
+    );
+
+  return evalMetricStatus({ ...def, threshold, comparator }, value);
+}
+
+export type MetricSemanticType = "boolean_gate" | "pass_rate" | "error_count" | "error_rate" | "score" | "diagnostic";
+
+export function metricSemanticType(def: MetricDef, result?: RuntimeMetricFields): MetricSemanticType {
+  const metricType = String(result?.metric_type ?? def.metricType ?? "").toLowerCase();
+  const unit = String(result?.unit ?? def.unit ?? "").toLowerCase();
+  const threshold = String(result?.threshold ?? def.thresholdLabel ?? "").toLowerCase();
+  const aggregation = String(result?.calculation?.aggregation ?? "").toLowerCase();
+  const id = String(result?.metric_id ?? result?.id ?? def.id).toLowerCase();
+
+  if (metricType === "boolean" || unit === "boolean" || threshold.includes("true") || threshold.includes("false")) {
+    return "boolean_gate";
+  }
+  if (metricType === "error_rate") return "error_rate";
+  if (
+    metricType === "error_count"
+    || id.includes("error")
+    || id.includes("violation")
+    || id.includes("failure")
+    || id.includes("mismatch")
+  ) {
+    return threshold.includes("100%") || aggregation.includes("pass_rate") || threshold === "pass"
+      ? "pass_rate"
+      : "error_count";
+  }
+  if (metricType === "coverage" || metricType === "pass_rate" || unit === "percent" || def.unit === "%") {
+    return "pass_rate";
+  }
+  if (metricType === "score") return "score";
+  return "diagnostic";
+}
+
+export function formatMetricTypeLabel(type: MetricSemanticType): string {
+  if (type === "boolean_gate") return "boolean_gate";
+  if (type === "pass_rate") return "pass_rate";
+  if (type === "error_count") return "error_count";
+  if (type === "error_rate") return "error_rate";
+  if (type === "score") return "score";
+  return "diagnostic";
+}
+
+export function formatMetricScope(def: MetricDef, result?: RuntimeMetricFields): string {
+  const type = metricSemanticType(def, result);
+  const numerator = result?.calculation?.numerator;
+  const denominator = result?.calculation?.denominator;
+  if ((type === "pass_rate" || type === "error_rate") && denominator !== null && denominator !== undefined) {
+    return `${formatRoundedNumber(denominator)} case đủ điều kiện`;
+  }
+  if (type === "error_count") {
+    const sampleSize = result?.sample_size;
+    const affected = Array.isArray(result?.failed_examples) ? result.failed_examples.length : null;
+    if (affected !== null && sampleSize !== null && sampleSize !== undefined) {
+      return `${formatRoundedNumber(affected)}/${formatRoundedNumber(sampleSize)} case ảnh hưởng`;
+    }
+    if (sampleSize !== null && sampleSize !== undefined) return `${formatRoundedNumber(sampleSize)} mẫu`;
+  }
+  if (type === "boolean_gate") return "artifact bắt buộc";
+  if (numerator !== null && numerator !== undefined && denominator !== null && denominator !== undefined) {
+    return `${formatRoundedNumber(numerator)}/${formatRoundedNumber(denominator)}`;
+  }
+  return result?.sample_size !== null && result?.sample_size !== undefined
+    ? `${formatRoundedNumber(result.sample_size)} samples`
+    : "runtime metric";
+}
+
+export function formatRuntimeMetricResult(
+  def: MetricDef,
+  result?: RuntimeMetricFields,
+  fallbackValue?: number | null,
+  options: { includeFormula?: boolean } = {},
+): string {
+  const type = metricSemanticType(def, result);
+  const value = result && Object.prototype.hasOwnProperty.call(result, "value")
+    ? result.value
+    : fallbackValue;
+  const numerator = result?.calculation?.numerator;
+  const denominator = result?.calculation?.denominator;
+
+  if (value === null || value === undefined || value === "") return "Thiếu dữ liệu";
+  if (type === "boolean_gate") {
+    if (typeof value === "boolean") return value ? "true" : "false";
+    return coerceMetricValue(value) === 1 ? "true" : "false";
+  }
+  if (type === "pass_rate") {
+    const numeric = coerceMetricValue(value);
+    const percent = numeric === null ? String(value) : formatMetricNumber({ ...def, unit: "%" }, numeric);
+    if (
+      options.includeFormula !== false
+      && numerator !== null
+      && numerator !== undefined
+      && denominator !== null
+      && denominator !== undefined
+    ) {
+      return `${formatRoundedNumber(numerator)}/${formatRoundedNumber(denominator)} = ${percent}`;
+    }
+    return percent;
+  }
+  if (type === "error_rate") {
+    const numeric = coerceMetricValue(value);
+    return numeric === null ? String(value) : formatMetricNumber({ ...def, unit: "%" }, numeric);
+  }
+  if (type === "error_count") {
+    const numeric = coerceMetricValue(value);
+    return `${numeric === null ? String(value) : formatRoundedNumber(numeric)} lỗi`;
+  }
+  if (typeof value === "number") return formatMetricNumber(def, value);
+  if (typeof value === "boolean") return value ? "true" : "false";
+  return String(value);
+}
+
 export function evalMetricStatus(
   def: MetricDef,
   value: number | null | undefined,
@@ -38,10 +247,18 @@ export function normalizeMetricStatus(status: string | null | undefined): Metric
 }
 
 export function formatMetricNumber(def: MetricDef, value: number): string {
-  if (def.unit !== "%") return `${value}`;
+  if (!Number.isFinite(value)) return `${value}`;
+  if (def.unit !== "%") return formatRoundedNumber(value);
   const displayValue = Math.abs(value) <= 1 ? value * 100 : value;
   const displayThreshold = Math.abs(def.threshold) <= 1 ? def.threshold * 100 : def.threshold;
-  return `${displayValue.toFixed(displayValue === displayThreshold ? 0 : 1)}%`;
+  return `${formatRoundedNumber(displayValue, displayValue === displayThreshold ? 0 : 1)}%`;
+}
+
+export function formatRoundedNumber(value: number, maxFractionDigits = 3): string {
+  if (!Number.isFinite(value)) return `${value}`;
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: Number.isInteger(value) ? 0 : maxFractionDigits,
+  }).format(value);
 }
 
 export function formatPassCondition(def: MetricDef): string {

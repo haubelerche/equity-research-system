@@ -48,7 +48,11 @@ ROOT = Path(__file__).resolve().parents[1]
 VALUATION_DIR = ROOT / "storage" / "runs" / os.environ.get("RUN_ID", "missing_run_id")
 
 def _get_current_price(ticker: str) -> float | None:
-    """Fetch latest close price from fact.price_history."""
+    """Current market price: vnstock fact.price_history first, CafeF as fallback.
+
+    Thin UPCOM names are often absent from price_history; CafeF's daily price
+    history is the hard-wired fallback so the valuation still has a market price.
+    """
     try:
         from backend.database.fact_store import PostgresFactStore
         store = PostgresFactStore()
@@ -63,7 +67,17 @@ def _get_current_price(ticker: str) -> float | None:
                 # vnstock stores prices in thousands VND; convert to VND/share
                 return price * 1000
     except Exception as exc:  # noqa: BLE001
-        print(f"[run_valuation] WARNING: could not fetch price for {ticker}: {exc}")
+        print(f"[run_valuation] WARNING: could not fetch price_history for {ticker}: {exc}")
+
+    # Fallback: CafeF daily price history (covers HOSE/HNX/UPCOM).
+    try:
+        from backend.documents.connectors.cafef_market_connector import fetch_latest_price
+        quote = fetch_latest_price(ticker)
+        if quote.last_price and quote.last_price > 0:
+            print(f"[run_valuation] {ticker} — current price from CafeF = {quote.last_price:,.0f} VND (as of {quote.as_of_date})")
+            return quote.last_price
+    except Exception as exc:  # noqa: BLE001
+        print(f"[run_valuation] WARNING: CafeF price fallback failed for {ticker}: {exc}")
     return None
 
 
@@ -287,6 +301,17 @@ def run_valuation(
     # WACC×g / Re×g sensitivity matrices come back all-null. Source it from the vnstock
     # VCI overview (MarketSnapshot) with provenance.
     _market_price_fallback = _get_current_price(ticker)
+    # Fallback for tickers with no live price feed (e.g. thin UPCOM names): use the
+    # year-end close captured from the official report (market_price.close fact).
+    if _market_price_fallback is None and "market_price.close" in full_table:
+        _mp_periods = full_table["market_price.close"]
+        if _mp_periods:
+            _latest_mp = _mp_periods.get(fy_periods[-1]) if fy_periods else None
+            _latest_mp = _latest_mp or list(_mp_periods.values())[-1]
+            _ocr_price = float(getattr(_latest_mp, "value", 0) or 0)
+            if _ocr_price > 0:
+                _market_price_fallback = _ocr_price
+                print(f"[run_valuation] {ticker} — market price from official report close = {_ocr_price:,.0f} VND")
     valuation_input_pack = build_valuation_input_pack(
         ticker=ticker,
         run_id=_run_id_context,

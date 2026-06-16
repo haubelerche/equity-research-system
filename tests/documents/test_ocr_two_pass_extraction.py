@@ -13,6 +13,7 @@ from __future__ import annotations
 from backend.documents.pdf_extractor import (
     _parse_ocr_text_to_rows,
     _parse_ocr_vnd_bn,
+    _tesseract_config,
     extract_rows_from_ocr_pages,
 )
 
@@ -39,6 +40,11 @@ def test_ocr_value_null_markers_return_none():
 
 
 # ── _parse_ocr_text_to_rows: consecutive-line (scanned layout) ──────────────
+
+def test_tesseract_config_uses_unquoted_tessdata_path():
+    # pytesseract tokenizes config itself; embedded quotes become path text on Windows.
+    assert '"' not in _tesseract_config()
+
 
 def test_parse_pairs_label_with_following_value_line():
     text = "Loi nhuan gop\n4,343,720\n"

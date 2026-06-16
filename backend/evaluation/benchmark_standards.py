@@ -6,6 +6,7 @@ used by existing dashboards and tests.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -441,6 +442,81 @@ def _operator_from_threshold(threshold: str) -> str:
         if normalized.startswith(operator):
             return operator
     return "="
+
+
+def _numeric_threshold_for_value(
+    threshold: Any,
+    *,
+    unit: str = "",
+    compared_value: float | None = None,
+) -> float | None:
+    text = str(threshold or "").strip().lower()
+    if not text:
+        return None
+    ratio = re.search(r"([-+]?\d+(?:\.\d+)?)\s*/\s*([-+]?\d+(?:\.\d+)?)", text)
+    if ratio:
+        numerator = float(ratio.group(1))
+        denominator = float(ratio.group(2))
+        if denominator == 0:
+            return None
+        if compared_value is not None and abs(compared_value) > 1:
+            return numerator
+        return numerator / denominator
+    match = re.search(r"[-+]?\d+(?:\.\d+)?", text)
+    if not match:
+        return None
+    value = float(match.group(0))
+    is_percent = "%" in text or unit == "percent"
+    if is_percent and (compared_value is None or abs(compared_value) <= 1):
+        return value / 100.0
+    return value
+
+
+def evaluate_metric_threshold(
+    metric: dict[str, Any],
+    value: Any,
+    *,
+    fallback_status: str = "not_evaluable",
+) -> str:
+    """Evaluate a metric value against the metric's own threshold contract."""
+    if value is None:
+        return "not_evaluable"
+    operator = str(
+        metric.get("threshold_operator")
+        or _operator_from_threshold(str(metric.get("threshold") or ""))
+    )
+    threshold = metric.get("threshold")
+    text_threshold = str(threshold or "").strip().lower()
+    if isinstance(value, bool) or text_threshold in {"true", "false", "= true", "= false"}:
+        if "true" in text_threshold:
+            target_bool: bool | None = True
+        elif "false" in text_threshold:
+            target_bool = False
+        else:
+            target_bool = None
+        if target_bool is None or operator != "=":
+            return fallback_status
+        return "pass" if bool(value) is target_bool else "fail"
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return fallback_status
+    target = _numeric_threshold_for_value(
+        threshold,
+        unit=str(metric.get("unit") or ""),
+        compared_value=float(value),
+    )
+    if target is None:
+        return fallback_status
+    if operator == "<=":
+        return "pass" if value <= target else "fail"
+    if operator == ">=":
+        return "pass" if value >= target else "fail"
+    if operator == "<":
+        return "pass" if value < target else "fail"
+    if operator == ">":
+        return "pass" if value > target else "fail"
+    if operator == "=":
+        return "pass" if abs(float(value) - target) <= 1e-9 else "fail"
+    return fallback_status
 
 
 def _standard_status(status: str) -> str:

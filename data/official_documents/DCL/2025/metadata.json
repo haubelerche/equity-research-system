@@ -1,0 +1,15 @@
+{
+  "ticker": "DCL",
+  "company_name": "DCL",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DCL FY2025 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DCL\\2025\\source_document.pdf",
+  "published_date": "2025-12-31",
+  "fiscal_year": 2025,
+  "language": "vi",
+  "file_hash": "8d0ac03eec6da666c3fbcae21fb097430796cb27afaa477883823b8cd05defd2",
+  "staged_at": "2026-06-15T09:41:18.200947+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DCL\\DCL 2025.pdf"
+}

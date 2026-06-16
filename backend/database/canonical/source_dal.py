@@ -51,6 +51,21 @@ def upsert_source_document(
         with conn.cursor() as cur:
             cur.execute(
                 """
+                SELECT source_doc_id
+                FROM ingest.source_documents
+                WHERE ticker IS NOT DISTINCT FROM %s
+                  AND source_type = %s
+                  AND fiscal_year IS NOT DISTINCT FROM %s
+                  AND checksum = %s
+                LIMIT 1
+                """,
+                (ticker, source_type, fiscal_year, checksum),
+            )
+            existing = cur.fetchone()
+            if existing:
+                source_doc_id = str(existing[0])
+            cur.execute(
+                """
                 INSERT INTO ingest.source_documents (
                     source_doc_id, ticker, source_type, source_tier,
                     source_uri, source_title, issuer, published_at,
@@ -71,6 +86,7 @@ def upsert_source_document(
                     connector_version = COALESCE(EXCLUDED.connector_version, ingest.source_documents.connector_version),
                     metadata_json     = COALESCE(ingest.source_documents.metadata_json, '{}'::jsonb)
                                         || COALESCE(EXCLUDED.metadata_json, '{}'::jsonb)
+                RETURNING source_doc_id
                 """,
                 (
                     source_doc_id,
@@ -96,7 +112,8 @@ def upsert_source_document(
                     json.dumps(metadata or {}),
                 ),
             )
-    return source_doc_id
+            row = cur.fetchone()
+    return str(row[0]) if row else source_doc_id
 
 
 def get_source_documents_for_ticker(

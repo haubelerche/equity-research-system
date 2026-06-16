@@ -1,0 +1,14 @@
+{
+  "ticker": "DHG",
+  "generated_at": "2026-06-15T07:59:11.854198+00:00",
+  "years": [
+    {
+      "fiscal_year": 2025,
+      "ingest_status": "OCR_PENDING_REVIEW",
+      "ocr_candidates": 18,
+      "ocr_promoted": 1,
+      "ocr_blocked": 17,
+      "errors": 0
+    }
+  ]
+}

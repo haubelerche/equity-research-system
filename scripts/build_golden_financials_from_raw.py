@@ -20,6 +20,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from backend.dataset.config_io import load_universe_rows  # noqa: E402
+from backend.evaluation.benchmark_paths import GOLDEN_FINANCIALS_DIR
 from scripts.connectors.vnstock_finance_connector import (  # noqa: E402
     _build_alias_map,
     _extract_facts_from_frame,
@@ -176,14 +177,42 @@ def _build_rows_for_ticker(ticker: str, raw_root: Path, from_year: int, to_year:
     return rows, []
 
 
-def build_golden_financials(raw_root: Path, output_dir: Path, from_year: int, to_year: int) -> dict[str, Any]:
+def _existing_source_tier(output_dir: Path, ticker: str) -> int | None:
+    path = output_dir / f"{ticker}_golden_provenance.json"
+    if not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return int(payload.get("source_tier"))
+    except (OSError, TypeError, ValueError, json.JSONDecodeError):
+        return None
+
+
+def build_golden_financials(
+    raw_root: Path,
+    output_dir: Path,
+    from_year: int,
+    to_year: int,
+    *,
+    missing_only: bool = False,
+    preserve_better_tier: bool = False,
+) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     generated_at = datetime.now(UTC).isoformat()
     built: list[dict[str, Any]] = []
     missing: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
     for row in load_universe_rows():
         ticker = str(row.get("ticker") or "").strip().upper()
         if not ticker:
+            continue
+        csv_path = output_dir / f"{ticker}.csv"
+        if missing_only and csv_path.is_file():
+            skipped.append({"ticker": ticker, "reason": "golden_csv_exists"})
+            continue
+        existing_tier = _existing_source_tier(output_dir, ticker)
+        if preserve_better_tier and csv_path.is_file() and existing_tier is not None and existing_tier < 3:
+            skipped.append({"ticker": ticker, "reason": f"existing_source_tier_{existing_tier}_is_better_than_local_raw"})
             continue
         rows, missing_files = _build_rows_for_ticker(ticker, raw_root, from_year, to_year)
         if missing_files:
@@ -196,7 +225,6 @@ def build_golden_financials(raw_root: Path, output_dir: Path, from_year: int, to
                     stale.unlink()
             missing.append({"ticker": ticker, "missing_files": [], "reason": "no_mapped_facts_in_raw_cache"})
             continue
-        csv_path = output_dir / f"{ticker}.csv"
         with csv_path.open("w", newline="", encoding="utf-8") as handle:
             writer = csv.DictWriter(handle, fieldnames=FIELDNAMES)
             writer.writeheader()
@@ -232,18 +260,26 @@ def build_golden_financials(raw_root: Path, output_dir: Path, from_year: int, to
         "universe_count": len(load_universe_rows()),
         "built_count": len(built),
         "missing_count": len(missing),
+        "skipped_count": len(skipped),
         "built": built,
         "missing": missing,
+        "skipped": skipped,
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw-root", default="data/raw/bctc")
-    parser.add_argument("--output-dir", default="config/benchmarks/shared/golden_financials")
+    parser.add_argument("--output-dir", default=str(GOLDEN_FINANCIALS_DIR))
     parser.add_argument("--from-year", type=int, default=2022)
     parser.add_argument("--to-year", type=int, default=2025)
     parser.add_argument("--audit-json", default="output/golden_financials_build_audit.json")
+    parser.add_argument("--missing-only", action="store_true", help="Only build tickers whose golden CSV is absent.")
+    parser.add_argument(
+        "--preserve-better-tier",
+        action="store_true",
+        help="Do not overwrite an existing golden CSV whose provenance source_tier is better than local raw Tier 3.",
+    )
     args = parser.parse_args()
 
     raw_root = Path(args.raw_root)
@@ -261,6 +297,8 @@ def main() -> int:
         output_dir=output_dir,
         from_year=args.from_year,
         to_year=args.to_year,
+        missing_only=args.missing_only,
+        preserve_better_tier=args.preserve_better_tier,
     )
     audit.parent.mkdir(parents=True, exist_ok=True)
     audit.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -268,6 +306,7 @@ def main() -> int:
         "universe_count": payload["universe_count"],
         "built_count": payload["built_count"],
         "missing_count": payload["missing_count"],
+        "skipped_count": payload["skipped_count"],
         "missing": [item["ticker"] for item in payload["missing"]],
     }, ensure_ascii=False, indent=2))
     return 0

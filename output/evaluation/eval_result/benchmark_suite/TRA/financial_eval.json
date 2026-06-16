@@ -1,0 +1,1184 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "plan_id": "03",
+  "plan_name": "Financial calculation",
+  "ticker": "TRA",
+  "generated_at": "2026-06-16T03:36:58.736490+00:00",
+  "status": "fail",
+  "test_execution": {
+    "status": "not_measured",
+    "targets": [
+      "tests/analytics",
+      "tests/reconciliation",
+      "tests/unit/test_dcf.py",
+      "tests/unit/test_ratios.py",
+      "tests/unit/test_debt_schedule.py",
+      "tests/unit/test_dividend_schedule.py",
+      "tests/unit/test_sensitivity.py",
+      "tests/unit/test_export_gate.py",
+      "tests/unit/test_valuation_workings.py",
+      "tests/evaluation/test_client_final_governance.py"
+    ],
+    "exit_code": null,
+    "duration_seconds": 0.0,
+    "summary": {},
+    "output_tail": [
+      "Skipped by --skip-tests."
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [
+      "financial_eval.json",
+      "valuation.json",
+      "formula_trace.json"
+    ],
+    "found": {
+      "financial_eval.json": [
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BCR\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BID\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CPC\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBT\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DCL\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DGW\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHG\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DNM\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP3\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DPP\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DRG\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DTP\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DVN\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\HBH\\financial_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\HDA\\financial_eval.json"
+      ],
+      "valuation.json": [
+        "storage\\runs\\dhg_verify_stinv\\valuation.json",
+        "storage\\runs\\missing_run_id\\valuation.json",
+        "storage\\runs\\run_dbd_eval_20260614T211400\\valuation.json",
+        "storage\\runs\\validation_amv\\valuation.json",
+        "storage\\runs\\validation_dbd\\valuation.json",
+        "storage\\runs\\validation_dgw\\valuation.json",
+        "storage\\runs\\validation_dhg2\\valuation.json",
+        "storage\\runs\\validation_dhg\\valuation.json",
+        "storage\\runs\\validation_dmc\\valuation.json",
+        "storage\\runs\\validation_imp\\valuation.json",
+        "storage\\runs\\validation_jvc\\valuation.json",
+        "storage\\runs\\validation_opc\\valuation.json",
+        "storage\\runs\\validation_tnh\\valuation.json",
+        "storage\\runs\\validation_tra\\valuation.json"
+      ],
+      "formula_trace.json": []
+    },
+    "missing": [
+      "formula_trace.json"
+    ],
+    "status": "blocked"
+  },
+  "blocking_issues": [
+    "accounting_invariant_violations:fcfe,blend_sensitivity",
+    "blend_sensitivity:threshold_not_met",
+    "fcfe:threshold_not_met",
+    "golden_drift_out_of_tolerance:threshold_not_met",
+    "valuation_publishable:low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical"
+  ],
+  "metrics": {
+    "test_suite_status": "not_measured",
+    "tests_passed": 0,
+    "tests_failed": 0
+  },
+  "metric_results": [
+    {
+      "id": "net_debt",
+      "label": "Net debt reconciliation",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "net_debt",
+      "metric_name": "Net debt reconciliation",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "net_debt",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "fcff",
+      "label": "FCFF formula",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "fcff",
+      "metric_name": "FCFF formula",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "fcff",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "fcfe",
+      "label": "FCFE formula",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "fcfe",
+      "metric_name": "FCFE formula",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [
+        {
+          "reason": "threshold_not_met",
+          "source": "storage\\runs\\validation_tra\\valuation.json"
+        }
+      ],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "fcfe",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "target_price",
+      "label": "Target price reproduction",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "target_price",
+      "metric_name": "Target price reproduction",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "target_price",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "gordon_growth",
+      "label": "Discount rate exceeds terminal growth",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "gordon_growth",
+      "metric_name": "Discount rate exceeds terminal growth",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "gordon_growth",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "sensitivity_varies",
+      "label": "FCFF sensitivity matrix varies",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "sensitivity_varies",
+      "metric_name": "FCFF sensitivity matrix varies",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "sensitivity_varies",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "fcfe_sensitivity",
+      "label": "FCFE sensitivity matrix varies",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "fcfe_sensitivity",
+      "metric_name": "FCFE sensitivity matrix varies",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "fcfe_sensitivity",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "blend_sensitivity",
+      "label": "Blend sensitivity matrix varies",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "blend_sensitivity",
+      "metric_name": "Blend sensitivity matrix varies",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [
+        {
+          "reason": "threshold_not_met",
+          "source": "storage\\runs\\validation_tra\\valuation.json"
+        }
+      ],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "blend_sensitivity",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "sensitivity_base_cell",
+      "label": "Sensitivity base cell reconciles to target",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "sensitivity_base_cell",
+      "metric_name": "Sensitivity base cell reconciles to target",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "sensitivity_base_cell",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "formula_trace",
+      "label": "Formula trace available",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "formula_trace",
+      "metric_name": "Formula trace available",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "formula_trace",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "valuation_publishable",
+      "label": "Valuation publishability policy",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical",
+      "metric_id": "valuation_publishable",
+      "metric_name": "Valuation publishability policy",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [
+        {
+          "reason": "low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical",
+          "source": "storage\\runs\\validation_tra\\valuation.json"
+        }
+      ],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "valuation_publishable",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "accounting_invariant_violations",
+      "label": "Accounting invariant violations",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "fcfe,blend_sensitivity",
+      "metric_id": "accounting_invariant_violations",
+      "metric_name": "Accounting invariant violations",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 2,
+      "threshold": "= 0",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [
+        {
+          "id": "fcfe",
+          "severity": "critical",
+          "passed": false,
+          "detail": "FCFE formula"
+        },
+        {
+          "id": "blend_sensitivity",
+          "severity": "critical",
+          "passed": false,
+          "detail": "Blend sensitivity matrix varies"
+        }
+      ],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "accounting_invariant_violations",
+        "framework": "deterministic_finance_gates",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "count(failed_critical_accounting_invariants)",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "error_count",
+        "numerator": 2,
+        "denominator": 10,
+        "per_sample_results": [
+          {
+            "id": "net_debt",
+            "severity": "critical",
+            "passed": true,
+            "detail": "Net debt reconciliation"
+          },
+          {
+            "id": "fcff",
+            "severity": "critical",
+            "passed": true,
+            "detail": "FCFF formula"
+          },
+          {
+            "id": "fcfe",
+            "severity": "critical",
+            "passed": false,
+            "detail": "FCFE formula"
+          },
+          {
+            "id": "target_price",
+            "severity": "critical",
+            "passed": true,
+            "detail": "Target price reproduction"
+          },
+          {
+            "id": "gordon_growth",
+            "severity": "critical",
+            "passed": true,
+            "detail": "Discount rate exceeds terminal growth"
+          },
+          {
+            "id": "sensitivity_varies",
+            "severity": "critical",
+            "passed": true,
+            "detail": "FCFF sensitivity matrix varies"
+          },
+          {
+            "id": "fcfe_sensitivity",
+            "severity": "critical",
+            "passed": true,
+            "detail": "FCFE sensitivity matrix varies"
+          },
+          {
+            "id": "blend_sensitivity",
+            "severity": "critical",
+            "passed": false,
+            "detail": "Blend sensitivity matrix varies"
+          },
+          {
+            "id": "sensitivity_base_cell",
+            "severity": "critical",
+            "passed": true,
+            "detail": "Sensitivity base cell reconciles to target"
+          },
+          {
+            "id": "formula_trace",
+            "severity": "critical",
+            "passed": true,
+            "detail": "Formula trace available"
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Critical accounting invariant violations can materially corrupt valuation.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    },
+    {
+      "id": "golden_drift_out_of_tolerance",
+      "label": "Golden valuation drift",
+      "source": "storage\\runs\\validation_tra\\valuation.json",
+      "detail": "",
+      "metric_id": "golden_drift_out_of_tolerance",
+      "metric_name": "Golden valuation drift",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 3,
+      "threshold": "0",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "valuation",
+      "failed_examples": [
+        {
+          "metric": "fcff_wacc",
+          "live": 0.1325,
+          "expected_range": {
+            "min": 0.11,
+            "max": 0.11
+          },
+          "in_range": false
+        },
+        {
+          "metric": "fcff_terminal_growth",
+          "live": 0.03,
+          "expected_range": {
+            "min": 0.025,
+            "max": 0.025
+          },
+          "in_range": false
+        },
+        {
+          "metric": "fcff_target_price_vnd",
+          "live": 147538.0,
+          "expected_range": {
+            "min": 52876.9593,
+            "max": 53945.1807
+          },
+          "in_range": false
+        }
+      ],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "golden_drift_out_of_tolerance",
+        "framework": "golden_valuation_regression",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "drift_violation_count",
+        "numerator": 3,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "metric": "fcff_wacc",
+            "live": 0.1325,
+            "expected_range": {
+              "min": 0.11,
+              "max": 0.11
+            },
+            "in_range": false
+          },
+          {
+            "metric": "fcff_terminal_growth",
+            "live": 0.03,
+            "expected_range": {
+              "min": 0.025,
+              "max": 0.025
+            },
+            "in_range": false
+          },
+          {
+            "metric": "fcff_target_price_vnd",
+            "live": 147538.0,
+            "expected_range": {
+              "min": 52876.9593,
+              "max": 53945.1807
+            },
+            "in_range": false
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T03:36:58.736490+00:00"
+    }
+  ],
+  "valuation_artifact": "storage\\runs\\validation_tra\\valuation.json",
+  "invariants": [
+    {
+      "id": "net_debt",
+      "severity": "critical",
+      "passed": true,
+      "detail": "Net debt reconciliation"
+    },
+    {
+      "id": "fcff",
+      "severity": "critical",
+      "passed": true,
+      "detail": "FCFF formula"
+    },
+    {
+      "id": "fcfe",
+      "severity": "critical",
+      "passed": false,
+      "detail": "FCFE formula"
+    },
+    {
+      "id": "target_price",
+      "severity": "critical",
+      "passed": true,
+      "detail": "Target price reproduction"
+    },
+    {
+      "id": "gordon_growth",
+      "severity": "critical",
+      "passed": true,
+      "detail": "Discount rate exceeds terminal growth"
+    },
+    {
+      "id": "sensitivity_varies",
+      "severity": "critical",
+      "passed": true,
+      "detail": "FCFF sensitivity matrix varies"
+    },
+    {
+      "id": "fcfe_sensitivity",
+      "severity": "critical",
+      "passed": true,
+      "detail": "FCFE sensitivity matrix varies"
+    },
+    {
+      "id": "blend_sensitivity",
+      "severity": "critical",
+      "passed": false,
+      "detail": "Blend sensitivity matrix varies"
+    },
+    {
+      "id": "sensitivity_base_cell",
+      "severity": "critical",
+      "passed": true,
+      "detail": "Sensitivity base cell reconciles to target"
+    },
+    {
+      "id": "formula_trace",
+      "severity": "critical",
+      "passed": true,
+      "detail": "Formula trace available"
+    }
+  ],
+  "critical_failures": 2,
+  "golden_drift_out_of_tolerance": 3,
+  "missing_traces": [],
+  "decision": "block",
+  "valuation_publishability": {
+    "ticker": "TRA",
+    "run_id": null,
+    "valuation_artifact_path": "storage\\runs\\validation_tra\\valuation.json",
+    "computed_methods": [
+      "FCFF",
+      "BLEND",
+      "CORE_PE_NET_CASH"
+    ],
+    "publishable_methods": [],
+    "excluded_methods": [
+      {
+        "method_name": "FCFF",
+        "reason": "formula_trace_missing"
+      },
+      {
+        "method_name": "FCFE",
+        "reason": "fcfe_blocked_net_borrowing_unavailable"
+      },
+      {
+        "method_name": "BLEND",
+        "reason": "fcfe_unavailable_for_blend"
+      },
+      {
+        "method_name": "PE_FORWARD",
+        "reason": "cross_check_only_not_primary"
+      },
+      {
+        "method_name": "CORE_PE_NET_CASH",
+        "reason": "cross_check_only_not_primary"
+      }
+    ],
+    "primary_method": null,
+    "target_price_publishable": false,
+    "recommendation_publishable": false,
+    "final_report_publishable": false,
+    "status": "blocked",
+    "severity": "critical",
+    "blocking_reasons": [
+      "low_confidence_primary_method",
+      "market_sanity_bridge_missing",
+      "valuation_method_divergence_critical"
+    ],
+    "warnings": [],
+    "divergence_pct": 0.8532174761756293,
+    "target_price_vnd": null,
+    "method_diagnostics": {
+      "FCFF": {
+        "method_name": "FCFF",
+        "computed": true,
+        "publishable": false,
+        "target_price_vnd": 147538.0,
+        "confidence": "low",
+        "role": "scenario_only",
+        "blocking_reasons": [
+          "formula_trace_missing",
+          "fcff_wacc_or_ev_to_equity_bridge_missing",
+          "fcff_low_confidence"
+        ],
+        "warnings": [],
+        "required_inputs_present": true,
+        "formula_trace_present": false,
+        "bridge_present": false,
+        "sensitivity_present": true,
+        "sensitivity_varies": true,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      },
+      "FCFE": {
+        "method_name": "FCFE",
+        "computed": false,
+        "publishable": false,
+        "target_price_vnd": null,
+        "confidence": "blocked",
+        "role": "excluded",
+        "blocking_reasons": [
+          "fcfe_blocked_net_borrowing_unavailable"
+        ],
+        "warnings": [],
+        "required_inputs_present": false,
+        "formula_trace_present": false,
+        "bridge_present": false,
+        "sensitivity_present": true,
+        "sensitivity_varies": true,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      },
+      "BLEND": {
+        "method_name": "BLEND",
+        "computed": true,
+        "publishable": false,
+        "target_price_vnd": 147538.0,
+        "confidence": "low",
+        "role": "scenario_only",
+        "blocking_reasons": [
+          "fcfe_unavailable_for_blend",
+          "blend_sensitivity_missing_or_constant",
+          "blend_is_draft_only"
+        ],
+        "warnings": [],
+        "required_inputs_present": true,
+        "formula_trace_present": true,
+        "bridge_present": false,
+        "sensitivity_present": false,
+        "sensitivity_varies": false,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      },
+      "PE_FORWARD": {
+        "method_name": "PE_FORWARD",
+        "computed": false,
+        "publishable": false,
+        "target_price_vnd": null,
+        "confidence": "medium",
+        "role": "cross_check",
+        "blocking_reasons": [
+          "cross_check_only_not_primary"
+        ],
+        "warnings": [],
+        "required_inputs_present": false,
+        "formula_trace_present": false,
+        "bridge_present": false,
+        "sensitivity_present": false,
+        "sensitivity_varies": false,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      },
+      "CORE_PE_NET_CASH": {
+        "method_name": "CORE_PE_NET_CASH",
+        "computed": true,
+        "publishable": false,
+        "target_price_vnd": 273420.0,
+        "confidence": "medium",
+        "role": "cross_check",
+        "blocking_reasons": [
+          "cross_check_only_not_primary"
+        ],
+        "warnings": [],
+        "required_inputs_present": true,
+        "formula_trace_present": false,
+        "bridge_present": false,
+        "sensitivity_present": false,
+        "sensitivity_varies": false,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      }
+    }
+  }
+}

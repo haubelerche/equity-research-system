@@ -1,0 +1,816 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "source": "benchmark_suite",
+  "cohort": "rag_representative_dhg",
+  "tickers": [
+    "DHG"
+  ],
+  "generated_at": "2026-06-16T06:29:33.329255+00:00",
+  "plan_id": "02",
+  "name": "RAG and evidence",
+  "artifact": "retrieval_eval.json",
+  "status": "fail",
+  "metrics": {
+    "cohort_tickers": 1,
+    "ticker_status_counts": {
+      "pass": 0,
+      "fail": 1,
+      "blocked": 0,
+      "not_measured": 0
+    }
+  },
+  "metric_results": [
+    {
+      "id": "context_precision",
+      "label": "Context precision",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "context_precision",
+      "metric_name": "Context precision",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.9529040403723432,
+      "threshold": ">= 0.80",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": "rag_golden_20260615_v2",
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluator": {
+        "id": "context_precision",
+        "framework": "ragas",
+        "framework_version": "0.4.3",
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "ragas_context_precision_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_mean",
+        "numerator": 0.9529040403723432,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "pass",
+            "value": 0.9529040403723432,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP threshold; the target profile is 0.85.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "rag_golden_20260615_v2",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T06:29:33.329255+00:00"
+    },
+    {
+      "id": "context_recall",
+      "label": "Context recall",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "context_recall",
+      "metric_name": "Context recall",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.9696969696969697,
+      "threshold": ">= 0.80",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": "rag_golden_20260615_v2",
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluator": {
+        "id": "context_recall",
+        "framework": "ragas",
+        "framework_version": "0.4.3",
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "ragas_context_recall_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_mean",
+        "numerator": 0.9696969696969697,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "pass",
+            "value": 0.9696969696969697,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP threshold; the target profile is 0.85.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "rag_golden_20260615_v2",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T06:29:33.329255+00:00"
+    },
+    {
+      "id": "faithfulness",
+      "label": "Faithfulness",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "faithfulness",
+      "metric_name": "Faithfulness",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.6393939393939394,
+      "threshold": ">= 0.85",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": "rag_golden_20260615_v2",
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [
+        {
+          "ticker": "DHG",
+          "metric_id": "faithfulness",
+          "status": "fail",
+          "value": 0.6393939393939394,
+          "detail": "",
+          "source": "config\\benchmarks\\02_ragas_retrieval\\golden_queries\\DHG.yaml",
+          "failed_examples": [
+            {
+              "sample_index": 1,
+              "sample_origin": "ragas_live",
+              "id": "dhg_revenue_2022",
+              "question": "DHG doanh thu thuần năm 2022 là bao nhiêu?",
+              "fiscal_year": 2022,
+              "reference": "DHG doanh thu thuần năm 2022 là 4676.016 tỷ VND.",
+              "response": "Câu hỏi: DHG doanh thu thuần năm 2022 là bao nhiêu? Trả lời: DHG doanh thu thuần năm 2022 là 4676.016 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 67,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.99999999998,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.9999999999999997
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 2,
+              "sample_origin": "ragas_live",
+              "id": "dhg_gross_profit_2022",
+              "question": "DHG lợi nhuận gộp năm 2022 là bao nhiêu?",
+              "fiscal_year": 2022,
+              "reference": "DHG lợi nhuận gộp năm 2022 là 2257.4949 tỷ VND.",
+              "response": "Câu hỏi: DHG lợi nhuận gộp năm 2022 là bao nhiêu? Trả lời: DHG lợi nhuận gộp năm 2022 là 2257.4949 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 67,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.99999999995,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.8319953730190214
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 4,
+              "sample_origin": "ragas_live",
+              "id": "dhg_total_assets_2022",
+              "question": "DHG tổng tài sản cuối kỳ năm 2022 là bao nhiêu?",
+              "fiscal_year": 2022,
+              "reference": "DHG tổng tài sản cuối kỳ năm 2022 là 5168.1865 tỷ VND.",
+              "response": "Câu hỏi: DHG tổng tài sản cuối kỳ năm 2022 là bao nhiêu? Trả lời: DHG tổng tài sản cuối kỳ năm 2022 là 5168.1865 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 67,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.999999999975,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 1.0000000000000002
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 5,
+              "sample_origin": "ragas_live",
+              "id": "dhg_equity_2022",
+              "question": "DHG vốn chủ sở hữu năm 2022 là bao nhiêu?",
+              "fiscal_year": 2022,
+              "reference": "DHG vốn chủ sở hữu năm 2022 là 4291.5369 tỷ VND.",
+              "response": "Câu hỏi: DHG vốn chủ sở hữu năm 2022 là bao nhiêu? Trả lời: DHG vốn chủ sở hữu năm 2022 là 4291.5369 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 67,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.99999999998,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.9774414779848777
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 6,
+              "sample_origin": "ragas_live",
+              "id": "dhg_operating_cash_flow_2022",
+              "question": "DHG lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2022 là bao nhiêu?",
+              "fiscal_year": 2022,
+              "reference": "DHG lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2022 là 901.2846 tỷ VND.",
+              "response": "Câu hỏi: DHG lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2022 là bao nhiêu? Trả lời: DHG lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2022 là 901.2846 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 67,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.99999999995,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 1.0000000000000002
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 8,
+              "sample_origin": "ragas_live",
+              "id": "dhg_shares_2022",
+              "question": "DHG số cổ phiếu lưu hành năm 2022 là bao nhiêu?",
+              "fiscal_year": 2022,
+              "reference": "DHG số cổ phiếu lưu hành năm 2022 là 135071693.0 shares.",
+              "response": "Câu hỏi: DHG số cổ phiếu lưu hành năm 2022 là bao nhiêu? Trả lời: DHG số cổ phiếu lưu hành năm 2022 là 135071693.0 shares.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 67,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.9999999999666667,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.8385809450844092
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 9,
+              "sample_origin": "ragas_live",
+              "id": "dhg_revenue_2023",
+              "question": "DHG doanh thu thuần năm 2023 là bao nhiêu?",
+              "fiscal_year": 2023,
+              "reference": "DHG doanh thu thuần năm 2023 là 5015.395 tỷ VND.",
+              "response": "Câu hỏi: DHG doanh thu thuần năm 2023 là bao nhiêu? Trả lời: DHG doanh thu thuần năm 2023 là 5015.395 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 147,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.99999999998,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.9999993387120579
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 10,
+              "sample_origin": "ragas_live",
+              "id": "dhg_gross_profit_2023",
+              "question": "DHG lợi nhuận gộp năm 2023 là bao nhiêu?",
+              "fiscal_year": 2023,
+              "reference": "DHG lợi nhuận gộp năm 2023 là 2343.545 tỷ VND.",
+              "response": "Câu hỏi: DHG lợi nhuận gộp năm 2023 là bao nhiêu? Trả lời: DHG lợi nhuận gộp năm 2023 là 2343.545 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 147,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.999999999975,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.9999993930279475
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 12,
+              "sample_origin": "ragas_live",
+              "id": "dhg_total_assets_2023",
+              "question": "DHG tổng tài sản cuối kỳ năm 2023 là bao nhiêu?",
+              "fiscal_year": 2023,
+              "reference": "DHG tổng tài sản cuối kỳ năm 2023 là 6110.4742 tỷ VND.",
+              "response": "Câu hỏi: DHG tổng tài sản cuối kỳ năm 2023 là bao nhiêu? Trả lời: DHG tổng tài sản cuối kỳ năm 2023 là 6110.4742 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 147,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.99999999998,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.9999999999999999
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 13,
+              "sample_origin": "ragas_live",
+              "id": "dhg_equity_2023",
+              "question": "DHG vốn chủ sở hữu năm 2023 là bao nhiêu?",
+              "fiscal_year": 2023,
+              "reference": "DHG vốn chủ sở hữu năm 2023 là 4852.9347 tỷ VND.",
+              "response": "Câu hỏi: DHG vốn chủ sở hữu năm 2023 là bao nhiêu? Trả lời: DHG vốn chủ sở hữu năm 2023 là 4852.9347 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 147,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.8874999999778125,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.9807944186285891
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 14,
+              "sample_origin": "ragas_live",
+              "id": "dhg_operating_cash_flow_2023",
+              "question": "DHG lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2023 là bao nhiêu?",
+              "fiscal_year": 2023,
+              "reference": "DHG lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2023 là 240.1712 tỷ VND.",
+              "response": "Câu hỏi: DHG lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2023 là bao nhiêu? Trả lời: DHG lưu chuyển tiền thuần từ hoạt động kinh doanh năm 2023 là 240.1712 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 147,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.9999999999666667,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.9999999999999999
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 15,
+              "sample_origin": "ragas_live",
+              "id": "dhg_capex_2023",
+              "question": "DHG CAPEX / chi mua sắm tài sản cố định năm 2023 là bao nhiêu?",
+              "fiscal_year": 2023,
+              "reference": "DHG CAPEX / chi mua sắm tài sản cố định năm 2023 là -486.3425 tỷ VND.",
+              "response": "Câu hỏi: DHG CAPEX / chi mua sắm tài sản cố định năm 2023 là bao nhiêu? Trả lời: DHG CAPEX / chi mua sắm tài sản cố định năm 2023 là -486.3425 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 147,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.99999999995,
+                "context_recall": 1.0,
+                "faithfulness": 0.6666666666666666,
+                "response_relevancy": 1.0
+              },
+              "metric_score": 0.6666666666666666,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 16,
+              "sample_origin": "ragas_live",
+              "id": "dhg_shares_2023",
+              "question": "DHG số cổ phiếu lưu hành năm 2023 là bao nhiêu?",
+              "fiscal_year": 2023,
+              "reference": "DHG số cổ phiếu lưu hành năm 2023 là 135046614.0 shares.",
+              "response": "Câu hỏi: DHG số cổ phiếu lưu hành năm 2023 là bao nhiêu? Trả lời: DHG số cổ phiếu lưu hành năm 2023 là 135046614.0 shares.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 147,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.99999999995,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.7537382563246712
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 17,
+              "sample_origin": "ragas_live",
+              "id": "dhg_revenue_2024",
+              "question": "DHG doanh thu thuần năm 2024 là bao nhiêu?",
+              "fiscal_year": 2024,
+              "reference": "DHG doanh thu thuần năm 2024 là 4884.8677 tỷ VND.",
+              "response": "Câu hỏi: DHG doanh thu thuần năm 2024 là bao nhiêu? Trả lời: DHG doanh thu thuần năm 2024 là 4884.8677 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 131,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.99999999998,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 1.0
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 18,
+              "sample_origin": "ragas_live",
+              "id": "dhg_gross_profit_2024",
+              "question": "DHG lợi nhuận gộp năm 2024 là bao nhiêu?",
+              "fiscal_year": 2024,
+              "reference": "DHG lợi nhuận gộp năm 2024 là 2137.7661 tỷ VND.",
+              "response": "Câu hỏi: DHG lợi nhuận gộp năm 2024 là bao nhiêu? Trả lời: DHG lợi nhuận gộp năm 2024 là 2137.7661 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 131,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.9999999999666667,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.959475731259816
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            },
+            {
+              "sample_index": 20,
+              "sample_origin": "ragas_live",
+              "id": "dhg_total_assets_2024",
+              "question": "DHG tổng tài sản cuối kỳ năm 2024 là bao nhiêu?",
+              "fiscal_year": 2024,
+              "reference": "DHG tổng tài sản cuối kỳ năm 2024 là 5959.2433 tỷ VND.",
+              "response": "Câu hỏi: DHG tổng tài sản cuối kỳ năm 2024 là bao nhiêu? Trả lời: DHG tổng tài sản cuối kỳ năm 2024 là 5959.2433 tỷ VND.",
+              "retrieved_context_count": 5,
+              "retrieved_candidate_count": 131,
+              "retrieval_candidate_k": 250,
+              "scores": {
+                "context_precision": 0.999999999975,
+                "context_recall": 1.0,
+                "faithfulness": 0.5,
+                "response_relevancy": 0.9999994144385179
+              },
+              "metric_score": 0.5,
+              "passed": false,
+              "metric_id": "faithfulness"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluator": {
+        "id": "faithfulness",
+        "framework": "ragas",
+        "framework_version": "0.4.3",
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "ragas_faithfulness_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_mean",
+        "numerator": 0.6393939393939394,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "fail",
+            "value": 0.6393939393939394,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Generated claims must be supported by retrieved evidence.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "rag_golden_20260615_v2",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T06:29:33.329255+00:00"
+    },
+    {
+      "id": "hit_rate_at_5",
+      "label": "Hit-rate@5",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "hit_rate_at_5",
+      "metric_name": "Hit-rate@5",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.9655172413793104,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": "rag_golden_20260615_v2",
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Inspect failed golden queries and improve retrieval ranking.",
+      "evaluator": {
+        "id": "hit_rate_at_5",
+        "framework": "lexical_golden_retrieval",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "queries_with_relevant_evidence_in_top_5 / evaluated_queries",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_mean",
+        "numerator": 0.9655172413793104,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "pass",
+            "value": 0.9655172413793104,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP retrieval target from BENCHMARK_STANDARDS.md.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "rag_golden_20260615_v2",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T06:29:33.329255+00:00"
+    },
+    {
+      "id": "mrr_at_5",
+      "label": "MRR@5",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "mrr_at_5",
+      "metric_name": "MRR@5",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.9655172413793104,
+      "threshold": ">= 0.75",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": "rag_golden_20260615_v2",
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluator": {
+        "id": "mrr_at_5",
+        "framework": "lexical_golden_retrieval",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "mean(reciprocal_rank_of_first_relevant_evidence_at_5)",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_mean",
+        "numerator": 0.9655172413793104,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "pass",
+            "value": 0.9655172413793104,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP threshold; the target profile is 0.80.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "rag_golden_20260615_v2",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T06:29:33.329255+00:00"
+    },
+    {
+      "id": "response_relevancy",
+      "label": "Response relevancy",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "response_relevancy",
+      "metric_name": "Response relevancy",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.9109050964768345,
+      "threshold": ">= 0.85",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": "rag_golden_20260615_v2",
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluator": {
+        "id": "response_relevancy",
+        "framework": "ragas",
+        "framework_version": "0.4.3",
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "ragas_response_relevancy_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_mean",
+        "numerator": 0.9109050964768345,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "pass",
+            "value": 0.9109050964768345,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Responses must directly address benchmark questions.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "rag_golden_20260615_v2",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T06:29:33.329255+00:00"
+    },
+    {
+      "id": "source_tier_hit_rate",
+      "label": "Source-tier hit rate",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "source_tier_hit_rate",
+      "metric_name": "Source-tier hit rate",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.9655172413793104,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": "rag_golden_20260615_v2",
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [],
+      "remediation_hint": "Tune source-tier preferences so material queries retrieve priority sources.",
+      "evaluator": {
+        "id": "source_tier_hit_rate",
+        "framework": "source_tier_retrieval_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": "material_queries_with_priority_source_in_top_k / material_queries",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "cohort_mean",
+        "numerator": 0.9655172413793104,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "status": "pass",
+            "value": 0.9655172413793104,
+            "detail": ""
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Material retrieval queries should surface priority evidence sources in the retrieved set.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "rag_golden_20260615_v2",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T06:29:33.329255+00:00"
+    }
+  ],
+  "blocking_issues": [
+    "faithfulness:threshold_not_met"
+  ]
+}

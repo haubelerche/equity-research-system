@@ -1,0 +1,15 @@
+{
+  "ticker": "DHN",
+  "company_name": "DHN",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DHN FY2023 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHN\\2023\\source_document.pdf",
+  "published_date": "2023-12-31",
+  "fiscal_year": 2023,
+  "language": "vi",
+  "file_hash": "55ed54eac1198ead834ef303ac6cc1012776e3fb0b0e302f532b6a5d93804b68",
+  "staged_at": "2026-06-15T09:41:21.288724+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHN\\DHN 2023.pdf"
+}

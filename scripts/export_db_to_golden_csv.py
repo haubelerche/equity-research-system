@@ -34,8 +34,13 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-GOLDEN_DIR = ROOT / "config" / "dataset" / "benchmarks" / "shared" / "golden_financials"
-COHORTS_PATH = ROOT / "config" / "dataset" / "benchmarks" / "shared" / "benchmark_cohorts.yaml"
+from backend.evaluation.benchmark_paths import (  # noqa: E402
+    BENCHMARK_COHORTS_PATH,
+    GOLDEN_FINANCIALS_DIR,
+)
+
+GOLDEN_DIR = GOLDEN_FINANCIALS_DIR
+COHORTS_PATH = BENCHMARK_COHORTS_PATH
 
 GOLDEN_CSV_FIELDS = [
     "ticker", "fiscal_year", "period", "statement_type", "canonical_key",

@@ -27,6 +27,7 @@ if str(ROOT) not in sys.path:
 from backend.evaluation.benchmark_cohorts import resolve_benchmark_tickers  # noqa: E402
 from backend.evaluation.benchmark_standards import (  # noqa: E402
     STANDARD_SCHEMA_VERSION,
+    evaluate_metric_threshold,
     metric_blocks_publish,
     publication_status_from_metrics,
     standard_metric,
@@ -186,6 +187,70 @@ def _run_for_ticker(
     return packet
 
 
+def _existing_plan_payload(*, ticker: str, output_dir: Path, plan: Any) -> dict[str, Any] | None:
+    path = output_dir / ticker / plan.artifact
+    if not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _packet_from_existing_ticker(
+    *,
+    ticker: str,
+    output_dir: Path,
+    generated_at: str,
+    plan_ids: tuple[str, ...] = DEFAULT_PLAN_IDS,
+) -> dict[str, Any]:
+    plan_records: list[dict[str, Any]] = []
+    for plan in _selected_plans(plan_ids):
+        payload = _existing_plan_payload(ticker=ticker, output_dir=output_dir, plan=plan)
+        if payload is None:
+            raise FileNotFoundError(
+                f"missing existing benchmark artifact for {ticker}: {output_dir / ticker / plan.artifact}"
+            )
+        plan_records.append({
+            "plan_id": str(payload.get("plan_id") or plan.id),
+            "name": str(payload.get("plan_name") or payload.get("name") or plan.name),
+            "artifact": plan.artifact,
+            "status": str(payload.get("status") or "not_measured"),
+            "metrics": payload.get("metrics") if isinstance(payload.get("metrics"), dict) else {},
+            "metric_results": payload.get("metric_results") if isinstance(payload.get("metric_results"), list) else [],
+            "blocking_issues": payload.get("blocking_issues") if isinstance(payload.get("blocking_issues"), list) else [],
+        })
+
+    all_metrics = [
+        metric
+        for record in plan_records
+        for metric in record.get("metric_results", [])
+        if isinstance(metric, dict)
+    ]
+    blocking = [metric for metric in all_metrics if metric_blocks_publish(metric)]
+    packet = {
+        "schema_version": STANDARD_SCHEMA_VERSION,
+        "benchmark_suite_version": "benchmark_standards_v1",
+        "source": "benchmark_suite",
+        "ticker": ticker,
+        "generated_at": generated_at,
+        "evaluation_order": list(plan_ids),
+        "fail_closed": True,
+        "overall_status": "blocked" if blocking else "pass",
+        "publication_status": publication_status_from_metrics(all_metrics),
+        "client_final_authorized": False,
+        "artifacts": plan_records,
+        "summary": {
+            status: sum(item["status"] == status for item in plan_records)
+            for status in ("pass", "fail", "blocked", "not_measured")
+        },
+        "reused_existing_artifacts": True,
+    }
+    _write_json(output_dir / ticker / "evaluation_packet.json", packet)
+    return packet
+
+
 def _aggregate_summary(
     *,
     cohort_name: str,
@@ -266,6 +331,22 @@ def _metric_status_rank(status: str) -> int:
     return order.get(str(status), 3)
 
 
+def _is_runtime_pass_gate(metric: dict[str, Any]) -> bool:
+    threshold = str(metric.get("threshold") or "").strip().lower()
+    aggregation = str((metric.get("calculation") or {}).get("aggregation") or "").lower()
+    return (
+        threshold in {"pass", "= pass"}
+        or aggregation in {"pass_count", "boolean_gate"}
+    )
+
+
+def _pass_rate_value(samples: list[dict[str, Any]]) -> tuple[float | None, int]:
+    if not samples:
+        return None, 0
+    passed = sum(1 for sample in samples if str(sample["metric"].get("status") or "") == "pass")
+    return passed / len(samples), passed
+
+
 def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], generated_at: str) -> dict[str, Any]:
     prototype = samples[0]["metric"]
     statuses = [str(sample["metric"].get("status") or "not_evaluable") for sample in samples]
@@ -277,8 +358,15 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     ]
     metric_type = str(prototype.get("metric_type") or "")
     unit = str(prototype.get("unit") or "")
-    if metric_type == "error_count" or unit == "count":
+    is_boolean_gate = metric_type == "boolean" or unit == "boolean"
+    is_error_rate = metric_type == "error_rate"
+    is_pass_gate = _is_runtime_pass_gate(prototype)
+    if is_pass_gate:
+        value, passed_count = _pass_rate_value(samples)
+    elif metric_type == "error_count" or unit == "count":
         value = sum(numeric_values)
+    elif is_error_rate and numeric_values:
+        value = sum(numeric_values) / len(numeric_values)
     elif len(numeric_values) == len(samples):
         value = sum(numeric_values) / len(numeric_values) if numeric_values else None
     else:
@@ -291,6 +379,12 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
             for sample in samples
         ]
         value = sum(pass_equivalents) / len(pass_equivalents) if pass_equivalents else None
+    if is_boolean_gate:
+        status = "not_evaluable" if value is None else ("pass" if value == 1.0 else "fail")
+    elif is_pass_gate:
+        status = "not_evaluable" if value is None else ("pass" if value == 1.0 else "fail")
+    else:
+        status = evaluate_metric_threshold(prototype, value, fallback_status=status)
 
     failed_examples = [
         {
@@ -306,18 +400,25 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         if str(sample["metric"].get("status") or "") in {"fail", "blocked", "not_evaluable"}
     ]
     calculation = dict(prototype.get("calculation") or {})
+    if is_pass_gate:
+        aggregation = "cohort_pass_rate"
+        numerator = passed_count
+    elif metric_type == "error_count" or unit == "count":
+        aggregation = "cohort_sum"
+        numerator = value
+    elif is_error_rate and numeric_values:
+        aggregation = "cohort_mean_observed"
+        numerator = value
+    elif len(numeric_values) == len(samples):
+        aggregation = "cohort_mean"
+        numerator = value
+    else:
+        aggregation = "cohort_pass_rate"
+        numerator = sum(1 for sample in samples if str(sample["metric"].get("status") or "") == "pass")
     calculation.update({
-        "aggregation": (
-            "cohort_sum"
-            if metric_type == "error_count" or unit == "count"
-            else ("cohort_mean" if len(numeric_values) == len(samples) else "cohort_pass_rate")
-        ),
-        "numerator": (
-            value
-            if metric_type == "error_count" or unit == "count" or len(numeric_values) == len(samples)
-            else sum(1 for sample in samples if str(sample["metric"].get("status") or "") == "pass")
-        ),
-        "denominator": len(samples),
+        "aggregation": aggregation,
+        "numerator": numerator,
+        "denominator": len(numeric_values) if is_error_rate and numeric_values else len(samples),
         "per_sample_results": [
             {
                 "ticker": sample["ticker"],
@@ -340,6 +441,22 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         "calculation": calculation,
         "evaluated_at": generated_at,
     }
+    if is_boolean_gate:
+        aggregate.update({
+            "metric_type": "coverage",
+            "unit": "percent",
+            "threshold": "= 100%",
+            "threshold_operator": "=",
+            "detail": f"cohort_boolean_pass_rate={calculation['numerator']}/{len(samples)}",
+        })
+    elif is_pass_gate:
+        aggregate.update({
+            "metric_type": "coverage",
+            "unit": "percent",
+            "threshold": "= 100%",
+            "threshold_operator": "=",
+            "detail": f"cohort_pass_rate={calculation['numerator']}/{len(samples)}",
+        })
     aggregate["id"] = metric_id
     aggregate["metric_id"] = metric_id
     return aggregate
@@ -490,6 +607,8 @@ def _aggregate_artifacts(
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--cohort",
@@ -500,6 +619,11 @@ def main() -> int:
     parser.add_argument("--plans", nargs="*", default=list(DEFAULT_PLAN_IDS), help="Plan ids to run, e.g. 01 02")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR / "benchmark_suite")
     parser.add_argument("--skip-tests", action="store_true")
+    parser.add_argument(
+        "--reuse-existing",
+        action="store_true",
+        help="Aggregate already-written per-ticker artifacts without re-running evaluators.",
+    )
     args = parser.parse_args()
     plan_ids = tuple(str(plan).zfill(2) for plan in args.plans)
 
@@ -510,7 +634,14 @@ def main() -> int:
     )
     generated_at = datetime.now(timezone.utc).isoformat()
     packets = [
-        _run_for_ticker(
+        _packet_from_existing_ticker(
+            ticker=ticker,
+            output_dir=args.output_dir,
+            generated_at=generated_at,
+            plan_ids=plan_ids,
+        )
+        if args.reuse_existing
+        else _run_for_ticker(
             ticker=ticker,
             output_dir=args.output_dir,
             generated_at=generated_at,

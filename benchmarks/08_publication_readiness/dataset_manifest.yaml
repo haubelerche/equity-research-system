@@ -1,0 +1,11 @@
+version: 20260615_v3
+framework: publication readiness deterministic gate
+datasets:
+  - publication_readiness_cases.jsonl
+  - publication_status_policy.yaml
+metrics:
+  - publication.package_validation_passed
+  - publication.report_quality_allow_export
+  - publication.publishable_model_locked
+  - publication.snapshot_match
+  - publication.final_approval_present

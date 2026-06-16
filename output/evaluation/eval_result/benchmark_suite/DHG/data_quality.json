@@ -4,10 +4,10 @@
   "plan_id": "01",
   "plan_name": "Data reliability",
   "ticker": "DHG",
-  "generated_at": "2026-06-15T05:47:04.744130+00:00",
+  "generated_at": "2026-06-15T13:59:02.867416+00:00",
   "status": "fail",
   "test_execution": {
-    "status": "pass",
+    "status": "not_measured",
     "targets": [
       "tests/reconciliation",
       "tests/official_sources",
@@ -18,14 +18,11 @@
       "tests/unit/test_ocr_reconciliation_gate.py",
       "tests/unit/test_source_provenance_gate.py"
     ],
-    "exit_code": 0,
-    "duration_seconds": 0.63,
-    "summary": {
-      "passed": 70
-    },
+    "exit_code": null,
+    "duration_seconds": 0.0,
+    "summary": {},
     "output_tail": [
-      "......................................................................   [100%]",
-      "70 passed in 0.27s"
+      "Skipped by --skip-tests."
     ]
   },
   "runtime_evidence_inventory": {
@@ -33,12 +30,31 @@
       "data_quality.json"
     ],
     "found": {
-      "data_quality.json": []
+      "data_quality.json": [
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BCR\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BID\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CPC\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBT\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DCL\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DGW\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DNM\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP3\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DPP\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DRG\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DTP\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DVN\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\HBH\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\HDA\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\IMP\\data_quality.json"
+      ]
     },
-    "missing": [
-      "data_quality.json"
-    ],
-    "status": "blocked"
+    "missing": [],
+    "status": "pass"
   },
   "blocking_issues": [
     "data_reliability_score:threshold_not_met",
@@ -47,8 +63,8 @@
     "valuation_method_data_readiness:data_requirement_or_reconciliation_gate_failed"
   ],
   "metrics": {
-    "test_suite_status": "pass",
-    "tests_passed": 70,
+    "test_suite_status": "not_measured",
+    "tests_passed": 0,
     "tests_failed": 0
   },
   "metric_results": [
@@ -441,7 +457,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     },
     {
       "id": "data_reliability_score",
@@ -456,7 +472,7 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0.8767944055944056,
+      "value": 0.843208547008547,
       "threshold": ">= 90/100",
       "threshold_operator": ">=",
       "unit": "score",
@@ -487,7 +503,7 @@
         {
           "sample_origin": "data_reliability_score_component",
           "component": "ocr_resolution_health",
-          "component_score": 0.7272727272727273,
+          "component_score": 0.05555555555555558,
           "weight": 0.05,
           "normalized_weight": 0.05
         }
@@ -545,7 +561,7 @@
           "perfect_score_not_forced": true
         },
         "aggregation": "weighted_score",
-        "numerator": 0.8767944055944056,
+        "numerator": 0.843208547008547,
         "denominator": 1.0,
         "per_sample_results": [
           {
@@ -605,7 +621,7 @@
           {
             "sample_origin": "data_reliability_score_component",
             "component": "ocr_resolution_health",
-            "component_score": 0.7272727272727273,
+            "component_score": 0.05555555555555558,
             "weight": 0.05,
             "normalized_weight": 0.05,
             "metric_id": "data_reliability_score",
@@ -844,7 +860,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     },
     {
       "id": "core_metric_coverage",
@@ -1336,7 +1352,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     },
     {
       "id": "period_completeness",
@@ -1721,7 +1737,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     },
     {
       "id": "provenance_coverage",
@@ -2090,7 +2106,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     },
     {
       "id": "official_reconciliation_rate",
@@ -2497,7 +2513,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     },
     {
       "id": "material_ocr_error_count",
@@ -2882,7 +2898,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     },
     {
       "id": "ocr_unresolved_rate",
@@ -2897,7 +2913,7 @@
       "scope": "benchmark_suite",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 0.2727272727272727,
+      "value": 0.9444444444444444,
       "threshold": "<= 5%",
       "threshold_operator": "<=",
       "unit": "percent",
@@ -2912,14 +2928,14 @@
       "owner": "data",
       "failed_examples": [
         {
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "status": "completed",
-          "pages_processed": 0,
+          "pages_processed": 40,
           "pages_failed": 0,
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "metric_id": "ocr_unresolved_rate",
           "sample_origin": "fallback_1",
           "sample_index": 1
@@ -2927,14 +2943,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 1,
           "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 2
@@ -2942,14 +2958,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 2,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 3
@@ -2957,14 +2973,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 3,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 4
@@ -2972,14 +2988,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 4,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 5
@@ -2987,14 +3003,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 5,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 6
@@ -3002,14 +3018,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 6,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 7
@@ -3017,14 +3033,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 7,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 8
@@ -3032,14 +3048,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 8,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 9
@@ -3047,14 +3063,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 9,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 10
@@ -3062,14 +3078,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 10,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 11
@@ -3077,14 +3093,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 11,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 12
@@ -3092,14 +3108,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 12,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 13
@@ -3107,14 +3123,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 13,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 14
@@ -3122,14 +3138,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 14,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 15
@@ -3137,14 +3153,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 15,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 16
@@ -3152,14 +3168,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 16,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 17
@@ -3167,14 +3183,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 17,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 18
@@ -3182,14 +3198,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 18,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 19
@@ -3197,14 +3213,14 @@
         {
           "sample_origin": "ocr_audit_unit",
           "ticker": "DHG",
-          "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+          "ocr_run_id": "85827c6bb296423190455bb573ef041e",
           "document_id": "DHG_2025_abaaac8d3813",
           "unit_index": 19,
-          "unit_type": "benchmark_control",
+          "unit_type": "page",
           "status": "checked",
-          "candidate_row_count": 11,
-          "mapped_fact_count": 8,
-          "unresolved_candidate_count": 3,
+          "candidate_row_count": 18,
+          "mapped_fact_count": 1,
+          "unresolved_candidate_count": 17,
           "evidence_available": true,
           "metric_id": "ocr_unresolved_rate",
           "sample_index": 20
@@ -3222,7 +3238,7 @@
         "formula": "unresolved_ocr_candidates / ocr_units_checked",
         "inputs": {
           "metadata": {
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "ticker": "DHG",
             "fiscal_year": 2025,
@@ -3233,14 +3249,16 @@
             "ocr_lang": "vie+eng",
             "dpi": 300,
             "parser_version": "1.0.0",
-            "started_at": "2026-06-14T17:10:37.485567+00:00",
-            "completed_at": "2026-06-14T17:10:45.763880+00:00",
+            "started_at": "2026-06-15T07:57:07.330766+00:00",
+            "completed_at": "2026-06-15T07:59:06.635846+00:00",
             "status": "completed",
-            "pages_processed": 0,
+            "pages_processed": 40,
             "pages_failed": 0,
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "warnings": [],
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "warnings": [
+              "blocked_candidates_pending_review"
+            ],
             "errors": []
           }
         },
@@ -3248,18 +3266,18 @@
           "unit": "candidate_rows_or_processed_pages"
         },
         "aggregation": "error_rate",
-        "numerator": 3,
-        "denominator": 11,
+        "numerator": 17,
+        "denominator": 18,
         "per_sample_results": [
           {
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "status": "completed",
-            "pages_processed": 0,
+            "pages_processed": 40,
             "pages_failed": 0,
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "metric_id": "ocr_unresolved_rate",
             "sample_origin": "fallback_1",
             "sample_index": 1
@@ -3267,14 +3285,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 1,
             "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 2
@@ -3282,14 +3300,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 2,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 3
@@ -3297,14 +3315,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 3,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 4
@@ -3312,14 +3330,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 4,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 5
@@ -3327,14 +3345,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 5,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 6
@@ -3342,14 +3360,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 6,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 7
@@ -3357,14 +3375,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 7,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 8
@@ -3372,14 +3390,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 8,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 9
@@ -3387,14 +3405,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 9,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 10
@@ -3402,14 +3420,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 10,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 11
@@ -3417,14 +3435,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 11,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 12
@@ -3432,14 +3450,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 12,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 13
@@ -3447,14 +3465,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 13,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 14
@@ -3462,14 +3480,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 14,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 15
@@ -3477,14 +3495,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 15,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 16
@@ -3492,14 +3510,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 16,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 17
@@ -3507,14 +3525,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 17,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 18
@@ -3522,14 +3540,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 18,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 19
@@ -3537,14 +3555,14 @@
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
             "document_id": "DHG_2025_abaaac8d3813",
             "unit_index": 19,
-            "unit_type": "benchmark_control",
+            "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 11,
-            "mapped_fact_count": 8,
-            "unresolved_candidate_count": 3,
+            "candidate_row_count": 18,
+            "mapped_fact_count": 1,
+            "unresolved_candidate_count": 17,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
             "sample_index": 20
@@ -3561,7 +3579,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     },
     {
       "id": "duplicate_fact_count",
@@ -3851,7 +3869,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     },
     {
       "id": "valuation_method_data_readiness",
@@ -4330,7 +4348,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     },
     {
       "id": "dataframe_schema_validity",
@@ -4722,7 +4740,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T13:59:02.867416+00:00"
     }
   ],
   "core_metric_coverage": 1.0,
@@ -4730,10 +4748,10 @@
   "provenance_coverage": 1.0,
   "official_reconciliation_rate": 1.0,
   "material_ocr_error_count": 0,
-  "ocr_unresolved_rate": 0.2727272727272727,
+  "ocr_unresolved_rate": 0.9444444444444444,
   "duplicate_fact_count": 0,
   "duplicate_fact_rate": 0.0,
-  "data_reliability_score": 0.8767944055944056,
+  "data_reliability_score": 0.843208547008547,
   "accepted_fact_confidence": 0.9043076923076924,
   "valuation_method_data_readiness": false,
   "raw_bctc_non_empty": true,
@@ -4920,7 +4938,7 @@
     }
   },
   "ocr": {
-    "ocr_run_id": "986ffdd10aba48f486ff57bdc805fc6e",
+    "ocr_run_id": "85827c6bb296423190455bb573ef041e",
     "document_id": "DHG_2025_abaaac8d3813",
     "ticker": "DHG",
     "fiscal_year": 2025,
@@ -4931,14 +4949,16 @@
     "ocr_lang": "vie+eng",
     "dpi": 300,
     "parser_version": "1.0.0",
-    "started_at": "2026-06-14T17:10:37.485567+00:00",
-    "completed_at": "2026-06-14T17:10:45.763880+00:00",
+    "started_at": "2026-06-15T07:57:07.330766+00:00",
+    "completed_at": "2026-06-15T07:59:06.635846+00:00",
     "status": "completed",
-    "pages_processed": 0,
+    "pages_processed": 40,
     "pages_failed": 0,
-    "candidate_row_count": 11,
-    "mapped_fact_count": 8,
-    "warnings": [],
+    "candidate_row_count": 18,
+    "mapped_fact_count": 1,
+    "warnings": [
+      "blocked_candidates_pending_review"
+    ],
     "errors": []
   },
   "pandera": {

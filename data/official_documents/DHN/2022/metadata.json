@@ -1,0 +1,15 @@
+{
+  "ticker": "DHN",
+  "company_name": "DHN",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DHN FY2022 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHN\\2022\\source_document.pdf",
+  "published_date": "2022-12-31",
+  "fiscal_year": 2022,
+  "language": "vi",
+  "file_hash": "55d18892c4185c3d95ac141a35504375ebefc5566febaa895a81082df1137ab2",
+  "staged_at": "2026-06-15T09:41:21.259593+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHN\\DHN 2022.pdf"
+}

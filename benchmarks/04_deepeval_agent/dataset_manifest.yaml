@@ -1,0 +1,20 @@
+generated_at: '2026-06-15'
+suite: vn_pharma_benchmark_suite_20260615
+default_cohort: requested10
+benchmark:
+  id: 04_deepeval_agent
+  title: DeepEval agent workflow and LLM-judge diagnostics
+primary_tool: deepeval
+datasets:
+  agent_cases: deepeval_cases/agent_cases.jsonl
+  agent_rubrics: agent_rubrics.yaml
+  cohorts: ../shared/benchmark_cohorts.yaml
+metrics:
+- role_adherence
+- groundedness
+- task_completion
+- plan_adherence
+- critic_issue_recall
+- tool_permission_compliance
+- schema_validity
+- no_unauthorized_calc

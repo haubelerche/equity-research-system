@@ -1,0 +1,14 @@
+{
+  "ticker": "DCL",
+  "generated_at": "2026-06-15T09:44:44.786870+00:00",
+  "years": [
+    {
+      "fiscal_year": 2024,
+      "ingest_status": "OCR_PENDING_REVIEW",
+      "ocr_candidates": 8,
+      "ocr_promoted": 0,
+      "ocr_blocked": 8,
+      "errors": 1
+    }
+  ]
+}

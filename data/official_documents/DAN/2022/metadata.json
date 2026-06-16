@@ -1,0 +1,15 @@
+{
+  "ticker": "DAN",
+  "company_name": "DAN",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DAN FY2022 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DAN\\2022\\source_document.pdf",
+  "published_date": "2022-12-31",
+  "fiscal_year": 2022,
+  "language": "vi",
+  "file_hash": "ab5de6671c3106b434c9a2d64bedd9f19ec57d25b9a25165ac7bf194f2ba45c5",
+  "staged_at": "2026-06-15T09:41:16.026840+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DAN\\DAN 2022.pdf"
+}

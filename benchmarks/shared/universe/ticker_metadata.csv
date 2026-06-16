@@ -1,0 +1,21 @@
+cohort,ticker,company_name,exchange,sector,is_mvp_core,benchmark_role
+requested10,DHG,Cong ty Co phan Duoc Hau Giang,HOSE,pharma,True,MVP core
+requested10,IMP,Cong ty Co phan Duoc pham Imexpharm,HOSE,pharma,True,MVP core
+requested10,DMC,Cong ty Co phan Xuat nhap khau Y te Domesco,HOSE,pharma,True,MVP core
+requested10,TRA,Cong ty Co phan Traphaco,HOSE,pharma,True,MVP core
+requested10,DP3,Cong ty Co phan Duoc pham Trung uong 3,UPCOM,pharma,False,scale
+requested10,DP1,Cong ty Co phan Duoc pham Trung uong CPC1,UPCOM,pharma,False,scale
+requested10,TW3,Cong ty Co phan Duoc - Trang thiet bi Y te Da Nang,UPCOM,pharma,False,scale
+requested10,MED,Cong ty Co phan Duoc Trung uong Mediplantex,UPCOM,pharma,False,scale
+requested10,PMC,Cong ty Co phan Duoc pham Duoc lieu Pharmedic,UPCOM,pharma,False,scale
+requested10,AMV,Cong ty Co phan San xuat Kinh doanh Duoc va Trang thiet bi Y te Viet My,HNX,medical_equipment,False,equipment stress
+recommended10,DHG,Cong ty Co phan Duoc Hau Giang,HOSE,pharma,True,primary reference
+recommended10,IMP,Cong ty Co phan Duoc pham Imexpharm,HOSE,pharma,True,MVP peer
+recommended10,DMC,Cong ty Co phan Xuat nhap khau Y te Domesco,HOSE,pharma,True,MVP peer
+recommended10,TRA,Cong ty Co phan Traphaco,HOSE,pharma,True,MVP peer
+recommended10,DBD,Cong ty Co phan Duoc - Trang thiet bi Y te Binh Dinh,HOSE,pharma,True,accepted stress case
+recommended10,OPC,Cong ty Co phan Duoc pham OPC,HOSE,traditional_pharma,False,listed pharma peer
+recommended10,DVN,Tong cong ty Duoc Viet Nam - CTCP,UPCOM,pharma_distribution,False,sector holding/distributor
+recommended10,DCL,Cong ty Co phan Duoc pham Cuu Long,HOSE,pharma,False,pharma peer
+recommended10,PMC,Cong ty Co phan Duoc pham Duoc lieu Pharmedic,HNX,pharma,False,small-cap pharma
+recommended10,AMV,Cong ty Co phan San xuat Kinh doanh Duoc va Trang thiet bi Y te Viet My,HNX,medical_equipment,False,equipment stress

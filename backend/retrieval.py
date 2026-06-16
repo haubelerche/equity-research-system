@@ -42,6 +42,14 @@ def _dsn() -> str:
 DEFAULT_EMBED_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
 VECTOR_DIM = 1536
 
+# Per-tier cosine-distance penalty applied on the vector retrieval path so that
+# official (tier-1) sources are preferred at near-equal similarity, while a
+# clearly-more-relevant lower-tier chunk (e.g. a reconciled canonical fact that
+# holds the exact figure a narrative annual-report page lacks) can still surface
+# into top-k. With cosine distance in [0, ~1], 0.03 means a tier-3 chunk must be
+# ~0.06 closer than a tier-1 chunk to outrank it.
+TIER_RANK_PENALTY = float(os.getenv("RETRIEVAL_TIER_RANK_PENALTY", "0.20"))
+
 try:
     from openai import OpenAI
 except ImportError:  # pragma: no cover - optional dependency at runtime
@@ -156,15 +164,28 @@ class RetrievalService:
                     rank_param: Any = None
                     fts_where_param: Any = None
                     order_param: Any = None
+                    # Strict tier-first ordering is correct for the lexical/FTS path,
+                    # but on the vector path it exiles the canonical-fact (tier-3)
+                    # evidence beneath dozens of tier-1 narrative chunks that never
+                    # actually contain the requested figure. The vector path instead
+                    # blends similarity with a small per-tier distance penalty
+                    # (TIER_RANK_PENALTY): official (tier-1) sources still win on
+                    # near-equal similarity, but a clearly-more-relevant lower-tier
+                    # chunk can surface. So we drop the tier-first prefix there.
+                    tier_order = "s.source_tier ASC, "
 
                     if use_vector and query_embedding is not None:
                         vector_param = _vector_literal(query_embedding)
                         rank_expr = "(1 - (dc.embedding <=> %s::vector))"
-                        order_expr = "dc.embedding <=> %s::vector ASC"
+                        order_expr = (
+                            f"((dc.embedding <=> %s::vector) "
+                            f"+ {TIER_RANK_PENALTY} * GREATEST(s.source_tier - 1, 0)) ASC"
+                        )
                         extra_where = "AND dc.embedding IS NOT NULL"
                         fts_clause = ""
                         rank_param = vector_param
                         order_param = vector_param
+                        tier_order = ""
                     elif query and query.strip():
                         # Use simple dictionary for cross-language Vietnamese + number support.
                         fts_clause = (
@@ -236,7 +257,7 @@ class RetrievalService:
                           {fts_clause}
                           {fy_clause}
                           {method_clause}
-                        ORDER BY s.source_tier ASC, {order_expr}
+                        ORDER BY {tier_order}{order_expr}
                         LIMIT %s
                     """
 

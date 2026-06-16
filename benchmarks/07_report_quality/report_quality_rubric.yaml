@@ -1,0 +1,20 @@
+version: 20260615_v3
+thresholds:
+  total_mvp_min: 85
+  completeness_min_pct: 90
+  financial_analysis_depth_min: 80
+  forecast_rationale_min: 80
+  valuation_transparency_min: 85
+weights:
+  completeness: 15
+  thesis_specificity: 15
+  financial_analysis_depth: 15
+  forecast_rationale: 15
+  valuation_transparency: 15
+  risk_catalyst_quality: 10
+  evidence_integration: 10
+  presentation_quality: 5
+decisions:
+  allow_export: score >= 85 and no blocking gate fail
+  draft_only: score >= 70 but not enough for export
+  block_export: score < 70 or missing critical artifacts

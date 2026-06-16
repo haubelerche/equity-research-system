@@ -21,6 +21,10 @@ cohorts:
     - TRA
     - JVC
     - DBD
+  rag_representative_dhg:
+    description: Single representative ticker for RAG/RAGAS retrieval evaluation; DHG has complete 2022-2025 official-document coverage and exercises the same retrieval/query pattern as peer tickers.
+    tickers:
+    - DHG
   financial_model_top10:
     description: Top deterministic financial-model benchmark cohort.
     tickers:

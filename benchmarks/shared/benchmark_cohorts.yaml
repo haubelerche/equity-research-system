@@ -1,0 +1,94 @@
+version: benchmark_cohorts_20260615_v2
+default_cohort: full_universe
+cohorts:
+  full_universe:
+    description: All tickers currently retained in config/dataset/universe/pharma_vn_universe.csv.
+    source: universe
+  diversified_core:
+    description: Compact core smoke cohort across pharma leaders, hospital services, and report-ready issuers.
+    tickers:
+    - DHG
+    - IMP
+    - DMC
+    - TRA
+    - TNH
+  diversified_healthcare:
+    description: Healthcare-focused cohort used for retrieval and source-provenance stress checks.
+    tickers:
+    - DHG
+    - IMP
+    - DMC
+    - TRA
+    - JVC
+    - DBD
+  financial_model_top10:
+    description: Top deterministic financial-model benchmark cohort.
+    tickers:
+    - DHG
+    - DBD
+    - IMP
+    - DMC
+    - TRA
+    - OPC
+    - TNH
+    - JVC
+    - DGW
+    - AMV
+  agent_llm_judge_top10:
+    description: Top agent and LLM-judge benchmark cohort aligned with financial_model_top10.
+    tickers:
+    - DHG
+    - DBD
+    - IMP
+    - DMC
+    - TRA
+    - OPC
+    - TNH
+    - JVC
+    - DGW
+    - AMV
+  requested10:
+    description: 10 mã đúng theo yêu cầu của người dùng; dùng để chứng minh benchmark chạy được trên core + UPCOM/HNX sparse/stress
+      names.
+    tickers:
+    - DHG
+    - IMP
+    - DMC
+    - TRA
+    - DP3
+    - DP1
+    - TW3
+    - MED
+    - PMC
+    - AMV
+  recommended_core10:
+    description: '10 mã được khuyến nghị cho đồ án: giữ MVP5 đã nghiệm thu và thêm peer/stress case có độ phủ/độ nổi bật tốt
+      hơn.'
+    tickers:
+    - DHG
+    - IMP
+    - DMC
+    - TRA
+    - DBD
+    - OPC
+    - DVN
+    - DCL
+    - PMC
+    - AMV
+  mvp5_validated:
+    description: Scope chất lượng sâu đã nghiệm thu trong tài liệu hiện hành.
+    tickers:
+    - DHG
+    - IMP
+    - DMC
+    - TRA
+    - DBD
+  scale_sparse:
+    description: Sparse/stress cohort dùng để kiểm tra missing data, source tier, latency và fail-closed behavior.
+    tickers:
+    - DP3
+    - DP1
+    - TW3
+    - MED
+    - PMC
+    - AMV

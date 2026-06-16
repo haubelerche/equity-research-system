@@ -71,7 +71,7 @@ assets/fonts/*.otf
 audits/storage_migrations/
 
 # Reproducible runtime output — never source (reports, logs, dumps, debug traces)
-artifacts/
+
 output/*.log
 
 # Removed no-data ticker raw directories. Keep them out if local tools recreate them.

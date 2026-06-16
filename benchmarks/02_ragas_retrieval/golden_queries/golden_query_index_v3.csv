@@ -1,0 +1,57 @@
+query_id,ticker,query,query_class,expected_chunk_ids,expected_source_tier_max,materiality,answerable,expected_answer_policy
+RQ_DHG_REV_2024,DHG,DHG doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_DHG_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_DHG_TAX_ASSUMPTION,DHG,Cơ sở giả định thuế suất dự phóng của DHG là gì?,valuation_assumption_support,"['CH_DHG_AR_2024_01', 'CH_DHG_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_DHG_UNSUPPORTED_API,DHG,DHG có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_DHG_CATALYST_SPAN,DHG,DHG có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_DHG_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_IMP_REV_2024,IMP,IMP doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_IMP_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_IMP_TAX_ASSUMPTION,IMP,Cơ sở giả định thuế suất dự phóng của IMP là gì?,valuation_assumption_support,"['CH_IMP_AR_2024_01', 'CH_IMP_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_IMP_UNSUPPORTED_API,IMP,IMP có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_IMP_CATALYST_SPAN,IMP,IMP có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_IMP_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_DMC_REV_2024,DMC,DMC doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_DMC_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_DMC_TAX_ASSUMPTION,DMC,Cơ sở giả định thuế suất dự phóng của DMC là gì?,valuation_assumption_support,"['CH_DMC_AR_2024_01', 'CH_DMC_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_DMC_UNSUPPORTED_API,DMC,DMC có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_DMC_CATALYST_SPAN,DMC,DMC có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_DMC_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_TRA_REV_2024,TRA,TRA doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_TRA_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_TRA_TAX_ASSUMPTION,TRA,Cơ sở giả định thuế suất dự phóng của TRA là gì?,valuation_assumption_support,"['CH_TRA_AR_2024_01', 'CH_TRA_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_TRA_UNSUPPORTED_API,TRA,TRA có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_TRA_CATALYST_SPAN,TRA,TRA có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_TRA_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_DP3_REV_2024,DP3,DP3 doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_DP3_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_DP3_TAX_ASSUMPTION,DP3,Cơ sở giả định thuế suất dự phóng của DP3 là gì?,valuation_assumption_support,"['CH_DP3_AR_2024_01', 'CH_DP3_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_DP3_UNSUPPORTED_API,DP3,DP3 có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_DP3_CATALYST_SPAN,DP3,DP3 có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_DP3_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_DP1_REV_2024,DP1,DP1 doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_DP1_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_DP1_TAX_ASSUMPTION,DP1,Cơ sở giả định thuế suất dự phóng của DP1 là gì?,valuation_assumption_support,"['CH_DP1_AR_2024_01', 'CH_DP1_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_DP1_UNSUPPORTED_API,DP1,DP1 có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_DP1_CATALYST_SPAN,DP1,DP1 có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_DP1_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_TW3_REV_2024,TW3,TW3 doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_TW3_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_TW3_TAX_ASSUMPTION,TW3,Cơ sở giả định thuế suất dự phóng của TW3 là gì?,valuation_assumption_support,"['CH_TW3_AR_2024_01', 'CH_TW3_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_TW3_UNSUPPORTED_API,TW3,TW3 có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_TW3_CATALYST_SPAN,TW3,TW3 có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_TW3_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_MED_REV_2024,MED,MED doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_MED_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_MED_TAX_ASSUMPTION,MED,Cơ sở giả định thuế suất dự phóng của MED là gì?,valuation_assumption_support,"['CH_MED_AR_2024_01', 'CH_MED_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_MED_UNSUPPORTED_API,MED,MED có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_MED_CATALYST_SPAN,MED,MED có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_MED_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_PMC_REV_2024,PMC,PMC doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_PMC_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_PMC_TAX_ASSUMPTION,PMC,Cơ sở giả định thuế suất dự phóng của PMC là gì?,valuation_assumption_support,"['CH_PMC_AR_2024_01', 'CH_PMC_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_PMC_UNSUPPORTED_API,PMC,PMC có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_PMC_CATALYST_SPAN,PMC,PMC có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_PMC_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_AMV_REV_2024,AMV,AMV doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_AMV_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_AMV_TAX_ASSUMPTION,AMV,Cơ sở giả định thuế suất dự phóng của AMV là gì?,valuation_assumption_support,"['CH_AMV_AR_2024_01', 'CH_AMV_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_AMV_UNSUPPORTED_API,AMV,AMV có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_AMV_CATALYST_SPAN,AMV,AMV có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_AMV_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_DBD_REV_2024,DBD,DBD doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_DBD_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_DBD_TAX_ASSUMPTION,DBD,Cơ sở giả định thuế suất dự phóng của DBD là gì?,valuation_assumption_support,"['CH_DBD_AR_2024_01', 'CH_DBD_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_DBD_UNSUPPORTED_API,DBD,DBD có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_DBD_CATALYST_SPAN,DBD,DBD có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_DBD_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_OPC_REV_2024,OPC,OPC doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_OPC_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_OPC_TAX_ASSUMPTION,OPC,Cơ sở giả định thuế suất dự phóng của OPC là gì?,valuation_assumption_support,"['CH_OPC_AR_2024_01', 'CH_OPC_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_OPC_UNSUPPORTED_API,OPC,OPC có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_OPC_CATALYST_SPAN,OPC,OPC có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_OPC_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_DVN_REV_2024,DVN,DVN doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_DVN_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_DVN_TAX_ASSUMPTION,DVN,Cơ sở giả định thuế suất dự phóng của DVN là gì?,valuation_assumption_support,"['CH_DVN_AR_2024_01', 'CH_DVN_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_DVN_UNSUPPORTED_API,DVN,DVN có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_DVN_CATALYST_SPAN,DVN,DVN có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_DVN_AR_2024_02'],2,medium,True,require_span_or_mark_missing
+RQ_DCL_REV_2024,DCL,DCL doanh thu thuần năm 2024 theo báo cáo chính thức là gì?,financial_fact_lookup,['CH_DCL_AR_2024_00'],1,high,True,cite_fact_or_canonical
+RQ_DCL_TAX_ASSUMPTION,DCL,Cơ sở giả định thuế suất dự phóng của DCL là gì?,valuation_assumption_support,"['CH_DCL_AR_2024_01', 'CH_DCL_AR_2023_01']",1,medium,True,cite_artifact_or_history
+RQ_DCL_UNSUPPORTED_API,DCL,DCL có rủi ro API nhập khẩu tăng giá trong quý tới không?,unsupported_or_missing_evidence,[],2,medium,False,refuse_or_mark_insufficient_evidence
+RQ_DCL_CATALYST_SPAN,DCL,DCL có catalyst GMP EU hoặc nhà máy mới nào cần đưa vào thesis không?,catalyst_lookup,['CH_DCL_AR_2024_02'],2,medium,True,require_span_or_mark_missing

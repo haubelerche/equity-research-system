@@ -5,6 +5,11 @@ benchmark:
   id: 02_ragas_retrieval
   title: RAGAS retrieval and evidence grounding
 primary_tool: ragas
+evaluation_scope:
+  representative_ticker: DHG
+  representative_cohort: rag_representative_dhg
+  rationale: DHG has complete 2022-2025 official-document coverage and uses the same financial fact lookup, valuation support, catalyst lookup, and unanswerable-query patterns as the wider pharma universe.
+  dashboard_command: .venv\Scripts\python.exe scripts/run_benchmark_suite.py --plans 02 --cohort rag_representative_dhg --reuse-existing
 datasets:
   golden_queries: golden_queries/*.yaml
   golden_chunks: golden_chunks/*.jsonl

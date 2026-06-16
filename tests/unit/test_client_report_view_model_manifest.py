@@ -7,6 +7,8 @@ keys and fall back to the valuation.json sub-sections instead of raising.
 """
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
 from backend.reporting import client_report_view_model as vm
@@ -90,6 +92,26 @@ def test_display_governance_hides_low_confidence_selected_method():
 
     assert display["target_price"] == 27_207
     assert display["recommendation"] == "Bán"
+
+
+def test_market_price_as_of_prefers_run_market_data_date():
+    market_data = SimpleNamespace(
+        as_of_date="2026-06-16",
+        trading_statistics=SimpleNamespace(last_close=102.0),
+    )
+
+    assert vm._market_price_as_of(
+        102_000.0,
+        valuation={"snapshot_as_of": "2026-06-15"},
+        market_data=market_data,
+    ) == "2026-06-16"
+
+
+def test_market_price_as_of_falls_back_to_valuation_snapshot_date():
+    assert vm._market_price_as_of(
+        50_200.0,
+        valuation={"snapshot_as_of": "2026-06-16T04:00:00+00:00"},
+    ) == "2026-06-16"
 
 
 def test_valuation_summary_omits_low_confidence_target():

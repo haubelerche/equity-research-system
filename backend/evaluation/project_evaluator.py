@@ -23,14 +23,21 @@ from typing import Any
 
 from backend.evaluation.benchmark_standards import (
     STANDARD_SCHEMA_VERSION,
+    evaluate_metric_threshold,
     metric_blocks_publish,
     publication_status_from_metrics,
+)
+from backend.evaluation.benchmark_paths import (
+    BENCHMARK_COHORTS_PATH,
+    BENCHMARK_CONFIG_LABEL,
+    BENCHMARK_RESULTS_LABEL,
+    EVALUATION_OUTPUT_ROOT,
 )
 from backend.evaluation.runtime_evaluators import evaluate_plan
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_OUTPUT_DIR = ROOT / "output" / "evaluation" / "eval_result"
-_COHORTS_PATH = ROOT / "config" / "dataset" / "benchmarks" / "shared" / "benchmark_cohorts.yaml"
+DEFAULT_OUTPUT_DIR = EVALUATION_OUTPUT_ROOT
+_COHORTS_PATH = BENCHMARK_COHORTS_PATH
 SUMMARY_RE = re.compile(
     r"(?P<count>\d+)\s+(?P<kind>passed|failed|error|errors|skipped|xfailed|xpassed)"
 )
@@ -433,7 +440,8 @@ def evaluate_project(
 def load_latest_evaluation(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
     benchmark_manifest = output_dir / "benchmark_suite" / "benchmark_suite.json"
     if benchmark_manifest.exists():
-        return json.loads(benchmark_manifest.read_text(encoding="utf-8"))
+        manifest = json.loads(benchmark_manifest.read_text(encoding="utf-8"))
+        return _merge_benchmark_suite_sibling_artifacts(manifest, benchmark_manifest.parent)
     manifest_path = output_dir / "evaluation_packet.json"
     if not manifest_path.exists():
         return {
@@ -447,6 +455,144 @@ def load_latest_evaluation(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, A
     return json.loads(manifest_path.read_text(encoding="utf-8"))
 
 
+def _load_json_object(path: Path) -> dict[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _artifact_summary_from_payload(
+    artifact_name: str,
+    payload: dict[str, Any],
+) -> dict[str, Any] | None:
+    if not payload:
+        return None
+    plan = next((item for item in PLANS if item.artifact == artifact_name), None)
+    metric_results = payload.get("metric_results")
+    if not isinstance(metric_results, list):
+        metric_results = []
+    metrics = payload.get("metrics")
+    if not isinstance(metrics, dict):
+        metrics = {}
+    blocking_issues = payload.get("blocking_issues")
+    if not isinstance(blocking_issues, list):
+        blocking_issues = []
+    return {
+        "plan_id": str(payload.get("plan_id") or (plan.id if plan else "")),
+        "name": str(payload.get("name") or payload.get("plan_name") or (plan.name if plan else artifact_name)),
+        "artifact": artifact_name,
+        "status": str(payload.get("status") or "not_measured"),
+        "metrics": metrics,
+        "metric_results": _normalize_metric_results(metric_results),
+        "blocking_issues": blocking_issues,
+    }
+
+
+def _normalize_metric_results(metrics: list[Any]) -> list[Any]:
+    normalized: list[Any] = []
+    for metric in metrics:
+        if not isinstance(metric, dict):
+            normalized.append(metric)
+            continue
+        current_status = str(metric.get("status") or "not_evaluable")
+        threshold_status = evaluate_metric_threshold(
+            metric,
+            metric.get("value"),
+            fallback_status=current_status,
+        )
+        if threshold_status == current_status:
+            normalized.append(metric)
+            continue
+        normalized_metric = dict(metric)
+        normalized_metric.setdefault("legacy_status", current_status)
+        normalized_metric["status"] = threshold_status
+        normalized_metric["threshold_status_source"] = "benchmark_threshold_contract"
+        normalized.append(normalized_metric)
+    return normalized
+
+
+def _normalize_artifact_summary(artifact: dict[str, Any]) -> dict[str, Any]:
+    metric_results = artifact.get("metric_results")
+    if not isinstance(metric_results, list):
+        return artifact
+    return {**artifact, "metric_results": _normalize_metric_results(metric_results)}
+
+
+def _merge_benchmark_suite_sibling_artifacts(
+    manifest: dict[str, Any],
+    suite_dir: Path,
+) -> dict[str, Any]:
+    """Augment a partial suite manifest with already-written sibling artifacts.
+
+    Focused benchmark runs may refresh only one plan and rewrite
+    ``benchmark_suite.json`` with that plan. The dashboard still needs the other
+    runtime results that already exist beside the manifest, so this loader
+    combines those result artifacts without fabricating metrics from config
+    fixtures.
+    """
+    artifacts = [
+        _normalize_artifact_summary(item) for item in manifest.get("artifacts") or []
+        if isinstance(item, dict)
+    ]
+    existing = {
+        str(item.get("artifact") or "")
+        for item in artifacts
+        if item.get("artifact")
+    }
+    additions: list[dict[str, Any]] = []
+    for plan in PLANS:
+        if plan.artifact in existing:
+            continue
+        path = suite_dir / plan.artifact
+        if not path.is_file():
+            continue
+        summary = _artifact_summary_from_payload(
+            plan.artifact,
+            _load_json_object(path),
+        )
+        if summary is not None:
+            additions.append(summary)
+
+    merged = {**manifest, "artifacts": [*artifacts, *additions]}
+    all_metrics = [
+        metric
+        for artifact in merged["artifacts"]
+        for metric in artifact.get("metric_results", [])
+        if isinstance(metric, dict)
+    ]
+    if not all_metrics:
+        return merged if additions else manifest
+    deterministic_failures = [
+        metric for metric in all_metrics if metric_blocks_publish(metric)
+    ]
+    merged["overall_status"] = "blocked" if deterministic_failures else (
+        manifest.get("overall_status") or "pass"
+    )
+    merged["publication_status"] = publication_status_from_metrics(all_metrics)
+    merged["client_final_authorized"] = False if deterministic_failures else manifest.get(
+        "client_final_authorized",
+    )
+    merged["summary"] = {
+        status: sum(item.get("status") == status for item in merged["artifacts"])
+        for status in ("pass", "fail", "blocked", "not_measured")
+    }
+    plan_ids = [
+        str(item.get("plan_id"))
+        for item in merged["artifacts"]
+        if item.get("plan_id")
+    ]
+    merged["plan_ids"] = list(dict.fromkeys(plan_ids))
+    if "evaluation_order" in merged:
+        merged["evaluation_order"] = list(dict.fromkeys(plan_ids))
+    merged["merged_artifact_sources"] = {
+        "runtime_results": BENCHMARK_RESULTS_LABEL,
+        "benchmark_config": BENCHMARK_CONFIG_LABEL,
+    }
+    return merged
+
+
 def load_evaluation_artifact(
     artifact_name: str, output_dir: Path = DEFAULT_OUTPUT_DIR
 ) -> dict[str, Any] | None:
@@ -455,9 +601,13 @@ def load_evaluation_artifact(
         return None
     benchmark_path = output_dir / "benchmark_suite" / artifact_name
     if benchmark_path.exists():
-        return json.loads(benchmark_path.read_text(encoding="utf-8"))
+        payload = json.loads(benchmark_path.read_text(encoding="utf-8"))
+        return _normalize_artifact_summary(payload) if isinstance(payload, dict) else None
     path = output_dir / artifact_name
-    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return _normalize_artifact_summary(payload) if isinstance(payload, dict) else None
 
 
 def _load_cohort_config() -> dict[str, Any]:

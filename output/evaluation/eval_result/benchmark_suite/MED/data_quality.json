@@ -4,10 +4,10 @@
   "plan_id": "01",
   "plan_name": "Data reliability",
   "ticker": "MED",
-  "generated_at": "2026-06-15T05:47:04.744130+00:00",
+  "generated_at": "2026-06-15T08:38:52.275906+00:00",
   "status": "fail",
   "test_execution": {
-    "status": "pass",
+    "status": "not_measured",
     "targets": [
       "tests/reconciliation",
       "tests/official_sources",
@@ -18,14 +18,11 @@
       "tests/unit/test_ocr_reconciliation_gate.py",
       "tests/unit/test_source_provenance_gate.py"
     ],
-    "exit_code": 0,
-    "duration_seconds": 0.572,
-    "summary": {
-      "passed": 70
-    },
+    "exit_code": null,
+    "duration_seconds": 0.0,
+    "summary": {},
     "output_tail": [
-      "......................................................................   [100%]",
-      "70 passed in 0.25s"
+      "Skipped by --skip-tests."
     ]
   },
   "runtime_evidence_inventory": {
@@ -34,22 +31,26 @@
     ],
     "found": {
       "data_quality.json": [
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BCR\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BID\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CPC\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBT\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DCL\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DGW\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DHG\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DNM\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DP3\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DPP\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DRG\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DTP\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DVN\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\IMP\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\JVC\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\LDP\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\MKP\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\OPC\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\PPP\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\TNH\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\TRA\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\TW3\\data_quality.json"
+        "output\\evaluation\\eval_result\\benchmark_suite\\HBH\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\HDA\\data_quality.json"
       ]
     },
     "missing": [],
@@ -59,8 +60,8 @@
     "valuation_method_data_readiness:data_requirement_or_reconciliation_gate_failed"
   ],
   "metrics": {
-    "test_suite_status": "pass",
-    "tests_passed": 70,
+    "test_suite_status": "not_measured",
+    "tests_passed": 0,
     "tests_failed": 0
   },
   "metric_results": [
@@ -453,7 +454,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     },
     {
       "id": "data_reliability_score",
@@ -850,7 +851,7 @@
         "dataset_version": "MED.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     },
     {
       "id": "core_metric_coverage",
@@ -1342,7 +1343,7 @@
         "dataset_version": "MED.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     },
     {
       "id": "period_completeness",
@@ -1727,7 +1728,7 @@
         "dataset_version": "MED.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     },
     {
       "id": "provenance_coverage",
@@ -2096,7 +2097,7 @@
         "dataset_version": "MED.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     },
     {
       "id": "official_reconciliation_rate",
@@ -2508,7 +2509,7 @@
         "dataset_version": "MED.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     },
     {
       "id": "material_ocr_error_count",
@@ -2893,7 +2894,7 @@
         "dataset_version": "MED.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     },
     {
       "id": "ocr_unresolved_rate",
@@ -3175,7 +3176,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     },
     {
       "id": "duplicate_fact_count",
@@ -3465,7 +3466,7 @@
         "dataset_version": "MED.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     },
     {
       "id": "valuation_method_data_readiness",
@@ -3882,7 +3883,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     },
     {
       "id": "dataframe_schema_validity",
@@ -4265,7 +4266,7 @@
         "dataset_version": "MED.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T05:47:04.744130+00:00"
+      "evaluated_at": "2026-06-15T08:38:52.275906+00:00"
     }
   ],
   "core_metric_coverage": 1.0,

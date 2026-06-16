@@ -1,0 +1,21 @@
+generated_at: '2026-06-15'
+suite: vn_pharma_benchmark_suite_20260615
+default_cohort: requested10
+benchmark:
+  id: 03_financial_benchmarks
+  title: Deterministic finance, valuation and accounting invariants
+primary_tool: pytest+pandas+domain_rubrics
+datasets:
+  golden_facts: ../shared/golden_financials
+  golden_ratios: golden_ratios.csv
+  valuation_cases: golden_valuation/valuation_cases.jsonl
+  sensitivity_grid: golden_valuation/sensitivity_grid.csv
+  expected_anomaly_flags: financial_anomaly_expected_flags.csv
+metrics:
+- accounting_invariant_violations
+- valuation_regression_failures
+- share_count_mismatch
+- target_price_bridge_error
+- wacc_terminal_growth_violation
+- net_debt_reconciliation_error
+- recommendation_inconsistency

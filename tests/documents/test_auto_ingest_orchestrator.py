@@ -197,3 +197,54 @@ def test_download_candidate_pdf_and_metadata_write_local_layout(tmp_path, monkey
     meta = json.loads((doc_dir / "metadata.json").read_text(encoding="utf-8"))
     assert meta["title"] == "Annual report 2022"
     assert meta["local_path"] == str(pdf_path)
+
+
+def test_fetch_pdf_reuses_cached_pdf_without_discovery(tmp_path, monkeypatch):
+    import json
+    from scripts import auto_ingest_official_documents as mod
+    from scripts.auto_ingest_official_documents import AutoIngestConfig, IngestStatus
+    import backend.documents.official_document_discovery as discovery
+
+    doc_dir = tmp_path / "data" / "official_documents" / "DHG" / "2025"
+    doc_dir.mkdir(parents=True)
+    (doc_dir / "source_document.pdf").write_bytes(b"%PDF cached")
+    (doc_dir / "metadata.json").write_text(
+        json.dumps({"title": "Cached DHG report"}),
+        encoding="utf-8",
+    )
+
+    def fail_discovery(*args, **kwargs):
+        raise AssertionError("cached PDF path must not call discovery")
+
+    monkeypatch.setattr(discovery, "discover_documents", fail_discovery)
+    monkeypatch.setattr(mod, "_is_scanned_pdf", lambda path: True)
+    monkeypatch.setattr(
+        mod,
+        "_run_ocr_pipeline",
+        lambda **kwargs: (
+            [{"metric_id": "current_assets.ending", "value": 1}],
+            IngestStatus.OCR_PENDING_REVIEW,
+            3,
+            1,
+            2,
+        ),
+    )
+
+    rows, status, stats = mod._fetch_pdf(
+        "DHG",
+        2025,
+        doc_dir,
+        AutoIngestConfig(ticker="DHG", from_year=2025, to_year=2025, ocr=True),
+    )
+
+    assert rows[0]["metric_id"] == "current_assets.ending"
+    assert status == IngestStatus.OCR_PENDING_REVIEW
+    assert stats == {"ocr_candidates": 3, "ocr_promoted": 1, "ocr_blocked": 2}
+
+
+def test_legacy_reconcile_schema_error_is_optional():
+    from scripts.auto_ingest_official_documents import _is_optional_reconcile_schema_error
+
+    exc = RuntimeError('relation "fact.fact_observations" does not exist')
+
+    assert _is_optional_reconcile_schema_error(exc) is True

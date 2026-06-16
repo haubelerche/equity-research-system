@@ -1,0 +1,124 @@
+benchmark:
+  id: 03_financial_benchmarks_strict_v1
+  purpose: Deterministic finance and valuation release gate with anti-overfit design.
+  scoring_rule: A run is publishable only when all P0 metrics pass. Diagnostic pass-count metrics must never override P0 failures.
+  data_split:
+    public_dev: visible inputs plus sample expected outputs for integration tests only
+    private_golden: hidden expected outputs used by evaluator
+    private_mutation: evaluator-generated randomized cases with the same formulas but new tickers and values
+  artifact_contract:
+    required: true
+    schema: valuation_run_v1
+    must_include:
+      - run_id
+      - dataset_version
+      - case_id
+      - ticker
+      - selected_methods
+      - inputs_used
+      - formula_trace
+      - computed_outputs
+      - sensitivity_grids
+      - publishability_decision
+metrics:
+  - id: finance.artifact_present
+    type: boolean
+    severity: P0
+    threshold: true
+    fail_when: artifact missing, unreadable, or empty
+
+  - id: finance.schema_validity
+    type: pass_rate
+    severity: P0
+    denominator: submitted_cases
+    threshold: 1.0
+    fail_when: any case violates the JSON schema or uses wrong units
+
+  - id: finance.case_coverage
+    type: pass_rate
+    severity: P0
+    denominator: required_cases
+    threshold: 1.0
+    fail_when: any required case is missing, duplicated, or replaced by an extra case
+
+  - id: finance.critical_accounting_invariant_errors
+    type: error_count
+    severity: P0
+    threshold_operator: "="
+    threshold: 0
+    checks:
+      - assets = liabilities + equity within max(1 bn VND, 0.1% of assets)
+      - shares_outstanding > 0
+      - net_debt = short_term_debt + long_term_debt - cash - short_term_investments within max(0.1 bn VND, 0.1% of gross debt plus cash)
+      - WACC > terminal_growth
+      - EV_to_equity_bridge
+      - target_price_bridge
+
+  - id: finance.formula_reproduction_errors
+    type: error_count
+    severity: P0
+    threshold_operator: "="
+    threshold: 0
+    denominator: required_case_fields
+    tolerances:
+      fcf_projection_bn_abs: 0.01
+      enterprise_value_bn: max(0.5 bn VND, 0.1% of EV)
+      equity_value_bn: max(0.5 bn VND, 0.1% of equity value)
+      target_price_vnd: max(100 VND, 0.5% of target price)
+    checks:
+      - FCFF selected => FCFF formula reproducible from submitted inputs
+      - FCFE selected => debt schedule and net borrowing present, formula reproducible
+      - blend selected => weights sum to 1 and blend target equals weighted selected methods
+
+  - id: finance.golden_valuation_drift_errors
+    type: error_count
+    severity: P0
+    threshold_operator: "="
+    threshold: 0
+    denominator: hidden_golden_case_fields
+    compare_fields:
+      - fcf_projection
+      - enterprise_value
+      - equity_value
+      - target_price
+      - rating
+    note: Report max_abs_pct_error and median_abs_pct_error as diagnostics, but gate on zero out-of-tolerance fields.
+
+  - id: finance.sensitivity_grid_errors
+    type: error_count
+    severity: P0
+    threshold_operator: "="
+    threshold: 0
+    checks:
+      - grid_shape matches configured WACC x terminal_growth points for every selected method
+      - base cell equals base valuation within target price tolerance
+      - target price decreases as WACC increases, holding terminal growth constant
+      - target price increases as terminal growth increases, holding WACC constant
+      - no constant or duplicated grid masquerading as sensitivity
+
+  - id: finance.publishability_errors
+    type: error_count
+    severity: P0
+    threshold_operator: "="
+    threshold: 0
+    checks:
+      - all positive publishable cases are publishable only when all P0 formula and invariant checks pass
+      - all negative seeded cases are blocked with the correct blocker code
+      - missing prerequisites for a selected method block publication instead of being counted as pass
+
+  - id: finance.seeded_issue_detection
+    type: precision_recall
+    severity: P1
+    thresholds:
+      recall: 0.95
+      precision: 0.90
+    note: Seeded cases must be hidden or mutated at evaluation time; public case_id and case_type must not be enough to pass.
+
+  - id: finance.llm_tool_governance
+    type: pass_rate
+    severity: P0
+    threshold: 1.0
+    checks:
+      - no unauthorized tool calls
+      - no material finance arithmetic performed only by LLM text when a calculator/dataframe/tool was required
+      - every valuation conclusion is grounded to provided facts or computed artifact fields

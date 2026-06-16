@@ -1,0 +1,15 @@
+version: 20260615_v3
+framework: custom citation validator + source provenance gates
+datasets:
+  - claim_ledger_cases.jsonl
+  - citation_resolution_cases.jsonl
+  - numeric_mismatch_cases.jsonl
+  - generic_citation_negative_cases.jsonl
+metrics:
+  - citation.quant_coverage
+  - citation.resolver_success
+  - citation.source_id_validity
+  - citation.numeric_mismatch
+  - citation.tier3_only_material_claim
+  - citation.generic_citation_label
+  - citation.catalyst_evidence_span_missing

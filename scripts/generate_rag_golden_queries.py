@@ -16,8 +16,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from backend.dataset.config_io import load_universe_rows  # noqa: E402
+from backend.evaluation.benchmark_paths import RAG_GOLDEN_QUERY_DIR  # noqa: E402
 
-OUTPUT_DIR = ROOT / "config" / "dataset" / "benchmarks" / "02_rag_evidence" / "golden_queries"
+OUTPUT_DIR = RAG_GOLDEN_QUERY_DIR
 
 # 8 canonical metrics × 3 fiscal years = 24 queries per ticker.
 # Uses canonical key format (e.g. "revenue.net") because most tickers only have

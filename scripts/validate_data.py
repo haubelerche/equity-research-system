@@ -36,6 +36,7 @@ import json
 import os
 from datetime import UTC, datetime
 
+from backend.evaluation.benchmark_paths import GOLDEN_FINANCIALS_DIR
 from backend.period_scope import DEFAULT_FROM_YEAR, DEFAULT_TO_YEAR
 
 _env_file = Path(__file__).resolve().parents[1] / ".env"
@@ -48,7 +49,7 @@ if _env_file.exists():
 
 ROOT = Path(__file__).resolve().parents[1]
 FACTS_DIR = ROOT / "artifacts" / "facts"
-GOLDEN_DIR = ROOT / "config" / "dataset" / "benchmarks" / "shared" / "golden_financials"
+GOLDEN_DIR = GOLDEN_FINANCIALS_DIR
 REPORTS_DIR = ROOT / "reports"
 
 _ALLOWED_FY_RE = re.compile(r"^(20\d{2})FY$")

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EvalDashboardPage } from "./EvalDashboardPage";
 
@@ -20,10 +20,10 @@ const packet = {
       scope: "report_run",
       severity: "P0",
       blocks_publish: true,
-      value: 0.5,
+      value: 0.3333333333333333,
       threshold: ">= 95%",
       status: "fail",
-      sample_size: 10,
+      sample_size: 3,
       owner: "data",
       source: "fixture",
       failed_examples: [{ reason: "missing_source" }],
@@ -35,8 +35,8 @@ const packet = {
       },
       calculation: {
         formula: "valid / required",
-        numerator: 5,
-        denominator: 10,
+        numerator: 1,
+        denominator: 3,
         aggregation: "coverage",
         per_sample_results: [{ id: "revenue", passed: false }],
       },
@@ -54,27 +54,29 @@ const packet = {
       metric_id: "fcff",
       metric_name: "FCFF formula",
       metric_type: "coverage",
-      value: 10,
-      threshold: "pass",
+      value: 1,
+      threshold: "= 100%",
       status: "pass",
-      unit: "count",
+      unit: "percent",
       evaluator: { framework: "deterministic_finance_gates" },
+      calculation: { numerator: 10, denominator: 10, aggregation: "cohort_pass_rate" },
     }, {
       metric_id: "valuation_publishable",
       metric_name: "Valuation publishability policy",
       metric_type: "coverage",
       value: 0,
-      threshold: "pass",
+      threshold: "= 100%",
       status: "fail",
-      unit: "count",
+      unit: "percent",
       evaluator: { framework: "valuation_publishability_policy" },
+      calculation: { numerator: 0, denominator: 10, aggregation: "cohort_pass_rate" },
     }, {
       metric_id: "new_backend_metric",
       metric_name: "New backend metric",
       metric_type: "score",
       value: 0.73,
       threshold: ">= 0.70",
-      status: "pass",
+      status: "fail",
       evaluator: { framework: "future_evaluator" },
     }],
   }, {
@@ -85,7 +87,7 @@ const packet = {
     metric_results: [{
       metric_id: "llm_retry_rate",
       metric_name: "LLM retry rate",
-      value: 0,
+      value: 0.10,
       threshold: "<= 5%",
       status: "pass",
     }, {
@@ -109,26 +111,51 @@ beforeEach(() => {
 describe("EvalDashboardPage", () => {
   it("renders the live benchmark packet with publication status", async () => {
     render(<EvalDashboardPage />);
-    expect(await screen.findByText(/BLOCKED_BY_P0/)).toBeInTheDocument();
+    expect(await screen.findByText(/Báo cáo đang bị chặn bởi lỗi P0/)).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith("/eval/framework", { cache: "no-store" });
     expect(screen.getAllByText("Core metric coverage").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("50.0%").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("33.3%").length).toBeGreaterThan(0);
+    expect(screen.queryByText("1/3 = 33.3%")).not.toBeInTheDocument();
+    expect(screen.queryByText("0.3333333333333333")).not.toBeInTheDocument();
     expect(screen.getByText("Số mã đạt công thức FCFF")).toBeInTheDocument();
     expect(screen.getByText("Số mã đủ điều kiện publish valuation")).toBeInTheDocument();
     expect(screen.getAllByText("New backend metric").length).toBeGreaterThan(0);
   });
 
+  it("opens publication blocking details from the suite status banner", async () => {
+    render(<EvalDashboardPage />);
+    await userEvent.click(await screen.findByRole("button", { name: /P0/ }));
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getAllByText(/final export/).length).toBeGreaterThan(1);
+    expect(screen.getAllByText("Core metric coverage").length).toBeGreaterThan(0);
+    expect(screen.getByText(/Metric P0\/P1/)).toBeInTheDocument();
+  });
+
+  it("recomputes dashboard pass/fail from metric thresholds instead of stale backend statuses", async () => {
+    render(<EvalDashboardPage />);
+    await screen.findByText(/P0/);
+
+    const dynamicMetricRow = screen.getAllByText("New backend metric")[0].closest("tr");
+    expect(dynamicMetricRow).not.toBeNull();
+    expect(within(dynamicMetricRow!).getByText("Đạt")).toBeInTheDocument();
+
+    const retryRow = screen.getByText("Tỷ lệ gọi LLM phải thử lại").closest("tr");
+    expect(retryRow).not.toBeNull();
+    expect(within(retryRow!).getByText("Chưa đạt")).toBeInTheDocument();
+  });
+
   it("opens a layer benchmark dialog", async () => {
     render(<EvalDashboardPage />);
-    await screen.findByText(/BLOCKED_BY_P0/);
-    await userEvent.click(screen.getAllByRole("button")[0]);
+    await screen.findByText(/P0/);
+    await userEvent.click(screen.getAllByRole("button", { name: "Xem thêm" })[0]);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getAllByText("project-eval-test").length).toBeGreaterThan(0);
   });
 
   it("opens calculation evidence when a metric row is clicked", async () => {
     render(<EvalDashboardPage />);
-    await screen.findByText(/BLOCKED_BY_P0/);
+    await screen.findByText(/P0/);
     await userEvent.click(screen.getAllByText("Core metric coverage")[0]);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("pandera")).toBeInTheDocument();
@@ -140,13 +167,27 @@ describe("EvalDashboardPage", () => {
     expect(screen.queryByText("Chặn xuất bản")).not.toBeInTheDocument();
   });
 
+  it("shows runtime calculation details in the layer explanation dialog", async () => {
+    render(<EvalDashboardPage />);
+    await screen.findByText(/P0/);
+    await userEvent.click(screen.getAllByRole("button", { name: "Giải thích" })[0]);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText("Lần chạy benchmark đang hiển thị")).toBeInTheDocument();
+    expect(screen.getAllByText("data_quality.json").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("coverage").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("1").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("3").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("33.3%").length).toBeGreaterThan(0);
+  });
+
   it("does not fall back to mock benchmark values when the packet cannot load", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("missing", { status: 404 })));
 
     render(<EvalDashboardPage />);
 
     expect(await screen.findByText(/khong hien thi so lieu thay the/i)).toBeInTheDocument();
-    expect(screen.getByText(/NOT_EVALUATED/)).toBeInTheDocument();
+    expect(screen.getByText(/Chưa có kết quả đánh giá/)).toBeInTheDocument();
     expect(screen.queryByText("70.0%")).not.toBeInTheDocument();
   });
 });

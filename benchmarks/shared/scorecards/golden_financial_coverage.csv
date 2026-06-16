@@ -1,0 +1,15 @@
+ticker,rows,years,canonical_keys,statement_types,accepted_rows,min_confidence,source_types
+AMV,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+DBD,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+DCL,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+DHG,130,"2022,2023,2024,2025",34,4,130,0.7,"financial_statement,ocr_extracted"
+DMC,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+DP1,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+DP3,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+DVN,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+IMP,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+MED,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+OPC,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+PMC,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+TRA,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement
+TW3,128,"2022,2023,2024,2025",32,4,128,0.85,financial_statement

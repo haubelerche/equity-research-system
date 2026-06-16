@@ -36,7 +36,7 @@
       "rows": 130,
       "years": 4,
       "keys": 34,
-      "min_conf": 0.7
+      "min_conf": 0.85
     },
     {
       "ticker": "DMC",
