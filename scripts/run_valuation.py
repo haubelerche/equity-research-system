@@ -452,6 +452,26 @@ def run_valuation(
         )
     _target_pe = valuation_input_pack.peers.get("peer_pe_median") or target_pe
     _target_ev_ebitda = valuation_input_pack.peers.get("peer_ev_ebitda_median") or target_ev_ebitda
+    # No manual peer dataset → derive peer medians from vnstock same-sector peers
+    # (price/EPS + EV/EBITDA from production facts). Needs >=3 valid peers, else stays
+    # pending (no fabrication). Honours the data contract: vnstock primary.
+    if _peer_data_source is None:
+        try:
+            from backend.valuation.peer_multiples import build_peer_pack_live
+
+            _pp = build_peer_pack_live(ticker)
+            if _pp.get("peer_pe_median") or _pp.get("peer_ev_ebitda_median"):
+                _target_pe = _pp.get("peer_pe_median") or _target_pe
+                _target_ev_ebitda = _pp.get("peer_ev_ebitda_median") or _target_ev_ebitda
+                _peer_data_source = _pp.get("peer_data_source")
+                print(
+                    f"[run_valuation] {ticker} peer medians (vnstock): "
+                    f"P/E={_target_pe:.1f}x EV/EBITDA="
+                    + (f"{_target_ev_ebitda:.1f}x" if _target_ev_ebitda else "n/a")
+                    + f" from {len(_pp['peers_used'])} peers"
+                )
+        except Exception as _peer_exc:  # noqa: BLE001 — peer pack is best-effort
+            print(f"[run_valuation] {ticker} vnstock peer pack failed: {_peer_exc}")
     multiples = compute_multiples(
         ticker=ticker,
         fact_table=full_table,
