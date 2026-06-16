@@ -1,8 +1,0 @@
-defaults:
-  method: stable_debt_unapproved
-  forecast_method: stable_debt
-  analyst_approved: false
-  publishable: false
-  status: accepted
-  source: manual_default
-tickers: {}

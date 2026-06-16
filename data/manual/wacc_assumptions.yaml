@@ -1,5 +1,0 @@
-defaults:
-  status: accepted
-  source: manual_default
-  assumption_status: default_unapproved
-tickers: {}

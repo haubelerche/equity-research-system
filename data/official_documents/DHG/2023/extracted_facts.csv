@@ -1,5 +1,0 @@
-ticker,fiscal_year,period_type,statement_type,metric_id,value,unit,document_title,page_number,table_name,extracted_text,extraction_method,verified_by,verified_at
-DHG,2023,FY,income_statement,charter_capital.ending,1307.0,vnd_bn,DHG FY2023 Annual Report / Audited Financial Statements,40,,Vốn điều lệ,pdf_table,,
-DHG,2023,FY,income_statement,total_assets.ending,6110.0,vnd_bn,DHG FY2023 Annual Report / Audited Financial Statements,40,,Tổng tài sản,pdf_table,,
-DHG,2023,FY,income_statement,revenue.net,5000.0,vnd_bn,DHG FY2023 Annual Report / Audited Financial Statements,47,,Doanh thu thuần,pdf_table,,
-DHG,2023,FY,income_statement,profit_before_tax.total,1130.0,vnd_bn,DHG FY2023 Annual Report / Audited Financial Statements,47,,Lợi nhuận trước thuế,pdf_table,,
