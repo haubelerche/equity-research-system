@@ -489,12 +489,36 @@ def run_forecast_tool(
     except Exception:  # noqa: BLE001 — evidence is additive; never block the forecast
         pdf_debt_plan = None
 
+    # AGM (ĐHCĐ) approved 2026 plan = priority forward driver: its disclosed borrowing
+    # plan and revenue-growth target override the annual-report plan / historical medians.
+    # Provenance is carried in driver_sources (source=agm_2026 + page) — NOT analyst-approval.
+    agm_kwargs: dict = {}
+    try:
+        from backend.analytics.agm_drivers import build_agm_assumptions
+        from backend.analytics.forecasting import _get
+        from backend.database.agm_dal import load_latest_agm
+
+        _fy = sorted(p for p in {p for v in fact_table.values() for p in v} if p.endswith("FY"))
+        _latest_rev = _get(fact_table, "revenue.net", _fy[-1]) if _fy else None
+        agm_kwargs = build_agm_assumptions(load_latest_agm(ticker), latest_revenue=_latest_rev)
+    except Exception:  # noqa: BLE001 — AGM drivers are additive; never block the forecast
+        agm_kwargs = {}
+    if agm_kwargs.get("pdf_debt_plan"):
+        pdf_debt_plan = agm_kwargs["pdf_debt_plan"]
+
+    assumption_kwargs: dict = {
+        "assumption_status": "default_unapproved",
+        "pdf_debt_plan": pdf_debt_plan,
+    }
+    if "revenue_growth_override" in agm_kwargs:
+        assumption_kwargs["revenue_growth_override"] = agm_kwargs["revenue_growth_override"]
+    if agm_kwargs.get("driver_sources"):
+        assumption_kwargs["driver_sources"] = agm_kwargs["driver_sources"]
+
     forecast = run_forecast(
         ticker=ticker,
         fact_table=fact_table,
-        assumptions=ForecastAssumptions(
-            assumption_status="default_unapproved", pdf_debt_plan=pdf_debt_plan
-        ),
+        assumptions=ForecastAssumptions(**assumption_kwargs),
     ).to_dict()
     from backend.evaluation.report_quality import build_pharma_driver_model
 

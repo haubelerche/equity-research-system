@@ -140,6 +140,9 @@ class ForecastAssumptions:
     corporate_actions: list[CorporateAction] | None = None
     corporate_action_status: str | None = None
     assumption_status: str = "default_unapproved"   # or "analyst_approved"
+    # Provenance for overrides sourced from the AGM (ĐHCĐ) plan: {driver: {source, page,
+    # value}}. Display/audit only — does NOT imply analyst approval (debt-schedule bug lesson).
+    driver_sources: dict | None = None
 
 
 @dataclass
@@ -319,6 +322,12 @@ def run_forecast(
     if assumptions.revenue_growth_override is not None:
         rev_growth = assumptions.revenue_growth_override
         revenue_cagr = None
+        _src = (assumptions.driver_sources or {}).get("revenue_growth_override") or {}
+        if _src.get("source") == "agm_2026":
+            warnings.append(
+                f"RevenueGrowth: {rev_growth:.1%} sourced from the AGM (ĐHCĐ) approved 2026 "
+                f"plan (page {_src.get('page')}) — not historical CAGR."
+            )
     elif len(rev_vals) >= 2:
         revenue_cagr = _cagr(rev_vals[0], rev_vals[-1], len(rev_vals) - 1)
         rev_growth = max(_MIN_REVENUE_GROWTH, min(_MAX_REVENUE_GROWTH, revenue_cagr or 0.05))

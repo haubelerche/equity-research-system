@@ -111,43 +111,10 @@ def load_page_texts(
     pdf_path: Path, ticker: str, fiscal_year: int, *, lang: str = "vie+eng"
 ) -> tuple[list[tuple[int, str]], str]:
     """Return (pages, kind). kind is 'text' (pdfplumber) or 'ocr' (Tesseract, cached)."""
-    import pdfplumber
+    from scripts.pdf_pages import load_pdf_pages
 
-    with pdfplumber.open(str(pdf_path)) as pdf:
-        text_pages = [((i + 1), (p.extract_text() or "")) for i, p in enumerate(pdf.pages)]
-    total_chars = sum(len(t) for _, t in text_pages)
-    if total_chars > 200:
-        return text_pages, "text"
-
-    # Scanned → OCR (with on-disk cache so reruns skip re-OCR).
     cache_dir = OCR_CACHE_DIR / ticker / str(fiscal_year)
-    cached = sorted(cache_dir.glob("page_*.txt")) if cache_dir.exists() else []
-    if cached:
-        pages = []
-        for f in cached:
-            n = int(f.stem.split("_")[1])
-            pages.append((n, f.read_text(encoding="utf-8", errors="replace")))
-        return pages, "ocr"
-
-    import pytesseract  # type: ignore
-    from pdf2image import convert_from_path  # type: ignore
-    from backend.documents.pdf_extractor import _find_tesseract_cmd, _tesseract_config
-
-    cmd = _find_tesseract_cmd()
-    if cmd:
-        pytesseract.pytesseract.tesseract_cmd = cmd
-    config = _tesseract_config()
-    images = convert_from_path(str(pdf_path), dpi=300)
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    pages = []
-    for n, image in enumerate(images, start=1):
-        try:
-            txt = pytesseract.image_to_string(image, lang=lang, config=config)
-        except Exception:  # noqa: BLE001
-            txt = ""
-        (cache_dir / f"page_{n:03d}.txt").write_text(txt, encoding="utf-8")
-        pages.append((n, txt))
-    return pages, "ocr"
+    return load_pdf_pages(pdf_path, cache_dir=cache_dir, lang=lang)
 
 
 # ---------------------------------------------------------------------------
