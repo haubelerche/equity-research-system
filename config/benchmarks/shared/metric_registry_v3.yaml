@@ -1,4 +1,6 @@
 benchmark_suite_version: 20260615_v3
+profiles:
+  active: mvp
 metrics:
   -
     metric_id: data.required_periods_completeness
@@ -167,6 +169,7 @@ metrics:
     threshold: 0.75
     unit: score
     owner: retrieval
+    framework: production_retriever_golden_set
     remediation_hint: Raise authoritative evidence rank.
   -
     metric_id: rag.context_precision
