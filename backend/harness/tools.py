@@ -476,10 +476,25 @@ def run_forecast_tool(
     raw_facts = load_snapshot_facts(snapshot_id)
     raw_facts += load_golden_csv_supplement(ticker, from_year=from_year, to_year=to_year)
     fact_table = compute_derived(to_analytics_vnd_bn(build_fact_table(raw_facts)))
+
+    # Phase 2: forward debt path from the company's disclosed borrowing plan (annual
+    # report). When present it becomes an approved manual_debt_path (FCFE publishable);
+    # absent → the policy fallback (zero_debt_policy / stable_debt) is used. Non-fatal.
+    pdf_debt_plan = None
+    try:
+        from backend.database.company_evidence_dal import load_latest_company_evidence
+
+        evidence = load_latest_company_evidence(ticker)
+        pdf_debt_plan = (evidence.get("company_plans") or {}).get("borrowing_plan") or None
+    except Exception:  # noqa: BLE001 — evidence is additive; never block the forecast
+        pdf_debt_plan = None
+
     forecast = run_forecast(
         ticker=ticker,
         fact_table=fact_table,
-        assumptions=ForecastAssumptions(assumption_status="default_unapproved"),
+        assumptions=ForecastAssumptions(
+            assumption_status="default_unapproved", pdf_debt_plan=pdf_debt_plan
+        ),
     ).to_dict()
     from backend.evaluation.report_quality import build_pharma_driver_model
 
@@ -742,6 +757,20 @@ def read_ratio_artifact_tool(ticker: str, snapshot_id: str | None, run_id: str |
         "metric_ids": sorted(ratios.keys()),
         "unit": "ratio",
     }
+    # Persist the ratio payload so the artifact ref carries a storage_path — the
+    # PACKAGE_VALIDATION_GATE flags `artifact_storage_path_missing:<T>_ratio_artifact`
+    # when it doesn't. Non-fatal: an in-memory ref is still returned if storage fails.
+    ref_storage: dict[str, Any] = {}
+    if run_id:
+        try:
+            storage_bucket, storage_path = _persist_run_json(run_id, "ratio_artifact.json", ratio_payload)
+            ref_storage = {
+                "storage_bucket": storage_bucket,
+                "storage_path": storage_path,
+                "checksum": stable_hash(ratio_payload),
+            }
+        except Exception:  # noqa: BLE001 — persistence is best-effort
+            ref_storage = {}
     return _result(
         "READ_RATIO_ARTIFACT",
         "completed",
@@ -752,6 +781,7 @@ def read_ratio_artifact_tool(ticker: str, snapshot_id: str | None, run_id: str |
                 artifact_type="ratio_json",
                 section_key="ratios",
                 producer="READ_RATIO_ARTIFACT",
+                **ref_storage,
             )
         ],
     )

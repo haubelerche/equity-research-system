@@ -41,10 +41,26 @@ def _created_ts(value: Any) -> float:
         return 0.0
 
 
+def _is_vnstock_primary(obs: dict) -> bool:
+    """True for the vnstock structured-API source (extraction_method='api_structured').
+
+    Per the locked data-source contract, vnstock is the PRIMARY source for
+    fundamentals; PDF/OCR/CafeF are additive-only (fill gaps, never override).
+    """
+    return (obs.get("extraction_method") or "") == "api_structured"
+
+
 def select_winner(group: list[dict]) -> dict:
     """Pick the canonical winner among competing observations for one (period, metric).
 
-    Order: lowest source_tier, then highest confidence, then freshest created_at.
+    Order:
+      0. vnstock-primary first — a vnstock structured-API observation outranks any
+         PDF/OCR/CafeF observation for the same (period, metric). This enforces the
+         additive-only contract: a partial/rounded tier-0 PDF-table figure (e.g. DHG
+         revenue=5200) must not override the precise, internally-consistent vnstock
+         income statement and break IS reconciliation. Non-vnstock sources still fill
+         gaps where vnstock has no observation.
+      1. lowest source_tier, then highest confidence, then freshest created_at.
     The created_at tiebreak makes the result deterministic when tier and confidence
     are equal, and lets a re-ingested observation supersede a stale legacy_import of
     the same rank (e.g. DHG short_term_investments: legacy 0 vs fresh api 2024 bn).
@@ -52,6 +68,7 @@ def select_winner(group: list[dict]) -> dict:
     return sorted(
         group,
         key=lambda o: (
+            0 if _is_vnstock_primary(o) else 1,
             _source_tier(o.get("source_tier")),
             -(o["confidence"] or 0.0),
             -_created_ts(o.get("created_at")),
@@ -133,9 +150,10 @@ def promote_accepted_facts(
             )
             continue
 
-        # Check for competing tier-0 observations not selected (official doc priority warning)
+        # Check for competing tier-0 observations not selected (official doc priority warning).
+        # A tier-0 PDF losing to vnstock is contract-intended (additive-only), not a problem.
         tier0_count = sum(1 for o in group if _source_tier(o.get("source_tier")) == 0)
-        if tier0_count > 0 and winner_tier > 0:
+        if tier0_count > 0 and winner_tier > 0 and not _is_vnstock_primary(winner):
             result.warnings.append(
                 f"{ticker} {period} {metric}: tier-0 observation exists but was not the winner"
             )

@@ -28,7 +28,7 @@ from typing import Any
 
 from backend.analytics.tax_policy import TaxPolicy, build_tax_policy
 from backend.analytics.dividend_schedule import build_dividend_schedule
-from backend.analytics.debt_schedule import build_debt_schedule, DebtSchedule
+from backend.analytics.debt_schedule import build_debt_schedule, DebtSchedule, interest_bearing_debt
 from backend.analytics.shares import explicit_shares_mn
 from backend.analytics.working_capital_schedule import (
     build_working_capital_schedule,
@@ -133,6 +133,10 @@ class ForecastAssumptions:
     manual_debt_path: dict[str, float] | None = None
     debt_schedule_approved: bool = False
     debt_policy_method: str | None = None
+    # PDF-disclosed borrowing plan [{year, amount(net borrowing tỷ VND), ...}] from the
+    # annual report. When present (and no explicit manual_debt_path), it is rolled into
+    # an approved manual_debt_path — the company's own stated plan is authoritative.
+    pdf_debt_plan: list[dict] | None = None
     corporate_actions: list[CorporateAction] | None = None
     corporate_action_status: str | None = None
     assumption_status: str = "default_unapproved"   # or "analyst_approved"
@@ -442,6 +446,25 @@ def run_forecast(
     # ── Build debt schedule (before main loop — determines interest expense) ──
     manual_debt_path = assumptions.manual_debt_path
     manual_debt_path_approved = assumptions.debt_schedule_approved
+    # PDF-disclosed borrowing plan → approved manual debt path (authoritative source).
+    # Lets FCFE publish for a company that still carries debt but has stated a plan,
+    # without inventing a path (debt_plan_to_manual_path returns None if unusable).
+    if manual_debt_path is None and assumptions.pdf_debt_plan:
+        from backend.analytics.debt_schedule import debt_plan_to_manual_path
+
+        pdf_path = debt_plan_to_manual_path(
+            assumptions.pdf_debt_plan,
+            interest_bearing_debt(fact_table, latest_fy),
+            forecast_labels_order,
+            forecast_years,
+        )
+        if pdf_path is not None:
+            manual_debt_path = pdf_path
+            manual_debt_path_approved = True
+            warnings.append(
+                "DebtPolicy: forecast debt path sourced from the company's disclosed "
+                "borrowing plan (annual report) — treated as approved for FCFE."
+            )
     if (
         manual_debt_path is None
         and assumptions.debt_policy_method == "cfs_net_borrowing"

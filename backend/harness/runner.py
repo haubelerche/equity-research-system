@@ -322,9 +322,23 @@ class ResearchGraphRunner:
 
             from backend.documents.company_research_pack import build_company_research_pack
 
+            # Load the offline-extracted qualitative evidence pack (Phase 1) so the
+            # research pack + analyst insights have company-specific content. Non-fatal:
+            # an empty pack just yields explicit coverage gaps rather than a crash.
+            evidence_pack = state.artifacts.get("evidence_pack") or {}
+            if not evidence_pack:
+                try:
+                    from backend.database.company_evidence_dal import load_latest_company_evidence
+
+                    evidence_pack = load_latest_company_evidence(state.ticker) or {}
+                    if evidence_pack:
+                        state.artifacts["evidence_pack"] = evidence_pack
+                except Exception:  # noqa: BLE001 — evidence is additive; never block ANALYZE
+                    evidence_pack = {}
+
             company_research_pack = build_company_research_pack(
                 ticker=state.ticker,
-                evidence_pack=state.artifacts.get("evidence_pack") or {},
+                evidence_pack=evidence_pack,
                 financial_analysis=state.artifacts.get("financial_analysis") or {},
             )
             state.artifacts["company_research_pack"] = company_research_pack
@@ -432,6 +446,24 @@ class ResearchGraphRunner:
                 "chart_specs": state.artifacts.get("chart_specs") or built_specs["chart_specs"],
                 "table_specs": state.artifacts.get("table_specs") or built_specs["table_specs"],
             }
+            # Phase 4b debug capture (env-gated): dump the chart_specs that reach the
+            # gate + whether they came from the agent or the deterministic builder, so
+            # the stock_price_vs_benchmark metadata/source_map gap can be fixed at root.
+            import os as _os
+            if _os.environ.get("CAPTURE_CHART_SPECS"):
+                try:
+                    import json as _json
+                    from pathlib import Path as _Path
+
+                    _out = ROOT / "output" / f"chart_specs_{state.run_id}.json"
+                    _out.parent.mkdir(parents=True, exist_ok=True)
+                    _out.write_text(_json.dumps({
+                        "from_agent": bool(state.artifacts.get("chart_specs")),
+                        "chart_specs_used": specs["chart_specs"],
+                        "deterministic_built": built_specs["chart_specs"],
+                    }, ensure_ascii=False, indent=2), encoding="utf-8")
+                except Exception:  # noqa: BLE001 — debug capture is best-effort
+                    pass
             state.artifacts.update(specs)
             validation = ReportAssembler().validate(state.draft_report, artifacts, specs)
             state.artifacts["report_assembly_validation"] = validation.to_dict()

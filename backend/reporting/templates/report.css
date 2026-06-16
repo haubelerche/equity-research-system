@@ -445,6 +445,10 @@ hr {
     border-collapse: collapse;
     font-size: 8.4pt;
     margin: 6pt 0 10pt 0;
+    /* Fixed layout pins the label/value columns. Without it, the sidebar's
+       overflow-wrap:anywhere lets a long value (e.g. the as-of timestamp) collapse
+       the label column to 1-char min-content → labels wrap one character per line. */
+    table-layout: fixed;
 }
 
 .broker-side-table td {
@@ -455,7 +459,15 @@ hr {
 
 .broker-side-table td:first-child {
     color: #333;
-    width: 58%;
+    width: 56%;
+    /* Wrap labels at word boundaries, not per character. */
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.broker-side-table td:last-child {
+    overflow-wrap: break-word;
+    word-break: normal;
 }
 
 .broker-side-table td:last-child {

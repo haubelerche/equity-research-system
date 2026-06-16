@@ -6,9 +6,54 @@ from backend.analytics.debt_schedule import (
     build_debt_schedule,
     build_historical_debt_schedule,
     build_forecast_debt_schedule,
+    debt_plan_to_manual_path,
     interest_bearing_debt,
     MissingValueReason,
 )
+
+
+_FL = ["2026F", "2027F", "2028F"]
+_FY = [2026, 2027, 2028]
+
+
+class TestDebtPlanToManualPath:
+    def test_net_borrowing_rolls_forward_ending_debt(self):
+        plan = [{"year": 2026, "amount": 100.0}, {"year": 2027, "amount": -40.0}]
+        path = debt_plan_to_manual_path(plan, last_ending=200.0, forecast_labels=_FL, forecast_years=_FY)
+        assert path["2026F"] == pytest.approx(300.0)   # 200 + 100
+        assert path["2027F"] == pytest.approx(260.0)   # 300 - 40
+        assert path["2028F"] == pytest.approx(260.0)   # no plan row → held flat
+
+    def test_no_new_borrowing_from_debt_free_anchor_is_all_zero(self):
+        plan = [{"year": y, "amount": 0.0} for y in _FY]
+        path = debt_plan_to_manual_path(plan, last_ending=0.0, forecast_labels=_FL, forecast_years=_FY)
+        assert all(v == 0.0 for v in path.values())
+
+    def test_ending_debt_floored_at_zero(self):
+        plan = [{"year": 2026, "amount": -500.0}]
+        path = debt_plan_to_manual_path(plan, last_ending=100.0, forecast_labels=_FL, forecast_years=_FY)
+        assert path["2026F"] == 0.0
+
+    def test_empty_plan_returns_none(self):
+        assert debt_plan_to_manual_path([], 100.0, _FL, _FY) is None
+        assert debt_plan_to_manual_path(None, 100.0, _FL, _FY) is None
+        assert debt_plan_to_manual_path([{"description": "x"}], 100.0, _FL, _FY) is None
+
+    def test_plan_path_makes_fcfe_publishable(self):
+        # A PDF-stated plan is authoritative → approved manual_override → FCFE publishable
+        # even for a company that still carries debt (would otherwise be stable_debt/low).
+        ft = _make_ft({"2024FY": 300.0})
+        hist = build_historical_debt_schedule("TEST", ft, ["2024FY"])
+        path = debt_plan_to_manual_path(
+            [{"year": 2026, "amount": -50.0}], last_ending=300.0,
+            forecast_labels=_FL, forecast_years=_FY,
+        )
+        sched = build_debt_schedule(
+            "TEST", ft, ["2024FY"], _FL, _FY,
+            manual_debt_path=path, manual_debt_path_approved=True,
+        )
+        assert sched.forecast_method == "manual_override"
+        assert sched.is_fcfe_publishable is True
 
 
 _FORECAST_LABELS = ["2026F", "2027F", "2028F"]
@@ -96,10 +141,13 @@ class TestForecastDebtSchedule:
         assert rows[0].confidence == "low"
         assert all(r.ending_interest_bearing_debt is not None for r in rows)
 
-    def test_stable_debt_rolls_forward_from_last_balance_no_phantom_borrowing(self):
+    def test_paid_down_to_zero_rolls_forward_with_no_phantom_borrowing(self):
         # Regression: DHG paid debt to 0 by the last actual year. The forecast must
         # roll forward from that real closing balance (0) — NOT jump to the historical
         # median — so no phantom net_borrowing is injected into FCFE.
+        # Updated intent (2026-06-16): being debt-free at the anchor is now treated as a
+        # no-new-debt POLICY (zero_debt_policy, high confidence), which unblocks FCFE.
+        # See test_debt_free_at_anchor_is_zero_debt_policy_and_publishable.
         ft = _make_ft({"2022FY": 115.0, "2023FY": 572.0, "2024FY": 650.0, "2025FY": 0.0})
         hist = build_historical_debt_schedule(
             "TEST", ft, ["2022FY", "2023FY", "2024FY", "2025FY"]
@@ -107,13 +155,36 @@ class TestForecastDebtSchedule:
         rows, method, _ = build_forecast_debt_schedule(
             "TEST", ft, hist, _FORECAST_LABELS, _FORECAST_YEARS
         )
-        assert method == "stable_debt"
-        # First forecast year begins at the real closing balance (0), not 343 median.
-        assert rows[0].beginning_interest_bearing_debt == pytest.approx(0.0)
-        # Every forecast year holds flat at 0 → zero net borrowing throughout.
+        assert method == "zero_debt_policy"
+        # Every forecast year is debt-free → zero net borrowing throughout (no phantom).
         for r in rows:
             assert r.ending_interest_bearing_debt == pytest.approx(0.0)
             assert r.net_borrowing == pytest.approx(0.0)
+
+    def test_debt_free_at_anchor_is_zero_debt_policy_and_publishable(self):
+        # Intent (2026-06-16): a company that has paid its interest-bearing debt down
+        # to ~0 by the last actual year (e.g. DHG 2025) is debt-free at the forecast
+        # anchor. Net borrowing forecasts to 0 as a defensible no-new-debt POLICY
+        # (high confidence), which must unblock FCFE — not be buried as low-confidence
+        # stable_debt. (Supersedes the earlier "stays stable_debt by design" stance.)
+        from backend.analytics.debt_schedule import DebtSchedule
+
+        ft = _make_ft({"2022FY": 115.0, "2023FY": 572.0, "2024FY": 650.0, "2025FY": 0.0})
+        hist = build_historical_debt_schedule(
+            "TEST", ft, ["2022FY", "2023FY", "2024FY", "2025FY"]
+        )
+        rows, method, warnings = build_forecast_debt_schedule(
+            "TEST", ft, hist, _FORECAST_LABELS, _FORECAST_YEARS
+        )
+        assert method == "zero_debt_policy"
+        for r in rows:
+            assert r.net_borrowing == 0.0
+            assert r.confidence == "high"
+        sched = DebtSchedule(
+            ticker="TEST", historical_rows=hist, forecast_rows=rows,
+            forecast_method=method, warnings=warnings,
+        )
+        assert sched.is_fcfe_publishable is True
 
     def test_manual_override_uses_provided_path(self):
         hist = self._hist_rows_with_debt(100.0)

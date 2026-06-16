@@ -79,6 +79,20 @@ def _debt_bearing_table() -> FactTable:
     }
 
 
+def test_pdf_debt_plan_yields_approved_manual_override_publishable_fcfe():
+    """A debt-bearing company is normally stable_debt (low → FCFE blocked). A PDF-
+    disclosed borrowing plan rolls into an approved manual_override → FCFE publishable."""
+    table = _debt_bearing_table()  # interest-bearing debt 550 at the latest FY
+    base = run_forecast("TST", table, n_years=3)
+    assert base.debt_schedule.forecast_method == "stable_debt"
+    assert base.debt_schedule.is_fcfe_publishable is False
+
+    plan = [{"year": 2025, "amount": -50.0}, {"year": 2026, "amount": -50.0}, {"year": 2027, "amount": -50.0}]
+    art = run_forecast("TST", table, n_years=3, assumptions=ForecastAssumptions(pdf_debt_plan=plan))
+    assert art.debt_schedule.forecast_method == "manual_override"
+    assert art.debt_schedule.is_fcfe_publishable is True
+
+
 def _zero_debt_table() -> FactTable:
     """Company with no interest-bearing debt (zero_debt_policy case)."""
     return {

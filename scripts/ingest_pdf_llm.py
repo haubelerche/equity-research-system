@@ -65,6 +65,7 @@ class YearOutcome:
     facts_skipped: int = 0          # already present in production (vnstock) — left untouched
     metrics: list[str] = field(default_factory=list)
     facts_detail: list[dict] = field(default_factory=list)
+    evidence_topics: int = 0        # qualitative evidence topics extracted (Phase 1)
     errors: list[str] = field(default_factory=list)
 
 
@@ -215,6 +216,20 @@ def run_year(ticker: str, fiscal_year: int, *, dry_run: bool) -> YearOutcome:
             out.errors.append(f"upsert {f.metric}: {type(exc).__name__}: {exc}")
     out.facts_written = written
     out.facts_skipped = skipped
+
+    # Phase 1: also extract + persist the qualitative evidence pack (business segments,
+    # market share, catalysts, risks, borrowing/investment plans) from the same PDF.
+    # Additive and PDF-sourced; non-fatal so it never blocks fact ingestion.
+    try:
+        from backend.documents.llm_evidence_extractor import extract_evidence_from_pdf
+        from backend.database.company_evidence_dal import upsert_company_evidence
+
+        evidence = extract_evidence_from_pdf(pages, ticker, fiscal_year)
+        topics = len(evidence.get("business_evidence") or {}) + len(evidence.get("company_plans") or {})
+        upsert_company_evidence(ticker, fiscal_year, evidence, model="gpt-5-mini")
+        out.evidence_topics = topics
+    except Exception as exc:  # noqa: BLE001 — evidence is additive; never block facts
+        out.errors.append(f"evidence: {type(exc).__name__}: {exc}")
     return out
 
 
@@ -234,7 +249,8 @@ def run_ticker(
         out = run_year(ticker, fy, dry_run=dry_run)
         print(
             f"[pdf-llm] {ticker} {fy}: source={out.source_kind} extracted={out.facts_extracted} "
-            f"filled={out.facts_written} skipped(already in vnstock)={out.facts_skipped}"
+            f"filled={out.facts_written} skipped(already in vnstock)={out.facts_skipped} "
+            f"evidence_topics={out.evidence_topics}"
             + (f" errors={len(out.errors)}" if out.errors else "")
         )
         outcomes.append(out)

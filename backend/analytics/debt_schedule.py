@@ -445,9 +445,18 @@ def build_forecast_debt_schedule(
             warnings.append("Debt forecast uses manual_override path - must be approved before publishing.")
         return rows, "manual_override", warnings
 
-    # Case 2: Zero-debt policy (historical debt is zero or trivially small)
+    # Case 2: Zero-debt / no-new-debt policy.
+    # Fires when the company is debt-free at the forecast anchor — either it never
+    # carried material debt, OR it has paid its interest-bearing debt down to ~0 by
+    # the last actual year (e.g. DHG 2025). A debt-free anchor means net borrowing
+    # forecasts to 0 as a defensible no-new-debt POLICY (high confidence), not a
+    # low-confidence "held flat" guess — so it unblocks FCFE. Keying off the *anchor*
+    # (last_ending) rather than the historical max is the fix: a company that has
+    # deleveraged to 0 should not stay FCFE-blocked because some earlier year had debt.
     all_hist_debts = [r.ending_interest_bearing_debt for r in historical_rows if r.ending_interest_bearing_debt is not None]
-    if all_hist_debts and max(all_hist_debts) < 1.0:  # < 1 VND bn threshold
+    never_had_debt = bool(all_hist_debts) and max(all_hist_debts) < 1.0  # < 1 VND bn threshold
+    debt_free_at_anchor = last_ending is not None and abs(last_ending) < 1.0
+    if never_had_debt or debt_free_at_anchor:
         rows = []
         for label, year in zip(forecast_labels, forecast_years):
             rows.append(DebtScheduleRow(
@@ -463,17 +472,22 @@ def build_forecast_debt_schedule(
                 method="zero_debt_policy", confidence="high",
                 warning=None,
             ))
-        warnings.append("Zero-debt policy applied: historical interest-bearing debt is negligible.")
+        if never_had_debt:
+            warnings.append("Zero-debt policy applied: historical interest-bearing debt is negligible.")
+        else:
+            warnings.append(
+                "No-new-debt policy: interest-bearing debt paid down to ~0 by the last "
+                "actual year; net borrowing forecast = 0 (FCFE publishable)."
+            )
         return rows, "zero_debt_policy", warnings
 
     # Case 3: Hold debt flat at the last reported closing balance.
-    # The forecast MUST roll forward from the real ending balance (last_ending),
-    # not a backward-looking median — otherwise a company that has paid debt down
-    # (e.g. last_ending = 0) gets a phantom net_borrowing jump in year 1 that flows
-    # into FCFE. Anchoring to last_ending makes net_borrowing = 0 every year and the
-    # series continuous with the actuals.
-    # NOTE: net_borrowing here is a balance-sheet hold (no new_borrowing/repayment
-    # split), so this stays confidence="low" and blocks is_fcfe_publishable by design.
+    # Reached only when the company still carries material debt at the anchor
+    # (last_ending >= ~1 VND bn). Anchoring to last_ending (not a backward-looking
+    # median) keeps the series continuous with actuals. net_borrowing here is a
+    # balance-sheet hold (no new_borrowing/repayment split), so it stays
+    # confidence="low" and blocks is_fcfe_publishable by design — an ongoing-debt
+    # company needs a real (CFS or analyst-approved) debt path before FCFE publishes.
     if all_hist_debts:
         anchor = last_ending if last_ending is not None else statistics.median(all_hist_debts)
         rows = []
@@ -528,6 +542,41 @@ def build_forecast_debt_schedule(
         "FCFE confidence will be low. Final recommendation is blocked pending analyst review."
     )
     return rows, "missing", warnings
+
+
+def debt_plan_to_manual_path(
+    plan: list[dict] | None,
+    last_ending: float | None,
+    forecast_labels: list[str],
+    forecast_years: list[int],
+) -> dict[str, float] | None:
+    """Convert a PDF-disclosed borrowing plan into a manual_debt_path {label: ending_debt}.
+
+    The plan rows are ``{year, amount, ...}`` where *amount* is the company's planned
+    NET borrowing for that year (positive = draw down new debt, negative = net
+    repayment, 0 = no new borrowing) in tỷ VND. We roll forward from the last
+    reported ending debt: ending_t = max(0, ending_{t-1} + amount_t). Years absent
+    from the plan hold the prior balance flat. Returns None when the plan has no
+    usable (year, amount) rows, so the caller falls back to the policy default.
+    """
+    if not plan:
+        return None
+    by_year: dict[int, float] = {}
+    for row in plan:
+        if not isinstance(row, dict):
+            continue
+        year, amount = row.get("year"), row.get("amount")
+        if isinstance(year, int) and isinstance(amount, (int, float)):
+            by_year[year] = float(amount)
+    if not by_year:
+        return None
+    path: dict[str, float] = {}
+    prev = float(last_ending or 0.0)
+    for label, year in zip(forecast_labels, forecast_years):
+        ending = max(0.0, prev + by_year[year]) if year in by_year else prev
+        path[label] = ending
+        prev = ending
+    return path
 
 
 def build_debt_schedule(

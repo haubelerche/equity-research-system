@@ -4,6 +4,11 @@ from __future__ import annotations
 from typing import Any
 
 
+# Market-data owners are fetched at publish time (market_data_artifact), so a chart
+# sourced from them is valid even when no such artifact sits in the build-time
+# artifacts dict. They are exempt from the "must be present in artifacts" filter.
+_ALWAYS_AVAILABLE = frozenset({"market_snapshot", "market_data"})
+
 _SOURCE_BY_TOKEN = {
     "price": ("market_snapshot", "market_data"),
     "trading": ("market_snapshot",),
@@ -51,7 +56,10 @@ def _spec(item: Any, kind: str, artifacts: dict[str, Any]) -> dict[str, Any]:
     for token, owners in _SOURCE_BY_TOKEN.items():
         if token in lowered:
             candidates.extend(owners)
-    refs = [owner for owner in dict.fromkeys(candidates) if artifacts.get(owner)]
+    refs = [
+        owner for owner in dict.fromkeys(candidates)
+        if artifacts.get(owner) or owner in _ALWAYS_AVAILABLE
+    ]
     return {
         f"{kind}_id": identifier,
         "id": identifier,
