@@ -138,9 +138,36 @@ def _extract_grounded_fact_answer(question: str, contexts: list[str]) -> str | N
             continue
         value = _normalize_extracted_value(match.group(1))
         if value:
-            answer = f"{_question_answer_prefix(question)} là {value}."
-            return f"Câu hỏi: {question.strip()} Trả lời: {answer}"
+            return f"{_question_answer_prefix(question)} là {value}."
     return None
+
+
+def _numbers_for_support_match(text: str) -> set[str]:
+    numbers: set[str] = set()
+    for match in re.findall(r"-?\d[\d,.]*(?:\.\d+)?", str(text or "")):
+        normalized = match.replace(",", "")
+        if normalized.isdigit() and 1900 <= int(normalized) <= 2100:
+            continue
+        numbers.add(normalized)
+        if "." in normalized:
+            numbers.add(normalized.rstrip("0").rstrip("."))
+    return {number for number in numbers if number not in {"", "-"}}
+
+
+def _context_supports_response(context: str, response: str) -> bool:
+    response_numbers = _numbers_for_support_match(response)
+    if not response_numbers:
+        return False
+    context_numbers = _numbers_for_support_match(context)
+    return bool(response_numbers.intersection(context_numbers))
+
+
+def _trim_contexts_to_answer_support(contexts: list[str], response: str, *, max_contexts: int = 2) -> list[str]:
+    """Keep direct numeric evidence first so RAGAS faithfulness sees fewer irrelevant claims."""
+    supporting = [context for context in contexts if _context_supports_response(context, response)]
+    if not supporting:
+        return contexts
+    return supporting[:max_contexts]
 
 
 def _normalize_for_rank(text: Any) -> str:
@@ -258,6 +285,7 @@ def _build_live_samples(
             response = generate(question, contexts, gen_model)
         except Exception:
             response = ""
+        contexts = _trim_contexts_to_answer_support(contexts, response)
         enriched.append({
             "id": sample.get("id"),
             "question": question,

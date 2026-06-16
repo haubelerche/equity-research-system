@@ -23,7 +23,7 @@ export function GenerateButton({ ticker, onComplete, label = "Sinh báo cáo" }:
         className="run-state run-state--running"
         onClick={() => gen.openModal(ticker)}
       >
-        Đang chạy…
+        Đang chạy...
       </button>
     );
   }

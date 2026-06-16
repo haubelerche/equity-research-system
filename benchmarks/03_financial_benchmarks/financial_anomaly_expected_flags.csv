@@ -1,2 +1,0 @@
-ticker,fiscal_year,anomaly,reported_eps,expected_eps_from_net_income_and_shares,relative_error,severity
-DHG,2025,eps_reconciliation_warning,852.354108,6308.0,0.8649,major

@@ -7,29 +7,29 @@ interface Props {
 }
 
 /**
- * Dropdown to pick one of the 53 tickers (or "all"). Selecting a ticker filters
- * the list below to that code; the empty value shows the whole universe.
+ * Dropdown to pick one of the configured tickers or "all". Selecting a ticker
+ * filters the list below to that code; the empty value shows the whole universe.
  */
 export function TickerSearch({ value, onChange, options }: Props) {
   return (
     <div className="ticker-search" role="search">
-      <label htmlFor="ticker-select">Ch?n m� c? phi?u</label>
+      <label htmlFor="ticker-select">Chọn mã cổ phiếu</label>
       <select
         id="ticker-select"
         aria-label="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
-        <option value="">T?t c? {options.length} m�</option>
+        <option value="">Tất cả {options.length} mã</option>
         {options.map((o) => (
           <option key={o.ticker} value={o.ticker}>
-            {`${o.ticker} � ${o.company_name}`}
+            {`${o.ticker} · ${o.company_name}`}
           </option>
         ))}
       </select>
       {value && (
         <button type="button" className="ticker-search__clear" onClick={() => onChange("")}>
-          B? l?c
+          Bỏ lọc
         </button>
       )}
     </div>

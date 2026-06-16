@@ -9,19 +9,19 @@ interface Props {
 }
 
 const SEGMENT_LABEL: Record<string, string> = {
-  pharma: "Du?c ph?m",
-  healthcare_services: "D?ch v? y t?",
-  medical_equipment: "Thi?t b? y t?",
-  medical_distribution: "Ph�n ph?i",
+  pharma: "Dược phẩm",
+  healthcare_services: "Dịch vụ y tế",
+  medical_equipment: "Thiết bị y tế",
+  medical_distribution: "Phân phối",
 };
 
 export function ReportRow({ item, onPreview, onGenerated }: Props) {
   const cacheToken = item.updated_at ?? item.report_size ?? null;
   const statusLabel = item.has_report
     ? item.has_explanation
-      ? "? �?y d?"
-      : "? Ch? b�o c�o"
-    : "? Chua c�";
+      ? "Đầy đủ"
+      : "Chỉ báo cáo"
+    : "Chưa có";
   return (
     <tr>
       <td className="ticker-cell">{item.ticker}</td>
@@ -37,19 +37,19 @@ export function ReportRow({ item, onPreview, onGenerated }: Props) {
         <div className="row-actions">
           {item.has_report ? (
             <>
-              <button onClick={() => onPreview(item.ticker)}>Xem tru?c</button>
+              <button onClick={() => onPreview(item.ticker)}>Xem trước</button>
               <a href={fileUrl(item.ticker, "report", cacheToken)} target="_blank" rel="noreferrer">
-                T?i b�o c�o
+                Tải báo cáo
               </a>
               {item.has_explanation && (
                 <a href={fileUrl(item.ticker, "explanation", cacheToken)} target="_blank" rel="noreferrer">
-                  T?i gi?i th�ch
+                  Tải giải thích
                 </a>
               )}
-              <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="C?p nh?t" />
+              <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Cập nhật" />
             </>
           ) : (
-            <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Sinh b�o c�o" />
+            <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Sinh báo cáo" />
           )}
         </div>
       </td>

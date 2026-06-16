@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from html import escape
 from typing import Any
 
@@ -17,6 +18,65 @@ DASH = "—"
 
 def _e(value: Any) -> str:
     return escape(str(value))
+
+
+def _fold(value: Any) -> str:
+    text = unicodedata.normalize("NFKD", str(value or ""))
+    return "".join(ch for ch in text if not unicodedata.combining(ch)).lower()
+
+
+def _find_row(table: TableData | None, *tokens: str) -> tuple[str, list[Any]] | None:
+    if table is None:
+        return None
+    folded_tokens = [_fold(token) for token in tokens]
+    for label, values in table.rows:
+        folded_label = _fold(label)
+        if all(token in folded_label for token in folded_tokens):
+            return label, values
+    return None
+
+
+def _numeric_points(table: TableData | None, *tokens: str, actual_only: bool = False) -> list[tuple[str, float]]:
+    row = _find_row(table, *tokens)
+    if not row or table is None:
+        return []
+    _label, values = row
+    points: list[tuple[str, float]] = []
+    for period, value in zip(table.periods, values):
+        if actual_only and str(period).endswith("F"):
+            continue
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            continue
+        points.append((_display_period(period), number))
+    return points
+
+
+def _last_two(points: list[tuple[str, float]]) -> tuple[tuple[str, float], tuple[str, float]] | None:
+    if len(points) < 2:
+        return None
+    return points[-2], points[-1]
+
+
+def _pct_text(value: float | None, signed: bool = False) -> str:
+    if value is None:
+        return DASH
+    sign = "+" if signed and value >= 0 else ""
+    return f"{sign}{value * 100:.1f}%"
+
+
+def _pp_text(value: float | None, signed: bool = True) -> str:
+    if value is None:
+        return DASH
+    sign = "+" if signed and value >= 0 else ""
+    return f"{sign}{value * 100:.1f} điểm %"
+
+
+def _growth(prev: float, latest: float) -> float | None:
+    if prev == 0:
+        return None
+    return latest / prev - 1
 
 
 def _with_refs(value: Any, refs: str) -> str:
@@ -215,6 +275,11 @@ def _format_percent(percent: Any) -> str:
 def _report_generated_at(vm: ClientReportViewModel) -> str:
     value = str(getattr(vm, "report_generated_at", "") or getattr(vm, "report_date", "") or "").strip()
     return value.replace("T", " ") if value else DASH
+
+
+def _report_generated_at_compact(vm: ClientReportViewModel) -> str:
+    value = _report_generated_at(vm)
+    return value[:16] if len(value) >= 16 else value
 
 
 def _market_price_as_of(vm: ClientReportViewModel) -> str:
@@ -485,7 +550,7 @@ def _chart(vm: ClientReportViewModel, chart_id: str) -> str:
     chart = vm.charts.get(chart_id)
     if not chart:
         return ""
-    takeaway = _CHART_COMMENTARY.get(chart_id, "")
+    takeaway = _chart_takeaway(vm, chart_id)
     takeaway_html = (
         f'<p class="chart-takeaway"><strong>Nhận định:</strong> {_e(takeaway)}</p>'
         if takeaway else ""
@@ -499,28 +564,77 @@ def _chart(vm: ClientReportViewModel, chart_id: str) -> str:
 """
 
 
-_CHART_COMMENTARY: dict[str, str] = {
-    "C1": (
-        "Diễn biến giá cổ phiếu cần được đối chiếu với giá mục tiêu, thanh khoản và các mốc công bố "
-        "kết quả kinh doanh để đánh giá biên an toàn."
-    ),
-    "C2": (
-        "Doanh thu tăng trong giai đoạn gần nhất nhưng biên EBITDA/EBIT không tăng tương ứng, "
-        "cho thấy động lực doanh thu cần được đọc cùng khả năng kiểm soát giá vốn và chi phí bán hàng."
-    ),
-    "C4": (
-        "Biên lợi nhuận gộp, biên lợi nhuận ròng và ROE phản ánh chất lượng tăng trưởng: "
-        "nếu ROE đi xuống trong khi doanh thu tăng, định giá phải chiết khấu rủi ro hiệu quả vốn."
-    ),
-    "C5": (
-        "Quỹ đạo dự phóng hàm ý tăng trưởng doanh thu ổn định hơn giai đoạn lịch sử; "
-        "độ tin cậy của giá mục tiêu phụ thuộc vào việc lợi nhuận sau thuế bắt kịp quy mô doanh thu."
-    ),
-}
-
-
 def _chart_with_commentary(vm: ClientReportViewModel, chart_id: str) -> str:
     return _chart(vm, chart_id)
+
+
+def _chart_takeaway(vm: ClientReportViewModel, chart_id: str) -> str:
+    if chart_id == "C1":
+        current = getattr(getattr(vm, "current_price", None), "amount", None)
+        target = getattr(getattr(vm, "target_price", None), "amount", None)
+        upside = getattr(getattr(vm, "upside_downside", None), "value", None)
+        if current is None or target is None or upside is None:
+            return "Chưa đủ dữ liệu giá mục tiêu hoặc thị giá để rút ra hàm ý định giá từ biểu đồ giá."
+        return (
+            f"Thị giá {_fmt_money(current)} VND so với giá mục tiêu {_fmt_money(target)} VND, "
+            f"hàm ý {_pct_text(upside, signed=True)}; tín hiệu giá chỉ có giá trị khi đi cùng thanh khoản "
+            f"và ngày giá {_market_price_as_of(vm)}."
+        )
+
+    if chart_id == "C2":
+        revenue = _last_two(_numeric_points(vm.valuation_model_table, "doanh", "thu", actual_only=True))
+        ebitda_margin = _last_two(_numeric_points(vm.valuation_model_table, "ebitda", "suat", actual_only=True))
+        ebit_margin = _last_two(_numeric_points(vm.valuation_model_table, "ebit", "bien", actual_only=True))
+        if not revenue or not ebitda_margin or not ebit_margin:
+            return "Chưa đủ chuỗi doanh thu, biên EBITDA và biên EBIT đã kiểm chứng để kết luận xu hướng vận hành."
+        (prev_period, prev_revenue), (latest_period, latest_revenue) = revenue
+        (_prev_e_period, prev_ebitda), (_latest_e_period, latest_ebitda) = ebitda_margin
+        (_prev_b_period, prev_ebit), (_latest_b_period, latest_ebit) = ebit_margin
+        rev_growth = _growth(prev_revenue, latest_revenue)
+        return (
+            f"{latest_period} doanh thu {_fmt_money(latest_revenue)} tỷ đồng, "
+            f"tăng {_pct_text(rev_growth, signed=True)} so với {prev_period}; biên EBITDA "
+            f"{_pp_text(latest_ebitda - prev_ebitda)} và biên EBIT {_pp_text(latest_ebit - prev_ebit)}. "
+            "Nếu doanh thu tăng nhưng hai biên này không mở rộng, luận điểm tăng trưởng phải dựa vào chất lượng chi phí chứ không chỉ vào quy mô."
+        )
+
+    if chart_id == "C4":
+        gross_margin = _last_two(_numeric_points(vm.valuation_model_table, "bien", "gop", actual_only=True))
+        net_margin = _last_two(_numeric_points(vm.valuation_model_table, "bien", "rong", actual_only=True))
+        roe = _last_two(_numeric_points(vm.profitability_valuation_table, "roe", actual_only=True))
+        if not gross_margin or not net_margin or not roe:
+            return "Chưa đủ dữ liệu biên lợi nhuận và ROE đã kiểm chứng để đánh giá chất lượng sinh lời."
+        (_gm_prev_period, gm_prev), (gm_period, gm_latest) = gross_margin
+        (_nm_prev_period, nm_prev), (_nm_period, nm_latest) = net_margin
+        (roe_prev_period, roe_prev), (roe_period, roe_latest) = roe
+        return (
+            f"{gm_period} biên gộp {_pct_text(gm_latest)} ({_pp_text(gm_latest - gm_prev)} so với kỳ trước), "
+            f"biên ròng {_pct_text(nm_latest)} ({_pp_text(nm_latest - nm_prev)}), "
+            f"ROE {_pct_text(roe_latest)} ({_pp_text(roe_latest - roe_prev)} so với {roe_prev_period}). "
+            "Chênh lệch giữa biên lợi nhuận và ROE là tín hiệu về hiệu quả sử dụng vốn, không phải chỉ là biến động kế toán."
+        )
+
+    if chart_id == "C5":
+        revenue = _numeric_points(vm.valuation_model_table, "doanh", "thu")
+        gross_margin = _numeric_points(vm.valuation_model_table, "bien", "gop")
+        actual_revenue = [point for point in revenue if not point[0].endswith("F")]
+        forecast_revenue = [point for point in revenue if point[0].endswith("F")]
+        actual_margin = [point for point in gross_margin if not point[0].endswith("F")]
+        forecast_margin = [point for point in gross_margin if point[0].endswith("F")]
+        if not actual_revenue or not forecast_revenue or not actual_margin or not forecast_margin:
+            return "Chưa đủ dữ liệu nối tiếp giữa năm thực tế và năm dự phóng để đánh giá độ hợp lý của quỹ đạo dự phóng."
+        last_actual_period, last_actual_revenue = actual_revenue[-1]
+        first_forecast_period, first_forecast_revenue = forecast_revenue[0]
+        (_last_margin_period, last_margin) = actual_margin[-1]
+        (_first_margin_period, first_margin) = forecast_margin[0]
+        implied_growth = _growth(last_actual_revenue, first_forecast_revenue)
+        return (
+            f"{first_forecast_period} hàm ý doanh thu tăng {_pct_text(implied_growth, signed=True)} so với {last_actual_period}, "
+            f"trong khi biên gộp dự phóng {_pct_text(first_margin)} so với mức thực tế {_pct_text(last_margin)}. "
+            "Đây là điểm kiểm tra trọng yếu vì sai lệch nhỏ ở tăng trưởng hoặc biên gộp sẽ truyền trực tiếp vào EBIT và FCFF."
+        )
+
+    return ""
 
 
 _REC_CSS: dict[str, str] = {
@@ -558,7 +672,7 @@ def _rec_hero(vm: ClientReportViewModel) -> str:
     &nbsp;|&nbsp;
     Ngày giá: {_e(_market_price_as_of(vm))}
     &nbsp;|&nbsp;
-    Tạo: {_e(_report_generated_at(vm))}
+    Tạo: {_e(_report_generated_at_compact(vm))}
   </div>
 </div>
 """
@@ -569,7 +683,7 @@ def _snapshot_page(vm: ClientReportViewModel) -> str:
         ("Giá mục tiêu (VND)", _format_price(vm.target_price)),
         ("Giá hiện tại (VND)", _format_price(vm.current_price)),
         ("Ngày giá thị trường", _market_price_as_of(vm)),
-        ("Thời điểm tạo báo cáo", _report_generated_at(vm)),
+        ("Thời điểm tạo báo cáo", _report_generated_at_compact(vm)),
         ("Tỷ lệ tăng/giảm", _format_percent(vm.upside_downside)),
         ("Tổng tỷ suất lợi nhuận", _format_percent(vm.total_return)),
     ]

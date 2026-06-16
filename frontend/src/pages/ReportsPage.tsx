@@ -43,8 +43,6 @@ export function ReportsPage() {
   const [query, setQuery] = useState("");
   const [previewTicker, setPreviewTicker] = useState<string | null>(null);
 
-  // Always render the full universe; enrich with live report status when the
-  // backend is reachable. On failure, keep the last known report status.
   const load = () => {
     fetchReports()
       .then((r) => {
@@ -66,9 +64,9 @@ export function ReportsPage() {
   return (
     <section>
       <header>
-        <h1>B�o c�o du?c ph?m</h1>
+        <h1>Báo cáo dược phẩm</h1>
         <p>
-          {rows.length} m� � {withReport} d� c� b�o c�o � {rows.length - withReport} chua c�
+          {rows.length} mã · {withReport} đã có báo cáo · {rows.length - withReport} chưa có
         </p>
       </header>
 
@@ -76,29 +74,29 @@ export function ReportsPage() {
 
       {apiError && (
         <p className="reports-api-warning" role="status">
-          Kh�ng th? d?ng b? tr?ng th�i b�o c�o t? API. Ki?m tra VITE_API_BASE tr�n Vercel.
+          Không thể đồng bộ trạng thái báo cáo từ API. Kiểm tra VITE_API_BASE trên Vercel.
         </p>
       )}
 
       <p className="reports-result-count" aria-live="polite">
-        �ang hi?n th? {filtered.length} / {rows.length} m�.
+        Đang hiển thị {filtered.length} / {rows.length} mã.
       </p>
 
       <table className="reports-table">
         <thead>
           <tr>
-            <th>M�</th>
-            <th>T�n c�ng ty</th>
-            <th>S�n</th>
-            <th>Ng�nh</th>
-            <th>Tr?ng th�i</th>
-            <th>H�nh d?ng</th>
+            <th>Mã</th>
+            <th>Tên công ty</th>
+            <th>Sàn</th>
+            <th>Ngành</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
           {filtered.length === 0 ? (
             <tr>
-              <td colSpan={6}>Kh�ng c� m� n�o kh?p l?a ch?n.</td>
+              <td colSpan={6}>Không có mã nào khớp lựa chọn.</td>
             </tr>
           ) : (
             filtered.map((it) => (

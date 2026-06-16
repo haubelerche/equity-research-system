@@ -11,6 +11,7 @@ from backend.evaluation.ragas_live import (
     _build_live_samples,
     _default_generate,
     _select_context_chunks,
+    _trim_contexts_to_answer_support,
     run_live_ragas,
 )
 
@@ -162,10 +163,48 @@ def test_default_generate_extracts_exact_fact_from_context_without_llm(monkeypat
         "unused-model",
     )
 
-    assert answer == (
-        "Câu hỏi: DHG lợi nhuận gộp năm 2022 là bao nhiêu? "
-        "Trả lời: DHG lợi nhuận gộp năm 2022 là 2257.4949 tỷ VND."
+    assert answer == "DHG lợi nhuận gộp năm 2022 là 2257.4949 tỷ VND."
+
+
+def test_live_sample_builder_trims_contexts_to_direct_numeric_support(monkeypatch):
+    monkeypatch.setenv("RAGAS_RETRIEVAL_CANDIDATE_K", "3")
+
+    def retrieve(ticker, query, fiscal_year=None, top_k=5):
+        return [
+            _Chunk(
+                "DHG Doanh thu thuần năm 2024: 4,884.8677 tỷ VND.",
+                fiscal_year=2024,
+                section_title="income_statement",
+            ),
+            _Chunk("DHG Tổng tài sản năm 2024: 5,959.2433 tỷ VND.", fiscal_year=2024),
+            _Chunk("DHG phần thuyết minh chung không chứa số doanh thu.", fiscal_year=2024),
+        ]
+
+    rows = _build_live_samples(
+        [{
+            "id": "dhg_revenue_2024",
+            "question": "DHG doanh thu thuần năm 2024 là bao nhiêu?",
+            "answer": "DHG doanh thu thuần năm 2024 là 4884.8677 tỷ VND.",
+            "metadata": {"ticker": "DHG", "fiscal_year": 2024},
+        }],
+        "DHG",
+        retrieve,
+        lambda question, contexts, model: (
+            "DHG doanh thu thuần năm 2024 là 4884.8677 tỷ VND."
+        ),
+        "test-model",
+        3,
     )
+
+    assert rows[0]["retrieved_contexts"] == [
+        "DHG Doanh thu thuần năm 2024: 4,884.8677 tỷ VND.",
+    ]
+
+
+def test_context_trim_keeps_original_contexts_when_no_numeric_support():
+    contexts = ["DHG narrative context", "DHG another context"]
+
+    assert _trim_contexts_to_answer_support(contexts, "Không đủ dữ liệu.") == contexts
 
 
 def test_generation_prompt_preserves_financial_number_unit_and_year():

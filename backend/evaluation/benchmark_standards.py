@@ -29,7 +29,7 @@ METRIC_REGISTRY_PATH = (
     / "config"
     / "benchmarks"
     / "shared"
-    / "metric_registry_base_from_existing.yaml"
+    / "metric_registry_v3.yaml"
 )
 
 
@@ -38,7 +38,31 @@ def _load_metric_registry() -> dict[str, Any]:
         payload = yaml.safe_load(METRIC_REGISTRY_PATH.read_text(encoding="utf-8")) or {}
     except (OSError, ValueError, TypeError):
         return {"version": None, "profiles": {"active": "mvp"}, "metrics": {}}
-    return payload if isinstance(payload, dict) else {"metrics": {}}
+    if not isinstance(payload, dict):
+        return {"metrics": {}}
+    raw_metrics = payload.get("metrics") or {}
+    if isinstance(raw_metrics, list):
+        normalized_metrics: dict[str, dict[str, Any]] = {}
+        for item in raw_metrics:
+            if not isinstance(item, dict):
+                continue
+            metric_id = str(item.get("metric_id") or "")
+            if not metric_id:
+                continue
+            threshold = item.get("threshold")
+            operator = str(item.get("threshold_operator") or "").strip()
+            policy = {
+                "threshold": f"{operator} {threshold}".strip(),
+                "framework": item.get("framework"),
+                "formula": item.get("formula"),
+                "rationale": item.get("rationale") or item.get("remediation_hint"),
+            }
+            normalized_metrics[metric_id] = policy
+            normalized_metrics[metric_id.split(".")[-1]] = policy
+        payload["metrics"] = normalized_metrics
+        payload["version"] = payload.get("benchmark_suite_version") or payload.get("version")
+        payload.setdefault("profiles", {"active": "v3"})
+    return payload
 
 
 METRIC_REGISTRY = _load_metric_registry()
@@ -48,6 +72,10 @@ def metric_policy(metric_id: str) -> dict[str, Any]:
     metrics = METRIC_REGISTRY.get("metrics") or {}
     policy = metrics.get(metric_id) if isinstance(metrics, dict) else None
     return dict(policy) if isinstance(policy, dict) else {}
+
+
+def metric_registry_version() -> Any:
+    return METRIC_REGISTRY.get("version")
 
 
 @dataclass(frozen=True)

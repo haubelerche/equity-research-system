@@ -25,15 +25,15 @@ export const PIPELINE_STAGES = [
 ] as const;
 
 const STAGE_LABELS: Record<string, string> = {
-  PREFLIGHT: "Ki?m tra di?u ki?n d?u v�o",
-  PLAN: "L?p k? ho?ch ph�n t�ch",
-  INGEST_AND_VALIDATE: "Thu th?p & ki?m d?nh d? li?u t�i ch�nh",
-  ANALYZE: "Ph�n t�ch t�i ch�nh",
-  FORECAST_AND_VALUE: "D? ph�ng & d?nh gi�",
-  WRITE_REPORT: "So?n b�o c�o",
-  REVIEW: "R� so�t ch?t lu?ng",
-  EXPORT_GATES: "Ki?m tra c?ng xu?t b?n",
-  PUBLISH: "D?ng file PDF",
+  PREFLIGHT: "Kiểm tra điều kiện đầu vào",
+  PLAN: "Lập kế hoạch phân tích",
+  INGEST_AND_VALIDATE: "Thu thập & kiểm định dữ liệu tài chính",
+  ANALYZE: "Phân tích tài chính",
+  FORECAST_AND_VALUE: "Dự phóng & định giá",
+  WRITE_REPORT: "Soạn báo cáo",
+  REVIEW: "Rà soát chất lượng",
+  EXPORT_GATES: "Kiểm tra cổng xuất bản",
+  PUBLISH: "Dựng file PDF",
 };
 
 export function stageLabel(stage: string): string {
@@ -41,11 +41,11 @@ export function stageLabel(stage: string): string {
 }
 
 const INGEST_SUBLABELS: Record<string, string> = {
-  cafef: "�ang t�m d? li?u tr�n CafeF�",
-  official_pdf: "�ang t?i BCTC t? HOSE/HNX/SSC�",
-  vnstock: "�ang l?y d? li?u vnstock�",
-  validate: "�ang ki?m d?nh & d?i chi?u s? li?u�",
-  rendering: "�ang d?ng file b�o c�o�",
+  cafef: "Đang tìm dữ liệu trên CafeF...",
+  official_pdf: "Đang tải BCTC từ HOSE/HNX/SSC...",
+  vnstock: "Đang lấy dữ liệu vnstock...",
+  validate: "Đang kiểm định & đối chiếu số liệu...",
+  rendering: "Đang dựng file báo cáo...",
 };
 
 /** Vietnamese label for an ingestion/render sub-step, or null if unknown. */

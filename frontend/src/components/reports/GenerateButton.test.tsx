@@ -33,11 +33,10 @@ describe("GenerateButton + GenerationProvider", () => {
     );
     const onComplete = renderButton();
 
-    await userEvent.click(screen.getByRole("button", { name: /sinh b�o c�o/i }));
+    await userEvent.click(screen.getByRole("button", { name: /sinh báo cáo/i }));
     expect(client.startRun).toHaveBeenCalledWith("DHG");
-    // The progress modal opens (its ?n button is stable across stage changes).
-    await screen.findByRole("button", { name: /?n c?a s? ti?n tr�nh/i });
-    await screen.findByText(/�� sinh xong b�o c�o DHG/i);
+    await screen.findByRole("button", { name: /ẩn cửa sổ tiến trình/i });
+    await screen.findByText(/đã sinh xong báo cáo DHG/i);
     expect(onComplete).toHaveBeenCalled();
   });
 
@@ -46,26 +45,24 @@ describe("GenerateButton + GenerationProvider", () => {
     vi.spyOn(client, "fetchRunStatus").mockResolvedValue(status());
     renderButton();
 
-    await userEvent.click(screen.getByRole("button", { name: /sinh b�o c�o/i }));
-    await screen.findByText(/�ang t?o b�o c�o DHG/i);
-    await userEvent.click(screen.getByRole("button", { name: /?n c?a s? ti?n tr�nh/i }));
+    await userEvent.click(screen.getByRole("button", { name: /sinh báo cáo/i }));
+    await screen.findByText(/đang tạo báo cáo DHG/i);
+    await userEvent.click(screen.getByRole("button", { name: /ẩn cửa sổ tiến trình/i }));
 
-    expect(screen.queryByText(/�ang t?o b�o c�o DHG/i)).not.toBeInTheDocument();
-    // The run continues � the row button reflects the still-running state.
-    await screen.findByRole("button", { name: /dang ch?y/i });
+    expect(screen.queryByText(/đang tạo báo cáo DHG/i)).not.toBeInTheDocument();
+    await screen.findByRole("button", { name: /đang chạy/i });
   });
 
   it("shows a failure toast with the Vietnamese blocking reason on BLOCKED", async () => {
     vi.spyOn(client, "startRun").mockResolvedValue({ run_id: "r3", mode: "full_pipeline" });
-    const reason = "Kh�ng d? d? li?u t�i ch�nh d? t?o b�o c�o cho DHG.";
+    const reason = "Không đủ dữ liệu tài chính để tạo báo cáo cho DHG.";
     vi.spyOn(client, "fetchRunStatus").mockResolvedValue(
       status({ status: "BLOCKED", current_stage: "INGEST_AND_VALIDATE", blocking_reason: reason, progress: { blocking_reason: reason } }),
     );
     renderButton();
 
-    await userEvent.click(screen.getByRole("button", { name: /sinh b�o c�o/i }));
-    // The reason shows in both the modal and the toast � assert at least one.
-    const matches = await screen.findAllByText(/Kh�ng d? d? li?u t�i ch�nh/i);
+    await userEvent.click(screen.getByRole("button", { name: /sinh báo cáo/i }));
+    const matches = await screen.findAllByText(/Không đủ dữ liệu tài chính/i);
     expect(matches.length).toBeGreaterThan(0);
   });
 });

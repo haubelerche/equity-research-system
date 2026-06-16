@@ -53,6 +53,7 @@ describe("evalMetricStatus", () => {
   it("parses runtime thresholds and comparators emitted as strings", () => {
     expect(parseRuntimeThreshold(">= 95%")).toBe(0.95);
     expect(parseRuntimeThreshold("<= 5%")).toBe(0.05);
+    expect(parseRuntimeThreshold(">= 90/100")).toBe(0.9);
     expect(parseRuntimeThreshold(">= 0.70")).toBe(0.7);
     expect(inferRuntimeComparator("<= 5%", undefined, "error_rate", "llm_retry_rate")).toBe("lte");
     expect(inferRuntimeComparator(">= 0.70", undefined, "score", "quality_score")).toBe("gte");

@@ -1593,3 +1593,48 @@ h3 { font-size: 12.5pt !important; }
 .snapshot-page .trading-performance-table td:first-child {
     width: 32% !important;
 }
+
+.news-materiality-table {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    table-layout: fixed !important;
+}
+
+.news-materiality-table th,
+.news-materiality-table td {
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    vertical-align: top !important;
+}
+
+.news-materiality-table th:nth-child(1),
+.news-materiality-table td:nth-child(1) {
+    width: 36% !important;
+}
+
+.news-materiality-table th:nth-child(2),
+.news-materiality-table td:nth-child(2) {
+    width: 24% !important;
+}
+
+.news-materiality-table th:nth-child(3),
+.news-materiality-table td:nth-child(3) {
+    width: 40% !important;
+    text-align: left !important;
+}
+
+.snapshot-page .broker-side-table {
+    table-layout: fixed !important;
+}
+
+.snapshot-page .broker-side-table td:first-child {
+    width: 48% !important;
+}
+
+.snapshot-page .broker-side-table td:last-child {
+    width: 52% !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+}

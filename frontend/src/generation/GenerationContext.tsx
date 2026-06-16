@@ -31,7 +31,7 @@ export function GenerationProvider({ children, pollMs = 4000 }: { children: Reac
 
   // Timers + onComplete callbacks live in refs so polling survives modal hide
   // and component re-renders. Polling is owned here (app level), never by the
-  // modal or button � hiding the modal cannot stop a run.
+  // modal or button; hiding the modal cannot stop a run.
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const onCompletes = useRef<Record<string, (() => void) | undefined>>({});
   const toastSeq = useRef(0);
@@ -59,7 +59,7 @@ export function GenerationProvider({ children, pollMs = 4000 }: { children: Reac
     try {
       res = await fetchRunStatus(runId);
     } catch {
-      // Transient error � keep polling rather than failing the run.
+      // Transient error; keep polling rather than failing the run.
       timers.current[ticker] = setTimeout(() => void poll(ticker, runId), pollMs);
       return;
     }
@@ -80,13 +80,13 @@ export function GenerationProvider({ children, pollMs = 4000 }: { children: Reac
 
     if (phase === "success") {
       clearTimer(ticker);
-      pushToast("success", `�� sinh xong b�o c�o ${ticker}`);
+      pushToast("success", `Đã sinh xong báo cáo ${ticker}`);
       onCompletes.current[ticker]?.();
       return;
     }
     if (phase === "failed") {
       clearTimer(ticker);
-      pushToast("error", blockingReason ?? `Kh�ng t?o du?c b�o c�o ${ticker}.`);
+      pushToast("error", blockingReason ?? `Không tạo được báo cáo ${ticker}.`);
       return;
     }
     timers.current[ticker] = setTimeout(() => void poll(ticker, runId), pollMs);
@@ -109,9 +109,9 @@ export function GenerationProvider({ children, pollMs = 4000 }: { children: Reac
       .catch(() => {
         setRuns((prev) => ({
           ...prev,
-          [ticker]: { ...prev[ticker], phase: "failed", blockingReason: "Kh�ng k?t n?i du?c API." },
+          [ticker]: { ...prev[ticker], phase: "failed", blockingReason: "Không kết nối được API." },
         }));
-        pushToast("error", `Kh�ng b?t d?u du?c qu� tr�nh sinh b�o c�o ${ticker}.`);
+        pushToast("error", `Không bắt đầu được quá trình sinh báo cáo ${ticker}.`);
       });
   }, [poll, pollMs, pushToast]);
 
