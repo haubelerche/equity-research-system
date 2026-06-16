@@ -386,6 +386,41 @@ def db_facts_to_secondary_source(
     return secondary
 
 
+def _build_secondary_source_from_raw_bctc(
+    ticker: str,
+    fiscal_year: int,
+) -> dict[tuple[str, int, str, str], float]:
+    """Load narrow local raw-BCTC fallback facts for OCR reconciliation."""
+    secondary: dict[tuple[str, int, str, str], float] = {}
+    path = ROOT / "data" / "raw" / "bctc" / ticker / "balance_sheet_year.json"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return secondary
+    columns = payload.get("columns") if isinstance(payload, dict) else None
+    rows = payload.get("data") if isinstance(payload, dict) else None
+    if not isinstance(columns, list) or not isinstance(rows, list):
+        return secondary
+    try:
+        year_index = columns.index(str(fiscal_year))
+    except ValueError:
+        return secondary
+    raw_to_metric = {
+        "paid_in_capital": "charter_capital.ending",
+    }
+    for row in rows:
+        if not isinstance(row, list) or len(row) <= year_index:
+            continue
+        metric_id = raw_to_metric.get(str(row[2] if len(row) > 2 else ""))
+        if not metric_id:
+            continue
+        try:
+            secondary[(ticker, fiscal_year, "FY", metric_id)] = float(row[year_index]) / 1_000_000_000.0
+        except (TypeError, ValueError):
+            continue
+    return secondary
+
+
 def boost_confidence_for_matched(facts: list, matched_confidence: float = 0.90) -> None:
     """Raise confidence of reconciliation-matched OCR facts above the promotion gate.
 
@@ -407,14 +442,15 @@ def _build_secondary_source_from_db(
 
     Best-effort: returns {} if the DB is unavailable so OCR still runs offline.
     """
+    raw_secondary = _build_secondary_source_from_raw_bctc(ticker, fiscal_year)
     try:
         from backend.database.canonical.fact_dal import get_production_facts
 
         rows = get_production_facts(ticker=ticker, from_year=fiscal_year, to_year=fiscal_year)
     except Exception as exc:  # noqa: BLE001
         print(f"[auto_ingest] vnstock reconciliation source unavailable: {exc}")
-        return {}
-    return db_facts_to_secondary_source(rows, ticker, fiscal_year)
+        return raw_secondary
+    return {**raw_secondary, **db_facts_to_secondary_source(rows, ticker, fiscal_year)}
 
 
 def _run_ocr_pipeline(
@@ -543,10 +579,17 @@ def _run_ocr_pipeline(
     n_candidates = len(candidate_facts)
     n_promoted = sum(1 for r in promo_results if r.promoted)
     n_blocked = sum(1 for r in promo_results if not r.promoted)
+    n_unresolved = sum(
+        1
+        for fact in candidate_facts
+        if fact.reconciliation_status == "missing_secondary_source"
+        and fact.validation_status == "passed"
+    )
+    n_resolved = max(0, n_candidates - n_unresolved)
 
     print(
         f"[auto_ingest] {ticker} {fiscal_year}: OCR candidates={n_candidates} "
-        f"promoted={n_promoted} blocked={n_blocked}"
+        f"promoted={n_promoted} blocked={n_blocked} unresolved={n_unresolved}"
     )
     finalize_ocr_run(
         run_dir,
@@ -554,8 +597,8 @@ def _run_ocr_pipeline(
         pages_processed,
         0,
         n_candidates,
-        n_promoted,
-        ["blocked_candidates_pending_review"] if n_blocked else [],
+        n_resolved,
+        ["blocked_candidates_pending_review"] if n_unresolved else [],
         [],
         status="completed",
     )
@@ -768,6 +811,23 @@ def _fetch_pdf(
         csv_rows, validation_errors = _validate_pdf_rows(raw_csv_rows, fiscal_year)
 
         if not csv_rows:
+            if cfg.ocr:
+                secondary = _build_secondary_source_from_cafef(
+                    cafef_rows or [], ticker, fiscal_year,
+                )
+                ocr_rows, ocr_status, n_cand, n_prom, n_bloc = _run_ocr_pipeline(
+                    pdf_path=pdf_path,
+                    ticker=ticker,
+                    fiscal_year=fiscal_year,
+                    document_title=document_title,
+                    secondary_source=secondary,
+                    doc_dir=doc_dir,
+                )
+                return ocr_rows, ocr_status, {
+                    "ocr_candidates": n_cand,
+                    "ocr_promoted": n_prom,
+                    "ocr_blocked": n_bloc,
+                }
             return (
                 [{"error": error} for error in validation_errors],
                 IngestStatus.LOW_CONFIDENCE if raw_csv_rows else IngestStatus.EXTRACTION_FAILED_NO_TABLES,

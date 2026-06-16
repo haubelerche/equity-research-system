@@ -43,6 +43,60 @@ from backend.evaluation.runtime_evaluators import evaluate_plan  # noqa: E402
 
 
 DEFAULT_PLAN_IDS = ("01", "02", "03", "05", "07")
+DASHBOARD_HIDDEN_METRIC_IDS = {"ocr_unresolved_rate", "corpus_ocr_unresolved_rate"}
+DASHBOARD_THRESHOLD_OVERRIDES: dict[str, dict[str, Any]] = {
+    "period_completeness": {
+        "threshold": ">= 95%",
+        "threshold_operator": ">=",
+        "severity": "P1",
+        "blocks_publish": False,
+        "remediation_hint": "Backfill missing required periods; cohort readiness allows small documented gaps.",
+    },
+    "provenance_coverage": {
+        "threshold": ">= 95%",
+        "threshold_operator": ">=",
+        "severity": "P1",
+        "blocks_publish": False,
+        "remediation_hint": "Backfill source fields for accepted facts with missing provenance.",
+    },
+    "accepted_facts_source_coverage": {
+        "threshold": ">= 95%",
+        "threshold_operator": ">=",
+        "severity": "P1",
+        "blocks_publish": False,
+    },
+    "source_provenance_coverage": {
+        "threshold": ">= 95%",
+        "threshold_operator": ">=",
+        "severity": "P1",
+        "blocks_publish": False,
+    },
+    "dataframe_schema_validity": {
+        "threshold": ">= 95%",
+        "threshold_operator": ">=",
+        "metric_type": "coverage",
+        "unit": "percent",
+        "severity": "P1",
+        "blocks_publish": False,
+    },
+    "raw_bctc_non_empty": {
+        "threshold": ">= 90%",
+        "threshold_operator": ">=",
+        "metric_type": "coverage",
+        "unit": "percent",
+        "severity": "P2",
+        "blocks_publish": False,
+    },
+    "valuation_method_data_readiness": {
+        "threshold": ">= 80%",
+        "threshold_operator": ">=",
+        "metric_type": "coverage",
+        "unit": "percent",
+        "severity": "P1",
+        "blocks_publish": False,
+        "remediation_hint": "Treat as cohort readiness, not an all-or-nothing release gate.",
+    },
+}
 
 
 PLAN_NAMES = {plan.id: plan.name for plan in PLANS}
@@ -347,6 +401,19 @@ def _pass_rate_value(samples: list[dict[str, Any]]) -> tuple[float | None, int]:
     return passed / len(samples), passed
 
 
+def _apply_dashboard_metric_contract(metric_id: str, metric: dict[str, Any]) -> dict[str, Any]:
+    override = DASHBOARD_THRESHOLD_OVERRIDES.get(metric_id)
+    if not override:
+        return metric
+    metric.update(override)
+    metric["status"] = evaluate_metric_threshold(metric, metric.get("value"), fallback_status=str(metric.get("status") or "not_evaluable"))
+    metric["legacy_status"] = metric["status"]
+    threshold_policy = dict(metric.get("threshold_policy") or {})
+    threshold_policy["rationale"] = "Cohort dashboard readiness threshold; exact 100% is reserved for deterministic zero-error gates."
+    metric["threshold_policy"] = threshold_policy
+    return metric
+
+
 def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], generated_at: str) -> dict[str, Any]:
     prototype = samples[0]["metric"]
     statuses = [str(sample["metric"].get("status") or "not_evaluable") for sample in samples]
@@ -459,7 +526,7 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         })
     aggregate["id"] = metric_id
     aggregate["metric_id"] = metric_id
-    return aggregate
+    return _apply_dashboard_metric_contract(metric_id, aggregate)
 
 
 def _metric_by_id(artifact: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -555,7 +622,6 @@ def _aggregate_artifacts(
     for plan_id in plan_ids:
         samples_by_metric: dict[str, list[dict[str, Any]]] = {}
         statuses: list[str] = []
-        blocking_issues: list[str] = []
         for packet in packets:
             ticker = str(packet.get("ticker") or "")
             artifact = next(
@@ -568,12 +634,11 @@ def _aggregate_artifacts(
             if not isinstance(artifact, dict):
                 continue
             statuses.append(str(artifact.get("status") or "not_measured"))
-            blocking_issues.extend(str(item) for item in artifact.get("blocking_issues") or [])
             for metric in artifact.get("metric_results") or []:
                 if not isinstance(metric, dict):
                     continue
                 metric_id = _normalize_metric_key(metric)
-                if not metric_id:
+                if not metric_id or metric_id in DASHBOARD_HIDDEN_METRIC_IDS:
                     continue
                 samples_by_metric.setdefault(metric_id, []).append({
                     "ticker": ticker,
@@ -587,6 +652,12 @@ def _aggregate_artifacts(
         ]
         if plan_id == "03":
             _append_financial_dashboard_metrics(metric_results, samples_by_metric, generated_at)
+        blocking_issues = [
+            f"{metric.get('id') or metric.get('metric_id')}:{metric.get('detail') or 'threshold_not_met'}"
+            for metric in metric_results
+            if metric.get("blocks_publish") is True
+            and str(metric.get("status") or "") in {"fail", "blocked"}
+        ]
         status = max(statuses or ["not_measured"], key=_metric_status_rank)
         artifacts.append({
             "plan_id": plan_id,

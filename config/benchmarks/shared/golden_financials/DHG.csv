@@ -121,11 +121,3 @@ DHG,2025,2025FY,income_statement,net_income.parent,net_income.parent,852.354108,
 DHG,2025,2025FY,income_statement,ppe.net,ppe.net,968.409066,vnd_bn,VND,financial_statement,local://data/raw/bctc/DHG/income_statement_year.json,Local raw BCTC cache DHG 2025FY,local_raw_cache,0.92,accepted
 DHG,2025,2025FY,income_statement,profit_before_tax.total,profit_before_tax.total,986.599267,vnd_bn,VND,financial_statement,local://data/raw/bctc/DHG/income_statement_year.json,Local raw BCTC cache DHG 2025FY,local_raw_cache,0.92,accepted
 DHG,2025,2025FY,income_statement,sga.total,sga.total,-1157.316021,vnd_bn,VND,financial_statement,local://data/raw/bctc/DHG/income_statement_year.json,Local raw BCTC cache DHG 2025FY,local_raw_cache,0.92,accepted
-DHG,2025,2025FY,income_statement,admin_expense.total,9. Chi phi quan ly doanh nghiép 26 36,5714.422856,vnd_bn,VND,ocr_extracted,ocr://pages/page_010.txt,OCR DHG FY2025 p10,tesseract_ocr,0.7,accepted
-DHG,2025,2025FY,income_statement,short_term_debt.ending,9. PHAI THU VE CHO VAY NGAN HAN,6.443575,vnd_bn,VND,ocr_extracted,ocr://pages/page_022.txt,OCR DHG FY2025 p22,tesseract_ocr,0.7,accepted
-DHG,2025,2025FY,income_statement,inventory.ending,HANG TON KHO,33.047573,vnd_bn,VND,ocr_extracted,ocr://pages/page_023.txt,OCR DHG FY2025 p23,tesseract_ocr,0.7,accepted
-DHG,2025,2025FY,balance_sheet,tax_expense.total,Thué thu nhap doanh nghiép,27.659928,vnd_bn,VND,ocr_extracted,ocr://pages/page_027.txt,OCR DHG FY2025 p27,tesseract_ocr,0.7,accepted
-DHG,2025,2025FY,income_statement,charter_capital.ending,Von diéu lé,4137.265176,vnd_bn,VND,ocr_extracted,ocr://pages/page_030.txt,OCR DHG FY2025 p30,tesseract_ocr,0.7,accepted
-DHG,2025,2025FY,income_statement,gross_profit.total,Loi nhuan gop,4343.72086,vnd_bn,VND,ocr_extracted,ocr://pages/page_032.txt,OCR DHG FY2025 p32,tesseract_ocr,0.7,accepted
-DHG,2025,2025FY,income_statement,revenue.net,T6ng doanh thu ban hang va cung cap dich vu,5622.839978,vnd_bn,VND,ocr_extracted,ocr://pages/page_032.txt,OCR DHG FY2025 p32,tesseract_ocr,0.7,accepted
-DHG,2025,2025FY,income_statement,eps.basic,Lai co ban trén c6 phiéu,852.354108,vnd_bn,VND,ocr_extracted,ocr://pages/page_036.txt,OCR DHG FY2025 p36,tesseract_ocr,0.7,accepted

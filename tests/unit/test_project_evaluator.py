@@ -677,6 +677,67 @@ def test_data_reliability_fails_closed_when_promoted_ocr_fact_lacks_metadata(tmp
     assert metric["failed_examples"][0]["reason"] == "ocr_metadata_missing_for_promoted_material_fact"
 
 
+def test_data_reliability_uses_ocr_reconciliation_for_unresolved_rate(tmp_path) -> None:
+    material_config = tmp_path / "config" / "material_metrics.yml"
+    material_config.parent.mkdir(parents=True)
+    material_config.write_text("income_statement:\n  - revenue.net\n", encoding="utf-8")
+    golden_dir = _benchmark_golden_financials_dir(tmp_path)
+    golden_dir.mkdir(parents=True)
+    (golden_dir / "AAA.csv").write_text(
+        "ticker,fiscal_year,period,statement_type,canonical_key,raw_label,value,unit,currency,source_type,source_uri,source_title,provider,confidence,validation_status\n"
+        "AAA,2025,2025FY,income_statement,revenue.net,Revenue,100,vnd_bn,VND,financial_statement,https://issuer.test/fs.pdf,Audited FS,golden_csv,0.99,accepted\n",
+        encoding="utf-8",
+    )
+    (golden_dir / "AAA_golden_provenance.json").write_text(
+        json.dumps({
+            "ticker": "AAA",
+            "fiscal_year": 2025,
+            "fiscal_period": "FY",
+            "metrics_verified": ["revenue.net"],
+        }),
+        encoding="utf-8",
+    )
+    metadata_dir = tmp_path / "storage" / "sources" / "ocr_artifacts" / "AAA" / "2025" / "run_1"
+    metadata_dir.mkdir(parents=True)
+    (metadata_dir / "metadata.json").write_text(
+        json.dumps({
+            "ticker": "AAA",
+            "status": "completed",
+            "pages_processed": 3,
+            "pages_failed": 0,
+            "candidate_row_count": 3,
+            "mapped_fact_count": 1,
+        }),
+        encoding="utf-8",
+    )
+    recon_dir = tmp_path / "data" / "reconciliation" / "AAA" / "2025"
+    recon_dir.mkdir(parents=True)
+    (recon_dir / "ocr_vs_structured.json").write_text(
+        json.dumps({
+            "ticker": "AAA",
+            "fiscal_year": 2025,
+            "total_records": 2,
+            "summary": {
+                "total": 2,
+                "matched": 1,
+                "conflicted": 1,
+                "needs_review_count": 0,
+            },
+            "records": [],
+        }),
+        encoding="utf-8",
+    )
+
+    result = evaluate_data_reliability(tmp_path, "AAA")
+    metric = {item["id"]: item for item in result["metrics"]}["ocr_unresolved_rate"]
+
+    assert metric["status"] == "pass"
+    assert metric["value"] == 0.0
+    assert metric["calculation"]["numerator"] == 0
+    assert metric["calculation"]["denominator"] == 2
+    assert metric["calculation"]["inputs"]["resolution_counts"]["resolved"] == 2
+
+
 def test_financial_evaluator_enforces_fcfe_formula_and_publishability(tmp_path) -> None:
     valuation_dir = tmp_path / "storage" / "runs" / "run_aaa"
     valuation_dir.mkdir(parents=True)

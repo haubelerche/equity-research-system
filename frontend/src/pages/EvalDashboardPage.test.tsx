@@ -111,14 +111,14 @@ beforeEach(() => {
 describe("EvalDashboardPage", () => {
   it("renders the live benchmark packet with publication status", async () => {
     render(<EvalDashboardPage />);
-    expect(await screen.findByText(/Báo cáo đang bị chặn bởi lỗi P0/)).toBeInTheDocument();
+    expect(await screen.findByText(/B�o c�o dang b? ch?n b?i l?i P0/)).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith("/eval/framework", { cache: "no-store" });
     expect(screen.getAllByText("Core metric coverage").length).toBeGreaterThan(0);
     expect(screen.getAllByText("33.3%").length).toBeGreaterThan(0);
     expect(screen.queryByText("1/3 = 33.3%")).not.toBeInTheDocument();
     expect(screen.queryByText("0.3333333333333333")).not.toBeInTheDocument();
-    expect(screen.getByText("Số mã đạt công thức FCFF")).toBeInTheDocument();
-    expect(screen.getByText("Số mã đủ điều kiện publish valuation")).toBeInTheDocument();
+    expect(screen.getByText("S? m� d?t c�ng th?c FCFF")).toBeInTheDocument();
+    expect(screen.getByText("S? m� d? di?u ki?n publish valuation")).toBeInTheDocument();
     expect(screen.getAllByText("New backend metric").length).toBeGreaterThan(0);
   });
 
@@ -138,17 +138,17 @@ describe("EvalDashboardPage", () => {
 
     const dynamicMetricRow = screen.getAllByText("New backend metric")[0].closest("tr");
     expect(dynamicMetricRow).not.toBeNull();
-    expect(within(dynamicMetricRow!).getByText("Đạt")).toBeInTheDocument();
+    expect(within(dynamicMetricRow!).getByText("�?t")).toBeInTheDocument();
 
-    const retryRow = screen.getByText("Tỷ lệ gọi LLM phải thử lại").closest("tr");
+    const retryRow = screen.getByText("T? l? g?i LLM ph?i th? l?i").closest("tr");
     expect(retryRow).not.toBeNull();
-    expect(within(retryRow!).getByText("Chưa đạt")).toBeInTheDocument();
+    expect(within(retryRow!).getByText("Chua d?t")).toBeInTheDocument();
   });
 
   it("opens a layer benchmark dialog", async () => {
     render(<EvalDashboardPage />);
     await screen.findByText(/P0/);
-    await userEvent.click(screen.getAllByRole("button", { name: "Xem thêm" })[0]);
+    await userEvent.click(screen.getAllByRole("button", { name: "Xem th�m" })[0]);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getAllByText("project-eval-test").length).toBeGreaterThan(0);
   });
@@ -164,16 +164,16 @@ describe("EvalDashboardPage", () => {
     expect(screen.queryByText("Scope")).not.toBeInTheDocument();
     expect(screen.queryByText("Severity")).not.toBeInTheDocument();
     expect(screen.queryByText("Owner")).not.toBeInTheDocument();
-    expect(screen.queryByText("Chặn xuất bản")).not.toBeInTheDocument();
+    expect(screen.queryByText("Ch?n xu?t b?n")).not.toBeInTheDocument();
   });
 
   it("shows runtime calculation details in the layer explanation dialog", async () => {
     render(<EvalDashboardPage />);
     await screen.findByText(/P0/);
-    await userEvent.click(screen.getAllByRole("button", { name: "Giải thích" })[0]);
+    await userEvent.click(screen.getAllByRole("button", { name: "Gi?i th�ch" })[0]);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText("Lần chạy benchmark đang hiển thị")).toBeInTheDocument();
+    expect(screen.getByText("L?n ch?y benchmark dang hi?n th?")).toBeInTheDocument();
     expect(screen.getAllByText("data_quality.json").length).toBeGreaterThan(0);
     expect(screen.getAllByText("coverage").length).toBeGreaterThan(0);
     expect(screen.getAllByText("1").length).toBeGreaterThan(0);
@@ -187,7 +187,7 @@ describe("EvalDashboardPage", () => {
     render(<EvalDashboardPage />);
 
     expect(await screen.findByText(/khong hien thi so lieu thay the/i)).toBeInTheDocument();
-    expect(screen.getByText(/Chưa có kết quả đánh giá/)).toBeInTheDocument();
+    expect(screen.getByText(/Chua c� k?t qu? d�nh gi�/)).toBeInTheDocument();
     expect(screen.queryByText("70.0%")).not.toBeInTheDocument();
   });
 });

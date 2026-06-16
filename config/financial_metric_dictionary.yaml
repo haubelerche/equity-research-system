@@ -328,7 +328,7 @@
   cafef_fields: [VonDieuLe]
   patterns:
     - "von dieu le"
-    - "von co phan"
+    - "von gop cua chu so huu"
 
 - metric_id: retained_earnings.ending
   statement_type: balance_sheet

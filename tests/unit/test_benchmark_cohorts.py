@@ -199,7 +199,7 @@ def test_benchmark_suite_boolean_metric_aggregates_as_percent_gate() -> None:
     assert metric["status"] == "fail"
     assert metric["metric_type"] == "coverage"
     assert metric["unit"] == "percent"
-    assert metric["threshold"] == "= 100%"
+    assert metric["threshold"] == ">= 90%"
     assert metric["calculation"]["aggregation"] == "cohort_pass_rate"
     assert metric["calculation"]["numerator"] == 1
     assert metric["calculation"]["denominator"] == 2
@@ -261,7 +261,7 @@ def test_benchmark_suite_aggregate_metric_status_follows_displayed_threshold_val
     assert metric["failed_examples"][0]["ticker"] == "IMP"
 
 
-def test_benchmark_suite_error_rate_aggregates_observed_numeric_values() -> None:
+def test_benchmark_suite_hides_corpus_ocr_unresolved_rate_from_dashboard() -> None:
     packets = [
         {
             "ticker": "DHG",
@@ -308,13 +308,65 @@ def test_benchmark_suite_error_rate_aggregates_observed_numeric_values() -> None
         generated_at="2026-06-15T00:00:00+00:00",
         plan_ids=("01",),
     )
+    metric_ids = {metric["metric_id"] for metric in summary["artifacts"][0]["metric_results"]}
+
+    assert "ocr_unresolved_rate" not in metric_ids
+
+
+def test_benchmark_suite_period_completeness_uses_cohort_readiness_threshold() -> None:
+    packets = [
+        {
+            "ticker": "DHG",
+            "artifacts": [{
+                "plan_id": "01",
+                "status": "pass",
+                "metric_results": [{
+                    "id": "period_completeness",
+                    "metric_id": "period_completeness",
+                    "metric_type": "coverage",
+                    "unit": "percent",
+                    "threshold": "100%",
+                    "threshold_operator": "=",
+                    "status": "pass",
+                    "value": 1.0,
+                    "calculation": {"aggregation": "coverage"},
+                }],
+            }],
+        },
+        {
+            "ticker": "IMP",
+            "artifacts": [{
+                "plan_id": "01",
+                "status": "fail",
+                "metric_results": [{
+                    "id": "period_completeness",
+                    "metric_id": "period_completeness",
+                    "metric_type": "coverage",
+                    "unit": "percent",
+                    "threshold": "100%",
+                    "threshold_operator": "=",
+                    "status": "fail",
+                    "value": 0.95,
+                    "failed_examples": [{"period": "2021FY"}],
+                    "calculation": {"aggregation": "coverage"},
+                }],
+            }],
+        },
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="data_quality",
+        tickers=["DHG", "IMP"],
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("01",),
+    )
     metric = summary["artifacts"][0]["metric_results"][0]
 
-    assert metric["value"] == 0.9444444444444444
-    assert metric["status"] == "fail"
-    assert metric["calculation"]["aggregation"] == "cohort_mean_observed"
-    assert metric["calculation"]["numerator"] == 0.9444444444444444
-    assert metric["calculation"]["denominator"] == 1
+    assert metric["value"] == 0.975
+    assert metric["threshold"] == ">= 95%"
+    assert metric["status"] == "pass"
+    assert metric["blocks_publish"] is False
 
 
 def test_benchmark_suite_finance_pass_count_aggregates_as_pass_rate() -> None:

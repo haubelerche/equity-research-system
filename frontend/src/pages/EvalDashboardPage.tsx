@@ -26,6 +26,7 @@ type ModalState =
   | null;
 
 type MetricResultMap = Record<string, BenchmarkMetricResult>;
+const HIDDEN_DASHBOARD_METRIC_IDS = new Set(["ocr_unresolved_rate", "corpus_ocr_unresolved_rate"]);
 type PublicationIssue = {
   artifact: string;
   artifactName: string;
@@ -92,7 +93,7 @@ function metricsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): Met
   const configured = layer.metrics;
   const configuredIds = new Set(configured.flatMap((metric) => [metric.id, ...(metric.aliases ?? [])]));
   const dynamic = Object.entries(results)
-    .filter(([id]) => id && !configuredIds.has(id))
+    .filter(([id]) => id && !configuredIds.has(id) && !HIDDEN_DASHBOARD_METRIC_IDS.has(id))
     .map(([, result]) => metricFromResult(result));
   return [...configured, ...dynamic];
 }
@@ -134,11 +135,11 @@ function blockingIssueCount(packet: EvaluationPacket | null): number {
 
 function publicationStatusTitle(packet: EvaluationPacket | null): string {
   const status = String(packet?.publication_status ?? "NOT_EVALUATED").toUpperCase();
-  if (status.includes("BLOCKED_BY_P0")) return "Báo cáo đang bị chặn bởi lỗi P0";
-  if (status.includes("BLOCKED")) return "Báo cáo đang bị chặn";
-  if (status.includes("AUTHORIZED") || status.includes("PUBLISHABLE")) return "Báo cáo đủ điều kiện xuất bản";
-  if (status.includes("NOT_EVALUATED")) return "Chưa có kết quả đánh giá";
-  return "Trạng thái xuất bản cần kiểm tra";
+  if (status.includes("BLOCKED_BY_P0")) return "B�o c�o dang b? ch?n b?i l?i P0";
+  if (status.includes("BLOCKED")) return "B�o c�o dang b? ch?n";
+  if (status.includes("AUTHORIZED") || status.includes("PUBLISHABLE")) return "B�o c�o d? di?u ki?n xu?t b?n";
+  if (status.includes("NOT_EVALUATED")) return "Chua c� k?t qu? d�nh gi�";
+  return "Tr?ng th�i xu?t b?n c?n ki?m tra";
 }
 
 function normalizeIssueReason(reason: string): string {
@@ -167,7 +168,7 @@ function collectPublicationIssues(packet: EvaluationPacket | null): PublicationI
         artifactName: artifact.name,
         metricId,
         metricName: String(metric?.metric_name ?? metric?.label ?? metricId),
-        reason: normalizeIssueReason(reason || "Metric này đang chặn xuất bản."),
+        reason: normalizeIssueReason(reason || "Metric n�y dang ch?n xu?t b?n."),
         severity: metric?.severity,
         status: metric?.status,
         value: metric?.value,
@@ -186,7 +187,7 @@ function collectPublicationIssues(packet: EvaluationPacket | null): PublicationI
             artifactName: artifact.name,
             metricId,
             metricName: String(metric.metric_name ?? metric.label ?? metricId),
-            reason: "Metric P0/P1 chưa đạt ngưỡng xuất bản.",
+            reason: "Metric P0/P1 chua d?t ngu?ng xu?t b?n.",
             severity: metric.severity,
             status: metric.status,
             value: metric.value,
@@ -205,12 +206,12 @@ function displayMetricValue(layer: EvalLayer, metricId: string, result: Benchmar
   if (typeof result?.value === "number" && def) return formatMetricNumber(def, result.value);
   if (typeof result?.value === "boolean") return result.value ? "true" : "false";
   if (typeof result?.value === "string") return result.value;
-  if (value === undefined || value === null || !def) return "Thiếu dữ liệu";
+  if (value === undefined || value === null || !def) return "Thi?u d? li?u";
   return formatMetricNumber(def, value);
 }
 
 function displayRuntimeValue(value: unknown): string {
-  if (value === null || value === undefined || value === "") return "Chưa có";
+  if (value === null || value === undefined || value === "") return "Chua c�";
   if (typeof value === "number") return formatRoundedNumber(value);
   if (typeof value === "boolean") return value ? "true" : "false";
   if (typeof value === "string") return value;
@@ -256,7 +257,7 @@ export function EvalDashboardPage() {
   return (
     <section>
       <header>
-        <h1>Khung đánh giá chất lượng hệ thống</h1>
+        <h1>Khung d�nh gi� ch?t lu?ng h? th?ng</h1>
       </header>
 
       <PipelineFlow />
@@ -266,13 +267,13 @@ export function EvalDashboardPage() {
         className={`pub-banner pub-banner--compact pub-banner--clickable ${allMetricsPassed ? "ok" : "blocked"}`}
         onClick={() => setModal({ kind: "publication" })}
       >
-        <span className="pub-banner__label">Trạng thái suite</span>
+        <span className="pub-banner__label">Tr?ng th�i suite</span>
         <strong>{publicationTitle}</strong>
         {!allMetricsPassed && (
           <span>
             {blockingIssues > 0
-              ? `${blockingIssues} lỗi đang chặn final export. Nhấn để xem chi tiết.`
-              : "Có gate hoặc bằng chứng bắt buộc chưa đạt. Nhấn để xem chi tiết."}
+              ? `${blockingIssues} l?i dang ch?n final export. Nh?n d? xem chi ti?t.`
+              : "C� gate ho?c b?ng ch?ng b?t bu?c chua d?t. Nh?n d? xem chi ti?t."}
           </span>
         )}
       </button>
@@ -307,20 +308,20 @@ export function EvalDashboardPage() {
       {modal?.kind === "publication" && (
         <EvalModal
           title={publicationTitle}
-          subtitle="Các lỗi dưới đây là nguyên nhân khiến hệ thống chưa cho phép xuất final export."
+          subtitle="C�c l?i du?i d�y l� nguy�n nh�n khi?n h? th?ng chua cho ph�p xu?t final export."
           onClose={() => setModal(null)}
         >
           <div className="explanation-block">
-            <h3>Vì sao bị chặn?</h3>
+            <h3>V� sao b? ch?n?</h3>
             <p>
-              Trạng thái này là trạng thái cấp suite, không phải một metric riêng.
-              Hệ thống đặt trạng thái chặn khi còn P0 gate, artifact bắt buộc, hoặc bằng chứng kiểm định chưa đạt.
+              Tr?ng th�i n�y l� tr?ng th�i c?p suite, kh�ng ph?i m?t metric ri�ng.
+              H? th?ng d?t tr?ng th�i ch?n khi c�n P0 gate, artifact b?t bu?c, ho?c b?ng ch?ng ki?m d?nh chua d?t.
             </p>
           </div>
           {publicationIssues.length === 0 ? (
             <div className="explanation-block">
-              <h3>Chưa có danh sách lỗi chi tiết</h3>
-              <p>Evaluation packet hiện tại không gửi kèm blocking_issues hoặc metric blocking cụ thể.</p>
+              <h3>Chua c� danh s�ch l?i chi ti?t</h3>
+              <p>Evaluation packet hi?n t?i kh�ng g?i k�m blocking_issues ho?c metric blocking c? th?.</p>
             </div>
           ) : (
             <div className="publication-issues">
@@ -329,7 +330,7 @@ export function EvalDashboardPage() {
                   <header>
                     <div>
                       <h3>{issue.metricName}</h3>
-                      <p>{issue.artifactName} · <code>{issue.artifact}</code></p>
+                      <p>{issue.artifactName} � <code>{issue.artifact}</code></p>
                     </div>
                     <StatusPill status={resolveMetricStatus({
                       id: issue.metricId,
@@ -342,12 +343,12 @@ export function EvalDashboardPage() {
                     }, { value: null, status: issue.status ?? "fail" })} />
                   </header>
                   <dl>
-                    <div><dt>Lỗi</dt><dd>{issue.reason}</dd></div>
+                    <div><dt>L?i</dt><dd>{issue.reason}</dd></div>
                     <div><dt>Metric ID</dt><dd><code>{issue.metricId}</code></dd></div>
                     <div><dt>Severity</dt><dd>{displayRuntimeValue(issue.severity)}</dd></div>
-                    <div><dt>Trạng thái metric</dt><dd>{displayRuntimeValue(issue.status)}</dd></div>
-                    <div><dt>Kết quả</dt><dd>{displayRuntimeValue(issue.value)}</dd></div>
-                    <div><dt>Ngưỡng đạt</dt><dd>{displayRuntimeValue(issue.threshold)}</dd></div>
+                    <div><dt>Tr?ng th�i metric</dt><dd>{displayRuntimeValue(issue.status)}</dd></div>
+                    <div><dt>K?t qu?</dt><dd>{displayRuntimeValue(issue.value)}</dd></div>
+                    <div><dt>Ngu?ng d?t</dt><dd>{displayRuntimeValue(issue.threshold)}</dd></div>
                     <div><dt>Failed examples</dt><dd>{formatRoundedNumber(issue.failedExamples)}</dd></div>
                   </dl>
                 </article>
@@ -359,19 +360,19 @@ export function EvalDashboardPage() {
 
       {modal?.kind === "benchmark" && (
         <EvalModal
-          title={`Lịch sử benchmark: ${modal.layer.title.replace(/^\d+ . /, "")}`}
-          subtitle="Snapshot project-level hoặc run-scoped mới nhất được dashboard tải về."
+          title={`L?ch s? benchmark: ${modal.layer.title.replace(/^\d+ . /, "")}`}
+          subtitle="Snapshot project-level ho?c run-scoped m?i nh?t du?c dashboard t?i v?."
           onClose={() => setModal(null)}
         >
           <table>
             <thead>
               <tr>
                 <th>Run</th>
-                <th>Chỉ số</th>
-                <th>Loại</th>
-                <th>Ngưỡng</th>
-                <th>Kết quả</th>
-                <th>Trạng thái</th>
+                <th>Ch? s?</th>
+                <th>Lo?i</th>
+                <th>Ngu?ng</th>
+                <th>K?t qu?</th>
+                <th>Tr?ng th�i</th>
                 <th>Failed examples</th>
               </tr>
             </thead>
@@ -392,7 +393,7 @@ export function EvalDashboardPage() {
                     <td className="num">{String(result?.threshold ?? formatPassCondition(metric))}</td>
                     <td className="num">{displayMetricValue(modal.layer, metric.id, result, values[metric.id])}</td>
                     <td><StatusPill status={status} /></td>
-                    <td>{(result?.failed_examples ?? []).length || result?.detail || "Không có"}</td>
+                    <td>{(result?.failed_examples ?? []).length || result?.detail || "Kh�ng c�"}</td>
                   </tr>
                 );
               })}
@@ -403,12 +404,12 @@ export function EvalDashboardPage() {
 
       {modal?.kind === "explanation" && (
         <EvalModal
-          title={`Giải thích: ${modal.layer.title.replace(/^\d+ . /, "")}`}
+          title={`Gi?i th�ch: ${modal.layer.title.replace(/^\d+ . /, "")}`}
           subtitle={modal.layer.subtitle}
           onClose={() => setModal(null)}
         >
           <div className="explanation-block">
-            <h3>Phương pháp đánh giá</h3>
+            <h3>Phuong ph�p d�nh gi�</h3>
             <ul>{modal.layer.methodology.map((item) => <li key={item}>{item}</li>)}</ul>
           </div>
           {(() => {
@@ -418,24 +419,24 @@ export function EvalDashboardPage() {
 
             return (
               <div className="explanation-block">
-                <h3>Lần chạy benchmark đang hiển thị</h3>
+                <h3>L?n ch?y benchmark dang hi?n th?</h3>
                 <dl className="benchmark-run-details">
                   <div><dt>Run</dt><dd><code>{packetRunId(packet, modal.layer)}</code></dd></div>
-                  <div><dt>Source</dt><dd>{packet?.source ?? "Chưa có"}</dd></div>
+                  <div><dt>Source</dt><dd>{packet?.source ?? "Chua c�"}</dd></div>
                   <div><dt>Artifact</dt><dd><code>{artifact?.artifact ?? modal.layer.artifact}</code></dd></div>
-                  <div><dt>Trạng thái artifact</dt><dd>{artifact?.status ?? "Chưa có"}</dd></div>
-                  <div><dt>Generated at</dt><dd>{packet?.generated_at ?? "Chưa có"}</dd></div>
+                  <div><dt>Tr?ng th�i artifact</dt><dd>{artifact?.status ?? "Chua c�"}</dd></div>
+                  <div><dt>Generated at</dt><dd>{packet?.generated_at ?? "Chua c�"}</dd></div>
                 </dl>
                 <table>
                   <thead>
                     <tr>
-                      <th>Chỉ số</th>
+                      <th>Ch? s?</th>
                       <th>Aggregation</th>
-                      <th>Tử số</th>
-                      <th>Mẫu số</th>
-                      <th>Kết quả</th>
-                      <th>Trạng thái</th>
-                      <th>Chi tiết</th>
+                      <th>T? s?</th>
+                      <th>M?u s?</th>
+                      <th>K?t qu?</th>
+                      <th>Tr?ng th�i</th>
+                      <th>Chi ti?t</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -451,7 +452,7 @@ export function EvalDashboardPage() {
                             <strong>{metric.label}</strong>
                             <span className="metric-technology">{metric.englishLabel ?? metric.technology}</span>
                           </td>
-                          <td>{displayRuntimeValue(calculation?.aggregation ?? result?.detail ?? "Chưa có")}</td>
+                          <td>{displayRuntimeValue(calculation?.aggregation ?? result?.detail ?? "Chua c�")}</td>
                           <td className="num">{displayRuntimeValue(calculation?.numerator)}</td>
                           <td className="num">{displayRuntimeValue(calculation?.denominator)}</td>
                           <td className="num">{displayMetricValue(modal.layer, metric.id, result, values[metric.id])}</td>
@@ -469,7 +470,7 @@ export function EvalDashboardPage() {
             );
           })()}
           <table>
-            <thead><tr><th>Chỉ số</th><th>Framework</th><th>Công thức hoặc phương pháp</th><th>Chưa đạt khi</th></tr></thead>
+            <thead><tr><th>Ch? s?</th><th>Framework</th><th>C�ng th?c ho?c phuong ph�p</th><th>Chua d?t khi</th></tr></thead>
             <tbody>
               {modal.layer.metrics.map((metric) => (
                 <tr key={metric.id}>
@@ -489,8 +490,8 @@ export function EvalDashboardPage() {
 
       {modal?.kind === "metric" && (
         <EvalModal
-          title={`Giải trình metric: ${modal.metric.label}`}
-          subtitle={`${modal.layer.title.replace(/^\d+ . /, "")} · ${modal.metric.englishLabel ?? modal.metric.technology}`}
+          title={`Gi?i tr�nh metric: ${modal.metric.label}`}
+          subtitle={`${modal.layer.title.replace(/^\d+ . /, "")} � ${modal.metric.englishLabel ?? modal.metric.technology}`}
           onClose={() => setModal(null)}
         >
           <MetricExplanation def={modal.metric} result={modal.result} />

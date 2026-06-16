@@ -47,6 +47,15 @@ export function parseRuntimeThreshold(threshold: unknown, unit?: string | null):
   if (typeof threshold === "boolean") return threshold ? 1 : 0;
   if (typeof threshold !== "string") return null;
 
+  const ratio = threshold.match(/(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)/);
+  if (ratio) {
+    const numerator = Number(ratio[1]);
+    const denominator = Number(ratio[2]);
+    if (Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0) {
+      return numerator / denominator;
+    }
+  }
+
   const match = threshold.match(/-?\d+(?:\.\d+)?/);
   if (!match) return null;
 

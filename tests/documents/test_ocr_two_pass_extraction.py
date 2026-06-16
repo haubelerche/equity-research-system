@@ -68,11 +68,12 @@ def test_parse_same_line_label_value_still_works():
     assert ["Tong tai san", "9,123,456"] in rows
 
 
-# ── extract_rows_from_ocr_pages: statement-type carry-forward ───────────────
+# -- extract_rows_from_ocr_pages: strict statement-page gating
 
-def test_extract_carries_statement_type_to_later_pages():
-    # Page 1 declares the income statement header (no values yet);
-    # page 2 has a mappable label+value on consecutive lines but no header.
+def test_extract_does_not_carry_statement_type_to_later_pages():
+    # Page 1 declares the income statement header; page 2 has a mappable
+    # label+value but no header. Strict OCR mode skips page 2 to avoid
+    # inherited statement context on notes/prose pages.
     pages = [
         (1, "BAO CAO KET QUA HOAT DONG KINH DOANH\nCho nam tai chinh 2025\n"),
         (2, "Loi nhuan gop\n4.343.720.860.197\n"),
@@ -80,13 +81,7 @@ def test_extract_carries_statement_type_to_later_pages():
     rows = extract_rows_from_ocr_pages(
         pages, ticker="DHG", fiscal_year=2025, document_title="DHG FY2025"
     )
-    assert rows, "expected at least one extracted row from a carry-forward page"
-    by_metric = {r.metric_id: r for r in rows}
-    assert "gross_profit.total" in by_metric
-    assert all(r.statement_type == "income_statement" for r in rows)
-    # Value must be scaled đồng→tỷ (4,343.72), not left as raw 4.3e12.
-    assert abs(by_metric["gross_profit.total"].value - 4343.720860197) < 1e-3
-
+    assert rows == []
 
 def test_extract_skips_pages_before_any_statement_header():
     # Cover page text with no statement header and no values → no rows, no crash.

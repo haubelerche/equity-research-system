@@ -215,6 +215,57 @@ def _latest_json_for_ticker(root: Path, name: str, ticker: str) -> Path | None:
     return None
 
 
+def _latest_ocr_reconciliation_report(root: Path, ticker: str) -> dict[str, Any]:
+    """Return the newest OCR reconciliation report for ``ticker`` if present."""
+    report_root = root / "data" / "reconciliation" / ticker.upper()
+    for path in _files_named(report_root, "ocr_vs_structured.json"):
+        payload = _read_json(path)
+        payload_ticker = str(payload.get("ticker") or "").upper()
+        if payload_ticker == ticker.upper():
+            return payload
+    return {}
+
+
+def _latest_completed_ocr_metadata(root: Path, ticker: str) -> dict[str, Any]:
+    """Return newest completed OCR metadata, ignoring in-progress runs."""
+    metadata_root = root / "storage" / "sources" / "ocr_artifacts" / ticker.upper()
+    latest: dict[str, Any] = {}
+    for path in _files_named(metadata_root, "metadata.json"):
+        payload = _read_json(path)
+        if str(payload.get("ticker") or "").upper() != ticker.upper():
+            continue
+        if payload.get("status") == "completed":
+            return payload
+        if not latest:
+            latest = payload
+    return latest
+
+
+def _ocr_resolution_counts_from_reconciliation(report: dict[str, Any]) -> dict[str, int]:
+    """Convert OCR reconciliation outcomes into resolved/unresolved counts.
+
+    ``conflicted`` candidates are resolved because they were explicitly compared
+    and blocked. Only ``needs_review`` / missing-secondary cases remain unresolved.
+    """
+    if not report:
+        return {}
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    records = report.get("records") if isinstance(report.get("records"), list) else []
+    total = int(summary.get("total") or report.get("total_records") or len(records) or 0)
+    needs_review = int(summary.get("needs_review_count") or 0)
+    if not needs_review and records:
+        needs_review = sum(1 for item in records if item.get("decision") == "needs_review")
+    matched = int(summary.get("matched") or 0)
+    conflicted = int(summary.get("conflicted") or summary.get("blocked_conflict_count") or 0)
+    return {
+        "total": total,
+        "resolved": max(0, total - needs_review),
+        "unresolved": max(0, needs_review),
+        "matched": matched,
+        "conflicted": conflicted,
+    }
+
+
 def _relative_or_missing(path: Path, root: Path) -> str:
     return str(path.relative_to(root)) if path.exists() else "missing"
 
@@ -410,6 +461,7 @@ def _ocr_audit_samples(
     ticker: str,
     *,
     metadata_required: bool = True,
+    unresolved_candidate_count: int | None = None,
     minimum: int = DATA_RELIABILITY_MIN_SAMPLE_ROWS,
 ) -> list[dict[str, Any]]:
     if metadata:
@@ -417,6 +469,11 @@ def _ocr_audit_samples(
         pages_failed = int(metadata.get("pages_failed") or 0)
         candidate_count = int(metadata.get("candidate_row_count") or 0)
         mapped_count = int(metadata.get("mapped_fact_count") or 0)
+        unresolved_count = (
+            max(0, candidate_count - mapped_count)
+            if unresolved_candidate_count is None
+            else max(0, unresolved_candidate_count)
+        )
         unit_count = max(pages, candidate_count, minimum)
         return [
             {
@@ -429,7 +486,7 @@ def _ocr_audit_samples(
                 "status": "failed" if index <= pages_failed else "checked",
                 "candidate_row_count": candidate_count,
                 "mapped_fact_count": mapped_count,
-                "unresolved_candidate_count": max(0, candidate_count - mapped_count),
+                "unresolved_candidate_count": unresolved_count,
                 "evidence_available": True,
             }
             for index in range(1, unit_count + 1)
@@ -784,15 +841,19 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
         row for row in accepted_material_rows if _is_ocr_source(row)
     ]
 
-    metadata = _read_json(
-        _latest_named(root / "storage" / "sources" / "ocr_artifacts" / ticker, "metadata.json")
-    )
+    metadata = _latest_completed_ocr_metadata(root, ticker)
     pages = int(metadata.get("pages_processed") or 0)
     pages_failed = int(metadata.get("pages_failed") or 0)
     ocr_failure_rate = pages_failed / pages if pages else None
     ocr_candidates = int(metadata.get("candidate_row_count") or 0)
-    unresolved = max(0, ocr_candidates - int(metadata.get("mapped_fact_count") or 0))
-    ocr_units_checked = ocr_candidates if ocr_candidates else pages
+    ocr_reconciliation = _latest_ocr_reconciliation_report(root, ticker)
+    ocr_resolution_counts = _ocr_resolution_counts_from_reconciliation(ocr_reconciliation)
+    if ocr_resolution_counts:
+        unresolved = ocr_resolution_counts["unresolved"]
+        ocr_units_checked = ocr_resolution_counts["total"]
+    else:
+        unresolved = max(0, ocr_candidates - int(metadata.get("mapped_fact_count") or 0))
+        ocr_units_checked = ocr_candidates if ocr_candidates else pages
     if not metadata:
         unresolved = len(material_ocr_source_rows)
         ocr_units_checked = len(material_ocr_source_rows)
@@ -808,6 +869,10 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
             "candidate_row_count": ocr_candidates,
             "mapped_fact_count": metadata.get("mapped_fact_count") or 0,
             "unresolved_candidate_count": unresolved,
+            "resolved_candidate_count": ocr_resolution_counts.get("resolved"),
+            "matched_candidate_count": ocr_resolution_counts.get("matched"),
+            "conflicted_candidate_count": ocr_resolution_counts.get("conflicted"),
+            "resolution_source": "ocr_reconciliation_report" if ocr_resolution_counts else "ocr_metadata",
         })
     elif material_ocr_source_rows:
         ocr_samples.extend(
@@ -879,6 +944,7 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
         metadata,
         ticker,
         metadata_required=ocr_metadata_required,
+        unresolved_candidate_count=unresolved if ocr_resolution_counts else None,
     )
     ocr_resolution_health = None if ocr_unresolved_rate is None else max(0.0, 1.0 - ocr_unresolved_rate)
     schema_component = None if pandera_result["passed"] is None else (
@@ -1121,8 +1187,12 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
                 ],
                 calculation={"numerator": unresolved, "denominator": ocr_units_checked,
                              "aggregation": "error_rate",
-                             "inputs": {"metadata": metadata} if metadata else {},
-                             "parameters": {"unit": "candidate_rows_or_processed_pages"},
+                             "inputs": {
+                                 "metadata": metadata,
+                                 "ocr_reconciliation": ocr_reconciliation,
+                                 "resolution_counts": ocr_resolution_counts,
+                             } if metadata else {},
+                             "parameters": {"unit": "reconciled_candidate_rows_or_processed_pages"},
                              "per_sample_results": ocr_unresolved_metric_samples}),
         _metric("duplicate_fact_count", "Duplicate canonical fact count", duplicate_count, "0",
                 _ratio_status(float(duplicate_count), 0.0, "lte"), golden_rel,

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fetchReports } from "../api/client";
 import type { ReportItem } from "../api/types";
 import { UNIVERSE } from "../data/universe";
@@ -66,9 +66,9 @@ export function ReportsPage() {
   return (
     <section>
       <header>
-        <h1>Báo cáo dược phẩm</h1>
+        <h1>B�o c�o du?c ph?m</h1>
         <p>
-          {rows.length} mã · {withReport} đã có báo cáo · {rows.length - withReport} chưa có
+          {rows.length} m� � {withReport} d� c� b�o c�o � {rows.length - withReport} chua c�
         </p>
       </header>
 
@@ -76,29 +76,29 @@ export function ReportsPage() {
 
       {apiError && (
         <p className="reports-api-warning" role="status">
-          Không thể đồng bộ trạng thái báo cáo từ API. Kiểm tra VITE_API_BASE trên Vercel.
+          Kh�ng th? d?ng b? tr?ng th�i b�o c�o t? API. Ki?m tra VITE_API_BASE tr�n Vercel.
         </p>
       )}
 
       <p className="reports-result-count" aria-live="polite">
-        Đang hiển thị {filtered.length} / {rows.length} mã.
+        �ang hi?n th? {filtered.length} / {rows.length} m�.
       </p>
 
       <table className="reports-table">
         <thead>
           <tr>
-            <th>Mã</th>
-            <th>Tên công ty</th>
-            <th>Sàn</th>
-            <th>Ngành</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
+            <th>M�</th>
+            <th>T�n c�ng ty</th>
+            <th>S�n</th>
+            <th>Ng�nh</th>
+            <th>Tr?ng th�i</th>
+            <th>H�nh d?ng</th>
           </tr>
         </thead>
         <tbody>
           {filtered.length === 0 ? (
             <tr>
-              <td colSpan={6}>Không có mã nào khớp lựa chọn.</td>
+              <td colSpan={6}>Kh�ng c� m� n�o kh?p l?a ch?n.</td>
             </tr>
           ) : (
             filtered.map((it) => (

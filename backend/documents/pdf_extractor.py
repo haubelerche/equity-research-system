@@ -264,9 +264,16 @@ class ExtractedRow:
 # Extractor class
 # ---------------------------------------------------------------------------
 
-_INCOME_MARKERS = {"ket qua hoat dong kinh doanh", "bao cao kqkd", "income", "doanh thu"}
+_INCOME_MARKERS = {
+    "bao cao ket qua hoat dong kinh doanh",
+    "ket qua hoat dong kinh doanh",
+    "bao cao kqkd",
+    "income statement",
+}
 _BALANCE_MARKERS = {"can doi ke toan", "bang can doi", "balance sheet", "bcdk"}
 _CASHFLOW_MARKERS = {"luu chuyen tien", "cash flow", "lctt"}
+_NOTE_MARKERS = {"thuyet minh bao cao tai chinh", "ban thuyet minh bao cao tai chinh"}
+_PRIMARY_STATEMENT_FORM_RE = re.compile(r"mau so b\s*0[123]\s*dn")
 
 
 def _detect_statement_type(slug_text: str) -> Optional[str]:
@@ -542,6 +549,16 @@ def _find_tesseract_cmd() -> Optional[str]:
     return None
 
 
+def _is_financial_statement_note_page(slug_text: str) -> bool:
+    """True when OCR text is in the notes section, not a primary statement table."""
+    return any(marker in slug_text for marker in _NOTE_MARKERS)
+
+
+def _is_primary_statement_page(slug_text: str) -> bool:
+    """True for B01/B02/B03 primary statement forms."""
+    return bool(_PRIMARY_STATEMENT_FORM_RE.search(slug_text))
+
+
 def extract_from_pdf_ocr(
     pdf_path: Path,
     ticker: str,
@@ -689,10 +706,10 @@ def extract_rows_from_ocr_pages(
 ) -> list[ExtractedRow]:
     """Extract BCTC facts from already-OCR'd page texts.
 
-    ``pages`` is a list of (page_number, ocr_text). The statement type is carried
-    forward across pages: once a statement section header is seen, later pages
-    (which hold the actual numbers but often re-declare no header) inherit it.
-    Pages before any statement header are skipped.
+    ``pages`` is a list of (page_number, ocr_text). OCR extraction is intentionally
+    strict: a page must declare a primary statement header itself. This gives up
+    some recall but prevents notes/prose pages from inheriting a stale statement
+    type and producing false financial candidates.
     """
     extractor = VietnameseBCTCExtractor(
         ticker=ticker,
@@ -701,12 +718,12 @@ def extract_rows_from_ocr_pages(
         extraction_method=extraction_method,
     )
     results: list[ExtractedRow] = []
-    current_statement: Optional[str] = None
     for page_num, ocr_text in pages:
-        detected = _detect_statement_type(_slug_label(ocr_text))
-        if detected:
-            current_statement = detected
-        if current_statement is None:
+        slug_text = _slug_label(ocr_text)
+        if _is_financial_statement_note_page(slug_text) and not _is_primary_statement_page(slug_text):
+            continue
+        detected = _detect_statement_type(slug_text)
+        if detected is None:
             continue
         rows = _parse_ocr_text_to_rows(ocr_text)
         if not rows:
@@ -715,7 +732,7 @@ def extract_rows_from_ocr_pages(
         results.extend(
             extractor.extract_from_table_rows(
                 rows=rows,
-                statement_type=current_statement,
+                statement_type=detected,
                 fiscal_years=[fiscal_year],
                 table_name="ocr_page",
                 vnd_parser=_parse_ocr_vnd_bn,
