@@ -20,6 +20,14 @@ from backend.facts.metric_metadata import (
 # ---------------------------------------------------------------------------
 
 class TestRegistry:
+    def test_working_capital_ending_keys_registered(self):
+        # Canonical keys used by fact.production_facts, the WC schedule, and the PDF
+        # extractor catalog. If unregistered, validate_and_normalize rejects them and
+        # build_fact_table drops them → working capital reads 0 (understated delta_nwc).
+        for key in ("accounts_receivable.ending", "inventory.ending", "accounts_payable.ending"):
+            assert is_known_metric(key), key
+            assert validate_and_normalize(key, 500.0, "vnd_bn").status == "ok"
+
     def test_critical_metrics_present(self):
         critical = {
             "revenue.net", "gross_profit.total", "operating_profit.total",

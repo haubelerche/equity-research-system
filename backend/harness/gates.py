@@ -311,6 +311,48 @@ def forecast_quality_gate(forecast_model: dict[str, Any]) -> dict[str, Any]:
     return pass_gate("FORECAST_QUALITY_GATE", summary)
 
 
+def balance_sheet_identity_gate(forecast_model: dict[str, Any]) -> dict[str, Any]:
+    """Spec B: assert the forecast balance sheet satisfies Assets = Liabilities + Equity.
+
+    Per forecast year: imbalance = |total_assets - (equity + total_debt + other_liabilities)|
+    must be <= 0.5% of total_assets. A guardrail against a wiring bug — with cash as the
+    plug the identity should hold by construction. Years lacking balance-sheet fields are
+    not verifiable; if none are verifiable the gate flags a warning (no silent pass) but
+    does not hard-block, so a missing-data run isn't masked as a balance failure.
+    """
+    years = forecast_model.get("forecast_years") or []
+    reasons: list[str] = []
+    checked = 0
+    for fy in years:
+        assets = _number(fy.get("total_assets"))
+        equity = _number(fy.get("equity"))
+        debt = _number(fy.get("total_debt"))
+        other = _number(fy.get("other_liabilities"))
+        if None in (assets, equity, debt, other):
+            continue
+        checked += 1
+        imbalance = abs(assets - (equity + debt + other))
+        tolerance = 0.005 * abs(assets)
+        if imbalance > tolerance:
+            reasons.append(
+                f"{fy.get('label') or '?'}:imbalance={imbalance:.2f}>tol={tolerance:.2f}"
+            )
+    summary = {"years_checked": checked, "year_count": len(years)}
+    if checked == 0:
+        return fail_gate(
+            "BALANCE_SHEET_IDENTITY_GATE",
+            "no_forecast_year_with_balance_sheet",
+            summary,
+            severity="warning",
+        )
+    if reasons:
+        return _gate_result(
+            "BALANCE_SHEET_IDENTITY_GATE", False,
+            [f"balance_sheet_imbalance:{r}" for r in reasons], summary,
+        )
+    return pass_gate("BALANCE_SHEET_IDENTITY_GATE", summary)
+
+
 def valuation_reconciliation_gate(
     valuation: dict[str, Any],
     market_snapshot: dict[str, Any] | None = None,

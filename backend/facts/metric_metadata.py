@@ -191,6 +191,14 @@ METRIC_METADATA: dict[str, MetricMeta] = {
     "inventories.total": _m(SemanticType.MONETARY),
     "receivables.total": _m(SemanticType.MONETARY),
     "fixed_assets.total": _m(SemanticType.MONETARY),
+    # Working-capital line items use the canonical ".ending" suffix everywhere
+    # (taxonomy, fact.production_facts, working_capital_schedule, PDF extractor catalog).
+    # Without registering them, validate_and_normalize rejected them as "unknown metric"
+    # and build_fact_table dropped AR/inventory/AP → working capital read 0 (the
+    # misleading "no historical AR data" WARN). Same fix as the liability ".ending" keys.
+    "accounts_receivable.ending": _m(SemanticType.MONETARY),
+    "inventory.ending": _m(SemanticType.MONETARY),
+    "accounts_payable.ending": _m(SemanticType.MONETARY),
     # Canonical balance-sheet liability keys use the ".ending" suffix everywhere
     # (taxonomy, fact.production_facts, reconciliation, ratios, golden CSV). The
     # ".total" form here was a mismatch that made validate_and_normalize reject

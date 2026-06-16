@@ -27,6 +27,7 @@ from backend.harness.gates import (
     pass_gate,
     fail_gate,
     forecast_quality_gate,
+    balance_sheet_identity_gate,
     valuation_reconciliation_gate,
     report_completeness_gate,
     senior_critic_gate,
@@ -384,6 +385,8 @@ class ResearchGraphRunner:
             # Forecast quality gate.
             forecast = state.artifacts.get("forecast_model") or {}
             self._record_gate(state, forecast_quality_gate(forecast))
+            # Spec B: assert the forecast balance sheet balances (Assets = Liabilities + Equity).
+            self._record_gate(state, balance_sheet_identity_gate(forecast))
             if state.blocking_reason:
                 return state
 

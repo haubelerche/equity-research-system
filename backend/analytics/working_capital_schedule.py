@@ -25,18 +25,18 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Any
 
+from backend.analytics._entry import entry_value
 from backend.facts.normalizer import FactTable
 
 
 def _get(table: FactTable, key: str, period: str) -> float | None:
+    # Use the canonical entry_value: the fact table holds FactEntry objects in real
+    # runs (build_fact_table), not raw floats/dicts. Reading entry directly returned
+    # None for FactEntry → AR/inventory/AP collapsed to 0 → understated NWC/delta_nwc.
     entry = table.get(key, {}).get(period)
     if entry is None:
         return None
-    value = entry.get("value") if isinstance(entry, dict) else entry
-    try:
-        return float(value) if value is not None else None
-    except (TypeError, ValueError):
-        return None
+    return entry_value(entry)
 
 
 @dataclass

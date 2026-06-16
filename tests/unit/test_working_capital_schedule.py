@@ -32,6 +32,33 @@ def _simple_ft() -> dict:
     )
 
 
+def test_reads_factentry_objects_not_just_floats():
+    # Real runs pass a FactTable of FactEntry objects (build_fact_table), not raw floats.
+    # _get must read FactEntry.value — otherwise AR/inventory/AP read as None and NWC
+    # collapses to 0 (the misleading "no historical AR data" WARN seen on real DHG).
+    from backend.facts.normalizer import FactEntry
+
+    def fe(d: dict) -> dict:
+        return {p: FactEntry(value=v) for p, v in d.items()}
+
+    ft = {
+        "accounts_receivable.ending": fe({p: 500.0 for p in _PERIODS}),
+        "inventory.ending": fe({p: 450.0 for p in _PERIODS}),
+        "accounts_payable.ending": fe({p: 150.0 for p in _PERIODS}),
+        "revenue.net": fe({p: 1800.0 for p in _PERIODS}),
+        "cogs.total": fe({p: -950.0 for p in _PERIODS}),
+    }
+    sched = build_working_capital_schedule(
+        ticker="TST", fact_table=ft, fy_periods=_PERIODS,
+        forecast_labels=["2026F"], forecast_revenues={"2026F": 1900.0},
+        forecast_cogs={"2026F": -1000.0},
+    )
+    assert sched.ar_days is not None and sched.ar_days > 0
+    assert sched.inv_days is not None and sched.ap_days is not None
+    fc = sched.forecast_rows[0]
+    assert fc.net_working_capital is not None and fc.net_working_capital > 0
+
+
 class TestHistoricalDrivers:
     def test_ar_days_computed(self):
         sched = build_working_capital_schedule(
