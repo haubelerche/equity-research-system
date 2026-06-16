@@ -558,19 +558,35 @@ def _forecast_by_label(forecast: dict[str, Any]) -> dict[str, dict[str, Any]]:
     debt_schedule = forecast.get("debt_schedule") or {}
     debt_method = str(debt_schedule.get("forecast_method") or "")
     debt_status = str(debt_schedule.get("status") or "")
-    debt_publishable = (
+    # net_borrowing is the financing FLOW that feeds FCFE. Trust it only when the
+    # schedule is explicitly FCFE-publishable, so an unapproved/low-confidence flow
+    # never leaks into a published FCFE or target price.
+    debt_flow_publishable = (
         bool(debt_schedule)
         and debt_schedule.get("is_fcfe_publishable") is True
         and debt_method not in {"stable_debt", "target_debt_ratio", "balance_sheet_delta", "missing"}
         and debt_status not in {"low", "blocked"}
     )
-    if not debt_publishable:
+    # The debt LEVEL (ending balance) is a balance-sheet position, distinct from the
+    # FCFE flow. It MUST be shown whenever it is anchored to a real reported balance —
+    # held flat (stable_debt), debt-free (zero_debt_policy), CFS-derived
+    # (direct_cash_flow) or an analyst path (manual_override). Hiding it renders a
+    # leveraged company as if it had no debt. Only fabricated levels
+    # (target_debt_ratio/balance_sheet_delta) or absent/unknown data stay hidden.
+    debt_level_displayable = debt_flow_publishable or debt_method in {
+        "stable_debt", "zero_debt_policy", "direct_cash_flow", "manual_override",
+    }
+    if not debt_level_displayable:
         for row in rows.values():
             for key in ("beginning_debt", "ending_debt", "total_debt", "net_borrowing", "cost_of_debt"):
                 row[key] = None
+    elif not debt_flow_publishable:
+        # Level is shown, but the FCFE flow stays gated.
+        for row in rows.values():
+            row["net_borrowing"] = None
 
     for debt_row in debt_schedule.get("forecast_rows", []):
-        if not debt_publishable:
+        if not debt_level_displayable:
             break
         if not isinstance(debt_row, dict):
             continue
@@ -578,13 +594,15 @@ def _forecast_by_label(forecast: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if not label or label not in rows:
             continue
         row = rows[label]
-        for target_key, source_key in (
+        level_fields = [
             ("beginning_debt", "beginning_interest_bearing_debt"),
             ("ending_debt", "ending_interest_bearing_debt"),
             ("total_debt", "ending_interest_bearing_debt"),
-            ("net_borrowing", "net_borrowing"),
             ("cost_of_debt", "cost_of_debt"),
-        ):
+        ]
+        if debt_flow_publishable:
+            level_fields.append(("net_borrowing", "net_borrowing"))
+        for target_key, source_key in level_fields:
             if row.get(target_key) is None:
                 row[target_key] = debt_row.get(source_key)
 

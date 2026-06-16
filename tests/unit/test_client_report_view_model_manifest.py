@@ -184,28 +184,63 @@ def test_forecast_cash_is_not_enriched_when_dividend_policy_is_missing():
     assert rows["2026F"]["cash"] is None
 
 
-def test_forecast_debt_is_not_enriched_when_debt_schedule_is_not_publishable():
+def test_forecast_debt_level_shown_but_flow_gated_for_stable_debt():
+    """A debt-bearing company forecast as held-flat (stable_debt, FCFE-blocked) MUST
+    still show its debt LEVEL — hiding it makes a leveraged issuer look debt-free.
+    Only the net_borrowing FLOW (which feeds FCFE) stays suppressed."""
     forecast = {
         "forecast_years": [{
             "label": "2026F",
             "revenue": 1000.0,
-            "total_debt": 343.0,
-            "net_borrowing": 343.0,
+            "total_debt": 4409.0,
+            "beginning_debt": 4409.0,
+            "ending_debt": 4409.0,
+            "net_borrowing": 0.0,
         }],
         "debt_schedule": {
             "is_fcfe_publishable": False,
+            "forecast_method": "stable_debt",
+            "status": "low",
             "forecast_rows": [{
                 "label": "2026F",
-                "beginning_interest_bearing_debt": 0.0,
-                "ending_interest_bearing_debt": 343.0,
-                "net_borrowing": 343.0,
+                "beginning_interest_bearing_debt": 4409.0,
+                "ending_interest_bearing_debt": 4409.0,
+                "net_borrowing": 0.0,
             }],
         },
     }
 
     rows = vm._forecast_by_label(forecast)
 
-    assert rows["2026F"]["total_debt"] is None
+    # Debt level is a balance-sheet position → shown.
+    assert rows["2026F"]["total_debt"] == pytest.approx(4409.0)
+    assert rows["2026F"]["ending_debt"] == pytest.approx(4409.0)
+    # net_borrowing flow feeds FCFE → gated when not FCFE-publishable.
+    assert rows["2026F"]["net_borrowing"] is None
+
+
+def test_forecast_debt_level_enriched_from_schedule_when_year_row_missing_it():
+    """When forecast_years lacks total_debt (e.g. older artifact) but the debt
+    schedule carries an anchored ending balance, the level is backfilled so the
+    report shows debt rather than a dash."""
+    forecast = {
+        "forecast_years": [{"label": "2026F", "revenue": 1000.0}],
+        "debt_schedule": {
+            "is_fcfe_publishable": False,
+            "forecast_method": "stable_debt",
+            "status": "low",
+            "forecast_rows": [{
+                "label": "2026F",
+                "beginning_interest_bearing_debt": 4409.0,
+                "ending_interest_bearing_debt": 4409.0,
+                "net_borrowing": 0.0,
+            }],
+        },
+    }
+
+    rows = vm._forecast_by_label(forecast)
+
+    assert rows["2026F"]["total_debt"] == pytest.approx(4409.0)
     assert rows["2026F"]["net_borrowing"] is None
 
 
