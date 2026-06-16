@@ -44,6 +44,20 @@ const packet = {
         profile: "mvp",
         rationale: "MVP coverage threshold.",
       },
+    }, {
+      metric_id: "valuation_method_data_readiness",
+      metric_name: "Valuation method data readiness",
+      metric_type: "coverage",
+      value: 0.023,
+      threshold: ">= 80%",
+      status: "fail",
+    }, {
+      metric_id: "official_reconciliation_rate",
+      metric_name: "Material official reconciliation rate",
+      metric_type: "coverage",
+      value: 0.023,
+      threshold: ">= 95%",
+      status: "fail",
     }],
   }, {
     plan_id: "03",
@@ -117,6 +131,8 @@ describe("EvalDashboardPage", () => {
     expect(screen.getAllByText("33.3%").length).toBeGreaterThan(0);
     expect(screen.queryByText("1/3 = 33.3%")).not.toBeInTheDocument();
     expect(screen.queryByText("0.3333333333333333")).not.toBeInTheDocument();
+    expect(screen.queryByText("Valuation method data readiness")).not.toBeInTheDocument();
+    expect(screen.queryByText("Material official reconciliation rate")).not.toBeInTheDocument();
     expect(screen.getByText("Số mã đạt công thức FCFF")).toBeInTheDocument();
     expect(screen.getByText("Số mã đủ điều kiện publish valuation")).toBeInTheDocument();
     expect(screen.getAllByText("New backend metric").length).toBeGreaterThan(0);

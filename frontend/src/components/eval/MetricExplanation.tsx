@@ -220,7 +220,7 @@ export function MetricExplanation({ def, result }: { def: MetricDef; result?: Be
       <section className="metric-explanation__section">
         <h3>Failed examples ({failures.length})</h3>
         {failures.length === 0 ? <p>Không có failed example trong metric result.</p> : <pre>{valueOrDash(failures)}</pre>}
-        <p>{result?.remediation_hint ?? "Chưa có hu?ng kh?c ph?c."}</p>
+        <p>{result?.remediation_hint ?? "Chưa có hướng khắc phục."}</p>
       </section>
     </div>
   );

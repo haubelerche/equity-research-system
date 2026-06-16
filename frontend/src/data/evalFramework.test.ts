@@ -13,6 +13,7 @@ describe("evalFramework", () => {
     expect(EVAL_LAYERS.find((layer) => layer.id === "report_quality")?.artifactAliases)
       .toContain("report_quality_eval.json");
   });
+
   it("keeps visible layer numbering contiguous after removed dashboard groups", () => {
     expect(EVAL_LAYERS.map((layer) => layer.title.split(" ")[0])).toEqual(["1", "2", "3", "4", "5", "6"]);
     expect(EVAL_LAYERS.map((layer) => layer.id)).toEqual([
@@ -32,6 +33,7 @@ describe("evalFramework", () => {
       "Vận hành",
     ]);
   });
+
   it("defines one threshold, technology and formula for every metric", () => {
     for (const layer of EVAL_LAYERS) {
       expect(layer.metrics.length).toBeGreaterThan(0);
@@ -43,12 +45,15 @@ describe("evalFramework", () => {
       }
     }
   });
+
   it("matches the executable evaluator threshold for RAG hit-rate", () => {
     const rag = EVAL_LAYERS.find((layer) => layer.id === "rag_evidence")!;
     expect(rag.metrics.find((metric) => metric.id === "hit_rate_at_5")!.threshold).toBe(0.9);
   });
-  it("keeps the evaluation pipeline and acceptance explanation", () => {
+
+  it("keeps the evaluation pipeline and acceptance explanation in Vietnamese", () => {
     expect(PIPELINE_ORDER[0]).toMatch(/Chất lượng dữ liệu/i);
     expect(ACCEPTANCE_EXPLANATION.length).toBeGreaterThan(0);
+    expect(ACCEPTANCE_EXPLANATION.join(" ")).toContain("Thiếu dữ liệu benchmark");
   });
 });

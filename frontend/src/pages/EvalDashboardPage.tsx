@@ -26,7 +26,14 @@ type ModalState =
   | null;
 
 type MetricResultMap = Record<string, BenchmarkMetricResult>;
-const HIDDEN_DASHBOARD_METRIC_IDS = new Set(["ocr_unresolved_rate", "corpus_ocr_unresolved_rate"]);
+
+const HIDDEN_DASHBOARD_METRIC_IDS = new Set([
+  "ocr_unresolved_rate",
+  "corpus_ocr_unresolved_rate",
+  "official_reconciliation_rate",
+  "valuation_method_data_readiness",
+]);
+
 type PublicationIssue = {
   artifact: string;
   artifactName: string;
@@ -90,7 +97,7 @@ function metricFromResult(result: BenchmarkMetricResult): MetricDef {
 
 function metricsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): MetricDef[] {
   const results = resultsForLayer(packet, layer);
-  const configured = layer.metrics;
+  const configured = layer.metrics.filter((metric) => !HIDDEN_DASHBOARD_METRIC_IDS.has(metric.id));
   const configuredIds = new Set(configured.flatMap((metric) => [metric.id, ...(metric.aliases ?? [])]));
   const dynamic = Object.entries(results)
     .filter(([id]) => id && !configuredIds.has(id) && !HIDDEN_DASHBOARD_METRIC_IDS.has(id))
@@ -343,7 +350,7 @@ export function EvalDashboardPage() {
                     }, { value: null, status: issue.status ?? "fail" })} />
                   </header>
                   <dl>
-                    <div><dt>L?i</dt><dd>{issue.reason}</dd></div>
+                    <div><dt>Lỗi</dt><dd>{issue.reason}</dd></div>
                     <div><dt>Metric ID</dt><dd><code>{issue.metricId}</code></dd></div>
                     <div><dt>Severity</dt><dd>{displayRuntimeValue(issue.severity)}</dd></div>
                     <div><dt>Trạng thái metric</dt><dd>{displayRuntimeValue(issue.status)}</dd></div>
@@ -369,7 +376,7 @@ export function EvalDashboardPage() {
               <tr>
                 <th>Run</th>
                 <th>Chỉ số</th>
-                <th>Lo?i</th>
+                <th>Loại</th>
                 <th>Ngưỡng</th>
                 <th>Kết quả</th>
                 <th>Trạng thái</th>
@@ -433,7 +440,7 @@ export function EvalDashboardPage() {
                       <th>Chỉ số</th>
                       <th>Aggregation</th>
                       <th>Tử số</th>
-                      <th>M?u s?</th>
+                      <th>Mẫu số</th>
                       <th>Kết quả</th>
                       <th>Trạng thái</th>
                       <th>Chi tiết</th>
@@ -497,7 +504,6 @@ export function EvalDashboardPage() {
           <MetricExplanation def={modal.metric} result={modal.result} />
         </EvalModal>
       )}
-
     </section>
   );
 }

@@ -19,7 +19,10 @@ const metric = (
   threshold: number,
   technology: string,
   formula: string,
-  options: Omit<Partial<MetricDef>, "id" | "label" | "englishLabel" | "unit" | "comparator" | "threshold" | "technology" | "formula"> = {},
+  options: Omit<
+    Partial<MetricDef>,
+    "id" | "label" | "englishLabel" | "unit" | "comparator" | "threshold" | "technology" | "formula"
+  > = {},
 ): MetricDef => ({ id, label, englishLabel, unit, comparator, threshold, technology, formula, ...options });
 
 export const EVAL_LAYERS: EvalLayer[] = [
@@ -31,9 +34,9 @@ export const EVAL_LAYERS: EvalLayer[] = [
     metrics: [
       metric("data_reliability_score", "Điểm tin cậy dữ liệu tổng hợp", "Data reliability score", "%", "gte", 0.9, "Pandera + Financial Fact Reconciliation + OCR Validation Gate", "Weighted score từ coverage, reconciliation, provenance, period completeness, schema validity, fact confidence và OCR health", { thresholdLabel: "≥ 90/100", metricType: "score", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("core_metric_coverage", "Độ bao phủ chỉ số cốt lõi", "Core metric coverage", "%", "gte", 0.95, "Valuation Data Requirements", "Số fact bắt buộc cho các phương pháp định giá có dữ liệu accepted / Tổng fact bắt buộc", { thresholdLabel: "≥ 95%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("valuation_method_data_readiness", "Muc san sang du lieu cho phuong phap dinh gia", "Valuation method data readiness", "%", "gte", 0.8, "Valuation Data Requirements + Pandera", "Ty le ma du du lieu cho it nhat mot phuong phap dinh gia chinh", { thresholdLabel: ">= 80%", metricType: "coverage", scope: "benchmark_suite", severity: "P1", blocksPublish: false }),
-      metric("period_completeness", "Muc day du theo ky bat buoc", "Required periods completeness", "%", "gte", 0.95, "Data Quality Framework noi bo", "So ky bat buoc co du lieu / Tong so ky bat buoc", { aliases: ["required_periods_completeness"], thresholdLabel: ">= 95%", metricType: "coverage", scope: "benchmark_suite", severity: "P1", blocksPublish: false }),
-      metric("provenance_coverage", "Do bao phu nguon cho accepted facts", "Accepted facts source coverage", "%", "gte", 0.95, "Evidence Packet + Source Registry", "So accepted facts co source_id hop le / Tong accepted facts dung trong report", { aliases: ["source_provenance_coverage", "accepted_facts_source_coverage"], thresholdLabel: ">= 95%", metricType: "coverage", scope: "benchmark_suite", severity: "P1", blocksPublish: false }),
+      metric("valuation_method_data_readiness", "Mức sẵn sàng dữ liệu cho phương pháp định giá", "Valuation method data readiness", "%", "gte", 0.8, "Valuation Data Requirements + Pandera", "Tỷ lệ mã đủ dữ liệu cho ít nhất một phương pháp định giá chính", { thresholdLabel: "≥ 80%", metricType: "coverage", scope: "benchmark_suite", severity: "P1", blocksPublish: false }),
+      metric("period_completeness", "Mức đầy đủ theo kỳ bắt buộc", "Required periods completeness", "%", "gte", 0.95, "Data Quality Framework nội bộ", "Số kỳ bắt buộc có dữ liệu / Tổng số kỳ bắt buộc", { aliases: ["required_periods_completeness"], thresholdLabel: "≥ 95%", metricType: "coverage", scope: "benchmark_suite", severity: "P1", blocksPublish: false }),
+      metric("provenance_coverage", "Độ bao phủ nguồn cho accepted facts", "Accepted facts source coverage", "%", "gte", 0.95, "Evidence Packet + Source Registry", "Số accepted facts có source_id hợp lệ / Tổng accepted facts dùng trong report", { aliases: ["source_provenance_coverage", "accepted_facts_source_coverage"], thresholdLabel: "≥ 95%", metricType: "coverage", scope: "benchmark_suite", severity: "P1", blocksPublish: false }),
       metric("official_reconciliation_rate", "Tỷ lệ đối soát dữ kiện trọng yếu với nguồn chính thức", "Material official reconciliation rate", "%", "gte", 0.95, "Financial Fact Reconciliation", "Số dữ kiện trọng yếu khớp nguồn chính thức / Tổng dữ kiện trọng yếu cần đối soát", { thresholdLabel: "≥ 95%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("material_ocr_error_count", "Số lỗi OCR ảnh hưởng số liệu trọng yếu", "Material OCR error count", "", "lte", 0, "OCR Validation Gate", "Số lỗi OCR ảnh hưởng số liệu dùng trong report", { aliases: ["ocr_material_error_count"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("duplicate_fact_count", "Số canonical fact trùng lặp chưa xử lý", "Duplicate canonical fact count", "", "lte", 0, "Fact Deduplication Gate", "Số fact chuẩn hóa bị trùng key ticker-period-line_item-source_priority", { aliases: ["duplicate_fact_rate"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
@@ -86,9 +89,9 @@ export const EVAL_LAYERS: EvalLayer[] = [
       metric("net_debt_reconciliation_error", "Số lỗi đối chiếu nợ ròng", "Net debt reconciliation error", "", "lte", 0, "Net Debt Reconciliation", "Số case nợ ròng không khớp công thức chuẩn", { thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
     ],
     methodology: [
-      "Net debt = interest-bearing debt − cash − short-term investments.",
-      "EPS = net income × 1.000 / diluted shares; FCFF = EBIT(1−tax) + D&A − CAPEX − ΔNWC.",
-      "FCFE = NI + D&A − CAPEX − ΔNWC + net borrowing; discount rate phải lớn hơn terminal growth.",
+      "Net debt = interest-bearing debt - cash - short-term investments.",
+      "EPS = net income / diluted shares; FCFF = EBIT(1-tax) + D&A - CAPEX - delta NWC.",
+      "FCFE = NI + D&A - CAPEX - delta NWC + net borrowing; discount rate phải lớn hơn terminal growth.",
       "Giá mục tiêu, cầu nối EV sang vốn chủ sở hữu và ma trận độ nhạy phải nhất quán với mô hình định giá.",
     ],
   },
@@ -119,12 +122,12 @@ export const EVAL_LAYERS: EvalLayer[] = [
     artifact: "report_eval.json",
     artifactAliases: ["report_quality_eval.json"],
     metrics: [
-      metric("report.quality_total", "Điểm chất lượng báo cáo tổng hợp", "Report quality total", "", "gte", 85, "Report Quality Rubric", "Tổng điểm rubric report quality trên các section bắt buộc", { aliases: ["report_quality_score"], thresholdLabel: ">= 85", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
-      metric("report.completeness", "Độ đầy đủ của báo cáo", "Report completeness", "%", "gte", 90, "Report Completeness Gate", "Số section, bảng và chart bắt buộc đã có / Tổng yêu cầu", { thresholdLabel: ">= 90%", metricType: "coverage", scope: "report_run", severity: "P1", blocksPublish: true }),
-      metric("report.financial_analysis_depth", "Độ sâu phân tích tài chính", "Financial analysis depth", "", "gte", 80, "Report Quality Rubric", "Điểm rubric cho driver tài chính cụ thể theo công ty", { thresholdLabel: ">= 80", metricType: "score", scope: "report_run", severity: "P2", blocksPublish: false }),
-      metric("report.forecast_rationale", "Chất lượng lý giải forecast", "Forecast rationale", "", "gte", 80, "Report Quality Rubric", "Điểm rubric cho revenue, margin, capex và NWC driver rationale", { thresholdLabel: ">= 80", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
-      metric("report.valuation_transparency", "Tính minh bạch định giá", "Valuation transparency", "", "gte", 85, "Valuation Transparency Gate", "Điểm rubric cho method selection, assumptions, WACC, bridge và sensitivity", { thresholdLabel: ">= 85", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: true }),
-      metric("report.evidence_integration", "Mức độ tích hợp bằng chứng", "Evidence integration", "", "gte", 80, "Report Quality Rubric", "Điểm rubric cho mức độ gắn claim với evidence và formula trace", { thresholdLabel: ">= 80", metricType: "score", scope: "report_run", severity: "P2", blocksPublish: false }),
+      metric("report.quality_total", "Điểm chất lượng báo cáo tổng hợp", "Report quality total", "", "gte", 85, "Report Quality Rubric", "Tổng điểm rubric report quality trên các section bắt buộc", { aliases: ["report_quality_score"], thresholdLabel: "≥ 85", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
+      metric("report.completeness", "Độ đầy đủ của báo cáo", "Report completeness", "%", "gte", 90, "Report Completeness Gate", "Số section, bảng và chart bắt buộc đã có / Tổng yêu cầu", { thresholdLabel: "≥ 90%", metricType: "coverage", scope: "report_run", severity: "P1", blocksPublish: true }),
+      metric("report.financial_analysis_depth", "Độ sâu phân tích tài chính", "Financial analysis depth", "", "gte", 80, "Report Quality Rubric", "Điểm rubric cho driver tài chính cụ thể theo công ty", { thresholdLabel: "≥ 80", metricType: "score", scope: "report_run", severity: "P2", blocksPublish: false }),
+      metric("report.forecast_rationale", "Chất lượng lý giải forecast", "Forecast rationale", "", "gte", 80, "Report Quality Rubric", "Điểm rubric cho revenue, margin, capex và NWC driver rationale", { thresholdLabel: "≥ 80", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
+      metric("report.valuation_transparency", "Tính minh bạch định giá", "Valuation transparency", "", "gte", 85, "Valuation Transparency Gate", "Điểm rubric cho method selection, assumptions, WACC, bridge và sensitivity", { thresholdLabel: "≥ 85", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: true }),
+      metric("report.evidence_integration", "Mức độ tích hợp bằng chứng", "Evidence integration", "", "gte", 80, "Report Quality Rubric", "Điểm rubric cho mức độ gắn claim với evidence và formula trace", { thresholdLabel: "≥ 80", metricType: "score", scope: "report_run", severity: "P2", blocksPublish: false }),
     ],
     methodology: [
       "Report quality là diagnostic và release gate riêng cho completeness và valuation transparency.",
@@ -167,7 +170,7 @@ export const PIPELINE_ORDER: string[] = [
 ];
 
 export const ACCEPTANCE_EXPLANATION: string[] = [
-  "Bảng sử dụng một bộ ngưỡng chuẩn dành cho bản vận hành chính thức; P0, P1 và P2 đã được loại bỏ để tránh tạo trạng thái trung gian không phục vụ quyết định.",
+  "Bảng sử dụng một bộ ngưỡng chuẩn dành cho bản vận hành chính thức; P0, P1 và P2 đã được phân loại để tránh tạo trạng thái trung gian không phục vụ quyết định.",
   "Chỉ số dùng điều kiện ≥ sẽ Chưa đạt khi thấp hơn ngưỡng; chỉ số dùng điều kiện ≤ sẽ Chưa đạt khi cao hơn ngưỡng.",
   "Thiếu dữ liệu benchmark được xem là Chưa đạt vì hệ thống không có đủ bằng chứng để xác nhận chất lượng.",
 ];
