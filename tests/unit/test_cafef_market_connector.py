@@ -52,3 +52,11 @@ def test_adjusted_close_preferred_over_raw():
 
 def test_build_url_contains_symbol():
     assert "Symbol=DHG" in cm.build_url("dhg")
+
+
+def test_build_url_uses_live_du_lieu_host():
+    # The legacy s.cafef.vn handler returns "symbol is null or empty"; the live
+    # endpoint moved under cafef.vn/du-lieu/. Lock the working host.
+    url = cm.build_url("DHG")
+    assert url.startswith("https://cafef.vn/du-lieu/Ajax/PageNew/DataHistory/PriceHistory.ashx")
+    assert "s.cafef.vn" not in url

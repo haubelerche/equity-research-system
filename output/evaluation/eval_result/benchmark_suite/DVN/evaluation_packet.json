@@ -1,0 +1,92 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "source": "benchmark_suite",
+  "ticker": "DVN",
+  "generated_at": "2026-06-17T14:58:34.505086+00:00",
+  "evaluation_order": [
+    "03"
+  ],
+  "fail_closed": true,
+  "overall_status": "pass",
+  "publication_status": "DRAFT_PUBLISHABLE",
+  "client_final_authorized": false,
+  "artifacts": [
+    {
+      "plan_id": "03",
+      "name": "Financial calculation",
+      "artifact": "financial_eval.json",
+      "status": "not_applicable",
+      "metrics": {
+        "test_suite_status": "not_measured",
+        "tests_passed": 0,
+        "tests_failed": 0
+      },
+      "metric_results": [
+        {
+          "id": "valuation_artifact",
+          "label": "Valuation run artifact",
+          "source": "storage/runs/*dvn*/valuation.json",
+          "detail": "valuation_artifact_missing_for_ticker",
+          "metric_id": "valuation_artifact",
+          "metric_name": "Valuation run artifact",
+          "category": "financial_model",
+          "layer": "release_gate",
+          "metric_type": "error_count",
+          "scope": "report_run",
+          "severity": "P0",
+          "blocks_publish": true,
+          "value": null,
+          "threshold": "pass",
+          "threshold_operator": "=",
+          "unit": "count",
+          "status": "not_applicable",
+          "legacy_status": "not_applicable",
+          "sample_size": 0,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "valuation",
+          "failed_examples": [],
+          "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+          "evaluator": {
+            "id": "valuation_artifact",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "not_executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": null,
+            "numerator": null,
+            "denominator": null,
+            "per_sample_results": []
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": null,
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-17T14:58:34.505086+00:00"
+        }
+      ],
+      "blocking_issues": []
+    }
+  ],
+  "summary": {
+    "pass": 0,
+    "fail": 0,
+    "blocked": 0,
+    "not_measured": 0
+  }
+}

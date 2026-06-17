@@ -1,0 +1,15 @@
+{
+  "ticker": "DP2",
+  "company_name": "DP2",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DP2 FY2022 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DP2\\2022\\source_document.pdf",
+  "published_date": "2022-12-31",
+  "fiscal_year": 2022,
+  "language": "vi",
+  "file_hash": "649cd334abdd2e2a455136445baac84e50c99b59dca448ee9784ecb7ccc62342",
+  "staged_at": "2026-06-15T09:41:22.051982+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DP2\\DP2 2022.pdf"
+}

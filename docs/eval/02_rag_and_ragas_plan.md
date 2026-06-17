@@ -92,7 +92,7 @@ Mot report co citation van co the sai neu retrieved context khong lien quan, cit
 
 | Hanh dong | Ket qua |
 |---|---|
-| Tao `config/eval/rag_golden_queries.yaml` | Co benchmark retrieval lap lai |
+| Tao/cap nhat `config/benchmarks/02_ragas_retrieval/golden_queries/` | Co benchmark retrieval lap lai |
 | Them test `tests/evaluation/test_retrieval_golden.py` | Bat regression khi chunking/retrieval thay doi |
 | Bat buoc evidence packet co page/source metadata | Citation audit duoc den document goc |
 

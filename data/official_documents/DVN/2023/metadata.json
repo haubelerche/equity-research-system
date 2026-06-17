@@ -1,0 +1,15 @@
+{
+  "ticker": "DVN",
+  "company_name": "DVN",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DVN FY2023 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DVN\\2023\\source_document.pdf",
+  "published_date": "2023-12-31",
+  "fiscal_year": 2023,
+  "language": "vi",
+  "file_hash": "a165bfdfdac2cba1e797f62c8ce775e8bb09d5718aa95025a48dfb3e566b5cbc",
+  "staged_at": "2026-06-15T09:41:23.373342+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DVN\\DVN 2023.pdf"
+}

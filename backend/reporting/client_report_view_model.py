@@ -120,6 +120,7 @@ class ClientReportViewModel:
     metric_availability: dict[str, Any] = field(default_factory=dict)
     company_profile: dict[str, Any] = field(default_factory=dict)
     market_data: MarketDataArtifact | None = None
+    valuation_evidence: dict[str, Any] = field(default_factory=dict)
     selected_valuation_methods: list[str] = field(default_factory=list)
     valuation_summary_table: TableData | None = None
     wacc_bridge_table: TableData | None = None
@@ -1229,9 +1230,18 @@ def _report_display_governance(
     # divergence, market-sanity break without a bridge) must not promote a hero
     # target price or a BUY/HOLD/SELL recommendation — regardless of any numeric
     # value present in the blend artifact.
-    if policy is not None and not getattr(policy, "target_price_publishable", True):
+    policy_blocks_display = policy is not None and not getattr(policy, "target_price_publishable", True)
+    local_blocks_display = bool(
+        "no_eligible_valuation_method" in blocking_reasons
+        or "blend_is_draft_only" in blocking_reasons
+    )
+    if policy_blocks_display:
         reasons = list(reasons) + list(getattr(policy, "blocking_reasons", None) or [])
         blocking_reasons = sorted(set(reasons))
+    if policy_blocks_display or local_blocks_display:
+        approved_for_display = False
+        target = None
+        upside = None
 
     # Publication QA stays in metadata/review artifacts. It must not replace
     # usable client-facing values or inject internal workflow states into PDF.
@@ -1243,7 +1253,7 @@ def _report_display_governance(
         "upside": upside,
         "recommendation": _recommendation(upside, mode, approved_for_display),
         "blocking_reasons": blocking_reasons,
-        "blend_target_price": target,  # keep blend for cross-check display
+        "blend_target_price": _display_target_price(val_result, blend, None),
     }
 
 
@@ -1254,9 +1264,11 @@ def _recommendation(
     approved_for_display: bool = False,
     dividend_yield: float = 0.0,
 ) -> str:
-    """Rating based on total expected return with exactly three labels."""
+    """Rating based on total expected return, gated before publication."""
+    if not approved_for_display:
+        return "Chưa phát hành"
     if upside is None:
-        return "Giữ"
+        return "Chưa phát hành"
     total_return = upside + dividend_yield
     if total_return > 0.20:
         return "Mua"
@@ -2215,6 +2227,57 @@ def _market_data(
     return None
 
 
+def _valuation_evidence_summary(
+    valuation: dict[str, Any],
+    policy: Any,
+    display_gate: dict[str, Any],
+    market_data: MarketDataArtifact | None,
+) -> dict[str, Any]:
+    """Collect the evidence the renderer must disclose, not just the conclusion."""
+    formula_traces = valuation.get("formula_traces") or []
+    market_bridge = valuation.get("market_sanity_bridge") or {}
+    multiples = valuation.get("multiples") or {}
+    pe_forward = valuation.get("pe_forward") or {}
+    all_warnings: list[str] = []
+    for section_name in ("fcff", "fcfe", "blend_dcf", "pe_forward", "multiples", "forecast"):
+        section = valuation.get(section_name) or {}
+        if isinstance(section, dict):
+            all_warnings.extend(str(item) for item in (section.get("warnings") or []))
+    peer_source = (
+        pe_forward.get("peer_data_source")
+        or multiples.get("peer_data_source")
+    )
+    method_diagnostics = {
+        name: {
+            "publishable": diag.publishable,
+            "computed": diag.computed,
+            "target_price_vnd": diag.target_price_vnd,
+            "confidence": diag.confidence,
+            "blocking_reasons": list(diag.blocking_reasons),
+            "warnings": list(diag.warnings),
+        }
+        for name, diag in getattr(policy, "method_diagnostics", {}).items()
+    }
+    return {
+        "formula_trace_count": len(formula_traces),
+        "formula_trace_methods": [
+            str((trace or {}).get("method") or (trace or {}).get("formula_id") or "")
+            for trace in formula_traces
+            if isinstance(trace, dict)
+        ],
+        "policy_status": getattr(policy, "status", ""),
+        "policy_blocking_reasons": list(getattr(policy, "blocking_reasons", []) or []),
+        "policy_warnings": list(getattr(policy, "warnings", []) or []),
+        "display_blocking_reasons": list(display_gate.get("blocking_reasons") or []),
+        "method_diagnostics": method_diagnostics,
+        "market_sanity_bridge": market_bridge if isinstance(market_bridge, dict) else {},
+        "peer_data_source": peer_source,
+        "relative_valuation_status": multiples.get("relative_valuation_status"),
+        "market_data_warnings": list(getattr(market_data, "warnings", []) or []) if market_data is not None else [],
+        "model_warnings": list(dict.fromkeys(all_warnings)),
+    }
+
+
 def _approved_agent_narrative(manifest) -> dict[str, str]:
     """Load agent-authored prose while keeping QA state out of client content.
 
@@ -2448,6 +2511,12 @@ def build_client_report_view_model(
         or _table_driver_sensitivity(fcff, blend if display_gate["approved_for_display"] else {}, forecast)
     )
     critic_findings = _load_critic_findings(manifest, run_id=run_id)
+    valuation_evidence = _valuation_evidence_summary(
+        val,
+        valuation_policy,
+        display_gate,
+        market_data,
+    )
 
     news_citations = _load_news_citations(ticker, company_name)
     insight_pack = _build_insight_pack_for_report(
@@ -2573,6 +2642,7 @@ def build_client_report_view_model(
             "Hoạt động chính": "Sản xuất và phân phối dược phẩm",
         },
         market_data=market_data,
+        valuation_evidence=valuation_evidence,
         selected_valuation_methods=[str(item).upper() for item in (val.get("selected_methods") or [])],
         valuation_summary_table=_table_valuation_summary(val),
         wacc_bridge_table=_table_wacc_bridge(val),

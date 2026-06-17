@@ -1,0 +1,23 @@
+{
+  "ticker": "LDP",
+  "generated_at": "2026-06-16T17:06:43.247340+00:00",
+  "outcome": {
+    "ticker": "LDP",
+    "meeting_year": 2026,
+    "source_kind": "text",
+    "files": [
+      "LDP DHCD 2026.pdf"
+    ],
+    "pages": 219,
+    "approved_resolutions": 15,
+    "drivers": {
+      "dividend_plan": 0,
+      "borrowing_plan": 2,
+      "investment_plan": 2,
+      "rnd_and_product_focus": 4,
+      "business_direction": 6,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

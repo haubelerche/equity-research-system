@@ -167,6 +167,8 @@ PLANS: tuple[PlanDefinition, ...] = (
     ),
 )
 
+SIDECAR_ARTIFACTS = {"publication_readiness.json"}
+
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -371,6 +373,26 @@ def evaluate_project(
             **domain_payload,
         }
         _write_json(output_dir / plan.artifact, payload)
+        if plan.id == "06" and isinstance(runtime_result.get("publication_readiness"), dict):
+            publication_payload = {
+                "schema_version": STANDARD_SCHEMA_VERSION,
+                "benchmark_suite_version": "benchmark_standards_v1",
+                "plan_id": "06B",
+                "plan_name": "Publication readiness",
+                "ticker": ticker.upper(),
+                "run_id": run_id,
+                "generated_at": generated_at,
+                "status": "pass" if runtime_result["publication_readiness"].get("passed") else "fail",
+                "blocking_issues": list(
+                    runtime_result["publication_readiness"].get("blocking_reasons") or []
+                ),
+                "checks": runtime_result["publication_readiness"].get("checks") or {},
+                "metric_results": [
+                    metric for metric in metric_results
+                    if isinstance(metric, dict) and metric.get("id") == "publication_readiness"
+                ],
+            }
+            _write_json(output_dir / "publication_readiness.json", publication_payload)
         prior_results[plan.id] = payload
         artifacts.append(
             {
@@ -479,7 +501,7 @@ def _artifact_summary_from_payload(
     blocking_issues = payload.get("blocking_issues")
     if not isinstance(blocking_issues, list):
         blocking_issues = []
-    return {
+    summary = {
         "plan_id": str(payload.get("plan_id") or (plan.id if plan else "")),
         "name": str(payload.get("name") or payload.get("plan_name") or (plan.name if plan else artifact_name)),
         "artifact": artifact_name,
@@ -488,6 +510,90 @@ def _artifact_summary_from_payload(
         "metric_results": _normalize_metric_results(metric_results),
         "blocking_issues": blocking_issues,
     }
+    for key in ("source", "generated_at", "cohort", "tickers"):
+        if key in payload:
+            summary[key] = payload[key]
+    return summary
+
+
+def _candidate_artifact_paths(
+    suite_dir: Path,
+    artifact_name: str,
+    manifest: dict[str, Any],
+) -> list[Path]:
+    paths = [suite_dir / artifact_name]
+    for ticker in manifest.get("tickers") or []:
+        ticker_path = suite_dir / str(ticker).upper() / artifact_name
+        if ticker_path.is_file():
+            paths.append(ticker_path)
+    return paths
+
+
+def _artifact_run_context(payload: dict[str, Any]) -> tuple[str | None, str | None]:
+    run_id = payload.get("run_id")
+    generated_at = payload.get("generated_at")
+    return (
+        str(run_id) if isinstance(run_id, str) and run_id.strip() else None,
+        str(generated_at) if isinstance(generated_at, str) and generated_at.strip() else None,
+    )
+
+
+def _artifact_matches_manifest_context(
+    payload: dict[str, Any],
+    manifest: dict[str, Any],
+) -> bool:
+    artifact_run_id, artifact_generated_at = _artifact_run_context(payload)
+    manifest_run_id, manifest_generated_at = _artifact_run_context(manifest)
+    if manifest_run_id and artifact_run_id:
+        return artifact_run_id == manifest_run_id
+    if manifest_generated_at and artifact_generated_at:
+        return artifact_generated_at == manifest_generated_at
+    return False
+
+
+def _manifest_has_run_context(manifest: dict[str, Any]) -> bool:
+    run_id, generated_at = _artifact_run_context(manifest)
+    return bool(run_id or generated_at)
+
+
+def _is_root_suite_artifact(path: Path, paths: list[Path]) -> bool:
+    return bool(paths) and path == paths[0]
+
+
+def _is_benchmark_suite_payload(payload: dict[str, Any]) -> bool:
+    return str(payload.get("source") or "") == "benchmark_suite"
+
+
+def _freshest_matching_artifact_path(
+    paths: list[Path],
+    manifest: dict[str, Any],
+    *,
+    prefer_root_suite_artifact: bool = False,
+    allow_latest_suite_fallback: bool = False,
+) -> Path | None:
+    matching: list[tuple[Path, dict[str, Any]]] = []
+    for path in paths:
+        if not path.is_file():
+            continue
+        payload = _load_json_object(path)
+        if not payload or not _artifact_matches_manifest_context(payload, manifest):
+            continue
+        matching.append((path, payload))
+    if matching:
+        if prefer_root_suite_artifact:
+            for path, payload in matching:
+                if _is_root_suite_artifact(path, paths) and _is_benchmark_suite_payload(payload):
+                    return path
+        return max((path for path, _payload in matching), key=lambda path: path.stat().st_mtime)
+    if not allow_latest_suite_fallback or not paths:
+        return None
+    root_path = paths[0]
+    if not root_path.is_file():
+        return None
+    root_payload = _load_json_object(root_path)
+    if not root_payload or not _is_benchmark_suite_payload(root_payload):
+        return None
+    return root_path
 
 
 def _normalize_metric_results(metrics: list[Any]) -> list[Any]:
@@ -527,10 +633,11 @@ def _merge_benchmark_suite_sibling_artifacts(
     """Augment a partial suite manifest with already-written sibling artifacts.
 
     Focused benchmark runs may refresh only one plan and rewrite
-    ``benchmark_suite.json`` with that plan. The dashboard still needs the other
-    runtime results that already exist beside the manifest, so this loader
-    combines those result artifacts without fabricating metrics from config
-    fixtures.
+    ``benchmark_suite.json`` with that plan. We first prefer sibling artifacts
+    sharing the same benchmark run context (``run_id`` or ``generated_at``), then
+    fall back to root suite artifacts that explicitly declare ``source:
+    benchmark_suite`` so the dashboard remains latest-by-plan without falling
+    through to ticker-local artifacts.
     """
     artifacts = [
         _normalize_artifact_summary(item) for item in manifest.get("artifacts") or []
@@ -545,8 +652,13 @@ def _merge_benchmark_suite_sibling_artifacts(
     for plan in PLANS:
         if plan.artifact in existing:
             continue
-        path = suite_dir / plan.artifact
-        if not path.is_file():
+        path = _freshest_matching_artifact_path(
+            _candidate_artifact_paths(suite_dir, plan.artifact, manifest),
+            manifest,
+            prefer_root_suite_artifact=True,
+            allow_latest_suite_fallback=True,
+        )
+        if path is None:
             continue
         summary = _artifact_summary_from_payload(
             plan.artifact,
@@ -596,10 +708,24 @@ def _merge_benchmark_suite_sibling_artifacts(
 def load_evaluation_artifact(
     artifact_name: str, output_dir: Path = DEFAULT_OUTPUT_DIR
 ) -> dict[str, Any] | None:
-    allowed = {plan.artifact for plan in PLANS} | {"evaluation_packet.json"}
+    allowed = {plan.artifact for plan in PLANS} | SIDECAR_ARTIFACTS | {"evaluation_packet.json"}
     if artifact_name not in allowed:
         return None
     benchmark_path = output_dir / "benchmark_suite" / artifact_name
+    benchmark_manifest = output_dir / "benchmark_suite" / "benchmark_suite.json"
+    if benchmark_manifest.exists() and artifact_name != "evaluation_packet.json":
+        manifest = _load_json_object(benchmark_manifest)
+        path = _freshest_matching_artifact_path(
+            _candidate_artifact_paths(benchmark_manifest.parent, artifact_name, manifest),
+            manifest,
+            prefer_root_suite_artifact=True,
+            allow_latest_suite_fallback=True,
+        )
+        if path is not None:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            return _normalize_artifact_summary(payload) if isinstance(payload, dict) else None
+        if _manifest_has_run_context(manifest):
+            return None
     if benchmark_path.exists():
         payload = json.loads(benchmark_path.read_text(encoding="utf-8"))
         return _normalize_artifact_summary(payload) if isinstance(payload, dict) else None

@@ -1,0 +1,7 @@
+ticker,fiscal_year,period_type,statement_type,metric_id,value,unit,document_title,page_number,table_name,extracted_text,extraction_method,verified_by,verified_at
+DP1,2024,FY,income_statement,revenue.net,2025.737,vnd_bn,DP1 FY2025 Annual Report / Audited Financial Statements,22,,Doanh thu thuần,pdf_table,,
+DP1,2025,FY,income_statement,revenue.net,2187.551,vnd_bn,DP1 FY2025 Annual Report / Audited Financial Statements,22,,Doanh thu thuần,pdf_table,,
+DP1,2024,FY,income_statement,profit_before_tax.total,144219.0,vnd_bn,DP1 FY2025 Annual Report / Audited Financial Statements,22,,Lợi nhuận trước thuế,pdf_table,,
+DP1,2025,FY,income_statement,profit_before_tax.total,128785.0,vnd_bn,DP1 FY2025 Annual Report / Audited Financial Statements,22,,Lợi nhuận trước thuế,pdf_table,,
+DP1,2024,FY,income_statement,net_income.total,113759.0,vnd_bn,DP1 FY2025 Annual Report / Audited Financial Statements,22,,Lợi nhuận sau thuế,pdf_table,,
+DP1,2025,FY,income_statement,net_income.total,103028.0,vnd_bn,DP1 FY2025 Annual Report / Audited Financial Statements,22,,Lợi nhuận sau thuế,pdf_table,,

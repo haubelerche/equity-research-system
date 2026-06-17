@@ -1,0 +1,24 @@
+{
+  "ticker": "CDP",
+  "generated_at": "2026-06-16T15:48:16.480160+00:00",
+  "outcome": {
+    "ticker": "CDP",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "CDP DHCD 2026 (1).pdf",
+      "CDP DHCD 2026 (2).pdf"
+    ],
+    "pages": 21,
+    "approved_resolutions": 12,
+    "drivers": {
+      "dividend_plan": 0,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 0,
+      "business_direction": 8,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

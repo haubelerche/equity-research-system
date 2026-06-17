@@ -1,0 +1,35 @@
+{
+  "ticker": "DHN",
+  "years_requested": 4,
+  "period": "year",
+  "from_year": 2022,
+  "to_year": 2025,
+  "provider": "auto",
+  "segment": "pharma",
+  "started_at": "2026-06-16T20:33:58.604126+00:00",
+  "finished_at": "2026-06-16T20:36:33.634291+00:00",
+  "elapsed_s": 155.03,
+  "overall_status": "partial_error",
+  "financials": {
+    "status": "ok",
+    "facts_upserted": 124,
+    "facts_promoted": 124,
+    "promotion_skipped_low_confidence": 0,
+    "promotion_warnings": [],
+    "period": "year",
+    "from_year": 2022,
+    "to_year": 2025,
+    "provider": "auto"
+  },
+  "price": {
+    "status": "ok",
+    "rows_upserted": 266,
+    "start": "2022-06-17",
+    "end": "2026-06-16"
+  },
+  "company": {
+    "status": "error",
+    "error": "new row for relation \"companies\" violates check constraint \"companies_exchange_check\"\nDETAIL:  Failing row contains (DHN, DHN, null, UPCoM, pharma, null, VND, 2026-06-16 20:36:35.133667+00, 2026-06-16 20:36:35.133667+00).\n"
+  },
+  "catalysts": {}
+}

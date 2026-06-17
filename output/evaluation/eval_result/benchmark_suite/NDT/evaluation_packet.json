@@ -1,0 +1,99 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "source": "benchmark_suite",
+  "ticker": "NDT",
+  "generated_at": "2026-06-16T13:19:52.077425+00:00",
+  "evaluation_order": [
+    "03"
+  ],
+  "fail_closed": true,
+  "overall_status": "blocked",
+  "publication_status": "BLOCKED_BY_P0",
+  "client_final_authorized": false,
+  "artifacts": [
+    {
+      "plan_id": "03",
+      "name": "Financial calculation",
+      "artifact": "financial_eval.json",
+      "status": "blocked",
+      "metrics": {
+        "test_suite_status": "pass",
+        "tests_passed": 132,
+        "tests_failed": 0
+      },
+      "metric_results": [
+        {
+          "id": "valuation_artifact",
+          "label": "Valuation run artifact",
+          "source": "storage/runs/*ndt*/valuation.json",
+          "detail": "valuation_artifact_missing_for_ticker",
+          "metric_id": "valuation_artifact",
+          "metric_name": "Valuation run artifact",
+          "category": "financial_model",
+          "layer": "release_gate",
+          "metric_type": "error_count",
+          "scope": "report_run",
+          "severity": "P0",
+          "blocks_publish": true,
+          "value": 0,
+          "threshold": "pass",
+          "threshold_operator": "=",
+          "unit": "count",
+          "status": "not_evaluable",
+          "legacy_status": "blocked",
+          "sample_size": 1,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "valuation",
+          "failed_examples": [
+            {
+              "reason": "valuation_artifact_missing_for_ticker",
+              "source": "storage/runs/*ndt*/valuation.json"
+            }
+          ],
+          "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+          "evaluator": {
+            "id": "valuation_artifact",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": null,
+            "numerator": null,
+            "denominator": null,
+            "per_sample_results": []
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": null,
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+        }
+      ],
+      "blocking_issues": [
+        "valuation_artifact_missing_for_ticker"
+      ]
+    }
+  ],
+  "summary": {
+    "pass": 0,
+    "fail": 0,
+    "blocked": 1,
+    "not_measured": 0
+  }
+}

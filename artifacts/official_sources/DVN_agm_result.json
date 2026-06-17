@@ -1,0 +1,23 @@
+{
+  "ticker": "DVN",
+  "generated_at": "2026-06-16T16:55:23.699541+00:00",
+  "outcome": {
+    "ticker": "DVN",
+    "meeting_year": 2026,
+    "source_kind": "text",
+    "files": [
+      "DVN DHCD 2026.pdf"
+    ],
+    "pages": 160,
+    "approved_resolutions": 1,
+    "drivers": {
+      "dividend_plan": 2,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 3,
+      "business_direction": 5,
+      "targets_2026": 0
+    },
+    "errors": []
+  }
+}

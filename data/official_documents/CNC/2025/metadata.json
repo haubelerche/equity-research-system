@@ -1,0 +1,15 @@
+{
+  "ticker": "CNC",
+  "company_name": "CNC",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "CNC FY2025 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\CNC\\2025\\source_document.pdf",
+  "published_date": "2025-12-31",
+  "fiscal_year": 2025,
+  "language": "vi",
+  "file_hash": "1b9a99b8d1e9a2a407dd8aa9333ef305ef3cb5bcf81bb9a9b58287099a829861",
+  "staged_at": "2026-06-15T09:41:15.988972+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\CNC\\CNC 2025.pdf"
+}

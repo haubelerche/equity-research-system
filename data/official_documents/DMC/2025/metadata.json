@@ -1,0 +1,15 @@
+{
+  "ticker": "DMC",
+  "company_name": "DMC",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DMC FY2025 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DMC\\2025\\source_document.pdf",
+  "published_date": "2025-12-31",
+  "fiscal_year": 2025,
+  "language": "vi",
+  "file_hash": "1d2908a110be7d20d469fca3aeb77e0edd74a5ffd1762fa081af5b322c5ad7af",
+  "staged_at": "2026-06-15T09:41:21.619181+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DMC\\DMC 2025.pdf"
+}

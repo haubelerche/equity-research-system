@@ -1,53 +1,31 @@
 {
   "ticker": "DHG",
-  "generated_at": "2026-06-16T05:24:53.792947+00:00",
+  "generated_at": "2026-06-16T09:18:25.269048+00:00",
   "years": [
     {
       "fiscal_year": 2022,
       "source_kind": "text",
       "pages": 43,
-      "facts_extracted": 7,
-      "facts_written": 7,
+      "facts_extracted": 8,
+      "facts_written": 0,
+      "facts_skipped": 8,
       "metrics": [
         "current_assets.ending",
         "eps.basic",
         "equity.parent",
         "profit_before_tax.total",
         "revenue.net",
+        "tax_expense.total",
         "total_assets.ending",
         "total_liabilities.ending"
       ],
       "facts_detail": [
         {
           "metric": "current_assets.ending",
-          "value": 4219.0,
+          "value": 4.219,
           "unit": "vnd_bn",
           "page": 9,
-          "label": "Tài sản ngắn hạn",
-          "confidence": 0.95
-        },
-        {
-          "metric": "equity.parent",
-          "value": 4292.0,
-          "unit": "vnd_bn",
-          "page": 9,
-          "label": "Vốn chủ sở hữu",
-          "confidence": 0.95
-        },
-        {
-          "metric": "total_assets.ending",
-          "value": 5168.0,
-          "unit": "vnd_bn",
-          "page": 9,
-          "label": "Tổng tài sản",
-          "confidence": 0.95
-        },
-        {
-          "metric": "total_liabilities.ending",
-          "value": 877.0,
-          "unit": "vnd_bn",
-          "page": 9,
-          "label": "Nợ phải trả",
+          "label": "2.2 Tài sản ngắn hạn",
           "confidence": 0.95
         },
         {
@@ -55,7 +33,31 @@
           "value": 7318.0,
           "unit": "vnd_per_share",
           "page": 9,
-          "label": "Lãi cơ bản trên cổ phiếu (EPS)",
+          "label": "4.1 Lãi cơ bản trên cổ phiếu (EPS) Đồng/CP",
+          "confidence": 0.95
+        },
+        {
+          "metric": "equity.parent",
+          "value": 4.292,
+          "unit": "vnd_bn",
+          "page": 9,
+          "label": "2.5 Vốn chủ sở hữu",
+          "confidence": 0.95
+        },
+        {
+          "metric": "total_assets.ending",
+          "value": 5.168,
+          "unit": "vnd_bn",
+          "page": 9,
+          "label": "2.1 Tổng tài sản",
+          "confidence": 0.95
+        },
+        {
+          "metric": "total_liabilities.ending",
+          "value": 877.0,
+          "unit": "vnd_bn",
+          "page": 9,
+          "label": "2.4 Nợ phải trả",
           "confidence": 0.95
         },
         {
@@ -64,7 +66,7 @@
           "unit": "vnd_bn",
           "page": 9,
           "label": "Lợi nhuận trước thuế",
-          "confidence": 0.9
+          "confidence": 0.95
         },
         {
           "metric": "revenue.net",
@@ -72,24 +74,41 @@
           "unit": "vnd_bn",
           "page": 9,
           "label": "Doanh thu thuần",
-          "confidence": 0.9
+          "confidence": 0.95
+        },
+        {
+          "metric": "tax_expense.total",
+          "value": 112.0,
+          "unit": "vnd_bn",
+          "page": 9,
+          "label": "Chi phí thuế thu nhập doanh nghiệp",
+          "confidence": 0.7
         }
       ],
+      "evidence_topics": 16,
       "errors": []
     },
     {
       "fiscal_year": 2023,
       "source_kind": "text",
       "pages": 99,
-      "facts_extracted": 8,
-      "facts_written": 8,
+      "facts_extracted": 15,
+      "facts_written": 2,
+      "facts_skipped": 13,
       "metrics": [
+        "capex.total",
         "cash_and_equivalents.ending",
         "current_assets.ending",
         "eps.basic",
         "equity.parent",
+        "financing_cash_flow.total",
+        "investing_cash_flow.total",
+        "operating_cash_flow.total",
+        "proceeds_from_borrowings.total",
         "profit_before_tax.total",
+        "repayment_of_borrowings.total",
         "revenue.net",
+        "tax_expense.total",
         "total_assets.ending",
         "total_liabilities.ending"
       ],
@@ -100,7 +119,7 @@
           "unit": "vnd_bn",
           "page": 56,
           "label": "Tổng giá trị tiền gửi tính đến 31/12/2023 là 2.230 tỷ đồng",
-          "confidence": 0.6
+          "confidence": 0.7
         },
         {
           "metric": "current_assets.ending",
@@ -124,7 +143,7 @@
           "unit": "vnd_bn",
           "page": 9,
           "label": "Vốn chủ sở hữu",
-          "confidence": 0.9
+          "confidence": 0.95
         },
         {
           "metric": "total_assets.ending",
@@ -132,7 +151,7 @@
           "unit": "vnd_bn",
           "page": 9,
           "label": "Tổng tài sản",
-          "confidence": 0.95
+          "confidence": 0.98
         },
         {
           "metric": "total_liabilities.ending",
@@ -141,6 +160,54 @@
           "page": 9,
           "label": "Nợ phải trả",
           "confidence": 0.95
+        },
+        {
+          "metric": "capex.total",
+          "value": 486.0,
+          "unit": "vnd_bn",
+          "page": 55,
+          "label": "khoản mục chi mua sắm, xây dựng TSCĐ và các tài sản dài hạn khác tăng thâm hụt lên 486 tỷ đồng",
+          "confidence": 0.8
+        },
+        {
+          "metric": "financing_cash_flow.total",
+          "value": -0.17,
+          "unit": "vnd_bn",
+          "page": 55,
+          "label": "dòng tiền thuần từ hoạt động tài chính chỉ còn thâm hụt 170 triệu đồng",
+          "confidence": 0.9
+        },
+        {
+          "metric": "investing_cash_flow.total",
+          "value": -180.0,
+          "unit": "vnd_bn",
+          "page": 55,
+          "label": "dòng tiền đầu tư giảm thâm hụt từ 354 tỷ đồng xuống còn 180 tỷ đồng",
+          "confidence": 0.9
+        },
+        {
+          "metric": "operating_cash_flow.total",
+          "value": 240.0,
+          "unit": "vnd_bn",
+          "page": 55,
+          "label": "Dòng tiền thu từ hoạt động sản xuất kinh doanh ... xuống còn 240 tỷ đồng",
+          "confidence": 0.9
+        },
+        {
+          "metric": "proceeds_from_borrowings.total",
+          "value": 1.524,
+          "unit": "vnd_bn",
+          "page": 55,
+          "label": "tiền thu từ đi vay tăng từ 737 tỷ đồng lên 1.524 tỷ đồng",
+          "confidence": 0.95
+        },
+        {
+          "metric": "repayment_of_borrowings.total",
+          "value": 1.067,
+          "unit": "vnd_bn",
+          "page": 55,
+          "label": "tiền chi trả nợ gốc vay gần 1.067 tỷ đồng",
+          "confidence": 0.85
         },
         {
           "metric": "profit_before_tax.total",
@@ -157,113 +224,32 @@
           "page": 9,
           "label": "Doanh thu thuần",
           "confidence": 0.95
+        },
+        {
+          "metric": "tax_expense.total",
+          "value": 108.0,
+          "unit": "vnd_bn",
+          "page": 9,
+          "label": "Lợi nhuận trước thuế - Lợi nhuận sau thuế (suy ra từ bảng tổng quan tài chính)",
+          "confidence": 0.6
         }
       ],
+      "evidence_topics": 15,
       "errors": []
     },
     {
       "fiscal_year": 2024,
       "source_kind": "text",
       "pages": 112,
-      "facts_extracted": 9,
-      "facts_written": 4,
+      "facts_extracted": 12,
+      "facts_written": 0,
+      "facts_skipped": 12,
       "metrics": [
         "cash_and_equivalents.ending",
-        "eps.basic",
-        "long_term_debt.ending",
-        "net_income.parent",
-        "profit_before_tax.total",
-        "revenue.net",
-        "shares_outstanding.ending",
-        "short_term_debt.ending",
-        "tax_expense.total"
-      ],
-      "facts_detail": [
-        {
-          "metric": "cash_and_equivalents.ending",
-          "value": 2808.0,
-          "unit": "vnd_bn",
-          "page": 56,
-          "label": "Tiền và các khoản tương đương tiền",
-          "confidence": 0.9
-        },
-        {
-          "metric": "eps.basic",
-          "value": 5763.0,
-          "unit": "vnd_per_share",
-          "page": 13,
-          "label": "Lãi cơ bản trên cổ phiếu (EPS)",
-          "confidence": 0.99
-        },
-        {
-          "metric": "long_term_debt.ending",
-          "value": 0.0,
-          "unit": "vnd_bn",
-          "page": 57,
-          "label": "Vay dài hạn",
-          "confidence": 0.7
-        },
-        {
-          "metric": "short_term_debt.ending",
-          "value": 650.0,
-          "unit": "vnd_bn",
-          "page": 57,
-          "label": "Nợ vay ngắn hạn",
-          "confidence": 0.85
-        },
-        {
-          "metric": "net_income.parent",
-          "value": 779.0,
-          "unit": "vnd_bn",
-          "page": 13,
-          "label": "Lợi nhuận sau thuế Tỷ đồng",
-          "confidence": 0.99
-        },
-        {
-          "metric": "profit_before_tax.total",
-          "value": 904.0,
-          "unit": "vnd_bn",
-          "page": 13,
-          "label": "Lợi nhuận trước thuế Tỷ đồng",
-          "confidence": 0.99
-        },
-        {
-          "metric": "revenue.net",
-          "value": 4.885,
-          "unit": "vnd_bn",
-          "page": 13,
-          "label": "Doanh thu thuần Tỷ đồng",
-          "confidence": 0.99
-        },
-        {
-          "metric": "shares_outstanding.ending",
-          "value": 130746071.0,
-          "unit": "shares",
-          "page": 59,
-          "label": "Số lượng cổ phiếu niêm yết và đang lưu hành",
-          "confidence": 0.99
-        },
-        {
-          "metric": "tax_expense.total",
-          "value": 125.0,
-          "unit": "vnd_bn",
-          "page": 13,
-          "label": "Lợi nhuận trước thuế; Lợi nhuận sau thuế",
-          "confidence": 0.75
-        }
-      ],
-      "errors": []
-    },
-    {
-      "fiscal_year": 2025,
-      "source_kind": "text",
-      "pages": 110,
-      "facts_extracted": 10,
-      "facts_written": 10,
-      "metrics": [
         "current_assets.ending",
         "eps.basic",
         "equity.parent",
+        "long_term_debt.ending",
         "profit_before_tax.total",
         "revenue.net",
         "shares_outstanding.ending",
@@ -274,68 +260,179 @@
       ],
       "facts_detail": [
         {
-          "metric": "current_assets.ending",
-          "value": 3.889,
+          "metric": "cash_and_equivalents.ending",
+          "value": 2808.0,
           "unit": "vnd_bn",
-          "page": 15,
-          "label": "Tài sản ngắn hạn",
+          "page": 56,
+          "label": "tiền và các khoản tương đương tiền đạt 2.808 tỷ đồng",
+          "confidence": 0.95
+        },
+        {
+          "metric": "current_assets.ending",
+          "value": 4604.0,
+          "unit": "vnd_bn",
+          "page": 13,
+          "label": "Tài sản ngắn hạn Tỷ đồng 4.604 (năm 2024)",
+          "confidence": 0.95
+        },
+        {
+          "metric": "eps.basic",
+          "value": 5763.0,
+          "unit": "vnd_per_share",
+          "page": 13,
+          "label": "Lãi cơ bản trên cổ phiếu (EPS) Đồng/CP 5.763 (năm 2024)",
           "confidence": 0.95
         },
         {
           "metric": "equity.parent",
-          "value": 4.137,
+          "value": 4095.0,
           "unit": "vnd_bn",
-          "page": 15,
-          "label": "Vốn chủ sở hữu",
+          "page": 13,
+          "label": "Vốn chủ sở hữu Tỷ đồng 4.095 (năm 2024)",
           "confidence": 0.95
         },
         {
-          "metric": "short_term_debt.ending",
+          "metric": "long_term_debt.ending",
           "value": 0.0,
           "unit": "vnd_bn",
-          "page": 44,
-          "label": "dư nợ vay ngắn hạn",
+          "page": 57,
+          "label": "toàn bộ là nợ vay ngắn hạn (không có vay dài hạn tại 31/12/2024)",
+          "confidence": 0.9
+        },
+        {
+          "metric": "short_term_debt.ending",
+          "value": 650.0,
+          "unit": "vnd_bn",
+          "page": 57,
+          "label": "nợ vay tăng từ 572 tỷ lên 650 tỷ đồng, toàn bộ là nợ vay ngắn hạn",
           "confidence": 0.9
         },
         {
           "metric": "total_assets.ending",
-          "value": 5.174,
+          "value": 5959.0,
           "unit": "vnd_bn",
-          "page": 15,
-          "label": "Tổng tài sản",
+          "page": 13,
+          "label": "Tổng tài sản Tỷ đồng 5.959 (năm 2024)",
           "confidence": 0.95
         },
         {
           "metric": "total_liabilities.ending",
-          "value": 1.037,
+          "value": 1864.0,
+          "unit": "vnd_bn",
+          "page": 13,
+          "label": "Nợ phải trả Tỷ đồng 1.864 (năm 2024)",
+          "confidence": 0.95
+        },
+        {
+          "metric": "profit_before_tax.total",
+          "value": 904.0,
+          "unit": "vnd_bn",
+          "page": 13,
+          "label": "Lợi nhuận trước thuế",
+          "confidence": 0.95
+        },
+        {
+          "metric": "revenue.net",
+          "value": 4.885,
+          "unit": "vnd_bn",
+          "page": 13,
+          "label": "Doanh thu thuần",
+          "confidence": 0.95
+        },
+        {
+          "metric": "shares_outstanding.ending",
+          "value": 130746071.0,
+          "unit": "shares",
+          "page": 59,
+          "label": "Số lượng cổ phiếu niêm yết và đang lưu hành",
+          "confidence": 0.95
+        },
+        {
+          "metric": "tax_expense.total",
+          "value": 125.0,
+          "unit": "vnd_bn",
+          "page": 53,
+          "label": "Chi phí thuế thu nhập doanh nghiệp",
+          "confidence": 0.8
+        }
+      ],
+      "evidence_topics": 16,
+      "errors": []
+    },
+    {
+      "fiscal_year": 2025,
+      "source_kind": "text",
+      "pages": 110,
+      "facts_extracted": 9,
+      "facts_written": 0,
+      "facts_skipped": 9,
+      "metrics": [
+        "current_assets.ending",
+        "eps.basic",
+        "equity.parent",
+        "profit_before_tax.total",
+        "revenue.net",
+        "shares_outstanding.ending",
+        "tax_expense.total",
+        "total_assets.ending",
+        "total_liabilities.ending"
+      ],
+      "facts_detail": [
+        {
+          "metric": "current_assets.ending",
+          "value": 3889.0,
           "unit": "vnd_bn",
           "page": 15,
-          "label": "Nợ phải trả",
-          "confidence": 0.95
+          "label": "Tài sản ngắn hạn",
+          "confidence": 0.9
         },
         {
           "metric": "eps.basic",
           "value": 6308.0,
           "unit": "vnd_per_share",
-          "page": 13,
-          "label": "EPS đồng",
-          "confidence": 0.99
+          "page": 15,
+          "label": "Lãi cơ bản trên cổ phiếu (EPS)",
+          "confidence": 0.95
+        },
+        {
+          "metric": "equity.parent",
+          "value": 4137.0,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Vốn chủ sở hữu",
+          "confidence": 0.9
+        },
+        {
+          "metric": "total_assets.ending",
+          "value": 5174.0,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Tổng tài sản",
+          "confidence": 0.9
+        },
+        {
+          "metric": "total_liabilities.ending",
+          "value": 1037.0,
+          "unit": "vnd_bn",
+          "page": 15,
+          "label": "Nợ phải trả",
+          "confidence": 0.9
         },
         {
           "metric": "profit_before_tax.total",
           "value": 987.0,
           "unit": "vnd_bn",
           "page": 15,
-          "label": "1.4 Lợi nhuận trước thuế",
-          "confidence": 0.99
+          "label": "Lợi nhuận trước thuế",
+          "confidence": 0.95
         },
         {
           "metric": "revenue.net",
           "value": 5267.0,
           "unit": "vnd_bn",
           "page": 15,
-          "label": "1.1 Doanh thu thuần",
-          "confidence": 0.99
+          "label": "Doanh thu thuần",
+          "confidence": 0.95
         },
         {
           "metric": "shares_outstanding.ending",
@@ -343,19 +440,20 @@
           "unit": "shares",
           "page": 13,
           "label": "Số lượng cổ phiếu niêm yết và đang lưu hành",
-          "confidence": 0.99
+          "confidence": 0.95
         },
         {
           "metric": "tax_expense.total",
           "value": 135.0,
           "unit": "vnd_bn",
           "page": 15,
-          "label": "Chi phí thuế (tính bằng Lợi nhuận trước thuế 987 - Lợi nhuận sau thuế 852)",
-          "confidence": 0.75
+          "label": "Lợi nhuận trước thuế / Lợi nhuận sau thuế",
+          "confidence": 0.85
         }
       ],
+      "evidence_topics": 15,
       "errors": []
     }
   ],
-  "total_written": 29
+  "total_written": 2
 }

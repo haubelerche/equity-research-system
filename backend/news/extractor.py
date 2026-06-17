@@ -13,7 +13,13 @@ from dataclasses import dataclass
 from html.parser import HTMLParser
 
 # Containers whose text is boilerplate and must be dropped.
-_SKIP_CONTAINERS = {"script", "style", "nav", "footer", "aside", "header", "form", "noscript"}
+# NOTE: "form" is intentionally NOT skipped. ASP.NET WebForms pages (e.g. CafeF
+# /du-lieu/ corporate-disclosure pages — the highest-priority ticker-scoped news
+# source) wrap the ENTIRE document body in a single <form runat="server">, so
+# skipping <form> dropped the whole article body (0 chars extracted). Genuine
+# standalone forms expose their text via <label>/<input>/<button>, none of which
+# are _CONTENT_TAGS, so not skipping <form> leaks negligible boilerplate.
+_SKIP_CONTAINERS = {"script", "style", "nav", "footer", "aside", "header", "noscript"}
 # Inline/block tags whose text we keep as article body.
 _CONTENT_TAGS = {"p", "h1", "h2", "h3", "h4", "li", "blockquote"}
 _WHITESPACE = re.compile(r"\s+")

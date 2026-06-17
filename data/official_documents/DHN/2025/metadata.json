@@ -1,0 +1,15 @@
+{
+  "ticker": "DHN",
+  "company_name": "DHN",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DHN FY2025 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHN\\2025\\source_document.pdf",
+  "published_date": "2025-12-31",
+  "fiscal_year": 2025,
+  "language": "vi",
+  "file_hash": "a383f2629716064cd1e52668e9c547208cecb3cde2db6428866c5fc840737711",
+  "staged_at": "2026-06-15T09:41:21.355434+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHN\\DHN 2025.pdf"
+}

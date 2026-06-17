@@ -1,0 +1,23 @@
+{
+  "ticker": "DBM",
+  "generated_at": "2026-06-16T15:57:04.628398+00:00",
+  "outcome": {
+    "ticker": "DBM",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "DBM DHCD 2026.pdf"
+    ],
+    "pages": 59,
+    "approved_resolutions": 11,
+    "drivers": {
+      "dividend_plan": 2,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 4,
+      "business_direction": 10,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

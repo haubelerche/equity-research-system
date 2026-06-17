@@ -1,9 +1,9 @@
 ticker,company_name,exchange,segment,is_mvp,notes
 DHG,Cong ty Co phan Duoc Hau Giang,HOSE,pharma,true,MVP core
-IMP,Cong ty Co phan Duoc pham Imexpharm,HOSE,pharma,true,MVP core
-DMC,Cong ty Co phan Xuat nhap khau Y te Domesco,HOSE,pharma,true,MVP core
+IMP,Cong ty Co phan Duoc pham Imexpharm,HOSE,pharma,true,
+DMC,Cong ty Co phan Xuat nhap khau Y te Domesco,HOSE,pharma,true,
 TRA,Cong ty Co phan Traphaco,HOSE,pharma,true,MVP core
-DBD,Cong ty Co phan Duoc - Trang thiet bi Y te Binh Dinh,HOSE,pharma,true,MVP core
+DBD,Cong ty Co phan Duoc - Trang thiet bi Y te Binh Dinh,HOSE,pharma,true,
 OPC,Cong ty Co phan Duoc pham OPC,HOSE,pharma,false,
 MKP,Cong ty Co phan Hoa - Duoc pham Mekophar,HOSE,pharma,false,
 TNH,Cong ty Co phan Benh vien Quoc te Thai Nguyen,HOSE,healthcare_services,false,
@@ -14,7 +14,7 @@ LDP,Cong ty Co phan Duoc Lam Dong - Ladophar,HNX,pharma,false,
 PPP,Cong ty Co phan Duoc pham Phong Phu,HNX,pharma,false,
 DP3,Cong ty Co phan Duoc pham Trung uong 3,UPCOM,pharma,false,
 DP1,Cong ty Co phan Duoc pham Trung uong CPC1,UPCOM,pharma,false,
-TW3,Cong ty Co phan Duoc - Trang thiet bi Y te Da Nang,UPCOM,pharma,false,
+TW3,Cong ty Co phan Duoc Trung uong 3,UPCOM,pharma,false,
 MED,Cong ty Co phan Duoc Trung uong Mediplantex,UPCOM,pharma,false,
 PMC,Cong ty Co phan Duoc pham Duoc lieu Pharmedic,UPCOM,pharma,false,
 AMV,Cong ty Co phan San xuat Kinh doanh Duoc va Trang thiet bi Y te Viet My,HNX,medical_equipment,false,
@@ -24,21 +24,23 @@ VDP,Cong ty Co phan Duoc pham Trung uong Vidipha,UPCOM,pharma,false,
 DCL,Cong ty Co phan Duoc pham Cuu Long,HOSE,pharma,false,
 SPM,Cong ty Co phan S.P.M,HOSE,pharma,false,
 VMD,Cong ty Co phan Y Duoc pham Vimedimex,HNX,pharma,false,
-HBH,Cong ty Co phan Chuoi Nha thuoc An Khang,HOSE,medical_distribution,false,
-DNM,Cong ty Co phan Dieu Duong Minh Hai,UPCOM,pharma,false,
-DBT,Cong ty Co phan Duoc pham Trung Viet,UPCOM,pharma,false,
-DPP,Cong ty Co phan Duoc pham Phuc Thanh,UPCOM,pharma,false,
-DTP,Cong ty Co phan Duoc Tay Ninh,UPCOM,pharma,false,
-VMC,Cong ty Co phan Y Duoc Viet Nam,UPCOM,pharma,false,
-NDT,Cong ty Co phan Benh vien Da khoa tinh Ninh Binh,UPCOM,healthcare_services,false,
-BID,Cong ty Co phan Duoc Binh Duong,UPCOM,pharma,false,
-BCR,Cong ty Co phan Bio-Pharmachemie,UPCOM,pharma,false,
-VNP,Cong ty Co phan Duoc Viet Nhon,UPCOM,pharma,false,
-CPC,Cong ty Co phan Duoc pham CPC1 Ha Noi,UPCOM,pharma,false,
-HDA,Cong ty Co phan Duoc Ha Dong,UPCOM,pharma,false,
-TMP,Cong ty Co phan Duoc pham Tam Phuc,UPCOM,pharma,false,
-DRG,Cong ty Co phan Duoc Re Giang,UPCOM,pharma,false,
-PVD,Cong ty Co phan Duoc pham Viet Duc,UPCOM,pharma,false,
-DGW,Cong ty Co phan The gioi So,HOSE,medical_distribution,false,
-TNT,Cong ty Co phan Duoc pham Tan Nhon Tay,UPCOM,pharma,false,
-AGP,Cong ty Co phan Duoc pham Agimexpharm,UPCOM,pharma,false,OCR pilot
+DNM,Tong Cong ty co phan Y te Danameco,UPCOM,medical_distribution,false,
+DBT,Cong ty Co phan Duoc pham Ben Tre,UPCOM,pharma,false,
+DPP,Cong ty Co phan Duoc Dong Nai,UPCOM,pharma,false,
+DTP,Cong ty Co phan Duoc pham CPC1 Ha Noi,UPCOM,pharma,false,
+AMP,Cong ty Co phan Armephaco,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+BCP,Cong ty Co phan Duoc Enlie,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+BIO,Cong ty Co phan Vac xin va Sinh pham Nha Trang,UPCOM,vaccine_biologic,false,identity-verified 2026-06-17; AGM+OCR ready
+CDP,Cong ty Co phan Duoc pham Trung uong Codupha,UPCOM,pharma_distribution,false,identity-verified 2026-06-17; AGM+OCR ready
+CNC,Cong ty Co phan Cong nghe Cao Traphaco,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+DAN,Cong ty Co phan Duoc Danapha,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+DBM,Cong ty Co phan Duoc - Vat tu Y te Dak Lak,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+DDN,Cong ty Co phan Duoc va Thiet bi Y te Da Nang,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+DHD,Cong ty Co phan Duoc Vat tu Y te Hai Duong,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+DHN,Cong ty Co phan Duoc pham Ha Noi,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+DP2,Cong ty Co phan Duoc pham Trung uong 2,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+DPH,Cong ty Co phan Duoc pham Hai Phong,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+DTG,Cong ty Co phan Duoc pham Tipharco,HNX,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+HDP,Cong ty Co phan Duoc Ha Tinh,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+MTP,Cong ty Co phan Duoc Medipharco,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+NDC,Cong ty Co phan Nam Duoc,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready

@@ -1,0 +1,23 @@
+{
+  "ticker": "DP1",
+  "generated_at": "2026-06-16T16:34:32.134392+00:00",
+  "outcome": {
+    "ticker": "DP1",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "DP1 DHCD 2026.pdf"
+    ],
+    "pages": 47,
+    "approved_resolutions": 11,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 3,
+      "business_direction": 6,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

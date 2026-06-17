@@ -1,0 +1,15 @@
+{
+  "ticker": "DHG",
+  "company_name": "DHG",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DHG FY2023 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHG\\2023\\source_document.pdf",
+  "published_date": "2023-12-31",
+  "fiscal_year": 2023,
+  "language": "vi",
+  "file_hash": "1b31cc2c165cdae418650e1cd464d8d9b49b694b5acb1e07e30e5fe696e65de9",
+  "staged_at": "2026-06-15T09:41:19.969814+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHG\\DHG 2023.pdf"
+}

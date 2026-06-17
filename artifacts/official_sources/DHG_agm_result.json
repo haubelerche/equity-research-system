@@ -1,0 +1,24 @@
+{
+  "ticker": "DHG",
+  "generated_at": "2026-06-16T16:20:14.504398+00:00",
+  "outcome": {
+    "ticker": "DHG",
+    "meeting_year": 2026,
+    "source_kind": "text",
+    "files": [
+      "DHG DHCD 2026(1).pdf",
+      "DHG DHCD 2026(2).pdf"
+    ],
+    "pages": 29,
+    "approved_resolutions": 14,
+    "drivers": {
+      "dividend_plan": 2,
+      "borrowing_plan": 1,
+      "investment_plan": 1,
+      "rnd_and_product_focus": 4,
+      "business_direction": 6,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "ticker": "DPH",
+  "company_name": "DPH",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DPH FY2022 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DPH\\2022\\source_document.pdf",
+  "published_date": "2022-12-31",
+  "fiscal_year": 2022,
+  "language": "vi",
+  "file_hash": "014f808f6dffff8bacf4ada1fe09d97e157215399959bd64b43fc4e9d5071736",
+  "staged_at": "2026-06-15T09:41:22.273257+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DPH\\DPH 2022.pdf"
+}

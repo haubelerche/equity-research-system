@@ -1,0 +1,28 @@
+{
+  "ticker": "NDC",
+  "years_requested": 4,
+  "period": "year",
+  "from_year": 2022,
+  "to_year": 2025,
+  "provider": "auto",
+  "segment": "pharma",
+  "started_at": "2026-06-16T21:25:09.075329+00:00",
+  "finished_at": "2026-06-16T21:25:32.175326+00:00",
+  "elapsed_s": 23.1,
+  "overall_status": "partial_error",
+  "financials": {
+    "status": "error",
+    "error": "insert or update on table \"source_documents\" violates foreign key constraint \"source_documents_ticker_fkey\"\nDETAIL:  Key (ticker)=(NDC) is not present in table \"companies\".\n",
+    "facts_upserted": 0
+  },
+  "price": {
+    "status": "error",
+    "error": "insert or update on table \"source_documents\" violates foreign key constraint \"source_documents_ticker_fkey\"\nDETAIL:  Key (ticker)=(NDC) is not present in table \"companies\".\n",
+    "rows_upserted": 0
+  },
+  "company": {
+    "status": "error",
+    "error": "insert or update on table \"source_documents\" violates foreign key constraint \"source_documents_ticker_fkey\"\nDETAIL:  Key (ticker)=(NDC) is not present in table \"companies\".\n"
+  },
+  "catalysts": {}
+}

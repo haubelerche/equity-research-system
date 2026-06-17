@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-06-16T14:55:52.269623+00:00",
+  "from_year": 2022,
+  "to_year": 2025,
+  "summary": {
+    "tickers": 1,
+    "by_status": {
+      "official_or_ocr": 1,
+      "pdf_found_no_facts": 0,
+      "no_source_pdf": 0
+    },
+    "ocr_candidates": 3,
+    "ocr_promoted": 1,
+    "ocr_blocked": 2
+  },
+  "tickers": [
+    {
+      "ticker": "DHG",
+      "years_total": 1,
+      "pdf_years": 1,
+      "official_text_years": 0,
+      "ocr_years": 1,
+      "ocr_candidates": 3,
+      "ocr_promoted": 1,
+      "ocr_blocked": 2,
+      "status": "official_or_ocr",
+      "errors": 0
+    }
+  ]
+}

@@ -1024,10 +1024,24 @@ def run_valuation(
     input_pack_path.write_text(json.dumps(_input_pack_dict, indent=2, default=str), encoding="utf-8")
     out_path = VALUATION_DIR / "valuation.json"
     out_path.write_text(json.dumps(artifact, indent=2, default=str), encoding="utf-8")
+    from backend.valuation.audit import build_valuation_audit
+
+    audit = build_valuation_audit(
+        artifact,
+        ticker=ticker,
+        run_id=os.environ.get("RUN_ID", "missing_run_id"),
+        ratio_results=artifact["ratios"],
+        forecast_results=artifact["forecast"],
+        gate_results={"ASSUMPTION_GATE": artifact["assumption_gate"]},
+    )
+    audit_path = VALUATION_DIR / "valuation_audit.json"
+    audit_path.write_text(json.dumps(audit, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
     print(f"\n[run_valuation] Artifact saved: {out_path}")
+    print(f"[run_valuation] Audit saved: {audit_path}")
 
     artifact["artifact_path"] = str(out_path)
     artifact["valuation_input_pack_path"] = str(input_pack_path)
+    artifact["valuation_audit_path"] = str(audit_path)
 
     return artifact
 

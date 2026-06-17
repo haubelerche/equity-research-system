@@ -115,6 +115,51 @@ def _warnings_block(*artifacts: Mapping[str, Any]) -> list[str]:
     return collected
 
 
+def _view_model_evidence(vm: Any | None) -> dict[str, Any]:
+    payload = getattr(vm, "valuation_evidence", None) if vm is not None else None
+    return dict(payload) if isinstance(payload, Mapping) else {}
+
+
+def _evidence_block(vm: Any | None) -> str:
+    evidence = _view_model_evidence(vm)
+    if not evidence:
+        return ""
+    rows: list[tuple[str, str]] = []
+    trace_count = evidence.get("formula_trace_count")
+    if trace_count is not None:
+        methods = ", ".join(item for item in (evidence.get("formula_trace_methods") or []) if item) or _DASH
+        rows.append(("Số vết công thức", f"{trace_count} ({methods})"))
+    if evidence.get("peer_data_source"):
+        rows.append(("Nguồn multiples đối chiếu", str(evidence["peer_data_source"])))
+    if evidence.get("relative_valuation_status"):
+        rows.append(("Trạng thái relative valuation", str(evidence["relative_valuation_status"])))
+    bridge = evidence.get("market_sanity_bridge") or {}
+    if isinstance(bridge, Mapping) and bridge:
+        rows.append(("Target/Market", str(bridge.get("target_to_market") or _DASH)))
+        rows.append(("Market sanity bridge", "có" if bridge.get("bridge_present") else "chưa có"))
+    blocks = []
+    if rows:
+        blocks.append(_kv_table(rows))
+    blockers = list(dict.fromkeys(
+        str(item) for item in (
+            list(evidence.get("display_blocking_reasons", []) or [])
+            + list(evidence.get("policy_blocking_reasons", []) or [])
+        ) if str(item).strip()
+    ))
+    if blockers:
+        blocks.append("**Lý do chặn công bố:**\n" + "\n".join(f"- {_translate_warning(item)}" for item in blockers))
+    warnings = list(dict.fromkeys(
+        str(item) for item in (
+            list(evidence.get("model_warnings", []) or [])
+            + list(evidence.get("market_data_warnings", []) or [])
+            + list(evidence.get("policy_warnings", []) or [])
+        ) if str(item).strip()
+    ))
+    if warnings:
+        blocks.append("**Cảnh báo mô hình và dữ liệu:**\n" + "\n".join(f"- {_translate_warning(item)}" for item in warnings))
+    return "\n\n".join(blocks)
+
+
 def _score(text: str) -> str:
     import re
 
@@ -639,6 +684,7 @@ def _section_crosschecks(
     fcff: Mapping[str, Any],
     blend: Mapping[str, Any],
     fcfe: Mapping[str, Any],
+    view_model: Any | None = None,
 ) -> str:
     lines = ["**Đối chiếu nhất quán số:**", ""]
     implied = _first(fcff, "implied_price")
@@ -666,6 +712,9 @@ def _section_crosschecks(
         "_Nguồn gốc dữ liệu: mọi số định giá được dẫn xuất từ dữ liệu tài chính chuẩn hóa đã khóa "
         "và tệp kết quả định giá bằng Python; không có số liệu nào do mô hình ngôn ngữ sinh ra._"
     )
+    evidence = _evidence_block(view_model)
+    if evidence:
+        lines.extend(["", "**Minh chứng kiểm định và phát hành:**", "", evidence])
     return f"## {SECTION_TITLES[10]}\n\n" + "\n".join(lines)
 
 
@@ -822,7 +871,7 @@ def build_valuation_workings_md(
         _section_blend(blend),
         _section_pe_forward(valuation),
         _section_sensitivity(valuation),
-        _section_crosschecks(valuation, fcff, blend, fcfe),
+        _section_crosschecks(valuation, fcff, blend, fcfe, view_model),
     ]
     return title + "\n" + intro + "\n" + "\n\n".join(sections) + "\n"
 
@@ -883,6 +932,9 @@ def build_report_explanation_md(
         status_lines.extend(f"- {_issue_label(issue)}" for issue in status_issues)
     else:
         status_lines.append("- Không ghi nhận thiếu sót trọng yếu trong các mục bắt buộc.")
+    evidence = _evidence_block(view_model)
+    if evidence:
+        status_lines.extend(["", "## Minh chứng kiểm định", "", evidence])
 
     decision_basis = _section_report_decision_basis(
         valuation,

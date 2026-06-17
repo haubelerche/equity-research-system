@@ -1,0 +1,199 @@
+{
+  "from_agent": false,
+  "chart_specs_used": {
+    "charts": [
+      {
+        "chart_id": "stock_price_vs_benchmark",
+        "id": "stock_price_vs_benchmark",
+        "title": "Stock Price Vs Benchmark",
+        "status": "present",
+        "source": "",
+        "source_artifact_refs": [],
+        "source_map": {
+          "stock_price_vs_benchmark": []
+        }
+      },
+      {
+        "chart_id": "revenue_by_channel",
+        "id": "revenue_by_channel",
+        "title": "Revenue By Channel",
+        "status": "present",
+        "source": "company_research_pack, forecast_model",
+        "source_artifact_refs": [
+          "company_research_pack",
+          "forecast_model"
+        ],
+        "source_map": {
+          "revenue_by_channel": [
+            "company_research_pack",
+            "forecast_model"
+          ]
+        }
+      },
+      {
+        "chart_id": "product_group_revenue_or_market_share",
+        "id": "product_group_revenue_or_market_share",
+        "title": "Product Group Revenue Or Market Share",
+        "status": "present",
+        "source": "company_research_pack, forecast_model",
+        "source_artifact_refs": [
+          "company_research_pack",
+          "forecast_model"
+        ],
+        "source_map": {
+          "product_group_revenue_or_market_share": [
+            "company_research_pack",
+            "forecast_model"
+          ]
+        }
+      },
+      {
+        "chart_id": "gross_margin_net_margin_trend",
+        "id": "gross_margin_net_margin_trend",
+        "title": "Gross Margin Net Margin Trend",
+        "status": "present",
+        "source": "financial_analysis, forecast_model",
+        "source_artifact_refs": [
+          "financial_analysis",
+          "forecast_model"
+        ],
+        "source_map": {
+          "gross_margin_net_margin_trend": [
+            "financial_analysis",
+            "forecast_model"
+          ]
+        }
+      },
+      {
+        "chart_id": "forecast_revenue",
+        "id": "forecast_revenue",
+        "title": "Forecast Revenue",
+        "status": "present",
+        "source": "forecast_model",
+        "source_artifact_refs": [
+          "forecast_model"
+        ],
+        "source_map": {
+          "forecast_revenue": [
+            "forecast_model"
+          ]
+        }
+      },
+      {
+        "chart_id": "forecast_gross_profit_or_margin",
+        "id": "forecast_gross_profit_or_margin",
+        "title": "Forecast Gross Profit Or Margin",
+        "status": "present",
+        "source": "financial_analysis, forecast_model",
+        "source_artifact_refs": [
+          "financial_analysis",
+          "forecast_model"
+        ],
+        "source_map": {
+          "forecast_gross_profit_or_margin": [
+            "financial_analysis",
+            "forecast_model"
+          ]
+        }
+      }
+    ]
+  },
+  "deterministic_built": {
+    "charts": [
+      {
+        "chart_id": "stock_price_vs_benchmark",
+        "id": "stock_price_vs_benchmark",
+        "title": "Stock Price Vs Benchmark",
+        "status": "present",
+        "source": "",
+        "source_artifact_refs": [],
+        "source_map": {
+          "stock_price_vs_benchmark": []
+        }
+      },
+      {
+        "chart_id": "revenue_by_channel",
+        "id": "revenue_by_channel",
+        "title": "Revenue By Channel",
+        "status": "present",
+        "source": "company_research_pack, forecast_model",
+        "source_artifact_refs": [
+          "company_research_pack",
+          "forecast_model"
+        ],
+        "source_map": {
+          "revenue_by_channel": [
+            "company_research_pack",
+            "forecast_model"
+          ]
+        }
+      },
+      {
+        "chart_id": "product_group_revenue_or_market_share",
+        "id": "product_group_revenue_or_market_share",
+        "title": "Product Group Revenue Or Market Share",
+        "status": "present",
+        "source": "company_research_pack, forecast_model",
+        "source_artifact_refs": [
+          "company_research_pack",
+          "forecast_model"
+        ],
+        "source_map": {
+          "product_group_revenue_or_market_share": [
+            "company_research_pack",
+            "forecast_model"
+          ]
+        }
+      },
+      {
+        "chart_id": "gross_margin_net_margin_trend",
+        "id": "gross_margin_net_margin_trend",
+        "title": "Gross Margin Net Margin Trend",
+        "status": "present",
+        "source": "financial_analysis, forecast_model",
+        "source_artifact_refs": [
+          "financial_analysis",
+          "forecast_model"
+        ],
+        "source_map": {
+          "gross_margin_net_margin_trend": [
+            "financial_analysis",
+            "forecast_model"
+          ]
+        }
+      },
+      {
+        "chart_id": "forecast_revenue",
+        "id": "forecast_revenue",
+        "title": "Forecast Revenue",
+        "status": "present",
+        "source": "forecast_model",
+        "source_artifact_refs": [
+          "forecast_model"
+        ],
+        "source_map": {
+          "forecast_revenue": [
+            "forecast_model"
+          ]
+        }
+      },
+      {
+        "chart_id": "forecast_gross_profit_or_margin",
+        "id": "forecast_gross_profit_or_margin",
+        "title": "Forecast Gross Profit Or Margin",
+        "status": "present",
+        "source": "financial_analysis, forecast_model",
+        "source_artifact_refs": [
+          "financial_analysis",
+          "forecast_model"
+        ],
+        "source_map": {
+          "forecast_gross_profit_or_margin": [
+            "financial_analysis",
+            "forecast_model"
+          ]
+        }
+      }
+    ]
+  }
+}

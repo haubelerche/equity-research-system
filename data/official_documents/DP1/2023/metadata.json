@@ -1,0 +1,15 @@
+{
+  "ticker": "DP1",
+  "company_name": "DP1",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DP1 FY2023 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DP1\\2023\\source_document.pdf",
+  "published_date": "2023-12-31",
+  "fiscal_year": 2023,
+  "language": "vi",
+  "file_hash": "576146d57518258478f13e89bc584e7345d8979eb588c409e1394f6f603034c0",
+  "staged_at": "2026-06-15T09:41:21.713289+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DP1\\DP1 2023.pdf"
+}

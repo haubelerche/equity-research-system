@@ -1,0 +1,7 @@
+defaults:
+  method: percent_of_revenue_delta
+  delta_nwc_ratio: 0.02
+  status: accepted
+  source: manual_default
+  publishable: true
+tickers: {}

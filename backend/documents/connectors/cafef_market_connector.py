@@ -6,8 +6,14 @@ endpoint that covers HOSE/HNX/UPCOM, so it is the hard-wired fallback for the
 *current market price* (and trading volume) that the valuation needs for
 upside / relative multiples.
 
-    GET https://s.cafef.vn/Ajax/PageNew/DataHistory/PriceHistory.ashx
+    GET https://cafef.vn/du-lieu/Ajax/PageNew/DataHistory/PriceHistory.ashx
         ?Symbol=<TICKER>&StartDate=&EndDate=&PageIndex=1&PageSize=<n>
+
+The legacy ``s.cafef.vn/Ajax/...`` host now rejects every request with
+``{"Success":false,"Message":"symbol is null or empty"}`` regardless of the
+``Symbol`` query param; the live handler moved under ``cafef.vn/du-lieu/``. The
+JSON shape (``Data.Data`` rows with ``GiaDieuChinh`` / ``GiaDongCua`` / ``Ngay`` /
+``KhoiLuongKhopLenh``) is unchanged.
 
 Prices are returned in thousand VND (e.g. 97.5 → 97,500 VND/share).
 """
@@ -20,7 +26,7 @@ from datetime import datetime
 from typing import Any, Callable, Optional
 
 _BASE_URL = (
-    "https://s.cafef.vn/Ajax/PageNew/DataHistory/PriceHistory.ashx"
+    "https://cafef.vn/du-lieu/Ajax/PageNew/DataHistory/PriceHistory.ashx"
     "?Symbol={symbol}&StartDate=&EndDate=&PageIndex=1&PageSize={page_size}"
 )
 SOURCE_NAME = "cafef_price_history"
@@ -45,7 +51,7 @@ def _default_http_get(url: str, timeout: int = 20) -> str:
         url,
         headers={
             "User-Agent": "maer-cafef-market/1.0",
-            "Referer": "https://s.cafef.vn/",
+            "Referer": "https://cafef.vn/",
         },
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310 (TLS verified)

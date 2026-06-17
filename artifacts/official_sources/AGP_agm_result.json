@@ -1,0 +1,23 @@
+{
+  "ticker": "AGP",
+  "generated_at": "2026-06-16T15:33:54.874630+00:00",
+  "outcome": {
+    "ticker": "AGP",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "AGP DHCD 2026.pdf"
+    ],
+    "pages": 49,
+    "approved_resolutions": 16,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 1,
+      "investment_plan": 1,
+      "rnd_and_product_focus": 4,
+      "business_direction": 7,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

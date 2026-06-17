@@ -155,6 +155,18 @@ def _sample_view_model() -> SimpleNamespace:
         current_price=SimpleNamespace(amount=75000, currency="VND"),
         target_price=SimpleNamespace(amount=101546, currency="VND"),
         upside_downside=SimpleNamespace(value=0.354),
+        valuation_evidence={
+            "formula_trace_count": 5,
+            "formula_trace_methods": ["fcff", "fcfe", "blend_dcf"],
+            "peer_data_source": "VN pharma peers: IMP, DMC, TRA",
+            "relative_valuation_status": "peer_data_available",
+            "market_sanity_bridge": {"target_to_market": 1.354, "bridge_present": True},
+            "display_blocking_reasons": ["blend_is_draft_only"],
+            "policy_blocking_reasons": ["market_sanity_bridge_missing"],
+            "model_warnings": ["FCFE BLOCKED - debt schedule unavailable"],
+            "market_data_warnings": ["served from cache; live fetch failed"],
+            "policy_warnings": ["valuation_method_divergence_warning"],
+        },
     )
 
 
@@ -269,6 +281,9 @@ def test_report_explanation_surfaces_data_and_method_warnings():
     assert "Lịch nợ vay chưa đủ" in md
     assert "Hai phương pháp dòng tiền" in md
     assert "Giá trị theo FCFF và FCFE lệch trên 25%" in md
+    assert "Số vết công thức" in md
+    assert "VN pharma peers: IMP, DMC, TRA" in md
+    assert "served from cache; live fetch failed" in md
 
 
 def test_report_explanation_translates_user_facing_finance_terms():

@@ -1313,11 +1313,37 @@ class ResearchGraphRunner:
             state.run_id, manifest_path, len(artifact_entries),
         )
 
+    def _write_local_eval_snapshot(self, state: "ResearchGraphState", packet: dict[str, Any]) -> None:
+        """Mirror the evidence packet + agent-effectiveness audit to the local
+        directory the benchmark plan-05 evaluator reads.
+
+        The runner's primary artifact store is Supabase, but the offline
+        benchmark suite resolves agent-governance evidence from
+        ``storage/archive/<run_id>/``. Writing a local snapshot here is what lets
+        plan 05 score a real run instead of a hand-made stub. It is best-effort:
+        a local filesystem failure must never abort a run.
+        """
+        from backend.harness.evidence_packet import build_agent_effectiveness_audit
+
+        try:
+            run_dir = ROOT / "storage" / "archive" / state.run_id
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (run_dir / f"{state.run_id}_evidence_packet.json").write_text(
+                json.dumps(packet, indent=2, default=str), encoding="utf-8"
+            )
+            audit = build_agent_effectiveness_audit(state)
+            (run_dir / f"{state.run_id}_agent_effectiveness_audit.json").write_text(
+                json.dumps(audit, indent=2, default=str), encoding="utf-8"
+            )
+        except Exception as exc:  # best-effort side artifact — never abort a run
+            _log.warning("local eval snapshot write failed for %s: %s", state.run_id, exc)
+
     def _write_evidence_packet(self, state: "ResearchGraphState") -> None:
         from backend.harness.evidence_packet import build_evidence_packet
         from backend.storage import RUNS_BUCKET, SupabaseStorageAdapter, run_artifact_key
 
         packet = build_evidence_packet(state)
+        self._write_local_eval_snapshot(state, packet)
         packet_path = run_artifact_key(state.run_id, "evidence_pack.json")
         adapter = SupabaseStorageAdapter()
         adapter.upload_json(RUNS_BUCKET, packet_path, packet, upsert=True)

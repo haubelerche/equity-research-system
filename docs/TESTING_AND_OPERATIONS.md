@@ -1,6 +1,6 @@
 # Testing và vận hành
 
-Cập nhật: 2026-06-14
+Cập nhật: 2026-06-17
 
 ## Context
 
@@ -49,6 +49,7 @@ make audit
 | Unit tests gates | `python -m pytest -q tests/unit/test_production_gates.py tests/evaluation/test_report_quality.py` | Pass |
 | Client-final governance | `python -m pytest -q tests/evaluation/test_client_final_governance.py tests/unit/test_publication_readiness.py tests/unit/test_package_validation_gate.py tests/unit/test_export_gate.py` | Pass; `auto_exported` không được xem là approved final |
 | Project evaluation | `python scripts/run_project_evaluation.py --ticker DHG --output-dir output/evaluation/eval_result` | Tạo tám plan artifacts và `evaluation_packet.json`; thiếu runtime evidence vẫn fail-closed |
+| Benchmark suite | `python scripts/run_benchmark_suite.py --cohort mvp5_validated` | Tạo artifact theo ticker và aggregate suite; đọc `publication_status` trước khi kết luận pass/fail |
 | Frontend | `cd frontend; npm test; npm run build` | Vitest pass và Vite production build thành công |
 | Static SPA serving | `python -m pytest -q tests/api/test_static_serving.py` | API routes được ưu tiên trước SPA fallback |
 | Full run draft | `python scripts/run_research.py --ticker DHG --from-year 2022 --to-year 2025 --draft` | Terminal status không `failed`; nếu `blocked`, đọc gate reasons |
@@ -87,7 +88,7 @@ Backend FastAPI nên deploy ở runtime khác, không ghép chung vào Vercel st
 
 | Ưu tiên | Hành động |
 |---|---|
-| Done | Test environment đã chuẩn hóa cho nghiệm thu 9/10; duy trì import smoke, unit tests, gates tests và migration dry-run như regression baseline |
+| Done | Test environment đã có regression baseline cho import smoke, unit tests, gates tests, migration dry-run, project evaluation và benchmark suite |
 | P0 | Chạy PDF render smoke trong container thật nếu PDF là deliverable bắt buộc |
 | P1 | Tách Docker command cho `worker`, `api` và `one-shot research job` |
 | Done | Dependency manifest đã khai báo trực tiếp crawler, vnstock, PDF fallback, pypdf và evaluation stack cần cho nghiệm thu |

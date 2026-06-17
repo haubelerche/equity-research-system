@@ -38,7 +38,7 @@ def test_available_benchmark_cohorts_expose_more_than_one_archetype() -> None:
         "OPC",
         "TNH",
         "JVC",
-        "DGW",
+        "DHT",
         "AMV",
     ]
     assert cohorts["agent_llm_judge_top10"] == cohorts["financial_model_top10"]
@@ -479,6 +479,62 @@ def test_benchmark_suite_finance_error_count_keeps_error_semantics() -> None:
     assert metric["unit"] == "count"
     assert metric["calculation"]["aggregation"] == "cohort_sum"
     assert metric["calculation"]["numerator"] == 6
+    assert metric["calculation"]["denominator"] == 2
+
+
+def test_benchmark_suite_missing_valuation_artifact_aggregates_as_fail_rate() -> None:
+    packets = [
+        {
+            "ticker": "DHG",
+            "artifacts": [{
+                "plan_id": "03",
+                "status": "blocked",
+                "metric_results": [{
+                    "id": "valuation_artifact",
+                    "metric_id": "valuation_artifact",
+                    "metric_type": "error_count",
+                    "unit": "count",
+                    "threshold": "pass",
+                    "threshold_operator": "=",
+                    "status": "blocked",
+                    "value": 0,
+                }],
+            }],
+        },
+        {
+            "ticker": "IMP",
+            "artifacts": [{
+                "plan_id": "03",
+                "status": "blocked",
+                "metric_results": [{
+                    "id": "valuation_artifact",
+                    "metric_id": "valuation_artifact",
+                    "metric_type": "error_count",
+                    "unit": "count",
+                    "threshold": "pass",
+                    "threshold_operator": "=",
+                    "status": "blocked",
+                    "value": 0,
+                }],
+            }],
+        },
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="financial_model_top10",
+        tickers=["DHG", "IMP"],
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("03",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 0
+    assert metric["status"] == "fail"
+    assert metric["metric_type"] == "coverage"
+    assert metric["unit"] == "percent"
+    assert metric["calculation"]["aggregation"] == "cohort_pass_rate"
+    assert metric["calculation"]["numerator"] == 0
     assert metric["calculation"]["denominator"] == 2
 
 

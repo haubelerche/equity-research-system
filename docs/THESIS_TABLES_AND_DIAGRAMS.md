@@ -469,7 +469,7 @@ stateDiagram-v2
 | Frontend | React/Vite | Dashboard bao cao va evaluation |
 | OCR | Tesseract, Poppler, pytesseract | Can cho BCTC scan |
 | Valuation engine | Python modules trong `backend/analytics/` | FCFF, FCFE, blend, multiples, sensitivity |
-| Evaluation | Data, retrieval, financial, citation, agent, report, publication, observability eval | Doc tu `backend/evaluation/` va `eval/` |
+| Evaluation | Data, retrieval, financial, citation, agent, report, publication, observability eval | Doc tu `backend/evaluation/`, `docs/eval/` va `config/benchmarks/` |
 | Pham vi ticker | Dien danh sach ticker thuc nghiem | Vi du DHG, DBD, DMC, DVN neu co ket qua |
 
 ### Bang 4.2. Danh muc co phieu thu nghiem

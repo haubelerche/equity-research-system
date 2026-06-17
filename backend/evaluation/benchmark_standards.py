@@ -443,6 +443,18 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
         "operations", "observability", "score", "benchmark_suite", "P3", False,
         "score", "platform", "Compare new p95 latency against the locked baseline and investigate regressions.",
     ),
+    "cost_per_report": MetricMetadata(
+        "operations", "observability", "score", "system_window", "P2", False,
+        "usd", "platform", "Apply budget policy, cache reuse, and model routing when report cost exceeds the soft budget.",
+    ),
+    "cost_per_full_report": MetricMetadata(
+        "operations", "observability", "score", "system_window", "P2", False,
+        "usd", "platform", "Apply budget policy, cache reuse, and model routing when report cost exceeds the soft budget.",
+    ),
+    "ops.cost_per_full_report_usd": MetricMetadata(
+        "operations", "observability", "score", "system_window", "P2", False,
+        "usd", "platform", "Apply budget policy, cache reuse, and model routing when report cost exceeds the soft budget.",
+    ),
     "duration_seconds": MetricMetadata(
         "operations", "observability", "latency_percentile", "system_window", "P3", False,
         "seconds", "platform", "Compare p95 runtime against warm/cold baseline and inspect slow stages.",
@@ -555,6 +567,12 @@ def _standard_status(status: str) -> str:
         return "fail"
     if normalized in {"warning", "warn"}:
         return "warning"
+    if normalized in {"not_applicable", "n/a", "na"}:
+        # A gate that legitimately does not apply to this case (e.g. FCFE when the
+        # model produced no usable debt schedule, or a DCF target when equity value
+        # is non-positive). Distinct from not_evaluable (missing evidence): it is
+        # excluded from cohort denominators rather than counted as a failure.
+        return "not_applicable"
     return "not_evaluable"
 
 

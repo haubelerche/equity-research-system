@@ -48,6 +48,100 @@ def write_evidence_packet(state: ResearchGraphState, base_dir: Path) -> Path:
     return path
 
 
+def build_agent_effectiveness_audit(state: ResearchGraphState) -> dict[str, Any]:
+    """Derive the agent-effectiveness audit from a real run's trace and state.
+
+    Benchmark plan 05 ("Agent workflow and LLM judge") scores tool-permission
+    compliance, artifact-manifest compliance, task completion and unauthorized
+    financial calculation from this audit. Historically it had no producer and
+    was scored against a hand-made stub; this builder makes it a real, governed
+    by-product of every run so the benchmark measures the actual pipeline.
+    """
+    trace = state.trace or []
+    agent_messages = [item for item in trace if item.get("kind") == "agent_message"]
+    tool_calls = [item for item in trace if item.get("kind") == "tool_call"]
+
+    agent_execution = [
+        {
+            "agent_id": item.get("agent_id") or item.get("agent_role"),
+            "action": item.get("action"),
+            "status": item.get("status"),
+            "latency_ms": item.get("latency_ms"),
+            "cost_estimate": item.get("cost_estimate"),
+            "confidence": item.get("confidence"),
+            "warnings": list(item.get("warnings") or []),
+            "requires_human": item.get("next_action") in {"request_human_review", "human_review"},
+            "fallback_triggered": bool(item.get("fallback_triggered")),
+            "output_summary": item.get("output_summary") or {},
+        }
+        for item in agent_messages
+    ]
+    tool_execution = [
+        {
+            "tool_name": item.get("tool_name"),
+            "agent_role": item.get("agent_role"),
+            "output_hash": item.get("output_hash"),
+            "output_summary": item.get("output_summary") or {},
+        }
+        for item in tool_calls
+    ]
+
+    audit = {
+        "schema_version": SCHEMA_VERSION,
+        "run_id": state.run_id,
+        "ticker": state.ticker,
+        "generated_at": datetime.now(UTC).isoformat(),
+        "current_stage": state.current_stage,
+        "status": state.status,
+        "requires_human": state.status == "blocked",
+        "blocking_reason": state.blocking_reason,
+        "tool_execution": tool_execution,
+        "agent_execution": agent_execution,
+        "data_retrieval_effectiveness": _data_retrieval_effectiveness(state),
+        "financial_analyst_effectiveness": _financial_analyst_effectiveness(state),
+        "report_writer_effectiveness": _report_writer_effectiveness(state),
+    }
+    return audit
+
+
+def write_agent_effectiveness_audit(state: ResearchGraphState, base_dir: Path) -> Path:
+    audit = build_agent_effectiveness_audit(state)
+    target_dir = Path(base_dir) / "audits"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    path = target_dir / f"{state.run_id}_agent_effectiveness_audit.json"
+    path.write_text(json.dumps(audit, indent=2, default=str), encoding="utf-8")
+    return path
+
+
+def _data_retrieval_effectiveness(state: ResearchGraphState) -> dict[str, Any]:
+    auto_ingest = (state.artifacts or {}).get("auto_ingest") or {}
+    facts = (state.artifacts or {}).get("build_facts") or {}
+    return {
+        "documents": len(_as_list(auto_ingest.get("documents"))),
+        "canonical_facts": len(_as_list(facts.get("facts"))),
+        "official_ready": bool(auto_ingest.get("official_ready")),
+    }
+
+
+def _financial_analyst_effectiveness(state: ResearchGraphState) -> dict[str, Any]:
+    tables = state.financial_tables or {}
+    return {
+        "payload_keys": sorted(str(key) for key in tables),
+        "snapshot_id": state.snapshot_id,
+    }
+
+
+def _report_writer_effectiveness(state: ResearchGraphState) -> dict[str, Any]:
+    report = state.draft_report or (state.artifacts or {}).get("report") or {}
+    quality = state.evaluation_results or {}
+    return {
+        "claims_count": len(_as_list(report.get("claims"))),
+        "citation_count": len(report.get("citation_map") or {}),
+        "quality_status": quality.get("decision") or quality.get("overall_status"),
+        "blocking_reason": state.blocking_reason,
+    }
+
+
 def _as_list(value: Any) -> list[Any]:
     if value is None:
         return []

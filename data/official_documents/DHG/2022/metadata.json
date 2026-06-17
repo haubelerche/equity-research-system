@@ -1,0 +1,15 @@
+{
+  "ticker": "DHG",
+  "company_name": "DHG",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DHG FY2022 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHG\\2022\\source_document.pdf",
+  "published_date": "2022-12-31",
+  "fiscal_year": 2022,
+  "language": "vi",
+  "file_hash": "5e66ba4affb32e758b1cbc523af12e0fb5edc335854a413aaebc567bc01ca132",
+  "staged_at": "2026-06-15T09:41:18.597998+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHG\\DHG 2022.pdf"
+}

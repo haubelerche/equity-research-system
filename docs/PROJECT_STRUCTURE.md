@@ -1,6 +1,6 @@
 # Cấu trúc dự án
 
-Cập nhật: 2026-06-14
+Cập nhật: 2026-06-17
 
 ## Context
 
@@ -29,13 +29,12 @@ Một repo agentic finance có nhiều lớp dễ gây nhầm lẫn: connector, 
 | `config/agents/` | Agent YAML và prompt library | Khi sửa role, prompt, allowed tools hoặc output schema |
 | `config/harness/` | Tool contracts, gate policy, run state schema, task registry | Khi sửa governance contract |
 | `config/dataset/` | Universe, source catalog, taxonomy, golden facts, JSON schemas | Khi mở rộng ticker hoặc chuẩn hóa domain data |
-| `config/eval/` | Dataset/query cấu hình cho evaluation benchmark | Khi thêm golden query hoặc benchmark input |
-| `eval/` | Tám kế hoạch evaluation và rollout | Khi thay đổi strategy/acceptance threshold |
+| `config/benchmarks/` | Dataset, cohort, schema, rubric và golden input cho benchmark suite | Khi thêm benchmark plan, cohort hoặc golden query |
+| `docs/eval/` | Kế hoạch evaluation và rollout ở mức tài liệu | Khi thay đổi strategy/acceptance threshold |
 | `frontend/` | React/Vite SPA cho report inventory và evaluation dashboard | Khi sửa trải nghiệm người dùng hoặc API client |
-| `dags/`, `astro/` | Airflow/Astro deploy kit tách khỏi app runtime | Khi sửa lịch batch/deployment |
-| `scale/` | Kế hoạch mở rộng universe, batch và publication quality | Khi lập kế hoạch rollout quy mô |
+| `scripts/schedule_news_collection.ps1` | Windows Task Scheduler job cho news collection; Airflow/Astro không còn là runtime active | Khi sửa lịch thu thập tin |
 | `tests/` | Unit, integration, database, documents, citations, evaluation tests | Khi thay đổi behavior hoặc bổ sung regression coverage |
-| `output/` | Local render outputs và logs | Không phải source of truth production |
+| `output/` | Local render outputs, benchmark outputs và logs | Không phải source of truth production; benchmark aggregate hiện nằm trong `output/evaluation/eval_result/benchmark_suite/` |
 | `storage/` | Local cache/staging | Production artifacts thuộc Supabase Storage |
 | `artifacts/` | Local/generated artifacts trong một số flow | Không nên dùng làm lookup "latest" cho production |
 
@@ -51,7 +50,8 @@ Một repo agentic finance có nhiều lớp dễ gây nhầm lẫn: connector, 
 | Sửa định giá | `backend/analytics/`, `scripts/run_valuation.py`, tests tương ứng |
 | Sửa report HTML/PDF | `backend/reporting/`, `backend/reporting/templates/` |
 | Sửa export readiness | `backend/harness/gates.py`, `backend/evaluation/report_quality.py`, `config/harness/export_gate_policy.yml` |
-| Sửa evaluation project-level | `backend/evaluation/project_evaluator.py`, `backend/evaluation/runtime_evaluators.py`, `eval/` |
+| Sửa evaluation project-level | `backend/evaluation/project_evaluator.py`, `backend/evaluation/runtime_evaluators.py`, `docs/eval/`, `config/benchmarks/` |
+| Sửa benchmark suite/cohort | `scripts/run_benchmark_suite.py`, `backend/evaluation/benchmark_cohorts.py`, `config/benchmarks/shared/benchmark_cohorts.yaml` |
 | Sửa report inventory UI | `frontend/src/pages/ReportsPage.tsx`, `backend/api.py`, `backend/reporting/output_inventory.py` |
 | Sửa evaluation dashboard | `frontend/src/pages/EvalDashboardPage.tsx`, `frontend/src/data/evalFramework.ts`, backend evaluation endpoints; `frontend/src/mock/` chỉ là fixture test/dev |
 

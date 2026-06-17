@@ -1,0 +1,15 @@
+{
+  "ticker": "DDN",
+  "company_name": "DDN",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DDN FY2022 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DDN\\2022\\source_document.pdf",
+  "published_date": "2022-12-31",
+  "fiscal_year": 2022,
+  "language": "vi",
+  "file_hash": "f82ca9e808541e8854482e89edddf84ecdd3ac16110615e4f2c4d7bdb3adf3c2",
+  "staged_at": "2026-06-15T09:41:18.229174+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DDN\\DDN 2022.pdf"
+}

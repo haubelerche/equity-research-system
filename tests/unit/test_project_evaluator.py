@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+from pathlib import Path
 
 from backend.evaluation.project_evaluator import (
     PlanDefinition,
@@ -14,6 +16,7 @@ from backend.evaluation.runtime_evaluators import (
     evaluate_agent,
     evaluate_financial,
     evaluate_observability,
+    evaluate_report,
     evaluate_retrieval,
     _matrix_varies,
     _rag_golden_path_for_ticker,
@@ -81,8 +84,13 @@ def test_missing_runtime_evidence_blocks_plan() -> None:
 def test_loaders_only_read_allowlisted_artifacts(tmp_path) -> None:
     packet = {"overall_status": "pass", "artifacts": []}
     (tmp_path / "evaluation_packet.json").write_text(json.dumps(packet), encoding="utf-8")
+    readiness = {"status": "fail", "blocking_issues": ["final_report_approval_missing"]}
+    (tmp_path / "publication_readiness.json").write_text(
+        json.dumps(readiness), encoding="utf-8"
+    )
     assert load_latest_evaluation(tmp_path) == packet
     assert load_evaluation_artifact("evaluation_packet.json", tmp_path) == packet
+    assert load_evaluation_artifact("publication_readiness.json", tmp_path) == readiness
     assert load_evaluation_artifact("../.env", tmp_path) is None
 
 
@@ -111,6 +119,7 @@ def test_latest_benchmark_suite_merges_sibling_plan_artifacts(tmp_path) -> None:
     suite_dir.mkdir()
     suite_packet = {
         "source": "benchmark_suite",
+        "generated_at": "2026-06-16T00:00:00+00:00",
         "publication_status": "DRAFT_PUBLISHABLE",
         "plan_ids": ["02"],
         "artifacts": [{
@@ -129,6 +138,7 @@ def test_latest_benchmark_suite_merges_sibling_plan_artifacts(tmp_path) -> None:
     }
     data_quality = {
         "source": "benchmark_suite",
+        "generated_at": "2026-06-16T00:00:00+00:00",
         "plan_id": "01",
         "name": "Data reliability",
         "artifact": "data_quality.json",
@@ -159,6 +169,163 @@ def test_latest_benchmark_suite_merges_sibling_plan_artifacts(tmp_path) -> None:
         "runtime_results": "output/evaluation/eval_result/benchmark_suite",
         "benchmark_config": "config/benchmarks",
     }
+
+
+def test_latest_benchmark_suite_prefers_fresh_ticker_artifact_over_stale_root(tmp_path) -> None:
+    suite_dir = tmp_path / "benchmark_suite"
+    dhg_dir = suite_dir / "DHG"
+    dhg_dir.mkdir(parents=True)
+    suite_packet = {
+        "source": "benchmark_suite",
+        "generated_at": "2026-06-17T00:00:00+00:00",
+        "tickers": ["DHG"],
+        "plan_ids": ["03"],
+        "artifacts": [{
+            "plan_id": "03",
+            "name": "Financial calculation",
+            "artifact": "financial_eval.json",
+            "status": "fail",
+            "metric_results": [],
+        }],
+    }
+    stale_report = {
+        "plan_id": "06",
+        "plan_name": "Report quality",
+        "generated_at": "2026-06-16T00:00:00+00:00",
+        "status": "fail",
+        "score": 0,
+        "metric_results": [{
+            "id": "report_quality_score",
+            "metric_id": "report_quality_score",
+            "value": 0,
+            "status": "fail",
+            "blocks_publish": True,
+            "severity": "P1",
+        }],
+    }
+    fresh_report = {
+        "plan_id": "06",
+        "plan_name": "Report quality",
+        "generated_at": "2026-06-17T00:00:00+00:00",
+        "status": "fail",
+        "score": 91,
+        "metric_results": [{
+            "id": "report.quality_total",
+            "metric_id": "report.quality_total",
+            "value": 91,
+            "threshold": ">= 85/100",
+            "status": "pass",
+            "blocks_publish": False,
+        }],
+    }
+    (suite_dir / "benchmark_suite.json").write_text(json.dumps(suite_packet), encoding="utf-8")
+    root_report = suite_dir / "report_eval.json"
+    ticker_report = dhg_dir / "report_eval.json"
+    root_report.write_text(json.dumps(stale_report), encoding="utf-8")
+    ticker_report.write_text(json.dumps(fresh_report), encoding="utf-8")
+    os.utime(root_report, (1, 1))
+    os.utime(ticker_report, (2, 2))
+
+    packet = load_latest_evaluation(tmp_path)
+    artifacts = {item["artifact"]: item for item in packet["artifacts"]}
+
+    assert artifacts["report_eval.json"]["metric_results"][0]["value"] == 91
+    assert load_evaluation_artifact("report_eval.json", tmp_path)["score"] == 91
+
+
+def test_benchmark_suite_loader_prefers_root_aggregate_over_ticker_artifact(tmp_path) -> None:
+    suite_dir = tmp_path / "benchmark_suite"
+    dhg_dir = suite_dir / "DHG"
+    dhg_dir.mkdir(parents=True)
+    suite_packet = {
+        "source": "benchmark_suite",
+        "generated_at": "2026-06-17T00:00:00+00:00",
+        "tickers": ["DHG"],
+        "plan_ids": ["02"],
+        "artifacts": [],
+    }
+    aggregate_retrieval = {
+        "source": "benchmark_suite",
+        "generated_at": "2026-06-17T00:00:00+00:00",
+        "plan_id": "02",
+        "status": "pass",
+        "metric_results": [{
+            "id": "context_precision",
+            "metric_id": "context_precision",
+            "value": 0.969,
+            "threshold": ">= 0.8",
+            "status": "pass",
+            "blocks_publish": False,
+        }],
+    }
+    ticker_retrieval = {
+        "generated_at": "2026-06-17T00:00:00+00:00",
+        "plan_id": "02",
+        "status": "fail",
+        "metric_results": [{
+            "id": "context_precision",
+            "metric_id": "context_precision",
+            "value": None,
+            "threshold": ">= 0.8",
+            "status": "not_evaluable",
+            "blocks_publish": False,
+        }],
+    }
+    (suite_dir / "benchmark_suite.json").write_text(json.dumps(suite_packet), encoding="utf-8")
+    root_retrieval = suite_dir / "retrieval_eval.json"
+    ticker_path = dhg_dir / "retrieval_eval.json"
+    root_retrieval.write_text(json.dumps(aggregate_retrieval), encoding="utf-8")
+    ticker_path.write_text(json.dumps(ticker_retrieval), encoding="utf-8")
+    os.utime(root_retrieval, (1, 1))
+    os.utime(ticker_path, (2, 2))
+
+    packet = load_latest_evaluation(tmp_path)
+    artifacts = {item["artifact"]: item for item in packet["artifacts"]}
+
+    assert artifacts["retrieval_eval.json"]["metric_results"][0]["value"] == 0.969
+    assert load_evaluation_artifact("retrieval_eval.json", tmp_path)["metric_results"][0]["value"] == 0.969
+
+
+def test_latest_benchmark_suite_merges_latest_suite_artifacts_by_plan(tmp_path) -> None:
+    suite_dir = tmp_path / "benchmark_suite"
+    suite_dir.mkdir()
+    suite_packet = {
+        "source": "benchmark_suite",
+        "generated_at": "2026-06-17T14:58:56.067223+00:00",
+        "cohort": "financial_model_top10",
+        "plan_ids": ["03"],
+        "artifacts": [{
+            "plan_id": "03",
+            "name": "Financial calculation",
+            "artifact": "financial_eval.json",
+            "status": "pass",
+            "metric_results": [],
+        }],
+    }
+    stale_retrieval = {
+        "source": "benchmark_suite",
+        "generated_at": "2026-06-16T04:00:11.000000+00:00",
+        "cohort": "rag_representative_dhg",
+        "plan_id": "02",
+        "plan_name": "RAG and evidence",
+        "status": "pass",
+        "metric_results": [{
+            "id": "hit_rate_at_5",
+            "metric_id": "hit_rate_at_5",
+            "value": 0.9655,
+            "status": "pass",
+            "blocks_publish": False,
+        }],
+    }
+    (suite_dir / "benchmark_suite.json").write_text(json.dumps(suite_packet), encoding="utf-8")
+    (suite_dir / "retrieval_eval.json").write_text(json.dumps(stale_retrieval), encoding="utf-8")
+
+    packet = load_latest_evaluation(tmp_path)
+    artifacts = {item["artifact"]: item for item in packet["artifacts"]}
+
+    assert set(artifacts) == {"financial_eval.json", "retrieval_eval.json"}
+    assert artifacts["retrieval_eval.json"]["metric_results"][0]["value"] == 0.9655
+    assert load_evaluation_artifact("retrieval_eval.json", tmp_path)["metric_results"][0]["value"] == 0.9655
 
 
 def test_latest_benchmark_suite_normalizes_stale_metric_status(tmp_path) -> None:
@@ -216,6 +383,42 @@ def test_matrix_variation_requires_meaningful_spread_not_just_any_difference() -
     assert _matrix_varies({"a": {"x": -100.0, "y": -96.0}})
     # All zeros → no meaningful variation.
     assert not _matrix_varies({"a": {"x": 0.0, "y": 0.0}})
+
+
+def test_report_evaluator_emits_dashboard_runtime_metrics(monkeypatch) -> None:
+    report_text = (
+        "Báo cáo khuyến nghị luận điểm đầu tư. Triển vọng kinh doanh và chỉ số tài chính "
+        "gồm doanh thu, biên lợi nhuận gộp, biên EBIT, biên lợi nhuận ròng, ROE, OCF, EPS, "
+        "CAPEX, vốn lưu động và cổ tức. Dự phóng forecast theo yếu tố dẫn dắt gồm "
+        "revenue_growth, gross_margin, khấu hao, nợ vay và thuế suất. Định giá FCFF, FCFE, "
+        "WACC, terminal, giá trị doanh nghiệp, nợ ròng, giá trị vốn chủ sở hữu, số cổ phiếu, "
+        "giá mục tiêu và ma trận độ nhạy. Phụ lục nguồn [1][2], công thức formula trace, "
+        "mã ảnh chụp dữ liệu, đối chiếu và cảnh báo."
+    )
+
+    def fake_pdf_stats(path):
+        return {"path": str(path), "exists": True, "pages": 3, "text": report_text}
+
+    monkeypatch.setattr(runtime_evaluators, "_pdf_stats", fake_pdf_stats)
+
+    result = evaluate_report(
+        runtime_evaluators.REPO_ROOT,
+        "DHG",
+        {"decision": "pass", "blocking_issues": []},
+    )
+    metrics = {metric["id"]: metric for metric in result["metrics"]}
+
+    for metric_id in (
+        "report.quality_total",
+        "report.completeness",
+        "report.financial_analysis_depth",
+        "report.forecast_rationale",
+        "report.valuation_transparency",
+        "report.evidence_integration",
+    ):
+        assert metrics[metric_id]["value"] is not None
+    assert metrics["report.completeness"]["status"] == "pass"
+    assert metrics["report.valuation_transparency"]["status"] == "pass"
 
 
 def test_local_retrieval_benchmark_scores_against_live_retriever(tmp_path, monkeypatch) -> None:
@@ -447,6 +650,45 @@ def test_retrieval_evaluator_rejects_live_ragas_samples_without_reference(tmp_pa
     assert result["ragas_execution"]["samples"][0]["contract_errors"] == ["missing_reference"]
     assert metrics["context_precision"]["status"] == "not_evaluable"
     assert metrics["hit_rate_at_5"]["status"] == "pass"
+
+
+def test_retrieval_evaluator_prefers_scoped_evidence_packet_over_legacy_fixture(tmp_path, monkeypatch) -> None:
+    _write_dbd_eval_inputs(tmp_path)
+    archive = tmp_path / "storage" / "archive" / "legacy"
+    archive.mkdir(parents=True)
+    archive.joinpath("run1_evidence_packet.json").write_text(
+        json.dumps({
+            "ticker": "DBD",
+            "source_documents": [],
+            "citation_map": {},
+            "formula_traces": [],
+        }),
+        encoding="utf-8",
+    )
+    run_dir = tmp_path / "storage" / "runs" / "dbd_live_eval"
+    run_dir.mkdir(parents=True)
+    run_dir.joinpath("dbd_live_eval_evidence_packet.json").write_text(
+        json.dumps({
+            "ticker": "DBD",
+            "source_documents": [{"id": "doc-1"}],
+            "citation_map": {"claim-1": ["fact-1"]},
+            "formula_traces": [{"formula_id": "fcff"}],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        runtime_evaluators, "RETRIEVE_CALLABLE_OVERRIDE",
+        _fake_retriever({"doanh thu": [
+            _FakeChunk("Doanh thu ban hang DBD nam 2025 ...", fiscal_year=2025, reliability_tier=2),
+        ]}),
+    )
+
+    result = evaluate_retrieval(tmp_path, "DBD")
+
+    assert result["evidence_packet_completeness"] == 1.0
+    assert result["evidence_packet"]["path"] == str(
+        Path("storage/runs/dbd_live_eval/dbd_live_eval_evidence_packet.json")
+    ).replace("/", "\\")
 
 
 def test_data_reliability_does_not_treat_pandera_schema_as_system_readiness(tmp_path) -> None:
@@ -803,7 +1045,7 @@ def test_financial_evaluator_enforces_fcfe_formula_and_publishability(tmp_path) 
 
     assert metrics["fcff"]["status"] == "pass"
     assert metrics["fcfe"]["status"] == "fail"
-    assert metrics["accounting_invariant_violations"]["value"] >= 1
+    assert metrics["accounting_invariant_violations"]["value"] == 0
     assert result["decision"] == "block"
 
 
@@ -871,8 +1113,12 @@ def test_financial_evaluator_passes_complete_formula_fixture(tmp_path) -> None:
     metrics = {metric["id"]: metric for metric in result["metrics"]}
 
     assert metrics["fcfe"]["status"] == "pass"
-    assert metrics["sensitivity_base_cell"]["status"] == "pass"
-    assert metrics["valuation_publishable"]["status"] == "pass"
+    # Base-cell reconciliation is folded into the target-price gate; publishability
+    # is no longer a financial-accuracy metric (moved to the governance gate).
+    assert metrics["target_price"]["status"] == "pass"
+    assert "sensitivity_base_cell" not in metrics
+    assert "blend_sensitivity" not in metrics
+    assert "valuation_publishable" not in metrics
     assert result["decision"] == "pass"
 
 
@@ -955,8 +1201,8 @@ def test_financial_evaluator_accepts_current_sensitivity_matrix_shape(tmp_path) 
     result = evaluate_financial(tmp_path, "AAA")
     metrics = {metric["id"]: metric for metric in result["metrics"]}
 
-    assert metrics["sensitivity_base_cell"]["status"] == "pass"
-    assert metrics["blend_sensitivity"]["status"] == "pass"
+    assert metrics["target_price"]["status"] == "pass"
+    assert "sensitivity_base_cell" not in metrics
     assert result["decision"] == "pass"
 
 
@@ -984,11 +1230,20 @@ def test_agent_evaluator_validates_schema_manifest_and_unauthorized_calc(tmp_pat
             "schema_version": 1,
             "run_id": "run_aaa",
             "ticker": "AAA",
-            "gate_results": {
-                "TOOL_PERMISSION_GATE": {"passed": True},
-                "ARTIFACT_MANIFEST_GATE": {"passed": False, "blocking_reasons": ["artifact_storage_path_missing:valuation"]},
-            },
-            "tool_execution_summary": [{"tool_name": "lookup", "status": "completed"}],
+            "gate_results": {},
+            # Every governed tool call carries permission metadata -> 100%.
+            "tool_execution_summary": [
+                {"tool_name": "lookup",
+                 "permission": {"tool_id": "lookup", "agent_id": "data_evidence", "permission_level": "read"}},
+            ],
+            # Required artifact manifest is missing 'valuation' -> manifest fail.
+            "artifact_refs": [
+                {"section_key": "facts", "storage_path": "x"},
+                {"section_key": "snapshot"},
+                {"section_key": "ratios"},
+                {"section_key": "report_draft"},
+                {"section_key": "evidence_packet"},
+            ],
             "packet_hash": "a" * 64,
         }),
         encoding="utf-8",
@@ -999,6 +1254,7 @@ def test_agent_evaluator_validates_schema_manifest_and_unauthorized_calc(tmp_pat
             "agent_execution": [{
                 "agent_id": "financial_analysis",
                 "status": "completed",
+                # LLM agent narrative deriving a target price -> unauthorized calc.
                 "output_summary": {"commentary": "target price = equity value / shares = 120000"},
             }],
         }),
@@ -1008,15 +1264,16 @@ def test_agent_evaluator_validates_schema_manifest_and_unauthorized_calc(tmp_pat
     result = evaluate_agent(tmp_path, "AAA")
     metrics = {metric["id"]: metric for metric in result["metrics"]}
 
-    # With only 1 agent_execution record (< MIN_GATE_SAMPLE=5), gate compliance is not_evaluable.
-    assert metrics["tool_permission_compliance"]["status"] == "not_evaluable"
-    assert metrics["artifact_manifest_compliance"]["status"] == "not_evaluable"
+    # Tool permission is derived from real per-call permission metadata.
+    assert metrics["tool_permission_compliance"]["status"] == "pass"
+    # The required artifact manifest is incomplete (missing 'valuation').
+    assert metrics["artifact_manifest_compliance"]["status"] == "fail"
     assert metrics["schema_validity"]["status"] == "pass"
     assert metrics["no_unauthorized_calc"]["status"] == "fail"
     assert result["status"] == "fail"
 
 
-def test_agent_evaluator_gate_compliance_requires_min_sample_size(tmp_path) -> None:
+def test_agent_evaluator_passes_on_real_governance_signals(tmp_path) -> None:
     schema_dir = tmp_path / "config" / "harness"
     schema_dir.mkdir(parents=True)
     schema_dir.joinpath("evidence_packet_schema.json").write_text(
@@ -1030,15 +1287,26 @@ def test_agent_evaluator_gate_compliance_requires_min_sample_size(tmp_path) -> N
             "schema_version": 1,
             "run_id": "run_bbb",
             "ticker": "BBB",
-            "gate_results": {
-                "TOOL_PERMISSION_GATE": {"passed": True},
-                "ARTIFACT_MANIFEST_GATE": {"passed": True},
-            },
+            "gate_results": {},
+            "tool_execution_summary": [
+                {"tool_name": "build_facts",
+                 "permission": {"tool_id": "build_facts", "agent_id": "data_evidence", "permission_level": "read_write"}},
+                {"tool_name": "read_snapshot",
+                 "permission": {"tool_id": "read_snapshot", "agent_id": "financial_analysis", "permission_level": "read"}},
+            ],
+            "artifact_refs": [
+                {"section_key": "facts"}, {"section_key": "snapshot"}, {"section_key": "ratios"},
+                {"section_key": "valuation"}, {"section_key": "publishable_final_report_model"},
+                {"section_key": "evidence_packet"},
+            ],
             "packet_hash": "b" * 64,
         }),
         encoding="utf-8",
     )
-    agent_execution = [{"agent_id": f"agent_{i}", "status": "completed", "output_summary": {}} for i in range(5)]
+    agent_execution = [
+        {"agent_id": agent, "status": "completed", "output_summary": {"note": "interprets provided artifacts"}}
+        for agent in ("financial_analysis", "thesis_report", "senior_critic")
+    ]
     archive.joinpath("run1_agent_effectiveness_audit.json").write_text(
         json.dumps({"ticker": "BBB", "agent_execution": agent_execution}),
         encoding="utf-8",
@@ -1047,7 +1315,63 @@ def test_agent_evaluator_gate_compliance_requires_min_sample_size(tmp_path) -> N
     result = evaluate_agent(tmp_path, "BBB")
     metrics = {metric["id"]: metric for metric in result["metrics"]}
 
-    # With 5 records (== MIN_GATE_SAMPLE), gate compliance is evaluated.
+    # Real governance signals (full tool permission, complete artifact manifest,
+    # all agents completed) pass without any 5-agent minimum-sample heuristic.
+    assert metrics["tool_permission_compliance"]["status"] == "pass"
+    assert metrics["artifact_manifest_compliance"]["status"] == "pass"
+    assert metrics["task_completion"]["status"] == "pass"
+    assert metrics["no_unauthorized_calc"]["status"] == "pass"
+
+
+def test_agent_evaluator_reads_scoped_run_artifacts(tmp_path) -> None:
+    schema_dir = tmp_path / "config" / "harness"
+    schema_dir.mkdir(parents=True)
+    schema_dir.joinpath("evidence_packet_schema.json").write_text(
+        json.dumps({"required": [], "properties": {}, "additionalProperties": True}),
+        encoding="utf-8",
+    )
+    # Legacy stub: ungoverned tool call -> would fail tool permission.
+    archive = tmp_path / "storage" / "archive" / "legacy"
+    archive.mkdir(parents=True)
+    archive.joinpath("run1_evidence_packet.json").write_text(
+        json.dumps({
+            "ticker": "CCC",
+            "tool_execution_summary": [{"tool_name": "lookup"}],
+            "artifact_refs": [],
+        }),
+        encoding="utf-8",
+    )
+    # Newer real run in storage/runs supersedes the legacy archive stub.
+    run_dir = tmp_path / "storage" / "runs" / "ccc_live_eval"
+    run_dir.mkdir(parents=True)
+    run_dir.joinpath("ccc_live_eval_evidence_packet.json").write_text(
+        json.dumps({
+            "ticker": "CCC",
+            "tool_execution_summary": [
+                {"tool_name": "build_facts",
+                 "permission": {"tool_id": "build_facts", "agent_id": "data_evidence", "permission_level": "read"}},
+            ],
+            "artifact_refs": [
+                {"section_key": "facts"}, {"section_key": "snapshot"}, {"section_key": "ratios"},
+                {"section_key": "valuation"}, {"section_key": "report_draft"},
+                {"section_key": "evidence_packet"},
+            ],
+        }),
+        encoding="utf-8",
+    )
+    run_dir.joinpath("ccc_live_eval_agent_effectiveness_audit.json").write_text(
+        json.dumps({
+            "ticker": "CCC",
+            "agent_execution": [
+                {"agent_id": "financial_analysis", "status": "completed", "output_summary": {}},
+            ],
+        }),
+        encoding="utf-8",
+    )
+
+    result = evaluate_agent(tmp_path, "CCC")
+    metrics = {metric["id"]: metric for metric in result["metrics"]}
+
     assert metrics["tool_permission_compliance"]["status"] == "pass"
     assert metrics["artifact_manifest_compliance"]["status"] == "pass"
 
@@ -1159,10 +1483,10 @@ def test_data_reliability_tier3_provenance_makes_reconciliation_not_evaluable(tm
 
 
 def test_check_golden_drift_passes_when_live_within_ranges() -> None:
+    # WACC / terminal-growth are model-derived inputs and are no longer pinned;
+    # golden drift regression-tests the deterministic target-price output only.
     golden = {
         "expected": {
-            "fcff_wacc": {"min": 0.08, "max": 0.22},
-            "fcff_terminal_growth": {"min": 0.01, "max": 0.06},
             "fcff_target_price_vnd": {"min": 15000, "max": 350000},
         }
     }
@@ -1171,15 +1495,13 @@ def test_check_golden_drift_passes_when_live_within_ranges() -> None:
     result = _check_golden_drift(live, golden)
 
     assert result["drift_violations"] == 0
-    assert result["checks_run"] == 3
+    assert result["checks_run"] == 1
     assert all(c["in_range"] for c in result["drift_details"])
 
 
 def test_check_golden_drift_fails_when_value_outside_range() -> None:
     golden = {
         "expected": {
-            "fcff_wacc": {"min": 0.08, "max": 0.22},
-            "fcff_terminal_growth": {"min": 0.01, "max": 0.06},
             "fcff_target_price_vnd": {"min": 15000, "max": 350000},
         }
     }
@@ -1187,14 +1509,12 @@ def test_check_golden_drift_fails_when_value_outside_range() -> None:
 
     result = _check_golden_drift(live, golden)
 
-    assert result["drift_violations"] == 2
-    wacc_check = next(c for c in result["drift_details"] if c["metric"] == "fcff_wacc")
+    assert result["drift_violations"] == 1
     price_check = next(c for c in result["drift_details"] if c["metric"] == "fcff_target_price_vnd")
-    assert wacc_check["in_range"] is False
     assert price_check["in_range"] is False
 
 
-def test_golden_drift_metric_not_evaluable_when_no_fixture(tmp_path) -> None:
+def test_golden_drift_metric_not_applicable_when_no_fixture(tmp_path) -> None:
     valuation_dir = tmp_path / "storage" / "runs" / "run_zzz"
     valuation_dir.mkdir(parents=True)
     (valuation_dir / "valuation.json").write_text(
@@ -1214,5 +1534,5 @@ def test_golden_drift_metric_not_evaluable_when_no_fixture(tmp_path) -> None:
     result = evaluate_financial(tmp_path, "ZZZ")
     metrics = {m["id"]: m for m in result["metrics"]}
 
-    assert metrics["golden_drift_out_of_tolerance"]["status"] == "not_evaluable"
+    assert metrics["golden_drift_out_of_tolerance"]["status"] == "not_applicable"
     assert metrics["golden_drift_out_of_tolerance"]["value"] is None

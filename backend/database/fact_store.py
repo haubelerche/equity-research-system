@@ -12,6 +12,24 @@ from psycopg2.extras import Json, execute_values
 
 from backend.database.config import connect_with_retry, require_database_url
 
+
+def normalize_exchange(exchange: str | None) -> str | None:
+    """Map a vnstock/connector exchange label to the canonical HOSE/HNX/UPCOM.
+
+    vnstock returns mixed casing (notably ``"UPCoM"``) and HOSE aliases (``"HSX"``)
+    that violate the ``ref.companies``/``v2_ref.companies`` exchange CHECK constraint
+    (``IN ('HOSE','HNX','UPCOM')``). Normalising at the write boundary protects every
+    caller. Unknown values are returned upper-cased and stripped so the constraint —
+    not silent corruption — surfaces genuinely new exchanges.
+    """
+    if exchange is None:
+        return None
+    value = exchange.strip().upper()
+    if not value:
+        return None
+    return {"HSX": "HOSE", "HOSE": "HOSE", "HNX": "HNX", "UPCOM": "UPCOM"}.get(value, value)
+
+
 @dataclass(frozen=True)
 class FinancialFact:
     ticker: str
@@ -134,6 +152,7 @@ class PostgresFactStore:
         officers_json: Any = None,
     ) -> None:
         """Update ref.companies with the latest company profile data."""
+        exchange = normalize_exchange(exchange)
         with self.conn() as connection:
             with connection.cursor() as cur:
                 cur.execute(

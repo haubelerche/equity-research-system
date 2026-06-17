@@ -1,0 +1,152 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "source": "cohort_audit",
+  "run_id": "benchmark-cohort-20260615",
+  "cohort": "diversified_core",
+  "tickers": [
+    "DHG",
+    "IMP",
+    "DMC",
+    "TRA",
+    "TNH"
+  ],
+  "ticker_count": 5,
+  "generated_at": "2026-06-15T03:42:50.307486+00:00",
+  "fail_closed": true,
+  "overall_status": "blocked",
+  "publication_status": "BLOCKED_BY_P0",
+  "aggregate_summary": {
+    "pass": 2,
+    "fail": 5,
+    "blocked": 2,
+    "not_measured": 0
+  },
+  "ticker_results": {
+    "DHG": {
+      "overall_status": "blocked",
+      "publication_status": "BLOCKED_BY_P0",
+      "summary": {
+        "pass": 2,
+        "fail": 5,
+        "blocked": 1,
+        "not_measured": 0
+      },
+      "blocking_issues": [
+        "accounting_invariant_violations:fcfe,blend_sensitivity",
+        "blend_sensitivity:threshold_not_met",
+        "claim_ledger_missing",
+        "context_precision:threshold_not_met",
+        "context_recall:threshold_not_met",
+        "duplicate_fact_count:threshold_not_met",
+        "faithfulness:threshold_not_met",
+        "fcfe:threshold_not_met",
+        "final_report_approval_missing",
+        "financial_gate_passed:threshold_not_met",
+        "ocr_unresolved_rate:threshold_not_met",
+        "publication_readiness:threshold_not_met",
+        "publishable_final_report_model_missing",
+        "response_relevancy:threshold_not_met",
+        "schema_validity:additional_property_not_allowed",
+        "valuation_method_data_readiness:data_requirement_or_reconciliation_gate_failed",
+        "valuation_publishable:low_confidence_primary_method,valuation_method_divergence_critical"
+      ]
+    },
+    "IMP": {
+      "overall_status": "blocked",
+      "publication_status": "BLOCKED_BY_P0",
+      "summary": {
+        "pass": 3,
+        "fail": 3,
+        "blocked": 2,
+        "not_measured": 0
+      },
+      "blocking_issues": [
+        "accounting_invariant_violations:fcfe,blend_sensitivity",
+        "blend_sensitivity:threshold_not_met",
+        "claim_ledger_missing",
+        "fcfe:threshold_not_met",
+        "final_report_approval_missing",
+        "financial_gate_passed:threshold_not_met",
+        "publication_readiness:threshold_not_met",
+        "publishable_final_report_model_missing",
+        "valuation_method_data_readiness:data_requirement_or_reconciliation_gate_failed",
+        "valuation_publishable:low_confidence_primary_method"
+      ]
+    },
+    "DMC": {
+      "overall_status": "blocked",
+      "publication_status": "BLOCKED_BY_P0",
+      "summary": {
+        "pass": 3,
+        "fail": 3,
+        "blocked": 2,
+        "not_measured": 0
+      },
+      "blocking_issues": [
+        "claim_ledger_missing",
+        "final_report_approval_missing",
+        "financial_gate_passed:threshold_not_met",
+        "publication_readiness:threshold_not_met",
+        "publishable_final_report_model_missing",
+        "valuation_method_data_readiness:data_requirement_or_reconciliation_gate_failed",
+        "valuation_publishable:low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical"
+      ]
+    },
+    "TRA": {
+      "overall_status": "blocked",
+      "publication_status": "BLOCKED_BY_P0",
+      "summary": {
+        "pass": 2,
+        "fail": 5,
+        "blocked": 1,
+        "not_measured": 0
+      },
+      "blocking_issues": [
+        "accounting_invariant_violations:fcfe,blend_sensitivity",
+        "blend_sensitivity:threshold_not_met",
+        "claim_ledger_missing",
+        "explanation_pdf_rendered:threshold_not_met",
+        "fcfe:threshold_not_met",
+        "final_report_approval_missing",
+        "financial_gate_passed:threshold_not_met",
+        "pdf_render_failures:threshold_not_met",
+        "pdf_source_mentions:threshold_not_met",
+        "publication_readiness:threshold_not_met",
+        "publishable_final_report_model_missing",
+        "report_pdf_rendered:threshold_not_met",
+        "valuation_method_data_readiness:data_requirement_or_reconciliation_gate_failed",
+        "valuation_publishable:low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical"
+      ]
+    },
+    "TNH": {
+      "overall_status": "blocked",
+      "publication_status": "BLOCKED_BY_P0",
+      "summary": {
+        "pass": 2,
+        "fail": 5,
+        "blocked": 1,
+        "not_measured": 0
+      },
+      "blocking_issues": [
+        "accounting_invariant_violations:fcfe,target_price,blend_sensitivity,sensitivity_base_cell",
+        "blend_sensitivity:threshold_not_met",
+        "claim_ledger_missing",
+        "explanation_pdf_rendered:threshold_not_met",
+        "fcfe:threshold_not_met",
+        "final_report_approval_missing",
+        "financial_gate_passed:threshold_not_met",
+        "pdf_render_failures:threshold_not_met",
+        "pdf_source_mentions:threshold_not_met",
+        "publication_readiness:threshold_not_met",
+        "publishable_final_report_model_missing",
+        "report_pdf_rendered:threshold_not_met",
+        "sensitivity_base_cell:threshold_not_met",
+        "target_price:threshold_not_met",
+        "valuation_method_data_readiness:data_requirement_or_reconciliation_gate_failed",
+        "valuation_publishable:threshold_not_met"
+      ]
+    }
+  },
+  "worst_ticker": "DHG"
+}

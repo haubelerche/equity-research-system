@@ -49,12 +49,8 @@ def test_client_final_readiness_passes_when_report_present() -> None:
     assert result.report_quality_score == 90
 
 
-def test_does_not_block_on_unapproved_run_quality_or_package() -> None:
-    # Decision (2026-06-16): no human-in-the-loop approval gates. The PDF is for the
-    # analyst to read and judge; the pipeline must publish the final report and disclose
-    # quality, not block on run-approval / final-approval / quality-score / package.
+def test_blocks_on_unapproved_run_quality_or_package() -> None:
     artifacts = _artifacts()
-    # Make every governance gate "fail"/missing: still must publish.
     for a in artifacts:
         if a["section_key"] == "report_quality_evaluation":
             a["payload"] = {"passed": False, "decision": "block", "score": 10}
@@ -68,8 +64,14 @@ def test_does_not_block_on_unapproved_run_quality_or_package() -> None:
         ticker="DHG",
     )
 
-    assert result.passed, result.blocking_reasons
-    assert result.snapshot_id == "snap-1"
+    assert not result.passed
+    assert set(result.blocking_reasons) >= {
+        "final_report_approval_missing",
+        "package_validation_gate_failed",
+        "report_quality_not_allow_export",
+        "report_quality_score_below_threshold",
+        "run_not_approved:auto_exported",
+    }
 
 
 def test_still_blocks_on_snapshot_mismatch() -> None:
@@ -85,8 +87,7 @@ def test_still_blocks_on_snapshot_mismatch() -> None:
     )
     assert not result.passed
     assert "artifact_snapshot_mismatch" in result.blocking_reasons
-    # Approval gates must NOT appear anymore.
-    assert not any("approv" in r for r in result.blocking_reasons)
+    assert "artifact_snapshot_mismatch" in result.blocking_reasons
 
 
 def test_missing_snapshot_payload_does_not_block() -> None:
@@ -98,9 +99,9 @@ def test_missing_snapshot_payload_does_not_block() -> None:
         if a["section_key"] == "valuation":
             a["payload"] = {}  # no snapshot_id available
     result = evaluate_client_final_readiness(
-        run={"ticker": "DHG", "status": "auto_exported"},
+        run={"ticker": "DHG", "status": "approved"},
         artifacts=artifacts,
-        final_approval=None,
+        final_approval={"decision": "approved"},
         ticker="DHG",
     )
     assert result.passed, result.blocking_reasons

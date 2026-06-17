@@ -395,16 +395,16 @@ Cách mô tả này phù hợp với yêu cầu của bài toán tài chính vì
 
 ## 16. Đánh giá theo ba tiêu chí kỹ thuật
 
-| Tiêu chí | Trạng thái nghiệm thu 9/10 | Giới hạn còn lại | Hướng cải thiện |
+| Tiêu chí | Trạng thái codebase hiện hành | Giới hạn còn lại | Hướng cải thiện |
 |---|---|---|---|
-| Khả năng mở rộng | MVP5 đạt chất lượng sâu; active configured universe có readiness matrix; snapshot reuse và index song song giảm chi phí mở rộng | Queue bền vững và SLA batch lớn vẫn thuộc productionization | Chuyển sang hàng đợi công việc có cơ chế thuê việc, thử lại và khôi phục từ checkpoint |
-| Độ tin cậy | Financial gates, citation coverage, evidence packet, manifest, formula trace và publication readiness đều đạt ngưỡng nghiệm thu | Client-final vẫn cần approval chuyên gia và audit vận hành khi thương mại hóa | Tách rõ policy cho analyst draft, approved final và long-term archive |
+| Khả năng mở rộng | Universe cấu hình đã mở rộng tới 43 ticker; benchmark suite hỗ trợ cohort; snapshot reuse và index song song giảm chi phí mở rộng | Không phải mọi ticker đều có chất lượng báo cáo sâu như MVP5; queue bền vững và SLA batch lớn vẫn thuộc productionization | Chuyển sang hàng đợi công việc có cơ chế thuê việc, thử lại và khôi phục từ checkpoint |
+| Độ tin cậy | Financial gates, citation coverage, evidence packet, manifest, formula trace và publication readiness đã được hiện thực; benchmark hiện hành có khả năng fail-closed khi gặp P0 | Một số aggregate benchmark hiện có thể đang `BLOCKED_BY_P0`; client-final vẫn cần approval chuyên gia và audit vận hành khi thương mại hóa | Tách rõ policy cho analyst draft, approved final và long-term archive |
 | Độ trễ | Luồng đủ nhanh cho nghiên cứu tài chính; fast render tái sử dụng artifact đã khóa; dashboard đọc evaluation live | OCR, gọi mô hình ngôn ngữ lớn và kết xuất PDF vẫn là các điểm tốn thời gian nhất | Giữ tái sử dụng ảnh chụp dữ liệu, giảm lời gọi mô hình không cần thiết, kết xuất lại từ artifact đã tồn tại |
 
 ---
 
 ## 17. Kết luận kiến trúc
 
-Hệ thống nên được trình bày là một quy trình nghiên cứu tài chính tự động có kiểm soát đã đạt trạng thái nghiên cứu-grade 9/10 cho phạm vi MVP5, không phải một hệ đa tác tử tự trị. Các tác tử trí tuệ nhân tạo được sử dụng có chọn lọc ở những bước cần năng lực ngôn ngữ và lập luận, trong khi dữ liệu, số liệu, định giá, kiểm định và xuất báo cáo được thực hiện bằng mã chương trình tất định.
+Hệ thống nên được trình bày là một quy trình nghiên cứu tài chính tự động có kiểm soát, không phải một hệ đa tác tử tự trị. Các tác tử trí tuệ nhân tạo được sử dụng có chọn lọc ở những bước cần năng lực ngôn ngữ và lập luận, trong khi dữ liệu, số liệu, định giá, kiểm định và xuất báo cáo được thực hiện bằng mã chương trình tất định. Với kết quả định lượng, cần nêu rõ phạm vi artifact hoặc benchmark đang được trích dẫn, đặc biệt khi aggregate mới nhất có trạng thái `BLOCKED_BY_P0`.
 
 Cách phân loại này giúp tài liệu kiến trúc chính xác hơn, tránh thổi phồng vai trò của tác tử, đồng thời bảo vệ được giá trị kỹ thuật cốt lõi của dự án: dữ liệu có nguồn, tính toán tái lập được, báo cáo có bằng chứng, kiểm định tự động và chuyên gia đánh giá cuối luồng.

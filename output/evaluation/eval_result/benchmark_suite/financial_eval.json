@@ -2,63 +2,30 @@
   "schema_version": "2.1",
   "benchmark_suite_version": "benchmark_standards_v1",
   "source": "benchmark_suite",
-  "cohort": "default",
+  "cohort": "financial_model_top10",
   "tickers": [
     "DHG",
+    "DBD",
     "IMP",
     "DMC",
     "TRA",
-    "DBD",
     "OPC",
-    "MKP",
     "TNH",
     "JVC",
-    "DVN",
     "DHT",
-    "LDP",
-    "PPP",
-    "DP3",
-    "DP1",
-    "TW3",
-    "MED",
-    "PMC",
-    "AMV",
-    "YTC",
-    "VHE",
-    "VDP",
-    "DCL",
-    "SPM",
-    "VMD",
-    "HBH",
-    "DNM",
-    "DBT",
-    "DPP",
-    "DTP",
-    "VMC",
-    "NDT",
-    "BID",
-    "BCR",
-    "VNP",
-    "CPC",
-    "HDA",
-    "TMP",
-    "DRG",
-    "PVD",
-    "DGW",
-    "TNT",
-    "AGP"
+    "AMV"
   ],
-  "generated_at": "2026-06-16T13:19:52.077425+00:00",
+  "generated_at": "2026-06-17T14:58:56.067223+00:00",
   "plan_id": "03",
   "name": "Financial calculation",
   "artifact": "financial_eval.json",
-  "status": "fail",
+  "status": "pass",
   "metrics": {
-    "cohort_tickers": 43,
+    "cohort_tickers": 10,
     "ticker_status_counts": {
-      "pass": 0,
-      "fail": 11,
-      "blocked": 32,
+      "pass": 9,
+      "fail": 0,
+      "blocked": 0,
       "not_measured": 0
     }
   },
@@ -67,7 +34,7 @@
       "id": "accounting_invariant_violations",
       "label": "Accounting invariant violations",
       "source": "benchmark_suite",
-      "detail": "cohort_size=11",
+      "detail": "cohort_size=9",
       "metric_id": "accounting_invariant_violations",
       "metric_name": "Accounting invariant violations",
       "category": "financial_model",
@@ -76,85 +43,20 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 4,
+      "value": 0,
       "threshold": "= 0",
       "threshold_operator": "=",
       "unit": "count",
-      "status": "fail",
-      "legacy_status": "fail",
-      "sample_size": 11,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "20260615_v3",
       "owner": "valuation",
-      "failed_examples": [
-        {
-          "ticker": "TNH",
-          "metric_id": "accounting_invariant_violations",
-          "status": "fail",
-          "value": 1,
-          "detail": "target_price",
-          "source": "storage\\runs\\validation_tnh\\valuation.json",
-          "failed_examples": [
-            {
-              "id": "target_price",
-              "severity": "critical",
-              "passed": false,
-              "detail": "Target price reproduction"
-            }
-          ]
-        },
-        {
-          "ticker": "AMV",
-          "metric_id": "accounting_invariant_violations",
-          "status": "fail",
-          "value": 1,
-          "detail": "target_price",
-          "source": "storage\\runs\\validation_amv\\valuation.json",
-          "failed_examples": [
-            {
-              "id": "target_price",
-              "severity": "critical",
-              "passed": false,
-              "detail": "Target price reproduction"
-            }
-          ]
-        },
-        {
-          "ticker": "DGW",
-          "metric_id": "accounting_invariant_violations",
-          "status": "fail",
-          "value": 1,
-          "detail": "target_price",
-          "source": "storage\\runs\\validation_dgw\\valuation.json",
-          "failed_examples": [
-            {
-              "id": "target_price",
-              "severity": "critical",
-              "passed": false,
-              "detail": "Target price reproduction"
-            }
-          ]
-        },
-        {
-          "ticker": "AGP",
-          "metric_id": "accounting_invariant_violations",
-          "status": "fail",
-          "value": 1,
-          "detail": "target_price",
-          "source": "storage\\runs\\agp_proof_003\\valuation.json",
-          "failed_examples": [
-            {
-              "id": "target_price",
-              "severity": "critical",
-              "passed": false,
-              "detail": "Target price reproduction"
-            }
-          ]
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "accounting_invariant_violations",
@@ -168,11 +70,17 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "cohort_sum",
-        "numerator": 4,
-        "denominator": 11,
+        "numerator": 0,
+        "denominator": 9,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "status": "pass",
+            "value": 0,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
             "status": "pass",
             "value": 0,
             "detail": ""
@@ -196,12 +104,6 @@
             "detail": ""
           },
           {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
             "ticker": "OPC",
             "status": "pass",
             "value": 0,
@@ -209,9 +111,9 @@
           },
           {
             "ticker": "TNH",
-            "status": "fail",
-            "value": 1,
-            "detail": "target_price"
+            "status": "pass",
+            "value": 0,
+            "detail": ""
           },
           {
             "ticker": "JVC",
@@ -221,21 +123,9 @@
           },
           {
             "ticker": "AMV",
-            "status": "fail",
-            "value": 1,
-            "detail": "target_price"
-          },
-          {
-            "ticker": "DGW",
-            "status": "fail",
-            "value": 1,
-            "detail": "target_price"
-          },
-          {
-            "ticker": "AGP",
-            "status": "fail",
-            "value": 1,
-            "detail": "target_price"
+            "status": "pass",
+            "value": 0,
+            "detail": ""
           }
         ]
       },
@@ -249,263 +139,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
-    },
-    {
-      "id": "blend_sensitivity",
-      "label": "Blend sensitivity matrix varies",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=2/11",
-      "metric_id": "blend_sensitivity",
-      "metric_name": "Blend sensitivity matrix varies",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 0.18181818181818182,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
-      "sample_size": 11,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [
-        {
-          "ticker": "DHG",
-          "metric_id": "blend_sensitivity",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_dhg\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_dhg\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "IMP",
-          "metric_id": "blend_sensitivity",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_imp\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_imp\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "TRA",
-          "metric_id": "blend_sensitivity",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_tra\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_tra\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DBD",
-          "metric_id": "blend_sensitivity",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_dbd\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_dbd\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "TNH",
-          "metric_id": "blend_sensitivity",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_tnh\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_tnh\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "JVC",
-          "metric_id": "blend_sensitivity",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_jvc\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_jvc\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "AMV",
-          "metric_id": "blend_sensitivity",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_amv\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_amv\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DGW",
-          "metric_id": "blend_sensitivity",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_dgw\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_dgw\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "AGP",
-          "metric_id": "blend_sensitivity",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\agp_proof_003\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\agp_proof_003\\valuation.json"
-            }
-          ]
-        }
-      ],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "blend_sensitivity",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 2,
-        "denominator": 11,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "fcfe",
       "label": "FCFE formula",
       "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=2/11",
+      "detail": "cohort_pass_rate=2/2",
       "metric_id": "fcfe",
       "metric_name": "FCFE formula",
       "category": "financial_model",
@@ -514,154 +154,27 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0.18181818181818182,
+      "value": 1.0,
       "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
-      "sample_size": 11,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "20260615_v3",
       "owner": "valuation",
-      "failed_examples": [
-        {
-          "ticker": "DHG",
-          "metric_id": "fcfe",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_dhg\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_dhg\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "IMP",
-          "metric_id": "fcfe",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_imp\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_imp\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "TRA",
-          "metric_id": "fcfe",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_tra\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_tra\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DBD",
-          "metric_id": "fcfe",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_dbd\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_dbd\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "TNH",
-          "metric_id": "fcfe",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_tnh\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_tnh\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "JVC",
-          "metric_id": "fcfe",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_jvc\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_jvc\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "AMV",
-          "metric_id": "fcfe",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_amv\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_amv\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DGW",
-          "metric_id": "fcfe",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_dgw\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_dgw\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "AGP",
-          "metric_id": "fcfe",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\agp_proof_003\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\agp_proof_003\\valuation.json"
-            }
-          ]
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "fcfe",
         "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "executed"
+        "execution_status": "not_executed"
       },
       "calculation": {
         "formula": null,
@@ -669,18 +182,24 @@
         "parameters": {},
         "aggregation": "cohort_pass_rate",
         "numerator": 2,
-        "denominator": 11,
+        "denominator": 2,
         "per_sample_results": [
           {
             "ticker": "DHG",
-            "status": "fail",
-            "value": 0,
+            "status": "not_applicable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
             "ticker": "IMP",
-            "status": "fail",
-            "value": 0,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
@@ -691,14 +210,8 @@
           },
           {
             "ticker": "TRA",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "fail",
-            "value": 0,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
@@ -709,32 +222,20 @@
           },
           {
             "ticker": "TNH",
-            "status": "fail",
-            "value": 0,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
             "ticker": "JVC",
-            "status": "fail",
-            "value": 0,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
             "ticker": "AMV",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "fail",
-            "value": 0,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           }
         ]
@@ -749,13 +250,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "fcfe_sensitivity",
       "label": "FCFE sensitivity matrix varies",
       "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=11/11",
+      "detail": "cohort_pass_rate=2/2",
       "metric_id": "fcfe_sensitivity",
       "metric_name": "FCFE sensitivity matrix varies",
       "category": "financial_model",
@@ -770,7 +271,7 @@
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 11,
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -784,26 +285,32 @@
         "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "executed"
+        "execution_status": "not_executed"
       },
       "calculation": {
         "formula": null,
         "inputs": {},
         "parameters": {},
         "aggregation": "cohort_pass_rate",
-        "numerator": 11,
-        "denominator": 11,
+        "numerator": 2,
+        "denominator": 2,
         "per_sample_results": [
           {
             "ticker": "DHG",
-            "status": "pass",
-            "value": 1,
+            "status": "not_applicable",
+            "value": null,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
             "ticker": "IMP",
-            "status": "pass",
-            "value": 1,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
@@ -814,14 +321,8 @@
           },
           {
             "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 1,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
@@ -832,32 +333,20 @@
           },
           {
             "ticker": "TNH",
-            "status": "pass",
-            "value": 1,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
             "ticker": "JVC",
-            "status": "pass",
-            "value": 1,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
             "ticker": "AMV",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "pass",
-            "value": 1,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           }
         ]
@@ -872,13 +361,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "fcff",
       "label": "FCFF formula",
       "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=11/11",
+      "detail": "cohort_pass_rate=9/9",
       "metric_id": "fcff",
       "metric_name": "FCFF formula",
       "category": "financial_model",
@@ -893,7 +382,7 @@
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 11,
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -914,11 +403,17 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "cohort_pass_rate",
-        "numerator": 11,
-        "denominator": 11,
+        "numerator": 9,
+        "denominator": 9,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "status": "pass",
+            "value": 1,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -937,12 +432,6 @@
           },
           {
             "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -970,18 +459,6 @@
             "status": "pass",
             "value": 1,
             "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
           }
         ]
       },
@@ -995,13 +472,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "formula_trace",
       "label": "Formula trace available",
       "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=11/11",
+      "detail": "cohort_pass_rate=9/9",
       "metric_id": "formula_trace",
       "metric_name": "Formula trace available",
       "category": "financial_model",
@@ -1016,7 +493,7 @@
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 11,
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -1037,11 +514,17 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "cohort_pass_rate",
-        "numerator": 11,
-        "denominator": 11,
+        "numerator": 9,
+        "denominator": 9,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "status": "pass",
+            "value": 1,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -1060,12 +543,6 @@
           },
           {
             "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -1093,18 +570,6 @@
             "status": "pass",
             "value": 1,
             "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
           }
         ]
       },
@@ -1118,13 +583,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "golden_drift_out_of_tolerance",
       "label": "Golden valuation drift",
       "source": "benchmark_suite",
-      "detail": "cohort_size=11",
+      "detail": "cohort_size=9",
       "metric_id": "golden_drift_out_of_tolerance",
       "metric_name": "Golden valuation drift",
       "category": "financial_model",
@@ -1133,327 +598,20 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 20,
+      "value": 0,
       "threshold": "0",
       "threshold_operator": "=",
       "unit": "count",
-      "status": "fail",
-      "legacy_status": "fail",
-      "sample_size": 11,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "20260615_v3",
       "owner": "valuation",
-      "failed_examples": [
-        {
-          "ticker": "DHG",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "fail",
-          "value": 3,
-          "detail": "",
-          "source": "storage\\runs\\validation_dhg\\valuation.json",
-          "failed_examples": [
-            {
-              "metric": "fcff_wacc",
-              "live": 0.138,
-              "expected_range": {
-                "min": 0.11,
-                "max": 0.11
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_terminal_growth",
-              "live": 0.03,
-              "expected_range": {
-                "min": 0.025,
-                "max": 0.025
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_target_price_vnd",
-              "live": 103294.0,
-              "expected_range": {
-                "min": 136441.5426,
-                "max": 139197.9374
-              },
-              "in_range": false
-            }
-          ]
-        },
-        {
-          "ticker": "IMP",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "fail",
-          "value": 3,
-          "detail": "",
-          "source": "storage\\runs\\validation_imp\\valuation.json",
-          "failed_examples": [
-            {
-              "metric": "fcff_wacc",
-              "live": 0.1317,
-              "expected_range": {
-                "min": 0.12,
-                "max": 0.12
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_terminal_growth",
-              "live": 0.03,
-              "expected_range": {
-                "min": 0.025,
-                "max": 0.025
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_target_price_vnd",
-              "live": 36300.0,
-              "expected_range": {
-                "min": 2883.7808999999997,
-                "max": 2942.0391
-              },
-              "in_range": false
-            }
-          ]
-        },
-        {
-          "ticker": "DMC",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "fail",
-          "value": 3,
-          "detail": "",
-          "source": "storage\\runs\\validation_dmc\\valuation.json",
-          "failed_examples": [
-            {
-              "metric": "fcff_wacc",
-              "live": 0.138,
-              "expected_range": {
-                "min": 0.13,
-                "max": 0.13
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_terminal_growth",
-              "live": 0.03,
-              "expected_range": {
-                "min": 0.025,
-                "max": 0.025
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_target_price_vnd",
-              "live": 9453.0,
-              "expected_range": {
-                "min": 45062.463599999995,
-                "max": 45972.8164
-              },
-              "in_range": false
-            }
-          ]
-        },
-        {
-          "ticker": "TRA",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "fail",
-          "value": 3,
-          "detail": "",
-          "source": "storage\\runs\\validation_tra\\valuation.json",
-          "failed_examples": [
-            {
-              "metric": "fcff_wacc",
-              "live": 0.1325,
-              "expected_range": {
-                "min": 0.11,
-                "max": 0.11
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_terminal_growth",
-              "live": 0.03,
-              "expected_range": {
-                "min": 0.025,
-                "max": 0.025
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_target_price_vnd",
-              "live": 147538.0,
-              "expected_range": {
-                "min": 52876.9593,
-                "max": 53945.1807
-              },
-              "in_range": false
-            }
-          ]
-        },
-        {
-          "ticker": "DBD",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "fail",
-          "value": 3,
-          "detail": "",
-          "source": "storage\\runs\\validation_dbd\\valuation.json",
-          "failed_examples": [
-            {
-              "metric": "fcff_wacc",
-              "live": 0.1312,
-              "expected_range": {
-                "min": 0.105,
-                "max": 0.105
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_terminal_growth",
-              "live": 0.03,
-              "expected_range": {
-                "min": 0.025,
-                "max": 0.025
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_target_price_vnd",
-              "live": 40081.0,
-              "expected_range": {
-                "min": 31174.308,
-                "max": 31804.092
-              },
-              "in_range": false
-            }
-          ]
-        },
-        {
-          "ticker": "OPC",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "fail",
-          "value": 3,
-          "detail": "",
-          "source": "storage\\runs\\validation_opc\\valuation.json",
-          "failed_examples": [
-            {
-              "metric": "fcff_wacc",
-              "live": 0.138,
-              "expected_range": {
-                "min": 0.13,
-                "max": 0.13
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_terminal_growth",
-              "live": 0.03,
-              "expected_range": {
-                "min": 0.025,
-                "max": 0.025
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_target_price_vnd",
-              "live": 25372.0,
-              "expected_range": {
-                "min": 9931.6008,
-                "max": 10132.2392
-              },
-              "in_range": false
-            }
-          ]
-        },
-        {
-          "ticker": "TNH",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "not_evaluable",
-          "value": null,
-          "detail": "golden_valuation_fixture_missing_for_ticker",
-          "source": "golden valuation fixture missing",
-          "failed_examples": [
-            {
-              "reason": "golden_valuation_fixture_missing_for_ticker",
-              "source": "golden valuation fixture missing"
-            }
-          ]
-        },
-        {
-          "ticker": "JVC",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "not_evaluable",
-          "value": null,
-          "detail": "golden_valuation_fixture_missing_for_ticker",
-          "source": "golden valuation fixture missing",
-          "failed_examples": [
-            {
-              "reason": "golden_valuation_fixture_missing_for_ticker",
-              "source": "golden valuation fixture missing"
-            }
-          ]
-        },
-        {
-          "ticker": "AMV",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "fail",
-          "value": 2,
-          "detail": "",
-          "source": "storage\\runs\\validation_amv\\valuation.json",
-          "failed_examples": [
-            {
-              "metric": "fcff_wacc",
-              "live": 0.1317,
-              "expected_range": {
-                "min": 0.135,
-                "max": 0.135
-              },
-              "in_range": false
-            },
-            {
-              "metric": "fcff_terminal_growth",
-              "live": 0.03,
-              "expected_range": {
-                "min": 0.025,
-                "max": 0.025
-              },
-              "in_range": false
-            }
-          ]
-        },
-        {
-          "ticker": "DGW",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "not_evaluable",
-          "value": null,
-          "detail": "golden_valuation_fixture_missing_for_ticker",
-          "source": "golden valuation fixture missing",
-          "failed_examples": [
-            {
-              "reason": "golden_valuation_fixture_missing_for_ticker",
-              "source": "golden valuation fixture missing"
-            }
-          ]
-        },
-        {
-          "ticker": "AGP",
-          "metric_id": "golden_drift_out_of_tolerance",
-          "status": "not_evaluable",
-          "value": null,
-          "detail": "golden_valuation_fixture_missing_for_ticker",
-          "source": "golden valuation fixture missing",
-          "failed_examples": [
-            {
-              "reason": "golden_valuation_fixture_missing_for_ticker",
-              "source": "golden valuation fixture missing"
-            }
-          ]
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "golden_drift_out_of_tolerance",
@@ -1467,72 +625,60 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "cohort_sum",
-        "numerator": 20,
-        "denominator": 11,
+        "numerator": 0,
+        "denominator": 9,
         "per_sample_results": [
           {
             "ticker": "DHG",
-            "status": "fail",
-            "value": 3,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "fail",
-            "value": 3,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "fail",
-            "value": 3,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "fail",
-            "value": 3,
+            "status": "pass",
+            "value": 0,
             "detail": ""
           },
           {
             "ticker": "DBD",
-            "status": "fail",
-            "value": 3,
+            "status": "pass",
+            "value": 0,
+            "detail": ""
+          },
+          {
+            "ticker": "IMP",
+            "status": "pass",
+            "value": 0,
+            "detail": ""
+          },
+          {
+            "ticker": "DMC",
+            "status": "pass",
+            "value": 0,
+            "detail": ""
+          },
+          {
+            "ticker": "TRA",
+            "status": "pass",
+            "value": 0,
             "detail": ""
           },
           {
             "ticker": "OPC",
-            "status": "fail",
-            "value": 3,
+            "status": "pass",
+            "value": 0,
             "detail": ""
           },
           {
             "ticker": "TNH",
-            "status": "not_evaluable",
+            "status": "not_applicable",
             "value": null,
             "detail": "golden_valuation_fixture_missing_for_ticker"
           },
           {
             "ticker": "JVC",
-            "status": "not_evaluable",
-            "value": null,
-            "detail": "golden_valuation_fixture_missing_for_ticker"
-          },
-          {
-            "ticker": "AMV",
-            "status": "fail",
-            "value": 2,
+            "status": "pass",
+            "value": 0,
             "detail": ""
           },
           {
-            "ticker": "DGW",
-            "status": "not_evaluable",
-            "value": null,
-            "detail": "golden_valuation_fixture_missing_for_ticker"
-          },
-          {
-            "ticker": "AGP",
-            "status": "not_evaluable",
+            "ticker": "AMV",
+            "status": "not_applicable",
             "value": null,
             "detail": "golden_valuation_fixture_missing_for_ticker"
           }
@@ -1548,13 +694,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "gordon_growth",
       "label": "Discount rate exceeds terminal growth",
       "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=11/11",
+      "detail": "cohort_pass_rate=9/9",
       "metric_id": "gordon_growth",
       "metric_name": "Discount rate exceeds terminal growth",
       "category": "financial_model",
@@ -1569,7 +715,7 @@
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 11,
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -1590,11 +736,17 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "cohort_pass_rate",
-        "numerator": 11,
-        "denominator": 11,
+        "numerator": 9,
+        "denominator": 9,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "status": "pass",
+            "value": 1,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -1613,12 +765,6 @@
           },
           {
             "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -1646,18 +792,6 @@
             "status": "pass",
             "value": 1,
             "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
           }
         ]
       },
@@ -1671,13 +805,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "net_debt",
       "label": "Net debt reconciliation",
       "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=11/11",
+      "detail": "cohort_pass_rate=9/9",
       "metric_id": "net_debt",
       "metric_name": "Net debt reconciliation",
       "category": "financial_model",
@@ -1692,7 +826,7 @@
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 11,
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -1713,11 +847,17 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "cohort_pass_rate",
-        "numerator": 11,
-        "denominator": 11,
+        "numerator": 9,
+        "denominator": 9,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "status": "pass",
+            "value": 1,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -1736,12 +876,6 @@
           },
           {
             "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -1769,18 +903,6 @@
             "status": "pass",
             "value": 1,
             "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
           }
         ]
       },
@@ -1794,193 +916,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
-    },
-    {
-      "id": "sensitivity_base_cell",
-      "label": "Sensitivity base cell reconciles to target",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=7/11",
-      "metric_id": "sensitivity_base_cell",
-      "metric_name": "Sensitivity base cell reconciles to target",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 0.6363636363636364,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
-      "sample_size": 11,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [
-        {
-          "ticker": "TNH",
-          "metric_id": "sensitivity_base_cell",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_tnh\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_tnh\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "AMV",
-          "metric_id": "sensitivity_base_cell",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_amv\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_amv\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DGW",
-          "metric_id": "sensitivity_base_cell",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_dgw\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_dgw\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "AGP",
-          "metric_id": "sensitivity_base_cell",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\agp_proof_003\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\agp_proof_003\\valuation.json"
-            }
-          ]
-        }
-      ],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "sensitivity_base_cell",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 7,
-        "denominator": 11,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "sensitivity_varies",
       "label": "FCFF sensitivity matrix varies",
       "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=11/11",
+      "detail": "cohort_pass_rate=9/9",
       "metric_id": "sensitivity_varies",
       "metric_name": "FCFF sensitivity matrix varies",
       "category": "financial_model",
@@ -1995,7 +937,7 @@
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 11,
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -2016,11 +958,17 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "cohort_pass_rate",
-        "numerator": 11,
-        "denominator": 11,
+        "numerator": 9,
+        "denominator": 9,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "status": "pass",
+            "value": 1,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -2039,12 +987,6 @@
           },
           {
             "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -2072,18 +1014,6 @@
             "status": "pass",
             "value": 1,
             "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
           }
         ]
       },
@@ -2097,13 +1027,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "target_price",
       "label": "Target price reproduction",
       "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=7/11",
+      "detail": "cohort_pass_rate=7/7",
       "metric_id": "target_price",
       "metric_name": "Target price reproduction",
       "category": "financial_model",
@@ -2112,77 +1042,20 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0.6363636363636364,
+      "value": 1.0,
       "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
-      "sample_size": 11,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "20260615_v3",
       "owner": "valuation",
-      "failed_examples": [
-        {
-          "ticker": "TNH",
-          "metric_id": "target_price",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_tnh\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_tnh\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "AMV",
-          "metric_id": "target_price",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_amv\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_amv\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DGW",
-          "metric_id": "target_price",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_dgw\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_dgw\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "AGP",
-          "metric_id": "target_price",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\agp_proof_003\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\agp_proof_003\\valuation.json"
-            }
-          ]
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "target_price",
@@ -2197,10 +1070,16 @@
         "parameters": {},
         "aggregation": "cohort_pass_rate",
         "numerator": 7,
-        "denominator": 11,
+        "denominator": 7,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "status": "pass",
+            "value": 1,
+            "detail": ""
+          },
+          {
+            "ticker": "DBD",
             "status": "pass",
             "value": 1,
             "detail": ""
@@ -2224,12 +1103,6 @@
             "detail": ""
           },
           {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
             "ticker": "OPC",
             "status": "pass",
             "value": 1,
@@ -2237,8 +1110,8 @@
           },
           {
             "ticker": "TNH",
-            "status": "fail",
-            "value": 0,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           },
           {
@@ -2249,20 +1122,8 @@
           },
           {
             "ticker": "AMV",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "fail",
-            "value": 0,
+            "status": "not_applicable",
+            "value": null,
             "detail": ""
           }
         ]
@@ -2277,13 +1138,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "valuation_artifact",
       "label": "Valuation run artifact",
       "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=0/32",
+      "detail": "cohort_pass_rate=0/0",
       "metric_id": "valuation_artifact",
       "metric_name": "Valuation run artifact",
       "category": "financial_model",
@@ -2292,476 +1153,27 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0.0,
+      "value": null,
       "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
-      "sample_size": 32,
+      "status": "not_applicable",
+      "legacy_status": "not_applicable",
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "20260615_v3",
       "owner": "valuation",
-      "failed_examples": [
-        {
-          "ticker": "MKP",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*mkp*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*mkp*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DVN",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*dvn*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*dvn*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DHT",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*dht*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*dht*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "LDP",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*ldp*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*ldp*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "PPP",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*ppp*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*ppp*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DP3",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*dp3*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*dp3*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DP1",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*dp1*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*dp1*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "TW3",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*tw3*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*tw3*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "MED",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*med*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*med*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "PMC",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*pmc*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*pmc*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "YTC",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*ytc*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*ytc*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "VHE",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*vhe*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*vhe*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "VDP",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*vdp*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*vdp*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DCL",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*dcl*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*dcl*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "SPM",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*spm*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*spm*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "VMD",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*vmd*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*vmd*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "HBH",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*hbh*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*hbh*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DNM",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*dnm*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*dnm*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DBT",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*dbt*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*dbt*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DPP",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*dpp*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*dpp*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DTP",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*dtp*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*dtp*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "VMC",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*vmc*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*vmc*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "NDT",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*ndt*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*ndt*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "BID",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*bid*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*bid*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "BCR",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*bcr*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*bcr*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "VNP",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*vnp*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*vnp*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "CPC",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*cpc*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*cpc*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "HDA",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*hda*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*hda*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "TMP",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*tmp*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*tmp*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DRG",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*drg*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*drg*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "PVD",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*pvd*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*pvd*/valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "TNT",
-          "metric_id": "valuation_artifact",
-          "status": "not_evaluable",
-          "value": 0,
-          "detail": "valuation_artifact_missing_for_ticker",
-          "source": "storage/runs/*tnt*/valuation.json",
-          "failed_examples": [
-            {
-              "reason": "valuation_artifact_missing_for_ticker",
-              "source": "storage/runs/*tnt*/valuation.json"
-            }
-          ]
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "valuation_artifact",
         "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "executed"
+        "execution_status": "not_executed"
       },
       "calculation": {
         "formula": null,
@@ -2769,198 +1181,12 @@
         "parameters": {},
         "aggregation": "cohort_pass_rate",
         "numerator": 0,
-        "denominator": 32,
+        "denominator": 0,
         "per_sample_results": [
-          {
-            "ticker": "MKP",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "DVN",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
           {
             "ticker": "DHT",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "LDP",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "PPP",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "DP3",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "DP1",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "TW3",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "MED",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "PMC",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "YTC",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "VHE",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "VDP",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "DCL",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "SPM",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "VMD",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "HBH",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "DNM",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "DBT",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "DPP",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "DTP",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "VMC",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "NDT",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "BID",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "BCR",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "VNP",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "CPC",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "HDA",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "TMP",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "DRG",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "PVD",
-            "status": "not_evaluable",
-            "value": 0,
-            "detail": "valuation_artifact_missing_for_ticker"
-          },
-          {
-            "ticker": "TNT",
-            "status": "not_evaluable",
-            "value": 0,
+            "status": "not_applicable",
+            "value": null,
             "detail": "valuation_artifact_missing_for_ticker"
           }
         ]
@@ -2975,291 +1201,13 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
-    },
-    {
-      "id": "valuation_publishable",
-      "label": "Valuation publishability policy",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=0/11",
-      "metric_id": "valuation_publishable",
-      "metric_name": "Valuation publishability policy",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 0.0,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
-      "sample_size": 11,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [
-        {
-          "ticker": "DHG",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "low_confidence_primary_method,valuation_method_divergence_critical",
-          "source": "storage\\runs\\validation_dhg\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "low_confidence_primary_method,valuation_method_divergence_critical",
-              "source": "storage\\runs\\validation_dhg\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "IMP",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "low_confidence_primary_method",
-          "source": "storage\\runs\\validation_imp\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "low_confidence_primary_method",
-              "source": "storage\\runs\\validation_imp\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DMC",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical",
-          "source": "storage\\runs\\validation_dmc\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical",
-              "source": "storage\\runs\\validation_dmc\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "TRA",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical",
-          "source": "storage\\runs\\validation_tra\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical",
-              "source": "storage\\runs\\validation_tra\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DBD",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "low_confidence_primary_method,valuation_method_divergence_critical",
-          "source": "storage\\runs\\validation_dbd\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "low_confidence_primary_method,valuation_method_divergence_critical",
-              "source": "storage\\runs\\validation_dbd\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "OPC",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "low_confidence_primary_method,valuation_method_divergence_critical",
-          "source": "storage\\runs\\validation_opc\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "low_confidence_primary_method,valuation_method_divergence_critical",
-              "source": "storage\\runs\\validation_opc\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "TNH",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_tnh\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_tnh\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "JVC",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "low_confidence_primary_method",
-          "source": "storage\\runs\\validation_jvc\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "low_confidence_primary_method",
-              "source": "storage\\runs\\validation_jvc\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "AMV",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_amv\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_amv\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "DGW",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_dgw\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\validation_dgw\\valuation.json"
-            }
-          ]
-        },
-        {
-          "ticker": "AGP",
-          "metric_id": "valuation_publishable",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\agp_proof_003\\valuation.json",
-          "failed_examples": [
-            {
-              "reason": "threshold_not_met",
-              "source": "storage\\runs\\agp_proof_003\\valuation.json"
-            }
-          ]
-        }
-      ],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "valuation_publishable",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 0,
-        "denominator": 11,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "fail",
-            "value": 0,
-            "detail": "low_confidence_primary_method,valuation_method_divergence_critical"
-          },
-          {
-            "ticker": "IMP",
-            "status": "fail",
-            "value": 0,
-            "detail": "low_confidence_primary_method"
-          },
-          {
-            "ticker": "DMC",
-            "status": "fail",
-            "value": 0,
-            "detail": "low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical"
-          },
-          {
-            "ticker": "TRA",
-            "status": "fail",
-            "value": 0,
-            "detail": "low_confidence_primary_method,market_sanity_bridge_missing,valuation_method_divergence_critical"
-          },
-          {
-            "ticker": "DBD",
-            "status": "fail",
-            "value": 0,
-            "detail": "low_confidence_primary_method,valuation_method_divergence_critical"
-          },
-          {
-            "ticker": "OPC",
-            "status": "fail",
-            "value": 0,
-            "detail": "low_confidence_primary_method,valuation_method_divergence_critical"
-          },
-          {
-            "ticker": "TNH",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "fail",
-            "value": 0,
-            "detail": "low_confidence_primary_method"
-          },
-          {
-            "ticker": "AMV",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DGW",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "AGP",
-            "status": "fail",
-            "value": 0,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "target_price_bridge_error",
       "label": "Target price bridge error",
       "source": "benchmark_suite",
-      "detail": "derived_from=target_price;cohort_size=11",
+      "detail": "derived_from=target_price;cohort_size=9",
       "metric_id": "target_price_bridge_error",
       "metric_name": "Target price bridge error",
       "category": "financial_model",
@@ -3268,53 +1216,20 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 4,
+      "value": 0,
       "threshold": "= 0",
       "threshold_operator": "=",
       "unit": "count",
-      "status": "fail",
-      "legacy_status": "fail",
-      "sample_size": 11,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "20260615_v3",
       "owner": "valuation",
-      "failed_examples": [
-        {
-          "ticker": "TNH",
-          "source_metric_id": "target_price",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_tnh\\valuation.json"
-        },
-        {
-          "ticker": "AMV",
-          "source_metric_id": "target_price",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_amv\\valuation.json"
-        },
-        {
-          "ticker": "DGW",
-          "source_metric_id": "target_price",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\validation_dgw\\valuation.json"
-        },
-        {
-          "ticker": "AGP",
-          "source_metric_id": "target_price",
-          "status": "fail",
-          "value": 0,
-          "detail": "",
-          "source": "storage\\runs\\agp_proof_003\\valuation.json"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "target_price_bridge_error",
@@ -3328,11 +1243,17 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "cohort_failure_count",
-        "numerator": 4,
-        "denominator": 11,
+        "numerator": 0,
+        "denominator": 9,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "source_metric_id": "target_price",
+            "status": "pass",
+            "value": 1
+          },
+          {
+            "ticker": "DBD",
             "source_metric_id": "target_price",
             "status": "pass",
             "value": 1
@@ -3356,12 +1277,6 @@
             "value": 1
           },
           {
-            "ticker": "DBD",
-            "source_metric_id": "target_price",
-            "status": "pass",
-            "value": 1
-          },
-          {
             "ticker": "OPC",
             "source_metric_id": "target_price",
             "status": "pass",
@@ -3370,8 +1285,8 @@
           {
             "ticker": "TNH",
             "source_metric_id": "target_price",
-            "status": "fail",
-            "value": 0
+            "status": "not_applicable",
+            "value": null
           },
           {
             "ticker": "JVC",
@@ -3382,20 +1297,8 @@
           {
             "ticker": "AMV",
             "source_metric_id": "target_price",
-            "status": "fail",
-            "value": 0
-          },
-          {
-            "ticker": "DGW",
-            "source_metric_id": "target_price",
-            "status": "fail",
-            "value": 0
-          },
-          {
-            "ticker": "AGP",
-            "source_metric_id": "target_price",
-            "status": "fail",
-            "value": 0
+            "status": "not_applicable",
+            "value": null
           }
         ]
       },
@@ -3407,27 +1310,25 @@
       "evidence": {
         "artifact_ids": [
           "DHG/financial_eval.json",
+          "DBD/financial_eval.json",
           "IMP/financial_eval.json",
           "DMC/financial_eval.json",
           "TRA/financial_eval.json",
-          "DBD/financial_eval.json",
           "OPC/financial_eval.json",
           "TNH/financial_eval.json",
           "JVC/financial_eval.json",
-          "AMV/financial_eval.json",
-          "DGW/financial_eval.json",
-          "AGP/financial_eval.json"
+          "AMV/financial_eval.json"
         ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "wacc_terminal_growth_violation",
       "label": "WACC terminal growth violation",
       "source": "benchmark_suite",
-      "detail": "derived_from=gordon_growth;cohort_size=11",
+      "detail": "derived_from=gordon_growth;cohort_size=9",
       "metric_id": "wacc_terminal_growth_violation",
       "metric_name": "WACC terminal growth violation",
       "category": "financial_model",
@@ -3442,7 +1343,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 11,
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -3464,10 +1365,16 @@
         "parameters": {},
         "aggregation": "cohort_failure_count",
         "numerator": 0,
-        "denominator": 11,
+        "denominator": 9,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "source_metric_id": "gordon_growth",
+            "status": "pass",
+            "value": 1
+          },
+          {
+            "ticker": "DBD",
             "source_metric_id": "gordon_growth",
             "status": "pass",
             "value": 1
@@ -3486,12 +1393,6 @@
           },
           {
             "ticker": "TRA",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "DBD",
             "source_metric_id": "gordon_growth",
             "status": "pass",
             "value": 1
@@ -3519,18 +1420,6 @@
             "source_metric_id": "gordon_growth",
             "status": "pass",
             "value": 1
-          },
-          {
-            "ticker": "DGW",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "AGP",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
           }
         ]
       },
@@ -3542,27 +1431,25 @@
       "evidence": {
         "artifact_ids": [
           "DHG/financial_eval.json",
+          "DBD/financial_eval.json",
           "IMP/financial_eval.json",
           "DMC/financial_eval.json",
           "TRA/financial_eval.json",
-          "DBD/financial_eval.json",
           "OPC/financial_eval.json",
           "TNH/financial_eval.json",
           "JVC/financial_eval.json",
-          "AMV/financial_eval.json",
-          "DGW/financial_eval.json",
-          "AGP/financial_eval.json"
+          "AMV/financial_eval.json"
         ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     },
     {
       "id": "net_debt_reconciliation_error",
       "label": "Net debt reconciliation error",
       "source": "benchmark_suite",
-      "detail": "derived_from=net_debt;cohort_size=11",
+      "detail": "derived_from=net_debt;cohort_size=9",
       "metric_id": "net_debt_reconciliation_error",
       "metric_name": "Net debt reconciliation error",
       "category": "financial_model",
@@ -3577,7 +1464,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 11,
+      "sample_size": 9,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -3599,10 +1486,16 @@
         "parameters": {},
         "aggregation": "cohort_failure_count",
         "numerator": 0,
-        "denominator": 11,
+        "denominator": 9,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "source_metric_id": "net_debt",
+            "status": "pass",
+            "value": 1
+          },
+          {
+            "ticker": "DBD",
             "source_metric_id": "net_debt",
             "status": "pass",
             "value": 1
@@ -3621,12 +1514,6 @@
           },
           {
             "ticker": "TRA",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "DBD",
             "source_metric_id": "net_debt",
             "status": "pass",
             "value": 1
@@ -3654,18 +1541,6 @@
             "source_metric_id": "net_debt",
             "status": "pass",
             "value": 1
-          },
-          {
-            "ticker": "DGW",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "AGP",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
           }
         ]
       },
@@ -3677,32 +1552,20 @@
       "evidence": {
         "artifact_ids": [
           "DHG/financial_eval.json",
+          "DBD/financial_eval.json",
           "IMP/financial_eval.json",
           "DMC/financial_eval.json",
           "TRA/financial_eval.json",
-          "DBD/financial_eval.json",
           "OPC/financial_eval.json",
           "TNH/financial_eval.json",
           "JVC/financial_eval.json",
-          "AMV/financial_eval.json",
-          "DGW/financial_eval.json",
-          "AGP/financial_eval.json"
+          "AMV/financial_eval.json"
         ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T13:19:52.077425+00:00"
+      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
     }
   ],
-  "blocking_issues": [
-    "accounting_invariant_violations:cohort_size=11",
-    "blend_sensitivity:cohort_pass_rate=2/11",
-    "fcfe:cohort_pass_rate=2/11",
-    "golden_drift_out_of_tolerance:cohort_size=11",
-    "sensitivity_base_cell:cohort_pass_rate=7/11",
-    "target_price:cohort_pass_rate=7/11",
-    "target_price_bridge_error:derived_from=target_price;cohort_size=11",
-    "valuation_artifact:cohort_pass_rate=0/32",
-    "valuation_publishable:cohort_pass_rate=0/11"
-  ]
+  "blocking_issues": []
 }

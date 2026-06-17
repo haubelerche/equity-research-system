@@ -1,0 +1,13 @@
+ticker,fiscal_year,period_type,statement_type,metric_id,value,unit,document_title,page_number,table_name,extracted_text,extraction_method,verified_by,verified_at
+AGP,2020,FY,income_statement,profit_before_tax.total,40221.0,vnd_bn,AGP FY2022 Annual Report / Audited Financial Statements,8,,Lợi nhuận trước thuế,pdf_table,,
+AGP,2018,FY,income_statement,profit_before_tax.total,39000.0,vnd_bn,AGP FY2022 Annual Report / Audited Financial Statements,8,,"+ Lợi nhuận
+trước thuế",pdf_table,,
+AGP,2020,FY,income_statement,profit_before_tax.total,45000.0,vnd_bn,AGP FY2022 Annual Report / Audited Financial Statements,8,,"+ Lợi nhuận
+trước thuế",pdf_table,,
+AGP,2022,FY,income_statement,profit_before_tax.total,35000.0,vnd_bn,AGP FY2022 Annual Report / Audited Financial Statements,8,,"+ Lợi nhuận
+trước thuế",pdf_table,,
+AGP,2022,FY,income_statement,revenue.net,419496.0,vnd_bn,AGP FY2022 Annual Report / Audited Financial Statements,14,,Doanh thu thuần,pdf_table,,
+AGP,2022,FY,income_statement,operating_profit.total,40285.0,vnd_bn,AGP FY2022 Annual Report / Audited Financial Statements,14,,"Lợi nhuận từ hoạt động kinh
+doanh",pdf_table,,
+AGP,2022,FY,income_statement,profit_before_tax.total,40221.0,vnd_bn,AGP FY2022 Annual Report / Audited Financial Statements,14,,Lợi nhuận trước thuế,pdf_table,,
+AGP,2022,FY,income_statement,net_income.total,32387.0,vnd_bn,AGP FY2022 Annual Report / Audited Financial Statements,14,,Lợi nhuận sau thuế,pdf_table,,

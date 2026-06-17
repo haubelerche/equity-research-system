@@ -16,7 +16,7 @@ from __future__ import annotations
 import statistics
 from typing import Any, Callable, Optional, Sequence
 
-MIN_PEERS = 3
+
 # Sanity bounds — drop nonsensical multiples (data errors) before taking the median.
 _PE_BOUNDS = (3.0, 60.0)
 _EV_EBITDA_BOUNDS = (2.0, 40.0)

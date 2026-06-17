@@ -1,10 +1,10 @@
 # API backend
 
-Cập nhật: 2026-06-14
+Cập nhật: 2026-06-17
 
 ## Context
 
-Backend API dùng FastAPI để tạo research run, kiểm tra trạng thái, lấy artifact metadata, phục vụ inventory/file báo cáo, expose live evaluation artifacts và phục vụ Vite SPA production. API không render report client-final trực tiếp; publication/rendering vẫn bị kiểm soát bởi artifact lifecycle và approval path.
+Backend API dùng FastAPI để tạo research run, kiểm tra trạng thái, lấy artifact metadata, phục vụ inventory/file báo cáo, expose live evaluation artifacts và phục vụ Vite SPA production. API có endpoint generate cho báo cáo: nếu có snapshot và run renderable thì đi nhánh `fast_render`, nếu không thì chạy `full_pipeline`. Client-final vẫn bị kiểm soát bởi artifact lifecycle và approval path.
 
 ## Problem Statement
 
@@ -32,8 +32,9 @@ API cho agentic workflow không nên chỉ trả về "success" hoặc "failed".
 | `GET` | `/research/{run_id}/status` | Trả trạng thái public của run |
 | `GET` | `/research/{run_id}/artifacts` | Liệt kê artifact metadata của run |
 | `GET` | `/reports` | Trả inventory cho toàn bộ ticker trong universe, ưu tiên run manifest/artifact lineage và dùng local preview như fallback |
-| `GET` | `/reports/{ticker}/file/{kind}` | Trả PDF local; `kind` chỉ nhận `report` hoặc `explanation` |
+| `GET` | `/reports/{ticker}/file/{kind}` | Trả PDF từ Supabase `exports` nếu có, fallback local; `kind` chỉ nhận `report` hoặc `explanation` |
 | `GET` | `/reports/{ticker}/preview/{page}` | Trả preview PNG local theo số trang |
+| `POST` | `/reports/{ticker}/generate` | Tạo run generate; trả `mode=fast_render` hoặc `mode=full_pipeline` |
 | `GET` | `/reports/{run_id}` | Lọc artifact liên quan report/evaluation/log |
 | `GET` | `/eval/framework` | Trả `evaluation_packet.json` và metadata tám lớp đánh giá mới nhất |
 | `GET` | `/eval/artifacts/{artifact_name}` | Trả artifact evaluation cụ thể, ví dụ `financial_eval.json` hoặc `citation_eval.json` |
@@ -56,6 +57,17 @@ Trang frontend `/eval` đọc các endpoint evaluation live theo mặc định; 
 ```
 
 API tạo `run_id` deterministic từ ticker, run type, objective và requester. Nếu create run gặp conflict nhưng run đã tồn tại, API trả lại status của run hiện có.
+
+### 3.1 GenerateReportResponse
+
+```json
+{
+  "run_id": "run identifier",
+  "mode": "fast_render"
+}
+```
+
+`mode=fast_render` nghĩa là backend render từ một run nguồn đã có artifact phù hợp và upload report/explanation vào `exports`. `mode=full_pipeline` nghĩa là backend cần chạy lại luồng nghiên cứu đầy đủ trước khi có thể render/store.
 
 ### 4. Public statuses
 

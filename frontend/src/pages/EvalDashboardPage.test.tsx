@@ -134,7 +134,10 @@ describe("EvalDashboardPage", () => {
     expect(screen.queryByText("Valuation method data readiness")).not.toBeInTheDocument();
     expect(screen.queryByText("Material official reconciliation rate")).not.toBeInTheDocument();
     expect(screen.getByText("Số mã đạt công thức FCFF")).toBeInTheDocument();
-    expect(screen.getByText("Số mã đủ điều kiện publish valuation")).toBeInTheDocument();
+    // valuation_publishable is no longer a benchmark-03 framework row (moved to the
+    // governance/publishability gate); when present it renders as a dynamic backend
+    // metric under its backend metric_name rather than the old framework label.
+    expect(screen.getAllByText("Valuation publishability policy").length).toBeGreaterThan(0);
     expect(screen.getAllByText("New backend metric").length).toBeGreaterThan(0);
   });
 

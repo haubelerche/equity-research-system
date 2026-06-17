@@ -1,0 +1,23 @@
+{
+  "ticker": "AMP",
+  "generated_at": "2026-06-16T15:37:47.763484+00:00",
+  "outcome": {
+    "ticker": "AMP",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "AMP DHCD 2026.pdf"
+    ],
+    "pages": 45,
+    "approved_resolutions": 8,
+    "drivers": {
+      "dividend_plan": 0,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 2,
+      "business_direction": 5,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

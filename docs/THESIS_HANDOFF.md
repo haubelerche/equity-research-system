@@ -1,79 +1,60 @@
-# Thesis Handoff: Research-Grade Completion State
+# Thesis Handoff: Current Thesis Framing
 
-Updated: 2026-06-14
+Cập nhật: 2026-06-17
 
 ## Context
 
-This project is a controlled multi-agent equity-research system for Vietnamese pharma and healthcare tickers. For thesis writing, the system should now be framed as a **research-grade 9/10 MVP5 platform with fail-closed governance**, not as a prototype awaiting core correctness repair and not as an autonomous investment-publication engine.
+Dự án là một hệ thống hỗ trợ nghiên cứu cổ phiếu dược và y tế Việt Nam theo mô hình workflow có kiểm soát. Khi viết đồ án, nên mô tả hệ thống như một research workbench có dữ liệu truy vết, định giá tất định, tác tử LLM bị giới hạn bởi artifact đã khóa, và cổng kiểm định fail-closed. Không nên mô tả hệ thống như nền tảng tự động phát hành khuyến nghị đầu tư hoặc chatbot RAG đơn giản.
 
-The accepted release scope is **MVP5**:
+File này dùng để định hướng cách viết luận văn. Trạng thái định lượng mới nhất phải đối chiếu thêm với `CURRENT_STATE_AND_UPDATES.md`, `output/evaluation/eval_result/benchmark_suite/benchmark_suite.json` và các artifact theo `run_id`. Các câu nghiệm thu cũ như “toàn bộ hệ thống đạt 9/10” chỉ được dùng nếu có artifact cụ thể chứng minh đúng phạm vi đó.
 
-| Ticker | Thesis role | Accepted status |
-|---|---|---|
-| DHG | Primary reference company | `DRAFT_PUBLISHABLE` with complete valuation, citation, report-quality and evidence gates |
-| IMP | MVP5 peer and expansion case | `DRAFT_PUBLISHABLE` with complete core metric and provenance coverage |
-| DMC | MVP5 peer and expansion case | `DRAFT_PUBLISHABLE` with complete core metric and provenance coverage |
-| TRA | MVP5 peer and expansion case | `DRAFT_PUBLISHABLE` with complete core metric and provenance coverage |
-| DBD | Diagnostic stress-test converted to accepted case | `DRAFT_PUBLISHABLE` after financial P0 repair and debt-schedule provenance hardening |
+## Current Thesis Scope
 
-The active configured universe remains a scale demonstration and readiness matrix. The thesis should use MVP5 as the validated quality scope and the full universe as evidence that the architecture can rank, queue and expand coverage without diluting governance thresholds.
-
-## Completion State
-
-| Area | Accepted state |
+| Phạm vi | Cách trình bày trung thực |
 |---|---|
-| Architecture | Backend, frontend, deterministic valuation, report renderer, evaluation harness and controlled agent workflow are integrated around run-scoped manifests. |
-| Frontend tests | Passing for the focused product surface, including reports and evaluation dashboard states. |
-| Backend tests | Smoke tests and focused deterministic test suites collect and pass under the standardized environment. |
-| Report artifacts | MVP5 reports, explanation artifacts, valuation files, evidence packets and manifests exist under run-scoped lineage. |
-| Evaluation governance | Project evaluation and run-scoped evaluation pass the defined 9/10 acceptance thresholds for MVP5. |
-| Data coverage | MVP5 core metric coverage and official reconciliation exceed the thesis threshold; active-universe coverage is represented by readiness tiers. |
-| RAG and citations | Retrieval, source-tier matching, claim ledger and citation coverage meet publication-draft thresholds. |
-| Agent observability | Runtime logs, tool permission metadata, schema validation and artifact manifests are available per research run. |
-| Product surface | `/reports` and `/eval` consume live backend artifacts first, with mock data retained only as development and test fixtures. |
+| MVP5 | Dùng làm phạm vi phân tích sâu gồm DHG, IMP, DMC, TRA và DBD; đây là nhóm phù hợp nhất để giải thích pipeline, dữ liệu, định giá và báo cáo. |
+| Universe 43 ticker | Dùng làm phạm vi mở rộng để chứng minh khả năng cấu hình universe và chạy benchmark/cohort; không mặc định mọi ticker có chất lượng báo cáo sâu như MVP5. |
+| Local rendered reports | Có thể dùng làm bằng chứng giao diện/kết xuất cho một số ticker, nhưng phải gọi là local output hoặc dev cache nếu chưa gắn với export storage/approval. |
+| Benchmark suite hiện hành | Dùng để chứng minh cơ chế đánh giá fail-closed; nếu aggregate báo `BLOCKED_BY_P0`, phải trình bày như phát hiện chất lượng đang tồn tại. |
+| Client-final | Chỉ được gọi là final khi có phê duyệt và authorization fail-closed; `auto_exported` hoặc `DRAFT_PUBLISHABLE` chưa phải phê duyệt chuyên gia. |
 
-## Thesis Narrative
+## Recommended Thesis Narrative
 
-| Chapter concern | Recommended framing |
+| Nội dung chương | Khung diễn giải nên dùng |
 |---|---|
-| Research problem | Vietnamese listed-company research suffers from fragmented disclosures, inconsistent financial data, weak provenance and high analyst effort. |
-| Technical contribution | The project combines deterministic financial computation, retrieval-grounded evidence management and bounded LLM agents inside a stateful workflow. |
-| Architectural novelty | The system rejects unconstrained autonomous agents and instead uses role-specific agents only where language reasoning is useful, while numerical and governance layers remain deterministic. |
-| Evaluation contribution | The system is assessed through eight evaluation domains: data quality, retrieval, financial calculation, citation provenance, agent workflow, report quality, observability and publication readiness. |
-| Product contribution | The output is a governed draft-publishable equity-research workbench for analysts, not a fully autonomous investment recommendation engine. |
+| Vấn đề nghiên cứu | Dữ liệu công bố của doanh nghiệp niêm yết Việt Nam phân tán, định dạng không đồng nhất, khó truy vết và tốn nhiều công analyst. |
+| Đóng góp kỹ thuật | Hệ thống kết hợp thu thập dữ liệu, chuẩn hóa facts, truy xuất bằng chứng, định giá bằng mã chương trình và sinh báo cáo bằng tác tử LLM có kiểm soát. |
+| Đóng góp kiến trúc | Workflow cố định thay cho agent tự trị; LLM chỉ tham gia diễn giải, tổng hợp và phản biện, còn dữ liệu/định giá/gate là deterministic. |
+| Đóng góp dữ liệu | Dữ liệu đi qua observation, canonical fact, snapshot, evidence index và manifest theo run, giúp báo cáo có thể truy ngược nguồn. |
+| Đóng góp đánh giá | Hệ thống có project evaluation, benchmark suite, report quality, citation, financial và observability checks; các kết quả fail phải được giữ nguyên thay vì làm đẹp. |
+| Đóng góp sản phẩm | Frontend có `/reports` và `/eval`, hỗ trợ xem báo cáo, tải file, chạy generate theo fast/full route và quan sát evaluation artifacts. |
 
-## Accepted Metrics
+## Evidence To Cite
 
-| Metric | Accepted threshold | Thesis statement |
-|---|---:|---|
-| Core metric coverage | >= 95% | MVP5 contains enough normalized facts for FCFF, FCFE, multiples and report tables. |
-| Official reconciliation | >= 95% | Material financial facts reconcile to official or high-confidence sources. |
-| Citation coverage | 100% for quantitative material claims | Every material numeric claim has fact/source/citation lineage. |
-| RAG hit-rate@5 | >= 90% | Retrieval reliably surfaces the relevant source chunk within the top five results. |
-| RAG MRR | >= 0.75 | Relevant official evidence appears high enough for analyst use. |
-| Source-tier hit rate | >= 90% | Retrieval prefers authoritative sources over weak narrative sources. |
-| Faithfulness | >= 0.90 | Generated narrative remains grounded in the supplied evidence. |
-| Report quality score | >= 85/100 | Draft reports are eligible for controlled publication after human approval. |
-| Tool permission compliance | 100% | Agent/tool calls respect the configured tool boundary. |
-| Artifact manifest compliance | 100% | Required run artifacts are present and traceable. |
+| Loại bằng chứng | Nơi kiểm tra |
+|---|---|
+| Workflow và gate | `docs/WORKFLOW.md`, `backend/harness/runner.py`, `backend/harness/gates.py` |
+| Dữ liệu và snapshot | `docs/SOURCES_AND_INGESTION.md`, `docs/DATA_ARCHITECTURE_ER.md`, `backend/dataops/` |
+| Định giá | `docs/VALUATION.md`, `backend/analytics/`, `backend/valuation/peer_multiples.py` |
+| Báo cáo và render | `docs/REPORTING.md`, `backend/reporting/`, `scripts/generate_fast_report.py` |
+| Evaluation | `docs/EVALUATION_GATES.md`, `backend/evaluation/`, `scripts/run_project_evaluation.py`, `scripts/run_benchmark_suite.py` |
+| Frontend | `frontend/src/`, `frontend/README.md`, `frontend/vercel.json` |
 
 ## Hard Boundaries
 
-- Do not claim the system produces autonomous investment advice; it produces analyst-reviewable, evidence-grounded research drafts.
-- Do not describe LLMs as the source of financial truth; valuation, reconciliation and sensitivity analysis are deterministic.
-- Do not collapse `DRAFT_PUBLISHABLE` into client-final approval; client-final remains fail-closed and human-authorized.
-- Do not present the active universe as equally deep as MVP5; present them as a scale-readiness universe.
-- Do not remove the residual roadmap; the remaining 1/10 is a legitimate productionization boundary, not a thesis failure.
+- Không nói hệ thống tự động đưa ra lời khuyên đầu tư cuối cùng; hệ thống tạo bản nháp nghiên cứu có bằng chứng để analyst rà soát.
+- Không nói LLM là nguồn sự thật tài chính; valuation, reconciliation, sensitivity và recommendation reconciliation phải do code tính.
+- Không gộp `DRAFT_PUBLISHABLE`, `auto_exported` và `client_final` làm một.
+- Không dùng full-universe benchmark để khẳng định mọi ticker đạt chất lượng báo cáo như MVP5.
+- Không che trạng thái `BLOCKED_BY_P0`; đây là bằng chứng hệ thống fail-closed và cần được diễn giải như phát hiện đánh giá.
 
 ## Commands For Reproduction
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; pytest -q
-npm.cmd run test
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -q tests
+npm.cmd run test --prefix frontend
 python scripts/run_project_evaluation.py --ticker DHG
-python scripts/run_project_evaluation.py --ticker IMP
-python scripts/run_project_evaluation.py --ticker DMC
-python scripts/run_project_evaluation.py --ticker TRA
-python scripts/run_project_evaluation.py --ticker DBD
+python scripts/run_benchmark_suite.py --cohort mvp5_validated
+python scripts/run_benchmark_suite.py --cohort full_universe --reuse-existing
 python scripts/audit_universe_report_readiness.py --include-db --write-json output/universe_report_readiness_db.json
 ```

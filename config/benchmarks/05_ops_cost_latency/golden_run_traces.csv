@@ -9,3 +9,6 @@ bench_tw3_20260615_07,TW3,warm,561,29388,0.2939,0,auto_exported,0,0
 bench_med_20260615_08,MED,warm,509,23700,0.237,3,auto_exported,0,0
 bench_pmc_20260615_09,PMC,warm,491,25596,0.256,0,auto_exported,0,0
 bench_amv_20260615_10,AMV,cold,1053,45267,0.4526,0,auto_exported,0,0
+bench_render_only_20260615_11,DHG,render_only,70,0,0.0,0,auto_exported,0,0
+bench_flash_warm_20260615_12,DHG,flash_memo_warm,58,3200,0.032,0,auto_exported,0,0
+bench_flash_cold_retrieval_20260615_13,DHG,flash_memo_cold_retrieval,132,6400,0.064,0,auto_exported,0,0

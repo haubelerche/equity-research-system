@@ -1,0 +1,23 @@
+{
+  "ticker": "MTP",
+  "generated_at": "2026-06-16T17:14:35.081017+00:00",
+  "outcome": {
+    "ticker": "MTP",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "MTP DHCD 2026.pdf"
+    ],
+    "pages": 56,
+    "approved_resolutions": 8,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 2,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 3,
+      "business_direction": 6,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

@@ -1,0 +1,3 @@
+ticker,fiscal_year,period_type,statement_type,metric_id,value,unit,document_title,page_number,table_name,extracted_text,extraction_method,verified_by,verified_at
+LDP,2025,FY,income_statement,revenue.net,243906.0,vnd_bn,LDP FY2025 cached official PDF,44,,Doanh thu thuần,pdf_table,,
+LDP,2025,FY,income_statement,profit_before_tax.total,7000.0,vnd_bn,LDP FY2025 cached official PDF,44,,Lợi nhuận trước thuế,pdf_table,,

@@ -1,0 +1,310 @@
+{
+  "ok": [
+    "DHG",
+    "IMP",
+    "DMC",
+    "TRA",
+    "DBD",
+    "OPC",
+    "MKP",
+    "TNH",
+    "JVC",
+    "DVN",
+    "DHT",
+    "LDP",
+    "PPP",
+    "DP3",
+    "DP1",
+    "TW3",
+    "MED",
+    "PMC",
+    "AMV",
+    "YTC",
+    "VHE",
+    "VDP",
+    "DCL",
+    "VMD",
+    "DNM",
+    "DBT",
+    "DPP",
+    "DTP",
+    "AGP"
+  ],
+  "wrong": [
+    "SPM",
+    "HBH",
+    "VMC",
+    "NDT",
+    "BID",
+    "BCR",
+    "VNP",
+    "CPC",
+    "HDA",
+    "TMP",
+    "DRG",
+    "PVD",
+    "DGW",
+    "TNT"
+  ],
+  "not_listed": [],
+  "records": [
+    {
+      "ticker": "DHG",
+      "verdict": "ok",
+      "real_name": "CTCP Dược Hậu Giang",
+      "csv_name": "Cong ty Co phan Duoc Hau Giang"
+    },
+    {
+      "ticker": "IMP",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm Imexpharm",
+      "csv_name": "Cong ty Co phan Duoc pham Imexpharm"
+    },
+    {
+      "ticker": "DMC",
+      "verdict": "ok",
+      "real_name": "CTCP Xuất nhập khẩu Y Tế DOMESCO",
+      "csv_name": "Cong ty Co phan Xuat nhap khau Y te Domesco"
+    },
+    {
+      "ticker": "TRA",
+      "verdict": "ok",
+      "real_name": "CTCP Traphaco",
+      "csv_name": "Cong ty Co phan Traphaco"
+    },
+    {
+      "ticker": "DBD",
+      "verdict": "ok",
+      "real_name": "CTCP Dược - Trang thiết bị Y tế Bình Định (Bidiphar)",
+      "csv_name": "Cong ty Co phan Duoc - Trang thiet bi Y te Binh Dinh"
+    },
+    {
+      "ticker": "OPC",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm OPC",
+      "csv_name": "Cong ty Co phan Duoc pham OPC"
+    },
+    {
+      "ticker": "MKP",
+      "verdict": "ok",
+      "real_name": "CTCP Hoá - Dược phẩm Mekophar",
+      "csv_name": "Cong ty Co phan Hoa - Duoc pham Mekophar"
+    },
+    {
+      "ticker": "TNH",
+      "verdict": "ok",
+      "real_name": "CTCP Tập đoàn Bệnh viện TNH",
+      "csv_name": "Cong ty Co phan Benh vien Quoc te Thai Nguyen"
+    },
+    {
+      "ticker": "JVC",
+      "verdict": "ok",
+      "real_name": "CTCP Đầu tư Y tế - Dược phẩm Việt Nam",
+      "csv_name": "Cong ty Co phan Thiet bi Y te Viet Nhat"
+    },
+    {
+      "ticker": "DVN",
+      "verdict": "ok",
+      "real_name": "Tổng Công ty Dược Việt Nam - CTCP",
+      "csv_name": "Tong Cong ty Duoc Viet Nam - CTCP"
+    },
+    {
+      "ticker": "DHT",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm Hà Tây",
+      "csv_name": "Cong ty Co phan Duoc pham Ha Tay"
+    },
+    {
+      "ticker": "LDP",
+      "verdict": "ok",
+      "real_name": "CTCP Dược Lâm Đồng (Ladophar)",
+      "csv_name": "Cong ty Co phan Duoc Lam Dong - Ladophar"
+    },
+    {
+      "ticker": "PPP",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm Phong Phú",
+      "csv_name": "Cong ty Co phan Duoc pham Phong Phu"
+    },
+    {
+      "ticker": "DP3",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm Trung ương 3",
+      "csv_name": "Cong ty Co phan Duoc pham Trung uong 3"
+    },
+    {
+      "ticker": "DP1",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm Trung ương CPC1",
+      "csv_name": "Cong ty Co phan Duoc pham Trung uong CPC1"
+    },
+    {
+      "ticker": "TW3",
+      "verdict": "ok",
+      "real_name": "CTCP Dược Trung ương 3",
+      "csv_name": "Cong ty Co phan Duoc - Trang thiet bi Y te Da Nang"
+    },
+    {
+      "ticker": "MED",
+      "verdict": "ok",
+      "real_name": "CTCP Dược Trung ương Mediplantex",
+      "csv_name": "Cong ty Co phan Duoc Trung uong Mediplantex"
+    },
+    {
+      "ticker": "PMC",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm Dược liệu Pharmedic",
+      "csv_name": "Cong ty Co phan Duoc pham Duoc lieu Pharmedic"
+    },
+    {
+      "ticker": "AMV",
+      "verdict": "ok",
+      "real_name": "CTCP Sản xuất Kinh doanh Dược và Trang thiết bị Y tế Việt Mỹ",
+      "csv_name": "Cong ty Co phan San xuat Kinh doanh Duoc va Trang thiet bi Y te Viet My"
+    },
+    {
+      "ticker": "YTC",
+      "verdict": "ok",
+      "real_name": "CTCP Xuất nhập khẩu Y tế Thành phố Hồ Chí Minh",
+      "csv_name": "Cong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh"
+    },
+    {
+      "ticker": "VHE",
+      "verdict": "ok",
+      "real_name": "CTCP Dược liệu và Thực phẩm Việt Nam",
+      "csv_name": "Cong ty Co phan Duoc lieu Viet Nam"
+    },
+    {
+      "ticker": "VDP",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm Trung ương VIDIPHA",
+      "csv_name": "Cong ty Co phan Duoc pham Trung uong Vidipha"
+    },
+    {
+      "ticker": "DCL",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm Cửu Long",
+      "csv_name": "Cong ty Co phan Duoc pham Cuu Long"
+    },
+    {
+      "ticker": "SPM",
+      "verdict": "WRONG",
+      "real_name": "CTCP SPM",
+      "csv_name": "Cong ty Co phan S.P.M"
+    },
+    {
+      "ticker": "VMD",
+      "verdict": "ok",
+      "real_name": "CTCP Y Dược phẩm Vimedimex",
+      "csv_name": "Cong ty Co phan Y Duoc pham Vimedimex"
+    },
+    {
+      "ticker": "HBH",
+      "verdict": "WRONG",
+      "real_name": "CTCP Habeco - Hải Phòng",
+      "csv_name": "Cong ty Co phan Chuoi Nha thuoc An Khang"
+    },
+    {
+      "ticker": "DNM",
+      "verdict": "ok",
+      "real_name": "Tổng Công ty cổ phần Y tế DANAMECO",
+      "csv_name": "Cong ty Co phan Dieu Duong Minh Hai"
+    },
+    {
+      "ticker": "DBT",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm Bến Tre",
+      "csv_name": "Cong ty Co phan Duoc pham Trung Viet"
+    },
+    {
+      "ticker": "DPP",
+      "verdict": "ok",
+      "real_name": "CTCP Dược Đồng Nai",
+      "csv_name": "Cong ty Co phan Duoc pham Phuc Thanh"
+    },
+    {
+      "ticker": "DTP",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm CPC1 Hà Nội",
+      "csv_name": "Cong ty Co phan Duoc Tay Ninh"
+    },
+    {
+      "ticker": "VMC",
+      "verdict": "WRONG",
+      "real_name": "CTCP Vimeco",
+      "csv_name": "Cong ty Co phan Y Duoc Viet Nam"
+    },
+    {
+      "ticker": "NDT",
+      "verdict": "WRONG",
+      "real_name": "Tổng Công ty cổ phần Dệt May Nam Định",
+      "csv_name": "Cong ty Co phan Benh vien Da khoa tinh Ninh Binh"
+    },
+    {
+      "ticker": "BID",
+      "verdict": "WRONG",
+      "real_name": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam",
+      "csv_name": "Cong ty Co phan Duoc Binh Duong"
+    },
+    {
+      "ticker": "BCR",
+      "verdict": "WRONG",
+      "real_name": "CTCP BCG Land",
+      "csv_name": "Cong ty Co phan Bio-Pharmachemie"
+    },
+    {
+      "ticker": "VNP",
+      "verdict": "WRONG",
+      "real_name": "CTCP Nhựa Việt Nam",
+      "csv_name": "Cong ty Co phan Duoc Viet Nhon"
+    },
+    {
+      "ticker": "CPC",
+      "verdict": "WRONG",
+      "real_name": "CTCP Thuốc sát trùng Cần Thơ",
+      "csv_name": "Cong ty Co phan Duoc pham CPC1 Ha Noi"
+    },
+    {
+      "ticker": "HDA",
+      "verdict": "WRONG",
+      "real_name": "CTCP Hãng sơn Đông Á",
+      "csv_name": "Cong ty Co phan Duoc Ha Dong"
+    },
+    {
+      "ticker": "TMP",
+      "verdict": "WRONG",
+      "real_name": "CTCP Thủy điện Thác Mơ",
+      "csv_name": "Cong ty Co phan Duoc pham Tam Phuc"
+    },
+    {
+      "ticker": "DRG",
+      "verdict": "WRONG",
+      "real_name": "CTCP Cao su Đắk Lắk",
+      "csv_name": "Cong ty Co phan Duoc Re Giang"
+    },
+    {
+      "ticker": "PVD",
+      "verdict": "WRONG",
+      "real_name": "Tổng Công ty cổ phần Khoan và Dịch vụ khoan Dầu khí",
+      "csv_name": "Cong ty Co phan Duoc pham Viet Duc"
+    },
+    {
+      "ticker": "DGW",
+      "verdict": "WRONG",
+      "real_name": "CTCP Thế Giới Số",
+      "csv_name": "Cong ty Co phan The gioi So"
+    },
+    {
+      "ticker": "TNT",
+      "verdict": "WRONG",
+      "real_name": "CTCP Tập đoàn TNT",
+      "csv_name": "Cong ty Co phan Duoc pham Tan Nhon Tay"
+    },
+    {
+      "ticker": "AGP",
+      "verdict": "ok",
+      "real_name": "CTCP Dược phẩm Agimexpharm",
+      "csv_name": "Cong ty Co phan Duoc pham Agimexpharm"
+    }
+  ]
+}

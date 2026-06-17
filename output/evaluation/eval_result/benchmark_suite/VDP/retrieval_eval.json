@@ -1,0 +1,2060 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "plan_id": "02",
+  "plan_name": "RAG and evidence",
+  "ticker": "VDP",
+  "generated_at": "2026-06-16T02:54:01.308448+00:00",
+  "status": "blocked",
+  "test_execution": {
+    "status": "not_measured",
+    "targets": [
+      "tests/unit/test_retrieval.py",
+      "tests/unit/test_citation_map.py",
+      "tests/unit/test_driver_evidence.py",
+      "tests/unit/test_news_relevance.py",
+      "tests/citations"
+    ],
+    "exit_code": null,
+    "duration_seconds": 0.0,
+    "summary": {},
+    "output_tail": [
+      "Skipped by --skip-tests."
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [
+      "retrieval_eval.json",
+      "evidence_packet.json"
+    ],
+    "found": {
+      "retrieval_eval.json": [
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHG\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP3\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DVN\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\IMP\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\JVC\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\LDP\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\MED\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\MKP\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\OPC\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\PMC\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\PPP\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\TNH\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\TRA\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\TW3\\retrieval_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\VHE\\retrieval_eval.json"
+      ],
+      "evidence_packet.json": []
+    },
+    "missing": [
+      "evidence_packet.json"
+    ],
+    "status": "blocked"
+  },
+  "blocking_issues": [
+    "rag_golden_query_set_missing"
+  ],
+  "metrics": {
+    "test_suite_status": "not_measured",
+    "tests_passed": 0,
+    "tests_failed": 0
+  },
+  "metric_results": [
+    {
+      "id": "hit_rate_at_5",
+      "label": "Hit-rate@5",
+      "source": "golden query set missing",
+      "detail": "golden_query_set_missing",
+      "metric_id": "hit_rate_at_5",
+      "metric_name": "Hit-rate@5",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [
+        {
+          "reason": "golden_query_set_missing",
+          "source": "golden query set missing"
+        }
+      ],
+      "remediation_hint": "Inspect failed golden queries and improve retrieval ranking.",
+      "evaluator": {
+        "id": "hit_rate_at_5",
+        "framework": "lexical_golden_retrieval",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "queries_with_relevant_evidence_in_top_5 / evaluated_queries",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 1,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 2,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 3,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 4,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 5,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 6,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 7,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 8,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 9,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 10,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 11,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 12,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 13,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 14,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 15,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 16,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 17,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 18,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 19,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 20,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP retrieval target from BENCHMARK_STANDARDS.md.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T02:54:01.308448+00:00"
+    },
+    {
+      "id": "mrr_at_5",
+      "label": "MRR@5",
+      "source": "golden query set missing",
+      "detail": "golden_query_set_missing",
+      "metric_id": "mrr_at_5",
+      "metric_name": "MRR@5",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 0.75",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [
+        {
+          "reason": "golden_query_set_missing",
+          "source": "golden query set missing"
+        }
+      ],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluator": {
+        "id": "mrr_at_5",
+        "framework": "lexical_golden_retrieval",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "mean(reciprocal_rank_of_first_relevant_evidence_at_5)",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "mean",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 1,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 2,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 3,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 4,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 5,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 6,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 7,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 8,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 9,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 10,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 11,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 12,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 13,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 14,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 15,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 16,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 17,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 18,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 19,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 20,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "mrr_at_5",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP threshold; the target profile is 0.80.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T02:54:01.308448+00:00"
+    },
+    {
+      "id": "context_precision",
+      "label": "Context precision",
+      "source": "golden query set missing",
+      "detail": "ragas_dataset_missing",
+      "metric_id": "context_precision",
+      "metric_name": "Context precision",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 0.80",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 1,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 1
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 2,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 2
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 3,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 3
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 4,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 4
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 5,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 5
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 6,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 6
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 7,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 7
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 8,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 8
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 9,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 9
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 10,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 10
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 11,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 11
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 12,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 12
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 13,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 13
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 14,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 14
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 15,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 15
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 16,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 16
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 17,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 17
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 18,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 18
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 19,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 19
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 20,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 20
+        }
+      ],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluator": {
+        "id": "context_precision",
+        "framework": "ragas",
+        "framework_version": "0.4.3",
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "ragas_context_precision_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "mean",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 1,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 2,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 3,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 4,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 5,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 6,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 7,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 8,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 9,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 10,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 11,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 12,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 13,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 14,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 15,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 16,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 17,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 18,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 19,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 20,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP threshold; the target profile is 0.85.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T02:54:01.308448+00:00"
+    },
+    {
+      "id": "context_recall",
+      "label": "Context recall",
+      "source": "golden query set missing",
+      "detail": "ragas_dataset_missing",
+      "metric_id": "context_recall",
+      "metric_name": "Context recall",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 0.80",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 1,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 1
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 2,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 2
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 3,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 3
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 4,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 4
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 5,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 5
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 6,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 6
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 7,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 7
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 8,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 8
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 9,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 9
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 10,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 10
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 11,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 11
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 12,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 12
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 13,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 13
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 14,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 14
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 15,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 15
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 16,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 16
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 17,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 17
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 18,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 18
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 19,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 19
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 20,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 20
+        }
+      ],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluator": {
+        "id": "context_recall",
+        "framework": "ragas",
+        "framework_version": "0.4.3",
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "ragas_context_recall_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "mean",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 1,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 2,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 3,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 4,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 5,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 6,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 7,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 8,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 9,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 10,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 11,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 12,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 13,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 14,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 15,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 16,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 17,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 18,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 19,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 20,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "MVP threshold; the target profile is 0.85.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T02:54:01.308448+00:00"
+    },
+    {
+      "id": "faithfulness",
+      "label": "Faithfulness",
+      "source": "golden query set missing",
+      "detail": "ragas_dataset_missing",
+      "metric_id": "faithfulness",
+      "metric_name": "Faithfulness",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 0.85",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 1,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 1
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 2,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 2
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 3,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 3
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 4,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 4
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 5,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 5
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 6,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 6
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 7,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 7
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 8,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 8
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 9,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 9
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 10,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 10
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 11,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 11
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 12,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 12
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 13,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 13
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 14,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 14
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 15,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 15
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 16,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 16
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 17,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 17
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 18,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 18
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 19,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 19
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 20,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 20
+        }
+      ],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluator": {
+        "id": "faithfulness",
+        "framework": "ragas",
+        "framework_version": "0.4.3",
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "ragas_faithfulness_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "mean",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 1,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 2,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 3,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 4,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 5,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 6,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 7,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 8,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 9,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 10,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 11,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 12,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 13,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 14,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 15,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 16,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 17,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 18,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 19,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 20,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Generated claims must be supported by retrieved evidence.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T02:54:01.308448+00:00"
+    },
+    {
+      "id": "response_relevancy",
+      "label": "Response relevancy",
+      "source": "golden query set missing",
+      "detail": "ragas_dataset_missing",
+      "metric_id": "response_relevancy",
+      "metric_name": "Response relevancy",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 0.85",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 1,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 1
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 2,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 2
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 3,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 3
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 4,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 4
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 5,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 5
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 6,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 6
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 7,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 7
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 8,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 8
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 9,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 9
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 10,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 10
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 11,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 11
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 12,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 12
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 13,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 13
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 14,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 14
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 15,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 15
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 16,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 16
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 17,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 17
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 18,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 18
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 19,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 19
+        },
+        {
+          "sample_origin": "benchmark_control",
+          "control_index": 20,
+          "status": "no_additional_runtime_sample_available",
+          "metric_id": "hit_rate_at_5",
+          "sample_index": 20
+        }
+      ],
+      "remediation_hint": "Tune chunking, retrieval ranking, source-tier preferences, or the golden query set.",
+      "evaluator": {
+        "id": "response_relevancy",
+        "framework": "ragas",
+        "framework_version": "0.4.3",
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "ragas_response_relevancy_mean",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "mean",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 1,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 2,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 3,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 4,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 5,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 6,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 7,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 8,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 9,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 10,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 11,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 12,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 13,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 14,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 15,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 16,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 17,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 18,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 19,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 20,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Responses must directly address benchmark questions.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T02:54:01.308448+00:00"
+    },
+    {
+      "id": "source_tier_hit_rate",
+      "label": "Source-tier hit rate",
+      "source": "golden query set missing",
+      "detail": "golden_query_set_missing",
+      "metric_id": "source_tier_hit_rate",
+      "metric_name": "Source-tier hit rate",
+      "category": "rag",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "benchmark_metric_registry_v1",
+      "owner": "retrieval",
+      "failed_examples": [
+        {
+          "reason": "golden_query_set_missing",
+          "source": "golden query set missing"
+        }
+      ],
+      "remediation_hint": "Tune source-tier preferences so material queries retrieve priority sources.",
+      "evaluator": {
+        "id": "source_tier_hit_rate",
+        "framework": "source_tier_retrieval_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": "material_queries_with_priority_source_in_top_k / material_queries",
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 1,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 2,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 3,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 4,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 5,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 6,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 7,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 8,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 9,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 10,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 11,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 12,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 13,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 14,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 15,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 16,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 17,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 18,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 19,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 20,
+            "status": "no_additional_runtime_sample_available",
+            "metric_id": "hit_rate_at_5",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Material retrieval queries should surface priority evidence sources in the retrieved set.",
+        "registry_version": "benchmark_metric_registry_v1"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-16T02:54:01.308448+00:00"
+    }
+  ],
+  "retrieval_backend": "not_measured",
+  "query_set_version": null,
+  "evidence_packet_completeness": null,
+  "ragas_scores": {
+    "context_precision": null,
+    "context_recall": null,
+    "faithfulness": null,
+    "response_relevancy": null
+  },
+  "ragas_execution": {
+    "execution_status": "not_executed",
+    "framework": "ragas",
+    "framework_version": "0.4.3",
+    "sample_size": 0,
+    "scores": {},
+    "samples": [],
+    "reason": "ragas_dataset_missing"
+  },
+  "golden_scores": {
+    "hit_rate_at_5": null,
+    "mrr_at_5": null,
+    "source_tier_hit_rate": null,
+    "queries": [],
+    "execution_status": "not_executed",
+    "reason": "golden_query_set_missing"
+  },
+  "evidence_packet": {
+    "path": null,
+    "source_documents": 0,
+    "citation_records": 0,
+    "formula_traces": 0
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "ticker": "BCP",
+  "generated_at": "2026-06-16T15:42:11.577740+00:00",
+  "outcome": {
+    "ticker": "BCP",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "BCP DHCD 2026.pdf"
+    ],
+    "pages": 51,
+    "approved_resolutions": 11,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 0,
+      "investment_plan": 2,
+      "rnd_and_product_focus": 4,
+      "business_direction": 6,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "ticker": "DHD",
+  "company_name": "DHD",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DHD FY2025 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHD\\2025\\source_document.pdf",
+  "published_date": "2025-12-31",
+  "fiscal_year": 2025,
+  "language": "vi",
+  "file_hash": "6658c24141668226f26c6debed48d0aa8c0cfe95cfaed8a76e220999f299b831",
+  "staged_at": "2026-06-15T09:41:18.574775+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHD\\DHD 2025.pdf"
+}

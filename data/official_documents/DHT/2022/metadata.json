@@ -1,0 +1,15 @@
+{
+  "ticker": "DHT",
+  "company_name": "DHT",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DHT FY2022 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHT\\2022\\source_document.pdf",
+  "published_date": "2022-12-31",
+  "fiscal_year": 2022,
+  "language": "vi",
+  "file_hash": "4db75bb2c61e8f19c5e5095a8c5af91e0f2986bbaa8cda715aa4d5f0016360c5",
+  "staged_at": "2026-06-15T09:41:21.383259+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHT\\DHT 2022.pdf"
+}

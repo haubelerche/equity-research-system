@@ -1,0 +1,63 @@
+ticker,company_name,exchange,segment,is_mvp,notes,reference_price_vnd,source,in_current_universe,current_company_name,current_name_score,icb_code,icb_name
+TNH,CTCP Tập đoàn Bệnh viện TNH,HOSE,healthcare_services,false,icb_healthcare_and_current_validated,9220.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Benh vien Quoc te Thai Nguyen,0.5556,4533,Chăm sóc y tế
+TTD,CTCP Bệnh viện tim Tâm Đức,UPCOM,healthcare_services,false,icb_healthcare,102500.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4533,Chăm sóc y tế
+DMC,CTCP Xuất nhập khẩu Y Tế DOMESCO,HOSE,medical_distribution,true,icb_healthcare_and_current_validated,59800.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Xuat nhap khau Y te Domesco,0.8533,4577,Dược phẩm
+AMV,CTCP Sản xuất Kinh doanh Dược và Trang thiết bị Y tế Việt Mỹ,HNX,medical_equipment,false,icb_healthcare_and_current_validated,1500.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan San xuat Kinh doanh Duoc va Trang thiet bi Y te Viet My,0.916,4535,Thiết bị y tế
+CVN,CTCP Vinam,UPCOM,medical_equipment,false,icb_healthcare,1000.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4535,Thiết bị y tế
+DBD,CTCP Dược - Trang thiết bị Y tế Bình Định (Bidiphar),HOSE,medical_equipment,true,icb_healthcare_and_current_validated,49350.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc - Trang thiet bi Y te Binh Dinh,0.7959,4577,Dược phẩm
+DBM,CTCP Dược - Vật tư Y Tế Đăk Lăk,UPCOM,medical_equipment,false,icb_healthcare,27000.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+DDN,CTCP Dược và Thiết bị Y tế Đà Nẵng,UPCOM,medical_equipment,false,icb_healthcare,8000.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+DHD,CTCP Dược Vật tư Y tế Hải Dương,UPCOM,medical_equipment,false,icb_healthcare,28100.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+DNM,Tổng Công ty cổ phần Y tế DANAMECO,UPCOM,medical_equipment,false,icb_healthcare_and_current_validated,6000.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Dieu Duong Minh Hai,0.5797,4537,Dụng cụ y tế
+DTH,CTCP Dược - Vật tư Y Tế Thanh Hóa,UPCOM,medical_equipment,false,icb_healthcare,12600.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4535,Thiết bị y tế
+JVC,CTCP Đầu tư Y tế - Dược phẩm Việt Nam,HOSE,medical_equipment,false,icb_healthcare_and_current_validated,3870.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Thiet bi Y te Viet Nhat,0.4324,4535,Thiết bị y tế
+MEF,CTCP MEINFA,UPCOM,medical_equipment,false,icb_healthcare,2100.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4537,Dụng cụ y tế
+MRF,CTCP Merufa,UPCOM,medical_equipment,false,icb_healthcare,23500.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4535,Thiết bị y tế
+NTF,CTCP Dược - Vật tư Y tế Nghệ An,UPCOM,medical_equipment,false,icb_healthcare,12000.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+SRA,CTCP Sara Việt Nam,HNX,medical_equipment,false,icb_healthcare,1700.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4535,Thiết bị y tế
+YTC,CTCP Xuất nhập khẩu Y tế Thành phố Hồ Chí Minh,UPCOM,medical_equipment,false,icb_healthcare_and_current_validated,24000.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh,0.8932,4537,Dụng cụ y tế
+AGP,CTCP Dược phẩm Agimexpharm,UPCOM,pharma,false,icb_healthcare,34200.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+AMP,CTCP Armephaco,UPCOM,pharma,false,icb_healthcare,13300.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+APC,CTCP Chiếu xạ An Phú,UPCOM,pharma,false,icb_healthcare,5500.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4570,Dược phẩm
+BCP,CTCP Dược ENLIE,UPCOM,pharma,false,icb_healthcare,10600.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+BIO,CTCP Vắc xin và Sinh phẩm Nha Trang,UPCOM,pharma,false,icb_healthcare,13500.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+CDP,CTCP Dược phẩm Trung ương Codupha,UPCOM,pharma,false,icb_healthcare,12500.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+CNC,CTCP Công nghệ Cao Traphaco,UPCOM,pharma,false,icb_healthcare,32600.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+DAN,CTCP Dược Danapha,UPCOM,pharma,false,icb_healthcare,23000.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+DBT,CTCP Dược phẩm Bến Tre,HOSE,pharma,false,icb_healthcare_and_current_validated,11250.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham Trung Viet,0.6207,4577,Dược phẩm
+DCL,CTCP Dược phẩm Cửu Long,HOSE,pharma,false,icb_healthcare_and_current_validated,38300.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham Cuu Long,0.807,4577,Dược phẩm
+DHG,CTCP Dược Hậu Giang,HOSE,pharma,true,icb_healthcare_and_current_validated,93200.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc Hau Giang,0.7755,4577,Dược phẩm
+DHN,CTCP Dược phẩm Hà Nội,UPCOM,pharma,false,icb_healthcare,18300.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+DHT,CTCP Dược phẩm Hà Tây,HNX,pharma,false,icb_healthcare_and_current_validated,66000.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham Ha Tay,0.7925,4577,Dược phẩm
+DP1,CTCP Dược phẩm Trung ương CPC1,UPCOM,pharma,false,icb_healthcare_and_current_validated,29600.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham Trung uong CPC1,0.8451,4577,Dược phẩm
+DP2,CTCP Dược phẩm Trung ương 2,UPCOM,pharma,false,icb_healthcare,4000.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+DP3,CTCP Dược phẩm Trung ương 3,HNX,pharma,false,icb_healthcare_and_current_validated,62400.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham Trung uong 3,0.8308,4577,Dược phẩm
+DPH,CTCP Dược phẩm Hải Phòng,UPCOM,pharma,false,icb_healthcare,51000.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+DPP,CTCP Dược Đồng Nai,UPCOM,pharma,false,icb_healthcare_current_name_mismatch,26500.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham Phuc Thanh,0.4074,4577,Dược phẩm
+DTG,CTCP Dược phẩm Tipharco,HNX,pharma,false,icb_healthcare,15500.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+DTP,CTCP Dược phẩm CPC1 Hà Nội,UPCOM,pharma,false,icb_healthcare_and_current_validated,79800.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc Tay Ninh,0.5091,4577,Dược phẩm
+DVM,CTCP Dược liệu Việt Nam,HNX,pharma,false,icb_healthcare,6900.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+DVN,Tổng Công ty Dược Việt Nam - CTCP,UPCOM,pharma,false,icb_healthcare_and_current_validated,20900.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Tong Cong ty Duoc Viet Nam - CTCP,1.0,4577,Dược phẩm
+FIT,CTCP Tập đoàn F.I.T,HOSE,pharma,false,icb_healthcare,3890.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+GPC,CTCP Tập đoàn Green+,UPCOM,pharma,false,icb_healthcare,1900.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+HDP,CTCP Dược Hà Tĩnh,UPCOM,pharma,false,icb_healthcare,25000.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+IMP,CTCP Dược phẩm Imexpharm,HOSE,pharma,true,icb_healthcare_and_current_validated,46150.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham Imexpharm,0.8136,4577,Dược phẩm
+LDP,CTCP Dược Lâm Đồng (Ladophar),HNX,pharma,false,icb_healthcare_and_current_validated,9300.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc Lam Dong - Ladophar,0.8308,4577,Dược phẩm
+MED,CTCP Dược Trung ương Mediplantex,HNX,pharma,false,icb_healthcare_and_current_validated,18400.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc Trung uong Mediplantex,0.8533,4577,Dược phẩm
+MKP,CTCP Hoá - Dược phẩm Mekophar,UPCOM,pharma,false,icb_healthcare_and_current_validated,26500.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Hoa - Duoc pham Mekophar,0.8308,4577,Dược phẩm
+MKV,CTCP Dược thú Y Cai Lậy,HNX,pharma,false,icb_healthcare,19300.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+MTP,CTCP Dược Medipharco,UPCOM,pharma,false,icb_healthcare,13500.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+NDC,CTCP Nam Dược,UPCOM,pharma,false,icb_healthcare,157000.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+NDP,CTCP Dược phẩm 2/9,UPCOM,pharma,false,icb_healthcare,22500.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+NHD,CTCP Dược phẩm Nam Hà,UPCOM,pharma,false,icb_healthcare,80500.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+OPC,CTCP Dược phẩm OPC,HOSE,pharma,false,icb_healthcare_and_current_validated,23900.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham OPC,0.766,4577,Dược phẩm
+PBC,CTCP Dược phẩm Trung ương I - Pharbaco,UPCOM,pharma,false,icb_healthcare,5900.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+PMC,CTCP Dược phẩm Dược liệu Pharmedic,HNX,pharma,false,icb_healthcare_and_current_validated,130000.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham Duoc lieu Pharmedic,0.8608,4577,Dược phẩm
+PPP,CTCP Dược phẩm Phong Phú,HNX,pharma,false,icb_healthcare_and_current_validated,18200.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham Phong Phu,0.8136,4577,Dược phẩm
+SPM,CTCP SPM,HOSE,pharma,false,icb_healthcare_and_current_validated,8500.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan S.P.M,0.5517,4577,Dược phẩm
+TRA,CTCP Traphaco,HOSE,pharma,true,icb_healthcare_and_current_validated,79900.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Traphaco,0.7027,4577,Dược phẩm
+TW3,CTCP Dược Trung ương 3,UPCOM,pharma,false,icb_healthcare_and_current_validated,13000.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc - Trang thiet bi Y te Da Nang,0.4857,4577,Dược phẩm
+UPH,CTCP Dược phẩm TW 25,UPCOM,pharma,false,icb_healthcare,6500.0,vnstock_vci_icb+vnstock_kbs_listing_master,False,,,4577,Dược phẩm
+VDP,CTCP Dược phẩm Trung ương VIDIPHA,HOSE,pharma,false,icb_healthcare_and_current_validated,50300.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc pham Trung uong Vidipha,0.8571,4577,Dược phẩm
+VHE,CTCP Dược liệu và Thực phẩm Việt Nam,HNX,pharma,false,icb_healthcare_and_current_validated,3100.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Duoc lieu Viet Nam,0.6571,4577,Dược phẩm
+VMD,CTCP Y Dược phẩm Vimedimex,HOSE,pharma,false,icb_healthcare_and_current_validated,14600.0,vnstock_vci_icb+vnstock_kbs_listing_master,True,Cong ty Co phan Y Duoc pham Vimedimex,0.8254,4577,Dược phẩm

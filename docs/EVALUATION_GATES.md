@@ -1,6 +1,6 @@
 # Evaluation gates và quality governance
 
-Cập nhật: 2026-06-14
+Cập nhật: 2026-06-17
 
 ## Context
 
@@ -14,14 +14,14 @@ Trong workflow agentic, false pass nguy hiểm hơn fail-fast vì nó tạo cả
 
 ### 0. Completion alignment
 
-Các kế hoạch chi tiết trong [`../eval/`](../eval/) đã được sử dụng làm khung nghiệm thu cho data reliability, RAG, financial calculation, citation provenance, agent workflow, report quality, observability và rollout/CI. Tài liệu này là contract vận hành của gates; thư mục `eval/` cung cấp nền tảng mở rộng và regression workflow sau trạng thái 9/10.
+Các kế hoạch chi tiết trong [`eval/`](eval/) được dùng làm khung đánh giá cho data reliability, RAG, financial calculation, citation provenance, agent workflow, report quality, observability và rollout/CI. Tài liệu này là contract vận hành của gates; trạng thái pass/fail cụ thể phải đọc từ run-scoped artifacts hoặc `output/evaluation/eval_result/benchmark_suite/benchmark_suite.json`, không suy diễn từ mô tả cũ.
 
 | Contract nghiệm thu | Ý nghĩa vận hành |
 |---|---|
 | `auto_exported` chỉ là publishable draft | Không được xem là client-facing final hoặc analyst-approved report |
 | `approved` cộng với `final_report_approval` là điều kiện client-final | Final render phải đi qua `authorize_client_final` |
 | `publishable_final_report_model` phải locked và cùng `snapshot_id` với valuation | Chặn render từ candidate/stale artifact |
-| `PACKAGE_VALIDATION_GATE` phải pass | Tool permission, manifest, formula trace, evidence packet, report quality và export blockers đều đạt đối với MVP5 |
+| `PACKAGE_VALIDATION_GATE` phải pass | Tool permission, manifest, formula trace, evidence packet, report quality và export blockers đều đạt trong phạm vi artifact đang xét |
 | Report-quality `decision` phải là `allow_export` và score >= 85 | `draft_only` hoặc `block_export` không được client-final |
 | Post-render audit có thể bổ sung blocker hiển thị | Model pass không bảo đảm HTML/PDF final không có lỗi trình bày |
 
@@ -101,20 +101,22 @@ Quyết định:
 
 `severity` là metadata chẩn đoán, đồng thời gate bắt buộc được dùng làm điều kiện promotion vào publishable artifact. Một số tool-level blocking reason được chuyển thành exception và làm run `failed`; các blocker có tính chất chất lượng làm run `blocked` hoặc ngăn tạo `publishable_final_report_model`. Client-final authorization đọc trực tiếp package/report-quality/governance artifacts để fail-closed. Khi debug, cần đọc cả `passed`, `severity`, `blocking_reasons`, `issues`, trạng thái run và publication readiness, không chỉ đọc boolean.
 
-### 5. Evaluation artifacts đã nghiệm thu
+### 5. Evaluation artifacts và benchmark hiện hành
 
-`backend/evaluation/run_evaluation.py` tạo tám artifact theo research run: `data_quality.json`, `retrieval_eval.json`, `financial_eval.json`, `citation_eval.json`, `agent_eval.json`, `report_eval.json`, `publication_readiness.json` và `observability_eval.json`. `backend/evaluation/project_evaluator.py` là harness riêng ở cấp repository, chạy tám plan trong `eval/`, thực thi test scope và không suy diễn metric run-specific từ test pass.
+`backend/evaluation/run_evaluation.py` tạo tám artifact theo research run: `data_quality.json`, `retrieval_eval.json`, `financial_eval.json`, `citation_eval.json`, `agent_eval.json`, `report_eval.json`, `publication_readiness.json` và `observability_eval.json`. `backend/evaluation/project_evaluator.py` là harness riêng ở cấp repository, chạy tám plan trong `docs/eval/`, thực thi test scope và không suy diễn metric run-specific từ test pass. `scripts/run_benchmark_suite.py` chạy một tập plan theo cohort và ghi aggregate vào `output/evaluation/eval_result/benchmark_suite/`.
 
-| Artifact | Ngưỡng 9/10 đã đạt cho MVP5 |
+| Artifact | Ý nghĩa kiểm định |
 |---|---|
-| `data_quality.json` | Core metric coverage >= 95% và official reconciliation >= 95% |
-| `retrieval_eval.json` | Hit-rate@5 >= 90%, MRR >= 0.75, source-tier hit >= 90%, faithfulness >= 0.90 |
-| `financial_eval.json` | FCFF, FCFE, blend, multiples, sensitivity và accounting invariants pass |
-| `citation_eval.json` | Quantitative material claim citation coverage = 100% |
-| `agent_eval.json` | Tool permission compliance = 100%, schema validity và run log đầy đủ |
-| `report_eval.json` | Report quality score >= 85 và decision `allow_export` |
-| `publication_readiness.json` | `DRAFT_PUBLISHABLE` cho MVP5; client-final vẫn yêu cầu approval |
-| `observability_eval.json` | Manifest, cost ledger, run log và artifact lineage đầy đủ |
+| `data_quality.json` | Kiểm tra coverage, provenance, reconciliation, freshness và source policy của dữ liệu |
+| `retrieval_eval.json` | Kiểm tra truy xuất bằng chứng, RAG/citation support và source-tier behavior |
+| `financial_eval.json` | Kiểm tra FCFF, FCFE, blend, multiples, sensitivity và accounting invariants |
+| `citation_eval.json` | Kiểm tra quantitative/material claim citation coverage |
+| `agent_eval.json` | Kiểm tra tool permission, schema validity và run log |
+| `report_eval.json` | Kiểm tra report quality score và decision export |
+| `publication_readiness.json` | Kiểm tra draft/client-final readiness và approval boundary |
+| `observability_eval.json` | Kiểm tra manifest, cost ledger, run log và artifact lineage |
+
+Kết quả benchmark aggregate mới nhất trong repo có thể chỉ phản ánh một plan hoặc một cohort cụ thể. Nếu `publication_status` là `BLOCKED_BY_P0`, tài liệu đồ án phải trình bày đây là phát hiện fail-closed của hệ thống đánh giá, không phải trạng thái pass.
 
 ## Strategic Recommendations
 

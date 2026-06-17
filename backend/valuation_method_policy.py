@@ -199,7 +199,7 @@ def _diag_fcff(valuation: dict[str, Any]) -> MethodDiagnostic:
     confidence_map = valuation.get("valuation_confidence") or {}
     sensitivity = valuation.get("sensitivity") or {}
     trace_methods = {
-        str((t or {}).get("method") or "").lower()
+        str((t or {}).get("method") or (t or {}).get("formula_id") or "").lower()
         for t in (valuation.get("formula_traces") or [])
     }
     target = _f(fcff.get("target_price_vnd")) or _f(fcff.get("value_per_share"))
@@ -251,7 +251,7 @@ def _diag_fcfe(valuation: dict[str, Any]) -> MethodDiagnostic:
     confidence_map = valuation.get("valuation_confidence") or {}
     sensitivity = valuation.get("sensitivity") or {}
     trace_methods = {
-        str((t or {}).get("method") or "").lower()
+        str((t or {}).get("method") or (t or {}).get("formula_id") or "").lower()
         for t in (valuation.get("formula_traces") or [])
     }
     rows = fcfe.get("fcfe_table") or []
@@ -334,13 +334,81 @@ def _diag_blend(valuation: dict[str, Any], fcfe_diag: MethodDiagnostic) -> Metho
 def _diag_cross_check(method_name: str, section: dict[str, Any] | None) -> MethodDiagnostic | None:
     if not section:
         return None
-    target = _f(section.get("target_price_vnd")) or _f(section.get("value_per_share"))
+    target = (
+        _f(section.get("target_price_vnd"))
+        or _f(section.get("value_per_share"))
+        or _f(section.get("price_pe_forward_vnd"))
+        or _f(section.get("implied_price_pe"))
+        or _f(section.get("implied_price_ev_ebitda"))
+    )
+    eps = _f(section.get("eps_fy1_vnd")) or _f(section.get("eps_vnd"))
+    target_pe = _f(section.get("target_pe"))
+    reasons = ["cross_check_only_not_primary"]
+    warnings: list[str] = []
+    if method_name in {"PE_FORWARD", "P/E"} and eps and target_pe and target is None:
+        reasons.append("pe_mapping_blank_with_eps_and_target_pe")
+        warnings.append("EPS and target P/E are present but P/E implied price is blank")
     return MethodDiagnostic(
         method_name=method_name, computed=target is not None, publishable=False,
         target_price_vnd=target, confidence="medium", role="cross_check",
-        blocking_reasons=["cross_check_only_not_primary"],
+        blocking_reasons=reasons,
+        warnings=warnings,
         required_inputs_present=target is not None,
     )
+
+
+def _has_market_sanity_bridge(valuation: dict[str, Any]) -> bool:
+    bridge = valuation.get("market_sanity_bridge")
+    if not isinstance(bridge, dict):
+        return False
+    return bool(
+        bridge.get("upside_downside") is not None
+        and (
+            bridge.get("current_pe") is not None
+            or bridge.get("target_pe_implied") is not None
+            or bridge.get("dcf_vs_pe") is not None
+            or bridge.get("dcf_vs_ev_ebitda") is not None
+        )
+    )
+
+
+def _gate_blockers(valuation: dict[str, Any]) -> list[str]:
+    reasons: list[str] = []
+    gate_results = valuation.get("gate_results") or {}
+    if isinstance(gate_results, dict):
+        for gate_name, gate in gate_results.items():
+            if isinstance(gate, dict) and gate.get("passed") is False:
+                reasons.append(f"{str(gate_name).lower()}_failed")
+    assumption_gate = valuation.get("assumption_gate") or {}
+    if isinstance(assumption_gate, dict) and assumption_gate.get("recommendation_allowed") is False:
+        reasons.append("recommendation_gate_not_allowed")
+    return reasons
+
+
+def _critical_warning_reasons(valuation: dict[str, Any]) -> list[str]:
+    critical_terms = (
+        "CRITICAL",
+        "BLOCKED",
+        "DATA_QUALITY_GATE",
+        "NO ELIGIBLE",
+        "NO_ELIGIBLE",
+        "SAME_DAY_MARKET_PRICE",
+        "FORMULA_TRACE_MISSING",
+        "MARKET_SANITY_BRIDGE_MISSING",
+        "METHOD_RENDERER_MISMATCH",
+    )
+    warnings: list[str] = []
+    for section_name in ("fcff", "fcfe", "blend_dcf", "pe_forward", "multiples"):
+        section = valuation.get(section_name) or {}
+        if isinstance(section, dict):
+            warnings.extend(str(item) for item in section.get("warnings") or [])
+    warnings.extend(str(item) for item in valuation.get("warnings") or [])
+    result: list[str] = []
+    for warning in warnings:
+        upper = warning.upper()
+        if any(term in upper for term in critical_terms):
+            result.append(f"critical_warning:{warning[:120]}")
+    return result
 
 
 def build_valuation_publishability_policy(
@@ -378,7 +446,11 @@ def build_valuation_publishability_policy(
     fcfe_d = _diag_fcfe(valuation)
     blend_d = _diag_blend(valuation, fcfe_d)
     diagnostics: dict[str, MethodDiagnostic] = {"FCFF": fcff_d, "FCFE": fcfe_d, "BLEND": blend_d}
-    for name, key in (("PE_FORWARD", "pe_forward"), ("CORE_PE_NET_CASH", "core_pe_net_cash")):
+    for name, key in (
+        ("PE_FORWARD", "pe_forward"),
+        ("P/E", "multiples"),
+        ("CORE_PE_NET_CASH", "core_pe_net_cash"),
+    ):
         cross = _diag_cross_check(name, valuation.get(key))
         if cross is not None:
             diagnostics[name] = cross
@@ -432,15 +504,49 @@ def build_valuation_publishability_policy(
     if sanity_candidate and current_price_vnd:
         cand = diagnostics[sanity_candidate]
         if cand.target_price_vnd and current_price_vnd > 0:
-            deviation = abs(cand.target_price_vnd / current_price_vnd - 1)
-            if deviation > MARKET_SANITY_BAND and not cand.bridge_present:
+            target_to_market = cand.target_price_vnd / current_price_vnd
+            deviation = abs(target_to_market - 1)
+            has_market_bridge = _has_market_sanity_bridge(valuation)
+            if deviation > MARKET_SANITY_BAND and not has_market_bridge:
                 blocking_reasons.append("market_sanity_bridge_missing")
+            if target_to_market < 0.4 and not valuation.get("senior_review"):
+                blocking_reasons.append("senior_review_required_for_severe_downside")
+            if target_to_market < 0.25 and not valuation.get("distress_evidence"):
+                blocking_reasons.append("distress_evidence_required_for_extreme_downside")
+
+    for reason in _gate_blockers(valuation):
+        blocking_reasons.append(reason)
+    for reason in _critical_warning_reasons(valuation):
+        blocking_reasons.append(reason)
+
+    raw_weights = valuation.get("method_weights") or {}
+    if isinstance(raw_weights, dict):
+        for method_name, weight in raw_weights.items():
+            diag = diagnostics.get(str(method_name).upper())
+            parsed_weight = _f(weight) or 0.0
+            if diag is not None and parsed_weight > 0 and not diag.publishable:
+                blocking_reasons.append(f"failed_method_has_nonzero_weight:{diag.method_name}")
 
     divergence_critical = "valuation_method_divergence_critical" in blocking_reasons
     market_sanity_fail = "market_sanity_bridge_missing" in blocking_reasons
+    gate_fail = any(
+        reason.endswith("_failed") or reason == "recommendation_gate_not_allowed"
+        for reason in blocking_reasons
+    )
+    method_weight_fail = any(reason.startswith("failed_method_has_nonzero_weight:") for reason in blocking_reasons)
+    critical_warning_fail = any(reason.startswith("critical_warning:") for reason in blocking_reasons)
+    senior_review_fail = "senior_review_required_for_severe_downside" in blocking_reasons
+    distress_fail = "distress_evidence_required_for_extreme_downside" in blocking_reasons
 
     target_price_publishable = bool(
-        primary_method is not None and not divergence_critical and not market_sanity_fail
+        primary_method is not None
+        and not divergence_critical
+        and not market_sanity_fail
+        and not gate_fail
+        and not method_weight_fail
+        and not critical_warning_fail
+        and not senior_review_fail
+        and not distress_fail
     )
     recommendation_publishable = target_price_publishable
     final_report_publishable = target_price_publishable and recommendation_publishable

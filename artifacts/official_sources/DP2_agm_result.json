@@ -1,0 +1,24 @@
+{
+  "ticker": "DP2",
+  "generated_at": "2026-06-16T16:39:32.365244+00:00",
+  "outcome": {
+    "ticker": "DP2",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "DP2 DHCD 2026.pdf",
+      "DP2 DHCD 2026(2).pdf"
+    ],
+    "pages": 71,
+    "approved_resolutions": 9,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 3,
+      "business_direction": 4,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

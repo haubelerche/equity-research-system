@@ -1,0 +1,23 @@
+{
+  "ticker": "DHD",
+  "generated_at": "2026-06-16T16:18:36.804061+00:00",
+  "outcome": {
+    "ticker": "DHD",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "DHD DHCD 2026.pdf"
+    ],
+    "pages": 88,
+    "approved_resolutions": 9,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 1,
+      "investment_plan": 2,
+      "rnd_and_product_focus": 4,
+      "business_direction": 5,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

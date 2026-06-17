@@ -1,0 +1,24 @@
+{
+  "ticker": "NDC",
+  "generated_at": "2026-06-16T17:16:07.014171+00:00",
+  "outcome": {
+    "ticker": "NDC",
+    "meeting_year": 2026,
+    "source_kind": "text",
+    "files": [
+      "NDC HDCD 2026(1).pdf",
+      "NDC DHCD 2026(2).pdf"
+    ],
+    "pages": 45,
+    "approved_resolutions": 7,
+    "drivers": {
+      "dividend_plan": 2,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 2,
+      "business_direction": 5,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

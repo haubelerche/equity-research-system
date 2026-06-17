@@ -1,0 +1,3 @@
+ticker,fiscal_year,period_type,statement_type,metric_id,value,unit,document_title,page_number,table_name,extracted_text,extraction_method,verified_by,verified_at
+DHG,2025,FY,income_statement,revenue.net,5210.0,vnd_bn,DHG FY2025 Annual Report / Audited Financial Statements,38,,Doanh thu thuần,pdf_table,,
+DHG,2025,FY,income_statement,profit_before_tax.total,940.0,vnd_bn,DHG FY2025 Annual Report / Audited Financial Statements,38,,Lợi nhuận trước thuế,pdf_table,,

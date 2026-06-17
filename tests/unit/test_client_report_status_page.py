@@ -47,6 +47,17 @@ def test_methodology_page_explains_data_calculation_and_decision_without_warning
         critic_findings=["English reviewer note must not be copied into the client page."],
         report_generated_at="2026-06-16T10:15:00+07:00",
         market_price_as_of="2026-06-16",
+        valuation_evidence={
+            "formula_trace_count": 5,
+            "formula_trace_methods": ["fcff", "blend_dcf"],
+            "peer_data_source": "VN pharma peers: IMP, DMC, TRA",
+            "relative_valuation_status": "peer_data_available",
+            "market_sanity_bridge": {"target_to_market": 1.139, "bridge_present": True},
+            "display_blocking_reasons": ["blend_is_draft_only"],
+            "policy_blocking_reasons": ["market_sanity_bridge_missing"],
+            "model_warnings": ["FCFE BLOCKED - debt schedule unavailable"],
+            "market_data_warnings": ["served from cache; live fetch failed"],
+        },
     )
 
     html = csb._report_status_page(vm)
@@ -64,6 +75,9 @@ def test_methodology_page_explains_data_calculation_and_decision_without_warning
     # Citation legend: real, always-present sources are numbered.
     assert "<strong>[1]</strong>" in html
     assert "<strong>[2]</strong>" in html
+    assert "Số vết công thức" in html
+    assert "VN pharma peers: IMP, DMC, TRA" in html
+    assert "served from cache; live fetch failed" in html
     assert "thuộc về người đọc" not in html
     # The hedging "sensitive points to check" warning list is gone.
     assert "Các điểm nhạy cảm" not in html

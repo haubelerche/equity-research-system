@@ -1,0 +1,24 @@
+{
+  "ticker": "TW3",
+  "generated_at": "2026-06-16T17:23:12.747947+00:00",
+  "outcome": {
+    "ticker": "TW3",
+    "meeting_year": 2026,
+    "source_kind": "text",
+    "files": [
+      "TW3 DHCD 2026(1).pdf",
+      "TW3 DHCD 2026(2).pdf"
+    ],
+    "pages": 54,
+    "approved_resolutions": 15,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 3,
+      "business_direction": 6,
+      "targets_2026": 0
+    },
+    "errors": []
+  }
+}

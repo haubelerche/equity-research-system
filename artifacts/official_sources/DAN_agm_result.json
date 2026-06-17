@@ -1,0 +1,23 @@
+{
+  "ticker": "DAN",
+  "generated_at": "2026-06-16T15:50:13.995117+00:00",
+  "outcome": {
+    "ticker": "DAN",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "DAN DHCD 2026(1).pdf"
+    ],
+    "pages": 8,
+    "approved_resolutions": 17,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 2,
+      "business_direction": 5,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

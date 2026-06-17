@@ -74,7 +74,7 @@ Neu trien khai evaluation sai thu tu, he thong co the co diem judge cao trong kh
 
 | Step | Owner layer | Done when |
 |---|---|---|
-| Create evaluation docs | Planning | `eval/` folder exists with scoped plans |
+| Create evaluation docs | Planning | `docs/eval/` folder exists with scoped plans |
 | Make export path fail-closed | Reporting/governance | Blocked/failed/unapproved run cannot render final PDF |
 | Add run-scoped eval packet manifest | Harness | All eval artifacts listed by `run_id` |
 | Seed negative fixtures | Evaluation | Known bad report/data/valuation fails reliably |

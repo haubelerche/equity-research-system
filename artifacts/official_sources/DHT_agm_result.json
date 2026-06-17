@@ -1,0 +1,23 @@
+{
+  "ticker": "DHT",
+  "generated_at": "2026-06-16T16:29:06.123158+00:00",
+  "outcome": {
+    "ticker": "DHT",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "DHT DHCD 2026.pdf"
+    ],
+    "pages": 63,
+    "approved_resolutions": 12,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 3,
+      "business_direction": 6,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

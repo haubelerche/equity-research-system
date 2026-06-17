@@ -64,6 +64,10 @@ def evaluate_client_final_readiness(
         return PublicationReadiness(False, ("run_missing",))
     if str(run.get("ticker") or "").upper() != expected_ticker:
         reasons.append("run_ticker_mismatch")
+    if run.get("status") != "approved":
+        reasons.append(f"run_not_approved:{run.get('status') or 'missing'}")
+    if not final_approval or final_approval.get("decision") != "approved":
+        reasons.append("final_report_approval_missing")
 
     sections = _latest_by_section(artifacts)
     for required in ("company_research_pack", "analyst_insight_pack"):
@@ -81,6 +85,15 @@ def evaluate_client_final_readiness(
     # report_quality_score is still surfaced (for in-report disclosure) but never blocks.
     report_quality = _payload(sections.get("report_quality_evaluation"))
     report_quality_score = report_quality.get("score")
+    if report_quality.get("decision") != "allow_export":
+        reasons.append("report_quality_not_allow_export")
+    if not isinstance(report_quality_score, (int, float)) or report_quality_score < 85:
+        reasons.append("report_quality_score_below_threshold")
+
+    quality_gate = _payload(sections.get("quality_gate"))
+    package_gate = quality_gate.get("PACKAGE_VALIDATION_GATE")
+    if not isinstance(package_gate, dict) or package_gate.get("passed") is not True:
+        reasons.append("package_validation_gate_failed")
 
     publishable_payload = _payload(publishable)
     valuation_payload = _payload(sections.get("valuation"))

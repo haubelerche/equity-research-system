@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "description": "Approved live-model target snapshot for golden-drift regression. Separate from the frozen closed-form valuation_cases truth set. Re-baseline only on an intentional, reviewed valuation change.",
+  "generated_at": "2026-06-17T14:55:29.242061+00:00",
+  "tolerance_pct": 0.02,
+  "tickers": {
+    "DBD": {
+      "fcff_target_price_vnd": 34565.0
+    },
+    "DHG": {
+      "fcff_target_price_vnd": 103294.0
+    },
+    "DMC": {
+      "fcff_target_price_vnd": 9453.0
+    },
+    "IMP": {
+      "fcff_target_price_vnd": 36300.0
+    },
+    "JVC": {
+      "fcff_target_price_vnd": 3875.0
+    },
+    "OPC": {
+      "fcff_target_price_vnd": 25372.0
+    },
+    "TRA": {
+      "fcff_target_price_vnd": 147538.0
+    }
+  }
+}

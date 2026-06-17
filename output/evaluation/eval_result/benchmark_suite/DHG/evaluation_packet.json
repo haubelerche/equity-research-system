@@ -1,0 +1,633 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "source": "benchmark_suite",
+  "ticker": "DHG",
+  "generated_at": "2026-06-17T15:54:08.954055+00:00",
+  "evaluation_order": [
+    "05"
+  ],
+  "fail_closed": true,
+  "overall_status": "pass",
+  "publication_status": "DRAFT_PUBLISHABLE",
+  "client_final_authorized": false,
+  "artifacts": [
+    {
+      "plan_id": "05",
+      "name": "Agent workflow and LLM judge",
+      "artifact": "agent_eval.json",
+      "status": "pass",
+      "metrics": {
+        "test_suite_status": "not_measured",
+        "tests_passed": 0,
+        "tests_failed": 0
+      },
+      "metric_results": [
+        {
+          "id": "tool_permission_compliance",
+          "label": "Tool permission compliance",
+          "source": "storage\\archive\\run_dhg_20260617T151159_c3f995776a\\run_dhg_20260617T151159_c3f995776a_evidence_packet.json",
+          "detail": "",
+          "metric_id": "tool_permission_compliance",
+          "metric_name": "Tool permission compliance",
+          "category": "agent_llm",
+          "layer": "release_gate",
+          "metric_type": "coverage",
+          "scope": "report_run",
+          "severity": "P0",
+          "blocks_publish": true,
+          "value": 1.0,
+          "threshold": "= 100",
+          "threshold_operator": "=",
+          "unit": "percent",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 7,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Reject or repair tool calls that lack explicit permission metadata.",
+          "evaluator": {
+            "id": "tool_permission_compliance",
+            "framework": "agent_tool_permission_trace",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": "coverage",
+            "numerator": 7,
+            "denominator": 7,
+            "per_sample_results": []
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Fix tool owner/permission metadata in trace.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+        },
+        {
+          "id": "artifact_manifest_compliance",
+          "label": "Artifact manifest compliance",
+          "source": "storage\\archive\\run_dhg_20260617T151159_c3f995776a\\run_dhg_20260617T151159_c3f995776a_evidence_packet.json",
+          "detail": "",
+          "metric_id": "artifact_manifest_compliance",
+          "metric_name": "Artifact manifest compliance",
+          "category": "agent_llm",
+          "layer": "release_gate",
+          "metric_type": "coverage",
+          "scope": "report_run",
+          "severity": "P0",
+          "blocks_publish": true,
+          "value": 1.0,
+          "threshold": "= 100",
+          "threshold_operator": "=",
+          "unit": "percent",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 6,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Attach storage paths for facts, index, ratios, valuation, report, and evidence packet artifacts.",
+          "evaluator": {
+            "id": "artifact_manifest_compliance",
+            "framework": "artifact_manifest_trace",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": "coverage",
+            "numerator": 6,
+            "denominator": 6,
+            "per_sample_results": []
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Ensure all required artifacts have storage path/checksum.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+        },
+        {
+          "id": "schema_validity",
+          "label": "Output schema validity",
+          "source": "config/harness/*.schema.json",
+          "detail": "",
+          "metric_id": "schema_validity",
+          "metric_name": "Output schema validity",
+          "category": "agent_llm",
+          "layer": "release_gate",
+          "metric_type": "coverage",
+          "scope": "report_run",
+          "severity": "P0",
+          "blocks_publish": true,
+          "value": 1.0,
+          "threshold": "100%",
+          "threshold_operator": "=",
+          "unit": "percent",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 2,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Validate required agent outputs against JSON schemas before downstream use.",
+          "evaluator": {
+            "id": "schema_validity",
+            "framework": "json_schema_required_contract",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": "coverage",
+            "numerator": 2,
+            "denominator": 2,
+            "per_sample_results": []
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": null,
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+        },
+        {
+          "id": "role_adherence",
+          "label": "Role adherence",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+          "detail": "'actual_output' cannot be empty for the 'role_adherence [GEval]' metric",
+          "metric_id": "role_adherence",
+          "metric_name": "Role adherence",
+          "category": "agent_llm",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": null,
+          "threshold": ">= 0.9",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "not_evaluable",
+          "legacy_status": "not_evaluable",
+          "sample_size": 10,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [
+            {
+              "reason": "'actual_output' cannot be empty for the 'role_adherence [GEval]' metric",
+              "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+            }
+          ],
+          "remediation_hint": "Review agent traces, tool permissions, schema validation, and calibrated judge results.",
+          "evaluator": {
+            "id": "role_adherence",
+            "framework": "deepeval",
+            "framework_version": "4.0.6",
+            "implementation_version": "2.1",
+            "execution_status": "execution_error"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": "mean",
+            "numerator": null,
+            "denominator": null,
+            "per_sample_results": []
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Tune prompt/role context.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+        },
+        {
+          "id": "groundedness",
+          "label": "Groundedness",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+          "detail": "'actual_output' cannot be empty for the 'role_adherence [GEval]' metric",
+          "metric_id": "groundedness",
+          "metric_name": "Groundedness",
+          "category": "agent_llm",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": null,
+          "threshold": ">= 0.85",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "not_evaluable",
+          "legacy_status": "not_evaluable",
+          "sample_size": 10,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [
+            {
+              "reason": "'actual_output' cannot be empty for the 'role_adherence [GEval]' metric",
+              "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+            }
+          ],
+          "remediation_hint": "Review agent traces, tool permissions, schema validation, and calibrated judge results.",
+          "evaluator": {
+            "id": "groundedness",
+            "framework": "deepeval",
+            "framework_version": "4.0.6",
+            "implementation_version": "2.1",
+            "execution_status": "execution_error"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": "mean",
+            "numerator": null,
+            "denominator": null,
+            "per_sample_results": []
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": null,
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+        },
+        {
+          "id": "no_unauthorized_calc",
+          "label": "No unauthorized financial calculation",
+          "source": "storage\\archive\\run_dhg_20260617T151159_c3f995776a\\run_dhg_20260617T151159_c3f995776a_agent_effectiveness_audit.json",
+          "detail": "",
+          "metric_id": "no_unauthorized_calc",
+          "metric_name": "No unauthorized financial calculation",
+          "category": "agent_llm",
+          "layer": "release_gate",
+          "metric_type": "coverage",
+          "scope": "report_run",
+          "severity": "P0",
+          "blocks_publish": true,
+          "value": 1.0,
+          "threshold": "100%",
+          "threshold_operator": "=",
+          "unit": "percent",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 6,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "valuation",
+          "failed_examples": [],
+          "remediation_hint": "Move financial calculations from LLM narrative into deterministic code paths.",
+          "evaluator": {
+            "id": "no_unauthorized_calc",
+            "framework": "deterministic_agent_trace_classifier",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": "coverage",
+            "numerator": 6,
+            "denominator": 6,
+            "per_sample_results": [
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "financial_analysis",
+                "action": "Create typed financial analysis with traceable diagnostics.",
+                "status": "completed",
+                "latency_ms": 110779,
+                "cost_estimate": 0.05035575,
+                "confidence": 0.72,
+                "warnings": [
+                  "schema_validation_relaxed:FinancialAnalysis",
+                  "1 validation error for FinancialAnalysis\nlatest_period\n  Field required [type=missing, input_value={'producer': 'financial_a...04c972c77f195e97d29956'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
+                ],
+                "requires_human": false,
+                "fallback_triggered": false,
+                "output_summary": {}
+              },
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "thesis_report",
+                "action": "Create the typed grounded report draft from approved artifacts.",
+                "status": "completed",
+                "latency_ms": 87144,
+                "cost_estimate": 0.09284925,
+                "confidence": 0.0,
+                "warnings": [
+                  "schema_validation_relaxed:ReportDraft",
+                  "15 validation errors for ReportDraft\nclaims.0.claim_id\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.section\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.text\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.claim_type\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.quantitative\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.claim_id\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.section\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.text\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.claim_type\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.quantitative\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.claim_id\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.section\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.text\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.claim_type\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.quantitative\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
+                ],
+                "requires_human": false,
+                "fallback_triggered": false,
+                "output_summary": {}
+              },
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "senior_critic",
+                "action": "Create the typed senior critic scorecard and findings.",
+                "status": "completed",
+                "latency_ms": 55894,
+                "cost_estimate": 0.0818535,
+                "confidence": 0.0,
+                "warnings": [
+                  "schema_validation_relaxed:CriticReview",
+                  "42 validation errors for CriticReview\nfindings.0.finding_id\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.target_section\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.target_agent\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.issue_type\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.explanation\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.required_action\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.finding_id\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.target_section\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.target_agent\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.issue_type\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.explanation\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.required_action\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.finding_id\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.target_section\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.target_agent\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.issue_type\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.explanation\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.required_action\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.finding_id\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.target_section\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.target_agent\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.issue_type\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.explanation\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.required_action\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.finding_id\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.target_section\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.target_agent\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.issue_type\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.explanation\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.required_action\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.finding_id\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.target_section\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.target_agent\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.issue_type\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.explanation\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.required_action\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.finding_id\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.target_section\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.target_agent\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.issue_type\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.explanation\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.required_action\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
+                ],
+                "requires_human": false,
+                "fallback_triggered": false,
+                "output_summary": {}
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_role": "financial_analysis",
+                "tool_name": null,
+                "status": "completed",
+                "output_hash": null
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_role": "thesis_report",
+                "tool_name": null,
+                "status": "completed",
+                "output_hash": null
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_role": "senior_critic",
+                "tool_name": null,
+                "status": "completed",
+                "output_hash": null
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": null,
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+        },
+        {
+          "id": "task_completion",
+          "label": "Task completion",
+          "source": "storage\\archive\\run_dhg_20260617T151159_c3f995776a\\run_dhg_20260617T151159_c3f995776a_agent_effectiveness_audit.json",
+          "detail": "",
+          "metric_id": "task_completion",
+          "metric_name": "Task completion",
+          "category": "agent_llm",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": 1.0,
+          "threshold": ">= 0.85",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Review incomplete agent trace events and retry policy.",
+          "evaluator": {
+            "id": "task_completion",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": "coverage",
+            "numerator": 3,
+            "denominator": 3,
+            "per_sample_results": []
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Improve stage-specific prompt outputs.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+        },
+        {
+          "id": "plan_adherence",
+          "label": "Plan adherence",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+          "detail": "'actual_output' cannot be empty for the 'role_adherence [GEval]' metric",
+          "metric_id": "plan_adherence",
+          "metric_name": "Plan adherence",
+          "category": "agent_llm",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": null,
+          "threshold": ">= 0.80",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "not_evaluable",
+          "legacy_status": "not_evaluable",
+          "sample_size": 10,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [
+            {
+              "reason": "'actual_output' cannot be empty for the 'role_adherence [GEval]' metric",
+              "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+            }
+          ],
+          "remediation_hint": "Review agent traces, tool permissions, schema validation, and calibrated judge results.",
+          "evaluator": {
+            "id": "plan_adherence",
+            "framework": "deepeval",
+            "framework_version": "4.0.6",
+            "implementation_version": "2.1",
+            "execution_status": "execution_error"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": "mean",
+            "numerator": null,
+            "denominator": null,
+            "per_sample_results": []
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": null,
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+        },
+        {
+          "id": "critic_issue_recall",
+          "label": "Critic issue recall",
+          "source": "seeded failure dataset missing",
+          "detail": "",
+          "metric_id": "critic_issue_recall",
+          "metric_name": "Critic issue recall",
+          "category": "agent_llm",
+          "layer": "diagnostic",
+          "metric_type": "coverage",
+          "scope": "benchmark_suite",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": null,
+          "threshold": ">= 90%",
+          "threshold_operator": ">=",
+          "unit": "percent",
+          "status": "not_evaluable",
+          "legacy_status": "measured_only",
+          "sample_size": 0,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "reviewer",
+          "failed_examples": [
+            {
+              "reason": "evaluation_evidence_missing",
+              "source": "seeded failure dataset missing"
+            }
+          ],
+          "remediation_hint": "Expand seeded issue fixtures and compare critic recall against expected labels.",
+          "evaluator": {
+            "id": "critic_issue_recall",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "not_executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {},
+            "parameters": {},
+            "aggregation": null,
+            "numerator": null,
+            "denominator": null,
+            "per_sample_results": []
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": null,
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [],
+            "dataset_version": null,
+            "trace_url": null
+          },
+          "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+        }
+      ],
+      "blocking_issues": []
+    }
+  ],
+  "summary": {
+    "pass": 1,
+    "fail": 0,
+    "blocked": 0,
+    "not_measured": 0
+  }
+}

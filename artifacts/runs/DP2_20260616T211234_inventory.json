@@ -1,0 +1,35 @@
+{
+  "ticker": "DP2",
+  "years_requested": 4,
+  "period": "year",
+  "from_year": 2022,
+  "to_year": 2025,
+  "provider": "auto",
+  "segment": "pharma",
+  "started_at": "2026-06-16T21:12:34.990636+00:00",
+  "finished_at": "2026-06-16T21:15:07.284333+00:00",
+  "elapsed_s": 152.29,
+  "overall_status": "partial_error",
+  "financials": {
+    "status": "ok",
+    "facts_upserted": 124,
+    "facts_promoted": 124,
+    "promotion_skipped_low_confidence": 0,
+    "promotion_warnings": [],
+    "period": "year",
+    "from_year": 2022,
+    "to_year": 2025,
+    "provider": "auto"
+  },
+  "price": {
+    "status": "ok",
+    "rows_upserted": 62,
+    "start": "2022-06-17",
+    "end": "2026-06-16"
+  },
+  "company": {
+    "status": "error",
+    "error": "column \"source_id\" of relation \"catalyst_events\" does not exist\nLINE 4: ...                    materiality_hint, source_url, source_id,...\n                                                             ^\n"
+  },
+  "catalysts": {}
+}

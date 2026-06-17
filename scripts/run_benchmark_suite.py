@@ -43,7 +43,22 @@ from backend.evaluation.runtime_evaluators import evaluate_plan  # noqa: E402
 
 
 DEFAULT_PLAN_IDS = ("01", "02", "03", "05", "07")
-DASHBOARD_HIDDEN_METRIC_IDS = {"ocr_unresolved_rate", "corpus_ocr_unresolved_rate"}
+DASHBOARD_HIDDEN_METRIC_IDS = {
+    "ocr_unresolved_rate",
+    "corpus_ocr_unresolved_rate",
+    "official_reconciliation_rate",
+    "valuation_method_data_readiness",
+    # Plan 05 LLM-as-judge dimensions are advisory only: they require a
+    # calibrated judge AND recorded per-role agent outputs, neither of which is
+    # available offline. Per docs/eval/05 plan §5.5 they must not gate publish.
+    # They remain computed and stored in each per-ticker agent_eval.json as
+    # advisory evidence, but are dropped from the cohort dashboard so they do
+    # not render as red failures against a judge that has not been run.
+    "role_adherence",
+    "groundedness",
+    "plan_adherence",
+    "critic_issue_recall",
+}
 DASHBOARD_THRESHOLD_OVERRIDES: dict[str, dict[str, Any]] = {
     "period_completeness": {
         "threshold": ">= 95%",
@@ -381,6 +396,7 @@ def _metric_status_rank(status: str) -> int:
         "warning": 2,
         "measured_only": 1,
         "pass": 0,
+        "not_applicable": -1,
     }
     return order.get(str(status), 3)
 
@@ -395,10 +411,17 @@ def _is_runtime_pass_gate(metric: dict[str, Any]) -> bool:
 
 
 def _pass_rate_value(samples: list[dict[str, Any]]) -> tuple[float | None, int]:
-    if not samples:
+    # ``not_applicable`` samples (a method the model legitimately did not produce
+    # for this ticker) are excluded from both numerator and denominator so the
+    # cohort pass-rate reflects only cases where the gate genuinely applies.
+    applicable = [
+        sample for sample in samples
+        if str(sample["metric"].get("status") or "") != "not_applicable"
+    ]
+    if not applicable:
         return None, 0
-    passed = sum(1 for sample in samples if str(sample["metric"].get("status") or "") == "pass")
-    return passed / len(samples), passed
+    passed = sum(1 for sample in applicable if str(sample["metric"].get("status") or "") == "pass")
+    return passed / len(applicable), passed
 
 
 def _apply_dashboard_metric_contract(metric_id: str, metric: dict[str, Any]) -> dict[str, Any]:
@@ -418,6 +441,7 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     prototype = samples[0]["metric"]
     statuses = [str(sample["metric"].get("status") or "not_evaluable") for sample in samples]
     status = max(statuses, key=_metric_status_rank)
+    applicable_count = sum(1 for s in statuses if s != "not_applicable")
     numeric_values = [
         metric.get("value")
         for metric in (sample["metric"] for sample in samples)
@@ -447,9 +471,10 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         ]
         value = sum(pass_equivalents) / len(pass_equivalents) if pass_equivalents else None
     if is_boolean_gate:
-        status = "not_evaluable" if value is None else ("pass" if value == 1.0 else "fail")
+        # value is None only when every sample was not_applicable (all excluded).
+        status = "not_applicable" if value is None else ("pass" if value == 1.0 else "fail")
     elif is_pass_gate:
-        status = "not_evaluable" if value is None else ("pass" if value == 1.0 else "fail")
+        status = "not_applicable" if value is None else ("pass" if value == 1.0 else "fail")
     else:
         status = evaluate_metric_threshold(prototype, value, fallback_status=status)
 
@@ -485,7 +510,11 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     calculation.update({
         "aggregation": aggregation,
         "numerator": numerator,
-        "denominator": len(numeric_values) if is_error_rate and numeric_values else len(samples),
+        "denominator": (
+            len(numeric_values) if is_error_rate and numeric_values
+            else applicable_count if is_pass_gate
+            else len(samples)
+        ),
         "per_sample_results": [
             {
                 "ticker": sample["ticker"],
@@ -522,7 +551,7 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
             "unit": "percent",
             "threshold": "= 100%",
             "threshold_operator": "=",
-            "detail": f"cohort_pass_rate={calculation['numerator']}/{len(samples)}",
+            "detail": f"cohort_pass_rate={calculation['numerator']}/{applicable_count}",
         })
     aggregate["id"] = metric_id
     aggregate["metric_id"] = metric_id

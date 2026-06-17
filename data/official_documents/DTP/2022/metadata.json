@@ -1,0 +1,15 @@
+{
+  "ticker": "DTP",
+  "company_name": "DTP",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "DTP FY2022 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DTP\\2022\\source_document.pdf",
+  "published_date": "2022-12-31",
+  "fiscal_year": 2022,
+  "language": "vi",
+  "file_hash": "f21ae07d9b62d283ca6c50401d2c635db5542fcbe2977a925831c8e7163ccace",
+  "staged_at": "2026-06-15T09:41:23.162502+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DTP\\DTP 2022.pdf"
+}

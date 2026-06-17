@@ -1,0 +1,59 @@
+{
+  "ticker": "DHG",
+  "fiscal_year": 2025,
+  "generated_at": "2026-06-16T12:11:33.384520+00:00",
+  "total_records": 3,
+  "summary": {
+    "total": 3,
+    "matched": 1,
+    "conflicted": 2,
+    "missing_secondary_source": 0,
+    "promote_eligible_count": 1,
+    "blocked_conflict_count": 2,
+    "needs_review_count": 0
+  },
+  "records": [
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "metric_id": "current_assets.ending",
+      "period_type": "FY",
+      "ocr_value": 3888.768378,
+      "secondary_value": 3888.768378369,
+      "absolute_diff": 3.6899973565596156e-07,
+      "relative_diff": 9.488858675885573e-11,
+      "ocr_source": "DHG_2025_abaaac8d3813",
+      "secondary_source": "vnstock+raw_bctc",
+      "status": "matched",
+      "decision": "promote_eligible"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "metric_id": "total_assets.ending",
+      "period_type": "FY",
+      "ocr_value": 1285.113251,
+      "secondary_value": 5173.881628997,
+      "absolute_diff": 3888.7683779970002,
+      "relative_diff": 0.7516152584942053,
+      "ocr_source": "DHG_2025_abaaac8d3813",
+      "secondary_source": "vnstock+raw_bctc",
+      "status": "conflicted",
+      "decision": "blocked_conflict"
+    },
+    {
+      "ticker": "DHG",
+      "fiscal_year": 2025,
+      "metric_id": "charter_capital.ending",
+      "period_type": "FY",
+      "ocr_value": 1036.616453,
+      "secondary_value": 1307.46071,
+      "absolute_diff": 270.84425699999997,
+      "relative_diff": 0.20715288415817862,
+      "ocr_source": "DHG_2025_abaaac8d3813",
+      "secondary_source": "vnstock+raw_bctc",
+      "status": "conflicted",
+      "decision": "blocked_conflict"
+    }
+  ]
+}

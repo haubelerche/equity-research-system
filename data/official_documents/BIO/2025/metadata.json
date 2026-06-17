@@ -1,0 +1,15 @@
+{
+  "ticker": "BIO",
+  "company_name": "BIO",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "BIO FY2025 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\BIO\\2025\\source_document.pdf",
+  "published_date": "2025-12-31",
+  "fiscal_year": 2025,
+  "language": "vi",
+  "file_hash": "6c0e0130e0a80a032d076d1777beca6251f148bc27a6e8d0b8bf88d4350da99e",
+  "staged_at": "2026-06-15T09:41:15.669032+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\BIO\\BIO 2025.pdf"
+}

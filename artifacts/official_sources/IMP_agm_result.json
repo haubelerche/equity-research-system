@@ -1,0 +1,23 @@
+{
+  "ticker": "IMP",
+  "generated_at": "2026-06-16T17:04:57.958147+00:00",
+  "outcome": {
+    "ticker": "IMP",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "IMP DHCD 2026.pdf"
+    ],
+    "pages": 94,
+    "approved_resolutions": 10,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 5,
+      "business_direction": 9,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

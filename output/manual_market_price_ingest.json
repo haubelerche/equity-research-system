@@ -1,0 +1,8 @@
+{
+  "csv_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\manual\\market_prices.csv",
+  "dry_run": false,
+  "accepted_rows": 0,
+  "inserted_rows": 0,
+  "rejected": [],
+  "tickers": []
+}

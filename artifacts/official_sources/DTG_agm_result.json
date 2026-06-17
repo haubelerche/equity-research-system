@@ -1,0 +1,23 @@
+{
+  "ticker": "DTG",
+  "generated_at": "2026-06-16T16:53:32.691164+00:00",
+  "outcome": {
+    "ticker": "DTG",
+    "meeting_year": 2026,
+    "source_kind": "text",
+    "files": [
+      "DTG DHCD 2026.pdf"
+    ],
+    "pages": 265,
+    "approved_resolutions": 9,
+    "drivers": {
+      "dividend_plan": 0,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 3,
+      "business_direction": 7,
+      "targets_2026": 0
+    },
+    "errors": []
+  }
+}

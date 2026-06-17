@@ -1,6 +1,6 @@
 # Workflow nghiên cứu full report
 
-Cập nhật: 2026-06-14
+Cập nhật: 2026-06-17
 
 ## Context
 
@@ -43,18 +43,26 @@ Trong bài toán tài chính, agentic workflow phải giảm xác suất halluci
 
 Mỗi stage ghi artifact ref và checkpoint. Artifact production phải gắn với `run_id`, `section_key`, `version`, `checksum`, `producer`, `storage_bucket` và `storage_path` khi có object trong storage. `PUBLISH` không render PDF; nó chỉ xác nhận `publishable_final_report_model` đã tồn tại và ghi manifest.
 
-### 4. Boundary giữa full pipeline và fast render
+### 4. Boundary giữa ingestion bổ sung, full pipeline và fast render
 
-| Đường chạy | Có ingest? | Có valuation mới? | Có LLM agent? | Có render HTML/PDF? |
-|---|---:|---:|---:|---:|
-| `scripts/run_research.py` | Có hoặc reuse snapshot | Có | Có | Không render PDF ở `PUBLISH` |
-| `scripts/generate_fast_report.py` | Không | Không | Không | Có, từ artifact đã có |
+| Đường chạy | Có PDF LLM gap-fill? | Có AGM/DHCD driver ingest? | Có valuation mới? | Có LLM agent? | Có render HTML/PDF? |
+|---|---:|---:|---:|---:|---:|
+| `scripts/ingest_pdf_llm.py` | Có | Không | Không | Có, chỉ để extract fact/evidence | Không |
+| `scripts/ingest_agm.py` | Không | Có | Không | Có, chỉ để extract nghị quyết/driver | Không |
+| `scripts/run_research.py` | Có hoặc reuse qua tool ingest nội bộ, tùy dữ liệu/run policy | Đọc driver đã ingest | Có | Có | Không render PDF ở `PUBLISH` |
+| `scripts/generate_fast_report.py` | Không | Không | Không | Không | Có, từ artifact đã có |
+| `POST /reports/{ticker}/generate` | Tùy route | Tùy route | Tùy route | Tùy route | Có nếu đi `fast_render`, hoặc chạy full rồi render/store |
+| `make run-once` | Có | Có | Có | Có | Có |
+
+`make run-once TICKER=DHG FROM_YEAR=2021 TO_YEAR=2025 REPORT_MODE=standard` là convenience target cho vận hành một ticker theo thứ tự cố định: PDF LLM gap-fill, AGM/DHCD ingest, full harness với OCR/draft, sau đó render local. Target này không thay đổi semantics của từng script; nó chỉ giảm lỗi thao tác khi cần tái chạy đầy đủ một lần.
+
+Trong API, `POST /reports/{ticker}/generate` kiểm tra snapshot sẵn sàng và run có đủ artifact để render. Nếu có, request được gắn `generate_mode=fast_render` và `source_run_id`; orchestrator render từ run nguồn rồi upload report/explanation vào Supabase `exports`. Nếu không có run renderable, request đi qua `full_pipeline`. Vì vậy nút “generate” trên frontend không đồng nghĩa lúc nào cũng crawl lại dữ liệu hoặc chạy lại valuation.
 
 ### 5. Blocking semantics
 
-Trong trạng thái nghiệm thu 9/10, gate bắt buộc không chỉ là metadata quan sát mà là điều kiện promotion của artifact downstream. Run chuyển thành `failed` khi stage/tool raise exception, chuyển thành `blocked` khi gate bắt buộc hoặc artifact bắt buộc không đạt, và chỉ được đặt `auto_exported` khi `publishable_final_report_model`, package validation, report quality, formula trace, evidence packet, tool permission và snapshot consistency đều đạt. Client-final vẫn fail-closed ở `authorize_client_final`, nơi approval, locked model và snapshot match được enforce thêm một lần.
+Trong trạng thái vận hành hiện tại, gate bắt buộc không chỉ là metadata quan sát mà là điều kiện promotion của artifact downstream. Run chuyển thành `failed` khi stage/tool raise exception, chuyển thành `blocked` khi gate bắt buộc hoặc artifact bắt buộc không đạt, và chỉ được đặt `auto_exported` khi `publishable_final_report_model`, package validation, report quality, formula trace, evidence packet, tool permission và snapshot consistency đều đạt. Client-final vẫn fail-closed ở `authorize_client_final`, nơi approval, locked model và snapshot match được enforce thêm một lần.
 
-Các gate quan trọng gồm `DATA_QUALITY_GATE`, `FORECAST_QUALITY_GATE`, `VALUATION_GATE`, `VALUATION_RECONCILIATION_GATE`, `REPORT_ASSEMBLY_GATE`, `REPORT_COMPLETENESS_GATE`, `SENIOR_CRITIC_GATE`, `CITATION_GATE`, `REPORT_QUALITY_GATE`, `PACKAGE_VALIDATION_GATE` và `EXPORT_GATE`. Đối với MVP5, các gate này đều đã được đưa vào evaluation packet và đạt ngưỡng acceptance cho trạng thái `DRAFT_PUBLISHABLE`.
+Các gate quan trọng gồm `DATA_QUALITY_GATE`, `FORECAST_QUALITY_GATE`, `VALUATION_GATE`, `VALUATION_RECONCILIATION_GATE`, `REPORT_ASSEMBLY_GATE`, `REPORT_COMPLETENESS_GATE`, `SENIOR_CRITIC_GATE`, `CITATION_GATE`, `REPORT_QUALITY_GATE`, `PACKAGE_VALIDATION_GATE` và `EXPORT_GATE`. Khi viết đồ án, chỉ nên kết luận một ticker hoặc cohort đạt `DRAFT_PUBLISHABLE` nếu artifact evaluation hiện hành của phạm vi đó thực sự pass.
 
 ## Strategic Recommendations
 

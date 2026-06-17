@@ -1,0 +1,28 @@
+{
+  "ticker": "MTP",
+  "years_requested": 4,
+  "period": "year",
+  "from_year": 2022,
+  "to_year": 2025,
+  "provider": "auto",
+  "segment": "pharma",
+  "started_at": "2026-06-16T21:23:58.488588+00:00",
+  "finished_at": "2026-06-16T21:24:21.168458+00:00",
+  "elapsed_s": 22.68,
+  "overall_status": "partial_error",
+  "financials": {
+    "status": "error",
+    "error": "insert or update on table \"source_documents\" violates foreign key constraint \"source_documents_ticker_fkey\"\nDETAIL:  Key (ticker)=(MTP) is not present in table \"companies\".\n",
+    "facts_upserted": 0
+  },
+  "price": {
+    "status": "error",
+    "error": "insert or update on table \"source_documents\" violates foreign key constraint \"source_documents_ticker_fkey\"\nDETAIL:  Key (ticker)=(MTP) is not present in table \"companies\".\n",
+    "rows_upserted": 0
+  },
+  "company": {
+    "status": "error",
+    "error": "insert or update on table \"source_documents\" violates foreign key constraint \"source_documents_ticker_fkey\"\nDETAIL:  Key (ticker)=(MTP) is not present in table \"companies\".\n"
+  },
+  "catalysts": {}
+}

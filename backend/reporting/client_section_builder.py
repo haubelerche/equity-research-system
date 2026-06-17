@@ -959,6 +959,54 @@ def _valuation_method_label(vm: ClientReportViewModel) -> str:
     return "dòng tiền tự do doanh nghiệp và vốn chủ sở hữu (FCFF/FCFE)"
 
 
+def _render_valuation_evidence(vm: ClientReportViewModel) -> str:
+    evidence = getattr(vm, "valuation_evidence", {}) or {}
+    if not isinstance(evidence, dict):
+        return ""
+    rows: list[tuple[str, str]] = []
+    trace_count = evidence.get("formula_trace_count")
+    if trace_count is not None:
+        methods = ", ".join(item for item in evidence.get("formula_trace_methods", []) if item) or "không ghi nhận"
+        rows.append(("Số vết công thức", f"{trace_count} vết; phương pháp: {methods}"))
+    peer_source = evidence.get("peer_data_source")
+    if peer_source:
+        rows.append(("Nguồn relative valuation", str(peer_source)))
+    rv_status = evidence.get("relative_valuation_status")
+    if rv_status:
+        rows.append(("Trạng thái relative valuation", str(rv_status)))
+    market_bridge = evidence.get("market_sanity_bridge") or {}
+    if isinstance(market_bridge, dict) and market_bridge:
+        rows.append((
+            "Đối chiếu thị trường",
+            f"target/market={market_bridge.get('target_to_market')}; bridge_present={market_bridge.get('bridge_present')}",
+        ))
+    warnings = list(dict.fromkeys(
+        [str(item) for item in evidence.get("model_warnings", []) if str(item).strip()]
+        + [str(item) for item in evidence.get("market_data_warnings", []) if str(item).strip()]
+    ))
+    blockers = list(dict.fromkeys(
+        [str(item) for item in evidence.get("display_blocking_reasons", []) if str(item).strip()]
+        + [str(item) for item in evidence.get("policy_blocking_reasons", []) if str(item).strip()]
+    ))
+    body = ""
+    if rows:
+        table_rows = "".join(f"<tr><td>{_e(label)}</td><td>{_e(value)}</td></tr>" for label, value in rows)
+        body += (
+            '<table class="financial-model-table report-status-table">'
+            "<thead><tr><th>Minh chứng</th><th>Chi tiết</th></tr></thead>"
+            f"<tbody>{table_rows}</tbody></table>"
+        )
+    if blockers:
+        body += "<h3>Cảnh báo chặn phát hành</h3><ul>" + "".join(
+            f"<li>{_e(item)}</li>" for item in blockers
+        ) + "</ul>"
+    if warnings:
+        body += "<h3>Cảnh báo mô hình và dữ liệu</h3><ul>" + "".join(
+            f"<li>{_e(item)}</li>" for item in warnings
+        ) + "</ul>"
+    return body
+
+
 def _render_report_status(vm: ClientReportViewModel) -> str:
     """Render the method and decision explanation in client-facing Vietnamese."""
     intro = _e(_client_status_sentence(vm))
@@ -1022,6 +1070,7 @@ def _render_report_status(vm: ClientReportViewModel) -> str:
         '<table class="financial-model-table report-status-table">'
         "<thead><tr><th>Hạng mục</th><th>Diễn giải</th></tr></thead>"
         f"<tbody>{table_rows}</tbody></table>"
+        + _render_valuation_evidence(vm)
         + _render_disclosed_limitations(vm)
     )
 

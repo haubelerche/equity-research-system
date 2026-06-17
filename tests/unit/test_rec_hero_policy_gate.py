@@ -48,15 +48,15 @@ def test_blocked_policy_hides_hero_target():
     policy = _blocked_policy()
     assert policy.target_price_publishable is False
     display = vm._report_display_governance("client_final", {}, _blend(), policy=policy)
-    assert display["target_price"] == 27_207
-    assert display["approved_for_display"] is True
+    assert display["target_price"] is None
+    assert display["blend_target_price"] == 27_207
+    assert display["approved_for_display"] is False
 
 
-def test_blocked_policy_still_uses_three_state_recommendation():
+def test_blocked_policy_suppresses_official_recommendation():
     policy = _blocked_policy()
     display = vm._report_display_governance("client_final", {}, _blend(), policy=policy)
-    assert display["recommendation"] in {"Mua", "Giữ", "Bán"}
-    assert display["recommendation"] == "Bán"
+    assert display["recommendation"] == "Chưa phát hành"
 
 
 def test_blocked_policy_surfaces_blocking_reasons():

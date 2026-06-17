@@ -1,0 +1,23 @@
+{
+  "ticker": "HDP",
+  "generated_at": "2026-06-16T16:56:35.823628+00:00",
+  "outcome": {
+    "ticker": "HDP",
+    "meeting_year": 2026,
+    "source_kind": "text",
+    "files": [
+      "HDP DHCD 2026.pdf"
+    ],
+    "pages": 52,
+    "approved_resolutions": 5,
+    "drivers": {
+      "dividend_plan": 2,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 4,
+      "business_direction": 7,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

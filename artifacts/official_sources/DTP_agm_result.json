@@ -1,0 +1,23 @@
+{
+  "ticker": "DTP",
+  "generated_at": "2026-06-16T16:54:09.248790+00:00",
+  "outcome": {
+    "ticker": "DTP",
+    "meeting_year": 2026,
+    "source_kind": "text",
+    "files": [
+      "dtp dhcd 2026.pdf"
+    ],
+    "pages": 41,
+    "approved_resolutions": 0,
+    "drivers": {
+      "dividend_plan": 0,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 2,
+      "business_direction": 6,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}

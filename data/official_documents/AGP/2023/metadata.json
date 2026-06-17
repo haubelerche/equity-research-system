@@ -1,0 +1,15 @@
+{
+  "ticker": "AGP",
+  "company_name": "AGP",
+  "source_type": "annual_report",
+  "issuer": "Company official filing (user-provided)",
+  "title": "AGP FY2023 Annual Report / Audited Financial Statements",
+  "url": "",
+  "local_path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\AGP\\2023\\source_document.pdf",
+  "published_date": "2023-12-31",
+  "fiscal_year": 2023,
+  "language": "vi",
+  "file_hash": "519da08c72bedfc2b4338356edff2f2d5e62d38d82fc897c5e30bfff14682687",
+  "staged_at": "2026-06-15T09:41:14.583123+00:00",
+  "staged_from": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\AGP\\AGP 2023.pdf"
+}

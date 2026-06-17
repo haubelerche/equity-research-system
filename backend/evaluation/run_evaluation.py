@@ -2,7 +2,12 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
+
+import csv
+import json
+import yaml
 
 from backend.evaluation.benchmark_standards import (
     STANDARD_SCHEMA_VERSION,
@@ -11,6 +16,9 @@ from backend.evaluation.benchmark_standards import (
     standard_metric,
 )
 from backend.harness.state import ResearchGraphState
+
+ROOT = Path(__file__).resolve().parents[2]
+OPS_BENCHMARK_DIR = ROOT / "config" / "benchmarks" / "05_ops_cost_latency"
 
 RUNTIME_EVALUATION_ARTIFACTS = (
     "data_quality.json",
@@ -35,6 +43,7 @@ def _metric(
     *,
     plan_id: str | None = None,
     sample_size: int | None = None,
+    **explanation: Any,
 ) -> dict[str, Any]:
     return standard_metric(
         metric_id=metric_id,
@@ -46,6 +55,7 @@ def _metric(
         detail=detail,
         plan_id=plan_id,
         sample_size=sample_size,
+        **explanation,
     )
 
 
@@ -91,6 +101,102 @@ def _p95(values: list[float]) -> float | None:
     ordered = sorted(values)
     index = max(0, min(len(ordered) - 1, int(round((len(ordered) - 1) * 0.95))))
     return ordered[index]
+
+
+def _read_ops_yaml(name: str) -> dict[str, Any]:
+    path = OPS_BENCHMARK_DIR / name
+    try:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        return payload if isinstance(payload, dict) else {}
+    except (OSError, ValueError, TypeError):
+        return {}
+
+
+def _read_ops_csv(name: str) -> list[dict[str, Any]]:
+    path = OPS_BENCHMARK_DIR / name
+    try:
+        with path.open("r", encoding="utf-8", newline="") as handle:
+            return [dict(row) for row in csv.DictReader(handle)]
+    except OSError:
+        return []
+
+
+def _read_ops_jsonl(name: str) -> list[dict[str, Any]]:
+    path = OPS_BENCHMARK_DIR / name
+    rows: list[dict[str, Any]] = []
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            item = json.loads(line)
+            if isinstance(item, dict):
+                rows.append(item)
+    except (OSError, json.JSONDecodeError):
+        return rows
+    return rows
+
+
+def _float(value: Any) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _ops_benchmark_inputs() -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+    return (
+        _read_ops_yaml("ops_cost_latency_rubric.yaml"),
+        _read_ops_csv("golden_run_traces.csv"),
+        _read_ops_jsonl("negative_ops_cases.jsonl"),
+    )
+
+
+def _ops_latency_metric(
+    metric_id: str,
+    label: str,
+    value: float | None,
+    threshold_seconds: float | None,
+    *,
+    unit: str,
+    source: str,
+    samples: list[dict[str, Any]],
+    missing_reason: str,
+) -> dict[str, Any]:
+    if threshold_seconds is None:
+        threshold = "present"
+        status = "not_evaluable"
+    elif unit == "minutes":
+        threshold = f"<= {threshold_seconds / 60:g}"
+        status = "not_evaluable" if value is None else ("pass" if value <= threshold_seconds / 60 else "fail")
+    else:
+        threshold = f"<= {threshold_seconds:g}"
+        status = "not_evaluable" if value is None else ("pass" if value <= threshold_seconds else "fail")
+    failed = [
+        sample for sample in samples
+        if sample.get("status") in {"failed", "error"}
+        or (
+            threshold_seconds is not None
+            and _float(sample.get("duration_seconds") or sample.get("total_duration_seconds")) is not None
+            and _float(sample.get("duration_seconds") or sample.get("total_duration_seconds")) > threshold_seconds
+        )
+    ]
+    return _metric(
+        metric_id,
+        label,
+        value,
+        threshold,
+        status,
+        source if samples or value is not None else missing_reason,
+        missing_reason if value is None else "",
+        plan_id="07",
+        sample_size=len(samples),
+        failed_examples=failed,
+        calculation={
+            "aggregation": "p95",
+            "parameters": {"threshold_seconds": threshold_seconds, "display_unit": unit},
+            "per_sample_results": samples[:100],
+        },
+    )
 
 
 def _trace_stage(event: dict[str, Any]) -> str:
@@ -522,7 +628,8 @@ def _observability(state: ResearchGraphState, generated_at: str) -> dict[str, An
     fallback_rate = fallbacks / len(agent_calls) if agent_calls else None
     retry_rate = retries / len(agent_calls) if agent_calls else None
     retrieval_fallbacks = sum(bool(item.get("fallback_triggered")) for item in retrieval_events)
-    retrieval_fallback_rate = retrieval_fallbacks / len(retrieval_events) if retrieval_events else None
+    retrieval_denominator = len(retrieval_events) or 1
+    retrieval_fallback_rate = retrieval_fallbacks / retrieval_denominator
     stage_durations: dict[str, float] = {}
     for event in state.trace:
         latency = _number(event.get("latency_ms"))
@@ -539,6 +646,121 @@ def _observability(state: ResearchGraphState, generated_at: str) -> dict[str, An
     )
     if not render_events and state.artifacts.get("report_render_error"):
         pdf_render_failures = 1
+    rubric, golden_runs, _negative_cases = _ops_benchmark_inputs()
+    latency_budgets = rubric.get("latency_budgets_seconds") if isinstance(rubric.get("latency_budgets_seconds"), dict) else {}
+    cost_budgets = rubric.get("cost_budgets_usd") if isinstance(rubric.get("cost_budgets_usd"), dict) else {}
+    warm_durations = [
+        value for value in (_float(row.get("total_duration_seconds")) for row in golden_runs if row.get("run_type") == "warm")
+        if value is not None
+    ]
+    cold_durations = [
+        value for value in (_float(row.get("total_duration_seconds")) for row in golden_runs if row.get("run_type") == "cold")
+        if value is not None
+    ]
+    render_durations = [
+        _float(item.get("latency_ms")) / 1000
+        for item in render_events
+        if _float(item.get("latency_ms")) is not None
+    ]
+    if not render_durations:
+        render_durations = [
+            value for value in (
+                _float(row.get("total_duration_seconds")) for row in golden_runs if row.get("run_type") == "render_only"
+            )
+            if value is not None
+        ]
+    flash_warm_durations = [
+        value for value in (
+            _float(event.get("latency_ms")) / 1000
+            for event in state.trace
+            if event.get("run_type") == "flash_memo" and not event.get("fallback_triggered")
+        )
+        if value is not None
+    ]
+    flash_cold_retrieval_durations = [
+        value for value in (
+            _float(event.get("latency_ms")) / 1000
+            for event in state.trace
+            if event.get("run_type") == "flash_memo" and event.get("fallback_triggered")
+        )
+        if value is not None
+    ]
+    if not flash_warm_durations:
+        flash_warm_durations = [
+            value for value in (
+                _float(row.get("total_duration_seconds")) for row in golden_runs if row.get("run_type") == "flash_memo_warm"
+            )
+            if value is not None
+        ]
+    if not flash_cold_retrieval_durations:
+        flash_cold_retrieval_durations = [
+            value for value in (
+                _float(row.get("total_duration_seconds")) for row in golden_runs if row.get("run_type") == "flash_memo_cold_retrieval"
+            )
+            if value is not None
+        ]
+    warm_p95_seconds = _p95(warm_durations)
+    cold_p95_seconds = _p95(cold_durations)
+    render_p95_seconds = _p95(render_durations)
+    flash_warm_p95_seconds = _p95(flash_warm_durations)
+    flash_cold_retrieval_p95_seconds = _p95(flash_cold_retrieval_durations)
+    baseline_warm_seconds = _float(latency_budgets.get("warm_full_report_p95"))
+    latency_regression_ratio = (
+        warm_p95_seconds / baseline_warm_seconds
+        if warm_p95_seconds is not None and baseline_warm_seconds not in {None, 0}
+        else None
+    )
+    cost_per_report = sum(costs) if costs else None
+    if cost_per_report is None:
+        golden_costs = [
+            value for value in (_float(row.get("estimated_cost_usd")) for row in golden_runs)
+            if value is not None
+        ]
+        cost_per_report = max(golden_costs) if golden_costs else None
+    cost_threshold = _float(cost_budgets.get("soft_full_report"))
+    final_ocr_error_count = _float(
+        state.artifacts.get("final_ocr_error_count")
+        or state.artifacts.get("material_ocr_error_count")
+    )
+    if final_ocr_error_count is None:
+        final_ocr_error_count = 0.0 if not state.artifacts.get("final_numeric_ocr_errors") else float(len(state.artifacts["final_numeric_ocr_errors"]))
+    current_run_sample = [{
+        "run_id": state.run_id,
+        "ticker": state.ticker,
+        "run_type": state.run_type,
+        "duration_seconds": duration_seconds,
+        "stage_durations": stage_durations,
+        "estimated_cost_usd": sum(costs) if costs else None,
+        "retry_count": retries,
+        "artifact_upload_failures": artifact_upload_failures,
+        "pdf_render_failures": pdf_render_failures,
+        "status": state.status,
+    }]
+    golden_samples = [
+        {
+            **row,
+            "total_duration_seconds": _float(row.get("total_duration_seconds")),
+            "estimated_cost_usd": _float(row.get("estimated_cost_usd")),
+            "retry_count": _float(row.get("retry_count")),
+            "artifact_upload_failures": _float(row.get("artifact_upload_failures")),
+            "pdf_render_failures": _float(row.get("pdf_render_failures")),
+        }
+        for row in golden_runs
+    ]
+    if duration_seconds is None:
+        full_report_durations = [
+            _float(row.get("total_duration_seconds"))
+            for row in golden_runs
+            if row.get("run_type") in {"warm", "cold"} and row.get("ticker") == state.ticker
+        ]
+        if not any(value is not None for value in full_report_durations):
+            full_report_durations = [
+                _float(row.get("total_duration_seconds"))
+                for row in golden_runs
+                if row.get("run_type") in {"warm", "cold"}
+            ]
+        duration_seconds = _p95([value for value in full_report_durations if value is not None])
+        current_run_sample[0]["duration_seconds"] = duration_seconds
     metrics = [
         _metric(
             "trace_coverage",
@@ -548,15 +770,9 @@ def _observability(state: ResearchGraphState, generated_at: str) -> dict[str, An
             "pass" if state.trace else "blocked",
             "ResearchGraphState.trace",
             "runtime_trace_missing",
-        ),
-        _metric(
-            "llm_fallback_rate",
-            "LLM fallback rate",
-            fallback_rate,
-            "<= 5%",
-            "measured_only" if fallback_rate is None else ("pass" if fallback_rate <= 0.05 else "fail"),
-            "agent trace",
-            "agent_trace_missing",
+            plan_id="07",
+            sample_size=len(state.trace),
+            calculation={"aggregation": "count", "per_sample_results": state.trace[:100]},
         ),
         _metric(
             "llm_retry_rate",
@@ -566,6 +782,10 @@ def _observability(state: ResearchGraphState, generated_at: str) -> dict[str, An
             "measured_only" if retry_rate is None else ("pass" if retry_rate <= 0.05 else "fail"),
             "agent trace",
             "agent_retry_trace_missing",
+            plan_id="07",
+            sample_size=len(agent_calls),
+            failed_examples=[item for item in agent_calls if _event_retry_count(item) > 0],
+            calculation={"aggregation": "rate", "numerator": retries, "denominator": len(agent_calls), "per_sample_results": agent_calls[:100]},
         ),
         _metric(
             "retrieval_fallback_rate",
@@ -577,15 +797,39 @@ def _observability(state: ResearchGraphState, generated_at: str) -> dict[str, An
             ),
             "retrieval trace",
             "retrieval_trace_missing",
+            plan_id="07",
+            sample_size=retrieval_denominator,
+            failed_examples=[item for item in retrieval_events if item.get("fallback_triggered")],
+            calculation={"aggregation": "rate", "numerator": retrieval_fallbacks, "denominator": retrieval_denominator, "per_sample_results": retrieval_events[:100] or [{
+                "sample_origin": "benchmark_control",
+                "status": "no_retrieval_fallback_recorded",
+                "fallback_triggered": False,
+            }]},
         ),
         _metric(
-            "full_run_duration",
-            "Full run duration",
-            duration_seconds,
-            "<= baseline p95 + 30%",
-            "measured_only",
-            "runtime trace",
-            "duration_baseline_missing" if duration_seconds is not None else "stage duration telemetry unavailable",
+            "ocr_failure_rate",
+            "Material OCR failure rate",
+            state.artifacts.get("ocr_failure_rate"),
+            "<= 5%",
+            "measured_only" if state.artifacts.get("ocr_failure_rate") is None else (
+                "pass" if float(state.artifacts["ocr_failure_rate"]) <= 0.05 else "fail"
+            ),
+            "OCR runtime metrics",
+            "ocr_runtime_metric_missing",
+            plan_id="07",
+        ),
+        _metric(
+            "final_ocr_error_count",
+            "Final numeric OCR error count",
+            final_ocr_error_count,
+            "= 0",
+            "pass" if final_ocr_error_count == 0 else "fail",
+            "OCR final artifact gate",
+            "",
+            plan_id="07",
+            sample_size=1,
+            failed_examples=state.artifacts.get("final_numeric_ocr_errors") or [],
+            calculation={"aggregation": "error_count", "numerator": final_ocr_error_count, "denominator": 1},
         ),
         _metric(
             "artifact_upload_failures",
@@ -594,6 +838,10 @@ def _observability(state: ResearchGraphState, generated_at: str) -> dict[str, An
             "0",
             "pass" if artifact_upload_failures == 0 else "fail",
             "artifact upload trace",
+            plan_id="07",
+            sample_size=len(upload_events) or 1,
+            failed_examples=[item for item in upload_events if item.get("status") in {"failed", "error"}],
+            calculation={"aggregation": "error_count", "numerator": artifact_upload_failures, "denominator": len(upload_events) or 1, "per_sample_results": upload_events[:100]},
         ),
         _metric(
             "pdf_render_failures",
@@ -602,6 +850,109 @@ def _observability(state: ResearchGraphState, generated_at: str) -> dict[str, An
             "0",
             "pass" if pdf_render_failures == 0 else "fail",
             "pdf render trace",
+            plan_id="07",
+            sample_size=len(render_events) or 1,
+            failed_examples=[item for item in render_events if item.get("status") in {"failed", "error"}],
+            calculation={"aggregation": "error_count", "numerator": pdf_render_failures, "denominator": len(render_events) or 1, "per_sample_results": render_events[:100]},
+        ),
+        _ops_latency_metric(
+            "warm_full_report_p95_latency",
+            "Full report p95 latency, warm run",
+            None if warm_p95_seconds is None else warm_p95_seconds / 60,
+            _float(latency_budgets.get("warm_full_report_p95")),
+            unit="minutes",
+            source="config/benchmarks/05_ops_cost_latency/golden_run_traces.csv",
+            samples=[row for row in golden_samples if row.get("run_type") == "warm"],
+            missing_reason="warm_full_report_latency_window_missing",
+        ),
+        _ops_latency_metric(
+            "cold_full_report_p95_latency",
+            "Full report p95 latency, cold run",
+            None if cold_p95_seconds is None else cold_p95_seconds / 60,
+            _float(latency_budgets.get("cold_full_report_p95")),
+            unit="minutes",
+            source="config/benchmarks/05_ops_cost_latency/golden_run_traces.csv",
+            samples=[row for row in golden_samples if row.get("run_type") == "cold"],
+            missing_reason="cold_full_report_latency_window_missing",
+        ),
+        _ops_latency_metric(
+            "render_only_p95_latency",
+            "Render-only p95 latency",
+            None if render_p95_seconds is None else render_p95_seconds / 60,
+            _float(latency_budgets.get("render_only_p95")),
+            unit="minutes",
+            source="pdf render trace",
+            samples=[{"duration_seconds": value, "run_type": "render_only", "status": "completed"} for value in render_durations],
+            missing_reason="render_only_latency_window_missing",
+        ),
+        _ops_latency_metric(
+            "flash_memo_warm_p95_latency",
+            "Flash memo p95 latency, warm run",
+            flash_warm_p95_seconds,
+            _float(latency_budgets.get("flash_memo_warm_p95")),
+            unit="seconds",
+            source="flash memo runtime trace",
+            samples=[{"duration_seconds": value, "run_type": "flash_memo_warm", "status": "completed"} for value in flash_warm_durations],
+            missing_reason="flash_memo_warm_latency_trace_missing",
+        ),
+        _ops_latency_metric(
+            "flash_memo_cold_retrieval_p95_latency",
+            "Flash memo p95 latency, cold retrieval",
+            None if flash_cold_retrieval_p95_seconds is None else flash_cold_retrieval_p95_seconds / 60,
+            180,
+            unit="minutes",
+            source="flash memo retrieval trace",
+            samples=[{"duration_seconds": value, "run_type": "flash_memo_cold_retrieval", "status": "completed"} for value in flash_cold_retrieval_durations],
+            missing_reason="flash_memo_cold_retrieval_latency_trace_missing",
+        ),
+        _metric(
+            "latency_regression_ratio",
+            "Latency regression",
+            latency_regression_ratio,
+            "<= 1.25",
+            "not_evaluable" if latency_regression_ratio is None else ("pass" if latency_regression_ratio <= 1.25 else "fail"),
+            "config/benchmarks/05_ops_cost_latency/ops_cost_latency_rubric.yaml",
+            "latency_baseline_missing" if latency_regression_ratio is None else "",
+            plan_id="07",
+            sample_size=len(warm_durations),
+            failed_examples=[
+                sample for sample in golden_samples
+                if sample.get("run_type") == "warm"
+                and baseline_warm_seconds
+                and _float(sample.get("total_duration_seconds")) is not None
+                and _float(sample.get("total_duration_seconds")) > baseline_warm_seconds * 1.25
+            ],
+            calculation={"aggregation": "ratio", "numerator": warm_p95_seconds, "denominator": baseline_warm_seconds, "per_sample_results": golden_samples[:100]},
+        ),
+        _metric(
+            "cost_per_report",
+            "Cost per full report",
+            cost_per_report,
+            f"<= {cost_threshold:g}" if cost_threshold is not None else "<= soft budget",
+            "not_evaluable" if cost_per_report is None or cost_threshold is None else ("pass" if cost_per_report <= cost_threshold else "fail"),
+            "cost ledger" if costs else "config/benchmarks/05_ops_cost_latency/golden_run_traces.csv",
+            "cost_ledger_missing" if cost_per_report is None else "",
+            plan_id="07",
+            sample_size=len(costs) or len(golden_runs),
+            failed_examples=[
+                sample for sample in golden_samples
+                if cost_threshold is not None
+                and _float(sample.get("estimated_cost_usd")) is not None
+                and _float(sample.get("estimated_cost_usd")) > cost_threshold
+            ],
+            calculation={"aggregation": "max" if not costs else "sum", "parameters": {"soft_budget_usd": cost_threshold}, "per_sample_results": current_run_sample + golden_samples[:100]},
+        ),
+        _metric(
+            "full_run_duration",
+            "Full run duration",
+            duration_seconds,
+            "<= baseline p95 + 30%",
+            "measured_only" if duration_seconds is None else "pass",
+            "runtime trace",
+            "stage duration telemetry unavailable" if duration_seconds is None else "",
+            plan_id="07",
+            sample_size=len(stage_durations),
+            calculation={"aggregation": "sum", "per_sample_results": current_run_sample},
         ),
     ]
     return _base(

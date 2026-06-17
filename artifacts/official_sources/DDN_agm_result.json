@@ -1,0 +1,23 @@
+{
+  "ticker": "DDN",
+  "generated_at": "2026-06-16T16:11:44.672674+00:00",
+  "outcome": {
+    "ticker": "DDN",
+    "meeting_year": 2026,
+    "source_kind": "ocr",
+    "files": [
+      "DDN DHCD 2026.pdf"
+    ],
+    "pages": 70,
+    "approved_resolutions": 11,
+    "drivers": {
+      "dividend_plan": 1,
+      "borrowing_plan": 0,
+      "investment_plan": 0,
+      "rnd_and_product_focus": 5,
+      "business_direction": 7,
+      "targets_2026": 1
+    },
+    "errors": []
+  }
+}
