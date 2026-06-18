@@ -18,3 +18,9 @@ metrics:
 - tool_permission_compliance
 - schema_validity
 - no_unauthorized_calc
+- stage_handoff_completeness
+- tool_call_success_rate
+- repair_loop_rate
+- token_budget_adherence
+- judge_calibration_agreement
+- judge_rationale_evidence_coverage

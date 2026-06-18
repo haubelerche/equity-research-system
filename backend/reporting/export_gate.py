@@ -33,6 +33,7 @@ from typing import Any, Literal
 
 from backend.reporting.report_artifact import ReportArtifact, RenderMode
 from backend.reporting.layout_audit import LayoutRenderAudit
+from backend.valuation_method_policy import build_valuation_publishability_policy
 
 GateStatus = Literal["PASS", "FAIL", "SKIP", "BLOCKED"]
 
@@ -357,6 +358,7 @@ def _valuation_gate(
     valuation_artifact: dict[str, Any] | None,
 ) -> GateResult:
     issues: list[str] = []
+    metadata: dict[str, Any] = {}
     if valuation_artifact is None:
         return GateResult("valuation_gate", "BLOCKED",
                           ["valuation_artifact missing — valuation gate blocked"])
@@ -403,8 +405,40 @@ def _valuation_gate(
     if fcfe and not fcfe.get("equity_value"):
         issues.append("FCFE equity_value missing — FCFE bridge incomplete")
 
+    policy = build_valuation_publishability_policy(
+        valuation_artifact,
+        ticker=str(valuation_artifact.get("ticker") or ""),
+        run_id=valuation_artifact.get("run_id"),
+        valuation_artifact_path=valuation_artifact.get("artifact_path"),
+        current_price_vnd=_current_price_from_valuation(valuation_artifact),
+    )
+    metadata["publishability_policy"] = policy.to_dict()
+    if not policy.recommendation_publishable:
+        if not policy.publishable_methods:
+            issues.append("valuation policy blocked: no eligible valuation method")
+        for reason in policy.blocking_reasons:
+            issues.append(f"valuation policy blocked: {reason}")
+
     status = "FAIL" if issues else "PASS"
-    return GateResult("valuation_gate", status, issues)
+    return GateResult("valuation_gate", status, issues, metadata)
+
+
+def _current_price_from_valuation(valuation_artifact: dict[str, Any]) -> float | None:
+    blend = valuation_artifact.get("blend_dcf", {}) or {}
+    for candidate in (
+        valuation_artifact.get("current_price_vnd"),
+        valuation_artifact.get("current_price"),
+        blend.get("current_price_vnd"),
+    ):
+        if candidate is None:
+            continue
+        try:
+            price = float(candidate)
+        except (TypeError, ValueError):
+            continue
+        if price > 0:
+            return price
+    return None
 
 
 def _sensitivity_gate(

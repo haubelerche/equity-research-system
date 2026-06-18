@@ -14,7 +14,7 @@ def test_metric_registry_governs_threshold_and_explanation_contract() -> None:
         detail="ticker mismatch",
     )
 
-    assert metric["threshold"] == ">= 0.75"
+    assert metric["threshold"] == ">= 75%"
     assert metric["threshold_policy"]["profile"] == "mvp"
     assert metric["evaluator"]["framework"] == "production_retriever_golden_set"
     assert metric["sample_size"] == 0
@@ -24,6 +24,10 @@ def test_metric_registry_governs_threshold_and_explanation_contract() -> None:
 def test_metric_threshold_evaluation_handles_ratio_percent_and_boolean_contracts() -> None:
     assert evaluate_metric_threshold(
         {"threshold": ">= 90/100", "threshold_operator": ">=", "unit": "score"},
+        0.978,
+    ) == "pass"
+    assert evaluate_metric_threshold(
+        {"threshold": ">= 90%", "threshold_operator": ">=", "unit": "score"},
         0.978,
     ) == "pass"
     assert evaluate_metric_threshold(

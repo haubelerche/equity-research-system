@@ -55,7 +55,11 @@ def test_methodology_page_explains_data_calculation_and_decision_without_warning
             "market_sanity_bridge": {"target_to_market": 1.139, "bridge_present": True},
             "display_blocking_reasons": ["blend_is_draft_only"],
             "policy_blocking_reasons": ["market_sanity_bridge_missing"],
-            "model_warnings": ["FCFE BLOCKED - debt schedule unavailable"],
+            "model_warnings": [
+                "FCFE BLOCKED - debt schedule unavailable",
+                "target_pe=15.0x is model default — validate with peer-median P/E before publishing",
+                "Relative valuation is PENDING — no peer_data_source provided.",
+            ],
             "market_data_warnings": ["served from cache; live fetch failed"],
         },
     )
@@ -78,6 +82,13 @@ def test_methodology_page_explains_data_calculation_and_decision_without_warning
     assert "Số vết công thức" in html
     assert "VN pharma peers: IMP, DMC, TRA" in html
     assert "served from cache; live fetch failed" in html
+    assert "market_sanity_bridge_missing" not in html
+    assert "blend_is_draft_only" not in html
+    assert "target_pe=15.0x is model default" not in html
+    assert "Relative valuation is PENDING" not in html
+    assert "Giá trị mô hình lệch đáng kể so với thị giá" in html
+    assert "P/E mục tiêu đang là giả định mặc định" in html
+    assert "Định giá tương đối chưa đủ điều kiện" in html
     assert "thuộc về người đọc" not in html
     # The hedging "sensitive points to check" warning list is gone.
     assert "Các điểm nhạy cảm" not in html

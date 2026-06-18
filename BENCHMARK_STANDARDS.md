@@ -165,12 +165,17 @@ Kiểm tra dữ liệu đầu vào có đủ kỳ, có nguồn, được đối 
 | Chỉ số | Công thức hoặc phương pháp tính | Threshold MVP | Threshold mục tiêu | Loại metric | Chặn xuất bản |
 |---|---|---:|---:|---|---|
 | Hit-rate@5 | Tỷ lệ câu hỏi có ít nhất một evidence đúng trong top 5 | `>= 90%` | `>= 95%` | Coverage | Không trực tiếp |
-| MRR@5 | Mean Reciprocal Rank của evidence đúng đầu tiên trong top 5 | `>= 0.75` | `>= 0.80` | Score | Không trực tiếp |
-| Context Precision | Tỷ lệ context retrieved thực sự liên quan | `>= 0.80` | `>= 0.85` | Score | Không trực tiếp |
-| Context Recall | Tỷ lệ bằng chứng cần thiết được retrieve | `>= 0.80` | `>= 0.85` | Score | Không trực tiếp |
-| Faithfulness | Điểm nội dung bám evidence | `>= 0.85` | `>= 0.90` | Score | Không trực tiếp |
-| Response Relevancy | Điểm câu trả lời đúng trọng tâm truy vấn | `>= 0.85` | `>= 0.85` | Score | Không trực tiếp |
+| MRR@5 | Mean Reciprocal Rank của evidence đúng đầu tiên trong top 5 | `>= 75%` | `>= 80%` | Score | Không trực tiếp |
+| Context Precision | Tỷ lệ context retrieved thực sự liên quan | `>= 80%` | `>= 85%` | Score | Không trực tiếp |
+| Context Recall | Tỷ lệ bằng chứng cần thiết được retrieve | `>= 80%` | `>= 85%` | Score | Không trực tiếp |
+| Faithfulness | Điểm nội dung bám evidence | `>= 85%` | `>= 90%` | Score | Không trực tiếp |
+| Response Relevancy | Điểm câu trả lời đúng trọng tâm truy vấn | `>= 75%` | `>= 85%` | Score | Không trực tiếp |
 | Source-tier hit rate | Tỷ lệ truy vấn trọng yếu có nguồn cấp ưu tiên trong top-k | `>= 90%` | `>= 95%` | Coverage | Không trực tiếp |
+| nDCG@10 | Mức xếp hạng evidence đúng theo độ liên quan trong top 10 | `>= 80%` | `>= 85%` | Score | Không trực tiếp |
+| Metadata filter accuracy | Tỷ lệ truy vấn áp đúng filter ticker, kỳ, loại tài liệu và source tier | `>= 95%` | `>= 98%` | Coverage | Không trực tiếp |
+| Unanswerable abstention accuracy | Tỷ lệ câu hỏi không đủ bằng chứng được trả về `insufficient_evidence` thay vì bịa | `>= 95%` | `>= 98%` | Coverage | Không trực tiếp |
+| Evidence span overlap | Mức overlap giữa context retrieved và span bằng chứng đã annotate | `>= 75%` | `>= 85%` | Score | Không trực tiếp |
+| Retrieval noise rate | Tỷ lệ chunk top-k bị stale, duplicate, sai công ty hoặc sai kỳ | `<= 20%` | `<= 10%` | Error rate | Không trực tiếp |
 
 ### Quy tắc sử dụng
 
@@ -272,11 +277,17 @@ match_status: exact | rounded | mismatch | unsupported
 | Tool permission compliance | Số lượt gọi công cụ đúng quyền / Tổng lượt gọi công cụ | `= 100%` | Coverage | Có nếu vi phạm nghiêm trọng |
 | JSON schema validity | Số output hợp lệ theo schema / Tổng output bắt buộc | `= 100%` | Coverage | Có nếu artifact bắt buộc fail |
 | Không tự ý thực hiện tính toán tài chính bằng LLM | Số lượt tuân thủ quy tắc / Tổng lượt cần kiểm tra | `= 100%` | Coverage | Có |
-| Role adherence | Điểm LLM Judge cho mức tuân thủ vai trò | `>= 0.85` | Score | Không trực tiếp |
-| Groundedness judge score | Điểm LLM Judge về mức kết luận có căn cứ | `>= 0.85` | Score | Không trực tiếp |
-| Task completion | Điểm hoàn thành yêu cầu bắt buộc | `>= 0.85` | Score | Không trực tiếp |
-| Plan compliance | Điểm thực hiện đúng kế hoạch | `>= 0.80` | Score | Không trực tiếp |
+| Role adherence | Điểm LLM Judge cho mức tuân thủ vai trò | `>= 85%` | Score | Không trực tiếp |
+| Groundedness judge score | Điểm LLM Judge về mức kết luận có căn cứ | `>= 85%` | Score | Không trực tiếp |
+| Task completion | Điểm hoàn thành yêu cầu bắt buộc | `>= 85%` | Score | Không trực tiếp |
+| Plan compliance | Điểm thực hiện đúng kế hoạch | `>= 80%` | Score | Không trực tiếp |
 | Seeded issue detection | Số lỗi cài trước được phát hiện / Tổng lỗi cài trước | `>= 90%` | Coverage | Không trực tiếp, dùng cho regression |
+| Stage handoff completeness | Số handoff có đủ input, output, artifact reference và blocking decision / Tổng handoff | `>= 95%` | Coverage | Có nếu làm thiếu artifact bắt buộc |
+| Tool call success rate | Số tool call thành công hoặc fail có kiểm soát / Tổng tool call | `>= 95%` | Coverage | Không trực tiếp |
+| Repair loop rate | Số lần phải repair schema, citation hoặc valuation trace / Tổng stage output | `<= 15%` | Error rate | Không trực tiếp |
+| Token budget adherence | Số run nằm trong token budget theo stage / Tổng run | `>= 90%` | Coverage | Không trực tiếp |
+| Judge calibration agreement | Mức đồng thuận của LLM Judge với deterministic labels, seeded defects và human review sample | `>= 85%` | Score | Không trực tiếp |
+| Judge rationale evidence coverage | Số fail/warning của judge có trace span, artifact hoặc rubric clause / Tổng fail/warning | `>= 90%` | Coverage | Không trực tiếp |
 
 ### Seeded issue evaluation tối thiểu
 
@@ -313,23 +324,31 @@ P2 seeded issue detection >= 90%
 
 | Chỉ số | Công thức hoặc phương pháp tính | Threshold MVP | Threshold mục tiêu | Loại metric | Chặn xuất bản |
 |---|---|---:|---:|---|---|
-| Report quality tổng | Điểm rubric tổng hợp | `>= 85/100` | `>= 90/100` | Score | Không trực tiếp |
+| Report quality tổng | Điểm rubric tổng hợp | `>= 85%` | `>= 90%` | Score | Không trực tiếp |
 | Report completeness | Số phần bắt buộc có nội dung đủ / Tổng phần bắt buộc | `>= 90%` | `= 100%` | Coverage | Có nếu thiếu phần trọng yếu |
-| Financial analysis depth | Điểm phân tích tài chính | `>= 80/100` | `>= 85/100` | Score | Không trực tiếp |
-| Forecast rationale | Điểm giải trình forecast | `>= 80/100` | `>= 85/100` | Score | Không trực tiếp |
-| Valuation transparency | Điểm minh bạch định giá | `>= 85/100` | `>= 90/100` | Score | Có nếu thiếu artifact định giá |
+| Financial analysis depth | Điểm phân tích tài chính | `>= 80%` | `>= 85%` | Score | Không trực tiếp |
+| Forecast rationale | Điểm giải trình forecast | `>= 80%` | `>= 85%` | Score | Không trực tiếp |
+| Valuation transparency | Điểm minh bạch định giá | `>= 85%` | `>= 90%` | Score | Có nếu thiếu artifact định giá |
+| Thesis specificity | Điểm luận điểm đầu tư riêng cho công ty, tránh nhận định ngành chung chung | `>= 80%` | `>= 85%` | Score | Không trực tiếp |
+| Risk/catalyst quality | Điểm chất lượng rủi ro và catalyst, gồm xác suất, thời điểm và đường truyền tài chính | `>= 80%` | `>= 85%` | Score | Không trực tiếp |
+| Recommendation consistency | Tỷ lệ nhất quán giữa rating, target price, market price, upside/downside và risk language | `= 100%` | `= 100%` | Coverage | Có |
+| Sensitivity disclosure completeness | Tỷ lệ driver trọng yếu có sensitivity hoặc scenario disclosure phù hợp | `>= 90%` | `= 100%` | Coverage | Không trực tiếp |
+| Peer/industry context quality | Điểm so sánh với peer/ngành về growth, margin, valuation và balance sheet | `>= 75%` | `>= 85%` | Score | Không trực tiếp |
+| Executive summary actionability | Điểm phần tóm tắt có recommendation, valuation basis, driver, risk và trigger giám sát | `>= 80%` | `>= 85%` | Score | Không trực tiếp |
 
 ### Rubric đề xuất nếu cần chi tiết hơn
 
 | Dimension | Weight |
 |---|---:|
-| Completeness | 15% |
-| Thesis specificity | 15% |
-| Financial analysis depth | 15% |
-| Forecast rationale | 15% |
-| Valuation transparency | 15% |
+| Completeness | 12% |
+| Thesis specificity | 12% |
+| Financial analysis depth | 14% |
+| Forecast rationale | 12% |
+| Valuation transparency | 14% |
 | Risk/catalyst quality | 10% |
 | Evidence integration | 10% |
+| Peer/industry context quality | 6% |
+| Executive summary actionability | 5% |
 | Presentation quality | 5% |
 
 ### Quy tắc đánh giá
@@ -460,11 +479,11 @@ Nếu cần triển khai nhanh, MVP chỉ cần các metric bắt buộc sau:
 | Nhóm | Metric bắt buộc |
 |---|---|
 | Data Quality | Required periods completeness, accepted facts source coverage, material OCR error count, duplicate canonical fact count |
-| RAG | Hit-rate@5, MRR@5, context precision, faithfulness |
+| RAG | Hit-rate@5, MRR@5, context precision, faithfulness, metadata filter accuracy, unanswerable abstention accuracy |
 | Financial Model | Accounting invariant violations, valuation regression failures, share count mismatch, target price bridge error, recommendation inconsistency |
 | Citation | Quant citation coverage, citation resolver success, numeric citation mismatch, catalyst evidence span |
-| Agent/LLM | Tool permission compliance, JSON schema validity, no LLM financial calculation, seeded issue detection |
-| Report Quality | Report quality total, completeness, forecast rationale, valuation transparency |
+| Agent/LLM | Tool permission compliance, JSON schema validity, no LLM financial calculation, seeded issue detection, stage handoff completeness, judge calibration agreement |
+| Report Quality | Report quality total, completeness, forecast rationale, valuation transparency, thesis specificity, recommendation consistency, risk/catalyst quality |
 | Operations | LLM retry rate, artifact upload failure, PDF render failure, warm full report p95, render-only p95 |
 
 ---

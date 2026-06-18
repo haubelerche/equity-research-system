@@ -1,12 +1,10 @@
 import type { BenchmarkMetricResult } from "../../api/types";
 import {
-  formatMetricNumber,
   formatMetricScope,
   formatMetricTypeLabel,
-  formatPassCondition,
   formatRuntimeMetricResult,
+  formatRuntimeThreshold,
   metricSemanticType,
-  parseRuntimeThreshold,
   resolveMetricStatus,
   type MetricDef,
   type MetricStatus,
@@ -32,13 +30,7 @@ function formatThreshold(
   def: MetricDef,
   result: BenchmarkMetricResult | undefined,
 ): string {
-  const raw = result?.threshold ?? formatPassCondition(def);
-  if (def.unit !== "%") return String(raw);
-  if (typeof raw === "string" && raw.includes("%")) return raw;
-  const numeric = parseRuntimeThreshold(result?.threshold, (result as { unit?: string | null })?.unit)
-    ?? def.threshold;
-  const comparator = def.comparator === "gte" ? "≥" : "≤";
-  return `${comparator} ${formatMetricNumber(def, numeric)}`;
+  return formatRuntimeThreshold(def, result);
 }
 
 export function MetricRow({ def, value, result, onSelect }: Props) {

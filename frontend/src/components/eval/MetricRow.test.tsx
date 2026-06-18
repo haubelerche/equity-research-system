@@ -22,13 +22,13 @@ describe("MetricRow", () => {
     expect(screen.getByText("97%")).toBeInTheDocument();
   });
 
-  it("shows not evaluated when benchmark data is missing", () => {
+  it("shows fail when benchmark data is missing", () => {
     render(<table><tbody><MetricRow def={def} value={undefined} /></tbody></table>);
     expect(screen.getByText("Coverage")).toBeInTheDocument();
-    expect(document.querySelector('[data-status="not_evaluable"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-status="fail"]')).toBeInTheDocument();
   });
 
-  it("uses normalized backend benchmark status when no numeric value is available", () => {
+  it("shows fail when no numeric benchmark value is available", () => {
     render(
       <table><tbody><MetricRow def={def} value={1} result={{
         metric_id: "cov",
@@ -38,7 +38,7 @@ describe("MetricRow", () => {
         value: null,
       }} /></tbody></table>,
     );
-    expect(document.querySelector('[data-status="not_evaluable"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-status="fail"]')).toBeInTheDocument();
   });
 
   it("recomputes status from numeric thresholds when backend pass/fail is stale", () => {

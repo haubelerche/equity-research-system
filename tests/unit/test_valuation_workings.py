@@ -286,6 +286,34 @@ def test_report_explanation_surfaces_data_and_method_warnings():
     assert "served from cache; live fetch failed" in md
 
 
+def test_report_explanation_translates_policy_blockers_and_mapping_warnings():
+    view_model = _sample_view_model()
+    view_model.valuation_evidence["policy_blocking_reasons"] = [
+        "no_eligible_valuation_method",
+        "valuation_method_divergence_critical",
+        "valuation_result_not_publishable",
+    ]
+    view_model.valuation_evidence["model_warnings"] = [
+        "target_pe=15.0x is model default — validate with peer-median P/E before publishing",
+        "Relative valuation is PENDING — no peer_data_source provided. Target P/E, P/B, and EV/EBITDA require a real peer group dataset.",
+        "EPS and target P/E are present but P/E implied price is blank",
+        "fcfe_low_confidence",
+    ]
+
+    md = _build_explanation(view_model=view_model)
+
+    assert "no_eligible_valuation_method" not in md
+    assert "valuation_method_divergence_critical" not in md
+    assert "target_pe=15.0x is model default" not in md
+    assert "Relative valuation is PENDING" not in md
+    assert "EPS and target P/E are present" not in md
+    assert "Chưa có phương pháp định giá chính đủ điều kiện" in md
+    assert "Các phương pháp định giá cho kết quả phân kỳ mạnh" in md
+    assert "Định giá tương đối chưa đủ điều kiện" in md
+    assert "EPS dự phóng và P/E mục tiêu đã có" in md
+    assert "P/E mục tiêu đang là giả định mặc định" in md
+
+
 def test_report_explanation_translates_user_facing_finance_terms():
     md = _build_explanation()
 

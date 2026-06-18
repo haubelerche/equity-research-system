@@ -38,3 +38,64 @@ diagnosis. Empty raw BCTC split-JSON files are surfaced through
 `raw_bctc_non_empty=warning`, while publication-blocking readiness remains
 controlled by canonical fact coverage, provenance, reconciliation, Pandera
 schema validity, and valuation input readiness.
+
+## Benchmark Architecture Contract v4
+
+### Context
+
+The system quality dashboard exposes six product-facing benchmark families:
+data reliability, RAG/evidence, financial correctness, agent governance and LLM
+judge, report quality, and operations/cost/latency. Citation/source provenance
+and publication readiness remain mandatory sidecar gates: they feed
+`publication_status` and blocking issues, but they do not need separate
+first-screen cards when the product view is constrained to six panels.
+
+### Problem Statement
+
+The benchmark suite must not report a large sample count while leaving the
+sample-level rows without evaluable state. A metric with 45 ticker-level samples
+can legitimately expand to 900 nested evidence rows, but each nested row must
+still be interpretable as measured evidence. `not_evaluable` is reserved for
+missing evaluator inputs or missing required artifacts; it must not be used as a
+placeholder for a row that was actually checked and found true, false, present,
+accepted, reconciled, or scored.
+
+### Technical Deep-Dive
+
+| Layer | Plan | Artifact | Primary sample unit | Blocking semantics |
+|---|---:|---|---|---|
+| Data reliability | 01 | `data_quality.json` | ticker/report-run metric, with fact-level trace rows | P0 only for material reconciliation, OCR material errors, duplicate canonical facts, snapshot/source provenance; cohort coverage is readiness diagnostic unless explicitly report-run scoped |
+| RAG and evidence | 02 | `retrieval_eval.json` | golden query or Ragas sample | Diagnostic by default; unsupported final claims escalate through citation/publication gates |
+| Financial correctness | 03 | `financial_eval.json` | valuation artifact or formula step | P0 deterministic gates; zero-error counts remain the correct threshold for formula, bridge, WACC/g, net-debt, share-count, and recommendation failures |
+| Agent governance and LLM judge | 05 | `agent_eval.json` | trace event, artifact output, or seeded case | Tool permission, schema validity, artifact manifest, and unauthorized calculation are deterministic gates; LLM judge scores are diagnostics after calibration |
+| Report quality | 06 | `report_eval.json` | report artifact or rubric dimension | Completeness and valuation transparency can gate; narrative/rubric scores route to human review and never override deterministic failures |
+| Operations, cost, latency | 07 | `observability_eval.json` | run, trace event, or system window | Upload failure, final OCR numeric error, and final PDF render failure gate; retry, fallback, cost, and latency are observability unless they corrupt final artifacts |
+
+### Sample Contract
+
+Every metric result must expose the normalized metric contract already defined
+by `config/benchmarks/shared/metric_registry_v3.yaml`: `metric_id`,
+`metric_name`, `category`, `layer`, `metric_type`, `scope`, `severity`,
+`blocks_publish`, `value`, `threshold`, `threshold_operator`, `unit`, `status`,
+`sample_size`, `failed_examples`, `evaluator`, `calculation`, `evidence`, and
+`remediation_hint`.
+
+`sample_size` counts the primary evaluation unit for the displayed metric. In a
+cohort aggregate this is normally the ticker count, not the total number of
+nested fact rows. Nested `calculation.per_sample_results[*].source_samples`
+are trace rows and may expand 45 ticker samples into hundreds of fact/component
+rows. Those trace rows must carry `sample_origin` and should carry both
+`status` and `value`; if old artifacts lack those fields, the dashboard may
+derive them from `component_score`, `passed`, `hit`, `present`, `complete`,
+`accepted`, `schema_valid`, `reconciled`, `validation_status`, or
+`evidence_available`.
+
+### Strategic Recommendations
+
+| Risk | Required control |
+|---|---|
+| Large sample tables show "missing" despite measured data | Normalize source samples in runtime evaluators and aggregate suite output; dashboard keeps a legacy inference path for old artifacts |
+| Cohort readiness blocks like report-run P0 | Separate diagnostic cohort thresholds from release-gate report-run thresholds in the metric registry and dashboard overrides |
+| LLM judge masks deterministic failures | Compute publication status only after deterministic metrics are evaluated; judge metrics remain advisory unless converted into explicit P1 human-review rules |
+| Citation gate disappears from six-panel UI | Keep `citation_eval.json` in the packet and publication blocker list even when it is not a first-screen panel |
+| Operations metrics mix observability with release gates | Only final artifact upload, final render, and final OCR numeric errors block; retry/fallback/latency/cost remain observability or regression diagnostics |

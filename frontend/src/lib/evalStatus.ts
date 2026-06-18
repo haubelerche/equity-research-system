@@ -98,12 +98,16 @@ export function resolveMetricStatus(
   result?: RuntimeMetricFields,
   fallbackValue?: number | null | undefined,
 ): MetricStatus {
+  const runtimeStatus = result?.status ? normalizeMetricStatus(String(result.status)) : null;
+  if (runtimeStatus && ["blocked", "not_measured"].includes(runtimeStatus)) {
+    return "fail";
+  }
   const rawValue = result && Object.prototype.hasOwnProperty.call(result, "value")
     ? result.value
     : fallbackValue;
   const value = coerceMetricValue(rawValue);
   if (value === null) {
-    return result?.status ? normalizeMetricStatus(String(result.status)) : "not_evaluable";
+    return runtimeStatus === "pass" ? "pass" : "fail";
   }
 
   const threshold = parseRuntimeThreshold(result?.threshold, result?.unit) ?? def.threshold;
@@ -113,7 +117,8 @@ export function resolveMetricStatus(
     && parseRuntimeThreshold(result.threshold, result.unit) === null
     && result.status
   ) {
-    return normalizeMetricStatus(String(result.status));
+    const status = runtimeStatus ?? normalizeMetricStatus(String(result.status));
+    return status === "pass" ? "pass" : "fail";
   }
   const comparator = result?.threshold === undefined || result?.threshold === null
     ? def.comparator
@@ -124,7 +129,8 @@ export function resolveMetricStatus(
       result.metric_id ?? result.id ?? def.id,
     );
 
-  return evalMetricStatus({ ...def, threshold, comparator }, value);
+  const computedStatus = evalMetricStatus({ ...def, threshold, comparator }, value);
+  return computedStatus;
 }
 
 export type MetricSemanticType = "boolean_gate" | "pass_rate" | "error_count" | "error_rate" | "score" | "diagnostic";
@@ -139,6 +145,9 @@ export function metricSemanticType(def: MetricDef, result?: RuntimeMetricFields)
   if (metricType === "boolean" || unit === "boolean" || threshold.includes("true") || threshold.includes("false")) {
     return "boolean_gate";
   }
+  if (aggregation === "boolean_gate") {
+    return "boolean_gate";
+  }
   if (metricType === "error_rate") return "error_rate";
   if (
     metricType === "error_count"
@@ -147,9 +156,7 @@ export function metricSemanticType(def: MetricDef, result?: RuntimeMetricFields)
     || id.includes("failure")
     || id.includes("mismatch")
   ) {
-    return threshold.includes("100%") || aggregation.includes("pass_rate") || threshold === "pass"
-      ? "pass_rate"
-      : "error_count";
+    return threshold.includes("100%") || aggregation.includes("pass_rate") ? "pass_rate" : "error_count";
   }
   if (metricType === "coverage" || metricType === "pass_rate" || unit === "percent" || def.unit === "%") {
     return "pass_rate";
@@ -171,6 +178,16 @@ export function formatMetricScope(def: MetricDef, result?: RuntimeMetricFields):
   const type = metricSemanticType(def, result);
   const numerator = result?.calculation?.numerator;
   const denominator = result?.calculation?.denominator;
+  const aggregation = String(result?.calculation?.aggregation ?? "").toLowerCase();
+  if (
+    aggregation === "cohort_mean_observed"
+    && denominator !== null
+    && denominator !== undefined
+    && result?.sample_size !== null
+    && result?.sample_size !== undefined
+  ) {
+    return `${formatRoundedNumber(denominator)}/${formatRoundedNumber(result.sample_size)} samples`;
+  }
   if ((type === "pass_rate" || type === "error_rate") && denominator !== null && denominator !== undefined) {
     return `${formatRoundedNumber(denominator)} case đủ điều kiện`;
   }
@@ -231,7 +248,11 @@ export function formatRuntimeMetricResult(
     const numeric = coerceMetricValue(value);
     return `${numeric === null ? String(value) : formatRoundedNumber(numeric)} lỗi`;
   }
-  if (typeof value === "number") return formatMetricNumber(def, value);
+  if (type === "score") {
+    const numeric = coerceMetricValue(value);
+    return numeric === null ? String(value) : formatMetricNumber(displayDefForMetric(def, result), numeric);
+  }
+  if (typeof value === "number") return formatMetricNumber(displayDefForMetric(def, result), value);
   if (typeof value === "boolean") return value ? "true" : "false";
   return String(value);
 }
@@ -261,6 +282,59 @@ export function formatMetricNumber(def: MetricDef, value: number): string {
   const displayValue = Math.abs(value) <= 1 ? value * 100 : value;
   const displayThreshold = Math.abs(def.threshold) <= 1 ? def.threshold * 100 : def.threshold;
   return `${formatRoundedNumber(displayValue, displayValue === displayThreshold ? 0 : 1)}%`;
+}
+
+function shouldDisplayAsPercent(def: MetricDef, result?: RuntimeMetricFields): boolean {
+  const type = metricSemanticType(def, result);
+  const unit = String(result?.unit ?? def.unit ?? "").toLowerCase();
+  if (type === "pass_rate" || type === "error_rate") return true;
+  if (unit === "%" || unit === "percent") return true;
+  if (type !== "score") return false;
+  if (unit === "usd" || unit === "seconds" || unit === "minutes" || unit === "count" || unit === "ratio") {
+    return false;
+  }
+  return unit === "" || unit === "score";
+}
+
+function displayDefForMetric(def: MetricDef, result?: RuntimeMetricFields): MetricDef {
+  return shouldDisplayAsPercent(def, result) ? { ...def, unit: "%" } : def;
+}
+
+function thresholdOperatorSymbol(result?: RuntimeMetricFields): "=" | "≥" | "≤" | ">" | "<" {
+  const operator = String(result?.threshold_operator ?? "").trim();
+  if (operator === "=" || operator === ">=" || operator === "<=" || operator === ">" || operator === "<") {
+    return operator === ">=" ? "≥" : operator === "<=" ? "≤" : operator;
+  }
+  const thresholdText = typeof result?.threshold === "string" ? result.threshold.trim() : "";
+  if (thresholdText.startsWith(">=")) return "≥";
+  if (thresholdText.startsWith("<=")) return "≤";
+  if (thresholdText.startsWith(">")) return ">";
+  if (thresholdText.startsWith("<")) return "<";
+  if (thresholdText.startsWith("=")) return "=";
+  return inferRuntimeComparator(
+    result?.threshold,
+    result?.threshold_operator,
+    result?.metric_type,
+    result?.metric_id ?? result?.id,
+  ) === "gte" ? "≥" : "≤";
+}
+
+export function formatRuntimeThreshold(def: MetricDef, result?: RuntimeMetricFields): string {
+  if (!result) return formatPassCondition(def);
+  const raw = result?.threshold ?? formatPassCondition(def);
+  const rawText = String(raw);
+  if (raw === null || raw === undefined || rawText === "") return "Chưa có";
+  if (typeof raw === "boolean") return raw ? "true" : "false";
+  if (rawText.toLowerCase() === "pass" || rawText.toLowerCase() === "present") return rawText;
+
+  const numeric = parseRuntimeThreshold(raw, result?.unit) ?? def.threshold;
+  const comparator = thresholdOperatorSymbol(result);
+
+  if (shouldDisplayAsPercent(def, result)) {
+    return `${comparator} ${formatMetricNumber({ ...def, unit: "%" }, numeric)}`;
+  }
+  if (typeof raw === "string" && /[<>]=?|=/.test(raw.trim()) && !raw.includes("/")) return raw;
+  return `${comparator} ${formatMetricNumber(def, numeric)}`;
 }
 
 export function formatRoundedNumber(value: number, maxFractionDigits = 3): string {

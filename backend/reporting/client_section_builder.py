@@ -970,15 +970,15 @@ def _render_valuation_evidence(vm: ClientReportViewModel) -> str:
         rows.append(("Số vết công thức", f"{trace_count} vết; phương pháp: {methods}"))
     peer_source = evidence.get("peer_data_source")
     if peer_source:
-        rows.append(("Nguồn relative valuation", str(peer_source)))
+        rows.append(("Nguồn định giá tương đối", _client_evidence_value(peer_source)))
     rv_status = evidence.get("relative_valuation_status")
     if rv_status:
-        rows.append(("Trạng thái relative valuation", str(rv_status)))
+        rows.append(("Trạng thái định giá tương đối", _client_evidence_value(rv_status)))
     market_bridge = evidence.get("market_sanity_bridge") or {}
     if isinstance(market_bridge, dict) and market_bridge:
         rows.append((
             "Đối chiếu thị trường",
-            f"target/market={market_bridge.get('target_to_market')}; bridge_present={market_bridge.get('bridge_present')}",
+            f"Tỷ lệ giá trị mô hình/thị giá={market_bridge.get('target_to_market')}; cầu nối={'có' if market_bridge.get('bridge_present') else 'chưa có'}",
         ))
     warnings = list(dict.fromkeys(
         [str(item) for item in evidence.get("model_warnings", []) if str(item).strip()]
@@ -998,13 +998,78 @@ def _render_valuation_evidence(vm: ClientReportViewModel) -> str:
         )
     if blockers:
         body += "<h3>Cảnh báo chặn phát hành</h3><ul>" + "".join(
-            f"<li>{_e(item)}</li>" for item in blockers
+            f"<li>{_e(_client_issue_label(item))}</li>" for item in blockers
         ) + "</ul>"
     if warnings:
         body += "<h3>Cảnh báo mô hình và dữ liệu</h3><ul>" + "".join(
-            f"<li>{_e(item)}</li>" for item in warnings
+            f"<li>{_e(_client_issue_label(item))}</li>" for item in warnings
         ) + "</ul>"
     return body
+
+
+_CLIENT_ISSUE_LABELS = {
+    "valuation_result_not_publishable": "Kết quả định giá có cảnh báo cần đọc cùng phần tính toán chi tiết.",
+    "no_eligible_valuation_method": "Chưa có phương pháp định giá chính đủ điều kiện để phát hành khuyến nghị.",
+    "blend_is_draft_only": "Kết quả kết hợp phương pháp đang ở trạng thái rà soát do thiếu hoặc lệch một cấu phần định giá.",
+    "fcff_fcfe_gap_gt_25pct": "Giá trị theo FCFF và FCFE lệch trên ngưỡng kiểm soát; cần đọc thêm phần đối chiếu phương pháp.",
+    "fcff_fcfe_gap_invalid": "Độ lệch giữa FCFF và FCFE chưa tính được một cách tin cậy.",
+    "market_sanity_bridge_missing": "Giá trị mô hình lệch đáng kể so với thị giá nhưng chưa có cầu nối giải thích bằng P/E, EV/EBITDA hoặc bằng chứng cơ bản.",
+    "valuation_method_divergence_critical": "Các phương pháp định giá cho kết quả phân kỳ mạnh; chưa nên chuyển thành kết luận đầu tư chính thức.",
+    "senior_review_required_for_severe_downside": "Mức giảm so với thị giá đủ lớn để cần rà soát cấp cao trước khi phát hành rating.",
+    "distress_evidence_required_for_extreme_downside": "Mức giảm cực lớn cần bằng chứng suy giảm hoặc rủi ro tài chính rõ ràng trước khi công bố.",
+    "recommendation_gate_not_allowed": "Khuyến nghị đầu tư chưa được phê duyệt ở lớp kiểm soát cuối.",
+    "low_confidence_primary_method": "Phương pháp định giá chính có độ tin cậy thấp và cần kiểm định giả định.",
+    "fcfe_blocked_net_borrowing_unavailable": "FCFE chưa đủ điều kiện vì lịch vay ròng hoặc dòng tiền cho chủ sở hữu chưa được xác minh.",
+    "fcfe_unavailable_for_blend": "Kết quả kết hợp chưa thể dùng đầy đủ FCFE; cần đọc trọng số phương pháp kèm cảnh báo.",
+    "formula_trace_missing": "Thiếu vết công thức để tái lập đầy đủ phép tính.",
+    "blend_sensitivity_missing_or_constant": "Bảng độ nhạy của kết quả kết hợp chưa đủ hoặc không biến thiên.",
+    "fcff_sensitivity_missing_or_constant": "Bảng độ nhạy FCFF chưa đủ hoặc không biến thiên.",
+    "fcfe_sensitivity_missing_or_constant": "Bảng độ nhạy FCFE chưa đủ hoặc không biến thiên.",
+}
+
+
+def _client_issue_label(item: Any) -> str:
+    key = str(item or "").strip()
+    if not key:
+        return ""
+    if key in _CLIENT_ISSUE_LABELS:
+        return _CLIENT_ISSUE_LABELS[key]
+    normalized = key.lower().replace("_", " ").replace("-", " ")
+    if "no new debt policy" in normalized:
+        return "Lịch nợ vay đang giả định không phát sinh nợ mới và dư nợ giảm về gần 0 ở năm cơ sở; cần kiểm tra lại chính sách vay, trả nợ và kế hoạch vốn."
+    if "normalized opening nwc" in normalized:
+        return "Vốn lưu động năm dự phóng đầu tiên dùng mức vốn lưu động mở đầu đã chuẩn hóa; cần đối chiếu lại với biến động phải thu, tồn kho và phải trả."
+    if "no reported ending cash" in normalized:
+        return "Thiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu đầy đủ lịch tiền mặt."
+    if "waccassumptions.tax" in normalized or "taxpolicy.effective tax rate" in normalized:
+        return "Thuế suất trong giả định WACC khác thuế suất hiệu dụng theo chính sách thuế; mô hình đang dùng thuế suất hiệu dụng để tính EBIT sau thuế."
+    if "model default" in normalized and "target pe" in normalized:
+        return "P/E mục tiêu đang là giả định mặc định của mô hình; cần đối chiếu với P/E trung vị nhóm doanh nghiệp so sánh trước khi dùng làm cơ sở khuyến nghị."
+    if "relative valuation is pending" in normalized:
+        return "Định giá tương đối chưa đủ điều kiện vì thiếu bộ doanh nghiệp so sánh đã phê duyệt; P/E, P/B và EV/EBITDA chỉ nên dùng sau khi có nhóm doanh nghiệp so sánh rõ ràng."
+    if "eps and target p/e are present" in normalized or "eps and target pe are present" in normalized:
+        return "EPS dự phóng và P/E mục tiêu đã có nhưng giá suy ra theo P/E đang bị trống; đây là lỗi mapping cần kiểm tra trong bảng định giá tương đối."
+    if key.startswith("failed_method_has_nonzero_weight:"):
+        method = key.split(":", 1)[1] or "phương pháp"
+        return f"Phương pháp {method} chưa đủ điều kiện nhưng vẫn có trọng số trong kết quả tổng hợp."
+    if key.startswith("critical_warning:"):
+        detail = key.split(":", 1)[1].strip()
+        return "Cảnh báo nghiêm trọng từ mô hình: " + (detail or "cần rà soát thêm.")
+    if key.endswith("_failed"):
+        return "Một cổng kiểm soát bắt buộc chưa đạt: " + key[:-7].replace("_", " ")
+    return "Cần rà soát thêm: " + key.replace("_", " ")
+
+
+def _client_evidence_value(value: Any) -> str:
+    key = str(value or "").strip()
+    normalized = key.lower().replace("_", " ").replace("-", " ")
+    if key == "analyst_default_pending_peers":
+        return "Giả định tạm thời của mô hình; chưa có bộ doanh nghiệp so sánh được phê duyệt."
+    if key == "pending_peer_dataset":
+        return "Đang chờ dữ liệu nhóm doanh nghiệp so sánh đã kiểm chứng."
+    if "peer" in normalized and "pending" in normalized:
+        return "Đang chờ dữ liệu nhóm doanh nghiệp so sánh đã kiểm chứng."
+    return key
 
 
 def _render_report_status(vm: ClientReportViewModel) -> str:

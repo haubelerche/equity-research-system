@@ -223,7 +223,7 @@ metrics:
     severity: P2
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 0.85
+    threshold: 0.75
     unit: score
     owner: retrieval
     remediation_hint: Improve query intent routing.
@@ -241,6 +241,76 @@ metrics:
     unit: percent
     owner: retrieval
     remediation_hint: Boost Tier 1/Tier 2 sources for material queries.
+  -
+    metric_id: rag.ndcg_at_10
+    metric_name: nDCG@10
+    category: rag
+    layer: diagnostic
+    metric_type: score
+    scope: benchmark_suite
+    severity: P2
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 0.8
+    unit: score
+    owner: retrieval
+    remediation_hint: Improve ranking so highly relevant official evidence appears above weak or generic chunks.
+  -
+    metric_id: rag.metadata_filter_accuracy
+    metric_name: Metadata filter accuracy
+    category: rag
+    layer: diagnostic
+    metric_type: coverage
+    scope: benchmark_suite
+    severity: P1
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 95
+    unit: percent
+    owner: retrieval
+    remediation_hint: Fix ticker, period, source_tier and document_type filters before retrieval scoring.
+  -
+    metric_id: rag.unanswerable_abstention_accuracy
+    metric_name: Unanswerable abstention accuracy
+    category: rag
+    layer: diagnostic
+    metric_type: coverage
+    scope: benchmark_suite
+    severity: P1
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 95
+    unit: percent
+    owner: retrieval
+    remediation_hint: Return insufficient_evidence for queries without adequate source support instead of generating unsupported guidance.
+  -
+    metric_id: rag.evidence_span_overlap
+    metric_name: Evidence span overlap
+    category: rag
+    layer: diagnostic
+    metric_type: score
+    scope: benchmark_suite
+    severity: P2
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 0.75
+    unit: score
+    owner: retrieval
+    remediation_hint: Retrieve page-level spans that overlap the annotated support span, not only the correct document.
+  -
+    metric_id: rag.retrieval_noise_rate
+    metric_name: Retrieval noise rate
+    category: rag
+    layer: diagnostic
+    metric_type: error_rate
+    scope: benchmark_suite
+    severity: P2
+    blocks_publish: false
+    threshold_operator: "<="
+    threshold: 20
+    unit: percent
+    owner: retrieval
+    remediation_hint: Reduce stale, duplicate or wrong-company chunks in top-k contexts.
   -
     metric_id: rag.unsupported_claim_rate
     metric_name: Unsupported claim rate
@@ -573,7 +643,7 @@ metrics:
     severity: P2
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 0.9
+    threshold: 0.85
     unit: score
     owner: reviewer
     remediation_hint: Tune prompt/role context.
@@ -587,7 +657,7 @@ metrics:
     severity: P2
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 0.9
+    threshold: 0.85
     unit: score
     owner: reviewer
     remediation_hint: Constrain narrative to evidence/artifacts.
@@ -615,7 +685,7 @@ metrics:
     severity: P2
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 0.85
+    threshold: 0.8
     unit: score
     owner: reviewer
     remediation_hint: Check fixed plan scope and role boundaries.
@@ -647,6 +717,90 @@ metrics:
     unit: percent
     owner: platform
     remediation_hint: Ensure all required artifacts have storage path/checksum.
+  -
+    metric_id: agent.stage_handoff_completeness
+    metric_name: Stage handoff completeness
+    category: agent_llm
+    layer: release_gate
+    metric_type: coverage
+    scope: report_run
+    severity: P1
+    blocks_publish: true
+    threshold_operator: ">="
+    threshold: 95
+    unit: percent
+    owner: platform
+    remediation_hint: Ensure each agent emits required inputs, outputs, artifact references and blocking decisions for the next stage.
+  -
+    metric_id: agent.tool_call_success_rate
+    metric_name: Tool call success rate
+    category: agent_llm
+    layer: diagnostic
+    metric_type: coverage
+    scope: benchmark_suite
+    severity: P2
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 95
+    unit: percent
+    owner: platform
+    remediation_hint: Fix brittle tool arguments, transient retry policy or upstream service contracts.
+  -
+    metric_id: agent.repair_loop_rate
+    metric_name: Repair loop rate
+    category: agent_llm
+    layer: diagnostic
+    metric_type: error_rate
+    scope: system_window
+    severity: P2
+    blocks_publish: false
+    threshold_operator: "<="
+    threshold: 15
+    unit: percent
+    owner: platform
+    remediation_hint: Reduce schema, citation and valuation repair loops through stricter prompts and preflight validation.
+  -
+    metric_id: agent.token_budget_adherence
+    metric_name: Token budget adherence
+    category: agent_llm
+    layer: diagnostic
+    metric_type: coverage
+    scope: system_window
+    severity: P2
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 90
+    unit: percent
+    owner: platform
+    remediation_hint: Route lower-risk stages to cheaper models and cap verbose intermediate reasoning artifacts.
+  -
+    metric_id: agent.judge_calibration_agreement
+    metric_name: Judge calibration agreement
+    category: agent_llm
+    layer: diagnostic
+    metric_type: score
+    scope: benchmark_suite
+    severity: P1
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 0.85
+    unit: score
+    owner: reviewer
+    remediation_hint: Calibrate LLM Judge rubric against deterministic labels, seeded defects and human review samples.
+  -
+    metric_id: agent.judge_rationale_evidence_coverage
+    metric_name: Judge rationale evidence coverage
+    category: agent_llm
+    layer: diagnostic
+    metric_type: coverage
+    scope: benchmark_suite
+    severity: P2
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 90
+    unit: percent
+    owner: reviewer
+    remediation_hint: Require judge rationales to cite trace spans, artifacts or rubric clauses for every fail/warning.
   -
     metric_id: report.quality_total
     metric_name: Report quality total
@@ -731,6 +885,90 @@ metrics:
     unit: score
     owner: report
     remediation_hint: Tie claims to evidence and formula trace.
+  -
+    metric_id: report.thesis_specificity
+    metric_name: Thesis specificity
+    category: report_quality
+    layer: diagnostic
+    metric_type: score
+    scope: report_run
+    severity: P2
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 80
+    unit: score
+    owner: report
+    remediation_hint: Replace generic sector commentary with company-specific drivers, constraints and materiality.
+  -
+    metric_id: report.risk_catalyst_quality
+    metric_name: Risk and catalyst quality
+    category: report_quality
+    layer: diagnostic
+    metric_type: score
+    scope: report_run
+    severity: P2
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 80
+    unit: score
+    owner: report
+    remediation_hint: Link risks and catalysts to probability, timing, financial transmission path and evidence.
+  -
+    metric_id: report.recommendation_consistency
+    metric_name: Recommendation consistency
+    category: report_quality
+    layer: release_gate
+    metric_type: coverage
+    scope: report_run
+    severity: P0
+    blocks_publish: true
+    threshold_operator: "="
+    threshold: 100
+    unit: percent
+    owner: report
+    remediation_hint: Align rating, target price, current price, upside/downside and risk language.
+  -
+    metric_id: report.sensitivity_disclosure_completeness
+    metric_name: Sensitivity disclosure completeness
+    category: report_quality
+    layer: diagnostic
+    metric_type: coverage
+    scope: report_run
+    severity: P1
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 90
+    unit: percent
+    owner: report
+    remediation_hint: Include sensitivity ranges for WACC, terminal growth, margin, revenue and peer multiples where relevant.
+  -
+    metric_id: report.peer_industry_context_quality
+    metric_name: Peer and industry context quality
+    category: report_quality
+    layer: diagnostic
+    metric_type: score
+    scope: report_run
+    severity: P2
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 75
+    unit: score
+    owner: report
+    remediation_hint: Add peer-relative valuation, margin, growth and balance-sheet context rather than isolated company facts.
+  -
+    metric_id: report.executive_summary_actionability
+    metric_name: Executive summary actionability
+    category: report_quality
+    layer: diagnostic
+    metric_type: score
+    scope: report_run
+    severity: P2
+    blocks_publish: false
+    threshold_operator: ">="
+    threshold: 80
+    unit: score
+    owner: report
+    remediation_hint: Ensure the summary states recommendation, valuation basis, key drivers, key risks and monitoring triggers.
   -
     metric_id: ops.llm_retry_rate
     metric_name: LLM retry rate

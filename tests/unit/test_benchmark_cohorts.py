@@ -45,7 +45,70 @@ def test_available_benchmark_cohorts_expose_more_than_one_archetype() -> None:
 
 
 def test_benchmark_suite_default_plan_ids_focus_evidence_sensitive_plans() -> None:
-    assert run_benchmark_suite.DEFAULT_PLAN_IDS == ("01", "03", "04", "05", "06", "07")
+    assert run_benchmark_suite.DEFAULT_PLAN_IDS == ("01", "02", "03", "04", "05", "06", "07")
+    assert "context_recall" not in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "response_relevancy" not in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "mrr_at_5" not in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "ndcg_at_10" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "metadata_filter_accuracy" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "unanswerable_abstention_accuracy" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "evidence_span_overlap" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "retrieval_noise_rate" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+
+
+def test_benchmark_suite_normalizes_legacy_source_sample_statuses() -> None:
+    samples = [
+        ({"component_score": 1.0}, "pass", 1.0),
+        ({
+            "permission": {
+                "tool_id": "read_snapshot",
+                "agent_id": "financial_analysis",
+                "permission_level": "read_only",
+            },
+        }, "pass", True),
+        ({"in_range": False}, "fail", False),
+        ({"generic_citations": 0, "source_mentions": 4}, "pass", 0),
+        ({"source_mentions": 0}, "fail", 0),
+        ({"financial_decision": "blocked"}, "fail", "blocked"),
+    ]
+
+    for raw, expected_status, expected_value in samples:
+        normalized = run_benchmark_suite._normalize_source_sample(raw)
+
+        assert normalized["status"] == expected_status
+        assert normalized["value"] == expected_value
+
+    missing_finance = run_benchmark_suite._normalize_source_sample({"financial_decision": None})
+    assert missing_finance["status"] == "not_evaluable"
+    assert "value" not in missing_finance
+
+    report_sample = run_benchmark_suite._normalize_source_sample(
+        {"scores": {"valuation_transparency": 70}},
+        source_metric_id="report.valuation_transparency",
+    )
+    assert report_sample["status"] == "fail"
+    assert report_sample["value"] == 70
+
+    missing_total = run_benchmark_suite._normalize_source_sample(
+        {"scores": {"valuation_transparency": 90}},
+        source_metric_id="report.quality_total",
+    )
+    assert missing_total["status"] == "not_evaluable"
+    assert "value" not in missing_total
+
+    latency_sample = run_benchmark_suite._normalize_source_sample(
+        {"run_type": "cold", "total_duration_seconds": 123.4, "terminal_status": "completed"},
+        source_metric_id="cold_full_report_p95_latency",
+    )
+    assert latency_sample["status"] == "measured_only"
+    assert latency_sample["value"] == 123.4
+
+    cost_sample = run_benchmark_suite._normalize_source_sample(
+        {"cost_estimate": 0.42, "terminal_status": "completed"},
+        source_metric_id="cost_per_report",
+    )
+    assert cost_sample["status"] == "measured_only"
+    assert cost_sample["value"] == 0.42
 
 
 def test_resolve_benchmark_tickers_deduplicates_and_normalizes_explicit_inputs() -> None:
@@ -108,7 +171,17 @@ def test_benchmark_suite_aggregate_metric_exposes_numeric_cohort_rate() -> None:
                     "unit": "percent",
                     "status": "pass",
                     "value": 1.0,
-                    "calculation": {"aggregation": "coverage"},
+                    "calculation": {
+                        "aggregation": "coverage",
+                        "per_sample_results": [{
+                            "tool_name": "READ_SNAPSHOT",
+                            "permission": {
+                                "tool_id": "read_snapshot",
+                                "agent_id": "financial_analysis",
+                                "permission_level": "read_only",
+                            },
+                        }],
+                    },
                     "evidence": {"artifact_ids": ["storage/runs/DHG/evidence_packet.json"]},
                 }],
             }],
@@ -162,6 +235,8 @@ def test_benchmark_suite_aggregate_metric_exposes_numeric_cohort_rate() -> None:
     ]
     assert metric["calculation"]["per_sample_results"][0]["artifact_id"] == "DHG/agent_eval.json"
     assert metric["calculation"]["per_sample_results"][0]["source_metric_id"] == "tool_permission_compliance"
+    assert metric["calculation"]["per_sample_results"][0]["source_samples"][0]["status"] == "pass"
+    assert metric["calculation"]["per_sample_results"][0]["source_samples"][0]["value"] is True
     assert metric["calculation"]["per_sample_results"][1]["failed_examples"] == [
         {"reason": "evaluation_evidence_missing"}
     ]
@@ -336,9 +411,11 @@ def test_benchmark_suite_aggregate_does_not_pass_when_ops_samples_are_not_evalua
     )
     metric = summary["artifacts"][0]["metric_results"][0]
 
-    assert metric["value"] == 0.5
-    assert metric["status"] == "not_evaluable"
+    assert metric["value"] == 500.0
+    assert metric["status"] == "pass"
     assert metric["sample_size"] == 2
+    assert metric["calculation"]["aggregation"] == "cohort_mean_observed"
+    assert metric["calculation"]["denominator"] == 1
     assert len(metric["calculation"]["per_sample_results"]) == 2
     assert metric["failed_examples"][0]["ticker"] == "AMP"
 
@@ -426,11 +503,18 @@ def test_benchmark_suite_aggregate_metric_status_follows_displayed_threshold_val
                     "metric_id": "data_reliability_score",
                     "metric_type": "score",
                     "unit": "score",
-                    "threshold": ">= 90/100",
+                    "threshold": ">= 90%",
                     "threshold_operator": ">=",
                     "status": "pass",
                     "value": 1.0,
-                    "calculation": {"aggregation": "weighted_score"},
+                    "calculation": {
+                        "aggregation": "weighted_score",
+                        "per_sample_results": [{
+                            "sample_origin": "data_reliability_score_component",
+                            "component": "core_metric_coverage",
+                            "component_score": 1.0,
+                        }],
+                    },
                 }],
             }],
         },
@@ -444,12 +528,19 @@ def test_benchmark_suite_aggregate_metric_status_follows_displayed_threshold_val
                     "metric_id": "data_reliability_score",
                     "metric_type": "score",
                     "unit": "score",
-                    "threshold": ">= 90/100",
+                    "threshold": ">= 90%",
                     "threshold_operator": ">=",
                     "status": "fail",
                     "value": 0.956,
                     "failed_examples": [{"component": "ocr_resolution_health"}],
-                    "calculation": {"aggregation": "weighted_score"},
+                    "calculation": {
+                        "aggregation": "weighted_score",
+                        "per_sample_results": [{
+                            "sample_origin": "data_reliability_score_component",
+                            "component": "ocr_resolution_health",
+                            "component_score": 0.956,
+                        }],
+                    },
                 }],
             }],
         },
@@ -465,9 +556,127 @@ def test_benchmark_suite_aggregate_metric_status_follows_displayed_threshold_val
     metric = summary["artifacts"][0]["metric_results"][0]
 
     assert metric["value"] == 0.978
-    assert metric["threshold"] == ">= 90/100"
+    assert metric["threshold"] == ">= 90%"
     assert metric["status"] == "pass"
+    assert metric["calculation"]["per_sample_results"][0]["source_samples"][0]["status"] == "pass"
+    assert metric["calculation"]["per_sample_results"][0]["source_samples"][0]["value"] == 1.0
+    assert metric["calculation"]["per_sample_results"][1]["source_samples"][0]["status"] == "warning"
+    assert metric["calculation"]["per_sample_results"][1]["source_samples"][0]["value"] == 0.956
     assert metric["failed_examples"][0]["ticker"] == "IMP"
+
+
+def test_benchmark_suite_score_metric_uses_observed_mean_when_some_tickers_missing() -> None:
+    packets = [
+        {
+            "ticker": "DHG",
+            "artifacts": [{
+                "plan_id": "06",
+                "status": "pass",
+                "metric_results": [{
+                    "id": "report.quality_total",
+                    "metric_id": "report.quality_total",
+                    "metric_type": "score",
+                    "unit": "score",
+                    "threshold": ">= 85/100",
+                    "threshold_operator": ">=",
+                    "status": "pass",
+                    "value": 90.0,
+                    "calculation": {"aggregation": "rubric_score"},
+                }],
+            }],
+        },
+        {
+            "ticker": "IMP",
+            "artifacts": [{
+                "plan_id": "06",
+                "status": "blocked",
+                "metric_results": [{
+                    "id": "report.quality_total",
+                    "metric_id": "report.quality_total",
+                    "metric_type": "score",
+                    "unit": "score",
+                    "threshold": ">= 85/100",
+                    "threshold_operator": ">=",
+                    "status": "not_evaluable",
+                    "value": None,
+                    "calculation": {"aggregation": "rubric_score"},
+                }],
+            }],
+        },
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="report_quality",
+        tickers=["DHG", "IMP"],
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("06",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 90.0
+    assert metric["status"] == "pass"
+    assert metric["calculation"]["aggregation"] == "cohort_mean_observed"
+    assert metric["calculation"]["numerator"] == 90.0
+    assert metric["calculation"]["denominator"] == 1
+
+
+def test_benchmark_suite_score_metric_excludes_not_applicable_tickers() -> None:
+    packets = [
+        {
+            "ticker": "DHG",
+            "artifacts": [{
+                "plan_id": "02",
+                "status": "pass",
+                "metric_results": [{
+                    "id": "context_precision",
+                    "metric_id": "context_precision",
+                    "metric_type": "score",
+                    "unit": "score",
+                    "threshold": ">= 80%",
+                    "threshold_operator": ">=",
+                    "status": "pass",
+                    "value": 0.95,
+                    "calculation": {"aggregation": "mean"},
+                }],
+            }],
+        },
+        {
+            "ticker": "AMP",
+            "artifacts": [{
+                "plan_id": "02",
+                "status": "pass",
+                "metric_results": [{
+                    "id": "context_precision",
+                    "metric_id": "context_precision",
+                    "metric_type": "score",
+                    "unit": "score",
+                    "threshold": ">= 80%",
+                    "threshold_operator": ">=",
+                    "status": "not_applicable",
+                    "value": None,
+                    "detail": "rag_dataset_not_applicable_for_ticker",
+                    "calculation": {"aggregation": "mean"},
+                }],
+            }],
+        },
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="full_universe",
+        tickers=["DHG", "AMP"],
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("02",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 0.95
+    assert metric["status"] == "pass"
+    assert metric["sample_size"] == 2
+    assert metric["calculation"]["aggregation"] == "cohort_mean_observed"
+    assert metric["calculation"]["denominator"] == 1
+    assert metric["failed_examples"] == []
 
 
 def test_benchmark_suite_hides_corpus_ocr_unresolved_rate_from_dashboard() -> None:
@@ -522,7 +731,7 @@ def test_benchmark_suite_hides_corpus_ocr_unresolved_rate_from_dashboard() -> No
     assert "ocr_unresolved_rate" not in metric_ids
 
 
-def test_benchmark_suite_period_completeness_uses_cohort_readiness_threshold() -> None:
+def test_benchmark_suite_hides_period_completeness_from_core_dashboard() -> None:
     packets = [
         {
             "ticker": "DHG",
@@ -570,12 +779,11 @@ def test_benchmark_suite_period_completeness_uses_cohort_readiness_threshold() -
         generated_at="2026-06-15T00:00:00+00:00",
         plan_ids=("01",),
     )
-    metric = summary["artifacts"][0]["metric_results"][0]
-
-    assert metric["value"] == 0.975
-    assert metric["threshold"] == ">= 95%"
-    assert metric["status"] == "pass"
-    assert metric["blocks_publish"] is False
+    metric_ids = {
+        metric["metric_id"]
+        for metric in summary["artifacts"][0]["metric_results"]
+    }
+    assert "period_completeness" not in metric_ids
 
 
 def test_benchmark_suite_finance_pass_count_aggregates_as_pass_rate() -> None:
@@ -586,8 +794,8 @@ def test_benchmark_suite_finance_pass_count_aggregates_as_pass_rate() -> None:
                 "plan_id": "03",
                 "status": "fail",
                 "metric_results": [{
-                    "id": "fcfe",
-                    "metric_id": "fcfe",
+                    "id": "fcff",
+                    "metric_id": "fcff",
                     "metric_type": "error_count",
                     "unit": "count",
                     "threshold": "pass",
@@ -603,8 +811,8 @@ def test_benchmark_suite_finance_pass_count_aggregates_as_pass_rate() -> None:
                 "plan_id": "03",
                 "status": "fail",
                 "metric_results": [{
-                    "id": "fcfe",
-                    "metric_id": "fcfe",
+                    "id": "fcff",
+                    "metric_id": "fcff",
                     "metric_type": "error_count",
                     "unit": "count",
                     "threshold": "pass",
@@ -736,15 +944,11 @@ def test_benchmark_suite_missing_valuation_artifact_aggregates_as_fail_rate() ->
         generated_at="2026-06-15T00:00:00+00:00",
         plan_ids=("03",),
     )
-    metric = summary["artifacts"][0]["metric_results"][0]
-
-    assert metric["value"] == 0
-    assert metric["status"] == "fail"
-    assert metric["metric_type"] == "coverage"
-    assert metric["unit"] == "percent"
-    assert metric["calculation"]["aggregation"] == "cohort_pass_rate"
-    assert metric["calculation"]["numerator"] == 0
-    assert metric["calculation"]["denominator"] == 2
+    metric_ids = {
+        metric["metric_id"]
+        for metric in summary["artifacts"][0]["metric_results"]
+    }
+    assert "valuation_artifact" not in metric_ids
 
 
 def test_benchmark_suite_writes_per_ticker_packets(monkeypatch, tmp_path) -> None:

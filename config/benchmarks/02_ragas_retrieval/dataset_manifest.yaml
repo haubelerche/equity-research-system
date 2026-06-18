@@ -23,3 +23,8 @@ metrics:
 - faithfulness
 - response_relevancy
 - source_tier_hit_rate
+- ndcg_at_10
+- metadata_filter_accuracy
+- unanswerable_abstention_accuracy
+- evidence_span_overlap
+- retrieval_noise_rate

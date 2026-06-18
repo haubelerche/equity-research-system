@@ -1213,7 +1213,8 @@ def _report_display_governance(
     # Display governance is separate from publication governance. Available
     # model outputs remain visible for analysis while client-final blockers stay
     # available to the export workflow as internal metadata.
-    approved_for_display = True
+    model_value_available = True
+    recommendation_publishable = True
     blocking_reasons = sorted(set(reasons))
 
     current, target, upside = _market_price_inputs(mode, val_result, blend)
@@ -1223,8 +1224,19 @@ def _report_display_governance(
     if target is None:
         # Only a genuinely missing computed value leaves the report unrated — there
         # is nothing to show. A present number is always shown.
-        approved_for_display = False
+        model_value_available = False
+        recommendation_publishable = False
         upside = None
+    if any(
+        reason in {
+            "valuation_result_not_publishable",
+            "no_eligible_valuation_method",
+            "fcff_fcfe_gap_gt_25pct",
+            "fcff_fcfe_gap_invalid",
+        }
+        for reason in reasons
+    ):
+        recommendation_publishable = False
 
     # Display is decoupled from publication (Option B). Publication readiness — low
     # confidence, unapproved assumptions, method divergence, market-sanity gaps — is
@@ -1237,13 +1249,22 @@ def _report_display_governance(
     if policy is not None:
         reasons = list(reasons) + list(getattr(policy, "blocking_reasons", None) or [])
         blocking_reasons = sorted(set(reasons))
+        recommendation_publishable = (
+            model_value_available
+            and bool(getattr(policy, "recommendation_publishable", False))
+        )
 
     return {
-        "approved_for_display": approved_for_display,
+        "approved_for_display": model_value_available,
+        "recommendation_publishable": recommendation_publishable,
         "current_price": current,
         "target_price": target,
         "upside": upside,
-        "recommendation": _recommendation(upside, mode, approved_for_display),
+        "recommendation": _recommendation(
+            upside, mode,
+            approved_for_display=recommendation_publishable,
+            has_model_value=model_value_available,
+        ),
         "blocking_reasons": blocking_reasons,
         "blend_target_price": _display_target_price(val_result, blend, None),
     }
@@ -1255,15 +1276,18 @@ def _recommendation(
     mode: RenderMode | str,
     approved_for_display: bool = False,
     dividend_yield: float = 0.0,
+    has_model_value: bool | None = None,
 ) -> str:
     """Rating based on total expected return, gated before publication.
 
-    When the valuation cannot support a rating, the client report shows the
-    standard sell-side "Không xếp hạng" (Not Rated) label — never an internal
-    workflow term — so the document stays clean and professional.
+    When the valuation has a computed model value but cannot support a rating,
+    the report shows "Đang rà soát" rather than a Buy/Hold/Sell conclusion.
+    If no model value exists at all, it remains "Không xếp hạng".
     """
+    if has_model_value is None:
+        has_model_value = upside is not None
     if not approved_for_display:
-        return "Không xếp hạng"
+        return "Đang rà soát" if has_model_value else "Không xếp hạng"
     if upside is None:
         return "Không xếp hạng"
     total_return = upside + dividend_yield
@@ -2261,6 +2285,8 @@ def _valuation_evidence_summary(
             if isinstance(trace, dict)
         ],
         "policy_status": getattr(policy, "status", ""),
+        "target_price_publishable": bool(getattr(policy, "target_price_publishable", False)),
+        "recommendation_publishable": bool(getattr(policy, "recommendation_publishable", False)),
         "policy_blocking_reasons": list(getattr(policy, "blocking_reasons", []) or []),
         "policy_warnings": list(getattr(policy, "warnings", []) or []),
         "display_blocking_reasons": list(display_gate.get("blocking_reasons") or []),
@@ -2432,8 +2458,9 @@ def build_client_report_view_model(
     dy_val = dividend_yield.value if dividend_yield is not None else 0.0
     recommendation = _recommendation(
         upside, mode,
-        approved_for_display=display_gate.get("approved_for_display", False),
+        approved_for_display=display_gate.get("recommendation_publishable", False),
         dividend_yield=dy_val,
+        has_model_value=target_price is not None,
     )
 
     missing: list[str] = []
@@ -2475,7 +2502,11 @@ def build_client_report_view_model(
 
     publication_status = (
         "complete"
-        if not missing and str(val_result.get("is_publishable")).lower() == "true"
+        if (
+            not missing
+            and str(val_result.get("is_publishable")).lower() == "true"
+            and display_gate.get("recommendation_publishable", False)
+        )
         else "available_with_disclosures"
     )
     missing = sorted(set(missing))

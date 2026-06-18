@@ -58,6 +58,41 @@ def test_ragas_adapter_scores_offline_contract_samples() -> None:
     assert len(result["samples"]) == 2
 
 
+def test_ragas_adapter_infers_offline_scores_from_labelled_samples() -> None:
+    result = evaluate_ragas_samples([
+        {
+            "id": "case-supported",
+            "question": "Revenue?",
+            "answer": "Revenue is 284.8445 vnd_bn.",
+            "ground_truth": "284.8445 vnd_bn",
+            "contexts": ["Audited revenue context: revenue.net = 284.8445 vnd_bn."],
+            "metadata": {
+                "expected_chunk_ids": ["chunk-1"],
+                "answerable": True,
+            },
+        },
+        {
+            "id": "case-unanswerable",
+            "question": "Unsupported catalyst?",
+            "answer": "Insufficient evidence.",
+            "ground_truth": "insufficient_evidence",
+            "contexts": [],
+            "metadata": {
+                "unanswerable": True,
+            },
+        },
+    ])
+
+    assert result["framework"] == "ragas_offline_contract"
+    assert result["execution_status"] == "executed_offline"
+    assert result["framework_version"] == "offline_inferred_v1"
+    assert result["scores"]["context_precision"] >= 0.95
+    assert result["scores"]["context_recall"] >= 0.95
+    assert result["scores"]["faithfulness"] == 1.0
+    assert result["scores"]["response_relevancy"] == 1.0
+    assert result["samples"][0]["sample_origin"] == "ragas_offline_contract_inferred"
+
+
 def test_pandera_adapter_reports_dependency_or_executes_schema() -> None:
     result = validate_financial_records_with_pandera([{
         "ticker": "DHG",

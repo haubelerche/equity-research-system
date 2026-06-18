@@ -41,6 +41,9 @@ GOLDEN_FINANCIALS_RELATIVE = BENCHMARK_SHARED_RELATIVE / "golden_financials"
 RAG_GOLDEN_QUERY_RELATIVE = (
     BENCHMARK_CONFIG_RELATIVE / "02_ragas_retrieval" / "golden_queries"
 )
+RAG_GOLDEN_CHUNK_RELATIVE = (
+    BENCHMARK_CONFIG_RELATIVE / "02_ragas_retrieval" / "golden_chunks"
+)
 RAGAS_SAMPLE_RELATIVE = (
     BENCHMARK_CONFIG_RELATIVE / "02_ragas_retrieval" / "ragas" / "ragas_samples.json"
 )
@@ -63,6 +66,9 @@ BENCHMARK_COHORTS_PATH = BENCHMARK_SHARED_ROOT / "benchmark_cohorts.yaml"
 GOLDEN_FINANCIALS_DIR = BENCHMARK_SHARED_ROOT / "golden_financials"
 RAG_GOLDEN_QUERY_DIR = (
     BENCHMARK_CONFIG_ROOT / "02_ragas_retrieval" / "golden_queries"
+)
+RAG_GOLDEN_CHUNK_DIR = (
+    BENCHMARK_CONFIG_ROOT / "02_ragas_retrieval" / "golden_chunks"
 )
 RAGAS_SAMPLE_PATH = (
     BENCHMARK_CONFIG_ROOT / "02_ragas_retrieval" / "ragas" / "ragas_samples.json"

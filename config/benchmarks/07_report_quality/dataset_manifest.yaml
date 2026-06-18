@@ -20,3 +20,9 @@ metrics:
   - report.forecast_rationale
   - report.valuation_transparency
   - report.evidence_integration
+  - report.thesis_specificity
+  - report.risk_catalyst_quality
+  - report.recommendation_consistency
+  - report.sensitivity_disclosure_completeness
+  - report.peer_industry_context_quality
+  - report.executive_summary_actionability

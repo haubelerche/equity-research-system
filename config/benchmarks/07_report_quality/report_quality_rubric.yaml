@@ -5,16 +5,24 @@ thresholds:
   financial_analysis_depth_min: 80
   forecast_rationale_min: 80
   valuation_transparency_min: 85
+  thesis_specificity_min: 80
+  risk_catalyst_quality_min: 80
+  recommendation_consistency_min_pct: 100
+  sensitivity_disclosure_completeness_min_pct: 90
+  peer_industry_context_quality_min: 75
+  executive_summary_actionability_min: 80
 weights:
-  completeness: 15
-  thesis_specificity: 15
-  financial_analysis_depth: 15
-  forecast_rationale: 15
-  valuation_transparency: 15
+  completeness: 12
+  thesis_specificity: 12
+  financial_analysis_depth: 14
+  forecast_rationale: 12
+  valuation_transparency: 14
   risk_catalyst_quality: 10
   evidence_integration: 10
+  peer_industry_context_quality: 6
+  executive_summary_actionability: 5
   presentation_quality: 5
 decisions:
-  allow_export: score >= 85 and no blocking gate fail
-  draft_only: score >= 70 but not enough for export
-  block_export: score < 70 or missing critical artifacts
+  allow_export: score >= 85% and no blocking gate fail
+  draft_only: score >= 70% but not enough for export
+  block_export: score < 70% or missing critical artifacts

@@ -42,11 +42,13 @@ class _FakeChunk:
     """Minimal stand-in for an EvidenceChunk returned by RetrievalService."""
 
     def __init__(self, chunk_text, fiscal_year=None, reliability_tier=2,
-                 extraction_method="cafef_structured"):
+                 extraction_method="cafef_structured", ticker=None, metadata=None):
         self.chunk_text = chunk_text
         self.fiscal_year = fiscal_year
         self.reliability_tier = reliability_tier
         self.extraction_method = extraction_method
+        self.ticker = ticker
+        self.metadata = metadata or {}
 
 
 def _fake_retriever(chunks_by_keyword):
@@ -426,7 +428,8 @@ def test_report_evaluator_emits_dashboard_runtime_metrics(monkeypatch) -> None:
         "CAPEX, vốn lưu động và cổ tức. Dự phóng forecast theo yếu tố dẫn dắt gồm "
         "revenue_growth, gross_margin, khấu hao, nợ vay và thuế suất. Định giá FCFF, FCFE, "
         "WACC, terminal, giá trị doanh nghiệp, nợ ròng, giá trị vốn chủ sở hữu, số cổ phiếu, "
-        "giá mục tiêu và ma trận độ nhạy. Phụ lục nguồn [1][2], công thức formula trace, "
+        "giá mục tiêu và ma trận độ nhạy; enterprise value, net debt, equity value, shares, "
+        "target price và sensitivity. Phụ lục nguồn [1][2], công thức formula trace, "
         "mã ảnh chụp dữ liệu, đối chiếu và cảnh báo."
     )
 
@@ -484,6 +487,7 @@ def test_local_retrieval_benchmark_scores_against_live_retriever(tmp_path, monke
     assert result["hit_rate_at_5"] == 1.0
     assert result["mrr_at_5"] == 1.0
     assert result["source_tier_hit_rate"] == 1.0
+    assert result["queries"][0]["top_5"][0]["relevant"] is True
 
 
 def test_local_retrieval_benchmark_blocks_when_retriever_unavailable(tmp_path, monkeypatch) -> None:
@@ -618,6 +622,20 @@ def test_retrieval_evaluator_scores_live_hits(tmp_path, monkeypatch) -> None:
 
     assert metrics["hit_rate_at_5"]["value"] == 1.0
     assert metrics["source_tier_hit_rate"]["value"] == 1.0
+    assert {
+        "hit_rate_at_5",
+        "mrr_at_5",
+        "source_tier_hit_rate",
+        "context_precision",
+        "context_recall",
+        "faithfulness",
+        "response_relevancy",
+    }.issubset(metrics)
+    assert "ndcg_at_10" not in metrics
+    assert "metadata_filter_accuracy" not in metrics
+    assert "unanswerable_abstention_accuracy" not in metrics
+    assert "evidence_span_overlap" not in metrics
+    assert "retrieval_noise_rate" not in metrics
     assert result["retrieval_backend"] in ("pgvector", "full_text")
     for metric in metrics.values():
         samples = metric["calculation"]["per_sample_results"]
@@ -798,6 +816,13 @@ def test_data_reliability_does_not_treat_pandera_schema_as_system_readiness(tmp_
     assert "material_ocr_error_count" in metrics
     assert "duplicate_fact_count" in metrics
     assert 0 < metrics["data_reliability_score"]["value"] < 1.0
+    score_components = metrics["data_reliability_score"]["calculation"]["per_sample_results"]
+    core_component = next(
+        sample for sample in score_components
+        if sample.get("component") == "core_metric_coverage"
+    )
+    assert core_component["value"] == core_component["component_score"]
+    assert core_component["status"] in {"pass", "warning"}
     assert metrics["core_metric_coverage"]["value"] < 1.0
     assert metrics["core_metric_coverage"]["failed_examples"]
     assert metrics["core_metric_coverage"]["evaluator"]["framework"] == "valuation_data_requirements+pandera"
@@ -1340,6 +1365,9 @@ def test_agent_evaluator_validates_schema_manifest_and_unauthorized_calc(tmp_pat
 
     # Tool permission is derived from real per-call permission metadata.
     assert metrics["tool_permission_compliance"]["status"] == "pass"
+    tool_sample = metrics["tool_permission_compliance"]["calculation"]["per_sample_results"][0]
+    assert tool_sample["status"] == "pass"
+    assert tool_sample["value"] is True
     # The required artifact manifest is incomplete (missing 'valuation').
     assert metrics["artifact_manifest_compliance"]["status"] == "fail"
     assert metrics["schema_validity"]["status"] == "pass"
@@ -1526,7 +1554,7 @@ def test_observability_evaluator_uses_run_trace_cost_latency_and_gate_history(tm
     assert metrics["pdf_render_failures"]["status"] == "pass"
 
 
-def test_data_reliability_tier3_provenance_makes_reconciliation_not_evaluable(tmp_path) -> None:
+def test_data_reliability_tier3_provenance_makes_reconciliation_not_applicable(tmp_path) -> None:
     material_config = tmp_path / "config" / "material_metrics.yml"
     material_config.parent.mkdir(parents=True)
     material_config.write_text("income_statement:\n  - revenue.net\n", encoding="utf-8")
@@ -1551,8 +1579,8 @@ def test_data_reliability_tier3_provenance_makes_reconciliation_not_evaluable(tm
     metric = {item["id"]: item for item in result["metrics"]}["official_reconciliation_rate"]
 
     assert metric["value"] is None
-    assert metric["status"] == "not_evaluable"
-    assert metric["detail"] == "source_tier_3_cannot_claim_official_reconciliation"
+    assert metric["status"] == "not_applicable"
+    assert metric["detail"] == "source_tier_3_provenance_only_not_official_reconciliation"
     assert result["official_reconciliation_rate"] is None
 
 
@@ -1571,6 +1599,8 @@ def test_check_golden_drift_passes_when_live_within_ranges() -> None:
     assert result["drift_violations"] == 0
     assert result["checks_run"] == 1
     assert all(c["in_range"] for c in result["drift_details"])
+    assert result["drift_details"][0]["status"] == "pass"
+    assert result["drift_details"][0]["value"] is True
 
 
 def test_check_golden_drift_fails_when_value_outside_range() -> None:
@@ -1586,6 +1616,8 @@ def test_check_golden_drift_fails_when_value_outside_range() -> None:
     assert result["drift_violations"] == 1
     price_check = next(c for c in result["drift_details"] if c["metric"] == "fcff_target_price_vnd")
     assert price_check["in_range"] is False
+    assert price_check["status"] == "fail"
+    assert price_check["value"] is False
 
 
 def test_golden_drift_metric_not_applicable_when_no_fixture(tmp_path) -> None:

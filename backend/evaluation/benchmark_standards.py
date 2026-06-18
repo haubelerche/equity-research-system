@@ -52,7 +52,12 @@ def _load_metric_registry() -> dict[str, Any]:
             threshold = item.get("threshold")
             operator = str(item.get("threshold_operator") or "").strip()
             policy = {
-                "threshold": f"{operator} {threshold}".strip(),
+                "threshold": _format_registry_threshold(
+                    operator=operator,
+                    threshold=threshold,
+                    unit=str(item.get("unit") or ""),
+                    metric_type=str(item.get("metric_type") or ""),
+                ),
                 "framework": item.get("framework"),
                 "formula": item.get("formula"),
                 "rationale": item.get("rationale") or item.get("remediation_hint"),
@@ -63,6 +68,33 @@ def _load_metric_registry() -> dict[str, Any]:
         payload["version"] = payload.get("benchmark_suite_version") or payload.get("version")
         payload.setdefault("profiles", {"active": "v3"})
     return payload
+
+
+def _format_registry_threshold(
+    *,
+    operator: str,
+    threshold: Any,
+    unit: str,
+    metric_type: str,
+) -> str:
+    unit_key = unit.strip().lower()
+    metric_type_key = metric_type.strip().lower()
+    if isinstance(threshold, bool):
+        return f"{operator} {str(threshold).lower()}".strip()
+    if threshold is None:
+        return operator.strip()
+    if unit_key == "percent" or (metric_type_key == "score" and unit_key == "score"):
+        try:
+            numeric = float(threshold)
+        except (TypeError, ValueError):
+            return f"{operator} {threshold}".strip()
+        percent_value = numeric * 100 if abs(numeric) <= 1 else numeric
+        return f"{operator} {_format_compact_number(percent_value)}%".strip()
+    return f"{operator} {threshold}".strip()
+
+
+def _format_compact_number(value: float) -> str:
+    return str(int(value)) if float(value).is_integer() else f"{value:g}"
 
 
 METRIC_REGISTRY = _load_metric_registry()

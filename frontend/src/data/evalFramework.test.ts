@@ -51,6 +51,30 @@ describe("evalFramework", () => {
     expect(rag.metrics.find((metric) => metric.id === "hit_rate_at_5")!.threshold).toBe(0.9);
   });
 
+  it("keeps the RAG dashboard contract aligned with core RAGAS and retrieval evaluators", () => {
+    const rag = EVAL_LAYERS.find((layer) => layer.id === "rag_evidence")!;
+    const metricIds = rag.metrics.map((metric) => metric.id);
+
+    expect(metricIds).toEqual(expect.arrayContaining([
+      "hit_rate_at_5",
+      "mrr_at_5",
+      "source_tier_hit_rate",
+      "context_precision",
+      "context_recall",
+      "faithfulness",
+      "response_relevancy",
+    ]));
+    expect(metricIds).not.toEqual(expect.arrayContaining([
+      "ndcg_at_10",
+      "metadata_filter_accuracy",
+      "unanswerable_abstention_accuracy",
+      "evidence_span_overlap",
+      "retrieval_noise_rate",
+    ]));
+    expect(rag.metrics.find((metric) => metric.id === "context_recall")!.threshold).toBe(0.8);
+    expect(rag.metrics.find((metric) => metric.id === "response_relevancy")!.threshold).toBe(0.75);
+  });
+
   it("keeps the evaluation pipeline and acceptance explanation in Vietnamese", () => {
     expect(PIPELINE_ORDER[0]).toMatch(/Chất lượng dữ liệu/i);
     expect(ACCEPTANCE_EXPLANATION.length).toBeGreaterThan(0);

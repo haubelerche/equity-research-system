@@ -53,6 +53,7 @@ def test_valuation_insight_uses_model_evidence_and_recommendation() -> None:
     pack = build_insight_pack(_inputs(upside=0.139, recommendation="Nắm giữ"))
     val = next(i for i in pack if i["section"] == "valuation")
     assert "[2]" in val["evidence_refs"]
+    assert "Khuyến nghị hệ thống" not in val["valuation_implication"]
     assert "Nắm giữ" in val["valuation_implication"]
 
 

@@ -1,9 +1,9 @@
 import type { BenchmarkMetricResult } from "../../api/types";
 import type { MetricDef } from "../../lib/evalStatus";
 import {
-  formatPassCondition,
   formatRoundedNumber,
   formatRuntimeMetricResult,
+  formatRuntimeThreshold,
   resolveMetricStatus,
 } from "../../lib/evalStatus";
 import { StatusPill } from "./StatusPill";
@@ -244,10 +244,12 @@ function sampleLabel(sample: unknown, index: number): string {
     ?? record?.metric
     ?? record?.stage
     ?? record?.check
+    ?? record?.tool_name
     ?? record?.file
     ?? record?.artifact
     ?? record?.section_key
     ?? record?.ticker
+    ?? record?.source_metric_id
     ?? record?.sample_index
     ?? record?.row_index
     ?? record?.unit_index
@@ -255,10 +257,146 @@ function sampleLabel(sample: unknown, index: number): string {
   );
 }
 
+const REPORT_SCORE_THRESHOLDS: Record<string, { key: string; threshold: number }> = {
+  "report.completeness": { key: "completeness", threshold: 90 },
+  "report.financial_analysis_depth": { key: "financial_analysis_depth", threshold: 80 },
+  "report.forecast_rationale": { key: "forecast_rationale", threshold: 80 },
+  "report.valuation_transparency": { key: "valuation_transparency", threshold: 85 },
+  "report.evidence_integration": { key: "evidence_integration", threshold: 80 },
+};
+
+const REPORT_TOTAL_WEIGHTS: Record<string, number> = {
+  completeness: 0.20,
+  financial_analysis_depth: 0.20,
+  forecast_rationale: 0.20,
+  valuation_transparency: 0.20,
+  evidence_integration: 0.15,
+  presentation_quality: 0.05,
+};
+
+const OPS_LATENCY_METRICS = new Set([
+  "duration_seconds",
+  "warm_full_report_p95_latency",
+  "cold_full_report_p95_latency",
+  "render_only_p95_latency",
+  "flash_memo_warm_p95_latency",
+  "flash_memo_cold_retrieval_p95_latency",
+  "latency_regression_ratio",
+]);
+
+function reportTotalScore(scores: Record<string, unknown>): number | null {
+  let total = 0;
+  for (const [key, weight] of Object.entries(REPORT_TOTAL_WEIGHTS)) {
+    const value = scores[key];
+    if (typeof value !== "number") return null;
+    total += value * weight;
+  }
+  return Number(total.toFixed(2));
+}
+
+function reportSampleStatusAndValue(record: Record<string, unknown>): { status: string; value: unknown } | null {
+  const sourceMetricId = typeof record.source_metric_id === "string" ? record.source_metric_id : null;
+  if (sourceMetricId === "report_pdf_rendered" && typeof record.report_exists === "boolean") {
+    return { status: record.report_exists ? "pass" : "fail", value: record.report_exists };
+  }
+  if (sourceMetricId === "explanation_pdf_rendered" && typeof record.explanation_exists === "boolean") {
+    return { status: record.explanation_exists ? "pass" : "fail", value: record.explanation_exists };
+  }
+  const scores = asRecord(record.scores);
+  if (!scores) return null;
+  if (sourceMetricId === "report.quality_total" || sourceMetricId === "report_quality_score") {
+    const total = reportTotalScore(scores);
+    if (total === null) return { status: "not_evaluable", value: null };
+    return { status: total >= 85 ? "pass" : "fail", value: total };
+  }
+  const scoreThreshold = sourceMetricId ? REPORT_SCORE_THRESHOLDS[sourceMetricId] : undefined;
+  if (!scoreThreshold) return null;
+  const value = scores[scoreThreshold.key];
+  if (typeof value !== "number") return { status: "not_evaluable", value: null };
+  return { status: value >= scoreThreshold.threshold ? "pass" : "fail", value };
+}
+
+function opsSampleStatusAndValue(record: Record<string, unknown>): { status: string; value: unknown } | null {
+  const sourceMetricId = typeof record.source_metric_id === "string" ? record.source_metric_id : null;
+  if (typeof record.artifact_upload_failures === "number") {
+    return {
+      status: record.artifact_upload_failures === 0 ? "pass" : "fail",
+      value: record.artifact_upload_failures,
+    };
+  }
+  if (typeof record.pdf_render_failures === "number") {
+    return {
+      status: record.pdf_render_failures === 0 ? "pass" : "fail",
+      value: record.pdf_render_failures,
+    };
+  }
+  if (sourceMetricId === "llm_retry_rate" && typeof record.retry_count === "number") {
+    return { status: record.retry_count === 0 ? "pass" : "fail", value: record.retry_count };
+  }
+  if (sourceMetricId === "retrieval_fallback_rate" && typeof record.fallback_triggered === "boolean") {
+    return { status: record.fallback_triggered ? "fail" : "pass", value: record.fallback_triggered };
+  }
+  let terminalStatus = typeof record.terminal_status === "string"
+    ? record.terminal_status.toLowerCase()
+    : "";
+  const rawStatus = typeof record.status === "string" ? record.status.toLowerCase() : "";
+  if (!terminalStatus && ["completed", "success", "failed", "error"].includes(rawStatus)) {
+    terminalStatus = rawStatus;
+  }
+  if (terminalStatus === "failed" || terminalStatus === "error") {
+    return { status: "fail", value: terminalStatus };
+  }
+  if (sourceMetricId === "cost_per_report") {
+    if (typeof record.estimated_cost_usd === "number") {
+      return { status: "measured_only", value: record.estimated_cost_usd };
+    }
+    if (typeof record.cost_estimate === "number") {
+      return { status: "measured_only", value: record.cost_estimate };
+    }
+  }
+  if (sourceMetricId && OPS_LATENCY_METRICS.has(sourceMetricId)) {
+    const duration = typeof record.duration_seconds === "number"
+      ? record.duration_seconds
+      : typeof record.total_duration_seconds === "number"
+        ? record.total_duration_seconds
+        : null;
+    if (duration !== null) return { status: "measured_only", value: duration };
+  }
+  if (terminalStatus) return { status: "pass", value: terminalStatus };
+  return null;
+}
+
+function inferredSampleStatus(record: Record<string, unknown>): string | null {
+  if (typeof record.component_score === "number") return record.component_score >= 1 ? "pass" : "warning";
+  const reportStatus = reportSampleStatusAndValue(record)?.status;
+  if (reportStatus) return reportStatus;
+  const opsStatus = opsSampleStatusAndValue(record)?.status;
+  if (opsStatus) return opsStatus;
+  for (const key of ["passed", "hit", "present", "complete", "accepted", "schema_valid", "reconciled", "in_range"]) {
+    if (typeof record[key] === "boolean") return record[key] ? "pass" : "fail";
+  }
+  for (const key of ["material_ocr_error", "is_duplicate"]) {
+    if (typeof record[key] === "boolean") return record[key] ? "fail" : "pass";
+  }
+  if (typeof record.generic_citations === "number") return record.generic_citations === 0 ? "pass" : "fail";
+  if (typeof record.source_mentions === "number") return record.source_mentions > 0 ? "pass" : "fail";
+  if (typeof record.financial_decision === "string") return record.financial_decision === "pass" ? "pass" : "fail";
+  if ("financial_decision" in record) return "not_evaluable";
+  const permission = asRecord(record.permission);
+  if (permission) return permission.tool_id && permission.agent_id ? "pass" : "fail";
+  if (record.evidence_available === false) return "not_evaluable";
+  if (typeof record.validation_status === "string" && record.validation_status.length > 0) {
+    return record.validation_status.toLowerCase() === "accepted" ? "pass" : "fail";
+  }
+  return null;
+}
+
 function sampleStatus(sample: unknown): string {
   const record = asRecord(sample);
   if (!record) return "Chưa có";
   if (record.status !== undefined) return String(record.status);
+  const inferred = inferredSampleStatus(record);
+  if (inferred) return inferred;
   if (record.passed !== undefined) return record.passed ? "pass" : "fail";
   if (record.hit !== undefined) return record.hit ? "hit" : "miss";
   return "Chưa có";
@@ -270,16 +408,36 @@ function sampleValue(sample: unknown): string {
   if (record.reported !== undefined || record.expected !== undefined) {
     return `${valueOrDash(record.reported)} / ${valueOrDash(record.expected)}`;
   }
+  const scoreValue = record.metric_score ?? record.score ?? record.reciprocal_rank;
+  if (typeof scoreValue === "number") {
+    return formatRoundedNumber(Math.abs(scoreValue) <= 1 ? scoreValue * 100 : scoreValue) + "%";
+  }
+  if (typeof record.component_score === "number") {
+    return formatRoundedNumber(Math.abs(record.component_score) <= 1 ? record.component_score * 100 : record.component_score) + "%";
+  }
+  const reportValue = reportSampleStatusAndValue(record)?.value;
+  if (reportValue !== undefined) return valueOrDash(reportValue);
+  const opsValue = opsSampleStatusAndValue(record)?.value;
+  if (opsValue !== undefined) return valueOrDash(opsValue);
+  const permission = asRecord(record.permission);
+  if (permission) {
+    return valueOrDash(permission.permission_level ?? permission.tool_id ?? true);
+  }
   return valueOrDash(
     record.value
     ?? record.present
+    ?? record.complete
+    ?? record.in_range
     ?? record.accepted
+    ?? record.schema_valid
+    ?? record.reconciled
+    ?? record.verified
+    ?? record.generic_citations
+    ?? record.source_mentions
+    ?? record.financial_decision
     ?? record.record_count
     ?? record.evidence_available
     ?? record.error
-    ?? record.metric_score
-    ?? record.score
-    ?? record.reciprocal_rank
     ?? record.retrieved_source_tier,
   );
 }
@@ -422,7 +580,7 @@ function calculationNarrative(def: MetricDef, result: BenchmarkMetricResult | un
   const aggregation = String(calculation?.aggregation ?? "");
   const numerator = valueOrDash(calculation?.numerator);
   const denominator = valueOrDash(calculation?.denominator);
-  const threshold = valueOrDash(result?.threshold ?? formatPassCondition(def));
+  const threshold = formatRuntimeThreshold(def, result);
   const sampleCount = calculation?.per_sample_results?.length ?? 0;
   const metricName = result?.metric_name ?? def.label;
 
@@ -495,7 +653,7 @@ export function MetricExplanation({ def, result }: { def: MetricDef; result?: Be
           <div><dt>Technology</dt><dd>{def.englishLabel ?? def.technology}</dd></div>
           <div><dt>Trạng thái</dt><dd><StatusPill status={status} /></dd></div>
           <div><dt>Kết quả</dt><dd><code>{formatRuntimeMetricResult(def, result)}</code></dd></div>
-          <div><dt>Ngưỡng đạt</dt><dd><code>{valueOrDash(result?.threshold ?? formatPassCondition(def))}</code></dd></div>
+          <div><dt>Ngưỡng đạt</dt><dd><code>{formatRuntimeThreshold(def, result)}</code></dd></div>
           <div><dt>Sample size</dt><dd>{valueOrDash(result?.sample_size)}</dd></div>
         </dl>
       </div>

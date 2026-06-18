@@ -58,6 +58,23 @@ const packet = {
             id: "gross_margin",
             passed: true,
             value: true,
+          }, {
+            sample_origin: "data_reliability_score_component",
+            component: "provenance_coverage",
+            component_score: 1,
+            weight: 0.15,
+          }, {
+            tool_name: "READ_SNAPSHOT",
+            permission: {
+              tool_id: "read_snapshot",
+              agent_id: "financial_analysis",
+              permission_level: "read_only",
+            },
+          }, {
+            source_metric_id: "report.valuation_transparency",
+            scores: {
+              valuation_transparency: 70,
+            },
           }],
         }],
       },
@@ -79,6 +96,89 @@ const packet = {
       value: 0.023,
       threshold: ">= 95%",
       status: "fail",
+    }],
+  }, {
+    plan_id: "02",
+    name: "RAG retrieval",
+    artifact: "retrieval_eval.json",
+    status: "pass",
+    metric_results: [{
+      metric_id: "hit_rate_at_5",
+      metric_name: "Hit-rate@5",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 0.95,
+      threshold: ">= 90%",
+      status: "pass",
+      sample_size: 20,
+      evaluator: { framework: "golden_retrieval_set", execution_status: "executed" },
+      calculation: { aggregation: "coverage", per_sample_results: [{ status: "pass", value: true }] },
+    }, {
+      metric_id: "mrr_at_5",
+      metric_name: "MRR@5",
+      metric_type: "score",
+      unit: "percent",
+      value: 0.82,
+      threshold: ">= 75%",
+      status: "pass",
+      sample_size: 20,
+      evaluator: { framework: "golden_retrieval_set", execution_status: "executed" },
+      calculation: { aggregation: "mean", per_sample_results: [{ status: "pass", value: 1 }] },
+    }, {
+      metric_id: "source_tier_hit_rate",
+      metric_name: "Source-tier hit rate",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 0.92,
+      threshold: ">= 90%",
+      status: "pass",
+      sample_size: 20,
+      evaluator: { framework: "source_tier_retrieval_audit", execution_status: "executed" },
+      calculation: { aggregation: "coverage", per_sample_results: [{ status: "pass", value: true }] },
+    }, {
+      metric_id: "context_precision",
+      metric_name: "Context Precision",
+      metric_type: "score",
+      unit: "percent",
+      value: 0.84,
+      threshold: ">= 80%",
+      status: "pass",
+      sample_size: 20,
+      evaluator: { framework: "ragas", execution_status: "executed" },
+      calculation: { aggregation: "mean", per_sample_results: [{ status: "pass", value: 0.84 }] },
+    }, {
+      metric_id: "context_recall",
+      metric_name: "Context Recall",
+      metric_type: "score",
+      unit: "percent",
+      value: 0.82,
+      threshold: ">= 80%",
+      status: "pass",
+      sample_size: 20,
+      evaluator: { framework: "ragas", execution_status: "executed" },
+      calculation: { aggregation: "mean", per_sample_results: [{ status: "pass", value: 0.82 }] },
+    }, {
+      metric_id: "faithfulness",
+      metric_name: "Faithfulness",
+      metric_type: "score",
+      unit: "percent",
+      value: 0.9,
+      threshold: ">= 85%",
+      status: "pass",
+      sample_size: 20,
+      evaluator: { framework: "ragas", execution_status: "executed" },
+      calculation: { aggregation: "mean", per_sample_results: [{ status: "pass", value: 0.9 }] },
+    }, {
+      metric_id: "response_relevancy",
+      metric_name: "Response Relevancy",
+      metric_type: "score",
+      unit: "percent",
+      value: 0.8,
+      threshold: ">= 75%",
+      status: "pass",
+      sample_size: 20,
+      evaluator: { framework: "ragas", execution_status: "executed" },
+      calculation: { aggregation: "mean", per_sample_results: [{ status: "pass", value: 0.8 }] },
     }],
   }, {
     plan_id: "03",
@@ -160,6 +260,21 @@ describe("EvalDashboardPage", () => {
     expect(fetch).toHaveBeenCalledWith("/eval/framework", { cache: "no-store" });
     expect(screen.getAllByText("Core metric coverage").length).toBeGreaterThan(0);
     expect(screen.getAllByText("33.3%").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("MRR@5").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Context Precision").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Context Recall").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Faithfulness").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Response Relevancy").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Source-tier hit rate").length).toBeGreaterThan(0);
+    expect(screen.queryByText("nDCG@10")).not.toBeInTheDocument();
+    expect(screen.queryByText("Metadata filter accuracy")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unanswerable abstention accuracy")).not.toBeInTheDocument();
+    expect(screen.queryByText("Evidence span overlap")).not.toBeInTheDocument();
+    expect(screen.queryByText("Retrieval noise rate")).not.toBeInTheDocument();
+    const contextRecallRow = screen.getAllByText("Context Recall")[0].closest("tr");
+    expect(contextRecallRow).not.toBeNull();
+    expect(within(contextRecallRow!).getByText(/80%/)).toBeInTheDocument();
+    expect(within(contextRecallRow!).getByText("82%")).toBeInTheDocument();
     expect(screen.queryByText("1/3 = 33.3%")).not.toBeInTheDocument();
     expect(screen.queryByText("0.3333333333333333")).not.toBeInTheDocument();
     expect(screen.queryByText("Valuation method data readiness")).not.toBeInTheDocument();
@@ -213,8 +328,26 @@ describe("EvalDashboardPage", () => {
     expect(screen.getByText("0.24.0")).toBeInTheDocument();
     expect(screen.getByText(/MVP coverage threshold/)).toBeInTheDocument();
     expect(screen.getByText(/đếm số sample đạt điều kiện/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /sample \(2\)/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /sample \(5\)/i })).toBeInTheDocument();
     expect(screen.getByText("gross_margin")).toBeInTheDocument();
+    const componentRow = screen.getByText("provenance_coverage").closest("tr");
+    expect(componentRow).not.toBeNull();
+    expect(within(componentRow!).getByText("pass")).toBeInTheDocument();
+    expect(within(componentRow!).getByText("100%")).toBeInTheDocument();
+    const permissionCell = screen
+      .getAllByText("READ_SNAPSHOT")
+      .find((element) => element.tagName.toLowerCase() === "td");
+    const permissionRow = permissionCell?.closest("tr");
+    expect(permissionRow).not.toBeNull();
+    expect(within(permissionRow!).getByText("pass")).toBeInTheDocument();
+    expect(within(permissionRow!).getByText("read_only")).toBeInTheDocument();
+    const reportScoreCell = screen
+      .getAllByText("report.valuation_transparency")
+      .find((element) => element.tagName.toLowerCase() === "td");
+    const reportScoreRow = reportScoreCell?.closest("tr");
+    expect(reportScoreRow).not.toBeNull();
+    expect(within(reportScoreRow!).getByText("fail")).toBeInTheDocument();
+    expect(within(reportScoreRow!).getByText("70")).toBeInTheDocument();
     expect(screen.getAllByText("Artifact ID").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Reason").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Evidence").length).toBeGreaterThan(0);

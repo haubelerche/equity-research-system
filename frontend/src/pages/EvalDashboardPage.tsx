@@ -5,8 +5,9 @@ import { EVAL_LAYERS, type EvalLayer } from "../data/evalFramework";
 import {
   formatFailCondition,
   formatMetricNumber,
-  formatPassCondition,
   formatRoundedNumber,
+  formatRuntimeMetricResult,
+  formatRuntimeThreshold,
   inferRuntimeComparator,
   parseRuntimeThreshold,
   resolveMetricStatus,
@@ -28,15 +29,45 @@ type ModalState =
 type MetricResultMap = Record<string, BenchmarkMetricResult>;
 
 const HIDDEN_DASHBOARD_METRIC_IDS = new Set([
+  "period_completeness",
+  "provenance_coverage",
+  "source_provenance_coverage",
+  "accepted_facts_source_coverage",
   "ocr_unresolved_rate",
   "corpus_ocr_unresolved_rate",
   "official_reconciliation_rate",
   "valuation_method_data_readiness",
+  "ndcg_at_10",
+  "metadata_filter_accuracy",
+  "unanswerable_abstention_accuracy",
+  "evidence_span_overlap",
+  "retrieval_noise_rate",
   "valuation_artifact",
+  "fcfe",
+  "sensitivity_varies",
+  "fcfe_sensitivity",
+  "golden_drift_out_of_tolerance",
+  "target_price_bridge_error",
+  "wacc_terminal_growth_violation",
+  "net_debt_reconciliation_error",
   "role_adherence",
   "groundedness",
+  "task_completion",
   "plan_adherence",
   "critic_issue_recall",
+  "artifact_manifest_compliance",
+  "report.financial_analysis_depth",
+  "report.forecast_rationale",
+  "report.evidence_integration",
+  "explanation_pdf_rendered",
+  "deterministic_finance_gate",
+  "publication_readiness",
+  "ocr_failure_rate",
+  "cold_full_report_p95_latency",
+  "render_only_p95_latency",
+  "flash_memo_warm_p95_latency",
+  "flash_memo_cold_retrieval_p95_latency",
+  "latency_regression_ratio",
 ]);
 
 type PublicationIssue = {
@@ -61,11 +92,50 @@ function resultKey(result: BenchmarkMetricResult): string {
   return String(result.metric_id ?? result.id ?? "");
 }
 
+function isObservedNumericAggregate(result: BenchmarkMetricResult): boolean {
+  const metricType = String(result.metric_type ?? "").toLowerCase();
+  const unit = String(result.unit ?? "").toLowerCase();
+  if (["coverage", "error_count", "error_rate", "boolean"].includes(metricType)) return false;
+  if (["count", "boolean", "percent"].includes(unit)) return false;
+  return ["score", "latency_percentile"].includes(metricType)
+    || ["score", "minutes", "seconds", "usd", "ratio"].includes(unit);
+}
+
+function normalizeObservedNumericAggregate(result: BenchmarkMetricResult): BenchmarkMetricResult {
+  const aggregation = String(result.calculation?.aggregation ?? "").toLowerCase();
+  const samples = result.calculation?.per_sample_results;
+  if (aggregation !== "cohort_pass_rate" || !isObservedNumericAggregate(result) || !Array.isArray(samples)) {
+    return result;
+  }
+  const numericValues = samples
+    .map((sample) => (sample && typeof sample === "object" ? (sample as Record<string, unknown>).value : undefined))
+    .filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+  if (numericValues.length === 0) return result;
+  const observedMean = numericValues.reduce((total, value) => total + value, 0) / numericValues.length;
+  const hasMissingEvidence = samples.some((sample) => {
+    if (!sample || typeof sample !== "object") return false;
+    const status = String((sample as Record<string, unknown>).status ?? "").toLowerCase();
+    return ["blocked", "not_evaluable", "not_measured"].includes(status);
+  });
+  return {
+    ...result,
+    value: observedMean,
+    status: hasMissingEvidence ? "pass" : result.status,
+    calculation: {
+      ...result.calculation,
+      aggregation: "cohort_mean_observed",
+      numerator: observedMean,
+      denominator: numericValues.length,
+    },
+  };
+}
+
 function resultsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): MetricResultMap {
   const artifact = artifactFor(packet, layer);
   const metricResults = artifact?.metric_results
     ?? (Array.isArray(artifact?.metrics) ? artifact.metrics as BenchmarkMetricResult[] : []);
   const entries = metricResults
+    .map((result) => normalizeObservedNumericAggregate(result))
     .map((result) => [resultKey(result), result] as const)
     .filter(([key]) => key.length > 0);
   const results = Object.fromEntries(entries);
@@ -80,7 +150,7 @@ function resultsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): Met
 function metricFromResult(result: BenchmarkMetricResult): MetricDef {
   const id = resultKey(result);
   const threshold = parseRuntimeThreshold(result.threshold, result.unit) ?? 0;
-  const unit = result.unit === "%" || result.unit === "percent" || String(result.threshold ?? "").includes("%") ? "%" : "";
+  const unit = result.unit === "percent" ? "%" : String(result.unit ?? "");
   return {
     id,
     label: String(result.metric_name ?? result.label ?? id),
@@ -230,7 +300,7 @@ function collectPublicationIssues(packet: EvaluationPacket | null): PublicationI
 
 function displayMetricValue(layer: EvalLayer, metricId: string, result: BenchmarkMetricResult | undefined, value: number | null | undefined): string {
   const def = layer.metrics.find((metric) => metric.id === metricId);
-  if (typeof result?.value === "number" && def) return formatMetricNumber(def, result.value);
+  if (result && def) return formatRuntimeMetricResult(def, result, value, { includeFormula: false });
   if (typeof result?.value === "boolean") return result.value ? "true" : "false";
   if (typeof result?.value === "string") return result.value;
   if (value === undefined || value === null || !def) return "Thiếu dữ liệu";
@@ -417,7 +487,7 @@ export function EvalDashboardPage() {
                       <span className="metric-technology">{metric.englishLabel ?? metric.technology}</span>
                     </td>
                     <td>{result?.metric_type ?? metric.metricType ?? metric.technology}</td>
-                    <td className="num">{String(result?.threshold ?? formatPassCondition(metric))}</td>
+                    <td className="num">{formatRuntimeThreshold(metric, result)}</td>
                     <td className="num">{displayMetricValue(modal.layer, metric.id, result, values[metric.id])}</td>
                     <td><StatusPill status={status} /></td>
                     <td>{(result?.failed_examples ?? []).length || result?.detail || "Không có"}</td>

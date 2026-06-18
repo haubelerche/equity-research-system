@@ -120,6 +120,18 @@ def _view_model_evidence(vm: Any | None) -> dict[str, Any]:
     return dict(payload) if isinstance(payload, Mapping) else {}
 
 
+def _evidence_value_label(value: Any) -> str:
+    key = str(value or "").strip()
+    normalized = key.lower().replace("_", " ").replace("-", " ")
+    if key == "analyst_default_pending_peers":
+        return "Giả định tạm thời của mô hình; chưa có bộ doanh nghiệp so sánh được phê duyệt."
+    if key == "pending_peer_dataset":
+        return "Đang chờ dữ liệu nhóm doanh nghiệp so sánh đã kiểm chứng."
+    if "peer" in normalized and "pending" in normalized:
+        return "Đang chờ dữ liệu nhóm doanh nghiệp so sánh đã kiểm chứng."
+    return key
+
+
 def _evidence_block(vm: Any | None) -> str:
     evidence = _view_model_evidence(vm)
     if not evidence:
@@ -130,13 +142,13 @@ def _evidence_block(vm: Any | None) -> str:
         methods = ", ".join(item for item in (evidence.get("formula_trace_methods") or []) if item) or _DASH
         rows.append(("Số vết công thức", f"{trace_count} ({methods})"))
     if evidence.get("peer_data_source"):
-        rows.append(("Nguồn multiples đối chiếu", str(evidence["peer_data_source"])))
+        rows.append(("Nguồn multiples đối chiếu", _evidence_value_label(evidence["peer_data_source"])))
     if evidence.get("relative_valuation_status"):
-        rows.append(("Trạng thái relative valuation", str(evidence["relative_valuation_status"])))
+        rows.append(("Trạng thái định giá tương đối", _evidence_value_label(evidence["relative_valuation_status"])))
     bridge = evidence.get("market_sanity_bridge") or {}
     if isinstance(bridge, Mapping) and bridge:
-        rows.append(("Target/Market", str(bridge.get("target_to_market") or _DASH)))
-        rows.append(("Market sanity bridge", "có" if bridge.get("bridge_present") else "chưa có"))
+        rows.append(("Tỷ lệ giá trị mô hình/thị giá", str(bridge.get("target_to_market") or _DASH)))
+        rows.append(("Cầu nối kiểm tra thị trường", "có" if bridge.get("bridge_present") else "chưa có"))
     blocks = []
     if rows:
         blocks.append(_kv_table(rows))
@@ -175,6 +187,18 @@ def _translate_warning(warning: Any) -> str:
     if not text:
         return ""
 
+    direct_rules = {
+        "no_eligible_valuation_method": "Chưa có phương pháp định giá chính đủ điều kiện để phát hành khuyến nghị.",
+        "valuation_method_divergence_critical": "Các phương pháp định giá cho kết quả phân kỳ mạnh; cần ưu tiên kiểm định giả định và cầu nối thị trường trước khi ra kết luận đầu tư.",
+        "valuation_result_not_publishable": "Kết quả định giá có cảnh báo trọng yếu nên chỉ được đọc cùng bảng tính chi tiết và phần đối chiếu.",
+        "market_sanity_bridge_missing": "Giá trị mô hình lệch đáng kể so với thị giá nhưng chưa có cầu nối giải thích bằng P/E, EV/EBITDA hoặc bằng chứng cơ bản.",
+        "fcfe_low_confidence": "FCFE có độ tin cậy thấp; lịch vay ròng và giả định dòng tiền cho cổ đông cần được kiểm định thêm.",
+        "fcff_low_confidence": "FCFF có độ tin cậy thấp; WACC, tăng trưởng dài hạn và dòng tiền nền cần được kiểm định thêm.",
+        "peer_data_source": "nguồn dữ liệu doanh nghiệp so sánh",
+    }
+    if text in direct_rules:
+        return direct_rules[text]
+
     evaluation_rules = {
         "driver logic": "Tính hợp lý của yếu tố dẫn dắt",
         "risk balance": "Mức độ cân bằng rủi ro",
@@ -193,6 +217,26 @@ def _translate_warning(warning: Any) -> str:
             return f"{label}{_score(text)}: kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan được công bố trong phụ lục."
 
     rules = [
+        (
+            "no-new-debt policy",
+            "Lịch nợ vay đang giả định không phát sinh nợ mới và dư nợ giảm về gần 0 ở năm cơ sở; FCFE có thể tính được nhưng vẫn cần kiểm tra lại chính sách vay, trả nợ và kế hoạch vốn.",
+        ),
+        (
+            "relative valuation is pending",
+            "Định giá tương đối chưa đủ điều kiện vì thiếu bộ doanh nghiệp so sánh đã phê duyệt; P/E, P/B và EV/EBITDA chỉ nên dùng sau khi có nhóm doanh nghiệp so sánh rõ ràng.",
+        ),
+        (
+            "eps and target p/e are present",
+            "EPS dự phóng và P/E mục tiêu đã có nhưng giá suy ra theo P/E đang bị trống; đây là lỗi mapping cần kiểm tra trong bảng định giá tương đối.",
+        ),
+        (
+            "model default",
+            "P/E mục tiêu đang là giả định mặc định của mô hình; cần đối chiếu với P/E trung vị nhóm doanh nghiệp so sánh trước khi dùng làm cơ sở khuyến nghị.",
+        ),
+        (
+            "critical_cảnh báo:relative valuation is pending",
+            "Cảnh báo nghiêm trọng: định giá tương đối chưa đủ điều kiện vì thiếu bộ doanh nghiệp so sánh đã phê duyệt.",
+        ),
         (
             "the fcfe stream is not publishable",
             "Mức độ nghiêm trọng cao: FCFE chưa đủ điều kiện công bố vì mô hình giữ dư nợ ổn định, "
@@ -267,6 +311,10 @@ def _translate_warning(warning: Any) -> str:
             "dùng thuế suất theo chính sách thuế để tính EBIT sau thuế.",
         ),
         (
+            "normalized opening nwc",
+            "Vốn lưu động năm dự phóng đầu tiên dùng mức vốn lưu động mở đầu đã chuẩn hóa; cần đối chiếu lại với biến động phải thu, tồn kho và phải trả.",
+        ),
+        (
             "delta nwc estimated as 2% revenue change",
             "Biến động vốn lưu động được ước tính bằng 2% thay đổi doanh thu do thiếu lịch vốn lưu động.",
         ),
@@ -289,7 +337,8 @@ def _translate_warning(warning: Any) -> str:
         ),
     ]
     for needle, translated in rules:
-        if needle.replace("-", " ") in normalized:
+        needle_norm = needle.lower().replace("_", " ").replace("-", " ")
+        if needle_norm in normalized:
             return translated
 
     replacements = {
@@ -727,6 +776,9 @@ _ISSUE_LABELS = {
     "dividend_schedule": "Chưa đủ dữ liệu để kiểm tra lịch cổ tức dự phóng.",
     "debt_schedule_publishable": "Lịch nợ vay chưa đủ để kiểm tra toàn bộ định giá dòng tiền cho cổ đông.",
     "forecast_debt": "Cần rà soát thêm lịch nợ vay dự phóng.",
+    "no_eligible_valuation_method": "Chưa có phương pháp định giá chính đủ điều kiện để phát hành khuyến nghị.",
+    "valuation_method_divergence_critical": "Các phương pháp định giá cho kết quả phân kỳ mạnh; cần ưu tiên kiểm định giả định và cầu nối thị trường trước khi ra kết luận đầu tư.",
+    "market_sanity_bridge_missing": "Giá trị mô hình lệch đáng kể so với thị giá nhưng chưa có cầu nối giải thích bằng P/E, EV/EBITDA hoặc bằng chứng cơ bản.",
     "valuation_result_not_publishable": "Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết.",
     "blend_is_draft_only": "Hai phương pháp dòng tiền có độ lệch lớn; cần đọc kỹ phần kết hợp phương pháp và đối chiếu.",
     "fcff_fcfe_gap_gt_25pct": "Giá trị theo FCFF và FCFE lệch trên 25%.",

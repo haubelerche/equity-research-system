@@ -3,10 +3,14 @@ import {
   evalMetricStatus,
   formatFailCondition,
   formatMetricNumber,
+  formatMetricScope,
   formatPassCondition,
   formatRoundedNumber,
+  formatRuntimeMetricResult,
+  formatRuntimeThreshold,
   inferRuntimeComparator,
   normalizeMetricStatus,
+  metricSemanticType,
   parseRuntimeThreshold,
   resolveMetricStatus,
   type MetricDef,
@@ -19,6 +23,11 @@ const gte: MetricDef = {
 const lte: MetricDef = {
   id: "dupes", label: "Duplicates", unit: "%", comparator: "lte", threshold: 0,
   technology: "Test framework", formula: "duplicates / total",
+};
+const coverageMetric: MetricDef = {
+  id: "fcff", label: "FCFF formula pass count", unit: "%", comparator: "gte", threshold: 10,
+  technology: "Test framework", formula: "fcff formula pass",
+  metricType: "coverage",
 };
 
 describe("evalMetricStatus", () => {
@@ -69,6 +78,137 @@ describe("evalMetricStatus", () => {
 
   it("trusts backend status for non-numeric runtime threshold contracts", () => {
     expect(resolveMetricStatus(gte, { value: 0, threshold: "pass", status: "fail" })).toBe("fail");
-    expect(resolveMetricStatus(gte, { value: 0, threshold: "present", status: "blocked" })).toBe("blocked");
+    expect(resolveMetricStatus(gte, { value: 0, threshold: "present", status: "blocked" })).toBe("fail");
+  });
+
+  it("passes partially observed aggregate metrics when the observed value meets threshold", () => {
+    expect(resolveMetricStatus(lte, {
+      value: 0.378,
+      threshold: "<= 10",
+      status: "not_evaluable",
+      metric_type: "latency_percentile",
+      unit: "minutes",
+      sample_size: 45,
+      calculation: { aggregation: "cohort_mean_observed", numerator: 0.378, denominator: 17 },
+    })).toBe("pass");
+  });
+
+  it("classifies boolean-gate runtime metrics as boolean by aggregation", () => {
+    const runtimeType = metricSemanticType(coverageMetric, {
+      metric_id: "fcff",
+      metric_type: "error_count",
+      threshold: "pass",
+      unit: "count",
+      calculation: { aggregation: "boolean_gate", numerator: 1, denominator: 1 },
+      value: 1,
+    });
+
+    expect(runtimeType).toBe("boolean_gate");
+  });
+
+  it("keeps runtime error_count metrics as error_count when threshold is pass", () => {
+    const runtimeType = metricSemanticType(coverageMetric, {
+      metric_id: "final_ocr_error_count",
+      metric_type: "error_count",
+      threshold: "pass",
+      unit: "count",
+      calculation: { aggregation: "error_count", numerator: 0, denominator: 1 },
+      value: 0,
+    });
+
+    expect(runtimeType).toBe("error_count");
+  });
+
+  it("describes observed numeric cohort means by observed sample count", () => {
+    expect(formatMetricScope(gte, {
+      metric_id: "warm_full_report_p95_latency",
+      metric_type: "latency_percentile",
+      unit: "minutes",
+      value: 9.35,
+      sample_size: 45,
+      calculation: { aggregation: "cohort_mean_observed", numerator: 9.35, denominator: 17 },
+    })).toBe("17/45 samples");
+  });
+
+  it("formats normalized score metrics as percentages without changing threshold semantics", () => {
+    const score: MetricDef = {
+      id: "data_reliability_score",
+      label: "Data reliability score",
+      unit: "%",
+      comparator: "gte",
+      threshold: 0.9,
+      technology: "weighted score",
+      formula: "weighted score",
+      metricType: "score",
+    };
+
+    expect(formatRuntimeMetricResult(score, {
+      metric_id: "data_reliability_score",
+      metric_type: "score",
+      unit: "score",
+      value: 0.992,
+      threshold: ">= 90/100",
+    })).toBe("99.2%");
+    expect(formatRuntimeThreshold(score, {
+      metric_id: "data_reliability_score",
+      metric_type: "score",
+      unit: "score",
+      threshold: ">= 90/100",
+    })).toBe("≥ 90%");
+  });
+
+  it("formats rubric scores and exact percentage gates consistently", () => {
+    const rubric: MetricDef = {
+      id: "report.quality_total",
+      label: "Report quality total",
+      unit: "",
+      comparator: "gte",
+      threshold: 85,
+      technology: "rubric",
+      formula: "rubric score",
+      metricType: "score",
+    };
+
+    expect(formatRuntimeMetricResult(rubric, {
+      metric_id: "report.quality_total",
+      metric_type: "score",
+      unit: "score",
+      value: 85,
+      threshold: ">= 85/100",
+    })).toBe("85%");
+    expect(formatRuntimeThreshold(gte, {
+      metric_id: "schema_validity",
+      metric_type: "coverage",
+      unit: "percent",
+      threshold: "= 100%",
+      threshold_operator: "=",
+    })).toBe("= 100%");
+  });
+
+  it("does not convert cost or ratio score metrics into percentages", () => {
+    const cost: MetricDef = {
+      id: "cost_per_report",
+      label: "Cost per report",
+      unit: "usd",
+      comparator: "lte",
+      threshold: 2,
+      technology: "cost ledger",
+      formula: "usd",
+      metricType: "score",
+    };
+
+    expect(formatRuntimeMetricResult(cost, {
+      metric_id: "cost_per_report",
+      metric_type: "score",
+      unit: "usd",
+      value: 1.25,
+      threshold: "<= 2",
+    })).toBe("1.25");
+    expect(formatRuntimeThreshold(cost, {
+      metric_id: "latency_regression_ratio",
+      metric_type: "score",
+      unit: "ratio",
+      threshold: "<= 1.25",
+    })).toBe("<= 1.25");
   });
 });

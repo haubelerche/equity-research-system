@@ -75,7 +75,7 @@ def test_display_governance_shows_target_even_when_no_method_eligible():
     assert display["target_price"] == 27_207
     assert display["upside"] is not None
     assert display["blend_target_price"] == 27_207
-    assert display["recommendation"] == "Bán"
+    assert display["recommendation"] == "Đang rà soát"
     # The readiness signal is still available to the export workflow as metadata.
     assert "no_eligible_valuation_method" in display["blocking_reasons"]
 
@@ -95,7 +95,7 @@ def test_display_governance_shows_low_confidence_target():
     display = vm._report_display_governance("standard", valuation, blend)
 
     assert display["target_price"] == 27_207
-    assert display["recommendation"] == "Bán"
+    assert display["recommendation"] == "Đang rà soát"
 
 
 def test_market_price_as_of_prefers_run_market_data_date():

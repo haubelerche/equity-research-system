@@ -11,8 +11,12 @@ Mục tiêu: kiểm định retrieval/evidence grounding cho equity research, kh
 ## Metric
 
 - Hit-rate@5 >= 90%.
-- MRR@5 >= 0.75.
+- MRR@5 >= 75%.
 - Source-tier hit >= 90%.
-- Context precision/recall >= 0.80.
-- Faithfulness >= 0.90.
+- Context precision/recall >= 80%.
+- Faithfulness >= 90%.
+- nDCG@10 >= 80%.
+- Metadata filter accuracy >= 95%.
+- Evidence span overlap >= 75%.
+- Retrieval noise rate <= 20%.
 - Unanswerable control phải trả lời `insufficient evidence`, không bịa guidance 2026.

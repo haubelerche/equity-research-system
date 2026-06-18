@@ -22,23 +22,55 @@ def _make_artifact(ticker: str = "TEST") -> ReportArtifact:
     )
 
 
+def _publishable_policy_fields(target: float = 100_000) -> dict:
+    return {
+        "current_price_vnd": target,
+        "valuation_confidence": {"fcff_dcf": "high", "fcfe_dcf": "high"},
+        "formula_traces": [{"method": "fcff"}, {"method": "fcfe"}],
+        "sensitivity": {
+            "fcff_wacc_g": {
+                "wacc_0.11": {"g_0.02": target * 1.05, "g_0.03": target},
+                "wacc_0.12": {"g_0.02": target, "g_0.03": target * 0.95},
+            },
+            "fcfe_re_g": {
+                "re_0.11": {"g_0.02": target * 1.04, "g_0.03": target},
+                "re_0.12": {"g_0.02": target, "g_0.03": target * 0.96},
+            },
+            "blend_grid": {
+                str(target * 0.95): {str(target * 0.95): target * 0.95},
+                str(target): {str(target): target},
+            },
+        },
+    }
+
+
 def _passing_gate_inputs() -> dict:
     val = {
+        **_publishable_policy_fields(),
         "blend_dcf": {
             "price_fcff_vnd": 100_000,
             "price_fcfe_vnd": 100_000,
             "target_price_dcf_vnd": 100_000,
+            "current_price_vnd": 100_000,
+            "is_draft_only": False,
         },
         "fcff": {
             "shares_mn": 100,
+            "target_price_vnd": 100_000,
             "wacc": 0.12,
             "terminal_growth": 0.03,
+            "wacc_breakdown": {"risk_free_rate": 0.04},
             "enterprise_value": 1000,
             "equity_value": 800,
+            "net_debt_bridge": {"status": "ok"},
+            "ev_to_equity_bridge": {"ev": 1000},
         },
         "fcfe": {
+            "target_price_vnd": 100_000,
+            "fcfe_table": [{"fcfe": 100, "net_borrowing": 0}],
             "equity_value": 750,
             "cost_of_equity": 0.12,
+            "cost_of_equity_breakdown": {"risk_free_rate": 0.04},
             "terminal_growth": 0.03,
         },
         "fcff_sensitivity": {
@@ -156,13 +188,33 @@ class TestExportGateControlsRender:
     def test_all_pass_means_client_final(self):
         artifact = _make_artifact()
         val = {
+            **_publishable_policy_fields(target=5),
             "blend_dcf": {
                 "price_fcff_vnd": 5,
                 "price_fcfe_vnd": 5,
                 "target_price_dcf_vnd": 5,
+                "current_price_vnd": 5,
+                "is_draft_only": False,
             },
-            "fcff": {"shares_mn": 100, "wacc": 0.12, "terminal_growth": 0.03, "enterprise_value": 1000, "equity_value": 800},
-            "fcfe": {"equity_value": 750, "cost_of_equity": 0.12, "terminal_growth": 0.03},
+            "fcff": {
+                "shares_mn": 100,
+                "target_price_vnd": 5,
+                "wacc": 0.12,
+                "terminal_growth": 0.03,
+                "wacc_breakdown": {"risk_free_rate": 0.04},
+                "enterprise_value": 1000,
+                "equity_value": 800,
+                "net_debt_bridge": {"status": "ok"},
+                "ev_to_equity_bridge": {"ev": 1000},
+            },
+            "fcfe": {
+                "target_price_vnd": 5,
+                "fcfe_table": [{"fcfe": 1, "net_borrowing": 0}],
+                "equity_value": 750,
+                "cost_of_equity": 0.12,
+                "cost_of_equity_breakdown": {"risk_free_rate": 0.04},
+                "terminal_growth": 0.03,
+            },
             "fcff_sensitivity": {
                 "matrix": [[1, 2, 3], [4, 5, 6], [7, 5, 9]],
                 "base_terminal_growth": 0.03,
@@ -345,4 +397,30 @@ class TestForecastAndValuationAnomalyGates:
         assert sensitivity_gate is not None
         assert sensitivity_gate.status == "FAIL"
         assert any("fcfe_sensitivity matrix missing" in issue for issue in sensitivity_gate.issues)
+        assert result.is_final_exportable is False
+
+    def test_publishability_policy_blocks_failed_method_weight(self):
+        artifact = _make_artifact()
+        inputs = _passing_gate_inputs()
+        inputs["valuation_artifact"]["fcfe"] = {
+            "target_price_vnd": None,
+            "fcfe_table": [{"fcfe": None, "net_borrowing": None}],
+            "equity_value": None,
+        }
+        inputs["valuation_artifact"]["blend_dcf"] = {
+            "price_fcff_vnd": 100_000,
+            "price_fcfe_vnd": None,
+            "target_price_dcf_vnd": 100_000,
+            "current_price_vnd": 100_000,
+            "is_draft_only": False,
+        }
+        inputs["valuation_artifact"]["valuation_confidence"]["fcfe_dcf"] = "blocked"
+        inputs["valuation_artifact"]["method_weights"] = {"FCFF": 60.0, "FCFE": 40.0}
+
+        result = evaluate_export_gate(artifact, **inputs)
+
+        valuation_gate = result.gate("valuation_gate")
+        assert valuation_gate is not None
+        assert valuation_gate.status == "FAIL"
+        assert any("failed_method_has_nonzero_weight:FCFE" in issue for issue in valuation_gate.issues)
         assert result.is_final_exportable is False

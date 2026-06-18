@@ -136,7 +136,7 @@ def build_insight_pack(inputs: dict[str, Any]) -> list[dict[str, Any]]:
         valuation_claim,
         evidence_refs=["[2]"],
         analysis_logic="Chiết khấu dòng tiền (FCFF/FCFE) theo WACC, so với giá hiện tại.",
-        valuation_implication=f"Khuyến nghị hệ thống: {rec}.",
+        valuation_implication=f"Trạng thái khuyến nghị theo mô hình: {rec}.",
         confidence="medium",
         inputs=inputs,
         required=["upside"],

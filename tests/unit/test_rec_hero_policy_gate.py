@@ -55,19 +55,21 @@ def test_publishability_never_blanks_computed_target():
     assert display["current_price"] == 50_200
     assert display["upside"] is not None
     assert display["approved_for_display"] is True
+    assert display["recommendation_publishable"] is False
 
 
-def test_recommendation_is_computed_never_jargon():
+def test_blocked_policy_uses_review_status_not_sell_rating():
     policy = _blocked_policy()
     display = vm._report_display_governance("client_final", {}, _blend(), policy=policy)
-    # 27,207 target vs 50,200 price => deep downside => a real "Bán" rating,
-    # never an internal "Chưa phát hành" / "Không xếp hạng" placeholder.
-    assert display["recommendation"] == "Bán"
+    # 27,207 target vs 50,200 price still remains visible, but the policy
+    # blocker suppresses an official Buy/Hold/Sell rating.
+    assert display["recommendation"] == "Đang rà soát"
 
 
 def test_recommendation_only_unrated_when_no_target_at_all():
     # The Not-Rated label appears only when there is genuinely no computed value.
     assert vm._recommendation(None, "client_final", approved_for_display=False) == "Không xếp hạng"
+    assert vm._recommendation(0.30, "client_final", approved_for_display=False) == "Đang rà soát"
     assert vm._recommendation(0.30, "client_final", approved_for_display=True) == "Mua"
 
 
@@ -115,5 +117,6 @@ def test_publishable_policy_overrides_local_no_eligible_heuristic():
     blend = {"current_price_vnd": 100_000.0, "target_price_dcf_vnd": 100_000.0, "is_draft_only": True}
     display = vm._report_display_governance("client_final", val_result, blend, policy=policy)
     assert display["approved_for_display"] is True
+    assert display["recommendation_publishable"] is True
     assert display["target_price"] == 100_000.0
     assert display["recommendation"] != "Chưa phát hành"

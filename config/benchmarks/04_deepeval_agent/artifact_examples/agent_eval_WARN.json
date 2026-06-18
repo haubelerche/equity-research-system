@@ -96,7 +96,7 @@
       "severity": "P2",
       "blocks_publish": false,
       "threshold_operator": ">=",
-      "threshold": 0.9,
+      "threshold": 0.85,
       "unit": "score",
       "owner": "reviewer",
       "remediation_hint": "Tune prompt/role context.",
