@@ -78,10 +78,10 @@ describe("evalMetricStatus", () => {
 
   it("trusts backend status for non-numeric runtime threshold contracts", () => {
     expect(resolveMetricStatus(gte, { value: 0, threshold: "pass", status: "fail" })).toBe("fail");
-    expect(resolveMetricStatus(gte, { value: 0, threshold: "present", status: "blocked" })).toBe("fail");
+    expect(resolveMetricStatus(gte, { value: 0, threshold: "present", status: "blocked" })).toBe("blocked");
   });
 
-  it("passes partially observed aggregate metrics when the observed value meets threshold", () => {
+  it("preserves fail-closed status for partially observed aggregate metrics", () => {
     expect(resolveMetricStatus(lte, {
       value: 0.378,
       threshold: "<= 10",
@@ -90,7 +90,7 @@ describe("evalMetricStatus", () => {
       unit: "minutes",
       sample_size: 45,
       calculation: { aggregation: "cohort_mean_observed", numerator: 0.378, denominator: 17 },
-    })).toBe("pass");
+    })).toBe("not_evaluable");
   });
 
   it("classifies boolean-gate runtime metrics as boolean by aggregation", () => {
@@ -128,6 +128,75 @@ describe("evalMetricStatus", () => {
       sample_size: 45,
       calculation: { aggregation: "cohort_mean_observed", numerator: 9.35, denominator: 17 },
     })).toBe("17/45 samples");
+  });
+
+  it("does not render a numerator formula when the ratio disagrees with value", () => {
+    expect(formatRuntimeMetricResult(coverageMetric, {
+      metric_id: "hit_rate_at_5",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 0.966,
+      threshold: ">= 90%",
+      calculation: { aggregation: "cohort_pass_rate", numerator: 14, denominator: 14 },
+    })).toBe("96.6%");
+  });
+
+  it("shows the missing-data reason when a metric is not evaluable", () => {
+    expect(formatRuntimeMetricResult(coverageMetric, {
+      metric_id: "fcfe",
+      metric_type: "coverage",
+      unit: "percent",
+      value: null,
+      status: "not_evaluable",
+      detail: "valuation_trace_missing",
+      evaluator: { execution_status: "not_executed" },
+    })).toBe("Thiếu dữ liệu: valuation_trace_missing");
+  });
+
+  it("renders pooled coverage formulas only when numerator and denominator match value", () => {
+    expect(metricSemanticType(coverageMetric, {
+      metric_id: "hit_rate_at_5",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 13 / 14,
+      threshold: ">= 90%",
+      calculation: { aggregation: "cohort_pooled_coverage", numerator: 13, denominator: 14 },
+    })).toBe("pass_rate");
+    expect(formatRuntimeMetricResult(coverageMetric, {
+      metric_id: "hit_rate_at_5",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 13 / 14,
+      threshold: ">= 90%",
+      calculation: { aggregation: "cohort_pooled_coverage", numerator: 13, denominator: 14 },
+    })).toBe("13/14 = 92.9%");
+    expect(formatMetricScope(coverageMetric, {
+      metric_id: "hit_rate_at_5",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 13 / 14,
+      threshold: ">= 90%",
+      calculation: { aggregation: "cohort_pooled_coverage", numerator: 13, denominator: 14 },
+    })).toBe("14 eligible samples");
+  });
+
+  it("classifies cohort means as score-like metrics instead of pass rates", () => {
+    expect(metricSemanticType(coverageMetric, {
+      metric_id: "hit_rate_at_5",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 0.966,
+      threshold: ">= 90%",
+      calculation: { aggregation: "cohort_mean", numerator: 43.47, denominator: 45 },
+    })).toBe("score");
+    expect(formatRuntimeMetricResult(coverageMetric, {
+      metric_id: "hit_rate_at_5",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 0.966,
+      threshold: ">= 90%",
+      calculation: { aggregation: "cohort_mean", numerator: 43.47, denominator: 45 },
+    })).toBe("96.6%");
   });
 
   it("formats normalized score metrics as percentages without changing threshold semantics", () => {

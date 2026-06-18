@@ -10,10 +10,9 @@ const LABEL: Record<MetricStatus, string> = {
 };
 
 export function StatusPill({ status }: { status: MetricStatus }) {
-  const displayStatus: MetricStatus = status === "pass" ? "pass" : "fail";
   return (
-    <span className={`pill pill--${displayStatus}`} data-status={displayStatus}>
-      {LABEL[displayStatus]}
+    <span className={`pill pill--${status}`} data-status={status}>
+      {LABEL[status]}
     </span>
   );
 }

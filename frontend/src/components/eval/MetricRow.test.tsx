@@ -28,7 +28,7 @@ describe("MetricRow", () => {
     expect(document.querySelector('[data-status="fail"]')).toBeInTheDocument();
   });
 
-  it("shows fail when no numeric benchmark value is available", () => {
+  it("shows not evaluable when runtime evidence is explicitly not evaluable", () => {
     render(
       <table><tbody><MetricRow def={def} value={1} result={{
         metric_id: "cov",
@@ -38,7 +38,7 @@ describe("MetricRow", () => {
         value: null,
       }} /></tbody></table>,
     );
-    expect(document.querySelector('[data-status="fail"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-status="not_evaluable"]')).toBeInTheDocument();
   });
 
   it("recomputes status from numeric thresholds when backend pass/fail is stale", () => {

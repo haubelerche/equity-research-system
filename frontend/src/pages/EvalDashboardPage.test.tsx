@@ -225,6 +225,56 @@ const packet = {
       evaluator: { framework: "future_evaluator" },
     }],
   }, {
+    plan_id: "05",
+    name: "Agent and judge",
+    artifact: "agent_eval.json",
+    status: "pass",
+    metric_results: [{
+      metric_id: "schema_validity",
+      metric_name: "Output schema validity",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 1,
+      threshold: "100%",
+      status: "pass",
+      sample_size: 2,
+      evaluator: { framework: "json_schema_required_contract", execution_status: "executed" },
+      calculation: {
+        numerator: 2,
+        denominator: 2,
+        aggregation: "coverage",
+        per_sample_results: [{
+          artifact_id: "DHG/agent_eval.json",
+          source_metric_id: "schema_validity",
+          status: "pass",
+          value: 1,
+          source_samples: [{
+            artifact: "evidence_packet",
+            status: "pass",
+            path: "storage/runs/DHG/evidence_packet.json",
+          }, {
+            artifact: "agent_effectiveness_audit",
+            status: "fail",
+            path: "storage/runs/DHG/agent_effectiveness_audit.json",
+          }],
+        }],
+      },
+    }, {
+      metric_id: "agent.judge_calibration_agreement",
+      metric_name: "Judge calibration agreement",
+      metric_type: "score",
+      value: null,
+      threshold: ">= 85%",
+      status: "not_evaluable",
+    }, {
+      metric_id: "agent.judge_rationale_evidence_coverage",
+      metric_name: "Judge rationale evidence coverage",
+      metric_type: "coverage",
+      value: null,
+      threshold: ">= 90%",
+      status: "not_evaluable",
+    }],
+  }, {
     plan_id: "07",
     name: "Observability, cost, and latency",
     artifact: "observability_eval.json",
@@ -286,6 +336,8 @@ describe("EvalDashboardPage", () => {
     // metric under its backend metric_name rather than the old framework label.
     expect(screen.getAllByText("Valuation publishability policy").length).toBeGreaterThan(0);
     expect(screen.getAllByText("New backend metric").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Judge calibration agreement")).not.toBeInTheDocument();
+    expect(screen.queryByText("Judge rationale evidence coverage")).not.toBeInTheDocument();
   });
 
   it("opens publication blocking details from the suite status banner", async () => {
@@ -359,6 +411,23 @@ describe("EvalDashboardPage", () => {
     expect(screen.queryByText("Severity")).not.toBeInTheDocument();
     expect(screen.queryByText("Owner")).not.toBeInTheDocument();
     expect(screen.queryByText("Chặn xuất bản")).not.toBeInTheDocument();
+  });
+
+  it("shows boolean values for legacy schema validity source samples", async () => {
+    render(<EvalDashboardPage />);
+    await screen.findByText(/P0/);
+    await userEvent.click(screen.getAllByText("JSON schema validity")[0]);
+
+    expect(screen.getByRole("heading", { name: /sample \(2\)/i })).toBeInTheDocument();
+    const evidencePacketRow = screen.getByText("evidence_packet").closest("tr");
+    expect(evidencePacketRow).not.toBeNull();
+    expect(within(evidencePacketRow!).getByText("pass")).toBeInTheDocument();
+    expect(within(evidencePacketRow!).getByText("true")).toBeInTheDocument();
+
+    const auditRow = screen.getByText("agent_effectiveness_audit").closest("tr");
+    expect(auditRow).not.toBeNull();
+    expect(within(auditRow!).getByText("fail")).toBeInTheDocument();
+    expect(within(auditRow!).getByText("false")).toBeInTheDocument();
   });
 
   it("shows runtime calculation details in the layer explanation dialog", async () => {

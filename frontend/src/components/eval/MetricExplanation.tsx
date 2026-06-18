@@ -402,6 +402,14 @@ function sampleStatus(sample: unknown): string {
   return "Chưa có";
 }
 
+function schemaDecisionValue(record: Record<string, unknown>): boolean | undefined {
+  if (record.source_metric_id !== "schema_validity") return undefined;
+  const status = typeof record.status === "string" ? record.status.toLowerCase() : "";
+  if (status === "pass") return true;
+  if (status === "fail") return false;
+  return undefined;
+}
+
 function sampleValue(sample: unknown): string {
   const record = asRecord(sample);
   if (!record) return valueOrDash(sample);
@@ -423,6 +431,8 @@ function sampleValue(sample: unknown): string {
   if (permission) {
     return valueOrDash(permission.permission_level ?? permission.tool_id ?? true);
   }
+  const schemaValue = schemaDecisionValue(record);
+  if (schemaValue !== undefined) return valueOrDash(schemaValue);
   return valueOrDash(
     record.value
     ?? record.present
@@ -541,6 +551,8 @@ function aggregationLabel(aggregation: unknown): string {
   switch (String(aggregation ?? "")) {
     case "coverage":
       return "Tỷ lệ bao phủ";
+    case "cohort_pooled_coverage":
+      return "Tỷ lệ bao phủ gộp trên sample nguồn hợp lệ";
     case "cohort_pass_rate":
       return "Tỷ lệ đạt trên toàn bộ cohort";
     case "boolean_gate":
@@ -587,7 +599,7 @@ function calculationNarrative(def: MetricDef, result: BenchmarkMetricResult | un
   if (!calculation) {
     return `${metricName}: chưa có calculation payload trong artifact; dashboard chỉ có thể hiển thị trạng thái tổng hợp và ngưỡng ${threshold}.`;
   }
-  if (aggregation === "coverage" || aggregation === "cohort_pass_rate") {
+  if (aggregation === "coverage" || aggregation === "cohort_pooled_coverage" || aggregation === "cohort_pass_rate") {
     return `${metricName}: đếm số sample đạt điều kiện chia cho tổng số sample hợp lệ. Tử số hiện là ${numerator}, mẫu số là ${denominator}; kết quả được so với ngưỡng ${threshold}. Bảng bên dưới liệt kê từng sample, trạng thái, giá trị và trace dùng để quyết định đạt hay không đạt.`;
   }
   if (aggregation === "boolean_gate" || aggregation === "presence" || aggregation === "artifact_presence") {
@@ -611,7 +623,7 @@ function calculationNarrative(def: MetricDef, result: BenchmarkMetricResult | un
   if (aggregation === "p95") {
     return `${metricName}: sắp xếp các latency sample và lấy phân vị 95 để so với budget ${threshold}. Bảng sample cho biết từng run/stage đóng góp vào phân vị.`;
   }
-  if (aggregation === "mean") {
+  if (aggregation === "mean" || aggregation === "cohort_mean" || aggregation === "cohort_mean_observed") {
     return `${metricName}: lấy trung bình điểm của ${sampleCount} sample đánh giá được và so sánh với ngưỡng ${threshold}.`;
   }
   if (aggregation === "sum") {

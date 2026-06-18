@@ -75,6 +75,14 @@ describe("evalFramework", () => {
     expect(rag.metrics.find((metric) => metric.id === "response_relevancy")!.threshold).toBe(0.75);
   });
 
+  it("does not expose judge calibration diagnostics in the Agent dashboard group", () => {
+    const agent = EVAL_LAYERS.find((layer) => layer.id === "agent")!;
+    const metricIds = agent.metrics.map((metric) => metric.id);
+
+    expect(metricIds).not.toContain("judge_calibration_agreement");
+    expect(metricIds).not.toContain("judge_rationale_evidence_coverage");
+  });
+
   it("keeps the evaluation pipeline and acceptance explanation in Vietnamese", () => {
     expect(PIPELINE_ORDER[0]).toMatch(/Chất lượng dữ liệu/i);
     expect(ACCEPTANCE_EXPLANATION.length).toBeGreaterThan(0);

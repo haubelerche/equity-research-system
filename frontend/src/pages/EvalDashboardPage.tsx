@@ -56,6 +56,10 @@ const HIDDEN_DASHBOARD_METRIC_IDS = new Set([
   "plan_adherence",
   "critic_issue_recall",
   "artifact_manifest_compliance",
+  "judge_calibration_agreement",
+  "agent.judge_calibration_agreement",
+  "judge_rationale_evidence_coverage",
+  "agent.judge_rationale_evidence_coverage",
   "report.financial_analysis_depth",
   "report.forecast_rationale",
   "report.evidence_integration",
@@ -92,50 +96,11 @@ function resultKey(result: BenchmarkMetricResult): string {
   return String(result.metric_id ?? result.id ?? "");
 }
 
-function isObservedNumericAggregate(result: BenchmarkMetricResult): boolean {
-  const metricType = String(result.metric_type ?? "").toLowerCase();
-  const unit = String(result.unit ?? "").toLowerCase();
-  if (["coverage", "error_count", "error_rate", "boolean"].includes(metricType)) return false;
-  if (["count", "boolean", "percent"].includes(unit)) return false;
-  return ["score", "latency_percentile"].includes(metricType)
-    || ["score", "minutes", "seconds", "usd", "ratio"].includes(unit);
-}
-
-function normalizeObservedNumericAggregate(result: BenchmarkMetricResult): BenchmarkMetricResult {
-  const aggregation = String(result.calculation?.aggregation ?? "").toLowerCase();
-  const samples = result.calculation?.per_sample_results;
-  if (aggregation !== "cohort_pass_rate" || !isObservedNumericAggregate(result) || !Array.isArray(samples)) {
-    return result;
-  }
-  const numericValues = samples
-    .map((sample) => (sample && typeof sample === "object" ? (sample as Record<string, unknown>).value : undefined))
-    .filter((value): value is number => typeof value === "number" && Number.isFinite(value));
-  if (numericValues.length === 0) return result;
-  const observedMean = numericValues.reduce((total, value) => total + value, 0) / numericValues.length;
-  const hasMissingEvidence = samples.some((sample) => {
-    if (!sample || typeof sample !== "object") return false;
-    const status = String((sample as Record<string, unknown>).status ?? "").toLowerCase();
-    return ["blocked", "not_evaluable", "not_measured"].includes(status);
-  });
-  return {
-    ...result,
-    value: observedMean,
-    status: hasMissingEvidence ? "pass" : result.status,
-    calculation: {
-      ...result.calculation,
-      aggregation: "cohort_mean_observed",
-      numerator: observedMean,
-      denominator: numericValues.length,
-    },
-  };
-}
-
 function resultsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): MetricResultMap {
   const artifact = artifactFor(packet, layer);
   const metricResults = artifact?.metric_results
     ?? (Array.isArray(artifact?.metrics) ? artifact.metrics as BenchmarkMetricResult[] : []);
   const entries = metricResults
-    .map((result) => normalizeObservedNumericAggregate(result))
     .map((result) => [resultKey(result), result] as const)
     .filter(([key]) => key.length > 0);
   const results = Object.fromEntries(entries);
