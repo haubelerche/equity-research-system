@@ -219,17 +219,21 @@ def _diag_fcff(valuation: dict[str, Any]) -> MethodDiagnostic:
     sensitivity_varies = _matrix_varies(grid)
     required_inputs_present = computed and fcff.get("wacc") is not None
     reasons: list[str] = []
+    warns: list[str] = []
     if computed and not formula_trace_present:
         reasons.append("formula_trace_missing")
     if computed and not bridge_present:
         reasons.append("fcff_wacc_or_ev_to_equity_bridge_missing")
     if computed and not (sensitivity_present and sensitivity_varies):
         reasons.append("fcff_sensitivity_missing_or_constant")
+    # Confidence below "high" is a disclosure for the reader, not a publishability
+    # blocker: on an unattended run assumptions are rarely analyst-approved, yet a
+    # fully computed model (target + bridge + trace + varying sensitivity) remains
+    # the analyst's best estimate and must reach the report with a caveat.
     if computed and confidence != "high":
-        reasons.append(f"fcff_{confidence}_confidence")
+        warns.append(f"fcff_{confidence}_confidence")
     publishable = bool(
         computed
-        and confidence == "high"
         and formula_trace_present
         and bridge_present
         and sensitivity_present
@@ -239,7 +243,7 @@ def _diag_fcff(valuation: dict[str, Any]) -> MethodDiagnostic:
     return MethodDiagnostic(
         method_name="FCFF", computed=computed, publishable=publishable,
         target_price_vnd=target, confidence=confidence, role=role,
-        blocking_reasons=reasons, required_inputs_present=required_inputs_present,
+        blocking_reasons=reasons, warnings=warns, required_inputs_present=required_inputs_present,
         formula_trace_present=formula_trace_present, bridge_present=bridge_present,
         sensitivity_present=sensitivity_present, sensitivity_varies=sensitivity_varies,
         source_backed_assumptions=bridge_present, analyst_approved_assumptions=False,
@@ -274,7 +278,9 @@ def _diag_fcfe(valuation: dict[str, Any]) -> MethodDiagnostic:
     sensitivity_present = bool(grid)
     sensitivity_varies = _matrix_varies(grid)
     reasons: list[str] = []
+    warns: list[str] = []
     if blocked:
+        # Net borrowing unavailable is a genuine data hard-fail for FCFE itself.
         reasons.append("fcfe_blocked_net_borrowing_unavailable")
     else:
         if not formula_trace_present:
@@ -283,10 +289,11 @@ def _diag_fcfe(valuation: dict[str, Any]) -> MethodDiagnostic:
             reasons.append("fcfe_equity_bridge_or_net_borrowing_missing")
         if not (sensitivity_present and sensitivity_varies):
             reasons.append("fcfe_sensitivity_missing_or_constant")
+        # Confidence below "high" is a disclosure, not a publishability blocker.
         if confidence != "high":
-            reasons.append(f"fcfe_{confidence}_confidence")
+            warns.append(f"fcfe_{confidence}_confidence")
     publishable = bool(
-        computed and not blocked and confidence == "high"
+        computed and not blocked
         and formula_trace_present and bridge_present
         and sensitivity_present and sensitivity_varies
     )
@@ -294,7 +301,7 @@ def _diag_fcfe(valuation: dict[str, Any]) -> MethodDiagnostic:
     return MethodDiagnostic(
         method_name="FCFE", computed=computed, publishable=publishable,
         target_price_vnd=target, confidence="blocked" if blocked else confidence, role=role,
-        blocking_reasons=reasons, required_inputs_present=rows_complete,
+        blocking_reasons=reasons, warnings=warns, required_inputs_present=rows_complete,
         formula_trace_present=formula_trace_present, bridge_present=bridge_present,
         sensitivity_present=sensitivity_present, sensitivity_varies=sensitivity_varies,
         source_backed_assumptions=bridge_present, analyst_approved_assumptions=False,
@@ -464,6 +471,10 @@ def build_valuation_publishability_policy(
 
     blocking_reasons: list[str] = []
     warnings: list[str] = []
+    # Surface per-method disclosures (e.g. low/medium confidence) so the report can
+    # publish a sound target with the appropriate caveat rather than blanking it.
+    for diag in diagnostics.values():
+        warnings.extend(diag.warnings)
 
     # Primary candidate: only DCF-family methods may be primary, in this order.
     primary_method: str | None = next(
@@ -527,14 +538,30 @@ def build_valuation_publishability_policy(
             if diag is not None and parsed_weight > 0 and not diag.publishable:
                 blocking_reasons.append(f"failed_method_has_nonzero_weight:{diag.method_name}")
 
+    # Demote the universal analyst-approval layer to disclosures (Option A): these
+    # reasons fire on essentially every unattended run, so treating them as hard
+    # blocks would blank the headline target on every report. They are real caveats
+    # for the reader, not evidence the valuation is unsound.
+    #   - recommendation_gate_not_allowed: assumption_gate approval (never True unattended)
+    #   - low_confidence_primary_method: confidence below "high"
+    #   - critical_warning:*: routine operational caveats (e.g. "FCFE BLOCKED",
+    #     "peer data PENDING", "single-pass interest")
+    advisory_reasons = [
+        reason for reason in blocking_reasons
+        if reason in {"recommendation_gate_not_allowed", "low_confidence_primary_method"}
+        or reason.startswith("critical_warning:")
+    ]
+    blocking_reasons = [reason for reason in blocking_reasons if reason not in advisory_reasons]
+    warnings.extend(advisory_reasons)
+
+    # Genuine per-valuation hard-fails that hide the headline target/recommendation:
+    # nothing computed, methods that disagree beyond the critical band, a target far
+    # from market with no reconciling bridge, severe/extreme downside without review,
+    # an explicit gate failure (e.g. data quality), or a failed method carrying weight.
     divergence_critical = "valuation_method_divergence_critical" in blocking_reasons
     market_sanity_fail = "market_sanity_bridge_missing" in blocking_reasons
-    gate_fail = any(
-        reason.endswith("_failed") or reason == "recommendation_gate_not_allowed"
-        for reason in blocking_reasons
-    )
+    gate_fail = any(reason.endswith("_failed") for reason in blocking_reasons)
     method_weight_fail = any(reason.startswith("failed_method_has_nonzero_weight:") for reason in blocking_reasons)
-    critical_warning_fail = any(reason.startswith("critical_warning:") for reason in blocking_reasons)
     senior_review_fail = "senior_review_required_for_severe_downside" in blocking_reasons
     distress_fail = "distress_evidence_required_for_extreme_downside" in blocking_reasons
 
@@ -544,7 +571,6 @@ def build_valuation_publishability_policy(
         and not market_sanity_fail
         and not gate_fail
         and not method_weight_fail
-        and not critical_warning_fail
         and not senior_review_fail
         and not distress_fail
     )

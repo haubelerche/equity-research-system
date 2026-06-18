@@ -115,19 +115,56 @@ def test_good_valuation_is_publishable():
     assert policy.target_price_vnd is not None
 
 
-def test_low_confidence_fcff_cannot_be_primary():
-    """Group A-1."""
+def test_low_confidence_complete_fcff_publishes_with_disclosure():
+    """Option A: a fully computed DCF (target + bridge + trace + varying
+    sensitivity) publishes even at low confidence, carrying a disclosure.
+
+    Low confidence reflects unapproved assumptions on an unattended run — it is a
+    caveat for the reader, not a reason to blank the headline target. Only the
+    genuine per-valuation red-flags (no method, critical divergence, market-sanity
+    break) hide the target.
+    """
     art = _artifact(
-        fcff=_fcff(confidence="low"),
+        fcff=_fcff(target=100000.0, confidence="low"),
         fcfe=_fcfe(blocked=True),
         confidence={"fcff_dcf": "low", "fcfe_dcf": "blocked"},
         blend={"price_fcff_vnd": 100000.0, "price_fcfe_vnd": None,
                "target_price_dcf_vnd": 100000.0, "is_draft_only": True},
     )
     policy = _build(art)
-    assert policy.primary_method != "FCFF"
-    assert policy.target_price_publishable is False
-    assert "low_confidence_primary_method" in policy.blocking_reasons
+    assert policy.primary_method == "FCFF"
+    assert policy.target_price_publishable is True
+    assert policy.target_price_vnd == 100000.0
+    assert policy.status == "review_required"
+    assert any("low_confidence" in w for w in policy.warnings)
+    assert "low_confidence_primary_method" not in policy.blocking_reasons
+
+
+def test_assumption_approval_pending_is_disclosure_not_block():
+    """Option A: the analyst-approval gate (recommendation_allowed=False) is
+    False on every unattended run. It must demote to a disclosure, never blank
+    the target of an otherwise sound valuation."""
+    art = _artifact(confidence={"fcff_dcf": "high", "fcfe_dcf": "high"})
+    art["assumption_gate"] = {"recommendation_allowed": False, "data_quality_passed": True}
+    policy = _build(art)
+    assert policy.target_price_publishable is True
+    assert "recommendation_gate_not_allowed" not in policy.blocking_reasons
+    assert "recommendation_gate_not_allowed" in policy.warnings
+
+
+def test_operational_caveats_are_disclosures_not_blockers():
+    """Option A: routine caveats (e.g. 'FCFE BLOCKED — debt held flat') describe
+    why a secondary leg is unavailable; they must not blank a sound FCFF target."""
+    art = _artifact(
+        fcfe=_fcfe(blocked=True),
+        confidence={"fcff_dcf": "high", "fcfe_dcf": "blocked"},
+        blend={"price_fcff_vnd": 100000.0, "price_fcfe_vnd": None,
+               "target_price_dcf_vnd": 100000.0, "is_draft_only": True},
+    )
+    policy = _build(art)
+    assert policy.primary_method == "FCFF"
+    assert policy.target_price_publishable is True
+    assert not any(r.startswith("critical_warning:") for r in policy.blocking_reasons)
 
 
 def test_blocked_fcfe_prevents_blended_final():

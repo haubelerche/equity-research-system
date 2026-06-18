@@ -44,22 +44,76 @@ def _blend() -> dict:
     }
 
 
-def test_blocked_policy_hides_hero_target():
+def test_publishability_never_blanks_computed_target():
+    """Option B: publication readiness is internal metadata only. A valuation
+    report must always present its computed target price — the gate never blanks
+    the client-facing number (a report with no target is useless)."""
     policy = _blocked_policy()
-    assert policy.target_price_publishable is False
+    assert policy.target_price_publishable is False  # internal metadata stays honest
     display = vm._report_display_governance("client_final", {}, _blend(), policy=policy)
-    assert display["target_price"] is None
-    assert display["blend_target_price"] == 27_207
-    assert display["approved_for_display"] is False
+    assert display["target_price"] == 27_207
+    assert display["current_price"] == 50_200
+    assert display["upside"] is not None
+    assert display["approved_for_display"] is True
 
 
-def test_blocked_policy_suppresses_official_recommendation():
+def test_recommendation_is_computed_never_jargon():
     policy = _blocked_policy()
     display = vm._report_display_governance("client_final", {}, _blend(), policy=policy)
-    assert display["recommendation"] == "Chưa phát hành"
+    # 27,207 target vs 50,200 price => deep downside => a real "Bán" rating,
+    # never an internal "Chưa phát hành" / "Không xếp hạng" placeholder.
+    assert display["recommendation"] == "Bán"
+
+
+def test_recommendation_only_unrated_when_no_target_at_all():
+    # The Not-Rated label appears only when there is genuinely no computed value.
+    assert vm._recommendation(None, "client_final", approved_for_display=False) == "Không xếp hạng"
+    assert vm._recommendation(0.30, "client_final", approved_for_display=True) == "Mua"
 
 
 def test_blocked_policy_surfaces_blocking_reasons():
     policy = _blocked_policy()
     display = vm._report_display_governance("client_final", {}, _blend(), policy=policy)
     assert any("divergence" in r for r in display["blocking_reasons"])
+
+
+def _clean_low_confidence_artifact() -> dict:
+    # FCFF fully computed, DCF == market, only caveat is low confidence.
+    return {
+        "current_price_vnd": 100_000.0,
+        "fcff": {
+            "target_price_vnd": 100_000.0, "wacc": 0.12,
+            "wacc_breakdown": {"risk_free_rate": 0.04},
+            "fcff_table": [{"fcff": 10.0}], "equity_value": 13_000.0,
+            "net_debt_bridge": {"net_debt": -100.0}, "ev_to_equity_bridge": {"ev": 12_000.0},
+        },
+        "fcfe": {"target_price_vnd": None, "fcfe_table": [{"fcfe": None, "net_borrowing": None}]},
+        "blend_dcf": {"price_fcff_vnd": 100_000.0, "price_fcfe_vnd": None,
+                      "target_price_dcf_vnd": 100_000.0, "is_draft_only": True},
+        "sensitivity": {"fcff_wacc_g": {"a": {"x": 100.0, "y": 110.0}}, "fcfe_re_g": {}, "blend_grid": {}},
+        "valuation_confidence": {"fcff_dcf": "low", "fcfe_dcf": "blocked"},
+        "formula_traces": [{"method": "fcff"}],
+    }
+
+
+def test_publishable_policy_overrides_local_no_eligible_heuristic():
+    """A clean low-confidence ticker (DCF == market, methods agree) is publishable
+    per the single source of truth. The renderer must defer to the policy and not
+    re-block it with its own confidence / draft-only heuristics."""
+    policy = build_valuation_publishability_policy(
+        _clean_low_confidence_artifact(), ticker="XYZ", current_price_vnd=100_000.0
+    )
+    assert policy.target_price_publishable is True  # sanity on the source of truth
+
+    val_result = {
+        "current_price": 100_000.0,
+        "target_price": 100_000.0,
+        "is_publishable": None,
+        "valuation_method_policy": {"selected_methods": []},  # confidence-excluded
+        "valuation_confidence": {"fcff_dcf": "low"},
+    }
+    blend = {"current_price_vnd": 100_000.0, "target_price_dcf_vnd": 100_000.0, "is_draft_only": True}
+    display = vm._report_display_governance("client_final", val_result, blend, policy=policy)
+    assert display["approved_for_display"] is True
+    assert display["target_price"] == 100_000.0
+    assert display["recommendation"] != "Chưa phát hành"

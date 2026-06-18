@@ -1221,30 +1221,22 @@ def _report_display_governance(
     if current and target and upside is None:
         upside = target / current - 1
     if target is None:
+        # Only a genuinely missing computed value leaves the report unrated — there
+        # is nothing to show. A present number is always shown.
         approved_for_display = False
         upside = None
 
-    # Authoritative override: the ValuationPublishabilityPolicy is the single
-    # source of truth. A non-publishable valuation (low-confidence primary,
-    # blocked FCFE driving a blend, missing/constant sensitivity, critical method
-    # divergence, market-sanity break without a bridge) must not promote a hero
-    # target price or a BUY/HOLD/SELL recommendation — regardless of any numeric
-    # value present in the blend artifact.
-    policy_blocks_display = policy is not None and not getattr(policy, "target_price_publishable", True)
-    local_blocks_display = bool(
-        "no_eligible_valuation_method" in blocking_reasons
-        or "blend_is_draft_only" in blocking_reasons
-    )
-    if policy_blocks_display:
+    # Display is decoupled from publication (Option B). Publication readiness — low
+    # confidence, unapproved assumptions, method divergence, market-sanity gaps — is
+    # surfaced in ``blocking_reasons`` as INTERNAL metadata for the export workflow
+    # and evaluators, but it NEVER blanks the client-facing market price, target
+    # price, upside or recommendation. A valuation report must always present the
+    # analyst's computed estimate; caveats belong in the disclosures section, not in
+    # a missing number. Market price in particular comes from the data pipeline and
+    # is never gated here.
+    if policy is not None:
         reasons = list(reasons) + list(getattr(policy, "blocking_reasons", None) or [])
         blocking_reasons = sorted(set(reasons))
-    if policy_blocks_display or local_blocks_display:
-        approved_for_display = False
-        target = None
-        upside = None
-
-    # Publication QA stays in metadata/review artifacts. It must not replace
-    # usable client-facing values or inject internal workflow states into PDF.
 
     return {
         "approved_for_display": approved_for_display,
@@ -1264,11 +1256,16 @@ def _recommendation(
     approved_for_display: bool = False,
     dividend_yield: float = 0.0,
 ) -> str:
-    """Rating based on total expected return, gated before publication."""
+    """Rating based on total expected return, gated before publication.
+
+    When the valuation cannot support a rating, the client report shows the
+    standard sell-side "Không xếp hạng" (Not Rated) label — never an internal
+    workflow term — so the document stays clean and professional.
+    """
     if not approved_for_display:
-        return "Chưa phát hành"
+        return "Không xếp hạng"
     if upside is None:
-        return "Chưa phát hành"
+        return "Không xếp hạng"
     total_return = upside + dividend_yield
     if total_return > 0.20:
         return "Mua"
@@ -1420,13 +1417,11 @@ def _table_valuation_model(
 def _table_valuation_summary(valuation: dict[str, Any]) -> TableData | None:
     methods = [str(item).upper() for item in valuation.get("selected_methods") or []]
     weights = valuation.get("method_weights") or {}
-    confidence = valuation.get("valuation_confidence") or {}
-    confidence_keys = {"FCFF": "fcff_dcf", "FCFE": "fcfe_dcf"}
     rows: list[tuple[str, list[Any]]] = []
     for method in methods:
-        level = str(confidence.get(confidence_keys.get(method), "")).lower()
-        if level in {"low", "unavailable"}:
-            continue
+        # Option B: show every computed method value. Confidence is disclosed in
+        # the report's status/disclosures section, not by hiding the valuation
+        # table — a valuation report must always present its computed prices.
         payload = valuation.get(method.lower()) or {}
         price = payload.get("value_per_share") or payload.get("target_price_vnd")
         weight = weights.get(method) or weights.get(method.lower())

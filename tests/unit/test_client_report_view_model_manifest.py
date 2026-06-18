@@ -53,7 +53,9 @@ def test_fcff_blend_forecast_fall_back_to_valuation_subsections():
     assert vm._forecast("DHG", manifest, False) == val["forecast"]
 
 
-def test_display_governance_hides_target_when_no_method_is_eligible():
+def test_display_governance_shows_target_even_when_no_method_eligible():
+    # Option B: the gate never blanks the client-facing target. "no eligible
+    # method" is surfaced as internal metadata only; the computed value still shows.
     valuation = {
         "valuation_method_policy": {
             "selected_methods": [],
@@ -70,14 +72,15 @@ def test_display_governance_hides_target_when_no_method_is_eligible():
     display = vm._report_display_governance("standard", valuation, blend)
 
     assert display["current_price"] == 50_200
-    assert display["target_price"] is None
-    assert display["upside"] is None
+    assert display["target_price"] == 27_207
+    assert display["upside"] is not None
     assert display["blend_target_price"] == 27_207
-    assert display["recommendation"] == "Chưa phát hành"
+    assert display["recommendation"] == "Bán"
+    # The readiness signal is still available to the export workflow as metadata.
     assert "no_eligible_valuation_method" in display["blocking_reasons"]
 
 
-def test_display_governance_hides_low_confidence_selected_method():
+def test_display_governance_shows_low_confidence_target():
     valuation = {
         "valuation_method_policy": {"selected_methods": ["FCFF"], "status": "draft_only"},
         "valuation_confidence": {"fcff_dcf": "low"},
@@ -91,8 +94,8 @@ def test_display_governance_hides_low_confidence_selected_method():
 
     display = vm._report_display_governance("standard", valuation, blend)
 
-    assert display["target_price"] is None
-    assert display["recommendation"] == "Chưa phát hành"
+    assert display["target_price"] == 27_207
+    assert display["recommendation"] == "Bán"
 
 
 def test_market_price_as_of_prefers_run_market_data_date():
@@ -115,7 +118,9 @@ def test_market_price_as_of_falls_back_to_valuation_snapshot_date():
     ) == "2026-06-16"
 
 
-def test_valuation_summary_omits_low_confidence_target():
+def test_valuation_summary_shows_low_confidence_methods():
+    # Option B: the valuation results table shows computed method values even at
+    # low confidence — caveats live in the disclosures, not in a hidden table.
     valuation = {
         "selected_methods": ["FCFF"],
         "method_weights": {"FCFF": 100.0},
@@ -124,10 +129,12 @@ def test_valuation_summary_omits_low_confidence_target():
         "blend_dcf": {"target_price_dcf_vnd": 27_207},
     }
 
-    assert vm._table_valuation_summary(valuation) is None
+    table = vm._table_valuation_summary(valuation)
+    assert table is not None
+    assert "FCFF" in [row[0] for row in table.rows]
 
 
-def test_recommendation_has_three_issued_states_plus_unpublished_state():
+def test_recommendation_has_three_issued_states_plus_unrated_state():
     labels = {
         vm._recommendation(0.25, "analyst_draft", approved_for_display=True),
         vm._recommendation(0.00, "analyst_draft", approved_for_display=True),
@@ -135,7 +142,7 @@ def test_recommendation_has_three_issued_states_plus_unpublished_state():
         vm._recommendation(None, "analyst_draft", approved_for_display=False),
     }
 
-    assert labels == {"Mua", "Giữ", "Bán", "Chưa phát hành"}
+    assert labels == {"Mua", "Giữ", "Bán", "Không xếp hạng"}
 
 
 def test_forecast_rows_are_enriched_from_debt_dividend_and_cash_schedules():
