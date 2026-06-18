@@ -2,28 +2,19 @@
   "schema_version": "2.1",
   "benchmark_suite_version": "benchmark_standards_v1",
   "source": "benchmark_suite",
-  "cohort": "financial_model_top10",
+  "cohort": "default",
   "tickers": [
-    "DHG",
-    "DBD",
-    "IMP",
-    "DMC",
-    "TRA",
-    "OPC",
-    "TNH",
-    "JVC",
-    "DHT",
-    "AMV"
+    "DHG"
   ],
-  "generated_at": "2026-06-17T14:58:56.067223+00:00",
+  "generated_at": "2026-06-17T17:09:23.053637+00:00",
   "plan_id": "03",
   "name": "Financial calculation",
   "artifact": "financial_eval.json",
   "status": "pass",
   "metrics": {
-    "cohort_tickers": 10,
+    "cohort_tickers": 1,
     "ticker_status_counts": {
-      "pass": 9,
+      "pass": 1,
       "fail": 0,
       "blocked": 0,
       "not_measured": 0
@@ -34,7 +25,7 @@
       "id": "accounting_invariant_violations",
       "label": "Accounting invariant violations",
       "source": "benchmark_suite",
-      "detail": "cohort_size=9",
+      "detail": "cohort_size=1",
       "metric_id": "accounting_invariant_violations",
       "metric_name": "Accounting invariant violations",
       "category": "financial_model",
@@ -49,7 +40,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 9,
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -67,65 +58,40 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
+        "inputs": {
+          "metric_id": "accounting_invariant_violations",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/financial_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "accounting_invariant_violations"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
         "aggregation": "cohort_sum",
         "numerator": 0,
-        "denominator": 9,
+        "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/financial_eval.json",
+            "source_metric_id": "accounting_invariant_violations",
             "status": "pass",
             "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
+            "detail": "",
+            "sample_size": 3,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
@@ -135,1018 +101,21 @@
         "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/financial_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "fcfe",
       "label": "FCFE formula",
       "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=2/2",
+      "detail": "cohort_pass_rate=0/0",
       "metric_id": "fcfe",
       "metric_name": "FCFE formula",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 1.0,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 9,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "fcfe",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "not_executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 2,
-        "denominator": 2,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
-    },
-    {
-      "id": "fcfe_sensitivity",
-      "label": "FCFE sensitivity matrix varies",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=2/2",
-      "metric_id": "fcfe_sensitivity",
-      "metric_name": "FCFE sensitivity matrix varies",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 1.0,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 9,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "fcfe_sensitivity",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "not_executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 2,
-        "denominator": 2,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
-    },
-    {
-      "id": "fcff",
-      "label": "FCFF formula",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=9/9",
-      "metric_id": "fcff",
-      "metric_name": "FCFF formula",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 1.0,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 9,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "fcff",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 9,
-        "denominator": 9,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
-    },
-    {
-      "id": "formula_trace",
-      "label": "Formula trace available",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=9/9",
-      "metric_id": "formula_trace",
-      "metric_name": "Formula trace available",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 1.0,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 9,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "formula_trace",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 9,
-        "denominator": 9,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
-    },
-    {
-      "id": "golden_drift_out_of_tolerance",
-      "label": "Golden valuation drift",
-      "source": "benchmark_suite",
-      "detail": "cohort_size=9",
-      "metric_id": "golden_drift_out_of_tolerance",
-      "metric_name": "Golden valuation drift",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "error_count",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 0,
-      "threshold": "0",
-      "threshold_operator": "=",
-      "unit": "count",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 9,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "golden_drift_out_of_tolerance",
-        "framework": "golden_valuation_regression",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_sum",
-        "numerator": 0,
-        "denominator": 9,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "not_applicable",
-            "value": null,
-            "detail": "golden_valuation_fixture_missing_for_ticker"
-          },
-          {
-            "ticker": "JVC",
-            "status": "pass",
-            "value": 0,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "not_applicable",
-            "value": null,
-            "detail": "golden_valuation_fixture_missing_for_ticker"
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
-    },
-    {
-      "id": "gordon_growth",
-      "label": "Discount rate exceeds terminal growth",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=9/9",
-      "metric_id": "gordon_growth",
-      "metric_name": "Discount rate exceeds terminal growth",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 1.0,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 9,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "gordon_growth",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 9,
-        "denominator": 9,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
-    },
-    {
-      "id": "net_debt",
-      "label": "Net debt reconciliation",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=9/9",
-      "metric_id": "net_debt",
-      "metric_name": "Net debt reconciliation",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 1.0,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 9,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "net_debt",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 9,
-        "denominator": 9,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
-    },
-    {
-      "id": "sensitivity_varies",
-      "label": "FCFF sensitivity matrix varies",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=9/9",
-      "metric_id": "sensitivity_varies",
-      "metric_name": "FCFF sensitivity matrix varies",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 1.0,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 9,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "sensitivity_varies",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 9,
-        "denominator": 9,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
-    },
-    {
-      "id": "target_price",
-      "label": "Target price reproduction",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=7/7",
-      "metric_id": "target_price",
-      "metric_name": "Target price reproduction",
-      "category": "financial_model",
-      "layer": "release_gate",
-      "metric_type": "coverage",
-      "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
-      "value": 1.0,
-      "threshold": "= 100%",
-      "threshold_operator": "=",
-      "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 9,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "20260615_v3",
-      "owner": "valuation",
-      "failed_examples": [],
-      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
-      "evaluator": {
-        "id": "target_price",
-        "framework": "custom",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 7,
-        "denominator": 7,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DBD",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "IMP",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "DMC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TRA",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "OPC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "TNH",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          },
-          {
-            "ticker": "JVC",
-            "status": "pass",
-            "value": 1,
-            "detail": ""
-          },
-          {
-            "ticker": "AMV",
-            "status": "not_applicable",
-            "value": null,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
-    },
-    {
-      "id": "valuation_artifact",
-      "label": "Valuation run artifact",
-      "source": "benchmark_suite",
-      "detail": "cohort_pass_rate=0/0",
-      "metric_id": "valuation_artifact",
-      "metric_name": "Valuation run artifact",
       "category": "financial_model",
       "layer": "release_gate",
       "metric_type": "coverage",
@@ -1169,7 +138,7 @@
       "failed_examples": [],
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
-        "id": "valuation_artifact",
+        "id": "fcfe",
         "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
@@ -1177,17 +146,40 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
+        "inputs": {
+          "metric_id": "fcfe",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/financial_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "fcfe"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
         "aggregation": "cohort_pass_rate",
         "numerator": 0,
         "denominator": 0,
         "per_sample_results": [
           {
-            "ticker": "DHT",
+            "ticker": "DHG",
+            "artifact_id": "DHG/financial_eval.json",
+            "source_metric_id": "fcfe",
             "status": "not_applicable",
             "value": null,
-            "detail": "valuation_artifact_missing_for_ticker"
+            "detail": "",
+            "sample_size": 0,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
@@ -1197,17 +189,723 @@
         "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/financial_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "fcfe_sensitivity",
+      "label": "FCFE sensitivity matrix varies",
+      "source": "benchmark_suite",
+      "detail": "cohort_pass_rate=0/0",
+      "metric_id": "fcfe_sensitivity",
+      "metric_name": "FCFE sensitivity matrix varies",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": null,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "not_applicable",
+      "legacy_status": "not_applicable",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "fcfe_sensitivity",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "fcfe_sensitivity",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/financial_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "fcfe_sensitivity"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 0,
+        "denominator": 0,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/financial_eval.json",
+            "source_metric_id": "fcfe_sensitivity",
+            "status": "not_applicable",
+            "value": null,
+            "detail": "",
+            "sample_size": 0,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/financial_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "fcff",
+      "label": "FCFF formula",
+      "source": "benchmark_suite",
+      "detail": "cohort_pass_rate=1/1",
+      "metric_id": "fcff",
+      "metric_name": "FCFF formula",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "fcff",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "fcff",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/financial_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "fcff"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/financial_eval.json",
+            "source_metric_id": "fcff",
+            "status": "pass",
+            "value": 1,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/financial_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "formula_trace",
+      "label": "Formula trace available",
+      "source": "benchmark_suite",
+      "detail": "cohort_pass_rate=1/1",
+      "metric_id": "formula_trace",
+      "metric_name": "Formula trace available",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "formula_trace",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "formula_trace",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/financial_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "formula_trace"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/financial_eval.json",
+            "source_metric_id": "formula_trace",
+            "status": "pass",
+            "value": 1,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/financial_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "golden_drift_out_of_tolerance",
+      "label": "Golden valuation drift",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "golden_drift_out_of_tolerance",
+      "metric_name": "Golden valuation drift",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "0",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "golden_drift_out_of_tolerance",
+        "framework": "golden_valuation_regression",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "golden_drift_out_of_tolerance",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/financial_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "golden_drift_out_of_tolerance"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_sum",
+        "numerator": 0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/financial_eval.json",
+            "source_metric_id": "golden_drift_out_of_tolerance",
+            "status": "pass",
+            "value": 0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/financial_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "gordon_growth",
+      "label": "Discount rate exceeds terminal growth",
+      "source": "benchmark_suite",
+      "detail": "cohort_pass_rate=1/1",
+      "metric_id": "gordon_growth",
+      "metric_name": "Discount rate exceeds terminal growth",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "gordon_growth",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "gordon_growth",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/financial_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "gordon_growth"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/financial_eval.json",
+            "source_metric_id": "gordon_growth",
+            "status": "pass",
+            "value": 1,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/financial_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "net_debt",
+      "label": "Net debt reconciliation",
+      "source": "benchmark_suite",
+      "detail": "cohort_pass_rate=1/1",
+      "metric_id": "net_debt",
+      "metric_name": "Net debt reconciliation",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "net_debt",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "net_debt",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/financial_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "net_debt"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/financial_eval.json",
+            "source_metric_id": "net_debt",
+            "status": "pass",
+            "value": 1,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/financial_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "sensitivity_varies",
+      "label": "FCFF sensitivity matrix varies",
+      "source": "benchmark_suite",
+      "detail": "cohort_pass_rate=1/1",
+      "metric_id": "sensitivity_varies",
+      "metric_name": "FCFF sensitivity matrix varies",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "sensitivity_varies",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "sensitivity_varies",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/financial_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "sensitivity_varies"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/financial_eval.json",
+            "source_metric_id": "sensitivity_varies",
+            "status": "pass",
+            "value": 1,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/financial_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "target_price",
+      "label": "Target price reproduction",
+      "source": "benchmark_suite",
+      "detail": "cohort_pass_rate=1/1",
+      "metric_id": "target_price",
+      "metric_name": "Target price reproduction",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "target_price",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "target_price",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/financial_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "target_price"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/financial_eval.json",
+            "source_metric_id": "target_price",
+            "status": "pass",
+            "value": 1,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/financial_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "target_price_bridge_error",
       "label": "Target price bridge error",
       "source": "benchmark_suite",
-      "detail": "derived_from=target_price;cohort_size=9",
+      "detail": "derived_from=target_price;cohort_size=1",
       "metric_id": "target_price_bridge_error",
       "metric_name": "Target price bridge error",
       "category": "financial_model",
@@ -1222,7 +920,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 9,
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -1244,61 +942,13 @@
         "parameters": {},
         "aggregation": "cohort_failure_count",
         "numerator": 0,
-        "denominator": 9,
+        "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
             "source_metric_id": "target_price",
             "status": "pass",
             "value": 1
-          },
-          {
-            "ticker": "DBD",
-            "source_metric_id": "target_price",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "IMP",
-            "source_metric_id": "target_price",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "DMC",
-            "source_metric_id": "target_price",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "TRA",
-            "source_metric_id": "target_price",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "OPC",
-            "source_metric_id": "target_price",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "TNH",
-            "source_metric_id": "target_price",
-            "status": "not_applicable",
-            "value": null
-          },
-          {
-            "ticker": "JVC",
-            "source_metric_id": "target_price",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "AMV",
-            "source_metric_id": "target_price",
-            "status": "not_applicable",
-            "value": null
           }
         ]
       },
@@ -1309,26 +959,18 @@
       },
       "evidence": {
         "artifact_ids": [
-          "DHG/financial_eval.json",
-          "DBD/financial_eval.json",
-          "IMP/financial_eval.json",
-          "DMC/financial_eval.json",
-          "TRA/financial_eval.json",
-          "OPC/financial_eval.json",
-          "TNH/financial_eval.json",
-          "JVC/financial_eval.json",
-          "AMV/financial_eval.json"
+          "DHG/financial_eval.json"
         ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "wacc_terminal_growth_violation",
       "label": "WACC terminal growth violation",
       "source": "benchmark_suite",
-      "detail": "derived_from=gordon_growth;cohort_size=9",
+      "detail": "derived_from=gordon_growth;cohort_size=1",
       "metric_id": "wacc_terminal_growth_violation",
       "metric_name": "WACC terminal growth violation",
       "category": "financial_model",
@@ -1343,7 +985,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 9,
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -1365,58 +1007,10 @@
         "parameters": {},
         "aggregation": "cohort_failure_count",
         "numerator": 0,
-        "denominator": 9,
+        "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "DBD",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "IMP",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "DMC",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "TRA",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "OPC",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "TNH",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "JVC",
-            "source_metric_id": "gordon_growth",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "AMV",
             "source_metric_id": "gordon_growth",
             "status": "pass",
             "value": 1
@@ -1430,26 +1024,18 @@
       },
       "evidence": {
         "artifact_ids": [
-          "DHG/financial_eval.json",
-          "DBD/financial_eval.json",
-          "IMP/financial_eval.json",
-          "DMC/financial_eval.json",
-          "TRA/financial_eval.json",
-          "OPC/financial_eval.json",
-          "TNH/financial_eval.json",
-          "JVC/financial_eval.json",
-          "AMV/financial_eval.json"
+          "DHG/financial_eval.json"
         ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "net_debt_reconciliation_error",
       "label": "Net debt reconciliation error",
       "source": "benchmark_suite",
-      "detail": "derived_from=net_debt;cohort_size=9",
+      "detail": "derived_from=net_debt;cohort_size=1",
       "metric_id": "net_debt_reconciliation_error",
       "metric_name": "Net debt reconciliation error",
       "category": "financial_model",
@@ -1464,7 +1050,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 9,
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -1486,58 +1072,10 @@
         "parameters": {},
         "aggregation": "cohort_failure_count",
         "numerator": 0,
-        "denominator": 9,
+        "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "DBD",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "IMP",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "DMC",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "TRA",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "OPC",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "TNH",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "JVC",
-            "source_metric_id": "net_debt",
-            "status": "pass",
-            "value": 1
-          },
-          {
-            "ticker": "AMV",
             "source_metric_id": "net_debt",
             "status": "pass",
             "value": 1
@@ -1551,20 +1089,12 @@
       },
       "evidence": {
         "artifact_ids": [
-          "DHG/financial_eval.json",
-          "DBD/financial_eval.json",
-          "IMP/financial_eval.json",
-          "DMC/financial_eval.json",
-          "TRA/financial_eval.json",
-          "OPC/financial_eval.json",
-          "TNH/financial_eval.json",
-          "JVC/financial_eval.json",
-          "AMV/financial_eval.json"
+          "DHG/financial_eval.json"
         ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     }
   ],
   "blocking_issues": []

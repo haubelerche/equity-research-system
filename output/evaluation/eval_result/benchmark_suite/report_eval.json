@@ -6,7 +6,7 @@
   "tickers": [
     "DHG"
   ],
-  "generated_at": "2026-06-15T14:07:12.795190+00:00",
+  "generated_at": "2026-06-17T17:09:23.053637+00:00",
   "plan_id": "06",
   "name": "Report quality",
   "artifact": "report_eval.json",
@@ -25,7 +25,7 @@
       "id": "explanation_pdf_rendered",
       "label": "Explanation PDF rendered",
       "source": "benchmark_suite",
-      "detail": "cohort_boolean_pass_rate=1.0/1",
+      "detail": "cohort_boolean_pass_rate=1/1",
       "metric_id": "explanation_pdf_rendered",
       "metric_name": "Explanation PDF rendered",
       "category": "report_quality",
@@ -45,7 +45,7 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "report",
       "failed_examples": [],
       "remediation_hint": "Render the explanation artifact from a validated report model.",
@@ -58,49 +58,74 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_mean",
-        "numerator": 1.0,
+        "inputs": {
+          "metric_id": "explanation_pdf_rendered",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "explanation_pdf_rendered"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "explanation_pdf_rendered",
             "status": "pass",
             "value": 1,
-            "detail": ""
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "benchmark_metric_registry_v1"
+        "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T14:07:12.795190+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "financial_gate_passed",
       "label": "Deterministic finance gate",
       "source": "benchmark_suite",
-      "detail": "cohort_size=1",
+      "detail": "cohort_pass_rate=0/1",
       "metric_id": "financial_gate_passed",
       "metric_name": "Deterministic finance gate",
       "category": "financial_model",
       "layer": "release_gate",
-      "metric_type": "error_count",
+      "metric_type": "coverage",
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0,
-      "threshold": "pass",
+      "value": 0.0,
+      "threshold": "= 100%",
       "threshold_operator": "=",
-      "unit": "count",
+      "unit": "percent",
       "status": "fail",
       "legacy_status": "fail",
       "sample_size": 1,
@@ -108,11 +133,12 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "valuation",
       "failed_examples": [
         {
           "ticker": "DHG",
+          "artifact_id": "DHG/report_eval.json",
           "metric_id": "financial_gate_passed",
           "status": "fail",
           "value": 0,
@@ -136,37 +162,67 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_sum",
+        "inputs": {
+          "metric_id": "financial_gate_passed",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "financial_gate_passed"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
         "numerator": 0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "financial_gate_passed",
             "status": "fail",
             "value": 0,
-            "detail": ""
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [
+              {
+                "reason": "threshold_not_met",
+                "source": "financial_eval.json"
+              }
+            ],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "benchmark_metric_registry_v1"
+        "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T14:07:12.795190+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "publication_readiness",
       "label": "Publication readiness",
       "source": "benchmark_suite",
-      "detail": "cohort_boolean_pass_rate=0.0/1",
+      "detail": "cohort_boolean_pass_rate=0/1",
       "metric_id": "publication_readiness",
       "metric_name": "Publication readiness",
       "category": "report_quality",
@@ -186,20 +242,21 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "reviewer",
       "failed_examples": [
         {
           "ticker": "DHG",
+          "artifact_id": "DHG/report_eval.json",
           "metric_id": "publication_readiness",
           "status": "fail",
           "value": 0,
-          "detail": "",
-          "source": "final approval and locked publishable model missing",
+          "detail": "run_approved,final_report_approval,package_validation,report_quality_allow_export,publishable_model_locked",
+          "source": "publication governance",
           "failed_examples": [
             {
-              "reason": "threshold_not_met",
-              "source": "final approval and locked publishable model missing"
+              "reason": "run_approved,final_report_approval,package_validation,report_quality_allow_export,publishable_model_locked",
+              "source": "publication governance"
             }
           ]
         }
@@ -214,37 +271,595 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_mean",
-        "numerator": 0.0,
+        "inputs": {
+          "metric_id": "publication_readiness",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "publication_readiness"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "publication_readiness",
             "status": "fail",
             "value": 0,
-            "detail": ""
+            "detail": "run_approved,final_report_approval,package_validation,report_quality_allow_export,publishable_model_locked",
+            "sample_size": 1,
+            "failed_examples": [
+              {
+                "reason": "run_approved,final_report_approval,package_validation,report_quality_allow_export,publishable_model_locked",
+                "source": "publication governance"
+              }
+            ],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "benchmark_metric_registry_v1"
+        "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T14:07:12.795190+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "report.completeness",
+      "label": "Report completeness",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "report.completeness",
+      "metric_name": "Report completeness",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 90",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.completeness",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "report.completeness",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "report.completeness"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 100.0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "report.completeness",
+            "status": "pass",
+            "value": 100.0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Add missing required sections/tables/charts.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "report.evidence_integration",
+      "label": "Evidence integration",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "report.evidence_integration",
+      "metric_name": "Evidence integration",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 80.0,
+      "threshold": ">= 80",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.evidence_integration",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "report.evidence_integration",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "report.evidence_integration"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 80.0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "report.evidence_integration",
+            "status": "pass",
+            "value": 80.0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Tie claims to evidence and formula trace.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "report.financial_analysis_depth",
+      "label": "Financial analysis depth",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "report.financial_analysis_depth",
+      "metric_name": "Financial analysis depth",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 90.0,
+      "threshold": ">= 80",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.financial_analysis_depth",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "report.financial_analysis_depth",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "report.financial_analysis_depth"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 90.0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "report.financial_analysis_depth",
+            "status": "pass",
+            "value": 90.0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Add company-specific financial drivers.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "report.forecast_rationale",
+      "label": "Forecast rationale",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "report.forecast_rationale",
+      "metric_name": "Forecast rationale",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 80.0,
+      "threshold": ">= 80",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.forecast_rationale",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "report.forecast_rationale",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "report.forecast_rationale"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 80.0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "report.forecast_rationale",
+            "status": "pass",
+            "value": 80.0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Add explicit revenue/margin/capex/NWC driver rationale.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "report.quality_total",
+      "label": "Report quality total",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "report.quality_total",
+      "metric_name": "Report quality total",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 91.0,
+      "threshold": ">= 85",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.quality_total",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "report.quality_total",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "report.quality_total"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 91.0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "report.quality_total",
+            "status": "pass",
+            "value": 91.0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Improve sections below rubric threshold.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "report.valuation_transparency",
+      "label": "Valuation transparency",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "report.valuation_transparency",
+      "metric_name": "Valuation transparency",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 85",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.valuation_transparency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "report.valuation_transparency",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "report.valuation_transparency"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 100.0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "report.valuation_transparency",
+            "status": "pass",
+            "value": 100.0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Show method selection, assumptions, WACC, bridge and sensitivity.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "report_pdf_rendered",
       "label": "Report PDF rendered",
       "source": "benchmark_suite",
-      "detail": "cohort_boolean_pass_rate=1.0/1",
+      "detail": "cohort_boolean_pass_rate=1/1",
       "metric_id": "report_pdf_rendered",
       "metric_name": "Report PDF rendered",
       "category": "report_quality",
@@ -264,7 +879,7 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "report",
       "failed_examples": [],
       "remediation_hint": "Render the analyst draft and client-final artifacts from a validated report model.",
@@ -277,31 +892,56 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_mean",
-        "numerator": 1.0,
+        "inputs": {
+          "metric_id": "report_pdf_rendered",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "report_pdf_rendered"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 1,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "report_pdf_rendered",
             "status": "pass",
             "value": 1,
-            "detail": ""
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "benchmark_metric_registry_v1"
+        "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T14:07:12.795190+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "report_quality_score",
@@ -316,76 +956,84 @@
       "scope": "report_run",
       "severity": "P1",
       "blocks_publish": true,
-      "value": 0.0,
+      "value": 91.0,
       "threshold": ">= 85/100",
       "threshold_operator": ">=",
       "unit": "score",
-      "status": "fail",
-      "legacy_status": "fail",
+      "status": "pass",
+      "legacy_status": "pass",
       "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "reviewer",
-      "failed_examples": [
-        {
-          "ticker": "DHG",
-          "metric_id": "report_quality_score",
-          "status": "not_evaluable",
-          "value": null,
-          "detail": "",
-          "source": "publishable report model missing",
-          "failed_examples": [
-            {
-              "reason": "evaluation_evidence_missing",
-              "source": "publishable report model missing"
-            }
-          ]
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Improve required sections, forecast rationale, valuation transparency, and presentation quality.",
       "evaluator": {
         "id": "report_quality_score",
-        "framework": "report_quality_rubric",
+        "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
-        "formula": "weighted_report_quality_score",
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 0,
+        "formula": null,
+        "inputs": {
+          "metric_id": "report_quality_score",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/report_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "report_quality_score"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 91.0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
-            "status": "not_evaluable",
-            "value": null,
-            "detail": ""
+            "artifact_id": "DHG/report_eval.json",
+            "source_metric_id": "report_quality_score",
+            "status": "pass",
+            "value": 91.0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": "MVP report-quality threshold before human review.",
-        "registry_version": "benchmark_metric_registry_v1"
+        "rationale": null,
+        "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/report_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T14:07:12.795190+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     }
   ],
   "blocking_issues": [
-    "final_report_approval_missing",
-    "financial_gate_passed:threshold_not_met",
-    "publication_readiness:threshold_not_met",
-    "publishable_final_report_model_missing"
+    "financial_gate_passed:cohort_pass_rate=0/1",
+    "publication_readiness:cohort_boolean_pass_rate=0/1"
   ]
 }

@@ -871,6 +871,29 @@ def _metric(
     )
 
 
+def _relative_existing_artifact_ids(root: Path, *paths: Path | None) -> list[str]:
+    artifact_ids: list[str] = []
+    for path in paths:
+        if path is None or not path.exists():
+            continue
+        artifact_ids.append(_source_path(path, root))
+    return artifact_ids
+
+
+def _artifact_evidence(root: Path, *paths: Path | None) -> dict[str, Any]:
+    artifact_ids = _relative_existing_artifact_ids(root, *paths)
+    sizes: dict[str, int] = {}
+    for path in paths:
+        if path is None or not path.exists():
+            continue
+        sizes[_source_path(path, root)] = path.stat().st_size
+    return {
+        "artifact_ids": artifact_ids,
+        "artifact_sizes_bytes": sizes,
+        "evidence_available": bool(artifact_ids),
+    }
+
+
 def _ratio_status(value: float | None, target: float, comparator: str = "gte") -> str:
     if value is None:
         return "not_evaluable"
@@ -943,7 +966,7 @@ def _blocked(metrics: list[dict[str, Any]]) -> list[str]:
     return [
         f"{item['id']}:{item.get('detail') or 'threshold_not_met'}"
         for item in metrics
-        if item["status"] == "fail"
+        if item["status"] in {"fail", "not_evaluable"} and item.get("blocks_publish") is True
     ]
 
 
@@ -1961,6 +1984,51 @@ def _cash_flow_formula_pass(
     return True
 
 
+def _cash_flow_formula_samples(
+    rows: list[dict[str, Any]],
+    *,
+    output_key: str,
+    add_keys: tuple[str, ...],
+    subtract_keys: tuple[str, ...],
+    tolerance: float = 0.2,
+) -> list[dict[str, Any]]:
+    samples: list[dict[str, Any]] = []
+    if not rows:
+        return [{
+            "sample_origin": "formula_row",
+            "status": "missing",
+            "output_key": output_key,
+            "reason": "formula_table_missing",
+        }]
+    for index, row in enumerate(rows, start=1):
+        output = _as_float(row.get(output_key))
+        add_values = {key: _as_float(row.get(key)) for key in add_keys}
+        subtract_values = {key: _as_float(row.get(key)) for key in subtract_keys}
+        missing = [
+            key for key, value in {**add_values, **subtract_values, output_key: output}.items()
+            if value is None
+        ]
+        expected = (
+            None if missing else sum(add_values.values()) - sum(subtract_values.values())  # type: ignore[arg-type]
+        )
+        error = None if expected is None or output is None else output - expected
+        passed = bool(error is not None and abs(error) <= tolerance)
+        samples.append({
+            "sample_origin": "formula_row",
+            "row_index": index,
+            "output_key": output_key,
+            "status": "pass" if passed else "fail",
+            "reported": output,
+            "expected": expected,
+            "error": error,
+            "tolerance": tolerance,
+            "add_keys": add_values,
+            "subtract_keys": subtract_values,
+            "missing_fields": missing,
+        })
+    return samples
+
+
 def _matrix_numbers(value: Any) -> list[float]:
     numbers: list[float] = []
     stack = [value]
@@ -2169,28 +2237,39 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
         root / "storage" / "runs", "valuation.json", ticker
     )
     if valuation_path is None:
-        # No valuation run exists for this ticker, so model *accuracy* cannot be
-        # measured here. This is reported as ``not_applicable`` (excluded from the
-        # accuracy cohort) rather than ``blocked``: a missing run is a coverage gap
-        # owned by the data/valuation pipeline benchmark, not a financial-model
-        # arithmetic error. The per-ticker reason is preserved for an honest
-        # coverage drill-down.
         metric = _metric(
             "valuation_artifact", "Valuation run artifact", None, "pass",
-            "not_applicable", "storage" + "/runs" + f"/*{ticker.lower()}*/valuation.json",
+            "not_evaluable", "storage" + "/runs" + f"/*{ticker.lower()}*/valuation.json",
             "valuation_artifact_missing_for_ticker",
+            sample_size=1,
+            failed_examples=[{
+                "ticker": ticker.upper(),
+                "reason": "valuation_artifact_missing_for_ticker",
+                "expected_artifact": "valuation.json",
+            }],
+            calculation={
+                "aggregation": "artifact_presence",
+                "numerator": 0,
+                "denominator": 1,
+                "per_sample_results": [{
+                    "ticker": ticker.upper(),
+                    "status": "not_evaluable",
+                    "expected_artifact": "valuation.json",
+                    "reason": "valuation_artifact_missing_for_ticker",
+                }],
+            },
         )
         policy = build_valuation_publishability_policy(None, ticker=ticker)
         return {
-            "status": "not_applicable",
+            "status": "blocked",
             "metrics": [metric],
-            "blocking_issues": [],
+            "blocking_issues": _blocked([metric]),
             "valuation_artifact": None,
             "invariants": [],
             "critical_failures": None,
             "golden_drift_out_of_tolerance": None,
             "missing_traces": ["valuation_formula_trace"],
-            "decision": "not_applicable",
+            "decision": "block",
             "valuation_publishability": policy.to_dict(),
         }
     valuation = _read_json(valuation_path)
@@ -2287,8 +2366,85 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
             return 0
         return None
 
+    finance_samples = {
+        "net_debt": [{
+            "sample_origin": "net_debt_bridge",
+            "status": "pass" if net_debt_pass else "fail",
+            "reported": _as_float(net_bridge.get("net_debt")),
+            "expected": expected_net_debt if net_bridge else None,
+            "components": {
+                "total_debt": _as_float(net_bridge.get("total_debt")),
+                "cash": _as_float(net_bridge.get("cash")),
+                "short_term_investments": _as_float(net_bridge.get("short_term_investments")),
+            },
+        }],
+        "fcff": _cash_flow_formula_samples(
+            fcff_rows,
+            output_key="fcff",
+            add_keys=("ebit_after_tax", "depreciation"),
+            subtract_keys=("capex", "delta_nwc"),
+        ),
+        "fcfe": _cash_flow_formula_samples(
+            fcfe_rows,
+            output_key="fcfe",
+            add_keys=("net_income", "depreciation", "net_borrowing"),
+            subtract_keys=("capex", "delta_nwc"),
+        ),
+        "target_price": [{
+            "sample_origin": "target_price_bridge",
+            "status": "pass" if target_passed else "fail",
+            "reported": target_value,
+            "expected": target_expected if target_applicable else None,
+            "equity_value": equity_value,
+            "shares_mn": _as_float(fcff.get("shares_mn")),
+            "base_cell_matches_target": base_cell_ok,
+        }],
+        "gordon_growth": [{
+            "sample_origin": "gordon_growth",
+            "status": "pass" if gordon_pass else "fail",
+            "wacc": _as_float(fcff.get("wacc")),
+            "terminal_growth": _as_float(fcff.get("terminal_growth")),
+        }],
+        "sensitivity_varies": [{
+            "sample_origin": "sensitivity_matrix",
+            "status": "pass" if sensitivity_pass else "fail",
+            "matrix": "fcff_wacc_g",
+            "numeric_cell_count": len(_matrix_numbers(sensitivity.get("fcff_wacc_g"))),
+        }],
+        "fcfe_sensitivity": [{
+            "sample_origin": "sensitivity_matrix",
+            "status": "pass" if fcfe_sensitivity else "fail",
+            "matrix": "fcfe_re_g",
+            "numeric_cell_count": len(_matrix_numbers(sensitivity.get("fcfe_re_g"))),
+        }],
+        "formula_trace": [{
+            "sample_origin": "formula_trace_manifest",
+            "status": "pass" if trace_pass else "fail",
+            "trace_count": len(formula_traces) if isinstance(formula_traces, list) else 0,
+        }],
+    }
     metrics = [
-        _metric(metric_id, label, _gate_value(status), "pass", status, artifact_rel)
+        _metric(
+            metric_id,
+            label,
+            _gate_value(status),
+            "pass",
+            status,
+            artifact_rel,
+            sample_size=len(finance_samples.get(metric_id, [])),
+            failed_examples=[
+                sample for sample in finance_samples.get(metric_id, [])
+                if sample.get("status") == "fail"
+            ],
+            evaluator={"framework": "deterministic_finance_formula_trace"},
+            calculation={
+                "aggregation": "boolean_gate",
+                "numerator": 1 if status == "pass" else 0,
+                "denominator": 1 if status != "not_applicable" else 0,
+                "per_sample_results": finance_samples.get(metric_id, []),
+            },
+            evidence=_artifact_evidence(root, valuation_path),
+        )
         for metric_id, label, status in metric_specs
     ]
     invariant_metric_ids = {"net_debt", "target_price", "gordon_growth"}
@@ -2318,6 +2474,7 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
                 "denominator": len(invariants),
                 "per_sample_results": invariants,
             },
+            evidence=_artifact_evidence(root, valuation_path),
         ),
     ])
     drift_summary = _check_golden_drift(valuation, golden_valuation) if golden_valuation else None
@@ -2360,6 +2517,7 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
                 "aggregation": "drift_violation_count",
                 "per_sample_results": drift_summary["drift_details"] if drift_summary else [],
             },
+            evidence=_artifact_evidence(root, valuation_path),
         ),
     )
     return {
@@ -2616,24 +2774,143 @@ def evaluate_citation(root: Path, ticker: str) -> dict[str, Any]:
     ))
     quant_claims = len(re.findall(r"\b\d[\d.,]*\s*(?:%|VND|x)\b", text, re.IGNORECASE))
     citation_markers = len(re.findall(r"\[\^|Nguon:|Source:", text, re.IGNORECASE))
-    claim_ledger = _latest_json_for_ticker(
+    claim_ledger_path = _latest_json_for_ticker(
         root / "storage" / "archive", "claim_ledger.json", ticker
     )
-    ledger_available = claim_ledger is not None
+    claim_ledger = _read_json(claim_ledger_path)
+    claims = [
+        claim for claim in (claim_ledger.get("claims") or [])
+        if isinstance(claim, dict)
+    ]
+    ledger_available = claim_ledger_path is not None and bool(claim_ledger)
+    quantitative_claims = [
+        claim for claim in claims
+        if claim.get("numeric_value") is not None
+        or str(claim.get("claim_type") or "").lower() in {"financial_fact", "valuation_output", "quantitative"}
+    ]
+    supported_claims = [
+        claim for claim in quantitative_claims
+        if claim.get("status") == "supported" and (claim.get("traces") or claim.get("supporting_refs"))
+    ]
+    trace_samples = [
+        {
+            "claim_id": claim.get("claim_id"),
+            "claim_type": claim.get("claim_type"),
+            "status": claim.get("status"),
+            "section": claim.get("section"),
+            "numeric_value": claim.get("numeric_value"),
+            "trace_count": len(claim.get("traces") or []),
+            "supporting_ref_count": len(claim.get("supporting_refs") or []),
+            "evidence_available": bool(claim.get("traces") or claim.get("supporting_refs")),
+        }
+        for claim in quantitative_claims
+    ]
+    trace_total = len(quantitative_claims)
+    trace_coverage = len(supported_claims) / trace_total if trace_total else None
+    unsupported_claims = [
+        sample for sample in trace_samples
+        if not sample["evidence_available"] or sample.get("status") == "unsupported"
+    ]
+    source_id_samples: list[dict[str, Any]] = []
+    for claim in quantitative_claims:
+        for trace in claim.get("traces") or []:
+            if not isinstance(trace, dict):
+                continue
+            source_id = trace.get("source_id") or trace.get("artifact_path")
+            source_id_samples.append({
+                "claim_id": claim.get("claim_id"),
+                "trace_type": trace.get("trace_type"),
+                "source_id": source_id,
+                "source_tier": trace.get("source_tier"),
+                "status": "pass" if source_id else "fail",
+            })
+    source_id_valid = sum(1 for sample in source_id_samples if sample["status"] == "pass")
+    source_id_validity = source_id_valid / len(source_id_samples) if source_id_samples else None
+    official_source_samples = [
+        sample for sample in source_id_samples
+        if sample.get("source_tier") is not None
+    ]
+    official_source_hits = sum(
+        1 for sample in official_source_samples
+        if _as_float(sample.get("source_tier")) is not None and _as_float(sample.get("source_tier")) <= 1
+    )
+    official_source_coverage = (
+        official_source_hits / len(official_source_samples) if official_source_samples else None
+    )
+    ledger_source = str(claim_ledger_path.relative_to(root)) if claim_ledger_path else "claim ledger missing"
+    ledger_missing_detail = "claim_ledger_missing" if not ledger_available else ""
     metrics = [
-        _metric("quantitative_citation_coverage", "Quantitative citation coverage", None, "100%",
-                "measured_only", "claim ledger missing",
-                "PDF-level source counts cannot prove claim-level coverage."),
-        _metric("citation_key_resolution", "Citation key resolution", None, "100%", "measured_only",
-                "claim ledger missing"),
-        _metric("source_id_validity", "Source ID validity", None, "100%", "measured_only",
-                "claim ledger missing"),
-        _metric("official_source_coverage", "Official source coverage", None, "100%", "measured_only",
-                "claim ledger missing"),
+        _metric("quantitative_citation_coverage", "Quantitative citation coverage", trace_coverage, "100%",
+                "not_evaluable" if trace_coverage is None else _ratio_status(trace_coverage, 1.0),
+                ledger_source, ledger_missing_detail or ("quantitative_claim_ledger_empty" if trace_total == 0 else ""),
+                failed_examples=unsupported_claims[:100] or (
+                    [{"reason": "quantitative_claim_ledger_empty"}] if ledger_available and trace_total == 0 else []
+                ),
+                sample_size=trace_total,
+                evaluator={"framework": "claim_ledger_trace_audit",
+                           "execution_status": "executed" if ledger_available else "not_executed"},
+                calculation={"aggregation": "coverage", "numerator": len(supported_claims),
+                             "denominator": trace_total, "per_sample_results": trace_samples[:100]},
+                evidence=_artifact_evidence(root, claim_ledger_path)),
+        _metric("citation_key_resolution", "Citation key resolution", trace_coverage, "100%",
+                "not_evaluable" if trace_coverage is None else _ratio_status(trace_coverage, 1.0),
+                ledger_source, ledger_missing_detail,
+                failed_examples=unsupported_claims[:100],
+                sample_size=trace_total,
+                evaluator={"framework": "claim_ledger_trace_audit",
+                           "execution_status": "executed" if ledger_available else "not_executed"},
+                calculation={"aggregation": "coverage", "numerator": len(supported_claims),
+                             "denominator": trace_total, "per_sample_results": trace_samples[:100]},
+                evidence=_artifact_evidence(root, claim_ledger_path)),
+        _metric("source_id_validity", "Source ID validity", source_id_validity, "100%",
+                "not_evaluable" if source_id_validity is None else _ratio_status(source_id_validity, 1.0),
+                ledger_source, ledger_missing_detail or ("citation_trace_source_id_missing" if source_id_validity != 1.0 else ""),
+                failed_examples=[sample for sample in source_id_samples if sample["status"] == "fail"][:100],
+                sample_size=len(source_id_samples),
+                evaluator={"framework": "claim_ledger_trace_audit",
+                           "execution_status": "executed" if ledger_available else "not_executed"},
+                calculation={"aggregation": "coverage", "numerator": source_id_valid,
+                             "denominator": len(source_id_samples), "per_sample_results": source_id_samples[:100]},
+                evidence=_artifact_evidence(root, claim_ledger_path)),
+        _metric("official_source_coverage", "Official source coverage", official_source_coverage, "100%",
+                "not_evaluable" if official_source_coverage is None else _ratio_status(official_source_coverage, 1.0),
+                ledger_source, ledger_missing_detail or ("official_source_tier_missing" if official_source_coverage is None else ""),
+                failed_examples=[
+                    sample for sample in official_source_samples
+                    if _as_float(sample.get("source_tier")) is None or _as_float(sample.get("source_tier")) > 1
+                ][:100],
+                sample_size=len(official_source_samples),
+                evaluator={"framework": "claim_ledger_trace_audit",
+                           "execution_status": "executed" if ledger_available else "not_executed"},
+                calculation={"aggregation": "coverage", "numerator": official_source_hits,
+                             "denominator": len(official_source_samples),
+                             "per_sample_results": official_source_samples[:100]},
+                evidence=_artifact_evidence(root, claim_ledger_path)),
         _metric("generic_citations", "Generic citation labels", generic, "0",
-                _ratio_status(float(generic), 0.0, "lte"), str(report["path"])),
+                _ratio_status(float(generic), 0.0, "lte"), str(report["path"]),
+                sample_size=max(1, source_mentions),
+                failed_examples=[{"reason": "generic_citation_label", "count": generic}] if generic else [],
+                calculation={"aggregation": "error_count", "numerator": generic,
+                             "denominator": max(1, source_mentions),
+                             "per_sample_results": [{
+                                 "source_mentions": source_mentions,
+                                 "generic_citations": generic,
+                                 "report_path": report["path"],
+                             }]},
+                evidence=_artifact_evidence(root, root / "output" / f"{ticker}_report.pdf")),
         _metric("pdf_source_mentions", "PDF source labels", source_mentions, "> 0",
-                "pass" if source_mentions > 0 else "fail", str(report["path"])),
+                "pass" if source_mentions > 0 else "fail", str(report["path"]),
+                sample_size=1,
+                failed_examples=[{"reason": "pdf_source_mentions_missing", "report_path": report["path"]}]
+                if source_mentions == 0 else [],
+                calculation={"aggregation": "presence", "numerator": source_mentions,
+                             "denominator": 1,
+                             "per_sample_results": [{
+                                 "source_mentions": source_mentions,
+                                 "citation_markers": citation_markers,
+                                 "report_path": report["path"],
+                             }]},
+                evidence=_artifact_evidence(root, root / "output" / f"{ticker}_report.pdf")),
     ]
     blockers = _blocked(metrics)
     if not ledger_available:
@@ -2642,11 +2919,11 @@ def evaluate_citation(root: Path, ticker: str) -> dict[str, Any]:
         "status": _status(metrics, blocked=not ledger_available),
         "metrics": metrics,
         "blocking_issues": blockers,
-        "claim_count": None,
-        "quantitative_claim_count": quant_claims,
-        "citation_coverage_ratio": None,
+        "claim_count": len(claims) if ledger_available else None,
+        "quantitative_claim_count": trace_total if ledger_available else quant_claims,
+        "citation_coverage_ratio": trace_coverage,
         "source_tier_counts": {},
-        "official_source_coverage": None,
+        "official_source_coverage": official_source_coverage,
         "numeric_mismatches": [],
         "generic_citations": generic,
         "citation_markers": citation_markers,
@@ -2767,7 +3044,9 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                 evaluator={"framework": "agent_tool_permission_trace",
                            "execution_status": "executed" if tool_summary else "not_executed"},
                 calculation={"numerator": len(permitted_tools),
-                             "denominator": len(tool_summary), "aggregation": "coverage"}),
+                             "denominator": len(tool_summary), "aggregation": "coverage",
+                             "per_sample_results": tool_summary[:100]},
+                evidence=_artifact_evidence(root, packet_path)),
         _metric("artifact_manifest_compliance", "Artifact manifest compliance", manifest_compliance, "100%",
                 _ratio_status(manifest_compliance, 1.0), str(packet_path.relative_to(root)) if packet_path else "missing",
                 ",".join(f"artifact_missing:{name}" for name in manifest_missing),
@@ -2776,7 +3055,16 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                 evaluator={"framework": "artifact_manifest_trace",
                            "execution_status": "executed" if manifest_sections else "not_executed"},
                 calculation={"numerator": len(required_artifact_groups) - len(manifest_missing),
-                             "denominator": len(required_artifact_groups), "aggregation": "coverage"}),
+                             "denominator": len(required_artifact_groups), "aggregation": "coverage",
+                             "per_sample_results": [
+                                 {
+                                     "section_group": list(group),
+                                     "status": "pass" if manifest_sections & set(group) else "fail",
+                                     "registered_sections": sorted(manifest_sections),
+                                 }
+                                 for group in required_artifact_groups
+                             ]},
+                evidence=_artifact_evidence(root, packet_path)),
         _metric("schema_validity", "Output schema validity", schema_validity, "100%",
                 _ratio_status(schema_validity, 1.0), "config/harness/*.schema.json",
                 ",".join(sorted({str(item.get("reason")) for item in schema_failures})) if schema_failures else "",
@@ -2785,17 +3073,33 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                 evaluator={"framework": "json_schema_required_contract",
                            "execution_status": "executed" if schema_units else "not_executed"},
                 calculation={"numerator": 0 if schema_validity is None else int(schema_validity * schema_units),
-                             "denominator": schema_units, "aggregation": "coverage"}),
+                             "denominator": schema_units, "aggregation": "coverage",
+                             "per_sample_results": [
+                                 {
+                                     "artifact": "evidence_packet",
+                                     "status": "pass" if packet and not [
+                                         item for item in schema_failures
+                                         if "evidence_packet_schema" in str(item.get("source"))
+                                     ] else "fail",
+                                     "path": str(packet_path.relative_to(root)) if packet_path else "missing",
+                                 },
+                                 {
+                                     "artifact": "agent_effectiveness_audit",
+                                     "status": "pass" if audit and isinstance(audit.get("agent_execution"), list) else "fail",
+                                     "path": str(audit_path.relative_to(root)) if audit_path else "missing",
+                                 },
+                             ][:schema_units or 2]},
+                evidence=_artifact_evidence(root, packet_path, audit_path)),
         _metric("role_adherence", "Role adherence", judge_scores.get("role_adherence"), ">= 0.85",
                 _ratio_status(judge_scores.get("role_adherence"), 0.85),
                 str(DEEPEVAL_CASE_PATH), deepeval_result.get("reason") or "",
                 sample_size=deepeval_result["sample_size"], evaluator=judge_evaluator,
-                calculation={"aggregation": "mean"}),
+                calculation={"aggregation": "mean", "per_sample_results": deepeval_result.get("samples", [])[:100]}),
         _metric("groundedness", "Groundedness", judge_scores.get("groundedness"), ">= 0.85",
                 _ratio_status(judge_scores.get("groundedness"), 0.85),
                 str(DEEPEVAL_CASE_PATH), deepeval_result.get("reason") or "",
                 sample_size=deepeval_result["sample_size"], evaluator=judge_evaluator,
-                calculation={"aggregation": "mean"}),
+                calculation={"aggregation": "mean", "per_sample_results": deepeval_result.get("samples", [])[:100]}),
         _metric("no_unauthorized_calc", "No unauthorized financial calculation", unauthorized_calc_score, "100%",
                 _ratio_status(unauthorized_calc_score, 1.0),
                 str(audit_path.relative_to(root)) if audit_path else (str(packet_path.relative_to(root)) if packet_path else "missing"),
@@ -2806,17 +3110,20 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                            "execution_status": "executed" if output_records else "not_executed"},
                 calculation={"numerator": max(0, len(output_records) - len(calc_findings)),
                              "denominator": len(output_records), "aggregation": "coverage",
-                             "per_sample_results": output_records[:100]}),
+                             "per_sample_results": output_records[:100]},
+                evidence=_artifact_evidence(root, packet_path, audit_path)),
         _metric("task_completion", "Task completion", task_completion, ">= 0.85",
                 _ratio_status(task_completion, 0.85), str(audit_path.relative_to(root)) if audit_path else "missing",
                 sample_size=len(agent_records),
                 calculation={"numerator": sum(record.get("status") == "completed" for record in agent_records),
-                             "denominator": len(agent_records), "aggregation": "coverage"}),
+                             "denominator": len(agent_records), "aggregation": "coverage",
+                             "per_sample_results": agent_records[:100]},
+                evidence=_artifact_evidence(root, audit_path)),
         _metric("plan_adherence", "Plan adherence", judge_scores.get("plan_adherence"), ">= 0.80",
                 _ratio_status(judge_scores.get("plan_adherence"), 0.80),
                 str(DEEPEVAL_CASE_PATH), deepeval_result.get("reason") or "",
                 sample_size=deepeval_result["sample_size"], evaluator=judge_evaluator,
-                calculation={"aggregation": "mean"}),
+                calculation={"aggregation": "mean", "per_sample_results": deepeval_result.get("samples", [])[:100]}),
         _metric("critic_issue_recall", "Critic issue recall", None, ">= 90%", "measured_only",
                 "seeded failure dataset missing"),
     ]
@@ -2856,6 +3163,19 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
     explanation = _pdf_stats(root / "output" / f"{ticker}_explanation.pdf")
     finance_pass = financial.get("decision") == "pass"
     scores = _report_quality_subscores(report, explanation)
+    claim_ledger_path = _latest_json_for_ticker(
+        root / "storage" / "archive", "claim_ledger.json", ticker
+    )
+    evidence_packet_path = _latest_scoped_json_artifact_for_ticker(
+        archive_root=root / "storage" / "archive",
+        runs_root=root / "storage" / "runs",
+        ticker=ticker,
+        legacy_name="run1_evidence_packet.json",
+        suffix="_evidence_packet.json",
+    )
+    evidence_support_available = claim_ledger_path is not None or evidence_packet_path is not None
+    if not evidence_support_available:
+        scores["evidence_integration"] = None
     total_score = _report_quality_total(scores)
     publishable_model_path = _latest_named_for_ticker(
         root / "storage" / "runs", "publishable_final_report_model.json", ticker
@@ -2878,46 +3198,95 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
         "publishable_model_locked": publishable_model_locked,
     }
     publication_pass = all(publication_checks.values())
+    report_evidence = _artifact_evidence(
+        root,
+        root / "output" / f"{ticker}_report.pdf",
+        root / "output" / f"{ticker}_explanation.pdf",
+        claim_ledger_path,
+        evidence_packet_path,
+    )
+    rubric_samples = [{
+        "ticker": ticker.upper(),
+        "report_pdf": report["path"],
+        "explanation_pdf": explanation["path"],
+        "report_exists": report["exists"],
+        "explanation_exists": explanation["exists"],
+        "claim_ledger_path": _source_path(claim_ledger_path, root) if claim_ledger_path else None,
+        "evidence_packet_path": _source_path(evidence_packet_path, root) if evidence_packet_path else None,
+        "evidence_support_available": evidence_support_available,
+        "scores": scores,
+    }]
     metrics = [
         _metric("report_pdf_rendered", "Report PDF rendered", 1 if report["exists"] else 0, "pass",
-                "pass" if report["exists"] else "fail", str(report["path"])),
+                "pass" if report["exists"] else "fail", str(report["path"]),
+                calculation={"aggregation": "presence", "numerator": 1 if report["exists"] else 0,
+                             "denominator": 1, "per_sample_results": rubric_samples},
+                evidence=report_evidence),
         _metric("explanation_pdf_rendered", "Explanation PDF rendered", 1 if explanation["exists"] else 0,
-                "pass", "pass" if explanation["exists"] else "fail", str(explanation["path"])),
+                "pass", "pass" if explanation["exists"] else "fail", str(explanation["path"]),
+                calculation={"aggregation": "presence", "numerator": 1 if explanation["exists"] else 0,
+                             "denominator": 1, "per_sample_results": rubric_samples},
+                evidence=report_evidence),
         _metric("financial_gate_passed", "Deterministic finance gate", 1 if finance_pass else 0, "pass",
                 "pass" if finance_pass else "fail", "financial_eval.json",
-                ",".join(financial.get("blocking_issues") or [])),
+                ",".join(financial.get("blocking_issues") or []),
+                calculation={"aggregation": "boolean_gate", "numerator": 1 if finance_pass else 0,
+                             "denominator": 1, "per_sample_results": [{
+                                 "financial_decision": financial.get("decision"),
+                                 "blocking_issues": financial.get("blocking_issues") or [],
+                             }]},
+                evidence=report_evidence),
         _metric("report.quality_total", "Report quality total", total_score, ">= 85/100",
                 _metric_status(total_score, 85), "report PDF rubric",
                 sample_size=1 if total_score is not None else 0,
-                calculation={"aggregation": "weighted_mean", "per_sample_results": [scores]}),
+                calculation={"aggregation": "weighted_mean", "per_sample_results": rubric_samples},
+                evidence=report_evidence),
         _metric("report_quality_score", "Report quality score", total_score, ">= 85/100",
                 _metric_status(total_score, 85), "report PDF rubric",
                 sample_size=1 if total_score is not None else 0,
-                calculation={"aggregation": "weighted_mean", "per_sample_results": [scores]}),
+                calculation={"aggregation": "weighted_mean", "per_sample_results": rubric_samples},
+                evidence=report_evidence),
         _metric("report.completeness", "Report completeness", scores["completeness"], ">= 90%",
                 _metric_status(scores["completeness"], 90), "report PDF rubric",
                 sample_size=1 if scores["completeness"] is not None else 0,
-                calculation={"aggregation": "required_element_coverage"}),
+                calculation={"aggregation": "required_element_coverage", "per_sample_results": rubric_samples},
+                evidence=report_evidence),
         _metric("report.financial_analysis_depth", "Financial analysis depth",
                 scores["financial_analysis_depth"], ">= 80",
                 _metric_status(scores["financial_analysis_depth"], 80), "report PDF rubric",
-                sample_size=1 if scores["financial_analysis_depth"] is not None else 0),
+                sample_size=1 if scores["financial_analysis_depth"] is not None else 0,
+                calculation={"aggregation": "rubric_score", "per_sample_results": rubric_samples},
+                evidence=report_evidence),
         _metric("report.forecast_rationale", "Forecast rationale",
                 scores["forecast_rationale"], ">= 80",
                 _metric_status(scores["forecast_rationale"], 80), "report PDF rubric",
-                sample_size=1 if scores["forecast_rationale"] is not None else 0),
+                sample_size=1 if scores["forecast_rationale"] is not None else 0,
+                calculation={"aggregation": "rubric_score", "per_sample_results": rubric_samples},
+                evidence=report_evidence),
         _metric("report.valuation_transparency", "Valuation transparency",
                 scores["valuation_transparency"], ">= 85",
                 _metric_status(scores["valuation_transparency"], 85), "report PDF rubric",
-                sample_size=1 if scores["valuation_transparency"] is not None else 0),
+                sample_size=1 if scores["valuation_transparency"] is not None else 0,
+                calculation={"aggregation": "rubric_score", "per_sample_results": rubric_samples},
+                evidence=report_evidence),
         _metric("report.evidence_integration", "Evidence integration",
                 scores["evidence_integration"], ">= 80",
                 _metric_status(scores["evidence_integration"], 80), "report PDF rubric",
-                sample_size=1 if scores["evidence_integration"] is not None else 0),
+                "claim_ledger_or_evidence_packet_missing" if not evidence_support_available else "",
+                sample_size=1 if scores["evidence_integration"] is not None else 0,
+                calculation={"aggregation": "rubric_score", "per_sample_results": rubric_samples},
+                evidence=report_evidence),
         _metric("publication_readiness", "Publication readiness", 1 if publication_pass else 0,
                 "pass", "pass" if publication_pass else "fail",
                 "publication governance",
-                ",".join(key for key, value in publication_checks.items() if not value)),
+                ",".join(key for key, value in publication_checks.items() if not value),
+                calculation={"aggregation": "boolean_gate", "numerator": 1 if publication_pass else 0,
+                             "denominator": 1,
+                             "per_sample_results": [
+                                 {"check": key, "status": "pass" if value else "fail"}
+                                 for key, value in publication_checks.items()
+                             ]},
+                evidence=report_evidence),
     ]
     blockers = _blocked(metrics)
     if not final_approval_present:
@@ -3006,8 +3375,8 @@ def evaluate_observability(root: Path, ticker: str) -> dict[str, Any]:
     llm_fallbacks = sum(bool(item.get("fallback_triggered")) for item in agent_records)
     llm_fallback_rate = llm_fallbacks / llm_calls if llm_calls else None
     retrieval_fallbacks = sum(bool(item.get("fallback_triggered")) for item in retrieval_events)
-    retrieval_denominator = len(retrieval_events) or 1
-    retrieval_fallback_rate = retrieval_fallbacks / retrieval_denominator
+    retrieval_denominator = len(retrieval_events)
+    retrieval_fallback_rate = retrieval_fallbacks / retrieval_denominator if retrieval_denominator else None
     stage_durations: dict[str, float] = {}
     duration_events = trace_events if trace_events else agent_records
     for event in duration_events:
@@ -3020,6 +3389,7 @@ def evaluate_observability(root: Path, ticker: str) -> dict[str, Any]:
     artifact_upload_failures = sum(
         1 for item in upload_events if item.get("status") in {"failed", "error"}
     )
+    artifact_upload_failure_value = artifact_upload_failures if upload_events else None
     trace_url = _trace_url(trace_events, packet, audit, run_log)
     metadata = _read_json(
         _latest_named(root / "storage" / "sources" / "ocr_artifacts" / ticker, "metadata.json")
@@ -3168,7 +3538,7 @@ def evaluate_observability(root: Path, ticker: str) -> dict[str, Any]:
                 calculation={"numerator": retries, "denominator": llm_calls, "aggregation": "rate",
                              "per_sample_results": agent_records[:100]}),
         _metric("retrieval_fallback_rate", "Retrieval fallback rate", retrieval_fallback_rate, "<= 20%",
-                "measured_only" if retrieval_fallback_rate is None else (
+                "not_evaluable" if retrieval_fallback_rate is None else (
                     "pass" if retrieval_fallback_rate <= 0.20 else "fail"
                 ),
                 "runtime retrieval trace" if retrieval_events else "retrieval trace missing",
@@ -3177,9 +3547,9 @@ def evaluate_observability(root: Path, ticker: str) -> dict[str, Any]:
                 failed_examples=[item for item in retrieval_events if item.get("fallback_triggered")],
                 calculation={"numerator": retrieval_fallbacks, "denominator": retrieval_denominator,
                              "aggregation": "rate", "per_sample_results": retrieval_events[:100] or [{
-                                 "sample_origin": "benchmark_control",
-                                 "status": "no_retrieval_fallback_recorded",
-                                 "fallback_triggered": False,
+                                 "sample_origin": "runtime_trace_requirement",
+                                 "status": "not_evaluable",
+                                 "reason": "retrieval_trace_missing",
                              }]}),
         _metric("ocr_failure_rate", "Material OCR failure rate", ocr_failure_rate, "<= 5%",
                 _ratio_status(ocr_failure_rate, 0.05, "lte"), "latest OCR metadata",
@@ -3199,13 +3569,19 @@ def evaluate_observability(root: Path, ticker: str) -> dict[str, Any]:
                 sample_size=1,
                 failed_examples=final_ocr_errors,
                 calculation={"aggregation": "error_count", "numerator": final_ocr_error_count, "denominator": 1}),
-        _metric("artifact_upload_failures", "Artifact upload failures", artifact_upload_failures, "0",
-                "pass" if artifact_upload_failures == 0 else "fail", "artifact upload trace",
+        _metric("artifact_upload_failures", "Artifact upload failures", artifact_upload_failure_value, "0",
+                "not_evaluable" if artifact_upload_failure_value is None else (
+                    "pass" if artifact_upload_failure_value == 0 else "fail"
+                ), "artifact upload trace" if upload_events else "artifact upload trace missing",
                 plan_id="07",
-                sample_size=len(upload_events) or 1,
+                sample_size=len(upload_events),
                 failed_examples=[item for item in upload_events if item.get("status") in {"failed", "error"}],
-                calculation={"aggregation": "error_count", "numerator": artifact_upload_failures,
-                             "denominator": len(upload_events) or 1, "per_sample_results": upload_events[:100]}),
+                calculation={"aggregation": "error_count", "numerator": artifact_upload_failure_value,
+                             "denominator": len(upload_events), "per_sample_results": upload_events[:100] or [{
+                                 "sample_origin": "runtime_trace_requirement",
+                                 "status": "not_evaluable",
+                                 "reason": "artifact_upload_trace_missing",
+                             }]}),
         _metric("pdf_render_failures", "PDF render failures", pdf_render_failures, "0",
                 "pass" if pdf_render_failures == 0 else "fail", f"output/{ticker}_report.pdf",
                 plan_id="07",

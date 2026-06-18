@@ -44,6 +44,10 @@ def test_available_benchmark_cohorts_expose_more_than_one_archetype() -> None:
     assert cohorts["agent_llm_judge_top10"] == cohorts["financial_model_top10"]
 
 
+def test_benchmark_suite_default_plan_ids_focus_evidence_sensitive_plans() -> None:
+    assert run_benchmark_suite.DEFAULT_PLAN_IDS == ("03", "04", "05", "06")
+
+
 def test_resolve_benchmark_tickers_deduplicates_and_normalizes_explicit_inputs() -> None:
     tickers = resolve_benchmark_tickers(tickers=[" dhg ", "DBD", "dhg", "IMP"])
 
@@ -80,6 +84,7 @@ def test_benchmark_suite_aggregate_counts_statuses() -> None:
         tickers=["DHG", "DBD"],
         packets=packets,
         generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("01", "02"),
     )
 
     assert summary["cohort"] == "diversified_core"
@@ -104,6 +109,7 @@ def test_benchmark_suite_aggregate_metric_exposes_numeric_cohort_rate() -> None:
                     "status": "pass",
                     "value": 1.0,
                     "calculation": {"aggregation": "coverage"},
+                    "evidence": {"artifact_ids": ["storage/runs/DHG/evidence_packet.json"]},
                 }],
             }],
         },
@@ -122,6 +128,7 @@ def test_benchmark_suite_aggregate_metric_exposes_numeric_cohort_rate() -> None:
                     "source": "missing",
                     "failed_examples": [{"reason": "evaluation_evidence_missing"}],
                     "calculation": {"aggregation": "coverage"},
+                    "evidence": {"artifact_ids": ["storage/runs/DBD/evidence_packet.json"]},
                 }],
             }],
         },
@@ -142,7 +149,24 @@ def test_benchmark_suite_aggregate_metric_exposes_numeric_cohort_rate() -> None:
     assert metric["calculation"]["aggregation"] == "cohort_pass_rate"
     assert metric["calculation"]["numerator"] == 1
     assert metric["calculation"]["denominator"] == 2
+    assert metric["calculation"]["inputs"]["source_artifacts"] == [
+        "DBD/agent_eval.json",
+        "DHG/agent_eval.json",
+    ]
+    assert metric["calculation"]["parameters"]["source_metric_ids"] == ["tool_permission_compliance"]
+    assert metric["evidence"]["artifact_ids"] == [
+        "DBD/agent_eval.json",
+        "DHG/agent_eval.json",
+        "storage/runs/DBD/evidence_packet.json",
+        "storage/runs/DHG/evidence_packet.json",
+    ]
+    assert metric["calculation"]["per_sample_results"][0]["artifact_id"] == "DHG/agent_eval.json"
+    assert metric["calculation"]["per_sample_results"][0]["source_metric_id"] == "tool_permission_compliance"
+    assert metric["calculation"]["per_sample_results"][1]["failed_examples"] == [
+        {"reason": "evaluation_evidence_missing"}
+    ]
     assert metric["failed_examples"][0]["ticker"] == "DBD"
+    assert metric["failed_examples"][0]["artifact_id"] == "DBD/agent_eval.json"
 
 
 def test_benchmark_suite_boolean_metric_aggregates_as_percent_gate() -> None:
@@ -626,3 +650,5 @@ def test_benchmark_suite_reuses_existing_per_ticker_artifact_for_dashboard(monke
     assert metric["metric_id"] == "hit_rate_at_5"
     assert metric["value"] == 0.9655
     assert metric["calculation"]["aggregation"] == "cohort_mean"
+    assert metric["calculation"]["per_sample_results"][0]["artifact_id"] == "DHG/retrieval_eval.json"
+    assert metric["evidence"]["artifact_ids"] == ["DHG/retrieval_eval.json"]

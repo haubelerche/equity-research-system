@@ -32,6 +32,11 @@ const HIDDEN_DASHBOARD_METRIC_IDS = new Set([
   "corpus_ocr_unresolved_rate",
   "official_reconciliation_rate",
   "valuation_method_data_readiness",
+  "valuation_artifact",
+  "role_adherence",
+  "groundedness",
+  "plan_adherence",
+  "critic_issue_recall",
 ]);
 
 type PublicationIssue = {
@@ -95,12 +100,27 @@ function metricFromResult(result: BenchmarkMetricResult): MetricDef {
   };
 }
 
+function isNotApplicableResult(result: BenchmarkMetricResult | undefined): boolean {
+  const status = String(result?.status ?? "").toLowerCase();
+  return ["not_applicable", "not_evaluable"].includes(status)
+    && (result?.value === null || result?.value === undefined)
+    && (result?.calculation?.denominator === 0 || result?.sample_size === 0);
+}
+
 function metricsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): MetricDef[] {
   const results = resultsForLayer(packet, layer);
-  const configured = layer.metrics.filter((metric) => !HIDDEN_DASHBOARD_METRIC_IDS.has(metric.id));
+  const configured = layer.metrics.filter((metric) => (
+    !HIDDEN_DASHBOARD_METRIC_IDS.has(metric.id)
+    && !isNotApplicableResult(results[metric.id])
+  ));
   const configuredIds = new Set(configured.flatMap((metric) => [metric.id, ...(metric.aliases ?? [])]));
   const dynamic = Object.entries(results)
-    .filter(([id]) => id && !configuredIds.has(id) && !HIDDEN_DASHBOARD_METRIC_IDS.has(id))
+    .filter(([id, result]) => (
+      id
+      && !configuredIds.has(id)
+      && !HIDDEN_DASHBOARD_METRIC_IDS.has(id)
+      && !isNotApplicableResult(result)
+    ))
     .map(([, result]) => metricFromResult(result));
   return [...configured, ...dynamic];
 }

@@ -6,7 +6,7 @@
   "tickers": [
     "DHG"
   ],
-  "generated_at": "2026-06-15T13:58:50.688387+00:00",
+  "generated_at": "2026-06-17T17:09:23.053637+00:00",
   "plan_id": "07",
   "name": "Observability, cost, and latency",
   "artifact": "observability_eval.json",
@@ -35,7 +35,7 @@
       "severity": "P0",
       "blocks_publish": true,
       "value": 0,
-      "threshold": "= 0",
+      "threshold": "0",
       "threshold_operator": "=",
       "unit": "count",
       "status": "pass",
@@ -45,44 +45,159 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "platform",
       "failed_examples": [],
       "remediation_hint": "Retry or repair final artifact storage uploads before export.",
       "evaluator": {
         "id": "artifact_upload_failures",
-        "framework": "artifact_storage_gate",
+        "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
       },
       "calculation": {
-        "formula": "count(final_artifact_upload_failures)",
-        "inputs": {},
-        "parameters": {},
+        "formula": null,
+        "inputs": {
+          "metric_id": "artifact_upload_failures",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "artifact_upload_failures"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
         "aggregation": "cohort_sum",
         "numerator": 0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "artifact_upload_failures",
             "status": "pass",
             "value": 0,
-            "detail": ""
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": "Final artifacts must be stored successfully.",
-        "registry_version": "benchmark_metric_registry_v1"
+        "rationale": null,
+        "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T13:58:50.688387+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "cold_full_report_p95_latency",
+      "label": "Full report p95 latency, cold run",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "cold_full_report_p95_latency",
+      "metric_name": "Full report p95 latency, cold run",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 17.55,
+      "threshold": "<= 30",
+      "threshold_operator": "<=",
+      "unit": "minutes",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect cold full-report p95 latency and ingest/OCR bottlenecks.",
+      "evaluator": {
+        "id": "cold_full_report_p95_latency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "cold_full_report_p95_latency",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "threshold_seconds": 1800.0,
+          "display_unit": "minutes",
+          "source_metric_ids": [
+            "cold_full_report_p95_latency"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 17.55,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "cold_full_report_p95_latency",
+            "status": "pass",
+            "value": 17.55,
+            "detail": "",
+            "sample_size": 3,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "cost_per_report",
@@ -92,75 +207,86 @@
       "metric_id": "cost_per_report",
       "metric_name": "Cost per full report",
       "category": "operations",
-      "layer": "diagnostic",
+      "layer": "observability",
       "metric_type": "score",
-      "scope": "report_run",
+      "scope": "system_window",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 0.0,
-      "threshold": "<= soft budget",
+      "value": 0.2250585,
+      "threshold": "<= 2",
       "threshold_operator": "<=",
-      "unit": "score",
-      "status": "not_evaluable",
-      "legacy_status": "not_evaluable",
+      "unit": "usd",
+      "status": "pass",
+      "legacy_status": "pass",
       "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "ticker": "DHG",
-          "metric_id": "cost_per_report",
-          "status": "not_evaluable",
-          "value": null,
-          "detail": "",
-          "source": "cost ledger missing",
-          "failed_examples": [
-            {
-              "reason": "evaluation_evidence_missing",
-              "source": "cost ledger missing"
-            }
-          ]
-        }
-      ],
-      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "failed_examples": [],
+      "remediation_hint": "Apply budget policy, cache reuse, and model routing when report cost exceeds the soft budget.",
       "evaluator": {
         "id": "cost_per_report",
         "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 0,
+        "inputs": {
+          "metric_id": "cost_per_report",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "soft_budget_usd": 2.0,
+          "source_metric_ids": [
+            "cost_per_report"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 0.2250585,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
-            "status": "not_evaluable",
-            "value": null,
-            "detail": ""
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "cost_per_report",
+            "status": "pass",
+            "value": 0.2250585,
+            "detail": "",
+            "sample_size": 3,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "benchmark_metric_registry_v1"
+        "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T13:58:50.688387+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "duration_seconds",
@@ -175,204 +301,88 @@
       "scope": "system_window",
       "severity": "P3",
       "blocks_publish": false,
-      "value": 0.0,
+      "value": 1009.0,
       "threshold": "<= baseline p95 + 30%",
       "threshold_operator": "<=",
       "unit": "seconds",
-      "status": "pass",
-      "legacy_status": "pass",
+      "status": "fail",
+      "legacy_status": "fail",
       "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "ticker": "DHG",
-          "metric_id": "duration_seconds",
-          "status": "not_evaluable",
-          "value": null,
-          "detail": "",
-          "source": "run trace missing",
-          "failed_examples": [
-            {
-              "reason": "evaluation_evidence_missing",
-              "source": "run trace missing"
-            }
-          ]
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Compare p95 runtime against warm/cold baseline and inspect slow stages.",
       "evaluator": {
         "id": "duration_seconds",
         "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 0,
+        "inputs": {
+          "metric_id": "duration_seconds",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "duration_seconds"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 1009.0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
-            "status": "not_evaluable",
-            "value": null,
-            "detail": ""
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "duration_seconds",
+            "status": "pass",
+            "value": 1009.0,
+            "detail": "",
+            "sample_size": 0,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "benchmark_metric_registry_v1"
+        "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T13:58:50.688387+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
-      "id": "llm_retry_rate",
-      "label": "LLM retry rate",
+      "id": "final_ocr_error_count",
+      "label": "Final numeric OCR error count",
       "source": "benchmark_suite",
       "detail": "cohort_size=1",
-      "metric_id": "llm_retry_rate",
-      "metric_name": "LLM retry rate",
-      "category": "operations",
-      "layer": "observability",
-      "metric_type": "error_rate",
-      "scope": "system_window",
-      "severity": "P3",
-      "blocks_publish": false,
-      "value": 0.0,
-      "threshold": "<= 5%",
-      "threshold_operator": "<=",
-      "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 1,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
-      "owner": "platform",
-      "failed_examples": [],
-      "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
-      "evaluator": {
-        "id": "llm_retry_rate",
-        "framework": "langfuse_tracing",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": "llm_retry_calls / llm_calls",
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_mean_observed",
-        "numerator": 0.0,
-        "denominator": 1,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "pass",
-            "value": 0.0,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": "Retry rate should remain low enough to control reliability and cost-to-serve.",
-        "registry_version": "benchmark_metric_registry_v1"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-15T13:58:50.688387+00:00"
-    },
-    {
-      "id": "ocr_failure_rate",
-      "label": "OCR failure rate",
-      "source": "benchmark_suite",
-      "detail": "cohort_size=1",
-      "metric_id": "ocr_failure_rate",
-      "metric_name": "OCR failure rate",
-      "category": "operations",
-      "layer": "observability",
-      "metric_type": "error_rate",
-      "scope": "system_window",
-      "severity": "P3",
-      "blocks_publish": false,
-      "value": 0.0,
-      "threshold": "<= 5%",
-      "threshold_operator": "<=",
-      "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 1,
-      "artifact_id": null,
-      "artifact_version": null,
-      "dataset_version": null,
-      "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
-      "owner": "platform",
-      "failed_examples": [],
-      "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
-      "evaluator": {
-        "id": "ocr_failure_rate",
-        "framework": "ocr_runtime_metrics",
-        "framework_version": null,
-        "implementation_version": "2.1",
-        "execution_status": "executed"
-      },
-      "calculation": {
-        "formula": "failed_material_ocr_documents / material_ocr_documents",
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_mean_observed",
-        "numerator": 0.0,
-        "denominator": 1,
-        "per_sample_results": [
-          {
-            "ticker": "DHG",
-            "status": "pass",
-            "value": 0.0,
-            "detail": ""
-          }
-        ]
-      },
-      "threshold_policy": {
-        "profile": "mvp",
-        "rationale": "Material OCR failures should remain rare and visible.",
-        "registry_version": "benchmark_metric_registry_v1"
-      },
-      "evidence": {
-        "artifact_ids": [],
-        "dataset_version": null,
-        "trace_url": null
-      },
-      "evaluated_at": "2026-06-15T13:58:50.688387+00:00"
-    },
-    {
-      "id": "pdf_render_failures",
-      "label": "PDF render failures",
-      "source": "benchmark_suite",
-      "detail": "cohort_size=1",
-      "metric_id": "pdf_render_failures",
-      "metric_name": "PDF render failures",
+      "metric_id": "final_ocr_error_count",
+      "metric_name": "Final numeric OCR error count",
       "category": "operations",
       "layer": "release_gate",
       "metric_type": "error_count",
@@ -390,44 +400,691 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
-      "owner": "platform",
+      "metric_registry_version": "20260615_v3",
+      "owner": "data",
       "failed_examples": [],
-      "remediation_hint": "Fix final PDF rendering failures before export.",
+      "remediation_hint": "Fix OCR errors that affect final reported numbers before export.",
       "evaluator": {
-        "id": "pdf_render_failures",
-        "framework": "pdf_render_gate",
+        "id": "final_ocr_error_count",
+        "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
       },
       "calculation": {
-        "formula": "count(final_pdf_render_failures)",
-        "inputs": {},
-        "parameters": {},
+        "formula": null,
+        "inputs": {
+          "metric_id": "final_ocr_error_count",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "final_ocr_error_count"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
         "aggregation": "cohort_sum",
         "numerator": 0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "final_ocr_error_count",
             "status": "pass",
             "value": 0,
-            "detail": ""
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": "Final PDF render failure blocks export.",
-        "registry_version": "benchmark_metric_registry_v1"
+        "rationale": "Block final export until OCR-caused numeric errors are resolved.",
+        "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T13:58:50.688387+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "flash_memo_cold_retrieval_p95_latency",
+      "label": "Flash memo p95 latency, cold retrieval",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "flash_memo_cold_retrieval_p95_latency",
+      "metric_name": "Flash memo p95 latency, cold retrieval",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 2.2,
+      "threshold": "<= 3",
+      "threshold_operator": "<=",
+      "unit": "minutes",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect retrieval/crawl bottlenecks for flash memo generation.",
+      "evaluator": {
+        "id": "flash_memo_cold_retrieval_p95_latency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "flash_memo_cold_retrieval_p95_latency",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "threshold_seconds": 180,
+          "display_unit": "minutes",
+          "source_metric_ids": [
+            "flash_memo_cold_retrieval_p95_latency"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 2.2,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "flash_memo_cold_retrieval_p95_latency",
+            "status": "pass",
+            "value": 2.2,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "flash_memo_warm_p95_latency",
+      "label": "Flash memo p95 latency, warm run",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "flash_memo_warm_p95_latency",
+      "metric_name": "Flash memo p95 latency, warm run",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 58.0,
+      "threshold": "<= 90",
+      "threshold_operator": "<=",
+      "unit": "seconds",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect warm flash memo latency regressions.",
+      "evaluator": {
+        "id": "flash_memo_warm_p95_latency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "flash_memo_warm_p95_latency",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "threshold_seconds": 90.0,
+          "display_unit": "seconds",
+          "source_metric_ids": [
+            "flash_memo_warm_p95_latency"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 58.0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "flash_memo_warm_p95_latency",
+            "status": "pass",
+            "value": 58.0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "latency_regression_ratio",
+      "label": "Latency regression",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "latency_regression_ratio",
+      "metric_name": "Latency regression",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 0.935,
+      "threshold": "<= 1.25",
+      "threshold_operator": "<=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Compare new p95 latency against the locked baseline and investigate regressions.",
+      "evaluator": {
+        "id": "latency_regression_ratio",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "latency_regression_ratio",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "latency_regression_ratio"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 0.935,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "latency_regression_ratio",
+            "status": "pass",
+            "value": 0.935,
+            "detail": "",
+            "sample_size": 7,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Compare p95 to previous baseline and bisect regression.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "llm_retry_rate",
+      "label": "LLM retry rate",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "llm_retry_rate",
+      "metric_name": "LLM retry rate",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "error_rate",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": "<= 5",
+      "threshold_operator": "<=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
+      "evaluator": {
+        "id": "llm_retry_rate",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "llm_retry_rate",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "llm_retry_rate"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean_observed",
+        "numerator": 0.0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "llm_retry_rate",
+            "status": "pass",
+            "value": 0.0,
+            "detail": "",
+            "sample_size": 6,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Investigate model/API/transient failures.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "ocr_failure_rate",
+      "label": "Material OCR failure rate",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "ocr_failure_rate",
+      "metric_name": "Material OCR failure rate",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "error_rate",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": "<= 5%",
+      "threshold_operator": "<=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
+      "evaluator": {
+        "id": "ocr_failure_rate",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "ocr_failure_rate",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "ocr_failure_rate"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean_observed",
+        "numerator": 0.0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "ocr_failure_rate",
+            "status": "pass",
+            "value": 0.0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "pdf_render_failures",
+      "label": "PDF render failures",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "pdf_render_failures",
+      "metric_name": "PDF render failures",
+      "category": "operations",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "0",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Fix final PDF rendering failures before export.",
+      "evaluator": {
+        "id": "pdf_render_failures",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "pdf_render_failures",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "pdf_render_failures"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_sum",
+        "numerator": 0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "pdf_render_failures",
+            "status": "pass",
+            "value": 0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "render_only_p95_latency",
+      "label": "Render-only p95 latency",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "render_only_p95_latency",
+      "metric_name": "Render-only p95 latency",
+      "category": "operations",
+      "layer": "release_gate",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P1",
+      "blocks_publish": true,
+      "value": 1.1666666666666667,
+      "threshold": "<= 2",
+      "threshold_operator": "<=",
+      "unit": "minutes",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Optimize render-only PDF generation and inspect final render telemetry.",
+      "evaluator": {
+        "id": "render_only_p95_latency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "render_only_p95_latency",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "threshold_seconds": 120.0,
+          "display_unit": "minutes",
+          "source_metric_ids": [
+            "render_only_p95_latency"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 1.1666666666666667,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "render_only_p95_latency",
+            "status": "pass",
+            "value": 1.1666666666666667,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "retrieval_fallback_rate",
@@ -443,7 +1100,7 @@
       "severity": "P3",
       "blocks_publish": false,
       "value": 0.0,
-      "threshold": "<= 20%",
+      "threshold": "<= 20",
       "threshold_operator": "<=",
       "unit": "percent",
       "status": "pass",
@@ -453,59 +1110,159 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "ticker": "DHG",
-          "metric_id": "retrieval_fallback_rate",
-          "status": "not_evaluable",
-          "value": null,
-          "detail": "",
-          "source": "retrieval trace missing",
-          "failed_examples": [
-            {
-              "reason": "evaluation_evidence_missing",
-              "source": "retrieval trace missing"
-            }
-          ]
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
       "evaluator": {
         "id": "retrieval_fallback_rate",
-        "framework": "retrieval_telemetry",
+        "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
-        "formula": "fallback_retrieval_queries / retrieval_queries",
-        "inputs": {},
-        "parameters": {},
-        "aggregation": "cohort_pass_rate",
-        "numerator": 0,
+        "formula": null,
+        "inputs": {
+          "metric_id": "retrieval_fallback_rate",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "retrieval_fallback_rate"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean_observed",
+        "numerator": 0.0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
-            "status": "not_evaluable",
-            "value": null,
-            "detail": ""
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "retrieval_fallback_rate",
+            "status": "pass",
+            "value": 0.0,
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": "High fallback rate indicates degraded retrieval path quality.",
-        "registry_version": "benchmark_metric_registry_v1"
+        "rationale": "Fix embeddings/vector store availability.",
+        "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T13:58:50.688387+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
+    },
+    {
+      "id": "warm_full_report_p95_latency",
+      "label": "Full report p95 latency, warm run",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=1",
+      "metric_id": "warm_full_report_p95_latency",
+      "metric_name": "Full report p95 latency, warm run",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 9.35,
+      "threshold": "<= 10",
+      "threshold_operator": "<=",
+      "unit": "minutes",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect warm full-report p95 latency regressions.",
+      "evaluator": {
+        "id": "warm_full_report_p95_latency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "warm_full_report_p95_latency",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/observability_eval.json"
+          ]
+        },
+        "parameters": {
+          "threshold_seconds": 600.0,
+          "display_unit": "minutes",
+          "source_metric_ids": [
+            "warm_full_report_p95_latency"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 9.35,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/observability_eval.json",
+            "source_metric_id": "warm_full_report_p95_latency",
+            "status": "pass",
+            "value": 9.35,
+            "detail": "",
+            "sample_size": 7,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/observability_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     }
   ],
   "blocking_issues": []

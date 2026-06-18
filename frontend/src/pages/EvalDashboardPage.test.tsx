@@ -38,7 +38,17 @@ const packet = {
         numerator: 1,
         denominator: 3,
         aggregation: "coverage",
-        per_sample_results: [{ id: "revenue", passed: false }],
+        per_sample_results: [{
+          id: "revenue",
+          passed: false,
+          artifact_id: "DHG/data_quality.json",
+          source_metric_id: "core_metric_coverage",
+          failed_examples: [{ reason: "missing_source" }],
+          evidence: {
+            artifact_ids: ["storage/runs/DHG/evidence_packet.json"],
+            trace_url: "storage/runs/DHG/trace.json",
+          },
+        }],
       },
       threshold_policy: {
         profile: "mvp",
@@ -74,6 +84,16 @@ const packet = {
       unit: "percent",
       evaluator: { framework: "deterministic_finance_gates" },
       calculation: { numerator: 10, denominator: 10, aggregation: "cohort_pass_rate" },
+    }, {
+      metric_id: "fcfe",
+      metric_name: "FCFE formula",
+      metric_type: "coverage",
+      value: null,
+      threshold: "= 100%",
+      status: "not_evaluable",
+      unit: "percent",
+      evaluator: { framework: "deterministic_finance_gates", execution_status: "not_executed" },
+      calculation: { numerator: 0, denominator: 0, aggregation: "cohort_pass_rate" },
     }, {
       metric_id: "valuation_publishable",
       metric_name: "Valuation publishability policy",
@@ -134,6 +154,7 @@ describe("EvalDashboardPage", () => {
     expect(screen.queryByText("Valuation method data readiness")).not.toBeInTheDocument();
     expect(screen.queryByText("Material official reconciliation rate")).not.toBeInTheDocument();
     expect(screen.getByText("Số mã đạt công thức FCFF")).toBeInTheDocument();
+    expect(screen.queryByText("Số mã đạt công thức FCFE")).not.toBeInTheDocument();
     // valuation_publishable is no longer a benchmark-03 framework row (moved to the
     // governance/publishability gate); when present it renders as a dynamic backend
     // metric under its backend metric_name rather than the old framework label.
@@ -180,6 +201,10 @@ describe("EvalDashboardPage", () => {
     expect(screen.getByText("pandera")).toBeInTheDocument();
     expect(screen.getByText("0.24.0")).toBeInTheDocument();
     expect(screen.getByText(/MVP coverage threshold/)).toBeInTheDocument();
+    expect(screen.getByText(/DHG\/data_quality\.json/)).toBeInTheDocument();
+    expect(screen.getAllByText(/core_metric_coverage/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/storage\/runs\/DHG\/evidence_packet\.json/)).toBeInTheDocument();
+    expect(screen.queryByText(/Metric result không có trace chi tiết/)).not.toBeInTheDocument();
     expect(screen.queryByText("Scope")).not.toBeInTheDocument();
     expect(screen.queryByText("Severity")).not.toBeInTheDocument();
     expect(screen.queryByText("Owner")).not.toBeInTheDocument();

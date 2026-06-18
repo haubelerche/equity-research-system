@@ -1,7 +1,7 @@
-"""Run the five benchmark plans across a diversified ticker cohort.
+"""Run the evidence-sensitive benchmark plans across a diversified ticker cohort.
 
 This runner exists to stop benchmarking the system through a single ticker
-proxy. It executes the core benchmark plans 01, 02, 03, 05, and 07 across a
+proxy. It executes benchmark plans 03, 04, 05, and 06 across a
 configurable cohort and writes both per-ticker packets and an aggregate suite
 summary.
 
@@ -42,7 +42,7 @@ from backend.evaluation.project_evaluator import (  # noqa: E402
 from backend.evaluation.runtime_evaluators import evaluate_plan  # noqa: E402
 
 
-DEFAULT_PLAN_IDS = ("01", "02", "03", "05", "07")
+DEFAULT_PLAN_IDS = ("03", "04", "05", "06")
 DASHBOARD_HIDDEN_METRIC_IDS = {
     "ocr_unresolved_rate",
     "corpus_ocr_unresolved_rate",
@@ -481,6 +481,7 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     failed_examples = [
         {
             "ticker": sample["ticker"],
+            "artifact_id": sample.get("artifact_id"),
             "metric_id": metric_id,
             "status": sample["metric"].get("status"),
             "value": sample["metric"].get("value"),
@@ -507,8 +508,37 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     else:
         aggregation = "cohort_pass_rate"
         numerator = sum(1 for sample in samples if str(sample["metric"].get("status") or "") == "pass")
+    evidence_artifact_ids = sorted({
+        str(sample.get("artifact_id") or "")
+        for sample in samples
+        if sample.get("artifact_id")
+    })
+    runtime_evidence_artifact_ids = sorted({
+        str(artifact_id)
+        for sample in samples
+        for artifact_id in (sample["metric"].get("evidence") or {}).get("artifact_ids", [])
+        if artifact_id
+    })
+    source_metric_ids = sorted({
+        str(sample["metric"].get("metric_id") or sample["metric"].get("id") or metric_id)
+        for sample in samples
+    })
+    calculation_inputs = dict(calculation.get("inputs") or {})
+    calculation_inputs.update({
+        "metric_id": metric_id,
+        "cohort_tickers": [sample["ticker"] for sample in samples],
+        "source_artifacts": evidence_artifact_ids,
+    })
+    calculation_parameters = dict(calculation.get("parameters") or {})
+    calculation_parameters.update({
+        "source_metric_ids": source_metric_ids,
+        "cohort_size": len(samples),
+        "aggregation_policy": "aggregate per-ticker benchmark metric results",
+    })
     calculation.update({
         "aggregation": aggregation,
+        "inputs": calculation_inputs,
+        "parameters": calculation_parameters,
         "numerator": numerator,
         "denominator": (
             len(numeric_values) if is_error_rate and numeric_values
@@ -518,13 +548,39 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         "per_sample_results": [
             {
                 "ticker": sample["ticker"],
+                "artifact_id": sample.get("artifact_id"),
+                "source_metric_id": sample["metric"].get("metric_id") or sample["metric"].get("id") or metric_id,
                 "status": sample["metric"].get("status"),
                 "value": sample["metric"].get("value"),
+                "threshold": sample["metric"].get("threshold"),
+                "evaluator": sample["metric"].get("evaluator") or {},
                 "detail": sample["metric"].get("detail") or "",
+                "sample_size": sample["metric"].get("sample_size"),
+                "failed_examples": sample["metric"].get("failed_examples") or [],
+                "evidence": sample["metric"].get("evidence") or {},
+                "source": sample["metric"].get("source"),
+                "source_calculation": {
+                    "aggregation": (sample["metric"].get("calculation") or {}).get("aggregation"),
+                    "numerator": (sample["metric"].get("calculation") or {}).get("numerator"),
+                    "denominator": (sample["metric"].get("calculation") or {}).get("denominator"),
+                    "per_sample_count": len((sample["metric"].get("calculation") or {}).get("per_sample_results") or []),
+                },
             }
             for sample in samples
         ],
     })
+    evidence = dict(prototype.get("evidence") or {})
+    existing_artifact_ids = [
+        str(item) for item in evidence.get("artifact_ids") or []
+        if item
+    ]
+    evidence["artifact_ids"] = sorted(set(
+        existing_artifact_ids
+        + evidence_artifact_ids
+        + runtime_evidence_artifact_ids
+    ))
+    evidence.setdefault("dataset_version", prototype.get("dataset_version"))
+    evidence.setdefault("trace_url", prototype.get("trace_url"))
     aggregate = {
         **prototype,
         "value": value,
@@ -535,6 +591,7 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         "detail": f"cohort_size={len(samples)}",
         "failed_examples": failed_examples[:100],
         "calculation": calculation,
+        "evidence": evidence,
         "evaluated_at": generated_at,
     }
     if is_boolean_gate:
@@ -669,8 +726,11 @@ def _aggregate_artifacts(
                 metric_id = _normalize_metric_key(metric)
                 if not metric_id or metric_id in DASHBOARD_HIDDEN_METRIC_IDS:
                     continue
+                artifact_name = PLAN_ARTIFACTS.get(plan_id, f"{plan_id}.json")
                 samples_by_metric.setdefault(metric_id, []).append({
                     "ticker": ticker,
+                    "artifact_id": f"{ticker}/{artifact_name}",
+                    "artifact": artifact_name,
                     "metric": metric,
                 })
 

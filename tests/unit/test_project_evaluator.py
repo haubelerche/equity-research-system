@@ -14,6 +14,7 @@ from backend.evaluation import runtime_evaluators
 from backend.evaluation.runtime_evaluators import (
     evaluate_data_reliability,
     evaluate_agent,
+    evaluate_citation,
     evaluate_financial,
     evaluate_observability,
     evaluate_report,
@@ -1204,6 +1205,46 @@ def test_financial_evaluator_accepts_current_sensitivity_matrix_shape(tmp_path) 
     assert metrics["target_price"]["status"] == "pass"
     assert "sensitivity_base_cell" not in metrics
     assert result["decision"] == "pass"
+
+
+def test_financial_evaluator_blocks_when_valuation_artifact_missing(tmp_path) -> None:
+    result = evaluate_financial(tmp_path, "AAA")
+    metric = {item["id"]: item for item in result["metrics"]}["valuation_artifact"]
+
+    assert result["status"] == "blocked"
+    assert result["decision"] == "block"
+    assert metric["status"] == "not_evaluable"
+    assert metric["calculation"]["per_sample_results"][0]["reason"] == "valuation_artifact_missing_for_ticker"
+    assert result["blocking_issues"] == ["valuation_artifact:valuation_artifact_missing_for_ticker"]
+
+
+def test_citation_evaluator_missing_claim_ledger_is_not_evaluable(tmp_path) -> None:
+    result = evaluate_citation(tmp_path, "AAA")
+    metrics = {item["id"]: item for item in result["metrics"]}
+
+    assert result["status"] == "fail"
+    assert "claim_ledger_missing" in result["blocking_issues"]
+    assert metrics["quantitative_citation_coverage"]["status"] == "not_evaluable"
+    assert metrics["quantitative_citation_coverage"]["evaluator"]["execution_status"] == "not_executed"
+
+
+def test_report_evidence_integration_requires_trace_artifact(tmp_path, monkeypatch) -> None:
+    text = " ".join([
+        "investment summary financial forecast fcff wacc sensitivity risk appendix source [1]",
+        "doanh thu roe ocf eps capex formula table grid citation",
+    ])
+
+    def fake_pdf_stats(path: Path) -> dict[str, object]:
+        return {"path": str(path), "exists": True, "pages": 1, "text": text}
+
+    monkeypatch.setattr(runtime_evaluators, "_pdf_stats", fake_pdf_stats)
+
+    result = evaluate_report(tmp_path, "AAA", {"decision": "pass", "blocking_issues": []})
+    metrics = {item["id"]: item for item in result["metrics"]}
+
+    assert metrics["report.evidence_integration"]["status"] == "not_evaluable"
+    assert metrics["report.evidence_integration"]["detail"] == "claim_ledger_or_evidence_packet_missing"
+    assert result["score"] is None
 
 
 def test_agent_evaluator_validates_schema_manifest_and_unauthorized_calc(tmp_path) -> None:

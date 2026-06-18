@@ -4,11 +4,10 @@
   "plan_id": "01",
   "plan_name": "Data reliability",
   "ticker": "DHG",
-  "run_id": "project-eval-20260616T205907Z",
-  "generated_at": "2026-06-16T20:59:07.070463+00:00",
+  "generated_at": "2026-06-17T17:06:35.363917+00:00",
   "status": "pass",
   "test_execution": {
-    "status": "pass",
+    "status": "not_measured",
     "targets": [
       "tests/reconciliation",
       "tests/official_sources",
@@ -19,14 +18,11 @@
       "tests/unit/test_ocr_reconciliation_gate.py",
       "tests/unit/test_source_provenance_gate.py"
     ],
-    "exit_code": 0,
-    "duration_seconds": 1.241,
-    "summary": {
-      "passed": 72
-    },
+    "exit_code": null,
+    "duration_seconds": 0.0,
+    "summary": {},
     "output_tail": [
-      "........................................................................ [100%]",
-      "72 passed in 0.83s"
+      "Skipped by --skip-tests."
     ]
   },
   "runtime_evidence_inventory": {
@@ -62,10 +58,9 @@
   },
   "blocking_issues": [],
   "metrics": {
-    "test_suite_status": "pass",
-    "tests_passed": 72,
-    "tests_failed": 0,
-    "runtime_evidence_coverage": 1.0
+    "test_suite_status": "not_measured",
+    "tests_passed": 0,
+    "tests_failed": 0
   },
   "metric_results": [
     {
@@ -457,7 +452,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     },
     {
       "id": "data_reliability_score",
@@ -846,7 +841,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     },
     {
       "id": "core_metric_coverage",
@@ -1330,7 +1325,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     },
     {
       "id": "period_completeness",
@@ -1715,7 +1710,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     },
     {
       "id": "provenance_coverage",
@@ -2084,7 +2079,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     },
     {
       "id": "official_reconciliation_rate",
@@ -2491,7 +2486,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     },
     {
       "id": "material_ocr_error_count",
@@ -2876,7 +2871,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     },
     {
       "id": "ocr_unresolved_rate",
@@ -3326,7 +3321,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     },
     {
       "id": "duplicate_fact_count",
@@ -3616,7 +3611,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     },
     {
       "id": "valuation_method_data_readiness",
@@ -4076,7 +4071,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     },
     {
       "id": "dataframe_schema_validity",
@@ -4459,7 +4454,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-16T20:59:07.070463+00:00"
+      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
     }
   ],
   "core_metric_coverage": 1.0,
@@ -4516,13 +4511,14 @@
     "computed_methods": [
       "FCFF",
       "BLEND",
+      "PE_FORWARD",
       "CORE_PE_NET_CASH"
     ],
     "publishable_methods": [],
     "excluded_methods": [
       {
         "method_name": "FCFF",
-        "reason": "formula_trace_missing"
+        "reason": "fcff_wacc_or_ev_to_equity_bridge_missing"
       },
       {
         "method_name": "FCFE",
@@ -4537,6 +4533,10 @@
         "reason": "cross_check_only_not_primary"
       },
       {
+        "method_name": "P/E",
+        "reason": "cross_check_only_not_primary"
+      },
+      {
         "method_name": "CORE_PE_NET_CASH",
         "reason": "cross_check_only_not_primary"
       }
@@ -4548,7 +4548,11 @@
     "status": "blocked",
     "severity": "critical",
     "blocking_reasons": [
+      "critical_warning:FCFE BLOCKED — debt_schedule.is_fcfe_publishable = False. Reason: Debt forecast holds the last reported balance flat. Ne",
+      "critical_warning:Relative valuation is PENDING — no peer_data_source provided. Target P/E, P/B, and EV/EBITDA require a real peer group d",
+      "critical_warning:[ForecastWarning] Interest expense is single-pass (no convergence iteration). Debt method = 'stable_debt' — FCFE is bloc",
       "low_confidence_primary_method",
+      "recommendation_gate_not_allowed",
       "valuation_method_divergence_critical"
     ],
     "warnings": [],
@@ -4563,13 +4567,12 @@
         "confidence": "low",
         "role": "scenario_only",
         "blocking_reasons": [
-          "formula_trace_missing",
           "fcff_wacc_or_ev_to_equity_bridge_missing",
           "fcff_low_confidence"
         ],
         "warnings": [],
         "required_inputs_present": true,
-        "formula_trace_present": false,
+        "formula_trace_present": true,
         "bridge_present": false,
         "sensitivity_present": true,
         "sensitivity_varies": true,
@@ -4588,7 +4591,7 @@
         ],
         "warnings": [],
         "required_inputs_present": false,
-        "formula_trace_present": false,
+        "formula_trace_present": true,
         "bridge_present": false,
         "sensitivity_present": true,
         "sensitivity_varies": true,
@@ -4618,15 +4621,37 @@
       },
       "PE_FORWARD": {
         "method_name": "PE_FORWARD",
-        "computed": false,
+        "computed": true,
         "publishable": false,
-        "target_price_vnd": null,
+        "target_price_vnd": 145617.46525898267,
         "confidence": "medium",
         "role": "cross_check",
         "blocking_reasons": [
           "cross_check_only_not_primary"
         ],
         "warnings": [],
+        "required_inputs_present": true,
+        "formula_trace_present": false,
+        "bridge_present": false,
+        "sensitivity_present": false,
+        "sensitivity_varies": false,
+        "source_backed_assumptions": false,
+        "analyst_approved_assumptions": false
+      },
+      "P/E": {
+        "method_name": "P/E",
+        "computed": false,
+        "publishable": false,
+        "target_price_vnd": null,
+        "confidence": "medium",
+        "role": "cross_check",
+        "blocking_reasons": [
+          "cross_check_only_not_primary",
+          "pe_mapping_blank_with_eps_and_target_pe"
+        ],
+        "warnings": [
+          "EPS and target P/E are present but P/E implied price is blank"
+        ],
         "required_inputs_present": false,
         "formula_trace_present": false,
         "bridge_present": false,

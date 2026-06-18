@@ -54,14 +54,34 @@ function hasStructuredTrace(samples: unknown[]): boolean {
       || record?.scores
       || record?.source
       || record?.artifact_id
-      || record?.trace_url,
+      || record?.trace_url
+      || record?.canonical_key
+      || record?.claim_id
+      || record?.sample_origin
+      || record?.reported !== undefined
+      || record?.expected !== undefined
+      || record?.evidence_available !== undefined,
     );
   });
 }
 
 function sampleLabel(sample: unknown, index: number): string {
   const record = asRecord(sample);
-  return valueOrDash(record?.id ?? record?.ticker ?? record?.sample_index ?? `#${index + 1}`);
+  return valueOrDash(
+    record?.id
+    ?? record?.claim_id
+    ?? record?.canonical_key
+    ?? record?.metric
+    ?? record?.stage
+    ?? record?.check
+    ?? record?.artifact
+    ?? record?.section_key
+    ?? record?.ticker
+    ?? record?.sample_index
+    ?? record?.row_index
+    ?? record?.unit_index
+    ?? `#${index + 1}`,
+  );
 }
 
 function sampleStatus(sample: unknown): string {
@@ -76,8 +96,15 @@ function sampleStatus(sample: unknown): string {
 function sampleValue(sample: unknown): string {
   const record = asRecord(sample);
   if (!record) return valueOrDash(sample);
+  if (record.reported !== undefined || record.expected !== undefined) {
+    return `${valueOrDash(record.reported)} / ${valueOrDash(record.expected)}`;
+  }
   return valueOrDash(
     record.value
+    ?? record.present
+    ?? record.accepted
+    ?? record.evidence_available
+    ?? record.error
     ?? record.metric_score
     ?? record.score
     ?? record.reciprocal_rank
@@ -95,29 +122,137 @@ function sampleEvidence(sample: unknown): string {
       return `rank ${valueOrDash(top.rank)} · tier ${valueOrDash(top.reliability_tier)} · ${valueOrDash(top.extraction_method)}`;
     }).join("; ")
     : "";
-  const parts = [
-    record.query ? `query: ${valueOrDash(record.query)}` : "",
-    record.question ? `question: ${valueOrDash(record.question)}` : "",
-    record.response ? `response: ${valueOrDash(record.response)}` : "",
-    record.reference ? `reference: ${valueOrDash(record.reference)}` : "",
-    record.metric_score !== undefined ? `metric_score: ${valueOrDash(record.metric_score)}` : "",
-    record.scores ? `scores: ${valueOrDash(record.scores)}` : "",
-    record.detail ? `detail: ${valueOrDash(record.detail)}` : "",
-    record.source ? `source: ${valueOrDash(record.source)}` : "",
-    record.source_metric_id ? `source_metric: ${valueOrDash(record.source_metric_id)}` : "",
-    record.fiscal_year ? `year: ${valueOrDash(record.fiscal_year)}` : "",
-    record.retrieved_chunks !== undefined ? `retrieved_chunks: ${valueOrDash(record.retrieved_chunks)}` : "",
-    record.source_tier_hit !== undefined ? `source_tier_hit: ${valueOrDash(record.source_tier_hit)}` : "",
-    top5 ? `top evidence: ${top5}` : "",
-  ].filter(Boolean);
-  return parts.length > 0 ? parts.join(" | ") : "Metric result không có trace chi tiết trong sample này.";
+  const summaryKeys = new Set([
+    "id",
+    "ticker",
+    "sample_index",
+    "row_index",
+    "unit_index",
+    "claim_id",
+    "canonical_key",
+    "metric",
+    "stage",
+    "check",
+    "artifact",
+    "section_key",
+    "status",
+    "passed",
+    "hit",
+    "value",
+    "score",
+    "metric_score",
+    "reciprocal_rank",
+    "retrieved_source_tier",
+  ]);
+  const parts = Object.entries(record)
+    .filter(([key, value]) => !summaryKeys.has(key) && value !== undefined && value !== null && value !== "")
+    .map(([key, value]) => `${key}: ${valueOrDash(value)}`);
+  if (top5) parts.push(`top evidence: ${top5}`);
+  return parts.length > 0 ? parts.join(" | ") : valueOrDash(record);
+}
+
+function aggregationLabel(aggregation: unknown): string {
+  switch (String(aggregation ?? "")) {
+    case "coverage":
+      return "Tỷ lệ bao phủ";
+    case "cohort_pass_rate":
+      return "Tỷ lệ đạt trên toàn bộ cohort";
+    case "boolean_gate":
+      return "Cổng đúng/sai";
+    case "presence":
+    case "artifact_presence":
+      return "Kiểm tra hiện diện artifact";
+    case "error_count":
+      return "Đếm số lỗi";
+    case "error_rate":
+    case "rate":
+      return "Tỷ lệ lỗi hoặc sự kiện";
+    case "weighted_score":
+    case "weighted_mean":
+      return "Điểm tổng hợp có trọng số";
+    case "rubric_score":
+      return "Điểm rubric";
+    case "schema_validation":
+      return "Kiểm tra hợp đồng schema";
+    case "mean":
+      return "Trung bình mẫu";
+    case "p95":
+      return "Phân vị p95";
+    case "ratio":
+      return "Tỷ số";
+    case "sum":
+      return "Tổng";
+    case "max":
+      return "Giá trị lớn nhất";
+    default:
+      return valueOrDash(aggregation);
+  }
+}
+
+function calculationNarrative(def: MetricDef, result: BenchmarkMetricResult | undefined): string {
+  const calculation = result?.calculation;
+  const aggregation = String(calculation?.aggregation ?? "");
+  const numerator = valueOrDash(calculation?.numerator);
+  const denominator = valueOrDash(calculation?.denominator);
+  const threshold = valueOrDash(result?.threshold ?? formatPassCondition(def));
+  const sampleCount = calculation?.per_sample_results?.length ?? 0;
+  const metricName = result?.metric_name ?? def.label;
+
+  if (!calculation) {
+    return `${metricName}: chưa có calculation payload trong artifact; dashboard chỉ có thể hiển thị trạng thái tổng hợp và ngưỡng ${threshold}.`;
+  }
+  if (aggregation === "coverage" || aggregation === "cohort_pass_rate") {
+    return `${metricName}: đếm số sample đạt điều kiện chia cho tổng số sample hợp lệ. Tử số hiện là ${numerator}, mẫu số là ${denominator}; kết quả được so với ngưỡng ${threshold}. Bảng bên dưới liệt kê từng sample, trạng thái, giá trị và trace dùng để quyết định đạt hay không đạt.`;
+  }
+  if (aggregation === "boolean_gate" || aggregation === "presence" || aggregation === "artifact_presence") {
+    return `${metricName}: kiểm tra từng điều kiện bắt buộc theo dạng đạt/không đạt. Metric chỉ đạt khi các điều kiện bắt buộc hoặc artifact cần thiết hiện diện đầy đủ; kết quả được so với ngưỡng ${threshold}.`;
+  }
+  if (aggregation === "error_count") {
+    return `${metricName}: đếm tổng số lỗi phát hiện trong các sample kiểm tra. Giá trị tốt là càng thấp càng tốt; thông thường ngưỡng đạt là ${threshold}. Failed examples và bảng sample cho biết lỗi nằm ở artifact, claim, công thức hoặc trace nào.`;
+  }
+  if (aggregation === "error_rate" || aggregation === "rate") {
+    return `${metricName}: lấy số sự kiện lỗi hoặc fallback chia cho tổng số sự kiện quan sát được. Tử số là ${numerator}, mẫu số là ${denominator}; kết quả được so với ngưỡng ${threshold}.`;
+  }
+  if (aggregation === "weighted_score" || aggregation === "weighted_mean") {
+    return `${metricName}: tổng hợp nhiều nhóm kiểm tra theo trọng số đã ghi trong calculation parameters. Điểm cuối cùng chỉ đáng tin cậy khi các sample thành phần và evidence artifacts bên dưới đều có dữ liệu.`;
+  }
+  if (aggregation === "rubric_score") {
+    return `${metricName}: chấm theo rubric nội dung trên report artifact, nhưng chỉ được xem là đánh giá được khi có artifact bằng chứng đi kèm như claim ledger hoặc evidence packet.`;
+  }
+  if (aggregation === "schema_validation") {
+    return `${metricName}: kiểm tra payload runtime với schema bắt buộc; mỗi sample đại diện cho một artifact hoặc nhóm field cần hợp lệ.`;
+  }
+  if (aggregation === "p95") {
+    return `${metricName}: sắp xếp các latency sample và lấy phân vị 95 để so với budget ${threshold}. Bảng sample cho biết từng run/stage đóng góp vào phân vị.`;
+  }
+  if (aggregation === "mean") {
+    return `${metricName}: lấy trung bình điểm của ${sampleCount} sample đánh giá được và so sánh với ngưỡng ${threshold}.`;
+  }
+  if (aggregation === "sum") {
+    return `${metricName}: cộng các giá trị sample thành tổng quan sát được; bảng sample cho biết từng thành phần đóng góp.`;
+  }
+  if (aggregation === "max") {
+    return `${metricName}: lấy giá trị lớn nhất trong các sample quan sát được để áp dụng chính sách thận trọng.`;
+  }
+  if (aggregation === "ratio") {
+    return `${metricName}: tính tỷ số giữa tử số ${numerator} và mẫu số ${denominator}, rồi so với ngưỡng ${threshold}.`;
+  }
+  return `${metricName}: aggregation '${aggregation || "không khai báo"}' được ghi trong artifact. Dashboard hiển thị numerator, denominator, parameters và từng sample bên dưới để reviewer kiểm tra lại phép tính.`;
 }
 
 export function MetricExplanation({ def, result }: { def: MetricDef; result?: BenchmarkMetricResult }) {
   const status = resolveMetricStatus(def, result);
   const calculation = result?.calculation;
-  const samples = calculation?.per_sample_results ?? [];
   const failures = result?.failed_examples ?? [];
+  const rawSamples = calculation?.per_sample_results ?? [];
+  const samples = rawSamples.length > 0
+    ? rawSamples
+    : failures.map((failure, index) => ({
+      sample_origin: "failed_example",
+      sample_index: index + 1,
+      status: "fail",
+      failure,
+    }));
   const artifactIds = result?.evidence?.artifact_ids ?? [];
   const traceUrl = result?.evidence?.trace_url ?? runtimeField(result, "trace_url");
   const evaluatedAt = runtimeField(result, "evaluated_at");
@@ -158,16 +293,16 @@ export function MetricExplanation({ def, result }: { def: MetricDef; result?: Be
         )}
         {hasEvidence && !hasDeepTrace && (
           <p className="metric-explanation__warning">
-            Packet đang hiển thị là cohort summary; sample hiện có chưa chứa trace cấp truy vấn/chunk. Cần mở artifact ticker hoặc bổ sung evidence.artifact_ids để audit sâu hơn.
+            Packet đang hiển thị là cohort summary; sample hiện có thể không chứa trace cấp truy vấn/chunk, nhưng bảng dưới đây vẫn hiển thị artifact nguồn và payload sample để audit sâu hơn.
           </p>
         )}
       </section>
 
       <section className="metric-explanation__section">
         <h3>Cách tính và ngưỡng</h3>
-        <p>{calculation?.formula ?? def.formula}</p>
+        <p>{calculationNarrative(def, result)}</p>
         <dl>
-          <div><dt>Aggregation</dt><dd>{valueOrDash(calculation?.aggregation)}</dd></div>
+          <div><dt>Aggregation</dt><dd>{aggregationLabel(calculation?.aggregation)}</dd></div>
           <div><dt>Numerator</dt><dd>{valueOrDash(calculation?.numerator)}</dd></div>
           <div><dt>Denominator</dt><dd>{valueOrDash(calculation?.denominator)}</dd></div>
           <div><dt>Threshold profile</dt><dd>{valueOrDash(result?.threshold_policy?.profile)}</dd></div>

@@ -6,7 +6,7 @@
   "tickers": [
     "DHG"
   ],
-  "generated_at": "2026-06-17T15:54:08.954055+00:00",
+  "generated_at": "2026-06-17T17:09:23.053637+00:00",
   "plan_id": "05",
   "name": "Agent workflow and LLM judge",
   "artifact": "agent_eval.json",
@@ -58,17 +58,40 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
+        "inputs": {
+          "metric_id": "artifact_manifest_compliance",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "artifact_manifest_compliance"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
         "aggregation": "cohort_mean",
         "numerator": 1.0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "artifact_manifest_compliance",
             "status": "pass",
             "value": 1.0,
-            "detail": ""
+            "detail": "",
+            "sample_size": 6,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
@@ -78,11 +101,13 @@
         "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/agent_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "no_unauthorized_calc",
@@ -121,17 +146,40 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
+        "inputs": {
+          "metric_id": "no_unauthorized_calc",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "no_unauthorized_calc"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
         "aggregation": "cohort_mean",
         "numerator": 1.0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "no_unauthorized_calc",
             "status": "pass",
             "value": 1.0,
-            "detail": ""
+            "detail": "",
+            "sample_size": 6,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
@@ -141,11 +189,13 @@
         "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/agent_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "schema_validity",
@@ -184,17 +234,40 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
+        "inputs": {
+          "metric_id": "schema_validity",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "schema_validity"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
         "aggregation": "cohort_mean",
         "numerator": 1.0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "schema_validity",
             "status": "pass",
             "value": 1.0,
-            "detail": ""
+            "detail": "",
+            "sample_size": 2,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
@@ -204,11 +277,13 @@
         "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/agent_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "task_completion",
@@ -247,17 +322,40 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
+        "inputs": {
+          "metric_id": "task_completion",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "task_completion"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
         "aggregation": "cohort_mean",
         "numerator": 1.0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "task_completion",
             "status": "pass",
             "value": 1.0,
-            "detail": ""
+            "detail": "",
+            "sample_size": 3,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
@@ -267,11 +365,13 @@
         "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/agent_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     },
     {
       "id": "tool_permission_compliance",
@@ -310,17 +410,40 @@
       },
       "calculation": {
         "formula": null,
-        "inputs": {},
-        "parameters": {},
+        "inputs": {
+          "metric_id": "tool_permission_compliance",
+          "cohort_tickers": [
+            "DHG"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "tool_permission_compliance"
+          ],
+          "cohort_size": 1,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
         "aggregation": "cohort_mean",
         "numerator": 1.0,
         "denominator": 1,
         "per_sample_results": [
           {
             "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "tool_permission_compliance",
             "status": "pass",
             "value": 1.0,
-            "detail": ""
+            "detail": "",
+            "sample_size": 7,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            }
           }
         ]
       },
@@ -330,11 +453,13 @@
         "registry_version": "20260615_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "DHG/agent_eval.json"
+        ],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-17T17:09:23.053637+00:00"
     }
   ],
   "blocking_issues": []
