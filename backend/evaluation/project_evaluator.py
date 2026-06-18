@@ -170,6 +170,37 @@ PLANS: tuple[PlanDefinition, ...] = (
 SIDECAR_ARTIFACTS = {"publication_readiness.json"}
 
 
+def _evaluation_storage_run_id() -> str:
+    return (
+        os.getenv("EVALUATION_STORAGE_RUN_ID")
+        or os.getenv("EVAL_STORAGE_RUN_ID")
+        or ""
+    ).strip()
+
+
+def _load_storage_json_artifact(artifact_name: str) -> dict[str, Any] | None:
+    """Load production evaluation artifacts from Supabase Storage when configured.
+
+    Railway containers should not carry local benchmark/output payloads. Production
+    can set ``EVALUATION_STORAGE_RUN_ID`` to a run-scoped prefix in the private
+    ``runs`` bucket, for example ``benchmark-suite-latest``. Local development
+    keeps the filesystem fallback below.
+    """
+    run_id = _evaluation_storage_run_id()
+    if not run_id:
+        return None
+    try:
+        from backend.storage import RUNS_BUCKET, SupabaseStorageAdapter, run_artifact_key
+
+        payload = SupabaseStorageAdapter().download_json(
+            RUNS_BUCKET,
+            run_artifact_key(run_id, artifact_name),
+        )
+    except Exception:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -460,6 +491,13 @@ def evaluate_project(
 
 
 def load_latest_evaluation(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
+    storage_manifest = _load_storage_json_artifact("benchmark_suite.json")
+    if storage_manifest is not None:
+        return storage_manifest
+    storage_packet = _load_storage_json_artifact("evaluation_packet.json")
+    if storage_packet is not None:
+        return storage_packet
+
     benchmark_manifest = output_dir / "benchmark_suite" / "benchmark_suite.json"
     if benchmark_manifest.exists():
         manifest = json.loads(benchmark_manifest.read_text(encoding="utf-8"))
@@ -711,6 +749,10 @@ def load_evaluation_artifact(
     allowed = {plan.artifact for plan in PLANS} | SIDECAR_ARTIFACTS | {"evaluation_packet.json"}
     if artifact_name not in allowed:
         return None
+    storage_payload = _load_storage_json_artifact(artifact_name)
+    if storage_payload is not None:
+        return _normalize_artifact_summary(storage_payload)
+
     benchmark_path = output_dir / "benchmark_suite" / artifact_name
     benchmark_manifest = output_dir / "benchmark_suite" / "benchmark_suite.json"
     if benchmark_manifest.exists() and artifact_name != "evaluation_packet.json":

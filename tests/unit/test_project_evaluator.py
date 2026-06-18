@@ -82,6 +82,39 @@ def test_missing_runtime_evidence_blocks_plan() -> None:
     assert payload["metrics"]["runtime_evidence_coverage"] == 0
 
 
+def test_evaluation_loaders_prefer_supabase_storage(monkeypatch, tmp_path) -> None:
+    calls: list[tuple[str, str]] = []
+
+    class FakeStorage:
+        def download_json(self, bucket: str, path: str) -> dict:
+            calls.append((bucket, path))
+            if path == "benchmark-suite-latest/benchmark_suite.json":
+                return {
+                    "source": "benchmark_suite",
+                    "publication_status": "BLOCKED_BY_P0",
+                    "artifacts": [],
+                }
+            if path == "benchmark-suite-latest/financial_eval.json":
+                return {"artifact": "financial_eval.json", "status": "pass"}
+            raise AssertionError(path)
+
+    import backend.storage as storage_module
+
+    monkeypatch.setenv("EVALUATION_STORAGE_RUN_ID", "benchmark-suite-latest")
+    monkeypatch.setattr(storage_module, "SupabaseStorageAdapter", lambda: FakeStorage())
+
+    latest = load_latest_evaluation(output_dir=tmp_path / "missing-output")
+    artifact = load_evaluation_artifact("financial_eval.json", output_dir=tmp_path / "missing-output")
+
+    assert latest["source"] == "benchmark_suite"
+    assert latest["publication_status"] == "BLOCKED_BY_P0"
+    assert artifact == {"artifact": "financial_eval.json", "status": "pass"}
+    assert calls == [
+        ("runs", "benchmark-suite-latest/benchmark_suite.json"),
+        ("runs", "benchmark-suite-latest/financial_eval.json"),
+    ]
+
+
 def test_loaders_only_read_allowlisted_artifacts(tmp_path) -> None:
     packet = {"overall_status": "pass", "artifacts": []}
     (tmp_path / "evaluation_packet.json").write_text(json.dumps(packet), encoding="utf-8")

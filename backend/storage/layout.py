@@ -31,6 +31,7 @@ _RUN_ARTIFACT_NAMES = {
     "publication_readiness.json",
     "observability_eval.json",
     "evaluation_packet.json",
+    "benchmark_suite.json",
     "report.md",
     "report.html",
     "report.pdf",

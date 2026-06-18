@@ -32,6 +32,17 @@ data/reconciliation/
 reports/
 artifacts/
 storage/
+output/
+
+# Frontend dev/build artifacts are served by Vercel, not the Railway API image.
+frontend/dist/
+frontend/node_modules/
+frontend/*.tsbuildinfo
+frontend/vite-dev*.log
+
+# Large source PDFs must live in Supabase Storage or a mounted ingestion volume,
+# not in the Railway API container image.
+config/dataset/DHCD/
 
 # Git and IDE
 .git/

@@ -291,9 +291,10 @@ def _latest_scoped_json_artifact_for_ticker(
 ) -> Path | None:
     """Resolve the newest ticker-scoped JSON artifact across current and legacy names.
 
-    Recent harness runs persist ``<run_id>_<artifact>.json`` into ``storage/runs``
-    and may also archive the same suffix-scoped artifact. Older smoke fixtures
-    only wrote a fixed ``run1_*.json`` filename under ``storage/archive``.
+    Recent harness runs persist ``<run_id>_<artifact>.json`` into the run
+    artifact directory and may also archive the same suffix-scoped artifact.
+    Older smoke fixtures only wrote a fixed ``run1_*.json`` filename under the
+    archive directory.
     Evaluators must accept both shapes so one plan updating its artifact naming
     does not silently make sibling benchmark plans look unevaluable.
     """

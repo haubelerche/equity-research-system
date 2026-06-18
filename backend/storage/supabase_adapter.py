@@ -6,6 +6,7 @@ import json
 import mimetypes
 import os
 import time
+from http.client import IncompleteRead
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -67,7 +68,7 @@ class SupabaseStorageAdapter:
                 # Real HTTP error response (4xx/5xx) — not a transient reset; do not retry.
                 detail = exc.read().decode("utf-8", errors="replace")
                 raise SupabaseStorageError(f"Supabase Storage {method} {endpoint} failed: {exc.code} {detail}") from exc
-            except (URLError, ConnectionError, TimeoutError, OSError) as exc:
+            except (URLError, ConnectionError, TimeoutError, OSError, IncompleteRead) as exc:
                 # Transient network reset (e.g. WinError 10054, dropped TLS) — retry with backoff.
                 last_exc = exc
                 if attempt == _STORAGE_MAX_ATTEMPTS - 1:
