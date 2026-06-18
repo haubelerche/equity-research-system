@@ -39,15 +39,26 @@ const packet = {
         denominator: 3,
         aggregation: "coverage",
         per_sample_results: [{
-          id: "revenue",
-          passed: false,
           artifact_id: "DHG/data_quality.json",
           source_metric_id: "core_metric_coverage",
+          status: "fail",
+          value: 0.3333333333333333,
+          sample_size: 2,
           failed_examples: [{ reason: "missing_source" }],
           evidence: {
             artifact_ids: ["storage/runs/DHG/evidence_packet.json"],
             trace_url: "storage/runs/DHG/trace.json",
           },
+          source_samples: [{
+            id: "revenue",
+            passed: false,
+            value: false,
+            reason: "missing_source",
+          }, {
+            id: "gross_margin",
+            passed: true,
+            value: true,
+          }],
         }],
       },
       threshold_policy: {
@@ -201,9 +212,12 @@ describe("EvalDashboardPage", () => {
     expect(screen.getByText("pandera")).toBeInTheDocument();
     expect(screen.getByText("0.24.0")).toBeInTheDocument();
     expect(screen.getByText(/MVP coverage threshold/)).toBeInTheDocument();
-    expect(screen.getByText(/DHG\/data_quality\.json/)).toBeInTheDocument();
+    expect(screen.getByText(/đếm số sample đạt điều kiện/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /sample \(2\)/i })).toBeInTheDocument();
+    expect(screen.getByText("gross_margin")).toBeInTheDocument();
+    expect(screen.getAllByText(/DHG\/data_quality\.json/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/core_metric_coverage/).length).toBeGreaterThan(0);
-    expect(screen.getByText(/storage\/runs\/DHG\/evidence_packet\.json/)).toBeInTheDocument();
+    expect(screen.getAllByText(/storage\/runs\/DHG\/evidence_packet\.json/).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Metric result không có trace chi tiết/)).not.toBeInTheDocument();
     expect(screen.queryByText("Scope")).not.toBeInTheDocument();
     expect(screen.queryByText("Severity")).not.toBeInTheDocument();

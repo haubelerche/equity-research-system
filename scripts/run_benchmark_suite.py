@@ -565,6 +565,7 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
                     "denominator": (sample["metric"].get("calculation") or {}).get("denominator"),
                     "per_sample_count": len((sample["metric"].get("calculation") or {}).get("per_sample_results") or []),
                 },
+                "source_samples": (sample["metric"].get("calculation") or {}).get("per_sample_results") or [],
             }
             for sample in samples
         ],

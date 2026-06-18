@@ -44,6 +44,47 @@ function runtimeField(result: BenchmarkMetricResult | undefined, key: string): u
   return result ? (result as Record<string, unknown>)[key] : undefined;
 }
 
+function nestedSampleResults(sample: unknown): unknown[] {
+  const record = asRecord(sample);
+  if (!record) return [];
+  if (Array.isArray(record.source_samples)) return record.source_samples;
+  const sourceCalculation = asRecord(record.source_calculation);
+  return Array.isArray(sourceCalculation?.per_sample_results)
+    ? sourceCalculation.per_sample_results
+    : [];
+}
+
+function expandSampleResults(samples: unknown[]): unknown[] {
+  return samples.flatMap((sample, sampleIndex) => {
+    const record = asRecord(sample);
+    const nestedSamples = nestedSampleResults(sample);
+    if (!record || nestedSamples.length === 0) return [sample];
+    return nestedSamples.map((nestedSample, nestedIndex) => {
+      const nestedRecord = asRecord(nestedSample);
+      if (!nestedRecord) {
+        return {
+          cohort_ticker: record.ticker,
+          artifact_id: record.artifact_id,
+          source_metric_id: record.source_metric_id,
+          evidence: record.evidence,
+          sample_index: nestedIndex + 1,
+          sample_origin: `nested_${sampleIndex + 1}`,
+          value: nestedSample,
+        };
+      }
+      return {
+        cohort_ticker: record.ticker,
+        artifact_id: record.artifact_id,
+        source_metric_id: record.source_metric_id,
+        ...nestedRecord,
+        evidence: nestedRecord.evidence ?? record.evidence,
+        sample_index: nestedRecord.sample_index ?? nestedIndex + 1,
+        sample_origin: nestedRecord.sample_origin ?? `nested_${sampleIndex + 1}`,
+      };
+    });
+  });
+}
+
 function hasStructuredTrace(samples: unknown[]): boolean {
   return samples.some((sample) => {
     const record = asRecord(sample);
@@ -74,6 +115,7 @@ function sampleLabel(sample: unknown, index: number): string {
     ?? record?.metric
     ?? record?.stage
     ?? record?.check
+    ?? record?.file
     ?? record?.artifact
     ?? record?.section_key
     ?? record?.ticker
@@ -103,6 +145,7 @@ function sampleValue(sample: unknown): string {
     record.value
     ?? record.present
     ?? record.accepted
+    ?? record.record_count
     ?? record.evidence_available
     ?? record.error
     ?? record.metric_score
@@ -133,6 +176,11 @@ function sampleEvidence(sample: unknown): string {
     "metric",
     "stage",
     "check",
+    "file",
+    "cohort_ticker",
+    "source_metric_id",
+    "source_samples",
+    "source_calculation",
     "artifact",
     "section_key",
     "status",
@@ -246,7 +294,7 @@ export function MetricExplanation({ def, result }: { def: MetricDef; result?: Be
   const failures = result?.failed_examples ?? [];
   const rawSamples = calculation?.per_sample_results ?? [];
   const samples = rawSamples.length > 0
-    ? rawSamples
+    ? expandSampleResults(rawSamples)
     : failures.map((failure, index) => ({
       sample_origin: "failed_example",
       sample_index: index + 1,

@@ -185,7 +185,13 @@ def test_benchmark_suite_boolean_metric_aggregates_as_percent_gate() -> None:
                     "threshold_operator": "=",
                     "status": "pass",
                     "value": True,
-                    "calculation": {"aggregation": "boolean_gate"},
+                    "calculation": {
+                        "aggregation": "boolean_gate",
+                        "per_sample_results": [
+                            {"file": "income_statement_year.json", "status": "non_empty"},
+                            {"file": "balance_sheet_year.json", "status": "non_empty"},
+                        ],
+                    },
                 }],
             }],
         },
@@ -227,6 +233,11 @@ def test_benchmark_suite_boolean_metric_aggregates_as_percent_gate() -> None:
     assert metric["calculation"]["aggregation"] == "cohort_pass_rate"
     assert metric["calculation"]["numerator"] == 1
     assert metric["calculation"]["denominator"] == 2
+    assert metric["calculation"]["per_sample_results"][0]["source_calculation"]["per_sample_count"] == 2
+    assert metric["calculation"]["per_sample_results"][0]["source_samples"] == [
+        {"file": "income_statement_year.json", "status": "non_empty"},
+        {"file": "balance_sheet_year.json", "status": "non_empty"},
+    ]
 
 
 def test_benchmark_suite_aggregate_metric_status_follows_displayed_threshold_value() -> None:
