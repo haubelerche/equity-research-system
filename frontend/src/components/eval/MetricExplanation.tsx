@@ -35,6 +35,135 @@ function valueOrDash(value: unknown): string {
   return String(value);
 }
 
+type EvidenceField = {
+  key: string;
+  label: string;
+  value: unknown;
+};
+
+const SUMMARY_KEYS = new Set([
+  "id",
+  "ticker",
+  "sample_index",
+  "row_index",
+  "unit_index",
+  "claim_id",
+  "canonical_key",
+  "metric",
+  "stage",
+  "check",
+  "file",
+  "cohort_ticker",
+  "source_samples",
+  "source_calculation",
+  "artifact",
+  "section_key",
+  "status",
+  "passed",
+  "hit",
+  "value",
+  "present",
+  "accepted",
+  "record_count",
+  "evidence_available",
+  "metric_score",
+  "score",
+  "reciprocal_rank",
+  "retrieved_source_tier",
+]);
+
+const FIELD_LABELS: Record<string, string> = {
+  actual: "Actual",
+  add_keys: "Formula add keys",
+  agent_id: "Agent ID",
+  agent_role: "Agent role",
+  artifact_id: "Artifact ID",
+  artifact_ids: "Artifact IDs",
+  artifact_producer_key: "Artifact producer",
+  artifact_upload_failures: "Artifact upload failures",
+  calculation_steps: "Calculation steps",
+  cash: "Cash",
+  claim_ledger_path: "Claim ledger path",
+  components: "Components",
+  expected: "Expected",
+  expected_source_tiers: "Expected source tiers",
+  expected_terms: "Expected terms",
+  explanation_exists: "Explanation exists",
+  explanation_pdf: "Explanation PDF",
+  extraction_method: "Extraction method",
+  failure: "Failure",
+  fiscal_year: "Fiscal year",
+  formula_id: "Formula ID",
+  formula_version: "Formula version",
+  has_complete_provenance: "Complete provenance",
+  has_value: "Has value",
+  material: "Material query",
+  output_hash: "Output hash",
+  output_key: "Output key",
+  path: "Path",
+  pdf_render_failures: "PDF render failures",
+  permission: "Permission",
+  permission_level: "Permission level",
+  query: "Query",
+  question: "Question",
+  reason: "Reason",
+  reported: "Reported",
+  report_exists: "Report exists",
+  report_path: "Report path",
+  report_pdf: "Report PDF",
+  retrieved_chunks: "Retrieved chunks",
+  run_id: "Run ID",
+  run_type: "Run type",
+  sample_origin: "Sample origin",
+  source: "Source",
+  source_metric_id: "Source metric ID",
+  source_title: "Source title",
+  source_type: "Source type",
+  source_tier_hit: "Source tier hit",
+  statement_type: "Statement type",
+  terminal_status: "Terminal status",
+  tolerance: "Tolerance",
+  tool_id: "Tool ID",
+  tool_name: "Tool name",
+  top_5: "Top-k evidence",
+  total_debt: "Total debt",
+  total_duration_seconds: "Total duration seconds",
+  total_tokens: "Total tokens",
+  trace_url: "Trace URL",
+  validation_status: "Validation status",
+};
+
+const FIELD_PRIORITY = [
+  "query",
+  "question",
+  "reason",
+  "source",
+  "path",
+  "report_path",
+  "report_pdf",
+  "explanation_pdf",
+  "artifact_id",
+  "source_metric_id",
+  "sample_origin",
+  "material",
+  "fiscal_year",
+  "expected_terms",
+  "expected_source_tiers",
+  "retrieved_chunks",
+  "top_5",
+  "source_tier_hit",
+  "reported",
+  "expected",
+  "tolerance",
+  "components",
+  "add_keys",
+  "scores",
+  "permission",
+  "output_hash",
+  "failure",
+  "evidence",
+];
+
 function listOrDash(values: unknown[] | undefined): string {
   if (!values || values.length === 0) return "Chưa có";
   return values.map(valueOrDash).join(", ");
@@ -155,48 +284,99 @@ function sampleValue(sample: unknown): string {
   );
 }
 
-function sampleEvidence(sample: unknown): string {
+function fieldLabel(key: string): string {
+  return FIELD_LABELS[key]
+    ?? key.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function isEmptyEvidenceValue(value: unknown): boolean {
+  return value === undefined
+    || value === null
+    || value === ""
+    || (Array.isArray(value) && value.length === 0);
+}
+
+function compareEvidenceFields(a: EvidenceField, b: EvidenceField): number {
+  const aPriority = FIELD_PRIORITY.indexOf(a.key);
+  const bPriority = FIELD_PRIORITY.indexOf(b.key);
+  if (aPriority !== -1 || bPriority !== -1) {
+    return (aPriority === -1 ? Number.MAX_SAFE_INTEGER : aPriority)
+      - (bPriority === -1 ? Number.MAX_SAFE_INTEGER : bPriority);
+  }
+  return a.label.localeCompare(b.label);
+}
+
+function topEvidenceSummary(items: unknown[]): string[] {
+  return items.map((item, index) => {
+    const top = asRecord(item);
+    if (!top) return valueOrDash(item);
+    const rank = top.rank ?? index + 1;
+    const tier = top.reliability_tier ?? top.source_tier ?? "Chưa có";
+    const fiscalYear = top.fiscal_year !== undefined ? ` fiscal_year ${valueOrDash(top.fiscal_year)}` : "";
+    const method = top.extraction_method !== undefined ? ` ${valueOrDash(top.extraction_method)}` : "";
+    return `rank ${valueOrDash(rank)} | tier ${valueOrDash(tier)}${fiscalYear}${method}`;
+  });
+}
+
+function sampleEvidenceFields(sample: unknown): EvidenceField[] {
   const record = asRecord(sample);
-  if (!record) return valueOrDash(sample);
-  const top5 = Array.isArray(record.top_5)
-    ? record.top_5.slice(0, 3).map((item) => {
-      const top = asRecord(item);
-      if (!top) return valueOrDash(item);
-      return `rank ${valueOrDash(top.rank)} · tier ${valueOrDash(top.reliability_tier)} · ${valueOrDash(top.extraction_method)}`;
-    }).join("; ")
-    : "";
-  const summaryKeys = new Set([
-    "id",
-    "ticker",
-    "sample_index",
-    "row_index",
-    "unit_index",
-    "claim_id",
-    "canonical_key",
-    "metric",
-    "stage",
-    "check",
-    "file",
-    "cohort_ticker",
-    "source_metric_id",
-    "source_samples",
-    "source_calculation",
-    "artifact",
-    "section_key",
-    "status",
-    "passed",
-    "hit",
-    "value",
-    "score",
-    "metric_score",
-    "reciprocal_rank",
-    "retrieved_source_tier",
-  ]);
-  const parts = Object.entries(record)
-    .filter(([key, value]) => !summaryKeys.has(key) && value !== undefined && value !== null && value !== "")
-    .map(([key, value]) => `${key}: ${valueOrDash(value)}`);
-  if (top5) parts.push(`top evidence: ${top5}`);
-  return parts.length > 0 ? parts.join(" | ") : valueOrDash(record);
+  if (!record) return [{ key: "value", label: "Value", value: sample }];
+  const fields = Object.entries(record)
+    .filter(([key, value]) => !SUMMARY_KEYS.has(key) && !isEmptyEvidenceValue(value))
+    .map(([key, value]) => ({
+      key,
+      label: fieldLabel(key),
+      value: key === "top_5" && Array.isArray(value) ? topEvidenceSummary(value) : value,
+    }))
+    .sort(compareEvidenceFields);
+  return fields.length > 0 ? fields : [{ key: "sample", label: "Raw sample", value: record }];
+}
+
+function renderEvidenceValue(value: unknown) {
+  if (Array.isArray(value)) {
+    if (value.every((item) => typeof item !== "object" || item === null)) {
+      return <span>{value.map(valueOrDash).join(", ")}</span>;
+    }
+    return <pre>{valueOrDash(value)}</pre>;
+  }
+  if (value && typeof value === "object") {
+    return <pre>{valueOrDash(value)}</pre>;
+  }
+  return <span>{valueOrDash(value)}</span>;
+}
+
+function EvidenceFieldList({ fields }: { fields: EvidenceField[] }) {
+  return (
+    <dl className="metric-explanation__field-list">
+      {fields.map((field, index) => (
+        <div key={`${field.key}-${index}`}>
+          <dt>{field.label}</dt>
+          <dd>{renderEvidenceValue(field.value)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function failedExampleLabel(failure: unknown, index: number): string {
+  const record = asRecord(failure);
+  return valueOrDash(
+    record?.id
+    ?? record?.claim_id
+    ?? record?.canonical_key
+    ?? record?.metric_id
+    ?? record?.reason
+    ?? `#${index + 1}`,
+  );
+}
+
+function failedExampleFields(failure: unknown): EvidenceField[] {
+  const record = asRecord(failure);
+  if (!record) return [{ key: "failure", label: "Failure", value: failure }];
+  return Object.entries(record)
+    .filter(([, value]) => !isEmptyEvidenceValue(value))
+    .map(([key, value]) => ({ key, label: fieldLabel(key), value }))
+    .sort(compareEvidenceFields);
 }
 
 function aggregationLabel(aggregation: unknown): string {
@@ -391,7 +571,7 @@ export function MetricExplanation({ def, result }: { def: MetricDef; result?: Be
                     <td>{sampleLabel(sample, index)}</td>
                     <td>{sampleStatus(sample)}</td>
                     <td className="num">{sampleValue(sample)}</td>
-                    <td>{sampleEvidence(sample)}</td>
+                    <td><EvidenceFieldList fields={sampleEvidenceFields(sample)} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -402,7 +582,18 @@ export function MetricExplanation({ def, result }: { def: MetricDef; result?: Be
 
       <section className="metric-explanation__section">
         <h3>Failed examples ({failures.length})</h3>
-        {failures.length === 0 ? <p>Không có failed example trong metric result.</p> : <pre>{valueOrDash(failures)}</pre>}
+        {failures.length === 0 ? (
+          <p>Không có failed example trong metric result.</p>
+        ) : (
+          <div className="metric-explanation__failed-list">
+            {failures.map((failure, index) => (
+              <article className="metric-explanation__failed-item" key={`${failedExampleLabel(failure, index)}-${index}`}>
+                <h4>{failedExampleLabel(failure, index)}</h4>
+                <EvidenceFieldList fields={failedExampleFields(failure)} />
+              </article>
+            ))}
+          </div>
+        )}
         <p>{result?.remediation_hint ?? "Chưa có hướng khắc phục."}</p>
       </section>
     </div>

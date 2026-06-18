@@ -42,7 +42,7 @@ from backend.evaluation.project_evaluator import (  # noqa: E402
 from backend.evaluation.runtime_evaluators import evaluate_plan  # noqa: E402
 
 
-DEFAULT_PLAN_IDS = ("03", "04", "05", "06")
+DEFAULT_PLAN_IDS = ("01", "03", "04", "05", "06", "07")
 DASHBOARD_HIDDEN_METRIC_IDS = {
     "ocr_unresolved_rate",
     "corpus_ocr_unresolved_rate",
@@ -429,7 +429,17 @@ def _apply_dashboard_metric_contract(metric_id: str, metric: dict[str, Any]) -> 
     if not override:
         return metric
     metric.update(override)
-    metric["status"] = evaluate_metric_threshold(metric, metric.get("value"), fallback_status=str(metric.get("status") or "not_evaluable"))
+    evaluated_status = evaluate_metric_threshold(
+        metric,
+        metric.get("value"),
+        fallback_status=str(metric.get("status") or "not_evaluable"),
+    )
+    previous_status = str(metric.get("status") or "not_evaluable")
+    metric["status"] = (
+        max([previous_status, evaluated_status], key=_metric_status_rank)
+        if previous_status in {"blocked", "not_evaluable"}
+        else evaluated_status
+    )
     metric["legacy_status"] = metric["status"]
     threshold_policy = dict(metric.get("threshold_policy") or {})
     threshold_policy["rationale"] = "Cohort dashboard readiness threshold; exact 100% is reserved for deterministic zero-error gates."
@@ -477,6 +487,11 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         status = "not_applicable" if value is None else ("pass" if value == 1.0 else "fail")
     else:
         status = evaluate_metric_threshold(prototype, value, fallback_status=status)
+    sample_status = max(
+        [item for item in statuses if item in {"blocked", "not_evaluable"}] or ["not_applicable"],
+        key=_metric_status_rank,
+    )
+    status = max([status, sample_status], key=_metric_status_rank)
 
     failed_examples = [
         {
@@ -616,6 +631,64 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     return _apply_dashboard_metric_contract(metric_id, aggregate)
 
 
+def _missing_metric_sample(
+    *,
+    metric_id: str,
+    prototype: dict[str, Any],
+    ticker: str,
+    artifact_id: str,
+    artifact_name: str,
+) -> dict[str, Any]:
+    metric_type = str(prototype.get("metric_type") or "")
+    unit = str(prototype.get("unit") or "")
+    if metric_type == "boolean" or unit == "boolean":
+        value: Any = False
+    elif metric_type == "error_count" or unit == "count":
+        value = 1
+    else:
+        value = None
+    evaluator = dict(prototype.get("evaluator") or {})
+    evaluator.setdefault("id", metric_id)
+    evaluator["execution_status"] = "not_executed"
+    return {
+        "ticker": ticker,
+        "artifact_id": artifact_id,
+        "artifact": artifact_name,
+        "metric": {
+            **prototype,
+            "id": metric_id,
+            "metric_id": metric_id,
+            "status": "not_evaluable",
+            "legacy_status": "not_evaluable",
+            "value": value,
+            "detail": "metric_missing_for_ticker",
+            "source": "missing_metric_in_artifact",
+            "sample_size": 0,
+            "failed_examples": [{
+                "ticker": ticker,
+                "reason": "metric_missing_for_ticker",
+                "artifact_id": artifact_id,
+            }],
+            "evaluator": evaluator,
+            "calculation": {
+                "aggregation": "missing_metric",
+                "numerator": 0,
+                "denominator": 1,
+                "per_sample_results": [{
+                    "ticker": ticker,
+                    "status": "not_evaluable",
+                    "reason": "metric_missing_for_ticker",
+                    "artifact_id": artifact_id,
+                }],
+            },
+            "evidence": {
+                "artifact_ids": [artifact_id],
+                "evidence_available": False,
+            },
+        },
+    }
+
+
 def _metric_by_id(artifact: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {
         _normalize_metric_key(metric): metric
@@ -708,7 +781,9 @@ def _aggregate_artifacts(
     artifacts: list[dict[str, Any]] = []
     for plan_id in plan_ids:
         samples_by_metric: dict[str, list[dict[str, Any]]] = {}
+        plan_records: list[dict[str, Any]] = []
         statuses: list[str] = []
+        artifact_name = PLAN_ARTIFACTS.get(plan_id, f"{plan_id}.json")
         for packet in packets:
             ticker = str(packet.get("ticker") or "")
             artifact = next(
@@ -721,19 +796,44 @@ def _aggregate_artifacts(
             if not isinstance(artifact, dict):
                 continue
             statuses.append(str(artifact.get("status") or "not_measured"))
+            present_metric_ids: set[str] = set()
             for metric in artifact.get("metric_results") or []:
                 if not isinstance(metric, dict):
                     continue
                 metric_id = _normalize_metric_key(metric)
                 if not metric_id or metric_id in DASHBOARD_HIDDEN_METRIC_IDS:
                     continue
-                artifact_name = PLAN_ARTIFACTS.get(plan_id, f"{plan_id}.json")
+                present_metric_ids.add(metric_id)
                 samples_by_metric.setdefault(metric_id, []).append({
                     "ticker": ticker,
                     "artifact_id": f"{ticker}/{artifact_name}",
                     "artifact": artifact_name,
                     "metric": metric,
                 })
+            plan_records.append({
+                "ticker": ticker,
+                "artifact_id": f"{ticker}/{artifact_name}",
+                "artifact": artifact_name,
+                "metric_ids": present_metric_ids,
+            })
+
+        ticker_order = {
+            str(packet.get("ticker") or ""): index
+            for index, packet in enumerate(packets)
+        }
+        for metric_id, samples in samples_by_metric.items():
+            prototype = samples[0]["metric"]
+            for record in plan_records:
+                if metric_id in record["metric_ids"]:
+                    continue
+                samples.append(_missing_metric_sample(
+                    metric_id=metric_id,
+                    prototype=prototype,
+                    ticker=record["ticker"],
+                    artifact_id=record["artifact_id"],
+                    artifact_name=record["artifact"],
+                ))
+            samples.sort(key=lambda sample: ticker_order.get(str(sample.get("ticker") or ""), len(ticker_order)))
 
         metric_results = [
             _aggregate_metric_group(metric_id, samples, generated_at)

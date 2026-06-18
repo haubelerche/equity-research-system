@@ -215,6 +215,9 @@ describe("EvalDashboardPage", () => {
     expect(screen.getByText(/đếm số sample đạt điều kiện/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /sample \(2\)/i })).toBeInTheDocument();
     expect(screen.getByText("gross_margin")).toBeInTheDocument();
+    expect(screen.getAllByText("Artifact ID").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Reason").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Evidence").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/DHG\/data_quality\.json/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/core_metric_coverage/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/storage\/runs\/DHG\/evidence_packet\.json/).length).toBeGreaterThan(0);

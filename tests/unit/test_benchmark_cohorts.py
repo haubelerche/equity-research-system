@@ -45,7 +45,7 @@ def test_available_benchmark_cohorts_expose_more_than_one_archetype() -> None:
 
 
 def test_benchmark_suite_default_plan_ids_focus_evidence_sensitive_plans() -> None:
-    assert run_benchmark_suite.DEFAULT_PLAN_IDS == ("03", "04", "05", "06")
+    assert run_benchmark_suite.DEFAULT_PLAN_IDS == ("01", "03", "04", "05", "06", "07")
 
 
 def test_resolve_benchmark_tickers_deduplicates_and_normalizes_explicit_inputs() -> None:
@@ -167,6 +167,180 @@ def test_benchmark_suite_aggregate_metric_exposes_numeric_cohort_rate() -> None:
     ]
     assert metric["failed_examples"][0]["ticker"] == "DBD"
     assert metric["failed_examples"][0]["artifact_id"] == "DBD/agent_eval.json"
+
+
+def test_benchmark_suite_aggregate_keeps_full_cohort_sample_details() -> None:
+    tickers = [f"T{i:02d}" for i in range(45)]
+    packets = [
+        {
+            "ticker": ticker,
+            "artifacts": [{
+                "plan_id": "03",
+                "status": "pass",
+                "metric_results": [{
+                    "id": "fcff",
+                    "metric_id": "fcff",
+                    "metric_type": "boolean",
+                    "unit": "boolean",
+                    "threshold": "= true",
+                    "threshold_operator": "=",
+                    "status": "pass",
+                    "value": True,
+                    "detail": "fcff formula reconciled",
+                    "calculation": {
+                        "aggregation": "boolean_gate",
+                        "per_sample_results": [{
+                            "ticker": ticker,
+                            "canonical_key": "fcff",
+                            "status": "pass",
+                        }],
+                    },
+                }],
+            }],
+        }
+        for ticker in tickers
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="full_universe",
+        tickers=tickers,
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("03",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+    per_ticker_samples = metric["calculation"]["per_sample_results"]
+
+    assert metric["sample_size"] == 45
+    assert len(per_ticker_samples) == 45
+    assert metric["calculation"]["denominator"] == 45
+    assert per_ticker_samples[0]["artifact_id"] == "T00/financial_eval.json"
+    assert per_ticker_samples[0]["source_samples"] == [{
+        "ticker": "T00",
+        "canonical_key": "fcff",
+        "status": "pass",
+    }]
+
+
+def test_benchmark_suite_aggregate_keeps_missing_metric_tickers_in_denominator() -> None:
+    tickers = [f"T{i:02d}" for i in range(45)]
+    packets = []
+    for index, ticker in enumerate(tickers):
+        metric_results = []
+        if index < 9:
+            metric_results.append({
+                "id": "fcff",
+                "metric_id": "fcff",
+                "metric_type": "boolean",
+                "unit": "boolean",
+                "threshold": "= true",
+                "threshold_operator": "=",
+                "status": "pass",
+                "value": True,
+                "calculation": {
+                    "aggregation": "boolean_gate",
+                    "per_sample_results": [{
+                        "ticker": ticker,
+                        "canonical_key": "fcff",
+                        "status": "pass",
+                    }],
+                },
+            })
+        packets.append({
+            "ticker": ticker,
+            "artifacts": [{
+                "plan_id": "03",
+                "status": "pass" if metric_results else "blocked",
+                "metric_results": metric_results,
+            }],
+        })
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="full_universe",
+        tickers=tickers,
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("03",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+    per_ticker_samples = metric["calculation"]["per_sample_results"]
+
+    assert metric["sample_size"] == 45
+    assert metric["value"] == 0.2
+    assert metric["status"] == "fail"
+    assert len(per_ticker_samples) == 45
+    assert per_ticker_samples[8]["status"] == "pass"
+    assert per_ticker_samples[9]["status"] == "not_evaluable"
+    assert per_ticker_samples[9]["source_samples"] == [{
+        "ticker": "T09",
+        "status": "not_evaluable",
+        "reason": "metric_missing_for_ticker",
+        "artifact_id": "T09/financial_eval.json",
+    }]
+
+
+def test_benchmark_suite_aggregate_does_not_pass_when_ops_samples_are_not_evaluable() -> None:
+    packets = [
+        {
+            "ticker": "DHG",
+            "artifacts": [{
+                "plan_id": "07",
+                "status": "pass",
+                "metric_results": [{
+                    "id": "warm_full_report_p95_latency",
+                    "metric_id": "warm_full_report_p95_latency",
+                    "metric_type": "latency_percentile",
+                    "unit": "seconds",
+                    "threshold": "<= 600",
+                    "threshold_operator": "<=",
+                    "status": "pass",
+                    "value": 500.0,
+                    "calculation": {"aggregation": "p95"},
+                }],
+            }],
+        },
+        {
+            "ticker": "AMP",
+            "artifacts": [{
+                "plan_id": "07",
+                "status": "blocked",
+                "metric_results": [{
+                    "id": "warm_full_report_p95_latency",
+                    "metric_id": "warm_full_report_p95_latency",
+                    "metric_type": "latency_percentile",
+                    "unit": "seconds",
+                    "threshold": "<= 600",
+                    "threshold_operator": "<=",
+                    "status": "not_evaluable",
+                    "value": None,
+                    "source": "latency trace missing",
+                    "failed_examples": [{"reason": "latency_trace_missing"}],
+                    "calculation": {
+                        "aggregation": "p95",
+                        "per_sample_results": [{
+                            "status": "not_evaluable",
+                            "reason": "latency_trace_missing",
+                        }],
+                    },
+                }],
+            }],
+        },
+    ]
+
+    summary = run_benchmark_suite._aggregate_summary(
+        cohort_name="ops",
+        tickers=["DHG", "AMP"],
+        packets=packets,
+        generated_at="2026-06-15T00:00:00+00:00",
+        plan_ids=("07",),
+    )
+    metric = summary["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 0.5
+    assert metric["status"] == "not_evaluable"
+    assert metric["sample_size"] == 2
+    assert len(metric["calculation"]["per_sample_results"]) == 2
+    assert metric["failed_examples"][0]["ticker"] == "AMP"
 
 
 def test_benchmark_suite_boolean_metric_aggregates_as_percent_gate() -> None:
