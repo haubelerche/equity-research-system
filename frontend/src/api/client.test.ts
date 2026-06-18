@@ -52,7 +52,8 @@ describe("api client", () => {
     await fetchEvaluationPacket();
     await fetchEvaluationPacket("run-1");
     expect((globalThis.fetch as any).mock.calls[0][0]).toBe("/eval/framework");
-    expect((globalThis.fetch as any).mock.calls[1][0]).toBe("/research/run-1/evaluation");
+    expect((globalThis.fetch as any).mock.calls[1][0]).toBe("/eval/framework.json");
+    expect((globalThis.fetch as any).mock.calls[2][0]).toBe("/research/run-1/evaluation");
   });
 
   it("falls back to the project benchmark packet when run scoped evaluation is missing", async () => {
@@ -67,8 +68,40 @@ describe("api client", () => {
 
     expect((globalThis.fetch as any).mock.calls[0][0]).toBe("/research/run-1/evaluation");
     expect((globalThis.fetch as any).mock.calls[1][0]).toBe("/eval/framework");
+    expect((globalThis.fetch as any).mock.calls[2][0]).toBe("/eval/framework.json");
     expect(packet.source).toBe("benchmark_suite");
     expect(packet.artifacts?.[0]?.artifact).toBe("data_quality.json");
+  });
+
+  it("uses the bundled Vercel benchmark snapshot when it is newer than the backend packet", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url === "/eval/framework") {
+        return jsonResponse({ source: "backend", generated_at: "2026-06-17T00:00:00Z" }, { status: 200 });
+      }
+      return jsonResponse({ source: "bundled", generated_at: "2026-06-18T00:00:00Z" }, { status: 200 });
+    }));
+
+    const packet = await fetchEvaluationPacket();
+
+    expect((globalThis.fetch as any).mock.calls[0][0]).toBe("/eval/framework");
+    expect((globalThis.fetch as any).mock.calls[1][0]).toBe("/eval/framework.json");
+    expect(packet.source).toBe("bundled");
+  });
+
+  it("uses the bundled Vercel benchmark snapshot when the project endpoint returns the SPA", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url === "/eval/framework") {
+        return new Response("<!doctype html>", {
+          status: 200,
+          headers: { "content-type": "text/html" },
+        });
+      }
+      return jsonResponse({ source: "bundled", generated_at: "2026-06-18T00:00:00Z" }, { status: 200 });
+    }));
+
+    const packet = await fetchEvaluationPacket();
+
+    expect(packet.source).toBe("bundled");
   });
 
   it("builds file and preview urls", () => {

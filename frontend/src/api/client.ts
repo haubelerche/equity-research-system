@@ -7,6 +7,7 @@ import type {
 
 // Strip a trailing slash so `${API_BASE}${path}` never produces a double slash.
 const API_BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/+$/, "");
+const STATIC_EVALUATION_PACKET = "/eval/framework.json";
 
 // Guard against the most common deploy misconfiguration: pointing VITE_API_BASE
 // at the Railway *dashboard* (railway.com/project/...) instead of the deployed
@@ -35,6 +36,47 @@ async function getJSON<T>(path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+async function getStaticEvaluationPacket(): Promise<EvaluationPacket | null> {
+  try {
+    const res = await fetch(STATIC_EVALUATION_PACKET, { cache: "no-store" });
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") ?? "";
+    if (!contentType.includes("application/json")) return null;
+    return (await res.json()) as EvaluationPacket;
+  } catch {
+    return null;
+  }
+}
+
+function packetTime(packet: EvaluationPacket | null): number {
+  const raw = packet?.generated_at;
+  if (typeof raw !== "string" || raw.length === 0) return 0;
+  const timestamp = Date.parse(raw);
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function newestEvaluationPacket(
+  live: EvaluationPacket | null,
+  bundled: EvaluationPacket | null,
+): EvaluationPacket {
+  if (live && bundled) {
+    return packetTime(bundled) > packetTime(live) ? bundled : live;
+  }
+  if (live) return live;
+  if (bundled) return bundled;
+  throw new Error("No evaluation packet available from API or bundled Vercel snapshot");
+}
+
+async function fetchProjectEvaluationPacket(): Promise<EvaluationPacket> {
+  let live: EvaluationPacket | null = null;
+  try {
+    live = await getJSON<EvaluationPacket>("/eval/framework");
+  } catch {
+    live = null;
+  }
+  return newestEvaluationPacket(live, await getStaticEvaluationPacket());
+}
+
 export async function fetchReports(): Promise<ReportsResponse> {
   return getJSON<ReportsResponse>("/reports");
 }
@@ -61,11 +103,11 @@ export async function fetchRunStatus(runId: string): Promise<RunStatusResponse> 
 }
 
 export async function fetchEvaluationPacket(runId?: string): Promise<EvaluationPacket> {
-  if (!runId) return getJSON<EvaluationPacket>("/eval/framework");
+  if (!runId) return fetchProjectEvaluationPacket();
   try {
     return await getJSON<EvaluationPacket>(`/research/${runId}/evaluation`);
   } catch {
-    return getJSON<EvaluationPacket>("/eval/framework");
+    return fetchProjectEvaluationPacket();
   }
 }
 
