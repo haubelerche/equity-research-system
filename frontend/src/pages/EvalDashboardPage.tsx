@@ -74,6 +74,18 @@ const HIDDEN_DASHBOARD_METRIC_IDS = new Set([
   "latency_regression_ratio",
 ]);
 
+const REPORT_QUALITY_METRIC_IDS = new Set([
+  "report.quality_total",
+  "report_quality_score",
+  "report.completeness",
+  "report.valuation_transparency",
+]);
+
+function metricIsVisibleForLayer(layer: EvalLayer, metricId: string): boolean {
+  if (layer.id === "report_quality") return REPORT_QUALITY_METRIC_IDS.has(metricId);
+  return !HIDDEN_DASHBOARD_METRIC_IDS.has(metricId);
+}
+
 type PublicationIssue = {
   artifact: string;
   artifactName: string;
@@ -145,7 +157,7 @@ function isNotApplicableResult(result: BenchmarkMetricResult | undefined): boole
 function metricsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): MetricDef[] {
   const results = resultsForLayer(packet, layer);
   const configured = layer.metrics.filter((metric) => (
-    !HIDDEN_DASHBOARD_METRIC_IDS.has(metric.id)
+    metricIsVisibleForLayer(layer, metric.id)
     && !isNotApplicableResult(results[metric.id])
   ));
   const configuredIds = new Set(configured.flatMap((metric) => [metric.id, ...(metric.aliases ?? [])]));
@@ -153,7 +165,7 @@ function metricsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): Met
     .filter(([id, result]) => (
       id
       && !configuredIds.has(id)
-      && !HIDDEN_DASHBOARD_METRIC_IDS.has(id)
+      && metricIsVisibleForLayer(layer, id)
       && !isNotApplicableResult(result)
     ))
     .map(([, result]) => metricFromResult(result));

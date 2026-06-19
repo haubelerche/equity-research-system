@@ -275,6 +275,41 @@ const packet = {
       status: "not_evaluable",
     }],
   }, {
+    plan_id: "06",
+    name: "Report quality",
+    artifact: "report_eval.json",
+    status: "pass",
+    metric_results: [{
+      metric_id: "report.quality_total",
+      metric_name: "Report quality total",
+      metric_type: "score",
+      value: 88,
+      threshold: ">= 85/100",
+      status: "pass",
+    }, {
+      metric_id: "report.completeness",
+      metric_name: "Report completeness",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 0.93,
+      threshold: ">= 90%",
+      status: "pass",
+    }, {
+      metric_id: "report.valuation_transparency",
+      metric_name: "Valuation transparency",
+      metric_type: "score",
+      value: 91,
+      threshold: ">= 85/100",
+      status: "pass",
+    }, {
+      metric_id: "report.thesis_specificity",
+      metric_name: "Legacy thesis specificity",
+      metric_type: "score",
+      value: 94,
+      threshold: ">= 85/100",
+      status: "pass",
+    }],
+  }, {
     plan_id: "07",
     name: "Observability, cost, and latency",
     artifact: "observability_eval.json",
@@ -338,6 +373,10 @@ describe("EvalDashboardPage", () => {
     expect(screen.getAllByText("New backend metric").length).toBeGreaterThan(0);
     expect(screen.queryByText("Judge calibration agreement")).not.toBeInTheDocument();
     expect(screen.queryByText("Judge rationale evidence coverage")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Report quality total").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Report completeness").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Valuation transparency").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Legacy thesis specificity")).not.toBeInTheDocument();
   });
 
   it("opens publication blocking details from the suite status banner", async () => {

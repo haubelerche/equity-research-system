@@ -83,6 +83,16 @@ describe("evalFramework", () => {
     expect(metricIds).not.toContain("judge_rationale_evidence_coverage");
   });
 
+  it("exposes only the three current report quality metrics", () => {
+    const report = EVAL_LAYERS.find((layer) => layer.id === "report_quality")!;
+
+    expect(report.metrics.map((metric) => metric.id)).toEqual([
+      "report.quality_total",
+      "report.completeness",
+      "report.valuation_transparency",
+    ]);
+  });
+
   it("keeps the evaluation pipeline and acceptance explanation in Vietnamese", () => {
     expect(PIPELINE_ORDER[0]).toMatch(/Chất lượng dữ liệu/i);
     expect(ACCEPTANCE_EXPLANATION.length).toBeGreaterThan(0);
