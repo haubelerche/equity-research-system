@@ -15,7 +15,7 @@ Bao cao co the trong chuyen nghiep nhung van khong dat chuan neu thieu citation 
 | Logic hien tai | Dieu chinh trong ke hoach |
 |---|---|
 | `evaluate_report_quality` gom 8 sub-gates: financial model integrity, forecast reasonableness, company research depth, analyst insight, valuation completeness, citation coverage, recommendation consistency, professional presentation | Report plan phai test tung sub-gate, khong chi test tong score |
-| Decision rule hien tai: `allow_export` neu score >= 85 va khong failed gate; `draft_only` neu score >= 70 nhung con fail; con lai `block_export` | Artifact `report_eval.json` phai expose `decision`, `failed_gates`, `section_scores` va raw sub-gate results |
+| Decision rule hien tai: `allow_export` neu score >= 85% va khong failed gate; `draft_only` neu score >= 70% nhung con fail; con lai `block_export` | Artifact `report_eval.json` phai expose `decision`, `failed_gates`, `section_scores` va raw sub-gate results |
 | `report_quality_gate` fail co severity warning trong harness | Warning severity khong co nghia final duoc phep render; `PACKAGE_VALIDATION_GATE` va `publication_readiness` van fail-closed |
 | `evaluate_client_final_readiness` yeu cau run `approved`, final approval `approved`, company/analyst insight packs, locked `publishable_final_report_model`, package gate pass, Report-quality allow_export score >=85, snapshot match | Blocking conditions phai them `final_report_approval_missing`, `run_not_approved:*`, `publishable_final_report_model_not_locked`, `artifact_snapshot_mismatch` |
 | `FinalReportRenderer` va `ClientReportPublisher` can `ClientFinalAuthorization`; thieu hoac mismatch authorization se raise `PublicationBlockedError` | Renderer test phai verify direct client-final call bi chan khi khong co authorization |
@@ -30,7 +30,12 @@ Bao cao co the trong chuyen nghiep nhung van khong dat chuan neu thieu citation 
 | Target price | Chi hien khi valuation publishable va approval cho phep |
 | Narrative | Company-specific, material, khong dung chung template |
 | Tables/charts | Numbered, sourced, unit ro, khong mau thuan voi artifact |
-| report-quality rubric | Score >= 85 va khong failed gate |
+| report-quality rubric | Score >= 85% va khong failed gate |
+| Thesis specificity | Thesis phai neu driver rieng cua cong ty, materiality va dieu kien bac bo |
+| Risk/catalyst quality | Risk/catalyst phai co xac suat, thoi diem, financial transmission path va evidence |
+| Peer/industry context | So sanh peer/nganh ve growth, margin, valuation va balance sheet |
+| Sensitivity disclosure | Driver trong yeu phai co sensitivity/scenario disclosure phu hop |
+| Executive summary | Phai actionable: recommendation, valuation basis, driver, risk va monitoring trigger |
 | Export package | Manifest, formula traces, evidence packet, quality gate, PDF/HTML |
 | Client-final authorization | Run approval, final approval, locked artifact, snapshot match, Report-quality allow_export |
 | Post-render audit | HTML/PDF khong lo internal banner, generic source note, draft markers hoac forbidden display |
@@ -49,12 +54,16 @@ Bao cao co the trong chuyen nghiep nhung van khong dat chuan neu thieu citation 
 
 | Nhom | Trong so | Dieu kien dat |
 |---|---:|---|
-| Data correctness | 25 | Financial model integrity pass, no stale/mismatched snapshot |
-| Financial model integrity | 25 | Forecast, BS, FCFF/FCFE, WACC, bridge, sensitivity pass |
-| Domain depth | 15 | Company research pack, analyst insights, archetype-specific drivers pass |
-| Valuation transparency | 15 | EV-to-equity bridge, WACC build-up, method status ro rang |
-| Citation quality | 10 | Claim-level citation, official source, no generic citation |
-| Professional presentation | 10 | Sections, tables, charts, recommendation consistency pass |
+| Completeness | 12 | Required sections, tables, charts and artifacts present |
+| Thesis specificity | 12 | Company-specific thesis, material drivers, explicit disconfirming conditions |
+| Financial analysis depth | 14 | Financial model integrity, ratio discussion and driver attribution pass |
+| Forecast rationale | 12 | Revenue, margin, capex and NWC assumptions have traceable rationale |
+| Valuation transparency | 14 | EV-to-equity bridge, WACC build-up, method status and sensitivity are clear |
+| Risk/catalyst quality | 10 | Probability, timing, financial transmission path and evidence are explicit |
+| Evidence integration | 10 | Claim-level citation, official source preference and formula trace are integrated |
+| Peer/industry context | 6 | Peer comparison supports valuation and operating interpretation |
+| Executive summary actionability | 5 | Summary supports an investment decision without reading the full appendix |
+| Professional presentation | 5 | Sections, tables, charts, units and recommendation consistency pass |
 
 ### 4. Blocking conditions
 
@@ -68,6 +77,8 @@ Bao cao co the trong chuyen nghiep nhung van khong dat chuan neu thieu citation 
 | Missing evidence packet or formula trace | Critical |
 | PDF rendered from `report_candidate_model` as final | Critical |
 | Missing numbered/sourced charts/tables | Warning in draft, critical in final |
+| Recommendation/rating inconsistent with target price, market price or upside/downside | Critical |
+| Sensitivity disclosure missing for valuation-critical drivers | Warning in draft, critical in final |
 | Missing final approval for client-final render | Critical |
 | `publishable_final_report_model` not locked | Critical |
 | Report-quality gate warning treated as final pass | Critical |

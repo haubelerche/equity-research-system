@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol, TypedDict
 
+from backend.reporting.pdf_quality_gate import is_client_pdf_safe
 from backend.storage.layout import EXPORTS_BUCKET
 
 _PREVIEW_RE = re.compile(r"_report_page_(\d+)\.png$")
@@ -176,10 +177,12 @@ def _resolve_report_files(ticker: str, output_dir: Path) -> _ResolvedFiles:
                 m = _PREVIEW_RE.search(entry.name)
                 if m:
                     pages.append(int(m.group(1)))
+    safe_report = report if is_client_pdf_safe(report) else None
+    safe_explanation = explanation if is_client_pdf_safe(explanation) else None
     return _ResolvedFiles(
-        report=report if report.is_file() else None,
-        explanation=explanation if explanation.is_file() else None,
-        preview_pages=sorted(pages),  # numeric order
+        report=safe_report,
+        explanation=safe_explanation,
+        preview_pages=sorted(pages) if safe_report else [],  # numeric order
     )
 
 

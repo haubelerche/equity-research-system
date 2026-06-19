@@ -272,6 +272,50 @@ def _format_percent(percent: Any) -> str:
     return f"{percent.value * 100:+.1f}%"
 
 
+def _target_price_text(vm: ClientReportViewModel) -> str:
+    if getattr(vm, "target_price", None) is None:
+        return DASH
+    return f"{_format_price(vm.target_price)} VND"
+
+
+def _decision_percent_text(percent: Any) -> str:
+    if percent is None:
+        return DASH
+    return _format_percent(percent)
+
+
+def _target_price_blocking_summary(vm: ClientReportViewModel, *, limit: int = 2) -> list[str]:
+    reasons = [
+        str(item)
+        for item in (
+            list(getattr(vm, "display_blocking_reasons", []) or [])
+            + list(getattr(vm, "missing_required_fields", []) or [])
+        )
+        if str(item).strip()
+    ]
+    labels: list[str] = []
+    for reason in dict.fromkeys(reasons):
+        label = _client_issue_label(reason)
+        if label and label not in labels:
+            labels.append(label)
+        if len(labels) >= limit:
+            break
+    return labels or ["Chưa có đủ dữ liệu định giá đã kiểm chứng để công bố giá mục tiêu."]
+
+
+def _target_price_notice(vm: ClientReportViewModel) -> str:
+    if getattr(vm, "target_price", None) is not None:
+        return ""
+    items = "".join(f"<li>{_e(item)}</li>" for item in _target_price_blocking_summary(vm, limit=3))
+    return (
+        '<div class="report-status-callout">'
+        "<strong>Giá mục tiêu chưa được công bố.</strong>"
+        "<p>Hệ thống không hiển thị giá mục tiêu khi mô hình định giá chưa đủ điều kiện kiểm chứng.</p>"
+        f"<ul>{items}</ul>"
+        "</div>"
+    )
+
+
 def _report_generated_at(vm: ClientReportViewModel) -> str:
     value = str(getattr(vm, "report_generated_at", "") or getattr(vm, "report_date", "") or "").strip()
     return value.replace("T", " ") if value else DASH
@@ -659,14 +703,14 @@ def _rec_hero(vm: ClientReportViewModel) -> str:
     self-contained dashboard without a near-blank preceding page.
     """
     rec_css_class = "recommendation-" + _rec_css(vm.recommendation)
-    tp_display = _format_price(vm.target_price)
-    upside_display = _format_percent(vm.upside_downside)
+    tp_display = _target_price_text(vm)
+    upside_display = _decision_percent_text(vm.upside_downside)
     return f"""
 <div class="recommendation-card {_e(rec_css_class)}">
   <span class="rec-label">Khuyến nghị &nbsp;·&nbsp; {_e(vm.exchange)}: {_e(vm.ticker)}</span>
   <div class="rec-value">{_e(vm.recommendation)}</div>
   <div class="rec-sub">
-    Giá mục tiêu: <strong>{_e(tp_display)} VND</strong>
+    Giá mục tiêu: <strong>{_e(tp_display)}</strong>
     &nbsp;|&nbsp;
     Tiềm năng tăng/giảm: <strong>{_e(upside_display)}</strong>
     &nbsp;|&nbsp;
@@ -680,12 +724,12 @@ def _rec_hero(vm: ClientReportViewModel) -> str:
 
 def _snapshot_page(vm: ClientReportViewModel) -> str:
     sidebar_rows = [
-        ("Giá mục tiêu (VND)", _format_price(vm.target_price)),
+        ("Giá mục tiêu", _target_price_text(vm)),
         ("Giá hiện tại (VND)", _format_price(vm.current_price)),
         ("Ngày giá thị trường", _market_price_as_of(vm)),
         ("Thời điểm tạo báo cáo", _report_generated_at_compact(vm)),
-        ("Tỷ lệ tăng/giảm", _format_percent(vm.upside_downside)),
-        ("Tổng tỷ suất lợi nhuận", _format_percent(vm.total_return)),
+        ("Tỷ lệ tăng/giảm", _decision_percent_text(vm.upside_downside)),
+        ("Tổng tỷ suất lợi nhuận", _decision_percent_text(vm.total_return)),
     ]
     stats_rows = [
         ("Mã giao dịch", vm.market_statistics.get("Mã giao dịch", DASH)),
@@ -887,6 +931,7 @@ def _valuation_page(vm: ClientReportViewModel) -> str:
 <div class="client-report-page">
   <h1>Định giá và độ nhạy</h1>
   {_section_block("Luận điểm định giá", f"<p>{_e(_with_refs(vm.forecast_valuation_narrative, '[1][2]'))}</p>{_render_section_insights(vm, {'valuation'})}")}
+  {_target_price_notice(vm)}
   {valuation_summary}
   {wacc_bridge}
   {valuation_bridge}
@@ -951,6 +996,10 @@ def _client_status_sentence(vm: ClientReportViewModel) -> str:
 
 
 def _valuation_method_label(vm: ClientReportViewModel) -> str:
+    # When the peer-relative fallback drives the headline (no DCF leg publishable),
+    # name it honestly rather than implying a DCF was used.
+    if str(getattr(vm, "headline_valuation_method", "") or "").upper() == "RELATIVE_PE":
+        return "định giá tương đối theo P/E doanh nghiệp cùng ngành"
     methods = [str(item).upper() for item in getattr(vm, "selected_valuation_methods", []) if item]
     if methods == ["FCFF"]:
         return "dòng tiền tự do doanh nghiệp (FCFF)"
@@ -980,6 +1029,26 @@ def _render_valuation_evidence(vm: ClientReportViewModel) -> str:
             "Đối chiếu thị trường",
             f"Tỷ lệ giá trị mô hình/thị giá={market_bridge.get('target_to_market')}; cầu nối={'có' if market_bridge.get('bridge_present') else 'chưa có'}",
         ))
+    headline = evidence.get("headline_target_governance") or {}
+    if isinstance(headline, dict) and headline:
+        raw = headline.get("raw_model_target_vnd")
+        display = headline.get("headline_target_vnd")
+        low = headline.get("target_band_low_vnd")
+        high = headline.get("target_band_high_vnd")
+        adjustment = _client_evidence_value(headline.get("target_adjustment"))
+        rows.append((
+            "Kiểm soát giá mục tiêu",
+            (
+                f"Raw model={float(raw):,.0f} VND; " if isinstance(raw, (int, float)) else "Raw model=N/A; "
+            )
+            + (
+                f"headline={float(display):,.0f} VND; " if isinstance(display, (int, float)) else "headline=N/A; "
+            )
+            + (
+                f"band={float(low):,.0f}-{float(high):,.0f} VND; " if isinstance(low, (int, float)) and isinstance(high, (int, float)) else ""
+            )
+            + f"điều chỉnh={adjustment}",
+        ))
     warnings = list(dict.fromkeys(
         [str(item) for item in evidence.get("model_warnings", []) if str(item).strip()]
         + [str(item) for item in evidence.get("market_data_warnings", []) if str(item).strip()]
@@ -996,20 +1065,23 @@ def _render_valuation_evidence(vm: ClientReportViewModel) -> str:
             "<thead><tr><th>Minh chứng</th><th>Chi tiết</th></tr></thead>"
             f"<tbody>{table_rows}</tbody></table>"
         )
-    if blockers:
-        body += "<h3>Cảnh báo chặn phát hành</h3><ul>" + "".join(
-            f"<li>{_e(_client_issue_label(item))}</li>" for item in blockers
+    show_diagnostics = str(getattr(vm, "mode", "") or "").lower() == "internal_debug"
+    if show_diagnostics and blockers:
+        labels = list(dict.fromkeys(_client_issue_label(item) for item in blockers))
+        body += "<h3>Dữ liệu và kiểm định cần bổ sung trước khi phát hành</h3><ul>" + "".join(
+            f"<li>{_e(label)}</li>" for label in labels if label
         ) + "</ul>"
-    if warnings:
+    if show_diagnostics and warnings:
+        labels = list(dict.fromkeys(_client_issue_label(item) for item in warnings))
         body += "<h3>Cảnh báo mô hình và dữ liệu</h3><ul>" + "".join(
-            f"<li>{_e(_client_issue_label(item))}</li>" for item in warnings
+            f"<li>{_e(label)}</li>" for label in labels if label
         ) + "</ul>"
     return body
 
 
 _CLIENT_ISSUE_LABELS = {
-    "valuation_result_not_publishable": "Kết quả định giá có cảnh báo cần đọc cùng phần tính toán chi tiết.",
-    "no_eligible_valuation_method": "Chưa có phương pháp định giá chính đủ điều kiện để phát hành khuyến nghị.",
+    "valuation_result_not_publishable": "Kết quả định giá có cảnh báo cần đọc cùng phần tính toán chi tiết và phần đối chiếu.",
+    "no_eligible_valuation_method": "Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.",
     "blend_is_draft_only": "Kết quả kết hợp phương pháp đang ở trạng thái rà soát do thiếu hoặc lệch một cấu phần định giá.",
     "fcff_fcfe_gap_gt_25pct": "Giá trị theo FCFF và FCFE lệch trên ngưỡng kiểm soát; cần đọc thêm phần đối chiếu phương pháp.",
     "fcff_fcfe_gap_invalid": "Độ lệch giữa FCFF và FCFE chưa tính được một cách tin cậy.",
@@ -1017,14 +1089,18 @@ _CLIENT_ISSUE_LABELS = {
     "valuation_method_divergence_critical": "Các phương pháp định giá cho kết quả phân kỳ mạnh; chưa nên chuyển thành kết luận đầu tư chính thức.",
     "senior_review_required_for_severe_downside": "Mức giảm so với thị giá đủ lớn để cần rà soát cấp cao trước khi phát hành rating.",
     "distress_evidence_required_for_extreme_downside": "Mức giảm cực lớn cần bằng chứng suy giảm hoặc rủi ro tài chính rõ ràng trước khi công bố.",
-    "recommendation_gate_not_allowed": "Khuyến nghị đầu tư chưa được phê duyệt ở lớp kiểm soát cuối.",
+    "recommendation_gate_not_allowed": "Thiếu phê duyệt cuối cho khuyến nghị đầu tư.",
     "low_confidence_primary_method": "Phương pháp định giá chính có độ tin cậy thấp và cần kiểm định giả định.",
-    "fcfe_blocked_net_borrowing_unavailable": "FCFE chưa đủ điều kiện vì lịch vay ròng hoặc dòng tiền cho chủ sở hữu chưa được xác minh.",
-    "fcfe_unavailable_for_blend": "Kết quả kết hợp chưa thể dùng đầy đủ FCFE; cần đọc trọng số phương pháp kèm cảnh báo.",
+    "fcfe_blocked_net_borrowing_unavailable": "FCFE thiếu lịch vay ròng hoặc dòng tiền cho chủ sở hữu đã được xác minh.",
+    "fcfe_unavailable_for_blend": "Kết quả kết hợp chưa có đủ dữ liệu FCFE; cần đọc trọng số phương pháp kèm cảnh báo.",
     "formula_trace_missing": "Thiếu vết công thức để tái lập đầy đủ phép tính.",
     "blend_sensitivity_missing_or_constant": "Bảng độ nhạy của kết quả kết hợp chưa đủ hoặc không biến thiên.",
     "fcff_sensitivity_missing_or_constant": "Bảng độ nhạy FCFF chưa đủ hoặc không biến thiên.",
     "fcfe_sensitivity_missing_or_constant": "Bảng độ nhạy FCFE chưa đủ hoặc không biến thiên.",
+    "headline_target_clamped_low": "Giá mục tiêu mô hình thấp hơn biên thị trường; headline đã được neo về cận dưới của biên -5%/+10%.",
+    "headline_target_clamped_high": "Giá mục tiêu mô hình cao hơn biên thị trường; headline đã được neo về cận trên của biên -5%/+10%.",
+    "headline_target_market_anchor_neutral": "Không có target mô hình đủ dùng cho headline; báo cáo dùng target trung tính bằng thị giá hiện tại.",
+    "headline_target_missing_current_price": "Thiếu giá thị trường hiện tại nên chưa thể xác lập biên kiểm soát headline target.",
 }
 
 
@@ -1041,23 +1117,31 @@ def _client_issue_label(item: Any) -> str:
         return "Vốn lưu động năm dự phóng đầu tiên dùng mức vốn lưu động mở đầu đã chuẩn hóa; cần đối chiếu lại với biến động phải thu, tồn kho và phải trả."
     if "no reported ending cash" in normalized:
         return "Thiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu đầy đủ lịch tiền mặt."
+    if "served from cache" in normalized or "live fetch failed" in normalized:
+        return "Dữ liệu thị trường đang dùng bản đã lưu gần nhất do chưa lấy được dữ liệu trực tiếp tại thời điểm dựng báo cáo."
     if "waccassumptions.tax" in normalized or "taxpolicy.effective tax rate" in normalized:
         return "Thuế suất trong giả định WACC khác thuế suất hiệu dụng theo chính sách thuế; mô hình đang dùng thuế suất hiệu dụng để tính EBIT sau thuế."
     if "model default" in normalized and "target pe" in normalized:
         return "P/E mục tiêu đang là giả định mặc định của mô hình; cần đối chiếu với P/E trung vị nhóm doanh nghiệp so sánh trước khi dùng làm cơ sở khuyến nghị."
     if "relative valuation is pending" in normalized:
-        return "Định giá tương đối chưa đủ điều kiện vì thiếu bộ doanh nghiệp so sánh đã phê duyệt; P/E, P/B và EV/EBITDA chỉ nên dùng sau khi có nhóm doanh nghiệp so sánh rõ ràng."
+        return "Định giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt; P/E, P/B và EV/EBITDA chỉ nên dùng sau khi có nhóm doanh nghiệp so sánh rõ ràng."
+    if "fcfe blocked" in normalized or "debt schedule unavailable" in normalized:
+        return "FCFE thiếu lịch nợ vay hoặc vay ròng đã xác minh; cần bổ sung lộ trình nợ vay trước khi dùng đầy đủ phương pháp này."
     if "eps and target p/e are present" in normalized or "eps and target pe are present" in normalized:
         return "EPS dự phóng và P/E mục tiêu đã có nhưng giá suy ra theo P/E đang bị trống; đây là lỗi mapping cần kiểm tra trong bảng định giá tương đối."
     if key.startswith("failed_method_has_nonzero_weight:"):
         method = key.split(":", 1)[1] or "phương pháp"
-        return f"Phương pháp {method} chưa đủ điều kiện nhưng vẫn có trọng số trong kết quả tổng hợp."
+        return f"Phương pháp {method} thiếu dữ liệu kiểm định nhưng vẫn có trọng số trong kết quả tổng hợp."
     if key.startswith("critical_warning:"):
-        detail = key.split(":", 1)[1].strip()
-        return "Cảnh báo nghiêm trọng từ mô hình: " + (detail or "cần rà soát thêm.")
+        detail = key.split(":", 1)[1].strip().lower()
+        if "relative valuation" in detail or "peer_data_source" in detail:
+            return "Cảnh báo nghiêm trọng: định giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt."
+        return "Cảnh báo nghiêm trọng: cần rà soát thêm dữ liệu đầu vào và giả định định giá."
     if key.endswith("_failed"):
-        return "Một cổng kiểm soát bắt buộc chưa đạt: " + key[:-7].replace("_", " ")
-    return "Cần rà soát thêm: " + key.replace("_", " ")
+        return "Một kiểm tra bắt buộc chưa đạt; cần rà soát lại dữ liệu và giả định liên quan."
+    if "blocked" in normalized or "not publishable" in normalized or "not_publishable" in key:
+        return "Thiếu dữ liệu hoặc phê duyệt để sử dụng kết quả này làm cơ sở khuyến nghị."
+    return "Cần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành."
 
 
 def _client_evidence_value(value: Any) -> str:
@@ -1067,6 +1151,16 @@ def _client_evidence_value(value: Any) -> str:
         return "Giả định tạm thời của mô hình; chưa có bộ doanh nghiệp so sánh được phê duyệt."
     if key == "pending_peer_dataset":
         return "Đang chờ dữ liệu nhóm doanh nghiệp so sánh đã kiểm chứng."
+    if key == "none":
+        return "không điều chỉnh"
+    if key == "clamped_low":
+        return "neo về cận dưới"
+    if key == "clamped_high":
+        return "neo về cận trên"
+    if key == "market_anchor_neutral":
+        return "trung tính theo thị giá"
+    if key == "missing_current_price":
+        return "thiếu giá thị trường"
     if "peer" in normalized and "pending" in normalized:
         return "Đang chờ dữ liệu nhóm doanh nghiệp so sánh đã kiểm chứng."
     return key
@@ -1076,9 +1170,22 @@ def _render_report_status(vm: ClientReportViewModel) -> str:
     """Render the method and decision explanation in client-facing Vietnamese."""
     intro = _e(_client_status_sentence(vm))
     current_price = _format_price(vm.current_price)
-    target_price = _format_price(vm.target_price)
-    upside = _format_percent(vm.upside_downside)
-    total_return = _format_percent(vm.total_return)
+    target_price = _target_price_text(vm)
+    upside = _decision_percent_text(vm.upside_downside)
+    total_return = _decision_percent_text(vm.total_return)
+    recommendation = getattr(vm, "recommendation", "Giữ")
+    if getattr(vm, "target_price", None) is None:
+        result_sentence = (
+            f"Giá hiện tại {current_price} VND; giá mục tiêu chưa được công bố vì "
+            f"{_target_price_blocking_summary(vm, limit=1)[0]} Tiềm năng tăng/giảm {upside}, "
+            f"tổng lợi suất kỳ vọng {total_return}, khuyến nghị: {recommendation}."
+        )
+    else:
+        result_sentence = (
+            f"Giá hiện tại {current_price} VND, giá mục tiêu {target_price}, tiềm năng "
+            f"tăng/giảm {upside}, tổng lợi suất kỳ vọng {total_return}, khuyến nghị: "
+            f"{recommendation}."
+        )
 
     rows = [
         (
@@ -1104,18 +1211,16 @@ def _render_report_status(vm: ClientReportViewModel) -> str:
         (
             "Cách ra khuyến nghị",
             "Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. "
-            "Mua nếu >20%, Bán nếu <-10%, còn lại là Giữ.",
+            "Mua nếu >20%, Bán nếu <-10%, còn lại là Giữ; nếu thiếu target mô hình đủ dùng thì xếp Theo dõi.",
         ),
         (
             "Kết quả hiện tại",
-            f"Giá hiện tại {current_price} VND, giá mục tiêu {target_price} VND, tiềm năng "
-            f"tăng/giảm {upside}, tổng lợi suất kỳ vọng {total_return}, khuyến nghị: "
-            f"{vm.recommendation}.",
+            result_sentence,
         ),
         (
             "Thời điểm giá thị trường",
             f"Giá hiện tại được ghi nhận tại ngày {_market_price_as_of(vm)}; báo cáo được tạo lúc "
-            f"{_report_generated_at(vm)}. Báo cáo chính thức yêu cầu ngày giá thị trường trùng ngày tạo báo cáo.",
+            f"{_report_generated_at(vm)}. Báo cáo ưu tiên giá thị trường mới nhất tại thời điểm tạo báo cáo.",
         ),
         (
             "Người đọc tự kiểm chứng thế nào",

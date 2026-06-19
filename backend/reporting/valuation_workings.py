@@ -112,7 +112,17 @@ def _warnings_block(*artifacts: Mapping[str, Any]) -> list[str]:
             translated = _translate_warning(warn)
             if translated and translated not in collected:
                 collected.append(translated)
-    return collected
+    return _dedupe_warnings(collected)
+
+
+def _dedupe_warnings(items: Sequence[str]) -> list[str]:
+    """Deduplicate translated warnings while preserving first-seen order."""
+    out: list[str] = []
+    for item in items:
+        text = str(item or "").strip()
+        if text and text not in out:
+            out.append(text)
+    return out
 
 
 def _view_model_evidence(vm: Any | None) -> dict[str, Any]:
@@ -142,7 +152,7 @@ def _evidence_block(vm: Any | None) -> str:
         methods = ", ".join(item for item in (evidence.get("formula_trace_methods") or []) if item) or _DASH
         rows.append(("Số vết công thức", f"{trace_count} ({methods})"))
     if evidence.get("peer_data_source"):
-        rows.append(("Nguồn multiples đối chiếu", _evidence_value_label(evidence["peer_data_source"])))
+        rows.append(("Nguồn định giá tương đối đối chiếu", _evidence_value_label(evidence["peer_data_source"])))
     if evidence.get("relative_valuation_status"):
         rows.append(("Trạng thái định giá tương đối", _evidence_value_label(evidence["relative_valuation_status"])))
     bridge = evidence.get("market_sanity_bridge") or {}
@@ -159,7 +169,10 @@ def _evidence_block(vm: Any | None) -> str:
         ) if str(item).strip()
     ))
     if blockers:
-        blocks.append("**Lý do chặn công bố:**\n" + "\n".join(f"- {_translate_warning(item)}" for item in blockers))
+        blocks.append(
+            "**Dữ liệu và kiểm định cần bổ sung trước khi phát hành:**\n"
+            + "\n".join(f"- {_translate_warning(item)}" for item in blockers)
+        )
     warnings = list(dict.fromkeys(
         str(item) for item in (
             list(evidence.get("model_warnings", []) or [])
@@ -188,13 +201,16 @@ def _translate_warning(warning: Any) -> str:
         return ""
 
     direct_rules = {
-        "no_eligible_valuation_method": "Chưa có phương pháp định giá chính đủ điều kiện để phát hành khuyến nghị.",
+        "no_eligible_valuation_method": "Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.",
         "valuation_method_divergence_critical": "Các phương pháp định giá cho kết quả phân kỳ mạnh; cần ưu tiên kiểm định giả định và cầu nối thị trường trước khi ra kết luận đầu tư.",
-        "valuation_result_not_publishable": "Kết quả định giá có cảnh báo trọng yếu nên chỉ được đọc cùng bảng tính chi tiết và phần đối chiếu.",
+        "valuation_result_not_publishable": "Kết quả định giá có cảnh báo trọng yếu; cần đọc cùng bảng tính chi tiết và phần đối chiếu trước khi sử dụng khuyến nghị.",
         "market_sanity_bridge_missing": "Giá trị mô hình lệch đáng kể so với thị giá nhưng chưa có cầu nối giải thích bằng P/E, EV/EBITDA hoặc bằng chứng cơ bản.",
         "fcfe_low_confidence": "FCFE có độ tin cậy thấp; lịch vay ròng và giả định dòng tiền cho cổ đông cần được kiểm định thêm.",
         "fcff_low_confidence": "FCFF có độ tin cậy thấp; WACC, tăng trưởng dài hạn và dòng tiền nền cần được kiểm định thêm.",
         "peer_data_source": "nguồn dữ liệu doanh nghiệp so sánh",
+        "recommendation_gate_not_allowed": "Thiếu phê duyệt cuối cho khuyến nghị đầu tư.",
+        "fcfe_blocked_net_borrowing_unavailable": "FCFE thiếu lịch vay ròng hoặc dòng tiền cho chủ sở hữu đã được xác minh.",
+        "fcfe_unavailable_for_blend": "Kết quả kết hợp chưa có đủ dữ liệu FCFE; cần đọc trọng số phương pháp kèm cảnh báo.",
     }
     if text in direct_rules:
         return direct_rules[text]
@@ -216,14 +232,49 @@ def _translate_warning(warning: Any) -> str:
         if normalized.startswith(needle):
             return f"{label}{_score(text)}: kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan được công bố trong phụ lục."
 
+    if normalized.startswith("critical warning:") or normalized.startswith("critical cảnh báo:"):
+        if "relative valuation" in normalized or "peer data source" in normalized:
+            return "Cảnh báo nghiêm trọng: định giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt."
+        return "Cảnh báo nghiêm trọng: cần rà soát thêm dữ liệu đầu vào và giả định định giá."
+    if "recommendation gate not allowed" in normalized:
+        return "Thiếu phê duyệt cuối cho khuyến nghị đầu tư."
+    if "valuation result not publishable" in normalized:
+        return "Kết quả định giá có cảnh báo trọng yếu; cần đọc cùng bảng tính chi tiết và phần đối chiếu trước khi sử dụng khuyến nghị."
+    if "no eligible valuation method" in normalized:
+        return "Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị."
+
     rules = [
+        (
+            "equity value is negative",
+            "Giá trị vốn chủ sở hữu âm nên không tính được giá mục tiêu theo phương pháp này.",
+        ),
+        (
+            "equity value is non-positive",
+            "Giá trị vốn chủ sở hữu không dương nên không tính được giá mục tiêu theo phương pháp này.",
+        ),
+        (
+            "dividends_paid is negative",
+            "Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.",
+        ),
+        (
+            "target price not computed",
+            "Không tính được giá mục tiêu theo phương pháp này.",
+        ),
+        (
+            "sg&a not reported",
+            "Chi phí bán hàng và quản lý chưa được công bố riêng; mô hình suy ra từ biên EBIT lịch sử để giữ dự phóng EBIT bám dữ liệu thực tế.",
+        ),
+        (
+            "valuation cross check divergence warning",
+            "Cảnh báo đối chiếu định giá: các kiểm tra độc lập cho kết quả lệch đáng kể, cần rà soát cầu nối thị trường và giả định mô hình.",
+        ),
         (
             "no-new-debt policy",
             "Lịch nợ vay đang giả định không phát sinh nợ mới và dư nợ giảm về gần 0 ở năm cơ sở; FCFE có thể tính được nhưng vẫn cần kiểm tra lại chính sách vay, trả nợ và kế hoạch vốn.",
         ),
         (
             "relative valuation is pending",
-            "Định giá tương đối chưa đủ điều kiện vì thiếu bộ doanh nghiệp so sánh đã phê duyệt; P/E, P/B và EV/EBITDA chỉ nên dùng sau khi có nhóm doanh nghiệp so sánh rõ ràng.",
+            "Định giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt; P/E, P/B và EV/EBITDA chỉ nên dùng sau khi có nhóm doanh nghiệp so sánh rõ ràng.",
         ),
         (
             "eps and target p/e are present",
@@ -235,13 +286,12 @@ def _translate_warning(warning: Any) -> str:
         ),
         (
             "critical_cảnh báo:relative valuation is pending",
-            "Cảnh báo nghiêm trọng: định giá tương đối chưa đủ điều kiện vì thiếu bộ doanh nghiệp so sánh đã phê duyệt.",
+            "Cảnh báo nghiêm trọng: định giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt.",
         ),
         (
             "the fcfe stream is not publishable",
-            "Mức độ nghiêm trọng cao: FCFE chưa đủ điều kiện công bố vì mô hình giữ dư nợ ổn định, "
-            "trong khi lộ trình vay ròng chưa được xác minh. Vì vậy, kết quả kết hợp thực tế đang phụ "
-            "thuộc 100% vào FCFF và độ nhạy theo giả định đòn bẩy chưa đáng tin cậy.",
+            "Mức độ nghiêm trọng cao: FCFE thiếu lộ trình vay ròng đã xác minh trong khi mô hình giữ dư nợ ổn định. "
+            "Vì vậy, kết quả kết hợp thực tế đang phụ thuộc 100% vào FCFF và độ nhạy theo giả định đòn bẩy cần được kiểm tra thêm.",
         ),
         (
             "historical ar/inv/ap days are null",
@@ -268,7 +318,7 @@ def _translate_warning(warning: Any) -> str:
             "all computed outputs are traceable",
             "Thông tin kiểm soát: các kết quả tính toán có thể truy vết và các cổng kiểm soát chính đã "
             "đạt; tuy nhiên chính sách thuế, lịch nợ vay và dữ liệu doanh nghiệp so sánh vẫn cần chuyên "
-            "viên phân tích phê duyệt trước khi công bố chính thức.",
+            "viên phân tích phê duyệt trước khi phát hành.",
         ),
         (
             "assumptions are defaults",
@@ -282,7 +332,7 @@ def _translate_warning(warning: Any) -> str:
         (
             "interest expense is single-pass",
             "Chi phí lãi vay mới được tính một vòng, chưa lặp đến hội tụ. Phương pháp giữ dư nợ ổn định "
-            "làm FCFE bị chặn; cần bổ sung lộ trình nợ vay đã phê duyệt.",
+            "khiến FCFE cần bổ sung lộ trình nợ vay đã phê duyệt.",
         ),
         (
             "no historical ar data",
@@ -324,8 +374,7 @@ def _translate_warning(warning: Any) -> str:
         ),
         (
             "fcfe blocked",
-            "FCFE bị chặn vì lịch nợ vay chưa đủ điều kiện công bố: dư nợ được giữ cố định và vay ròng "
-            "chưa có nguồn từ báo cáo lưu chuyển tiền tệ hoặc lịch đáo hạn. Cần lộ trình nợ vay đã phê duyệt.",
+            "FCFE thiếu lịch nợ vay đã xác minh: dư nợ được giữ cố định và vay ròng chưa có nguồn từ báo cáo lưu chuyển tiền tệ hoặc lịch đáo hạn. Cần lộ trình nợ vay đã phê duyệt.",
         ),
         (
             "terminal value = 0 due to missing fcfe",
@@ -359,8 +408,8 @@ def _translate_warning(warning: Any) -> str:
         "artifact": "tệp kết quả",
         "forecast": "dự phóng",
         "warning": "cảnh báo",
-        "blocked": "bị chặn",
-        "pending": "đang chờ",
+        "blocked": "thiếu dữ liệu",
+        "pending": "thiếu dữ liệu xác minh",
     }
     translated = text
     for source, target in replacements.items():
@@ -433,8 +482,13 @@ def _section_forecast(forecast: Mapping[str, Any]) -> str:
     labels = [str(r.get("label") or _DASH) for r in years]
     metrics = [
         ("Doanh thu thuần", "revenue"),
+        ("Giá vốn hàng bán (COGS)", "cogs"),
         ("Lợi nhuận gộp", "gross_profit"),
+        ("Chi phí SG&A", "sga"),
         ("EBIT", "ebit"),
+        ("Chi phí lãi vay", "interest_expense"),
+        ("Lợi nhuận trước thuế", "profit_before_tax"),
+        ("Chi phí thuế", "tax_expense"),
         ("LNST cổ đông mẹ", "net_income"),
         ("Khấu hao (D&A)", "depreciation"),
         ("CAPEX", "capex"),
@@ -479,6 +533,21 @@ def _section_forecast(forecast: Mapping[str, Any]) -> str:
         "\n\n_Logic yếu tố dẫn dắt: doanh thu theo tăng trưởng giả định; biên lợi nhuận dẫn xuất EBIT/LNST; "
         "lịch nợ vay chuyển tiếp với `vay ròng = phát hành nợ − trả nợ`; cổ tức theo tỷ lệ chi trả._"
     )
+    negative_ebit_labels = []
+    for row, label in zip(years, labels):
+        try:
+            gross_profit = row.get("gross_profit")
+            ebit = row.get("ebit")
+            if gross_profit is not None and ebit is not None and float(gross_profit) > 0 and float(ebit) < 0:
+                negative_ebit_labels.append(label)
+        except (TypeError, ValueError):
+            continue
+    if negative_ebit_labels:
+        note += (
+            "\n\n> **Vì sao EBIT âm:** chi phí bán hàng và quản lý (SG&A) lớn hơn lợi nhuận gộp ở "
+            + ", ".join(negative_ebit_labels)
+            + ", nên EBIT chuyển âm dù lợi nhuận gộp vẫn dương. Đây là hệ quả trực tiếp của giả định chi phí hoạt động trong dự phóng và cần được rà soát trước khi dùng kết quả định giá dòng tiền."
+        )
     return f"## {SECTION_TITLES[3]}\n\n" + "\n".join(lines) + note
 
 
@@ -509,6 +578,38 @@ def _section_ratios(forecast: Mapping[str, Any]) -> str:
     return f"## {SECTION_TITLES[4]}\n\n" + "\n".join(lines)
 
 
+def _fcff_pv(row: Mapping[str, Any]) -> Any:
+    """Use explicit PV when present; otherwise derive PV from FCFF and discount factor."""
+    pv = row.get("pv")
+    if pv is not None:
+        return pv
+    fcff = row.get("fcff")
+    factor = row.get("discount_factor")
+    if fcff is None or factor is None:
+        return None
+    try:
+        return float(fcff) * float(factor)
+    except (TypeError, ValueError):
+        return None
+
+
+def _sum_pv_fcff(fcff: Mapping[str, Any]) -> Any:
+    total = _first(fcff, "pv_fcff")
+    if total is not None:
+        return total
+    rows = fcff.get("fcff_table") or []
+    pvs = [_fcff_pv(r) for r in rows if isinstance(r, Mapping)]
+    pvs = [p for p in pvs if p is not None]
+    return sum(pvs) if pvs else None
+
+
+def _non_positive(value: Any) -> bool:
+    try:
+        return value is not None and float(value) <= 0
+    except (TypeError, ValueError):
+        return False
+
+
 def _section_fcff(fcff: Mapping[str, Any]) -> str:
     wacc = _first(fcff, "wacc")
     g = _first(fcff, "terminal_growth")
@@ -536,12 +637,15 @@ def _section_fcff(fcff: Mapping[str, Any]) -> str:
         body = [header, sep]
         for label, key in metric_rows:
             fmt = _pct if key in ("tax_rate", "discount_factor") else _num
-            cells = [fmt(r.get(key)) for r in rows if isinstance(r, Mapping)]
+            if key == "pv":
+                cells = [fmt(_fcff_pv(r)) for r in rows if isinstance(r, Mapping)]
+            else:
+                cells = [fmt(r.get(key)) for r in rows if isinstance(r, Mapping)]
             body.append(f"| {label} | " + " | ".join(cells) + " |")
         fcff_lines = "\n".join(body) + "\n\n"
 
     bridge = _kv_table([
-        ("PV dòng tiền dự phóng (Σ PV FCFF)", _num(_first(fcff, "pv_fcff"))),
+        ("PV dòng tiền dự phóng (Σ PV FCFF)", _num(_sum_pv_fcff(fcff))),
         ("Giá trị cuối kỳ (Gordon: FCFFₙ×(1+g)/(WACC−g))", _num(_first(fcff, "terminal_value"))),
         ("Giá trị hiện tại của giá trị cuối kỳ", _num(_first(fcff, "pv_terminal_value"))),
         ("Tỷ trọng giá trị cuối kỳ / giá trị doanh nghiệp", _pct(_first(fcff, "terminal_value_weight"))),
@@ -551,7 +655,19 @@ def _section_fcff(fcff: Mapping[str, Any]) -> str:
         ("÷ Số cổ phiếu (triệu)", _num(_first(fcff, "shares_outstanding", "shares_mn"))),
         ("= Giá/cổ phiếu (FCFF, VND)", _num(_first(fcff, "implied_price"))),
     ])
-    return f"## {SECTION_TITLES[5]}\n\n" + head + "\n" + fcff_lines + bridge
+    note = ""
+    if _first(fcff, "implied_price") is None:
+        equity = _first(fcff, "equity_value")
+        if _non_positive(equity):
+            note = (
+                f"\n\n_Giá/cổ phiếu theo FCFF hiển thị `—` vì giá trị vốn chủ sở hữu âm ({_num(equity)}): "
+                "dòng tiền tự do âm kéo giá trị doanh nghiệp và phần vốn chủ sở hữu xuống dưới 0, nên không thể quy ra giá dương. Đây là kết quả kinh tế của mô hình, không phải thiếu dữ liệu._"
+            )
+        else:
+            note = (
+                "\n\n_Giá/cổ phiếu theo FCFF hiển thị `—` do thiếu một đầu vào bắt buộc như số cổ phiếu, nợ ròng hoặc dòng tiền nền. Xem phần đối chiếu và cảnh báo._"
+            )
+    return f"## {SECTION_TITLES[5]}\n\n" + head + "\n" + fcff_lines + bridge + note
 
 
 def _section_fcfe(fcfe: Mapping[str, Any]) -> str:
@@ -564,7 +680,14 @@ def _section_fcfe(fcfe: Mapping[str, Any]) -> str:
     ])
     note = ""
     if _first(fcfe, "implied_price") is None:
-        note = "\n\n_Giá FCFE chưa tính được do thiếu dữ liệu vay ròng hoặc số cổ phiếu. Hiển thị `—`._"
+        equity = _first(fcfe, "equity_value")
+        if _non_positive(equity):
+            note = (
+                f"\n\n_Giá/cổ phiếu theo FCFE hiển thị `—` vì giá trị vốn chủ sở hữu âm ({_num(equity)}): "
+                "dòng tiền cho cổ đông chiết khấu về giá trị âm nên không quy ra được giá dương. Đây là kết quả kinh tế của mô hình, không phải thiếu dữ liệu._"
+            )
+        else:
+            note = "\n\n_Giá FCFE chưa tính được do thiếu dữ liệu vay ròng hoặc số cổ phiếu. Hiển thị `—`._"
     return (
         f"## {SECTION_TITLES[6]}\n\n"
         "**Công thức:** `FCFE = lợi nhuận sau thuế + khấu hao − CAPEX − ΔNWC + vay ròng`, "
@@ -579,10 +702,24 @@ def _section_blend(blend: Mapping[str, Any]) -> str:
     w_fcfe = _first(blend, "fcfe_weight") or 0.4
     target = _first(blend, "target_price_dcf_vnd")
     formula = "Giá mục tiêu = 0.60 × Giá_FCFF + 0.40 × Giá_FCFE"
-    arithmetic = (
-        f"`{_num(w_fcff, 2)} × {_num(price_fcff)} + {_num(w_fcfe, 2)} × {_num(price_fcfe)} "
-        f"= {_num(target)}`"
-    )
+    if price_fcff is not None and price_fcfe is not None and target is not None:
+        arithmetic = (
+            f"**Số học:** `{_num(w_fcff, 2)} × {_num(price_fcff)} + {_num(w_fcfe, 2)} × {_num(price_fcfe)} "
+            f"= {_num(target)}`"
+        )
+    else:
+        missing = []
+        if price_fcff is None:
+            missing.append("giá FCFF")
+        if price_fcfe is None:
+            missing.append("giá FCFE")
+        if target is None:
+            missing.append("giá mục tiêu kết hợp")
+        arithmetic = (
+            "**Diễn giải:** Chưa thể kết hợp theo trọng số 60/40 vì "
+            + ", ".join(missing)
+            + " chưa có giá trị hợp lệ. Bảng giữ nguyên từng cấu phần để người đọc thấy rõ ô nào không thể tính."
+        )
     rows = _kv_table([
         ("Giá theo FCFF (VND)", _num(price_fcff)),
         ("Giá theo FCFE (VND)", _num(price_fcfe)),
@@ -595,13 +732,13 @@ def _section_blend(blend: Mapping[str, Any]) -> str:
     gap = _first(blend, "fcff_fcfe_gap_pct")
     try:
         if gap is not None and float(gap) > 0.25:
-            gap_note = "\n\n> Chênh lệch FCFF/FCFE > 25% — kết quả kết hợp bị chặn ở trạng thái nháp; cần rà soát vay ròng, nợ ròng, CAPEX và vốn lưu động."
+            gap_note = "\n\n> Chênh lệch FCFF/FCFE > 25% — kết quả kết hợp cần rà soát thêm trước khi sử dụng; cần kiểm tra vay ròng, nợ ròng, CAPEX và vốn lưu động."
     except (TypeError, ValueError):
         pass
     return (
         f"## {SECTION_TITLES[7]}\n\n"
         f"**Công thức:** `{formula}`\n\n"
-        f"**Số học:** {arithmetic}\n\n" + rows + gap_note
+        f"{arithmetic}\n\n" + rows + gap_note
     )
 
 
@@ -734,6 +871,8 @@ def _section_crosschecks(
     blend: Mapping[str, Any],
     fcfe: Mapping[str, Any],
     view_model: Any | None = None,
+    *,
+    include_evidence: bool = True,
 ) -> str:
     lines = ["**Đối chiếu nhất quán số:**", ""]
     implied = _first(fcff, "implied_price")
@@ -761,9 +900,10 @@ def _section_crosschecks(
         "_Nguồn gốc dữ liệu: mọi số định giá được dẫn xuất từ dữ liệu tài chính chuẩn hóa đã khóa "
         "và tệp kết quả định giá bằng Python; không có số liệu nào do mô hình ngôn ngữ sinh ra._"
     )
-    evidence = _evidence_block(view_model)
-    if evidence:
-        lines.extend(["", "**Minh chứng kiểm định và phát hành:**", "", evidence])
+    if include_evidence:
+        evidence = _evidence_block(view_model)
+        if evidence:
+            lines.extend(["", "**Minh chứng kiểm định và phát hành:**", "", evidence])
     return f"## {SECTION_TITLES[10]}\n\n" + "\n".join(lines)
 
 
@@ -776,10 +916,10 @@ _ISSUE_LABELS = {
     "dividend_schedule": "Chưa đủ dữ liệu để kiểm tra lịch cổ tức dự phóng.",
     "debt_schedule_publishable": "Lịch nợ vay chưa đủ để kiểm tra toàn bộ định giá dòng tiền cho cổ đông.",
     "forecast_debt": "Cần rà soát thêm lịch nợ vay dự phóng.",
-    "no_eligible_valuation_method": "Chưa có phương pháp định giá chính đủ điều kiện để phát hành khuyến nghị.",
+    "no_eligible_valuation_method": "Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.",
     "valuation_method_divergence_critical": "Các phương pháp định giá cho kết quả phân kỳ mạnh; cần ưu tiên kiểm định giả định và cầu nối thị trường trước khi ra kết luận đầu tư.",
     "market_sanity_bridge_missing": "Giá trị mô hình lệch đáng kể so với thị giá nhưng chưa có cầu nối giải thích bằng P/E, EV/EBITDA hoặc bằng chứng cơ bản.",
-    "valuation_result_not_publishable": "Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết.",
+    "valuation_result_not_publishable": "Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.",
     "blend_is_draft_only": "Hai phương pháp dòng tiền có độ lệch lớn; cần đọc kỹ phần kết hợp phương pháp và đối chiếu.",
     "fcff_fcfe_gap_gt_25pct": "Giá trị theo FCFF và FCFE lệch trên 25%.",
     "post_render_client_language_forbidden:critic": "Hậu kiểm phát hiện thuật ngữ nội bộ trong bản dành cho người đọc; nội dung đã được chuyển sang ngôn ngữ phản biện chuyên môn.",
@@ -787,12 +927,35 @@ _ISSUE_LABELS = {
 }
 
 
+def _translate_critic_finding(text: str) -> str:
+    lower = text.lower()
+    if "peer" in lower and ("multiple" in lower or "pe_median" in lower or "ev_ebitda" in lower):
+        return (
+            "Định giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt nên P/E và EV/EBITDA chưa cho ra giá đối chiếu; "
+            "báo cáo tạm thiếu một kiểm tra thị trường tiêu chuẩn."
+        )
+    if "cash" in lower and ("dividend" in lower or "sweep" in lower):
+        return (
+            "Lịch tiền mặt và chính sách cổ tức dự phóng cần được đối chiếu lại để bảo đảm số dư tiền cuối kỳ và dòng tiền ra được trình bày nhất quán."
+        )
+    if "terminal" in lower or "fcf" in lower:
+        return (
+            "DCF và FCFF/FCFE có cảnh báo về dòng tiền tự do lịch sử âm hoặc tỷ trọng giá trị cuối kỳ cao; cần kiểm tra trong phân tích độ nhạy và bước chuẩn hóa giả định."
+        )
+    return ""
+
+
 def _issue_label(issue: Any) -> str:
     key = str(issue)
     if key in _ISSUE_LABELS:
         return _ISSUE_LABELS[key]
+    critic = _translate_critic_finding(key)
+    if critic:
+        return critic
     translated = _translate_warning(key)
-    return translated if translated != key else "Cần rà soát thêm: " + key.replace("_", " ")
+    if translated != key:
+        return translated
+    return "Cần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành."
 
 
 def _vm_amount(value: Any) -> Any:
@@ -801,6 +964,46 @@ def _vm_amount(value: Any) -> Any:
 
 def _vm_ratio(value: Any) -> Any:
     return getattr(value, "value", value)
+
+
+def _decision_narrative(
+    target: Any,
+    upside: Any,
+    recommendation: str,
+    forecast: Mapping[str, Any],
+    fcff: Mapping[str, Any],
+    fcfe: Mapping[str, Any],
+) -> str:
+    """Explain blank target/recommendation outcomes from the available model facts."""
+    if target is not None:
+        return ""
+    years = [r for r in forecast.get("forecast_years", []) if isinstance(r, Mapping)]
+    steps: list[str] = []
+    negative_ebit = any(
+        (r.get("gross_profit") is not None and r.get("ebit") is not None)
+        and _non_positive(r.get("ebit"))
+        and not _non_positive(r.get("gross_profit"))
+        for r in years
+    )
+    if negative_ebit:
+        steps.append("dự phóng cho **EBIT âm** dù lợi nhuận gộp vẫn dương do SG&A vượt lợi nhuận gộp")
+    fcff_equity = _first(fcff, "equity_value")
+    fcfe_equity = _first(fcfe, "equity_value")
+    if _non_positive(fcff_equity) or _non_positive(fcfe_equity):
+        steps.append("dòng tiền chiết khấu kéo **giá trị vốn chủ sở hữu âm hoặc không dương**")
+    steps.append("không phương pháp dòng tiền nào cho ra giá dương nên **giá mục tiêu để trống**")
+    tail = ""
+    if upside is None:
+        tail = (
+            f" Vì **không tính được mức tăng/giảm** so với thị giá, luật xếp hạng không đủ đầu vào định lượng; "
+            f"khuyến nghị **{recommendation}** phải được đọc như kết luận thận trọng kèm cảnh báo, không phải tín hiệu đã được xác nhận đầy đủ."
+        )
+    return (
+        "\n\n**Vì sao giá mục tiêu để trống và khuyến nghị như vậy:** "
+        + "; ".join(steps)
+        + "."
+        + tail
+    )
 
 
 def _section_report_decision_basis(
@@ -863,6 +1066,9 @@ def _section_report_decision_basis(
             "phân tích độ nhạy và đối chiếu cảnh báo thay vì chỉ đọc một giá mục tiêu duy nhất."
         ),
     ]
+    narrative = _decision_narrative(target, upside, str(recommendation), forecast, fcff, fcfe)
+    if narrative:
+        lines.append(narrative)
     if issues:
         lines.extend(["", "**Cảnh báo cần đọc kèm kết luận:**"])
         lines.extend(f"- {_issue_label(issue)}" for issue in issues)
@@ -896,6 +1102,7 @@ def build_valuation_workings_md(
     forecast: Mapping[str, Any],
     facts: Mapping[str, Any],
     view_model: Any | None = None,
+    include_crosscheck_evidence: bool = True,
 ) -> str:
     """Return the full valuation workings Markdown for *ticker* / *run_id*."""
     ticker = (ticker or "").upper()
@@ -923,7 +1130,14 @@ def build_valuation_workings_md(
         _section_blend(blend),
         _section_pe_forward(valuation),
         _section_sensitivity(valuation),
-        _section_crosschecks(valuation, fcff, blend, fcfe, view_model),
+        _section_crosschecks(
+            valuation,
+            fcff,
+            blend,
+            fcfe,
+            view_model,
+            include_evidence=include_crosscheck_evidence,
+        ),
     ]
     return title + "\n" + intro + "\n" + "\n\n".join(sections) + "\n"
 
@@ -1005,6 +1219,7 @@ def build_report_explanation_md(
         forecast=forecast,
         facts=facts,
         view_model=view_model,
+        include_crosscheck_evidence=False,
     )
     workings = workings.replace(
         "# Diễn giải định giá — " + ticker,

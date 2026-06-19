@@ -10,7 +10,15 @@ _SAMPLE = json.dumps({
     "Data": {
         "TotalCount": 250,
         "Data": [
-            {"Ngay": "25/12/2025", "GiaDongCua": 97.5, "GiaDieuChinh": 97.5, "KhoiLuongKhopLenh": 123456.0},
+            {
+                "Ngay": "25/12/2025",
+                "GiaMoCua": 97.0,
+                "GiaCaoNhat": 98.0,
+                "GiaThapNhat": 96.5,
+                "GiaDongCua": 97.5,
+                "GiaDieuChinh": 97.5,
+                "KhoiLuongKhopLenh": 123456.0,
+            },
             {"Ngay": "24/12/2025", "GiaDongCua": 96.0, "GiaDieuChinh": 96.0, "KhoiLuongKhopLenh": 100000.0},
         ],
     }
@@ -22,6 +30,11 @@ def test_parse_quote_scales_thousand_vnd_and_parses_date():
     assert q.last_price == 97500.0          # 97.5k VND → 97,500 VND
     assert q.as_of_date == "2025-12-25"     # dd/mm/yyyy → ISO, newest row
     assert q.volume == 123456.0
+    assert q.open_price == 97000.0
+    assert q.high_price == 98000.0
+    assert q.low_price == 96500.0
+    assert q.high_52w == 98000.0
+    assert q.low_52w == 96000.0
     assert q.source == "cafef_price_history"
 
 

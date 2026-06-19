@@ -262,20 +262,24 @@ def _renderer_errors(
     errors: list[dict[str, Any]] = []
     report_target = _number(report_draft.get("target_price") or report_draft.get("target_price_vnd"))
     report_rec = str(report_draft.get("recommendation") or "").strip().upper()
-    if not policy.recommendation_publishable and report_rec in OFFICIAL_RECOMMENDATIONS:
+    headline = getattr(policy, "headline_target_governance", {}) or {}
+    headline_target = _number(headline.get("headline_target_vnd"))
+    headline_displayable = headline_target is not None and _number(headline.get("current_price_vnd")) is not None
+    if not policy.recommendation_publishable and report_rec in OFFICIAL_RECOMMENDATIONS and not headline_displayable:
         errors.append({
             "code": "REPORT_RENDER_ERROR",
             "severity": "critical",
             "message": "report displays an official recommendation while policy blocks publication",
             "details": {"recommendation": report_rec},
         })
-    if policy.target_price_publishable and report_target and policy.target_price_vnd:
-        if abs(report_target - policy.target_price_vnd) > 1:
+    expected_target = headline_target or policy.target_price_vnd
+    if report_target and expected_target:
+        if abs(report_target - expected_target) > 1:
             errors.append({
                 "code": "REPORT_RENDER_ERROR",
                 "severity": "critical",
-                "message": "report target price differs from valuation policy target",
-                "details": {"report_target": report_target, "policy_target": policy.target_price_vnd},
+                "message": "report target price differs from headline governance target",
+                "details": {"report_target": report_target, "headline_target": expected_target},
             })
     return errors
 
@@ -448,6 +452,12 @@ def build_valuation_audit(
             "market_price": market_bridge.get("market_price"),
             "target_price": market_bridge.get("target_price"),
             "upside_downside": market_bridge.get("upside_downside"),
+            "raw_model_target": policy.headline_target_governance.get("raw_model_target_vnd"),
+            "headline_target": policy.headline_target_governance.get("headline_target_vnd"),
+            "headline_upside": policy.headline_target_governance.get("headline_upside"),
+            "target_adjustment": policy.headline_target_governance.get("target_adjustment"),
+            "target_band_low": policy.headline_target_governance.get("target_band_low_vnd"),
+            "target_band_high": policy.headline_target_governance.get("target_band_high_vnd"),
             "method_count_passed": sum(item["status"] == "pass" for item in method_eligibility.values()),
             "critical_error_codes": sorted({e["code"] for e in critical_errors}),
             "method_weights": weights,

@@ -59,6 +59,12 @@ class RunStatusResponse(BaseModel):
     created_at: str
     updated_at: str
     finished_at: str | None = None
+    mode: str | None = None
+    source_run_id: str | None = None
+    executor_state: str | None = None
+    stage_started_at: str | None = None
+    last_heartbeat_at: str | None = None
+    elapsed_seconds: int | None = None
 
 
 class ArtifactItem(BaseModel):

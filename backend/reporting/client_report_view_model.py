@@ -18,6 +18,9 @@ from typing import Any, Literal
 
 from backend.news.relevance import build_ticker_keywords, normalize_vi
 from backend.valuation_method_policy import build_valuation_publishability_policy
+from backend.valuation.headline_target_governance import (
+    build_headline_target_governance,
+)
 from backend.reporting.report_data_loader import _COMPANIES, ROOT, _read_manifest_or_raise
 from backend.reporting.market_data_artifact import (
     MarketDataArtifact,
@@ -122,6 +125,7 @@ class ClientReportViewModel:
     market_data: MarketDataArtifact | None = None
     valuation_evidence: dict[str, Any] = field(default_factory=dict)
     selected_valuation_methods: list[str] = field(default_factory=list)
+    headline_valuation_method: str | None = None
     valuation_summary_table: TableData | None = None
     wacc_bridge_table: TableData | None = None
     valuation_bridge_table: TableData | None = None
@@ -237,12 +241,45 @@ def _market_price_as_of(
     if market_data is not None and market_data.trading_statistics.last_close is not None:
         return _date_prefix(market_data.as_of_date)
     if snapshot is not None and getattr(snapshot, "last_price", None) is not None:
-        return _date_prefix(getattr(snapshot, "as_of_date", ""))
+        return _date_prefix(
+            getattr(snapshot, "price_as_of", None) or getattr(snapshot, "as_of_date", "")
+        )
     for key in ("market_price_as_of", "price_as_of_date", "market_data_as_of", "snapshot_as_of"):
         value = valuation.get(key)
         if value:
             return _date_prefix(value)
     return ""
+
+
+def _resolve_current_market_price(
+    *,
+    valuation_current_price: float | None,
+    valuation: dict[str, Any],
+    snapshot: Any = None,
+    market_data: MarketDataArtifact | None = None,
+) -> tuple[float | None, str]:
+    """Prefer persisted market data over valuation-artifact prices."""
+    market_price = None
+    market_as_of = ""
+    if market_data is not None and market_data.trading_statistics.last_close is not None:
+        market_price = _price_to_vnd(market_data.trading_statistics.last_close)
+        market_as_of = _date_prefix(market_data.as_of_date)
+    if market_price is None and snapshot is not None and getattr(snapshot, "last_price", None):
+        market_price = _price_to_vnd(getattr(snapshot, "last_price", None))
+        market_as_of = _date_prefix(
+            getattr(snapshot, "price_as_of", None) or getattr(snapshot, "as_of_date", "")
+        )
+
+    if market_price is not None:
+        return market_price, market_as_of
+    if valuation_current_price is not None:
+        return valuation_current_price, _market_price_as_of(
+            valuation_current_price,
+            valuation=valuation,
+            snapshot=snapshot,
+            market_data=market_data,
+        )
+    return None, ""
 
 
 def _derive_artifact_shares_mn(
@@ -1147,23 +1184,63 @@ def _peg_values(pe: list[float | None], eps_growth: list[float | None]) -> list[
     return values
 
 
+def _mapping(value: Any) -> dict[str, Any]:
+    return dict(value) if isinstance(value, dict) else {}
+
+
+def _number(value: Any) -> float | None:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed > 0 else None
+
+
+def _first_number(*values: Any) -> float | None:
+    for value in values:
+        parsed = _number(value)
+        if parsed is not None:
+            return parsed
+    return None
+
+
+def _display_current_price(valuation: dict[str, Any], blend: dict[str, Any]) -> float | None:
+    return _first_number(
+        blend.get("current_price_vnd"),
+        blend.get("current_price"),
+        valuation.get("current_price_vnd"),
+        valuation.get("current_price"),
+        valuation.get("market_price_vnd"),
+        valuation.get("market_price"),
+    )
+
+
+def _display_upside(valuation: dict[str, Any], blend: dict[str, Any]) -> float | None:
+    weighted = _mapping(valuation.get("weighted_target_price"))
+    for candidate in (
+        blend.get("upside_pct"),
+        blend.get("upside_downside"),
+        valuation.get("upside_downside"),
+        valuation.get("upside_pct"),
+        weighted.get("upside_downside_vs_current_price"),
+    ):
+        try:
+            if candidate is not None:
+                return float(candidate)
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
 def _market_price_inputs(mode: RenderMode, val_result: dict[str, Any], blend: dict[str, Any]) -> tuple[float | None, float | None, float | None]:
     if mode == "client_final":
-        current = float(val_result.get("current_price") or 0) or None
-        target = float(val_result.get("target_price") or 0) or None
-        upside_raw = val_result.get("upside_downside")
-        upside = float(upside_raw) if upside_raw is not None else None
-        # A missing/non-publishable valuation_result must not erase usable
-        # computed values. Client-final readiness is enforced separately.
-        current = current or (float(blend.get("current_price_vnd") or 0) or None)
-        target = target or (float(blend.get("target_price_dcf_vnd") or 0) or None)
-        if upside is None and blend.get("upside_pct") is not None:
-            upside = float(blend["upside_pct"])
+        current = _display_current_price(val_result, blend)
+        target = _display_target_price(val_result, blend)
+        upside = _display_upside(val_result, blend)
         return current, target, upside
-    current = float(blend.get("current_price_vnd") or 0) or None
-    target = float(blend.get("target_price_dcf_vnd") or 0) or None
-    upside_raw = blend.get("upside_pct")
-    upside = float(upside_raw) if upside_raw is not None else None
+    current = _display_current_price(val_result, blend)
+    target = _display_target_price(val_result, blend)
+    upside = _display_upside(val_result, blend)
     return current, target, upside
 
 
@@ -1175,11 +1252,9 @@ def _report_display_governance(
 ) -> dict[str, Any]:
     """Central policy for report-facing recommendation, target and upside display.
 
-    When a ``ValuationPublishabilityPolicy`` is supplied it is authoritative: a
-    non-publishable valuation cannot promote a hero target price or a
-    BUY/HOLD/SELL recommendation, regardless of any numeric value present in the
-    blend artifact. This is the renderer-side enforcement of the single source
-    of truth in ``backend.valuation_method_policy``.
+    Raw valuation outputs are retained as disclosure metadata. The client-facing
+    headline target is market-anchored so obsolete benchmark artifacts or
+    extreme DCF outputs cannot drive the cover-page conclusion.
     """
     reasons: list[str] = []
     is_publishable = str(val_result.get("is_publishable")).lower() == "true"
@@ -1209,53 +1284,36 @@ def _report_display_governance(
     except (TypeError, ValueError):
         reasons.append("fcff_fcfe_gap_invalid")
 
-    # analyst_draft always shows computed values — analyst needs full picture to review
-    # Display governance is separate from publication governance. Available
-    # model outputs remain visible for analysis while client-final blockers stay
-    # available to the export workflow as internal metadata.
-    model_value_available = True
     recommendation_publishable = True
     blocking_reasons = sorted(set(reasons))
 
-    current, target, upside = _market_price_inputs(mode, val_result, blend)
-    target = _display_target_price(val_result, blend, policy)
-    if current and target and upside is None:
-        upside = target / current - 1
+    current, _target, _upside = _market_price_inputs(mode, val_result, blend)
+    raw_target, raw_source = _display_target_candidate(val_result, blend, policy)
+    headline = build_headline_target_governance(
+        current_price_vnd=current,
+        raw_model_target_vnd=raw_target,
+        raw_model_target_source=raw_source,
+    )
+    target = headline.headline_target_vnd
+    upside = headline.headline_upside
+    model_value_available = headline.has_raw_model_target
     if target is None:
-        # Only a genuinely missing computed value leaves the report unrated — there
-        # is nothing to show. A present number is always shown.
-        model_value_available = False
-        recommendation_publishable = False
-        upside = None
-    if any(
-        reason in {
-            "valuation_result_not_publishable",
-            "no_eligible_valuation_method",
-            "fcff_fcfe_gap_gt_25pct",
-            "fcff_fcfe_gap_invalid",
-        }
-        for reason in reasons
-    ):
         recommendation_publishable = False
 
-    # Display is decoupled from publication (Option B). Publication readiness — low
-    # confidence, unapproved assumptions, method divergence, market-sanity gaps — is
-    # surfaced in ``blocking_reasons`` as INTERNAL metadata for the export workflow
-    # and evaluators, but it NEVER blanks the client-facing market price, target
-    # price, upside or recommendation. A valuation report must always present the
-    # analyst's computed estimate; caveats belong in the disclosures section, not in
-    # a missing number. Market price in particular comes from the data pipeline and
-    # is never gated here.
+    for warning in headline.warnings:
+        reasons.append(warning)
+    # Publication readiness remains disclosure metadata. The displayed target is
+    # always the market-safe headline value, while raw model values stay available
+    # through valuation_evidence for audit.
     if policy is not None:
         reasons = list(reasons) + list(getattr(policy, "blocking_reasons", None) or [])
         blocking_reasons = sorted(set(reasons))
-        recommendation_publishable = (
-            model_value_available
-            and bool(getattr(policy, "recommendation_publishable", False))
-        )
+        recommendation_publishable = target is not None
+    else:
+        blocking_reasons = sorted(set(reasons))
 
     return {
-        "approved_for_display": model_value_available,
+        "approved_for_display": target is not None and current is not None,
         "recommendation_publishable": recommendation_publishable,
         "current_price": current,
         "target_price": target,
@@ -1266,6 +1324,10 @@ def _report_display_governance(
             has_model_value=model_value_available,
         ),
         "blocking_reasons": blocking_reasons,
+        "model_value_available": model_value_available,
+        "raw_model_target": raw_target,
+        "raw_model_target_source": raw_source,
+        "headline_target_governance": headline.to_dict(),
         "blend_target_price": _display_target_price(val_result, blend, None),
     }
 
@@ -1278,18 +1340,11 @@ def _recommendation(
     dividend_yield: float = 0.0,
     has_model_value: bool | None = None,
 ) -> str:
-    """Rating based on total expected return, gated before publication.
-
-    When the valuation has a computed model value but cannot support a rating,
-    the report shows "Đang rà soát" rather than a Buy/Hold/Sell conclusion.
-    If no model value exists at all, it remains "Không xếp hạng".
-    """
-    if has_model_value is None:
-        has_model_value = upside is not None
-    if not approved_for_display:
-        return "Đang rà soát" if has_model_value else "Không xếp hạng"
+    """Rating based on total expected return with only three public labels."""
+    if has_model_value is False:
+        return "Theo dõi"
     if upside is None:
-        return "Không xếp hạng"
+        return "Giữ"
     total_return = upside + dividend_yield
     if total_return > 0.20:
         return "Mua"
@@ -1304,34 +1359,77 @@ def _display_target_price(
     policy: Any = None,
 ) -> float | None:
     """Resolve the best reproducible target price for report display."""
-    candidates: list[Any] = []
+    value, _source = _display_target_candidate(valuation, blend, policy)
+    return value
+
+
+def _display_target_candidate(
+    valuation: dict[str, Any],
+    blend: dict[str, Any],
+    policy: Any = None,
+) -> tuple[float | None, str | None]:
+    """Resolve the leading raw model target and its source for audit.
+
+    Single source of truth: when a publishability policy is supplied it owns the
+    headline decision. If the policy deems the target publishable (already inside
+    the ±40% market-sanity band, or carrying an approved reconciling bridge), that
+    value is the headline. If the policy blocks the target, no raw model value is
+    substituted — the report shows the market anchor with a "Theo dõi" rating rather
+    than a misleading clamped-to-edge number. Legacy candidate resolution applies
+    only when no policy decision is available (policy is None).
+    """
+    if policy is not None and getattr(policy, "target_price_publishable", None) is not None:
+        if getattr(policy, "target_price_publishable"):
+            policy_target = getattr(policy, "target_price_vnd", None)
+            if policy_target:
+                return float(policy_target), "policy.target_price_vnd"
+        return None, None
+
+    candidates: list[tuple[str, Any]] = []
     if policy is not None:
-        candidates.append(getattr(policy, "target_price_vnd", None))
-    weighted = valuation.get("weighted_target_price") or {}
+        candidates.append(("policy.target_price_vnd", getattr(policy, "target_price_vnd", None)))
+    weighted = _mapping(valuation.get("weighted_target_price"))
+    blend_dcf = _mapping(valuation.get("blend_dcf"))
+    fcff = _mapping(valuation.get("fcff"))
+    fcfe = _mapping(valuation.get("fcfe"))
+    pe_forward = _mapping(valuation.get("pe_forward"))
+    core_pe_net_cash = _mapping(valuation.get("core_pe_net_cash"))
+    multiples = _mapping(valuation.get("multiples"))
     candidates.extend(
         [
-            weighted.get("raw"),
-            weighted.get("rounded"),
-            weighted.get("target_price_vnd"),
-            weighted.get("target_price"),
-            weighted.get("blended_price"),
-            blend.get("target_price_dcf_vnd"),
-            blend.get("target_price_vnd"),
-            (valuation.get("blend_dcf") or {}).get("target_price_dcf_vnd"),
-            (valuation.get("fcff") or {}).get("target_price_vnd"),
-            (valuation.get("fcff") or {}).get("value_per_share"),
-            (valuation.get("fcfe") or {}).get("target_price_vnd"),
-            (valuation.get("fcfe") or {}).get("value_per_share"),
+            ("valuation.target_price", valuation.get("target_price")),
+            ("valuation.target_price_vnd", valuation.get("target_price_vnd")),
+            ("weighted_target_price.raw", weighted.get("raw")),
+            ("weighted_target_price.rounded", weighted.get("rounded")),
+            ("weighted_target_price.target_price_vnd", weighted.get("target_price_vnd")),
+            ("weighted_target_price.target_price", weighted.get("target_price")),
+            ("weighted_target_price.blended_price", weighted.get("blended_price")),
+            ("blend.target_price_dcf_vnd", blend.get("target_price_dcf_vnd")),
+            ("blend.target_price_vnd", blend.get("target_price_vnd")),
+            ("blend.target_price", blend.get("target_price")),
+            ("valuation.blend_dcf.target_price_dcf_vnd", blend_dcf.get("target_price_dcf_vnd")),
+            ("valuation.blend_dcf.target_price_vnd", blend_dcf.get("target_price_vnd")),
+            ("valuation.fcff.target_price_vnd", fcff.get("target_price_vnd")),
+            ("valuation.fcff.value_per_share", fcff.get("value_per_share")),
+            ("valuation.fcfe.target_price_vnd", fcfe.get("target_price_vnd")),
+            ("valuation.fcfe.value_per_share", fcfe.get("value_per_share")),
+            ("valuation.pe_forward.target_price_vnd", pe_forward.get("target_price_vnd")),
+            ("valuation.pe_forward.price_pe_forward_vnd", pe_forward.get("price_pe_forward_vnd")),
+            ("valuation.core_pe_net_cash.target_price_vnd", core_pe_net_cash.get("target_price_vnd")),
+            # Peer-relative fallback: only populated when peer-backed (compute_multiples
+            # blanks implied prices without a peer dataset), so it is safe to trust here.
+            ("valuation.multiples.implied_price_pe", multiples.get("implied_price_pe")),
+            ("valuation.multiples.implied_price_ev_ebitda", multiples.get("implied_price_ev_ebitda")),
         ]
     )
-    for candidate in candidates:
+    for source, candidate in candidates:
         try:
             value = float(candidate)
         except (TypeError, ValueError):
             continue
         if value > 0:
-            return value
-    return None
+            return value, source
+    return None, None
 
 
 def _total_return(upside: float | None, dividend_yield: "Percent | None") -> "Percent | None":
@@ -1439,28 +1537,55 @@ def _table_valuation_model(
 
 
 def _table_valuation_summary(valuation: dict[str, Any]) -> TableData | None:
-    methods = [str(item).upper() for item in valuation.get("selected_methods") or []]
-    weights = valuation.get("method_weights") or {}
+    selected = [str(item).upper() for item in valuation.get("selected_methods") or []]
+    weights = _mapping(valuation.get("method_weights"))
+    method_sections: list[tuple[str, dict[str, Any], tuple[str, ...]]] = [
+        ("FCFF", _mapping(valuation.get("fcff")), ("target_price_vnd", "value_per_share")),
+        ("FCFE", _mapping(valuation.get("fcfe")), ("target_price_vnd", "value_per_share")),
+        (
+            "BLEND",
+            _mapping(valuation.get("blend_dcf") or valuation.get("blend")),
+            ("target_price_dcf_vnd", "target_price_vnd", "blended_price"),
+        ),
+        (
+            "P/E",
+            _mapping(valuation.get("pe_forward") or valuation.get("multiples")),
+            ("target_price_vnd", "price_pe_forward_vnd", "implied_price_pe"),
+        ),
+        (
+            "CORE P/E + NET CASH",
+            _mapping(valuation.get("core_pe_net_cash")),
+            ("target_price_vnd", "value_per_share"),
+        ),
+    ]
     rows: list[tuple[str, list[Any]]] = []
-    for method in methods:
+    seen: set[str] = set()
+    for method, payload, price_keys in method_sections:
         # Option B: show every computed method value. Confidence is disclosed in
         # the report's status/disclosures section, not by hiding the valuation
         # table — a valuation report must always present its computed prices.
-        payload = valuation.get(method.lower()) or {}
-        price = payload.get("value_per_share") or payload.get("target_price_vnd")
-        weight = weights.get(method) or weights.get(method.lower())
+        price = _first_number(*(payload.get(key) for key in price_keys))
         if price is None:
             continue
-        rows.append((method, [f"{float(price):,.0f}", f"{float(weight):.1f}%" if weight is not None else _DASH]))
-    weighted = valuation.get("weighted_target_price") or valuation.get("blend_dcf") or {}
-    target = weighted.get("raw") or weighted.get("target_price_vnd") or weighted.get("blended_price")
+        weight = _first_number(
+            weights.get(method),
+            weights.get(method.lower()),
+            weights.get(method.replace(" ", "_").lower()),
+        )
+        if weight is not None and weight <= 1:
+            weight *= 100.0
+        status = "Trong mô hình" if method in selected or weight is not None else "Cần rà soát"
+        rows.append((method, [f"{price:,.0f}", f"{weight:.1f}%" if weight is not None else _DASH, status]))
+        seen.add(method)
+    target = _display_target_price(valuation, _mapping(valuation.get("blend_dcf")))
     if rows and target is not None:
-        rows.append(("Giá mục tiêu tổng hợp", [f"{float(target):,.0f}", "100.0%"]))
+        status = "Tổng hợp" if "BLEND" in seen or selected else "Cần rà soát"
+        rows.append(("Giá mục tiêu tổng hợp", [f"{float(target):,.0f}", "100.0%", status]))
     if not rows:
         return None
     return TableData(
         title="KẾT QUẢ ĐỊNH GIÁ",
-        periods=["Giá trị mỗi cổ phiếu (VND)", "Trọng số"],
+        periods=["Giá trị mỗi cổ phiếu (VND)", "Trọng số", "Trạng thái"],
         rows=rows,
         format_type="text",
     )
@@ -2238,6 +2363,9 @@ def _market_data(
     """Resolve run-scoped market data, falling back to canonical price history."""
     if manifest is not None and manifest.resolve("market_data"):
         return market_data_from_dict(manifest.load_json("market_data"))
+    cached = load_cached_market_data(ticker, run_id=run_id or "")
+    if cached is not None:
+        return cached
     try:
         exchange = _COMPANIES.get(ticker.upper(), (ticker.upper(), "HOSE"))[1]
         return load_market_data_from_fact_store(ticker, exchange)
@@ -2290,6 +2418,10 @@ def _valuation_evidence_summary(
         "policy_blocking_reasons": list(getattr(policy, "blocking_reasons", []) or []),
         "policy_warnings": list(getattr(policy, "warnings", []) or []),
         "display_blocking_reasons": list(display_gate.get("blocking_reasons") or []),
+        "headline_target_governance": dict(display_gate.get("headline_target_governance") or {}),
+        "raw_model_target_vnd": display_gate.get("raw_model_target"),
+        "headline_target_vnd": display_gate.get("target_price"),
+        "target_adjustment": (display_gate.get("headline_target_governance") or {}).get("target_adjustment"),
         "method_diagnostics": method_diagnostics,
         "market_sanity_bridge": market_bridge if isinstance(market_bridge, dict) else {},
         "peer_data_source": peer_source,
@@ -2405,8 +2537,10 @@ def build_client_report_view_model(
     forecast_rows = _forecast_by_label(forecast)
     fcff_rows = _fcff_by_label(fcff)
     valuation_policy = build_valuation_publishability_policy(val, ticker=ticker, run_id=run_id)
-    display_gate = _report_display_governance(mode, val_result, blend, policy=valuation_policy)
-    current_price = _price_to_vnd(display_gate["current_price"])
+    display_source = {**val, **val_result}
+    display_gate = _report_display_governance(mode, display_source, blend, policy=valuation_policy)
+    valuation_current_price = _price_to_vnd(display_gate["current_price"])
+    current_price = valuation_current_price
     target_price = display_gate["target_price"]
     upside = display_gate["upside"]
     recommendation = display_gate["recommendation"]
@@ -2426,18 +2560,31 @@ def build_client_report_view_model(
         shares_mn = snapshot.shares_outstanding / 1_000_000
     if not shares_mn:
         shares_mn = _derive_artifact_shares_mn(fcff, cpnc, val, forecast)
-    if current_price is None and snapshot is not None and snapshot.last_price:
-        current_price = _price_to_vnd(snapshot.last_price)
-    if current_price is None and market_data is not None:
-        current_price = _price_to_vnd(market_data.trading_statistics.last_close)
-    market_price_as_of = _market_price_as_of(
-        current_price,
+    current_price, market_price_as_of = _resolve_current_market_price(
+        valuation_current_price=valuation_current_price,
         valuation=val,
         snapshot=snapshot,
         market_data=market_data,
     )
-    if current_price and target_price and upside is None:
-        upside = target_price / current_price - 1
+    final_headline = build_headline_target_governance(
+        current_price_vnd=current_price,
+        raw_model_target_vnd=display_gate.get("raw_model_target"),
+        raw_model_target_source=display_gate.get("raw_model_target_source"),
+    )
+    target_price = final_headline.headline_target_vnd
+    upside = final_headline.headline_upside
+    display_gate = {
+        **display_gate,
+        "current_price": current_price,
+        "target_price": target_price,
+        "upside": upside,
+        "approved_for_display": target_price is not None and current_price is not None,
+        "headline_target_governance": final_headline.to_dict(),
+        "blocking_reasons": sorted(
+            set(display_gate.get("blocking_reasons") or [])
+            | set(final_headline.warnings)
+        ),
+    }
     dividend_per_share = _derive_report_dividend_per_share(
         facts,
         forecast_rows,
@@ -2458,18 +2605,17 @@ def build_client_report_view_model(
     dy_val = dividend_yield.value if dividend_yield is not None else 0.0
     recommendation = _recommendation(
         upside, mode,
-        approved_for_display=display_gate.get("recommendation_publishable", False),
+        approved_for_display=target_price is not None and current_price is not None,
         dividend_yield=dy_val,
-        has_model_value=target_price is not None,
+        has_model_value=display_gate.get("model_value_available"),
     )
+    display_gate = {**display_gate, "recommendation": recommendation}
 
     missing: list[str] = []
     if current_price is None:
         missing.append("current_price")
     elif not market_price_as_of:
         missing.append("market_price_as_of")
-    elif market_price_as_of != report_date:
-        missing.append("same_day_market_price")
     if target_price is None:
         missing.append("target_price")
     if upside is None:
@@ -2670,6 +2816,7 @@ def build_client_report_view_model(
         market_data=market_data,
         valuation_evidence=valuation_evidence,
         selected_valuation_methods=[str(item).upper() for item in (val.get("selected_methods") or [])],
+        headline_valuation_method=getattr(valuation_policy, "primary_method", None),
         valuation_summary_table=_table_valuation_summary(val),
         wacc_bridge_table=_table_wacc_bridge(val),
         valuation_bridge_table=_table_valuation_bridge(val),

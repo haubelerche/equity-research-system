@@ -47,6 +47,22 @@ if _env_file.exists():
 ROOT = Path(__file__).resolve().parents[1]
 VALUATION_DIR = ROOT / "storage" / "runs" / os.environ.get("RUN_ID", "missing_run_id")
 
+def _resolve_current_price(ticker: str, *, allow_live: bool | None = None):
+    """Resolve market price once, returning the full audit payload."""
+    from backend.valuation.market_price_resolver import resolve_market_price
+
+    if allow_live is None:
+        allow_live = os.environ.get("ALLOW_LIVE_MARKET_PRICE") == "1"
+    resolution = resolve_market_price(ticker, allow_live=allow_live)
+    for warning in resolution.warnings:
+        print(f"[run_valuation] WARNING: market price resolver {ticker}: {warning}")
+    if resolution.current_price and resolution.source:
+        print(
+            f"[run_valuation] {ticker} market price source: {resolution.source}"
+            + (f" as_of={resolution.price_as_of}" if resolution.price_as_of else "")
+        )
+    return resolution
+
 def _get_current_price(ticker: str) -> float | None:
     """Current market price: vnstock fact.price_history first, CafeF as fallback.
 
@@ -228,6 +244,7 @@ def run_valuation(
     target_pb: float = 2.5,
     target_ev_ebitda: float = 10.0,
     auto_approve_assumptions: bool = False,
+    allow_live_market_price: bool | None = None,
 ) -> dict:
     from backend.dataops.snapshot import create_snapshot, load_snapshot_facts
     from backend.facts.normalizer import (
@@ -300,7 +317,8 @@ def run_valuation(
     # absent from snapshot facts. Without it FCFF/FCFE block the target price AND the
     # WACC×g / Re×g sensitivity matrices come back all-null. Source it from the vnstock
     # VCI overview (MarketSnapshot) with provenance.
-    _market_price_fallback = _get_current_price(ticker)
+    _market_price_resolution = _resolve_current_price(ticker, allow_live=allow_live_market_price)
+    _market_price_fallback = _market_price_resolution.current_price
     # Fallback for tickers with no live price feed (e.g. thin UPCOM names): use the
     # year-end close captured from the official report (market_price.close fact).
     if _market_price_fallback is None and "market_price.close" in full_table:
@@ -329,7 +347,11 @@ def run_valuation(
         latest_period=fy_periods[-1] if fy_periods else None,
     )
 
-    if fy_periods and "shares_outstanding.ending" not in full_table:
+    if (
+        fy_periods
+        and "shares_outstanding.ending" not in full_table
+        and os.environ.get("SKIP_LIVE_MARKET_SNAPSHOT") != "1"
+    ):
         try:
             from backend.reporting.market_snapshot import get_market_snapshot
             from backend.facts.normalizer import FactEntry
@@ -452,26 +474,38 @@ def run_valuation(
         )
     _target_pe = valuation_input_pack.peers.get("peer_pe_median") or target_pe
     _target_ev_ebitda = valuation_input_pack.peers.get("peer_ev_ebitda_median") or target_ev_ebitda
-    # No manual peer dataset → derive peer medians from vnstock same-sector peers
-    # (price/EPS + EV/EBITDA from production facts). Needs >=3 valid peers, else stays
-    # pending (no fabrication). Honours the data contract: vnstock primary.
+    # No manual peer dataset → derive peer medians from same-sector peers. Needs >=3
+    # valid peers, else stays pending (no fabrication). Peer P/E uses trailing EPS so
+    # it is the market-anchored fallback that lets a target reach the report when DCF
+    # is unpublishable. Prefer the OFFLINE pack (peer prices from the collected
+    # data/manual/market_prices.csv + production facts): no vnstock fan-out, so it is
+    # safe across the whole universe in a batch. SKIP_LIVE_PEER=1 disables the legacy
+    # live fallback (which trips vnstock's 20-req/min guest limit) for cohort runs.
     if _peer_data_source is None:
         try:
-            from backend.valuation.peer_multiples import build_peer_pack_live
+            from backend.valuation.peer_multiples import (
+                build_peer_pack_offline,
+                build_peer_pack_live,
+            )
 
-            _pp = build_peer_pack_live(ticker)
+            _pp = build_peer_pack_offline(ticker)
+            _source_label = "manual prices CSV"
+            if not (_pp.get("peer_pe_median") or _pp.get("peer_ev_ebitda_median")):
+                if os.environ.get("SKIP_LIVE_PEER") != "1":
+                    _pp = build_peer_pack_live(ticker)
+                    _source_label = "vnstock"
             if _pp.get("peer_pe_median") or _pp.get("peer_ev_ebitda_median"):
                 _target_pe = _pp.get("peer_pe_median") or _target_pe
                 _target_ev_ebitda = _pp.get("peer_ev_ebitda_median") or _target_ev_ebitda
                 _peer_data_source = _pp.get("peer_data_source")
                 print(
-                    f"[run_valuation] {ticker} peer medians (vnstock): "
+                    f"[run_valuation] {ticker} peer medians ({_source_label}): "
                     f"P/E={_target_pe:.1f}x EV/EBITDA="
                     + (f"{_target_ev_ebitda:.1f}x" if _target_ev_ebitda else "n/a")
-                    + f" from {len(_pp['peers_used'])} peers"
+                    + f" from {len(_pp.get('peers_used') or [])} peers"
                 )
         except Exception as _peer_exc:  # noqa: BLE001 — peer pack is best-effort
-            print(f"[run_valuation] {ticker} vnstock peer pack failed: {_peer_exc}")
+            print(f"[run_valuation] {ticker} peer pack failed: {_peer_exc}")
     multiples = compute_multiples(
         ticker=ticker,
         fact_table=full_table,
@@ -959,6 +993,14 @@ def run_valuation(
         ),
     ]
 
+    _market_price_resolution_payload = _market_price_resolution.to_dict()
+    if current_price and not _market_price_resolution_payload.get("current_price"):
+        _market_price_resolution_payload.update({
+            "current_price": current_price,
+            "source": "official_report_market_price_close",
+            "warnings": _market_price_resolution_payload.get("warnings", []) + ["used_official_report_close_fallback"],
+        })
+
     artifact = {
         "ticker": ticker,
         "generated_at": generated_at.isoformat(),
@@ -996,6 +1038,7 @@ def run_valuation(
         },
         "multiples": multiples.to_dict(),
         "current_price_vnd": current_price,
+        "market_price_resolution": _market_price_resolution_payload,
         "valuation_input_pack": _input_pack_dict,
         "module_readiness": valuation_input_pack.readiness,
         "data_completeness": preflight["data_completeness"],
@@ -1061,6 +1104,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--target-pb", type=float, default=2.5, dest="target_pb")
     parser.add_argument("--target-ev-ebitda", type=float, default=10.0, dest="target_ev_ebitda")
     parser.add_argument("--auto-approve-assumptions", action="store_true", dest="auto_approve_assumptions")
+    parser.add_argument("--allow-live-market-price", action="store_true", dest="allow_live_market_price")
     return parser.parse_args()
 
 
@@ -1077,6 +1121,7 @@ def main() -> None:
         target_pb=args.target_pb,
         target_ev_ebitda=args.target_ev_ebitda,
         auto_approve_assumptions=args.auto_approve_assumptions,
+        allow_live_market_price=args.allow_live_market_price,
     )
     print("\n[run_valuation] done")
 

@@ -8,9 +8,7 @@ This file defines how Codex must work in this repository. Treat these rules as r
 
 Optimize in this order:
 
-1. Correctness and reproducibility.
-2. Security and privacy.
-3. Minimal, reviewable diff.
+1. Runable, Correctness and reproducibility.
 4. Maintainability and architectural consistency.
 5. Performance, scalability, and latency.
 6. Developer ergonomics.
@@ -158,12 +156,13 @@ Changed files:
 Validation:
 - <command>: <pass/fail/not run and why>
 
-Residual risks:
-- <risk or "none identified">
-
 Human review focus:
 - <specific files/logic to inspect>
 ```
+What to do next:
+- ...
+
+
 
 ## When to ask before editing
 

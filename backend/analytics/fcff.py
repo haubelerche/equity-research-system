@@ -147,6 +147,23 @@ class FCFFResult:
             "current_price_vnd": _r(self.current_price_vnd, 0),
             "upside_pct": round(self.upside_pct, 4) if self.upside_pct is not None else None,
             "net_debt_bridge": self.net_debt_bridge.to_dict() if self.net_debt_bridge else None,
+            # EV→equity walk: enterprise_value − net_debt = equity_value → /shares.
+            # Disclosure required by the publishability policy; assembled from the
+            # values already computed above.
+            "ev_to_equity_bridge": (
+                {
+                    "enterprise_value": _r(self.enterprise_value),
+                    "less_net_debt": _r(self.net_debt),
+                    "equity_value": _r(self.equity_value),
+                    "shares_mn": _r(self.shares_mn),
+                    "value_per_share_vnd": (
+                        round(self.target_price_vnd, 0)
+                        if self.target_price_vnd is not None else None
+                    ),
+                }
+                if self.enterprise_value is not None and self.equity_value is not None
+                else None
+            ),
             "warnings": self.warnings,
         }
 

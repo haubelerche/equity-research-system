@@ -17,6 +17,9 @@ import statistics
 from typing import Any, Callable, Optional, Sequence
 
 
+# Minimum valid peers before a median is trusted (no fabrication below this).
+MIN_PEERS = 3
+
 # Sanity bounds — drop nonsensical multiples (data errors) before taking the median.
 _PE_BOUNDS = (3.0, 60.0)
 _EV_EBITDA_BOUNDS = (2.0, 40.0)
@@ -131,6 +134,61 @@ def build_peer_pack_live(ticker: str, *, limit: int = 12) -> dict[str, Any]:
         peer_tickers=peers,
         price_loader=_default_price_loader,
         fact_loader=_default_fact_loader,
+    )
+
+
+def _offline_price_loader(ticker: str, *, manual_csv_path: Any = None) -> Optional[tuple]:
+    """(price_vnd, market_cap_bn) from the collected manual price CSV — no network.
+
+    Price comes from data/manual/market_prices.csv via the market-price resolver
+    (allow_live=False, so it never falls through to vnstock). market_cap is derived
+    from explicit production shares when available (price x shares); when shares are
+    missing it stays None and only EV/EBITDA for that peer is skipped — peer P/E,
+    which the fallback target relies on, is unaffected.
+    """
+    try:
+        from backend.valuation.market_price_resolver import resolve_market_price
+
+        res = resolve_market_price(ticker, allow_live=False, manual_csv_path=manual_csv_path)
+        if res is None or res.current_price is None:
+            return None
+        market_cap_bn: float | None = None
+        try:
+            from backend.valuation.input_pack_builder import _load_fact_table_from_production
+            from backend.analytics.shares import explicit_shares_mn
+
+            ft = _load_fact_table_from_production(ticker, None, None)
+            fys = sorted({p for vals in ft.values() for p in vals if p.endswith("FY")})
+            shares_mn = explicit_shares_mn(ft, fys[-1]) if fys else None
+            if shares_mn:
+                market_cap_bn = res.current_price * shares_mn / 1_000.0
+        except Exception:  # noqa: BLE001 — market_cap is best-effort for EV/EBITDA only
+            market_cap_bn = None
+        return (res.current_price, market_cap_bn)
+    except Exception:  # noqa: BLE001 — per-peer resolution errors are non-fatal
+        return None
+
+
+def build_peer_pack_offline(
+    ticker: str,
+    *,
+    limit: int = 12,
+    peer_tickers: Optional[Sequence[str]] = None,
+    price_loader: Optional[Callable[[str], Optional[tuple]]] = None,
+    fact_loader: Optional[Callable[[str], Optional[dict]]] = None,
+) -> dict[str, Any]:
+    """Peer pack built entirely from collected data (manual price CSV + production facts).
+
+    No live vnstock calls, so it is safe to run across the whole universe in a batch
+    without tripping the guest rate limit. Loaders are injectable for testing; the
+    median math is the same proven path as ``build_peer_pack``.
+    """
+    peers = list(peer_tickers) if peer_tickers is not None else select_pharma_peers(ticker, limit=limit)
+    return build_peer_pack(
+        ticker,
+        peer_tickers=peers,
+        price_loader=price_loader or _offline_price_loader,
+        fact_loader=fact_loader or _default_fact_loader,
     )
 
 

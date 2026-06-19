@@ -57,3 +57,49 @@ def test_build_peer_pack_stays_pending_with_too_few_peers():
     )
     assert pack["peer_pe_median"] is None
     assert pack["relative_valuation_status"] == "pending_peer_dataset"
+
+
+def test_min_peers_is_defined_and_median_requires_it():
+    # Regression: MIN_PEERS was referenced but never defined, raising NameError
+    # on every build_peer_pack call and silently disabling relative valuation.
+    assert isinstance(pm.MIN_PEERS, int) and pm.MIN_PEERS >= 1
+    assert pm._median([10.0] * pm.MIN_PEERS) is not None
+    assert pm._median([10.0] * (pm.MIN_PEERS - 1)) is None
+
+
+def test_offline_price_loader_reads_manual_csv(tmp_path):
+    csv = tmp_path / "market_prices.csv"
+    csv.write_text(
+        "as_of_date,ticker,price,status,source\n"
+        "2026-06-19,IMP,45500,accepted,cafef_price_history\n",
+        encoding="utf-8",
+    )
+    loaded = pm._offline_price_loader("IMP", manual_csv_path=csv)
+    assert loaded is not None
+    price, _market_cap = loaded
+    assert price == pytest.approx(45500.0)
+
+
+def test_offline_price_loader_returns_none_when_absent(tmp_path):
+    csv = tmp_path / "market_prices.csv"
+    csv.write_text("as_of_date,ticker,price,status,source\n", encoding="utf-8")
+    assert pm._offline_price_loader("ZZZ", manual_csv_path=csv) is None
+
+
+def test_build_peer_pack_offline_wires_injected_loaders():
+    # build_peer_pack_offline must accept injected loaders so the median math is
+    # the same proven path as build_peer_pack — only the default source differs.
+    prices = {"IMP": (46150.0, 7107.0), "OPC": (40000.0, 2000.0), "TRA": (90000.0, 3000.0)}
+    facts = {
+        "IMP": {"eps": 4000.0, "ebitda": 500.0, "total_debt": 100.0, "cash_sti": 200.0},
+        "OPC": {"eps": 3500.0, "ebitda": 250.0, "total_debt": 50.0, "cash_sti": 80.0},
+        "TRA": {"eps": 6000.0, "ebitda": 400.0, "total_debt": 0.0, "cash_sti": 300.0},
+    }
+    pack = pm.build_peer_pack_offline(
+        "DHG",
+        peer_tickers=list(prices),
+        price_loader=lambda t: prices.get(t),
+        fact_loader=lambda t: facts.get(t),
+    )
+    assert pack["peer_pe_median"] is not None
+    assert pack["relative_valuation_status"] == "peer_data_available"

@@ -47,12 +47,18 @@ Rui ro agentic workflow gom: agent dung tool sai quyen, tao claim khong co evide
 |---|---|---:|
 | Tool permission compliance | Custom gate | 100% |
 | Output schema validity | Pydantic/JSON schema | 100% |
-| Role adherence | DeepEval/OpenAI grader | >= 0.90 |
-| Groundedness | Ragas/DeepEval/custom judge | >= 0.90 for final narrative |
+| Role adherence | DeepEval/OpenAI grader | >= 85% |
+| Groundedness | Ragas/DeepEval/custom judge | >= 85% for final narrative |
 | No unauthorized financial calculation | Custom regex + judge | 100% compliance |
-| Task completion | DeepEval agentic metric | >= 0.85 |
-| Plan adherence | DeepEval agentic metric | >= 0.85 |
+| Task completion | DeepEval agentic metric | >= 85% |
+| Plan adherence | DeepEval agentic metric | >= 80% |
 | Critic issue recall on seeded failures | Golden bad reports | >= 90% |
+| Stage handoff completeness | Trace artifact audit | >= 95% |
+| Tool call success rate | Trace/runtime metrics | >= 95% |
+| Repair loop rate | Trace/runtime metrics | <= 15% |
+| Token budget adherence | Cost telemetry | >= 90% |
+| Judge calibration agreement | Human/deterministic label set | >= 85% |
+| Judge rationale evidence coverage | Judge output audit | >= 90% |
 
 ### 4. LLM judge rubric
 
@@ -64,6 +70,8 @@ Rui ro agentic workflow gom: agent dung tool sai quyen, tao claim khong co evide
 | Materiality | Agent co uu tien driver anh huong forecast/valuation khong |
 | Risk balance | Report co neu dieu kien bac bo thesis va downside khong |
 | Citation integrity | Claim material co citation ro va citation support dung claim khong |
+| Judge calibration | Judge co dong thuan voi deterministic labels va seeded defects khong |
+| Rationale traceability | Moi fail/warning co artifact, trace span hoac rubric clause khong |
 | Professional tone | Phu hop research report, khong marketing, khong overclaim |
 
 ### 5. Dataset

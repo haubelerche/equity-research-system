@@ -34,12 +34,61 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _BROKEN_TEXT_MARKERS = (
     "\ufffd",
     "\u00ef\u00bf\u00bd",
+    "\u00c2\u00a0",
+    "\u00e2\u20ac",
+    "\u00e1\u00ba",
+    "\u00e1\u00bb",
+    "\u00c3\u00a1",
+    "\u00c3\u00aa",
+    "\u00c3\u00b4",
+    "\u00c4\u2018",
+    "\u00c6\u00b0",
     "Gi\u00ef",
     "Ch?",
     "B->o",
     "c->o",
     "d? li?u",
 )
+
+_MOJIBAKE_TOKEN_RE = re.compile(r"[^\t\r\n <>]+")
+_MOJIBAKE_HINTS = (
+    "Ã", "Â", "â", "Ä", "Æ", "Ă", "ă", "áº", "á»",
+    "\x80", "\x90", "\x9d",
+)
+
+
+def _mojibake_score(value: str) -> int:
+    return sum(value.count(marker) for marker in _MOJIBAKE_HINTS) + value.count("\ufffd")
+
+
+def _repair_mojibake_token(token: str) -> str:
+    if not any(marker in token for marker in _MOJIBAKE_HINTS):
+        return token
+    best = token
+    best_score = _mojibake_score(token)
+    current = token
+    for _ in range(3):
+        improved = False
+        for encoding in ("cp1252", "latin-1", "cp1258"):
+            try:
+                repaired = current.encode(encoding).decode("utf-8")
+            except UnicodeError:
+                continue
+            score = _mojibake_score(repaired)
+            if repaired != current and score < best_score:
+                best = repaired
+                best_score = score
+                current = repaired
+                improved = True
+                break
+        if not improved:
+            break
+    return best
+
+
+def repair_vietnamese_mojibake(value: str) -> str:
+    """Repair UTF-8 text that was previously decoded as Windows-1252/Latin-1."""
+    return _MOJIBAKE_TOKEN_RE.sub(lambda match: _repair_mojibake_token(match.group(0)), value)
 
 
 class HTMLPreflightError(RuntimeError):
@@ -196,6 +245,7 @@ class HTMLRenderer:
 
         # Embed all images as base64 data URIs → self-contained HTML
         rendered = self._embed_images(rendered)
+        rendered = repair_vietnamese_mojibake(rendered)
 
         preflight_rendered_html_text(rendered)
 

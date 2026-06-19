@@ -116,14 +116,33 @@ def _sample_forecast() -> dict:
             {
                 "label": "2026F",
                 "revenue": 5000,
+                "cogs": -3000,
                 "gross_profit": 2000,
+                "sga": -800,
                 "ebit": 1200,
+                "interest_expense": -100,
+                "profit_before_tax": 1100,
+                "tax_expense": -200,
                 "net_income": 900,
                 "capex": -200,
                 "depreciation": 150,
                 "eps": 6000,
             },
-            {"label": "2027F", "revenue": 5500, "ebit": 1300, "net_income": 980, "eps": 6500},
+            {
+                "label": "2027F",
+                "revenue": 5500,
+                "cogs": -3300,
+                "gross_profit": 2200,
+                "sga": -900,
+                "ebit": 1300,
+                "interest_expense": -120,
+                "profit_before_tax": 1180,
+                "tax_expense": -200,
+                "net_income": 980,
+                "capex": -220,
+                "depreciation": 160,
+                "eps": 6500,
+            },
         ],
         "debt_schedule": {
             "forecast_rows": [
@@ -224,6 +243,186 @@ def test_renders_sensitivity_matrix_as_markdown_table():
     assert "54,518" in md  # a matrix cell from blend_grid
 
 
+def test_forecast_section_renders_full_income_statement_waterfall():
+    md = _build()
+
+    assert "| Doanh thu thuần | 5,000 | 5,500 |" in md
+    assert "| Giá vốn hàng bán (COGS) | -3,000 | -3,300 |" in md
+    assert "| Lợi nhuận gộp | 2,000 | 2,200 |" in md
+    assert "| Chi phí SG&A | -800 | -900 |" in md
+    assert "| EBIT | 1,200 | 1,300 |" in md
+    assert "| Chi phí lãi vay | -100 | -120 |" in md
+    assert "| Lợi nhuận trước thuế | 1,100 | 1,180 |" in md
+    assert "| Chi phí thuế | -200 | -200 |" in md
+    assert "| LNST cổ đông mẹ | 900 | 980 |" in md
+    assert "| Khấu hao (D&A) | 150 | 160 |" in md
+    assert "| CAPEX | -200 | -220 |" in md
+    assert "| EPS (VND) | 6,000 | 6,500 |" in md
+
+
+def test_forecast_section_explains_positive_gross_profit_with_negative_ebit():
+    forecast = _sample_forecast()
+    forecast["forecast_years"][0]["gross_profit"] = 100
+    forecast["forecast_years"][0]["sga"] = -150
+    forecast["forecast_years"][0]["ebit"] = -50
+
+    md = _build(forecast=forecast)
+
+    assert "Vì sao EBIT âm" in md
+    assert "SG&A" in md
+    assert "2026F" in md
+
+
+def test_fcff_pv_computed_from_discount_factor_when_missing():
+    val = _sample_valuation()
+    val["fcff_dcf"]["pv_fcff"] = None
+    val["fcff_dcf"]["fcff_table"][0].pop("pv")
+    val["fcff_dcf"]["fcff_table"][0]["fcff"] = 900
+    val["fcff_dcf"]["fcff_table"][0]["discount_factor"] = 0.879
+
+    md = _build(valuation=val)
+
+    assert "| PV(FCFF) | 791 | 763 |" in md
+    assert "| PV dòng tiền dự phóng (Σ PV FCFF) | 1,554 |" in md
+
+
+def test_fcff_explains_blank_price_when_equity_value_negative():
+    val = _sample_valuation()
+    val["fcff_dcf"]["equity_value"] = -211
+    val["fcff_dcf"]["implied_price"] = None
+
+    md = _build(valuation=val)
+
+    assert "giá trị vốn chủ sở hữu âm" in md.lower()
+    assert "không phải thiếu dữ liệu" in md.lower()
+
+
+def test_fcfe_blank_price_reason_matches_negative_equity():
+    val = _sample_valuation()
+    val["fcfe_dcf"]["equity_value"] = -305
+    val["fcfe_dcf"]["implied_price"] = None
+
+    md = _build(valuation=val)
+
+    assert "giá trị vốn chủ sở hữu âm" in md.lower()
+    assert "thiếu dữ liệu vay ròng hoặc số cổ phiếu" not in md
+
+
+def test_blend_explains_missing_when_component_price_absent():
+    val = _sample_valuation()
+    val["blend"]["price_fcff_vnd"] = None
+    val["blend"]["price_fcfe_vnd"] = None
+    val["blend"]["target_price_dcf_vnd"] = None
+
+    md = _build(valuation=val)
+
+    assert "0.60 × — + 0.40 × —" not in md
+    assert "Chưa thể kết hợp" in md
+
+
+def test_blend_still_shows_arithmetic_when_components_present():
+    val = _sample_valuation()
+    val["blend"]["price_fcfe_vnd"] = 9030
+    val["blend"]["target_price_dcf_vnd"] = 56588
+
+    md = _build(valuation=val)
+
+    assert "`0.60 × 88,294 + 0.40 × 9,030 = 56,588`" in md
+
+
+def test_decision_basis_explains_blank_target_chain():
+    val = _sample_valuation()
+    val["target_price"] = None
+    val["upside_downside"] = None
+    val["fcff_dcf"]["equity_value"] = -211
+    val["fcff_dcf"]["implied_price"] = None
+    val["fcfe_dcf"]["equity_value"] = -305
+    val["fcfe_dcf"]["implied_price"] = None
+    val["blend"]["price_fcff_vnd"] = None
+    val["blend"]["price_fcfe_vnd"] = None
+    val["blend"]["target_price_dcf_vnd"] = None
+    val["blend"]["upside_pct"] = None
+    forecast = _sample_forecast()
+    forecast["forecast_years"][0]["gross_profit"] = 34
+    forecast["forecast_years"][0]["sga"] = -84
+    forecast["forecast_years"][0]["ebit"] = -50
+    vm = _sample_view_model()
+    vm.target_price = None
+    vm.upside_downside = None
+    vm.recommendation = "Giữ"
+
+    md = _build_explanation(valuation=val, forecast=forecast, view_model=vm)
+
+    assert "Vì sao giá mục tiêu để trống và khuyến nghị như vậy" in md
+    assert "EBIT âm" in md
+    assert "giá trị vốn chủ sở hữu âm" in md.lower()
+    assert "không tính được mức tăng/giảm" in md.lower()
+
+
+def test_translates_equity_value_and_cashsweep_warnings():
+    val = _sample_valuation()
+    val["blend"]["warnings"] = [
+        "FCFF: equity value is negative — target price not computed",
+        "FCFE: equity value is non-positive — target price not computed",
+        "[CashSweep] 2026F: dividends_paid is negative (-20.66) — expected positive outflow; taking abs().",
+        "[CashSweep] 2027F: dividends_paid is negative (-20.84) — expected positive outflow; taking abs().",
+        "[CashSweep] 2028F: dividends_paid is negative (-21.02) — expected positive outflow; taking abs().",
+    ]
+
+    md = _build(valuation=val)
+
+    assert "equity value is negative" not in md
+    assert "dividends_paid" not in md
+    assert "taking abs" not in md
+    assert "[CashSweep]" not in md
+    assert "giá trị vốn chủ sở hữu âm" in md.lower()
+    assert md.count("Cổ tức dự phóng mang dấu âm") == 1
+
+
+def test_translates_sga_and_cross_check_warning_leaks():
+    vm = _sample_view_model()
+    vm.valuation_evidence["model_warnings"] = [
+        "SG&A not reported — derived from historical EBIT margin (3.0%) so forecast EBIT stays anchored to actuals.",
+        "valuation_cross_check_divergence_warning",
+    ]
+
+    md = _build_explanation(view_model=vm)
+
+    assert "SG&A not reported" not in md
+    assert "valuation_cross_check_divergence" not in md
+    assert "Chi phí bán hàng và quản lý chưa được công bố riêng" in md
+    assert "Cảnh báo đối chiếu định giá" in md
+
+
+def test_translates_english_critic_findings():
+    vm = _sample_view_model()
+    vm.critic_findings = [
+        "[Major] The multiples module is intentionally marked pending and implied prices "
+        "are blank because peer_pe_median and peer_ev_ebitda_median are not supplied.",
+        "[cảnh báo] Simplified DCF and FCFF/FCFE runs include warnings about negative "
+        "historical FCF in 2022 and terminal-value share-of-EV above recommended thresholds.",
+    ]
+
+    md = _build_explanation(view_model=vm)
+
+    assert "peer_pe_median" not in md
+    assert "terminal-value share-of-EV" not in md
+    assert "[Major]" not in md
+    assert "multiples" not in md.lower()
+
+
+def test_explanation_evidence_block_not_duplicated():
+    md = _build_explanation()
+
+    assert md.count("## Minh chứng kiểm định") == 1
+
+
+def test_standalone_workings_still_includes_crosscheck_evidence():
+    md = _build()
+
+    assert "Minh chứng kiểm định và phát hành" in md
+
+
 def test_missing_values_render_as_dash_not_fabricated():
     val = _sample_valuation()
     val["fcfe_dcf"]["implied_price"] = None
@@ -307,11 +506,18 @@ def test_report_explanation_translates_policy_blockers_and_mapping_warnings():
     assert "target_pe=15.0x is model default" not in md
     assert "Relative valuation is PENDING" not in md
     assert "EPS and target P/E are present" not in md
-    assert "Chưa có phương pháp định giá chính đủ điều kiện" in md
+    assert "Thiếu phương pháp định giá chính đã được xác minh" in md
     assert "Các phương pháp định giá cho kết quả phân kỳ mạnh" in md
-    assert "Định giá tương đối chưa đủ điều kiện" in md
+    assert "Định giá tương đối thiếu bộ doanh nghiệp so sánh" in md
     assert "EPS dự phóng và P/E mục tiêu đã có" in md
     assert "P/E mục tiêu đang là giả định mặc định" in md
+    assert "Lý do chặn công bố" not in md
+    assert "recommendation_gate_not_allowed" not in md
+    assert "valuation_result_not_publishable" not in md
+    assert "peer_data_source" not in md
+    assert "PENDING" not in md
+    assert "BLOCKED" not in md
+    assert "bị chặn" not in md
 
 
 def test_report_explanation_translates_user_facing_finance_terms():
@@ -329,5 +535,9 @@ def test_report_explanation_translates_user_facing_finance_terms():
         "Lineage:",
         "canonical facts",
         "artifact định giá",
+        "Lý do chặn công bố",
+        "recommendation_gate_not_allowed",
+        "valuation_result_not_publishable",
+        "peer_data_source",
     ]:
         assert english_term not in md

@@ -1,5 +1,10 @@
 from pathlib import Path
+from backend.reporting import pdf_quality_gate
 from backend.reporting.output_inventory import scan_report_inventory, ReportInventoryItem, load_universe
+
+
+def _client_pdf_bytes(label: bytes = b"report") -> bytes:
+    return b"%PDF-1.4\n" + label + (b"\n0" * 6000)
 
 
 def _universe():
@@ -11,8 +16,8 @@ def _universe():
 
 def test_scan_reports_present_and_absent(tmp_path: Path):
     out = tmp_path
-    (out / "DHG_report.pdf").write_bytes(b"%PDF-1.4 report")
-    (out / "DHG_explanation.pdf").write_bytes(b"%PDF-1.4 expl")
+    (out / "DHG_report.pdf").write_bytes(_client_pdf_bytes(b"report"))
+    (out / "DHG_explanation.pdf").write_bytes(_client_pdf_bytes(b"expl"))
     preview = out / "pdf_preview"
     preview.mkdir()
     # intentionally out of lexicographic order to prove numeric sort
@@ -53,7 +58,7 @@ def test_output_dir_does_not_exist(tmp_path: Path):
 def test_preview_dir_absent_yields_empty_pages(tmp_path: Path):
     """Ticker has a report PDF but no pdf_preview/ subdirectory → preview_pages is []."""
     out = tmp_path
-    (out / "DHG_report.pdf").write_bytes(b"%PDF-1.4 report")
+    (out / "DHG_report.pdf").write_bytes(_client_pdf_bytes(b"report"))
     # No pdf_preview directory created
 
     items = scan_report_inventory(out, [_universe()[0]])
@@ -66,7 +71,7 @@ def test_preview_dir_absent_yields_empty_pages(tmp_path: Path):
 def test_lowercase_ticker_in_universe_resolves_uppercase_files(tmp_path: Path):
     """A lowercase ticker in the universe row still resolves DHG_*.pdf (resolver uppercases it)."""
     out = tmp_path
-    (out / "DHG_report.pdf").write_bytes(b"%PDF-1.4 report")
+    (out / "DHG_report.pdf").write_bytes(_client_pdf_bytes(b"report"))
     preview = out / "pdf_preview"
     preview.mkdir()
     (preview / "DHG_report_page_1.png").write_bytes(b"png")
@@ -85,7 +90,7 @@ def test_lowercase_ticker_in_universe_resolves_uppercase_files(tmp_path: Path):
 def test_directory_inside_preview_not_counted_as_page(tmp_path: Path):
     """A subdirectory named like a valid preview file must NOT be counted as a page."""
     out = tmp_path
-    (out / "DHG_report.pdf").write_bytes(b"%PDF-1.4 report")
+    (out / "DHG_report.pdf").write_bytes(_client_pdf_bytes(b"report"))
     preview = out / "pdf_preview"
     preview.mkdir()
     # Real file page
@@ -141,3 +146,54 @@ def test_scan_reports_uses_export_storage_when_local_files_are_missing(tmp_path:
     assert dhg.report_size == 2048
     assert dhg.updated_at == "2026-06-15T00:00:01+00:00"
     assert items[1].has_report is False
+
+
+def test_scan_reports_rejects_local_benchmark_stub(tmp_path: Path):
+    out = tmp_path
+    (out / "DHG_report.pdf").write_bytes(
+        b"%PDF-1.4\nbenchmark_valuation_v1 analyst draft\n"
+    )
+    (out / "DHG_explanation.pdf").write_bytes(_client_pdf_bytes(b"expl"))
+
+    items = scan_report_inventory(out, _universe())
+
+    dhg = items[0]
+    assert dhg.has_report is False
+    assert dhg.preview_pages == []
+    assert dhg.report_size is None
+
+
+def test_scan_reports_rejects_local_tofu_or_mojibake_pdf(tmp_path: Path, monkeypatch):
+    out = tmp_path
+    (out / "DHG_report.pdf").write_bytes(_client_pdf_bytes(b"report"))
+    monkeypatch.setattr(
+        pdf_quality_gate,
+        "_extract_pdf_text_best_effort",
+        lambda path: "khuyến nghị ■ vÃ khuyáº",
+    )
+
+    items = scan_report_inventory(out, _universe())
+
+    assert items[0].has_report is False
+
+
+def test_scan_reports_uses_export_when_local_pdf_is_rejected(tmp_path: Path):
+    class FakeStorage:
+        def list_objects(self, bucket: str, prefix: str = "", limit: int = 1000, offset: int = 0):
+            assert bucket == "exports"
+            if prefix == "client_reports/DHG/":
+                return [
+                    {"name": "report.pdf", "updated_at": "2026-06-15T00:00:00+00:00", "size": 2048},
+                    {"name": "explanation.pdf", "updated_at": "2026-06-15T00:00:01+00:00"},
+                ]
+            return []
+
+    out = tmp_path
+    (out / "DHG_report.pdf").write_bytes(b"%PDF-1.4\nbenchmark_valuation_v1 analyst draft\n")
+
+    items = scan_report_inventory(out, _universe(), storage=FakeStorage())
+
+    dhg = items[0]
+    assert dhg.has_report is True
+    assert dhg.has_explanation is True
+    assert dhg.report_size == 2048

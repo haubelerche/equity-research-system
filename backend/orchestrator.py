@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any
 
 from backend.harness.runner import ResearchGraphRunner
@@ -13,6 +14,10 @@ _log = logging.getLogger(__name__)
 
 # DB statuses for which a downloadable report can be rendered from run artifacts.
 _RENDERABLE_STATUSES = {"auto_exported", "approved", "report_ready"}
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 @dataclass
@@ -53,9 +58,26 @@ class FullReportOrchestrator:
         artifacts (e.g. the "Cập nhật" button).
         """
         source_run_id = (context.flags or {}).get("source_run_id") or context.run_id
+        _log.info(
+            "fast render requested ticker=%s target_run=%s source_run=%s",
+            context.ticker,
+            context.run_id,
+            source_run_id,
+        )
         self.store.update_run_state(context.run_id, "report_ready", "PUBLISH")
         self.store.update_run_progress(
-            context.run_id, substep="rendering", detail="Đang dựng file báo cáo…"
+            context.run_id,
+            substep="rendering",
+            detail=f"Đang dựng file báo cáo từ lần chạy {source_run_id}…",
+            source_run_id=source_run_id,
+        )
+        self.store.update_run_progress(
+            context.run_id,
+            mode="fast_render",
+            source_run_id=source_run_id,
+            stage_started_at=_utc_now_iso(),
+            last_heartbeat_at=_utc_now_iso(),
+            operation="render_start",
         )
         try:
             from backend.reporting.report_delivery import render_and_store
@@ -68,23 +90,62 @@ class FullReportOrchestrator:
                 self.store.update_run_progress(
                     context.run_id,
                     substep="export_available",
-                    detail="Existing report export is still available; skipped failed re-render.",
+                    detail=(
+                        "Bản báo cáo hiện có vẫn sẵn sàng; "
+                        "lần cập nhật mới chưa ghi đè do dựng lại thất bại."
+                    ),
+                    source_run_id=source_run_id,
+                    render_error=str(exc),
+                )
+                self.store.update_run_progress(
+                    context.run_id,
+                    mode="fast_render",
+                    source_run_id=source_run_id,
+                    render_error=str(exc),
+                    last_heartbeat_at=_utc_now_iso(),
+                    operation="existing_export_fallback",
                 )
                 self.store.update_run_state(context.run_id, "auto_exported", "PUBLISH", finished=True)
                 _log.warning(
-                    "fast render failed for %s run=%s, using existing export: %s",
+                    "fast render failed for %s target_run=%s source_run=%s, using existing export: %s",
                     context.ticker,
                     context.run_id,
+                    source_run_id,
                     exc,
                 )
                 return None
             self.store.update_run_progress(
                 context.run_id,
                 blocking_reason=f"Không dựng được file báo cáo cho {context.ticker}.",
+                source_run_id=source_run_id,
+                render_error=str(exc),
+            )
+            self.store.update_run_progress(
+                context.run_id,
+                mode="fast_render",
+                source_run_id=source_run_id,
+                render_error=str(exc),
+                last_heartbeat_at=_utc_now_iso(),
+                operation="render_failed",
             )
             self.store.update_run_state(context.run_id, "failed", "PUBLISH", finished=True)
-            _log.warning("fast render failed for %s run=%s: %s", context.ticker, context.run_id, exc)
+            _log.warning(
+                "fast render failed for %s target_run=%s source_run=%s: %s",
+                context.ticker,
+                context.run_id,
+                source_run_id,
+                exc,
+            )
             return None
+        self.store.update_run_progress(
+            context.run_id,
+            substep="rendered",
+            detail="Dá»±ng vÃ  lÆ°u file PDF hoÃ n táº¥t.",
+            mode="fast_render",
+            source_run_id=source_run_id,
+            last_heartbeat_at=_utc_now_iso(),
+            operation="render_complete",
+        )
         self.store.update_run_state(context.run_id, "auto_exported", "PUBLISH", finished=True)
         return None
 

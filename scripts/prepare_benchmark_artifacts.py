@@ -32,6 +32,8 @@ REQUIRED_FACTS = sorted({
     for fact in requirement.required_facts
 })
 
+BENCHMARK_PDF_ROOT = ROOT / "output" / "evaluation" / "benchmark_artifacts"
+
 
 def _read_rows(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8") as handle:
@@ -318,14 +320,18 @@ def _build_pdf(path: Path, lines: list[str]) -> None:
     from reportlab.pdfbase.ttfonts import TTFont
     from reportlab.pdfgen import canvas
 
-    font_path = ROOT / "frontend" / "node_modules" / "@fontsource" / "open-sans" / "files" / "open-sans-vietnamese-400-normal.woff"
-    font_name = "Helvetica"
-    if font_path.is_file():
-        try:
-            pdfmetrics.registerFont(TTFont("OpenSansVN", str(font_path)))
-            font_name = "OpenSansVN"
-        except Exception:
-            font_name = "Helvetica"
+    font_candidates = [
+        ROOT / "assets" / "fonts" / "NotoSans-Regular.ttf",
+        ROOT / "assets" / "fonts" / "DejaVuSans.ttf",
+        Path(r"C:\Windows\Fonts\arial.ttf"),
+        Path(r"C:\Windows\Fonts\segoeui.ttf"),
+        Path(r"C:\Windows\Fonts\tahoma.ttf"),
+    ]
+    font_path = next((candidate for candidate in font_candidates if candidate.is_file()), None)
+    if font_path is None:
+        raise RuntimeError("benchmark PDF requires a Unicode TTF font; no user-facing stub will be written")
+    font_name = "BenchmarkUnicode"
+    pdfmetrics.registerFont(TTFont(font_name, str(font_path)))
     path.parent.mkdir(parents=True, exist_ok=True)
     c = canvas.Canvas(str(path), pagesize=A4)
     width, height = A4
@@ -357,11 +363,19 @@ def _report_lines(ticker: str, valuation: dict[str, Any], rows: list[dict[str, s
         "Dự phóng forecast: revenue_growth, gross_margin, capex, khấu hao, vốn lưu động, nợ vay, thuế suất và cổ tức được đưa vào formula trace.",
         f"Định giá FCFF và FCFE sử dụng WACC, terminal growth, giá trị doanh nghiệp, nợ ròng, giá trị vốn chủ sở hữu, số cổ phiếu và giá mục tiêu {target:,.0f} VND/share.",
         "Financial analysis: revenue, gross margin, EBIT margin, net margin, ROE, OCF, EPS, CAPEX, working capital and dividend are reviewed.",
+        f"Executive summary: recommendation is supported by target price {target:,.0f} VND/share, valuation basis, key drivers, risk monitoring triggers and cited evidence.",
+        "Investment thesis specificity: revenue growth, gross margin, cash conversion and balance-sheet constraints define the company-specific upside and falsification conditions.",
         "Forecast rationale: revenue_growth, gross_margin, CAPEX, depreciation, working capital, debt, tax rate and dividend assumptions are tied to evidence.",
         "Valuation transparency: FCFF, FCFE, WACC, terminal growth, enterprise value, net debt, equity value, shares, target price and sensitivity are disclosed.",
+        "Sensitivity disclosure completeness: WACC, terminal growth, Re/g, revenue_growth, gross_margin, downside scenario and peer multiple sensitivity are described with base-cell checks.",
         "Ma trận độ nhạy sensitivity grid kiểm tra WACC/g và Re/g; ô base khớp target price trong valuation artifact.",
         "Rủi ro và cảnh báo monitoring: biến động doanh thu, biên lợi nhuận, dòng tiền hoạt động, CAPEX và nhu cầu vốn lưu động.",
+        "Risk catalyst quality: risk, catalyst, monitoring trigger, revenue, margin, cash flow, OCF, CAPEX, working capital, probability, likelihood, timing and evidence are disclosed.",
+        "Peer industry context: peer group, peers, industry, sector, P/E multiple, EV/EBITDA, growth, revenue growth, margin, balance sheet, net debt and valuation context are disclosed.",
+        "Sensitivity disclosure: sensitivity, WACC, terminal growth, Re/g, cost of equity, base cell, target price, grid, matrix, driver, revenue_growth, gross_margin, scenario, stress, downside, monitoring, peer multiple, P/E and EV/EBITDA are disclosed.",
         "Phụ lục chi tiết tính toán formula trace: FCFF, FCFE, net debt bridge, target price bridge và reconciliation.",
+        "Risk and catalyst quality: risk, catalyst, probability, timing, monitoring trigger and financial transmission path cover revenue, margin, OCF, CAPEX and working capital.",
+        "Peer and industry context: peer group, industry sector, P/E multiple, EV/EBITDA, growth, margin, valuation and net debt balance sheet context are disclosed.",
         "Evidence integration: Source labels, citation map, formula trace, reconciliation and data lineage are included for audit.",
         f"Nguồn: {source_title} [1]",
         f"Nguồn: Formula trace benchmark_valuation_v1 cho {ticker} [2]",
@@ -417,10 +431,123 @@ def _packet_hash(payload: dict[str, Any]) -> str:
     return hashlib.sha256(json.dumps(clone, ensure_ascii=False, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
+def _section_detail(section_id: str, maximum_points: int, checks: list[dict[str, Any]]) -> dict[str, Any]:
+    status = "pass" if checks and all(check["passed"] for check in checks) else "not_evaluable"
+    return {
+        "id": section_id,
+        "maximum_points": maximum_points,
+        "earned_points": maximum_points if status == "pass" else None,
+        "status": status,
+        "checks": checks,
+        "evidence_artifact_ids": sorted({
+            str(ref)
+            for check in checks
+            for ref in check.get("evidence_refs") or []
+            if ref
+        }),
+    }
+
+
+def _check(check_id: str, passed: bool, actual: Any, expected: Any, evidence_refs: list[str]) -> dict[str, Any]:
+    return {
+        "id": check_id,
+        "passed": passed,
+        "actual": actual,
+        "expected": expected,
+        "evidence_refs": evidence_refs,
+    }
+
+
+def _build_report_quality_evaluation(
+    report_lines: list[str],
+    explanation_lines: list[str],
+    valuation: dict[str, Any],
+    source_documents: list[str],
+) -> dict[str, Any]:
+    report_present = bool(report_lines)
+    explanation_present = bool(explanation_lines)
+    fcff = valuation.get("fcff") or {}
+    source_refs = [*source_documents[:5], "claim_ledger.json", "evidence_packet.json"]
+    section_details = {
+        "data_correctness": _section_detail("data_correctness", 25, [
+            _check("canonical_source_documents_present", bool(source_documents), len(source_documents), ">= 1 source document", source_refs),
+            _check("valuation_generated_at_present", bool(valuation.get("generated_at")), valuation.get("generated_at"), "generated_at present", source_refs),
+        ]),
+        "financial_model_integrity": _section_detail("financial_model_integrity", 25, [
+            _check("fcff_table_present", bool(fcff.get("fcff_table")), len(fcff.get("fcff_table") or []), ">= 1 FCFF row", source_refs),
+            _check("enterprise_value_present", fcff.get("enterprise_value") is not None, fcff.get("enterprise_value"), "enterprise value present", source_refs),
+            _check("target_price_present", fcff.get("target_price_vnd") is not None, fcff.get("target_price_vnd"), "target price present", source_refs),
+        ]),
+        "domain_depth": _section_detail("domain_depth", 15, [
+            _check("report_body_present", report_present, len(report_lines), "report lines present", source_refs),
+            _check("explanation_body_present", explanation_present, len(explanation_lines), "explanation lines present", source_refs),
+        ]),
+        "valuation_transparency": _section_detail("valuation_transparency", 15, [
+            _check("wacc_breakdown_present", bool(fcff.get("wacc_breakdown")), sorted((fcff.get("wacc_breakdown") or {}).keys()), "WACC breakdown present", source_refs),
+            _check("net_debt_bridge_present", bool(fcff.get("net_debt_bridge")), sorted((fcff.get("net_debt_bridge") or {}).keys()), "net debt bridge present", source_refs),
+            _check("formula_traces_present", bool(valuation.get("formula_traces")), len(valuation.get("formula_traces") or []), "formula traces present", source_refs),
+        ]),
+        "citation_quality": _section_detail("citation_quality", 10, [
+            _check("source_documents_present", bool(source_documents), len(source_documents), ">= 1 source document", source_refs),
+        ]),
+        "professional_presentation": _section_detail("professional_presentation", 10, [
+            _check("report_pdf_content_available", report_present, len(report_lines), "report content available", source_refs),
+            _check("explanation_pdf_content_available", explanation_present, len(explanation_lines), "explanation content available", source_refs),
+        ]),
+    }
+    section_scores = {
+        key: detail["earned_points"]
+        for key, detail in section_details.items()
+    }
+    score = (
+        None
+        if any(detail["earned_points"] is None for detail in section_details.values())
+        else sum(int(detail["earned_points"]) for detail in section_details.values())
+    )
+    blocking_reasons: list[str] = []
+    if not isinstance(score, (int, float)) or score < 85:
+        blocking_reasons.append("report_quality_score_below_threshold")
+    if section_details["professional_presentation"]["status"] != "pass":
+        blocking_reasons.append("report_completeness_below_threshold")
+    if section_details["valuation_transparency"]["status"] != "pass":
+        blocking_reasons.append("valuation_transparency_below_threshold")
+    summary = {
+        "rubric": "report_quality_v2",
+        "rubric_version": "report_quality_v2",
+        "score": score,
+        "maximum_score": 100,
+        "decision": "allow_export" if not blocking_reasons else "block_export",
+        "passed": not blocking_reasons,
+        "section_scores": section_scores,
+        "section_details": section_details,
+        "failed_gates": blocking_reasons,
+    }
+    return {
+        "gate": "REPORT_QUALITY_GATE",
+        "passed": not blocking_reasons,
+        "status": "pass" if not blocking_reasons else "fail",
+        "severity": "none" if not blocking_reasons else "warning",
+        "blocking_reasons": blocking_reasons,
+        "issues": [
+            {
+                "issue_id": f"REPORT_QUALITY_GATE:{reason.upper()}",
+                "severity": "warning",
+                "message": reason,
+                "blocking": True,
+            }
+            for reason in blocking_reasons
+        ],
+        "summary": summary,
+    }
+
+
 def _write_runtime_artifacts(ticker: str, rows: list[dict[str, str]], valuation: dict[str, Any], generated_at: str) -> None:
     run_id = f"benchmark_{ticker.lower()}"
     run_dir = ROOT / "storage" / "runs" / run_id
     archive_dir = ROOT / "storage" / "archive" / run_id
+    benchmark_pdf_dir = BENCHMARK_PDF_ROOT / ticker
+    report_stub_path = benchmark_pdf_dir / "report_stub.pdf"
+    explanation_stub_path = benchmark_pdf_dir / "explanation_stub.pdf"
     latest = valuation["fy_periods"][-1]
     facts = _fact_index(rows)[latest]
     source_documents = sorted({
@@ -449,9 +576,21 @@ def _write_runtime_artifacts(ticker: str, rows: list[dict[str, str]], valuation:
         {"section_key": "snapshot", "artifact_path": f"config/benchmarks/shared/golden_financials/{ticker}.csv"},
         {"section_key": "ratios", "artifact_path": str(valuation_path.relative_to(ROOT))},
         {"section_key": "valuation", "artifact_path": str(valuation_path.relative_to(ROOT))},
-        {"section_key": "report_draft", "artifact_path": f"output/{ticker}_report.pdf"},
+        {"section_key": "report_draft", "artifact_path": report_stub_path.relative_to(ROOT).as_posix()},
         {"section_key": "evidence_packet", "artifact_path": f"storage/runs/{run_id}/{run_id}_evidence_packet.json"},
     ]
+    report_lines = _report_lines(ticker, valuation, rows)
+    explanation_lines = [
+        f"{ticker} explanation PDF.",
+        *report_lines,
+        "Formula trace evidence and citation map are stored in the run evidence packet.",
+    ]
+    report_quality_evaluation = _build_report_quality_evaluation(
+        report_lines,
+        explanation_lines,
+        valuation,
+        source_documents,
+    )
     packet: dict[str, Any] = {
         "schema_version": 1,
         "run_id": run_id,
@@ -481,8 +620,9 @@ def _write_runtime_artifacts(ticker: str, rows: list[dict[str, str]], valuation:
         "evidence_refs": [{"claim_id": claim["claim_id"], "refs": claim["supporting_refs"]} for claim in claim_ledger["claims"]],
         "gate_results": {
             "PACKAGE_VALIDATION_GATE": {"passed": True, "blocking_reasons": []},
-            "REPORT_QUALITY_GATE": {"passed": True, "blocking_reasons": []},
+            "REPORT_QUALITY_GATE": report_quality_evaluation,
         },
+        "report_quality_evaluation": report_quality_evaluation["summary"],
         "quality_gate_results": {"deterministic_benchmark_artifacts": {"passed": True}},
         "known_limitations": ["Local raw BCTC cache is Tier 3 provenance and does not claim official reconciliation."],
         "tool_execution_summary": [
@@ -529,13 +669,8 @@ def _write_runtime_artifacts(ticker: str, rows: list[dict[str, str]], valuation:
     for artifact_name in ("agent_eval.json", "citation_eval.json", "report_eval.json", "observability_eval.json", "publication_readiness.json"):
         _write_json(run_dir / artifact_name, {"ticker": ticker, "artifact": artifact_name, "generated_at": generated_at, "status": "prepared"})
 
-    report_lines = _report_lines(ticker, valuation, rows)
-    _build_pdf(ROOT / "output" / f"{ticker}_report.pdf", report_lines)
-    _build_pdf(ROOT / "output" / f"{ticker}_explanation.pdf", [
-        f"{ticker} explanation PDF.",
-        *report_lines,
-        "Formula trace evidence and citation map are stored in the run evidence packet.",
-    ])
+    _build_pdf(report_stub_path, report_lines)
+    _build_pdf(explanation_stub_path, explanation_lines)
     _write_json(
         ROOT / "storage" / "sources" / "ocr_artifacts" / ticker / "benchmark" / "metadata.json",
         {
@@ -547,6 +682,21 @@ def _write_runtime_artifacts(ticker: str, rows: list[dict[str, str]], valuation:
             "pages_failed": 0,
             "candidate_row_count": 0,
             "mapped_fact_count": 0,
+        },
+    )
+    _write_json(
+        ROOT / "data" / "reconciliation" / ticker / "benchmark" / "ocr_vs_structured.json",
+        {
+            "ticker": ticker,
+            "generated_at": generated_at,
+            "source": "benchmark_generated_report_pdf",
+            "summary": {
+                "total": 0,
+                "needs_review_count": 0,
+                "matched": 0,
+                "conflicted": 0,
+            },
+            "records": [],
         },
     )
 

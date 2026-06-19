@@ -1,6 +1,6 @@
 {
   "ticker": "DPP",
-  "generated_at": "2026-06-16T16:52:08.980315+00:00",
+  "generated_at": "2026-06-19T07:37:35.071080+00:00",
   "outcome": {
     "ticker": "DPP",
     "meeting_year": 2026,
@@ -9,13 +9,13 @@
       "DPP DHCD 2026.pdf"
     ],
     "pages": 34,
-    "approved_resolutions": 11,
+    "approved_resolutions": 12,
     "drivers": {
       "dividend_plan": 2,
-      "borrowing_plan": 1,
+      "borrowing_plan": 0,
       "investment_plan": 0,
-      "rnd_and_product_focus": 1,
-      "business_direction": 9,
+      "rnd_and_product_focus": 0,
+      "business_direction": 6,
       "targets_2026": 1
     },
     "errors": []

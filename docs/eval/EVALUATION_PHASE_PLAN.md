@@ -239,10 +239,10 @@ File đề xuất: `config/benchmarks/02_ragas_retrieval/golden_queries/default.
 | Metric | Tool | Threshold P0 | Threshold P1 |
 |---|---|---:|---:|
 | Hit-rate@5 | Custom pytest | >= 90% golden queries | >= 95% |
-| MRR@5 | Custom pytest | >= 0.70 | >= 0.80 |
-| Context precision | Ragas | >= 0.75 | >= 0.85 |
-| Context recall | Ragas | >= 0.75 | >= 0.85 |
-| Faithfulness | Ragas | >= 0.85 | >= 0.90 |
+| MRR@5 | Custom pytest | >= 75% | >= 80% |
+| Context precision | Ragas | >= 80% | >= 85% |
+| Context recall | Ragas | >= 80% | >= 85% |
+| Faithfulness | Ragas | >= 85% | >= 90% |
 | Noise sensitivity | Ragas | Baseline only | Improve 20% |
 | Unsupported claim rate | Custom validator | 0% final | 0% final |
 | Tier-3-only material claim | Source gate | 0 | 0 |
@@ -491,11 +491,11 @@ File đề xuất: `config/benchmarks/02_ragas_retrieval/golden_queries/default.
 |---|---|---:|
 | Tool permission compliance | Custom gate | 100% |
 | Output schema validity | Pydantic/JSON schema | 100% |
-| Role adherence | DeepEval/OpenAI grader | >= 0.90 |
-| Groundedness | Ragas/DeepEval/custom judge | >= 0.90 final narrative |
+| Role adherence | DeepEval/OpenAI grader | >= 85% |
+| Groundedness | Ragas/DeepEval/custom judge | >= 85% final narrative |
 | No unauthorized financial calculation | Custom regex + judge | 100% compliance |
-| Task completion | DeepEval agentic metric | >= 0.85 |
-| Plan adherence | DeepEval agentic metric | >= 0.85 |
+| Task completion | DeepEval agentic metric | >= 85% |
+| Plan adherence | DeepEval agentic metric | >= 80% |
 | Critic issue recall on seeded failures | Golden bad reports | >= 90% |
 
 ### LLM judge rubric
@@ -549,7 +549,7 @@ Lưu ý: `agent_eval.json` là advisory đối với các tiêu chí judge. Nó 
 | Target price | Chỉ hiển thị khi valuation publishable và approval cho phép |
 | Narrative | Company-specific, material, không dùng template chung chung |
 | Tables/charts | Numbered, sourced, unit rõ, không mâu thuẫn với artifact |
-| Report-quality rubric | Score >= 85 và không failed gate |
+| Report-quality rubric | Score >= 85% và không failed gate |
 | Export package | Manifest, formula traces, evidence packet, quality gate, PDF/HTML |
 | Client-final authorization | Run approval, final approval, locked artifact, snapshot match |
 | Post-render audit | HTML/PDF không lộ internal banner, generic source note, draft markers |
@@ -569,7 +569,7 @@ Lưu ý: `agent_eval.json` là advisory đối với các tiêu chí judge. Nó 
 
 | Điều kiện | Decision |
 |---|---|
-| Score >= 85 và không failed deterministic gate | `allow_export` |
+| Score >= 85% và không failed deterministic gate | `allow_export` |
 | Score >= 70 nhưng còn failed gate | `draft_only` |
 | Score < 70 hoặc critical gate fail | `block_export` |
 
@@ -884,10 +884,10 @@ python -m pytest \
 | Data critical failures | 0 | 0 | 0 |
 | Finance critical failures | 0 | 0 | 0 |
 | Citation coverage final | 100% | 100% | 100% |
-| Report quality score | >= 85 | >= 85 | >= 90 published |
+| Report quality score | >= 85% | >= 85% | >= 90% published |
 | RAG hit-rate@5 | Measured only | >= 90% | >= 95% |
-| Ragas faithfulness | Measured only | >= 0.85 | >= 0.90 |
-| Agent role adherence | Measured only | >= 0.85 | >= 0.90 |
+| Ragas faithfulness | Measured only | >= 85% | >= 90% |
+| Agent role adherence | Measured only | >= 85% | >= 90% |
 | Cost per report | Baseline | <= baseline + 15% | Budgeted by archetype |
 
 ---

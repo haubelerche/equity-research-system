@@ -24,6 +24,7 @@ from typing import Any
 from backend.evaluation.benchmark_standards import (
     STANDARD_SCHEMA_VERSION,
     evaluate_metric_threshold,
+    metric_policy,
     metric_blocks_publish,
     publication_status_from_metrics,
 )
@@ -539,19 +540,46 @@ def _artifact_summary_from_payload(
     blocking_issues = payload.get("blocking_issues")
     if not isinstance(blocking_issues, list):
         blocking_issues = []
+    normalized_metric_results = _normalize_metric_results(metric_results)
+    derived_blocking_issues = [
+        f"{metric.get('id') or metric.get('metric_id')}:{metric.get('detail') or 'threshold_not_met'}"
+        for metric in normalized_metric_results
+        if isinstance(metric, dict) and metric_blocks_publish(metric)
+    ]
     summary = {
         "plan_id": str(payload.get("plan_id") or (plan.id if plan else "")),
         "name": str(payload.get("name") or payload.get("plan_name") or (plan.name if plan else artifact_name)),
         "artifact": artifact_name,
-        "status": str(payload.get("status") or "not_measured"),
+        "status": _artifact_status_from_metric_results(
+            str(payload.get("status") or "not_measured"),
+            normalized_metric_results,
+        ),
         "metrics": metrics,
-        "metric_results": _normalize_metric_results(metric_results),
-        "blocking_issues": blocking_issues,
+        "metric_results": normalized_metric_results,
+        "blocking_issues": sorted(set([*blocking_issues, *derived_blocking_issues])),
     }
     for key in ("source", "generated_at", "cohort", "tickers"):
         if key in payload:
             summary[key] = payload[key]
     return summary
+
+
+def _artifact_status_from_metric_results(
+    fallback_status: str,
+    metric_results: list[Any],
+) -> str:
+    statuses = [
+        str(metric.get("status") or "")
+        for metric in metric_results
+        if isinstance(metric, dict)
+    ]
+    if any(status == "fail" for status in statuses):
+        return "fail"
+    if any(status in {"blocked", "not_evaluable", "not_measured"} for status in statuses):
+        return "blocked"
+    if statuses and all(status in {"measured_only", "warning"} for status in statuses):
+        return "measured_only"
+    return fallback_status
 
 
 def _candidate_artifact_paths(
@@ -640,16 +668,44 @@ def _normalize_metric_results(metrics: list[Any]) -> list[Any]:
         if not isinstance(metric, dict):
             normalized.append(metric)
             continue
-        current_status = str(metric.get("status") or "not_evaluable")
+        metric_id = str(metric.get("metric_id") or metric.get("id") or "")
+        if _is_legacy_dashboard_presentation_metric(metric):
+            normalized.append(_legacy_dashboard_presentation_metric(metric))
+            continue
+        metric_for_threshold = _normalize_metric_threshold_contract(metric, metric_id)
+        metric_for_evidence = _normalize_report_quality_evidence_contract(
+            metric_for_threshold,
+            metric_id,
+        )
+        current_status = str(metric_for_evidence.get("status") or "not_evaluable")
+        if (
+            current_status == "pass"
+            and metric_for_evidence.get("value") in (None, "")
+            and current_status != "not_applicable"
+        ):
+            normalized_metric = dict(metric_for_evidence)
+            normalized_metric.setdefault("legacy_status", current_status)
+            normalized_metric["status"] = "not_evaluable"
+            normalized_metric["detail"] = normalized_metric.get("detail") or "metric_value_missing"
+            evaluator = dict(normalized_metric.get("evaluator") or {})
+            evaluator["execution_status"] = "not_executed"
+            normalized_metric["evaluator"] = evaluator
+            if not normalized_metric.get("failed_examples"):
+                normalized_metric["failed_examples"] = [{
+                    "reason": "metric_value_missing",
+                    "source": normalized_metric.get("source"),
+                }]
+            normalized.append(normalized_metric)
+            continue
         threshold_status = evaluate_metric_threshold(
-            metric,
-            metric.get("value"),
+            metric_for_evidence,
+            metric_for_evidence.get("value"),
             fallback_status=current_status,
         )
         if threshold_status == current_status:
-            normalized.append(metric)
+            normalized.append(metric_for_evidence)
             continue
-        normalized_metric = dict(metric)
+        normalized_metric = dict(metric_for_evidence)
         normalized_metric.setdefault("legacy_status", current_status)
         normalized_metric["status"] = threshold_status
         normalized_metric["threshold_status_source"] = "benchmark_threshold_contract"
@@ -657,11 +713,272 @@ def _normalize_metric_results(metrics: list[Any]) -> list[Any]:
     return normalized
 
 
+REPORT_QUALITY_RUBRIC_METRIC_IDS = {
+    "report.quality_total",
+    "report_quality_score",
+    "report.completeness",
+    "report.thesis_specificity",
+    "report.financial_analysis_depth",
+    "report.forecast_rationale",
+    "report.valuation_transparency",
+    "report.risk_catalyst_quality",
+    "report.evidence_integration",
+    "report.peer_industry_context_quality",
+    "report.executive_summary_actionability",
+    "report.sensitivity_disclosure_completeness",
+}
+
+
+def _is_legacy_dashboard_presentation_metric(metric: dict[str, Any]) -> bool:
+    threshold_policy = metric.get("threshold_policy")
+    calculation = metric.get("calculation")
+    parameters = calculation.get("parameters") if isinstance(calculation, dict) else {}
+    return (
+        isinstance(threshold_policy, dict)
+        and threshold_policy.get("source") == "dashboard_presentation_contract"
+    ) or (
+        isinstance(parameters, dict)
+        and parameters.get("presentation_score_policy") == "cap_passed_scores_to_85_95_band"
+    )
+
+
+def _legacy_dashboard_presentation_metric(metric: dict[str, Any]) -> dict[str, Any]:
+    normalized_metric = dict(metric)
+    normalized_metric.setdefault("legacy_status", metric.get("status"))
+    normalized_metric.setdefault("legacy_value", metric.get("value"))
+    normalized_metric["value"] = None
+    normalized_metric["status"] = "not_evaluable"
+    normalized_metric["detail"] = "legacy_presentation_score_requires_regeneration"
+    normalized_metric["sample_size"] = 0
+    evaluator = dict(normalized_metric.get("evaluator") or {})
+    evaluator["execution_status"] = "not_executed"
+    normalized_metric["evaluator"] = evaluator
+    failed_examples = list(normalized_metric.get("failed_examples") or [])
+    failed_examples.append({
+        "reason": "legacy_presentation_score_requires_regeneration",
+        "legacy_threshold": metric.get("threshold"),
+        "threshold_policy": metric.get("threshold_policy"),
+    })
+    normalized_metric["failed_examples"] = failed_examples
+    return normalized_metric
+
+
+def _nested_report_quality_source_samples(sample: Any) -> list[dict[str, Any]]:
+    if not isinstance(sample, dict):
+        return []
+    nested: list[dict[str, Any]] = []
+    for item in sample.get("source_samples") or []:
+        if isinstance(item, dict):
+            nested.append(item)
+    source_calculation = sample.get("source_calculation")
+    if isinstance(source_calculation, dict):
+        for item in source_calculation.get("per_sample_results") or []:
+            if isinstance(item, dict):
+                nested.append(item)
+    return nested
+
+
+def _report_quality_applicable_samples(samples: list[Any]) -> list[dict[str, Any]]:
+    applicable: list[dict[str, Any]] = []
+    for sample in samples:
+        if not isinstance(sample, dict):
+            continue
+        status = str(sample.get("status") or "").lower()
+        if status == "not_applicable":
+            continue
+        if str(sample.get("sample_origin") or "").lower() == "benchmark_control":
+            continue
+        applicable.append(sample)
+    return applicable
+
+
+def _report_quality_structured_sample_available(sample: Any) -> bool:
+    if not isinstance(sample, dict):
+        return False
+    if sample.get("structured_report_quality_available") is True:
+        return True
+    return any(
+        nested.get("structured_report_quality_available") is True
+        for nested in _nested_report_quality_source_samples(sample)
+    )
+
+
+def _report_quality_sample_value_present(sample: dict[str, Any], key: str) -> bool:
+    if sample.get(key) not in (None, "", [], {}):
+        return True
+    return any(
+        nested.get(key) not in (None, "", [], {})
+        for nested in _nested_report_quality_source_samples(sample)
+    )
+
+
+def _normalize_report_quality_evidence_contract(
+    metric: dict[str, Any],
+    metric_id: str,
+) -> dict[str, Any]:
+    if metric_id not in REPORT_QUALITY_RUBRIC_METRIC_IDS:
+        return metric
+    calculation = dict(metric.get("calculation") or {})
+    samples = calculation.get("per_sample_results")
+    sample_list = samples if isinstance(samples, list) else []
+    applicable_samples = _report_quality_applicable_samples(sample_list)
+    if applicable_samples and all(
+        _report_quality_structured_sample_available(sample)
+        for sample in applicable_samples
+    ):
+        return metric
+    if metric.get("detail") == "structured_report_quality_evidence_missing":
+        return metric
+    reason = "structured_report_quality_evidence_missing"
+    normalized_metric = dict(metric)
+    normalized_metric.setdefault("legacy_status", metric.get("status"))
+    normalized_metric.setdefault("legacy_value", metric.get("value"))
+    normalized_metric["value"] = None
+    normalized_metric["status"] = "not_evaluable"
+    normalized_metric["detail"] = reason
+    normalized_metric["sample_size"] = 0
+
+    claim_ledger_available = any(
+        _report_quality_sample_value_present(sample, "claim_ledger_path")
+        for sample in applicable_samples
+    )
+    evidence_packet_available = any(
+        _report_quality_sample_value_present(sample, "evidence_packet_path")
+        for sample in applicable_samples
+    )
+    missing_samples = [
+        {
+            "reason": reason,
+            "ticker": sample.get("ticker"),
+            "artifact_id": sample.get("artifact_id"),
+            "source_metric_id": sample.get("source_metric_id"),
+            "claim_ledger_available": _report_quality_sample_value_present(sample, "claim_ledger_path"),
+            "evidence_packet_available": _report_quality_sample_value_present(sample, "evidence_packet_path"),
+            "legacy_status": sample.get("status"),
+            "legacy_value": sample.get("value"),
+        }
+        for sample in applicable_samples
+        if not _report_quality_structured_sample_available(sample)
+    ]
+    normalized_metric["failed_examples"] = missing_samples or [{
+        "reason": reason,
+        "claim_ledger_available": claim_ledger_available,
+        "evidence_packet_available": evidence_packet_available,
+        "legacy_status": metric.get("status"),
+        "legacy_value": metric.get("value"),
+    }]
+
+    evaluator = dict(normalized_metric.get("evaluator") or {})
+    evaluator["execution_status"] = "not_executed"
+    normalized_metric["evaluator"] = evaluator
+
+    threshold_policy = dict(normalized_metric.get("threshold_policy") or {})
+    threshold_policy["evidence_basis"] = "structured_report_quality_evaluation_required"
+    normalized_metric["threshold_policy"] = threshold_policy
+
+    if sample_list:
+        calculation["per_sample_results"] = [
+            {
+                **sample,
+                "status": "not_evaluable",
+                "value": None,
+                "reason": reason,
+                "legacy_status": sample.get("status"),
+                "legacy_value": sample.get("value"),
+            }
+            if isinstance(sample, dict)
+            else sample
+            for sample in sample_list
+        ]
+    calculation["numerator"] = None
+    calculation["denominator"] = len(applicable_samples)
+    normalized_metric["calculation"] = calculation
+    return normalized_metric
+
+
+def _operator_from_threshold_text(threshold: Any) -> str | None:
+    if not isinstance(threshold, str):
+        return None
+    text = threshold.strip()
+    for operator in (">=", "<=", ">", "<", "="):
+        if text.startswith(operator):
+            return operator
+    return None
+
+
+def _normalize_metric_threshold_contract(metric: dict[str, Any], metric_id: str) -> dict[str, Any]:
+    if not metric_id:
+        return metric
+    if (metric.get("threshold_policy") or {}).get("source") == "dashboard_presentation_contract":
+        return metric
+    policy = metric_policy(metric_id)
+    governed_threshold = policy.get("threshold")
+    if not governed_threshold:
+        threshold_policy = dict(metric.get("threshold_policy") or {})
+        if threshold_policy.get("source"):
+            return metric
+        normalized_metric = dict(metric)
+        threshold_policy.setdefault("source", "legacy/fallback")
+        normalized_metric["threshold_policy"] = threshold_policy
+        return normalized_metric
+    policy_operator = policy.get("threshold_operator") or _operator_from_threshold_text(governed_threshold)
+    policy_metric_type = policy.get("metric_type")
+    policy_severity = policy.get("severity")
+    policy_blocks_publish = policy.get("blocks_publish")
+    needs_contract_update = (
+        str(metric.get("threshold") or "") != str(governed_threshold)
+        or (policy_operator is not None and str(metric.get("threshold_operator") or "") != policy_operator)
+        or (policy_metric_type is not None and metric.get("metric_type") != policy_metric_type)
+        or (policy_severity is not None and metric.get("severity") != policy_severity)
+        or (policy_blocks_publish is not None and metric.get("blocks_publish") is not policy_blocks_publish)
+        or (metric.get("threshold_policy") or {}).get("source") != "metric_registry_v3"
+    )
+    if not needs_contract_update:
+        return metric
+    current_threshold = metric.get("threshold")
+    normalized_metric = dict(metric)
+    if current_threshold not in (None, "") and str(current_threshold) != str(governed_threshold):
+        normalized_metric.setdefault("legacy_threshold", current_threshold)
+    normalized_metric["threshold"] = governed_threshold
+    if policy_operator:
+        normalized_metric["threshold_operator"] = policy_operator
+    for key, value in (
+        ("metric_type", policy_metric_type),
+        ("severity", policy_severity),
+        ("blocks_publish", policy_blocks_publish),
+    ):
+        if value is not None:
+            normalized_metric[key] = value
+    threshold_policy = dict(normalized_metric.get("threshold_policy") or {})
+    if policy.get("rationale"):
+        threshold_policy.setdefault("rationale", policy["rationale"])
+    threshold_policy["source"] = "metric_registry_v3"
+    normalized_metric["threshold_policy"] = threshold_policy
+    return normalized_metric
+
+
 def _normalize_artifact_summary(artifact: dict[str, Any]) -> dict[str, Any]:
     metric_results = artifact.get("metric_results")
     if not isinstance(metric_results, list):
         return artifact
-    return {**artifact, "metric_results": _normalize_metric_results(metric_results)}
+    normalized_metric_results = _normalize_metric_results(metric_results)
+    derived_blocking_issues = [
+        f"{metric.get('id') or metric.get('metric_id')}:{metric.get('detail') or 'threshold_not_met'}"
+        for metric in normalized_metric_results
+        if isinstance(metric, dict) and metric_blocks_publish(metric)
+    ]
+    existing_blocking = artifact.get("blocking_issues")
+    if not isinstance(existing_blocking, list):
+        existing_blocking = []
+    return {
+        **artifact,
+        "status": _artifact_status_from_metric_results(
+            str(artifact.get("status") or "not_measured"),
+            normalized_metric_results,
+        ),
+        "metric_results": normalized_metric_results,
+        "blocking_issues": sorted(set([*existing_blocking, *derived_blocking_issues])),
+    }
 
 
 def _merge_benchmark_suite_sibling_artifacts(

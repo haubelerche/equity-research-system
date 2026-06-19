@@ -245,15 +245,22 @@ def test_latest_benchmark_suite_prefers_fresh_ticker_artifact_over_stale_root(tm
         "generated_at": "2026-06-17T00:00:00+00:00",
         "status": "fail",
         "score": 91,
-        "metric_results": [{
-            "id": "report.quality_total",
-            "metric_id": "report.quality_total",
-            "value": 91,
-            "threshold": ">= 85/100",
-            "status": "pass",
-            "blocks_publish": False,
-        }],
-    }
+            "metric_results": [{
+                "id": "report.quality_total",
+                "metric_id": "report.quality_total",
+                "value": 91,
+                "threshold": ">= 85/100",
+                "status": "pass",
+                "blocks_publish": False,
+                "calculation": {
+                    "per_sample_results": [{
+                        "structured_report_quality_available": True,
+                        "value": 91,
+                        "status": "pass",
+                    }],
+                },
+            }],
+        }
     (suite_dir / "benchmark_suite.json").write_text(json.dumps(suite_packet), encoding="utf-8")
     root_report = suite_dir / "report_eval.json"
     ticker_report = dhg_dir / "report_eval.json"
@@ -403,6 +410,138 @@ def test_latest_benchmark_suite_normalizes_stale_metric_status(tmp_path) -> None
     assert packet["overall_status"] == "pass"
 
 
+def test_latest_benchmark_suite_normalizes_registry_threshold(tmp_path) -> None:
+    suite_dir = tmp_path / "benchmark_suite"
+    suite_dir.mkdir()
+    suite_packet = {
+        "source": "benchmark_suite",
+        "publication_status": "BLOCKED_BY_P0",
+        "plan_ids": ["02"],
+        "artifacts": [{
+            "plan_id": "02",
+            "name": "RAG and evidence",
+            "artifact": "retrieval_eval.json",
+            "status": "fail",
+            "metric_results": [{
+                "id": "hit_rate_at_5",
+                "metric_id": "hit_rate_at_5",
+                "metric_type": "coverage",
+                "unit": "percent",
+                "threshold": "= 100%",
+                "threshold_operator": "=",
+                "value": 0.966,
+                "status": "fail",
+                "blocks_publish": False,
+            }],
+        }],
+    }
+    (suite_dir / "benchmark_suite.json").write_text(json.dumps(suite_packet), encoding="utf-8")
+
+    packet = load_latest_evaluation(tmp_path)
+    metric = packet["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] == 0.966
+    assert metric["threshold"] == ">= 90%"
+    assert metric["threshold_operator"] == ">="
+    assert metric["legacy_threshold"] == "= 100%"
+    assert metric["status"] == "pass"
+    assert metric["legacy_status"] == "fail"
+    assert metric["metric_type"] == "coverage"
+    assert metric["threshold_policy"]["source"] == "metric_registry_v3"
+
+
+def test_latest_benchmark_suite_invalidates_dashboard_presentation_threshold(tmp_path) -> None:
+    suite_dir = tmp_path / "benchmark_suite"
+    suite_dir.mkdir()
+    suite_packet = {
+        "source": "benchmark_suite",
+        "publication_status": "DRAFT_PUBLISHABLE",
+        "plan_ids": ["05"],
+        "artifacts": [{
+            "plan_id": "05",
+            "name": "Agent workflow and LLM judge",
+            "artifact": "agent_eval.json",
+            "status": "pass",
+            "metric_results": [{
+                "id": "schema_validity",
+                "metric_id": "schema_validity",
+                "metric_type": "coverage",
+                "unit": "percent",
+                "threshold": ">= 85/100",
+                "threshold_operator": ">=",
+                "value": 0.92,
+                "raw_value": 1.0,
+                "status": "pass",
+                "blocks_publish": True,
+                "severity": "P0",
+                "threshold_policy": {
+                    "source": "dashboard_presentation_contract",
+                    "score_band": "85-95",
+                },
+            }],
+        }],
+    }
+    (suite_dir / "benchmark_suite.json").write_text(json.dumps(suite_packet), encoding="utf-8")
+
+    packet = load_latest_evaluation(tmp_path)
+    metric = packet["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] is None
+    assert metric["status"] == "not_evaluable"
+    assert metric["legacy_value"] == 0.92
+    assert metric["legacy_status"] == "pass"
+    assert metric["detail"] == "legacy_presentation_score_requires_regeneration"
+    assert metric["failed_examples"][0]["reason"] == "legacy_presentation_score_requires_regeneration"
+
+
+def test_latest_benchmark_suite_fail_closes_legacy_report_quality_scores(tmp_path) -> None:
+    suite_dir = tmp_path / "benchmark_suite"
+    suite_dir.mkdir()
+    suite_packet = {
+        "source": "benchmark_suite",
+        "plan_ids": ["06"],
+        "artifacts": [{
+            "plan_id": "06",
+            "name": "Report quality",
+            "artifact": "report_eval.json",
+            "status": "pass",
+            "metric_results": [{
+                "id": "report.quality_total",
+                "metric_id": "report.quality_total",
+                "metric_type": "score",
+                "unit": "score",
+                "threshold": ">= 85%",
+                "threshold_operator": ">=",
+                "value": 100.0,
+                "status": "pass",
+                "calculation": {
+                    "aggregation": "weighted_mean",
+                    "per_sample_results": [{
+                        "ticker": "DHG",
+                        "claim_ledger_path": "storage/archive/benchmark_dhg/claim_ledger.json",
+                        "evidence_packet_path": "storage/archive/benchmark_dhg/benchmark_dhg_evidence_packet.json",
+                        "scores": {"completeness": 100.0},
+                        "status": "pass",
+                        "value": 100.0,
+                    }],
+                },
+            }],
+        }],
+    }
+    (suite_dir / "benchmark_suite.json").write_text(json.dumps(suite_packet), encoding="utf-8")
+
+    packet = load_latest_evaluation(tmp_path)
+    metric = packet["artifacts"][0]["metric_results"][0]
+
+    assert metric["value"] is None
+    assert metric["status"] == "not_evaluable"
+    assert metric["legacy_value"] == 100.0
+    assert metric["legacy_status"] == "pass"
+    assert metric["detail"] == "structured_report_quality_evidence_missing"
+    assert metric["threshold_policy"]["evidence_basis"] == "structured_report_quality_evaluation_required"
+    assert metric["calculation"]["per_sample_results"][0]["legacy_value"] == 100.0
+
+
 def test_matrix_variation_requires_multiple_numeric_values() -> None:
     assert _matrix_varies({"a": {"x": 1, "y": 2}})
     assert not _matrix_varies({"a": {"x": 1, "y": 1}})
@@ -437,6 +576,8 @@ def test_report_evaluator_emits_dashboard_runtime_metrics(monkeypatch) -> None:
         return {"path": str(path), "exists": True, "pages": 3, "text": report_text}
 
     monkeypatch.setattr(runtime_evaluators, "_pdf_stats", fake_pdf_stats)
+    monkeypatch.setattr(runtime_evaluators, "_latest_json_for_ticker", lambda *args, **kwargs: None)
+    monkeypatch.setattr(runtime_evaluators, "_latest_scoped_json_artifact_for_ticker", lambda *args, **kwargs: None)
 
     result = evaluate_report(
         runtime_evaluators.REPO_ROOT,
@@ -444,6 +585,9 @@ def test_report_evaluator_emits_dashboard_runtime_metrics(monkeypatch) -> None:
         {"decision": "pass", "blocking_issues": []},
     )
     metrics = {metric["id"]: metric for metric in result["metrics"]}
+
+    assert metrics["report_pdf_rendered"]["status"] == "pass"
+    assert metrics["explanation_pdf_rendered"]["status"] == "pass"
 
     for metric_id in (
         "report.quality_total",
@@ -453,9 +597,14 @@ def test_report_evaluator_emits_dashboard_runtime_metrics(monkeypatch) -> None:
         "report.valuation_transparency",
         "report.evidence_integration",
     ):
-        assert metrics[metric_id]["value"] is not None
-    assert metrics["report.completeness"]["status"] == "pass"
-    assert metrics["report.valuation_transparency"]["status"] == "pass"
+        metric = metrics[metric_id]
+        assert metric["value"] is None
+        assert metric["status"] == "not_evaluable"
+        assert metric["detail"] == "structured_report_quality_evidence_missing"
+        assert metric["evaluator"]["execution_status"] == "not_executed"
+        assert metric["threshold_policy"]["evidence_basis"] == "structured_report_quality_evaluation_required"
+        assert metric["failed_examples"][0]["heuristic_scores"]["completeness"] is not None
+    assert result["score"] is None
 
 
 def test_local_retrieval_benchmark_scores_against_live_retriever(tmp_path, monkeypatch) -> None:
@@ -1301,8 +1450,66 @@ def test_report_evidence_integration_requires_trace_artifact(tmp_path, monkeypat
     metrics = {item["id"]: item for item in result["metrics"]}
 
     assert metrics["report.evidence_integration"]["status"] == "not_evaluable"
-    assert metrics["report.evidence_integration"]["detail"] == "claim_ledger_or_evidence_packet_missing"
+    assert metrics["report.evidence_integration"]["detail"] == "structured_report_quality_evidence_missing"
+    assert metrics["report.evidence_integration"]["failed_examples"][0]["claim_ledger_available"] is False
+    assert metrics["report.evidence_integration"]["failed_examples"][0]["evidence_packet_available"] is False
     assert result["score"] is None
+
+
+def test_report_quality_uses_structured_rubric_evidence(tmp_path, monkeypatch) -> None:
+    text = "investment summary financial forecast fcff wacc sensitivity risk appendix source [1]"
+
+    def fake_pdf_stats(path: Path) -> dict[str, object]:
+        return {"path": str(path), "exists": True, "pages": 1, "text": text}
+
+    archive = tmp_path / "storage" / "archive" / "run_aaa"
+    archive.mkdir(parents=True)
+    claim_ledger_path = archive / "claim_ledger.json"
+    evidence_packet_path = archive / "run1_evidence_packet.json"
+    claim_ledger_path.write_text(json.dumps({"claims": []}), encoding="utf-8")
+    evidence_packet_path.write_text(
+        json.dumps({
+            "report_quality_evaluation": {
+                "rubric_version": "report_quality_v2",
+                "score": 90,
+                "section_scores": {
+                    "data_correctness": 25,
+                    "financial_model_integrity": 25,
+                    "domain_depth": 15,
+                    "valuation_transparency": 15,
+                    "citation_quality": 10,
+                    "professional_presentation": 10,
+                },
+                "section_details": {
+                    "data_correctness": {"maximum_points": 25, "earned_points": 25, "status": "pass", "checks": []},
+                    "financial_model_integrity": {"maximum_points": 25, "earned_points": 25, "status": "pass", "checks": []},
+                    "domain_depth": {"maximum_points": 15, "earned_points": 10, "status": "fail", "checks": [{"id": "domain", "passed": False}]},
+                    "valuation_transparency": {"maximum_points": 15, "earned_points": 15, "status": "pass", "checks": []},
+                    "citation_quality": {"maximum_points": 10, "earned_points": 5, "status": "fail", "checks": [{"id": "citation", "passed": False}]},
+                    "professional_presentation": {"maximum_points": 10, "earned_points": 10, "status": "pass", "checks": []},
+                },
+            }
+        }),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(runtime_evaluators, "_pdf_stats", fake_pdf_stats)
+    monkeypatch.setattr(runtime_evaluators, "_latest_json_for_ticker", lambda *args, **kwargs: claim_ledger_path)
+    monkeypatch.setattr(
+        runtime_evaluators,
+        "_latest_scoped_json_artifact_for_ticker",
+        lambda *args, **kwargs: evidence_packet_path,
+    )
+
+    result = evaluate_report(tmp_path, "AAA", {"decision": "pass", "blocking_issues": []})
+    metrics = {item["id"]: item for item in result["metrics"]}
+
+    assert metrics["report.quality_total"]["value"] == 90.0
+    assert metrics["report.quality_total"]["status"] == "pass"
+    assert metrics["report.quality_total"]["detail"] == ""
+    assert metrics["report.completeness"]["value"] == 100.0
+    assert metrics["report.completeness"]["status"] == "pass"
+    assert result["section_scores"]["valuation_transparency"] == 100.0
 
 
 def test_agent_evaluator_validates_schema_manifest_and_unauthorized_calc(tmp_path) -> None:
@@ -1371,6 +1578,18 @@ def test_agent_evaluator_validates_schema_manifest_and_unauthorized_calc(tmp_pat
     # The required artifact manifest is incomplete (missing 'valuation').
     assert metrics["artifact_manifest_compliance"]["status"] == "fail"
     assert metrics["schema_validity"]["status"] == "pass"
+    schema_metric = metrics["schema_validity"]
+    schema_samples = schema_metric["calculation"]["per_sample_results"]
+    assert schema_metric["calculation"]["numerator"] == 2
+    assert schema_metric["calculation"]["denominator"] == 2
+    assert {sample["artifact"] for sample in schema_samples} == {
+        "evidence_packet",
+        "agent_effectiveness_audit",
+    }
+    assert all(sample["status"] == "pass" for sample in schema_samples)
+    assert all(sample["value"] is True for sample in schema_samples)
+    assert all(sample["schema_valid"] is True for sample in schema_samples)
+    assert all(sample["failure_count"] == 0 for sample in schema_samples)
     assert metrics["no_unauthorized_calc"]["status"] == "fail"
     assert result["status"] == "fail"
 

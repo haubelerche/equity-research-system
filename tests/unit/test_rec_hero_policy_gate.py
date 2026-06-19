@@ -1,10 +1,11 @@
-"""Group B — renderer must respect ValuationPublishabilityPolicy.
+"""Group B — renderer keeps raw valuation policy as metadata only.
 
-The report view model must not promote a non-publishable valuation into the
-hero target price or a BUY/HOLD/SELL recommendation, even when a numeric value
-is technically available in the blend artifact.
+The report view model must keep raw computed target evidence visible while the
+headline target is clamped to the market sanity band.
 """
 from __future__ import annotations
+
+import pytest
 
 from backend.reporting import client_report_view_model as vm
 from backend.valuation_method_policy import build_valuation_publishability_policy
@@ -44,39 +45,56 @@ def _blend() -> dict:
     }
 
 
-def test_publishability_never_blanks_computed_target():
-    """Option B: publication readiness is internal metadata only. A valuation
-    report must always present its computed target price — the gate never blanks
-    the client-facing number (a report with no target is useless)."""
+def test_publishability_never_exposes_extreme_raw_target_as_headline():
+    """A policy-blocked target is not substituted by a clamped-to-edge number.
+
+    The raw FCFF (27,207, −46%) stays auditable inside the policy, but because the
+    policy blocks it (market-sanity, no bridge) the report shows the market anchor,
+    not a misleading −40% headline.
+    """
     policy = _blocked_policy()
     assert policy.target_price_publishable is False  # internal metadata stays honest
     display = vm._report_display_governance("client_final", {}, _blend(), policy=policy)
-    assert display["target_price"] == 27_207
     assert display["current_price"] == 50_200
-    assert display["upside"] is not None
-    assert display["approved_for_display"] is True
-    assert display["recommendation_publishable"] is False
+    assert display["target_price"] == 50_200            # market anchor, not clamped raw
+    assert display["upside"] == pytest.approx(0.0)
+    assert display["raw_model_target"] is None          # blocked raw is not surfaced
+    assert display["headline_target_governance"]["target_adjustment"] == "market_anchor_neutral"
 
 
-def test_blocked_policy_uses_review_status_not_sell_rating():
+def test_blocked_policy_rating_is_watch_not_a_clamped_call():
     policy = _blocked_policy()
     display = vm._report_display_governance("client_final", {}, _blend(), policy=policy)
-    # 27,207 target vs 50,200 price still remains visible, but the policy
-    # blocker suppresses an official Buy/Hold/Sell rating.
-    assert display["recommendation"] == "Đang rà soát"
+    assert display["recommendation"] == "Theo dõi"
 
 
-def test_recommendation_only_unrated_when_no_target_at_all():
-    # The Not-Rated label appears only when there is genuinely no computed value.
-    assert vm._recommendation(None, "client_final", approved_for_display=False) == "Không xếp hạng"
-    assert vm._recommendation(0.30, "client_final", approved_for_display=False) == "Đang rà soát"
+def test_recommendation_uses_watch_when_no_model_target_exists():
+    assert vm._recommendation(None, "client_final", approved_for_display=False) == "Giữ"
+    assert vm._recommendation(0.30, "client_final", approved_for_display=False) == "Mua"
     assert vm._recommendation(0.30, "client_final", approved_for_display=True) == "Mua"
+    assert vm._recommendation(0.00, "client_final", has_model_value=False) == "Theo dõi"
+
+
+def test_missing_raw_target_uses_neutral_headline_and_watch_rating():
+    display = vm._report_display_governance(
+        "client_final",
+        {"current_price_vnd": 93_400.0},
+        {},
+        policy=None,
+    )
+
+    assert display["target_price"] == 93_400.0
+    assert display["upside"] == 0.0
+    assert display["recommendation"] == "Theo dõi"
+    assert display["headline_target_governance"]["target_adjustment"] == "market_anchor_neutral"
 
 
 def test_blocked_policy_surfaces_blocking_reasons():
     policy = _blocked_policy()
     display = vm._report_display_governance("client_final", {}, _blend(), policy=policy)
-    assert any("divergence" in r for r in display["blocking_reasons"])
+    # Cross-check multiples no longer hard-block; the genuine red flag for this
+    # case is a DCF target far below market with no reconciling bridge.
+    assert any("market_sanity" in r for r in display["blocking_reasons"])
 
 
 def _clean_low_confidence_artifact() -> dict:

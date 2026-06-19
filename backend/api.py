@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import logging
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +34,7 @@ def _load_dotenv() -> None:
 _load_dotenv()
 
 from backend.reporting.output_inventory import scan_report_inventory, load_universe
+from backend.reporting.pdf_quality_gate import is_client_pdf_safe
 from backend.evaluation.project_evaluator import (
     load_evaluation_artifact,
     load_latest_evaluation,
@@ -53,9 +56,32 @@ from backend.universe_registration import ensure_ticker_registered_from_universe
 from backend.utils import deterministic_id
 from backend.runtime_store import to_public_status
 
+_log = logging.getLogger(__name__)
 
-def _to_status_response(run: dict[str, Any]) -> RunStatusResponse:
+
+def _parse_iso_datetime(raw: str | None) -> datetime | None:
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def _elapsed_seconds(start_raw: str | None, end_raw: str | None) -> int | None:
+    start = _parse_iso_datetime(start_raw)
+    if start is None:
+        return None
+    end = _parse_iso_datetime(end_raw) or datetime.now(timezone.utc)
+    return max(0, int((end - start).total_seconds()))
+
+
+def _to_status_response(run: dict[str, Any], *, executor_state: str | None = None) -> RunStatusResponse:
     progress = run.get("progress_json", {}) or {}
+    flags = run.get("flags_json", {}) or {}
     return RunStatusResponse(
         run_id=run["run_id"],
         ticker=run["ticker"],
@@ -64,10 +90,16 @@ def _to_status_response(run: dict[str, Any]) -> RunStatusResponse:
         current_stage=run["current_stage"],
         progress=progress,
         blocking_reason=progress.get("blocking_reason"),
-        flags=run.get("flags_json", {}),
+        flags=flags,
         created_at=run["created_at"],
         updated_at=run["updated_at"],
         finished_at=run.get("finished_at"),
+        mode=flags.get("generate_mode") or progress.get("mode"),
+        source_run_id=flags.get("source_run_id") or progress.get("source_run_id"),
+        executor_state=executor_state,
+        stage_started_at=progress.get("stage_started_at"),
+        last_heartbeat_at=progress.get("last_heartbeat_at") or run["updated_at"],
+        elapsed_seconds=_elapsed_seconds(run.get("created_at"), run.get("finished_at")),
     )
 
 
@@ -167,7 +199,14 @@ def create_app(
         run = app.state.store.get_run(run_id)
         if run is None:
             raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
-        return _to_status_response(run)
+        executor_state = None
+        executor = getattr(app.state, "executor", None)
+        if executor is not None:
+            try:
+                executor_state = executor.future_state(run_id)
+            except Exception:  # noqa: BLE001 - diagnostics must not break status
+                executor_state = None
+        return _to_status_response(run, executor_state=executor_state)
 
     @app.get("/research/{run_id}/artifacts", response_model=ArtifactsResponse)
     def get_artifacts(run_id: str) -> ArtifactsResponse:
@@ -334,7 +373,7 @@ def create_app(
             return served
         path = (_output_dir() / f"{ticker}{suffix}").resolve()
         out_root = _output_dir().resolve()
-        if out_root not in path.parents or not path.is_file():
+        if out_root not in path.parents or not path.is_file() or not is_client_pdf_safe(path):
             raise HTTPException(status_code=404, detail="File not found")
         return FileResponse(
             path,
@@ -357,25 +396,50 @@ def create_app(
         return FileResponse(path, media_type="image/png", headers={"Cache-Control": "no-store"})
 
     @app.post("/reports/{ticker}/generate", response_model=GenerateReportResponse)
-    def generate_report(ticker: str) -> GenerateReportResponse:
+    def generate_report(ticker: str, force_full: bool = False) -> GenerateReportResponse:
         ticker = ticker.upper()
         if ticker not in _universe_index():
             raise HTTPException(status_code=404, detail="Unknown ticker")
         store = app.state.store
         executor = app.state.executor
 
-        # Route fast (render from existing artifacts) vs full pipeline. Any error
-        # here just means "no renderable run yet" -> run the full pipeline.
+        # Route fast (render from existing artifacts) vs full pipeline. A ticker
+        # with an existing client export should fail fast into "use current
+        # export" instead of spending minutes in a full analytical rerun.
         source_run_id: str | None = None
+        route_reason = "no_renderable_artifacts"
+        snapshot_ready = False
+        existing_export = False
         try:
             from backend.dataops.snapshot_freshness import latest_ready_snapshot
-            from backend.reporting.report_delivery import latest_renderable_run_id
+            from backend.reporting.report_delivery import (
+                existing_client_report_available,
+                latest_renderable_run_id,
+            )
 
-            if latest_ready_snapshot(ticker) is not None:
-                source_run_id = latest_renderable_run_id(ticker)
-        except Exception:
+            snapshot_ready = latest_ready_snapshot(ticker) is not None
+            source_run_id = latest_renderable_run_id(ticker)
+            existing_export = existing_client_report_available(ticker)
+            if force_full:
+                source_run_id = None
+                route_reason = "force_full_refresh"
+            elif source_run_id:
+                route_reason = "renderable_run_found"
+            elif existing_export:
+                route_reason = "existing_export_only"
+        except Exception as exc:
             source_run_id = None
-        mode = "fast_render" if source_run_id else "full_pipeline"
+            route_reason = f"route_probe_failed:{type(exc).__name__}"
+        mode = "full_pipeline" if force_full else "fast_render" if source_run_id or existing_export else "full_pipeline"
+        _log.info(
+            "report generate route ticker=%s mode=%s source_run=%s snapshot_ready=%s existing_export=%s reason=%s",
+            ticker,
+            mode,
+            source_run_id,
+            snapshot_ready,
+            existing_export,
+            route_reason,
+        )
 
         objective = f"Generate full equity research report for {ticker}"
         # Fresh run per click (a uuid component) so "Cập nhật"/re-render always
@@ -394,6 +458,10 @@ def create_app(
             "thesisNeedsRefresh": False,
             "citationsNeedRefresh": False,
             "generate_mode": mode,
+            "generate_route_reason": route_reason,
+            "snapshot_ready": snapshot_ready,
+            "existing_export_available": existing_export,
+            "force_full_refresh": force_full,
         }
         if source_run_id:
             flags["source_run_id"] = source_run_id

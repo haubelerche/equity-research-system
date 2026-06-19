@@ -297,9 +297,12 @@ def write_market_data_artifact(
     base_dir: Path | str | None = None,
 ) -> Path:
     out_dir = Path(base_dir) if base_dir else MARKET_DATA_DIR
+    if run_id:
+        out_dir = out_dir / run_id
+        path = out_dir / "market_data.json"
+    else:
+        path = out_dir / f"{artifact.ticker}_market_data.json"
     out_dir.mkdir(parents=True, exist_ok=True)
-    prefix = f"{run_id}_" if run_id else ""
-    path = out_dir / f"{prefix}{artifact.ticker}_market_data.json"
     path.write_text(json.dumps(artifact.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
     return path
 

@@ -39,6 +39,11 @@ class CafeFQuote:
     as_of_date: Optional[str]     # trade date, ISO YYYY-MM-DD
     volume: Optional[float]       # matched volume (shares)
     source_url: str
+    open_price: Optional[float] = None
+    high_price: Optional[float] = None
+    low_price: Optional[float] = None
+    high_52w: Optional[float] = None
+    low_52w: Optional[float] = None
     source: str = SOURCE_NAME
 
 
@@ -70,6 +75,14 @@ def _f(value: Any) -> Optional[float]:
     except (TypeError, ValueError):
         return None
     return None if v != v else v
+
+
+def _price_vnd(row: dict, *keys: str) -> Optional[float]:
+    for key in keys:
+        value = _f(row.get(key))
+        if value is not None:
+            return value * 1000
+    return None
 
 
 def _iso_date(raw: Any) -> Optional[str]:
@@ -108,25 +121,43 @@ def parse_quote(ticker: str, raw_json: str, source_url: str) -> CafeFQuote:
         return empty
     row = rows[0]  # most recent trading day first
     # Prefer adjusted close, then raw close; CafeF reports them in thousand VND.
-    price_k = _f(row.get("GiaDieuChinh")) or _f(row.get("GiaDongCua")) or _f(row.get("GiaDongCuaShow"))
-    last_price = price_k * 1000 if price_k is not None else None
+    last_price = _price_vnd(row, "GiaDieuChinh", "GiaDongCua", "GiaDongCuaShow", "Close", "close")
+    high_values = [
+        value
+        for item in rows
+        for value in [_price_vnd(item, "GiaCaoNhat", "GiaTran", "High", "high", "GiaDieuChinh", "GiaDongCua", "Close", "close")]
+        if value is not None
+    ]
+    low_values = [
+        value
+        for item in rows
+        for value in [_price_vnd(item, "GiaThapNhat", "GiaSan", "Low", "low", "GiaDieuChinh", "GiaDongCua", "Close", "close")]
+        if value is not None
+    ]
     return CafeFQuote(
         ticker=ticker.upper(),
         last_price=last_price,
         as_of_date=_iso_date(row.get("Ngay") or row.get("NgayDuLieu")),
         volume=_f(row.get("KhoiLuongKhopLenh")),
         source_url=source_url,
+        open_price=_price_vnd(row, "GiaMoCua", "Open", "open") or last_price,
+        high_price=_price_vnd(row, "GiaCaoNhat", "High", "high") or last_price,
+        low_price=_price_vnd(row, "GiaThapNhat", "Low", "low") or last_price,
+        high_52w=max(high_values, default=None),
+        low_52w=min(low_values, default=None),
     )
 
 
 def fetch_latest_price(
-    ticker: str, http_get: Optional[Callable[[str], str]] = None
+    ticker: str,
+    http_get: Optional[Callable[[str], str]] = None,
+    page_size: int = 260,
 ) -> CafeFQuote:
     """Fetch the latest CafeF close for *ticker*. http_get injectable for tests.
 
     Never raises: returns an empty quote (last_price=None) on any failure.
     """
-    url = build_url(ticker)
+    url = build_url(ticker, page_size=page_size)
     get = http_get or _default_http_get
     try:
         raw = get(url)

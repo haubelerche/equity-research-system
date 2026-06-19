@@ -4,6 +4,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from backend.valuation.headline_target_governance import (
+    build_headline_target_governance,
+)
+
 
 def select_valuation_methods(
     *,
@@ -146,6 +150,7 @@ class ValuationPublishabilityPolicy:
     method_diagnostics: dict[str, MethodDiagnostic]
     divergence_pct: float | None = None
     target_price_vnd: float | None = None
+    headline_target_governance: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -165,6 +170,7 @@ class ValuationPublishabilityPolicy:
             "warnings": list(self.warnings),
             "divergence_pct": self.divergence_pct,
             "target_price_vnd": self.target_price_vnd,
+            "headline_target_governance": dict(self.headline_target_governance),
             "method_diagnostics": {
                 name: diag.to_dict() for name, diag in self.method_diagnostics.items()
             },
@@ -364,6 +370,53 @@ def _diag_cross_check(method_name: str, section: dict[str, Any] | None) -> Metho
     )
 
 
+def _diag_relative_pe(valuation: dict[str, Any]) -> MethodDiagnostic:
+    """Relative valuation (peer P/E x trailing EPS) — the fallback primary.
+
+    Publishable only when peer-backed: a real peer dataset produced the median
+    (``relative_valuation_status == 'peer_data_available'`` and a ``peer_data_source``
+    string is present). It uses trailing EPS, so it is immune to the forecast bug
+    that blocks DCF. It only becomes the headline target when no DCF method is
+    publishable (primary precedence handles that), and always carries a disclosure.
+    """
+    mult = valuation.get("multiples") or {}
+    target = _f(mult.get("implied_price_pe"))
+    computed = target is not None and target > 0
+    peer_backed = (
+        str(mult.get("relative_valuation_status") or "").lower() == "peer_data_available"
+        and bool(mult.get("peer_data_source"))
+    )
+    reasons: list[str] = []
+    warns: list[str] = []
+    if computed and not peer_backed:
+        reasons.append("relative_pe_not_peer_backed")
+    publishable = bool(computed and peer_backed)
+    if publishable:
+        warns.append("relative_valuation_fallback_pe")
+    role: Role = "primary" if publishable else ("scenario_only" if computed else "excluded")
+    return MethodDiagnostic(
+        method_name="RELATIVE_PE", computed=computed, publishable=publishable,
+        target_price_vnd=target, confidence="medium" if publishable else "low", role=role,
+        blocking_reasons=reasons, warnings=warns,
+        required_inputs_present=peer_backed,
+        formula_trace_present=peer_backed, bridge_present=peer_backed,
+        sensitivity_present=False, sensitivity_varies=False,
+        source_backed_assumptions=peer_backed, analyst_approved_assumptions=False,
+    )
+
+
+def _is_market_inconsistent(
+    diag: MethodDiagnostic, current_price_vnd: float | None, valuation: dict[str, Any]
+) -> bool:
+    """True when a method's target sits beyond the ±40% band with no reconciling bridge."""
+    target = diag.target_price_vnd
+    if not target or not current_price_vnd or current_price_vnd <= 0:
+        return False
+    if abs(target / current_price_vnd - 1) <= MARKET_SANITY_BAND:
+        return False
+    return not _has_market_sanity_bridge(valuation)
+
+
 def _has_market_sanity_bridge(valuation: dict[str, Any]) -> bool:
     bridge = valuation.get("market_sanity_bridge")
     if not isinstance(bridge, dict):
@@ -418,6 +471,16 @@ def _critical_warning_reasons(valuation: dict[str, Any]) -> list[str]:
     return result
 
 
+def _leading_raw_target(
+    diagnostics: dict[str, MethodDiagnostic],
+) -> tuple[float | None, str | None]:
+    for name in ("BLEND", "FCFF", "FCFE", "RELATIVE_PE", "PE_FORWARD", "P/E", "CORE_PE_NET_CASH"):
+        diag = diagnostics.get(name)
+        if diag is not None and diag.target_price_vnd and diag.target_price_vnd > 0:
+            return diag.target_price_vnd, name
+    return None, None
+
+
 def build_valuation_publishability_policy(
     valuation: dict[str, Any] | None,
     *,
@@ -444,6 +507,11 @@ def build_valuation_publishability_policy(
             status="missing_artifact", severity="critical",
             blocking_reasons=["valuation_artifact_missing_for_ticker"], warnings=[],
             method_diagnostics={}, divergence_pct=None, target_price_vnd=None,
+            headline_target_governance=build_headline_target_governance(
+                current_price_vnd=current_price_vnd,
+                raw_model_target_vnd=None,
+                raw_model_target_source=None,
+            ).to_dict(),
         )
 
     if current_price_vnd is None:
@@ -452,7 +520,10 @@ def build_valuation_publishability_policy(
     fcff_d = _diag_fcff(valuation)
     fcfe_d = _diag_fcfe(valuation)
     blend_d = _diag_blend(valuation, fcfe_d)
-    diagnostics: dict[str, MethodDiagnostic] = {"FCFF": fcff_d, "FCFE": fcfe_d, "BLEND": blend_d}
+    relative_d = _diag_relative_pe(valuation)
+    diagnostics: dict[str, MethodDiagnostic] = {
+        "FCFF": fcff_d, "FCFE": fcfe_d, "BLEND": blend_d, "RELATIVE_PE": relative_d,
+    }
     for name, key in (
         ("PE_FORWARD", "pe_forward"),
         ("P/E", "multiples"),
@@ -476,10 +547,27 @@ def build_valuation_publishability_policy(
     for diag in diagnostics.values():
         warnings.extend(diag.warnings)
 
-    # Primary candidate: only DCF-family methods may be primary, in this order.
-    primary_method: str | None = next(
-        (n for n in ("BLEND", "FCFF", "FCFE") if diagnostics[n].publishable), None
+    # Primary candidate: a publishable DCF leg leads. But a DCF leg can pass its own
+    # per-method checks yet be market-inconsistent (target beyond the ±40% sanity band
+    # with no reconciling bridge) — in which case the policy would otherwise blank the
+    # headline. When that happens and a peer-backed relative target exists, fall back to
+    # RELATIVE_PE (market-anchored, so it passes Rule 8) rather than going neutral.
+    # RELATIVE_PE also leads outright when no DCF leg is publishable at all.
+    dcf_primary = next((n for n in ("BLEND", "FCFF", "FCFE") if diagnostics[n].publishable), None)
+    relative_publishable = diagnostics["RELATIVE_PE"].publishable
+    dcf_market_inconsistent = (
+        dcf_primary is not None
+        and _is_market_inconsistent(diagnostics[dcf_primary], current_price_vnd, valuation)
     )
+    if dcf_primary and dcf_market_inconsistent and relative_publishable:
+        primary_method: str | None = "RELATIVE_PE"
+        warnings.append("dcf_market_inconsistent_relative_fallback_used")
+    elif dcf_primary:
+        primary_method = dcf_primary
+    elif relative_publishable:
+        primary_method = "RELATIVE_PE"
+    else:
+        primary_method = None
 
     # Rule 6 — low-confidence DCF cannot become primary.
     if primary_method is None:
@@ -489,12 +577,16 @@ def build_valuation_publishability_policy(
                 blocking_reasons.append("low_confidence_primary_method")
                 break
 
-    # Rule 7 — method divergence across usable computed targets (exclude blocked
-    # FCFE; exclude the composite BLEND to avoid double-counting its legs).
+    # Rule 7 — method divergence. The hard block applies only across DCF-family
+    # methods (FCFF vs FCFE): genuine disagreement between the primary valuation
+    # legs. Cross-check multiples (P/E, core P/E, EV/EBITDA) are rough by design
+    # and must not hard-block a market-consistent DCF target — their scatter is a
+    # disclosure, not a defect. (DCF-vs-market is governed separately by Rule 8.)
+    _DCF_FAMILY = {"FCFF", "FCFE"}
     divergence_targets = [
         d.target_price_vnd
         for n, d in diagnostics.items()
-        if n != "BLEND" and d.computed and d.target_price_vnd and d.confidence != "blocked"
+        if n in _DCF_FAMILY and d.computed and d.target_price_vnd and d.confidence != "blocked"
     ]
     divergence_pct: float | None = None
     if len(divergence_targets) >= 2:
@@ -505,6 +597,22 @@ def build_valuation_publishability_policy(
                 blocking_reasons.append("valuation_method_divergence_critical")
             elif divergence_pct >= DIVERGENCE_WARNING:
                 warnings.append("valuation_method_divergence_warning")
+
+    # Cross-check scatter (DCF primary vs multiples) — disclosure only.
+    _primary_target = next(
+        (diagnostics[n].target_price_vnd for n in ("BLEND", "FCFF", "FCFE")
+         if diagnostics[n].publishable and diagnostics[n].target_price_vnd),
+        None,
+    )
+    _cross_targets = [
+        d.target_price_vnd
+        for n, d in diagnostics.items()
+        if n not in _DCF_FAMILY and n != "BLEND" and d.computed and d.target_price_vnd
+    ]
+    if _primary_target and _cross_targets:
+        _spread = max(_cross_targets + [_primary_target]) / min(_cross_targets + [_primary_target]) - 1
+        if _spread >= DIVERGENCE_WARNING:
+            warnings.append("valuation_cross_check_divergence_warning")
 
     # Rule 8 — market sanity. Apply to the value the system would otherwise
     # publish (primary, else the leading computed DCF). Beyond the band, a
@@ -518,11 +626,20 @@ def build_valuation_publishability_policy(
             target_to_market = cand.target_price_vnd / current_price_vnd
             deviation = abs(target_to_market - 1)
             has_market_bridge = _has_market_sanity_bridge(valuation)
+            # The peer-relative fallback is itself market/peer-anchored and bounded by
+            # peer-P/E sanity limits: its deviation from the current price is the
+            # re-rating thesis, not a defect. So for RELATIVE_PE the market-sanity
+            # checks become disclosures, never hard blocks — otherwise a cheap-vs-peers
+            # stock would blank its only available target.
+            is_relative_primary = sanity_candidate == "RELATIVE_PE"
             if deviation > MARKET_SANITY_BAND and not has_market_bridge:
-                blocking_reasons.append("market_sanity_bridge_missing")
-            if target_to_market < 0.4 and not valuation.get("senior_review"):
+                if is_relative_primary:
+                    warnings.append("relative_target_deviates_from_market")
+                else:
+                    blocking_reasons.append("market_sanity_bridge_missing")
+            if target_to_market < 0.4 and not valuation.get("senior_review") and not is_relative_primary:
                 blocking_reasons.append("senior_review_required_for_severe_downside")
-            if target_to_market < 0.25 and not valuation.get("distress_evidence"):
+            if target_to_market < 0.25 and not valuation.get("distress_evidence") and not is_relative_primary:
                 blocking_reasons.append("distress_evidence_required_for_extreme_downside")
 
     for reason in _gate_blockers(valuation):
@@ -592,6 +709,13 @@ def build_valuation_publishability_policy(
         status = "blocked"
         severity = "critical"
 
+    raw_headline_target, raw_headline_source = _leading_raw_target(diagnostics)
+    headline_target_governance = build_headline_target_governance(
+        current_price_vnd=current_price_vnd,
+        raw_model_target_vnd=raw_headline_target,
+        raw_model_target_source=raw_headline_source,
+    ).to_dict()
+
     return ValuationPublishabilityPolicy(
         ticker=ticker, run_id=run_id, valuation_artifact_path=valuation_artifact_path,
         computed_methods=computed_methods, publishable_methods=publishable_methods,
@@ -602,4 +726,5 @@ def build_valuation_publishability_policy(
         status=status, severity=severity, blocking_reasons=blocking_reasons,
         warnings=warnings, method_diagnostics=diagnostics,
         divergence_pct=divergence_pct, target_price_vnd=target_price_vnd,
+        headline_target_governance=headline_target_governance,
     )

@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -63,6 +64,29 @@ class ResearchGraphRunner:
         from backend.harness.progress import ProgressReporter
         self.progress: ProgressReporter = progress or ProgressReporter(quiet=True)
 
+    def _heartbeat(
+        self,
+        state: ResearchGraphState,
+        *,
+        operation: str,
+        substep: str | None = None,
+        detail: str | None = None,
+        stage_started_at: str | None = None,
+    ) -> None:
+        try:
+            self.store.update_run_progress(
+                state.run_id,
+                substep=substep,
+                detail=detail,
+                operation=operation,
+                stage_started_at=stage_started_at,
+                last_heartbeat_at=datetime.now(timezone.utc).isoformat(),
+                mode=(state.flags or {}).get("generate_mode", "full_pipeline"),
+                source_run_id=(state.flags or {}).get("source_run_id"),
+            )
+        except Exception:  # noqa: BLE001 - diagnostics must not stop a run
+            pass
+
     def execute(self, context) -> ResearchGraphState:
         state = ResearchGraphState(
             run_id=context.run_id,
@@ -92,6 +116,7 @@ class ResearchGraphRunner:
                 self.progress.blocking(stage, current.blocking_reason)
                 break
             current.current_stage = stage
+            stage_started_at = datetime.now(timezone.utc).isoformat()
             # Persist the in-progress stage immediately so the live progress modal
             # reflects what is running now (the per-stage update in _execute_stage
             # otherwise only lands as each stage starts its work).
@@ -101,6 +126,13 @@ class ResearchGraphRunner:
                 )
             except Exception:  # noqa: BLE001 — progress persistence is best-effort
                 pass
+            self._heartbeat(
+                current,
+                operation="stage_start",
+                substep=stage.lower(),
+                detail=f"Stage {stage} started.",
+                stage_started_at=stage_started_at,
+            )
             self.progress.stage_start(stage, idx, len(stages))
             stage_t0 = time.monotonic()
             current = self._run_stage(current, stage)
@@ -685,15 +717,33 @@ class ResearchGraphRunner:
         config = self.agent_registry.get_agent_config(agent_id)
         if tool_id not in config.allowed_tools:
             raise PermissionError(f"Tool {tool_id!r} is not declared in allowed_tools for agent {agent_id!r}")
+        self._heartbeat(
+            state,
+            operation=f"tool_start:{tool_id}",
+            substep=tool_id,
+            detail=f"Running tool {tool_id}.",
+        )
         self.progress.tool_start(tool_id, agent_id)
         try:
             result = spec.implementation(*args, **kwargs)
         except SystemExit as exc:
             self.progress.tool_end(tool_id, "failed", str(exc))
+            self._heartbeat(
+                state,
+                operation=f"tool_failed:{tool_id}",
+                substep=tool_id,
+                detail=f"Tool {tool_id} failed.",
+            )
             raise RuntimeError(
                 f"tool_process_exit: tool_id={tool_id} exit_code={exc.code}"
             ) from exc
         self.progress.tool_end(tool_id, "ok" if not result.blocking_reason else "blocked", result.blocking_reason)
+        self._heartbeat(
+            state,
+            operation=f"tool_end:{tool_id}",
+            substep=tool_id,
+            detail=f"Tool {tool_id} completed.",
+        )
         result.gate_inputs.setdefault(
             "tool_permission",
             {
@@ -786,6 +836,12 @@ class ResearchGraphRunner:
             "[%s] _run_agent agent=%s context_ms=%d serialize_ms=%d state_chars=%d input_refs=%d",
             state.current_stage, agent_id, ctx_ms, serialize_ms, state_size, len(input_refs),
         )
+        self._heartbeat(
+            state,
+            operation=f"agent_start:{agent_id}",
+            substep=agent_id,
+            detail=f"Running agent {agent_id}.",
+        )
         try:
             result = self.model_adapter.run_agent(
                 agent_config=config,
@@ -822,6 +878,12 @@ class ResearchGraphRunner:
             result.warnings.append(f"primary_model_failed:{config.model}")
             result.warnings.append(f"fallback_model_used:{fallback_model}")
         self.progress.agent_end(agent_id, result.status, getattr(result, 'confidence', None))
+        self._heartbeat(
+            state,
+            operation=f"agent_end:{agent_id}",
+            substep=agent_id,
+            detail=f"Agent {agent_id} completed.",
+        )
 
         t0 = _time.perf_counter()
         self._inject_artifact_lineage(state, result.payload)

@@ -193,8 +193,13 @@ def test_empty_blend_grid_blocks_blend():
     assert "blend_sensitivity_missing_or_constant" in blend.blocking_reasons
 
 
-def test_critical_divergence_blocks_target_and_recommendation():
-    """Group A-4 / C-1 (DBD-like): FCFF 27k, P/E 49k, core P/E 63k, price 50k."""
+def test_dcf_far_below_market_without_bridge_is_blocked():
+    """DBD-like: FCFF 27k is 46% below market 50k with no reconciling bridge.
+
+    Cross-check multiples (P/E 49k, core P/E 63k) scatter widely but must NOT be
+    the blocking reason — multiples are rough. The genuine red flag is the DCF
+    sitting far below market with no bridge, caught by Rule 8 (market sanity).
+    """
     art = _artifact(
         current_price=50200.0,
         fcff=_fcff(target=27207.0, confidence="low"),
@@ -207,12 +212,31 @@ def test_critical_divergence_blocks_target_and_recommendation():
         sensitivity={"fcff_wacc_g": _varying_grid(), "fcfe_re_g": {}, "blend_grid": {}},
     )
     policy = _build(art)
-    assert policy.divergence_pct is not None and policy.divergence_pct > 0.80
+    # Cross-check scatter no longer hard-blocks; the market-sanity gate does.
+    assert "valuation_method_divergence_critical" not in policy.blocking_reasons
+    assert "market_sanity_bridge_missing" in policy.blocking_reasons
     assert policy.target_price_publishable is False
-    assert policy.recommendation_publishable is False
-    assert "valuation_method_divergence_critical" in policy.blocking_reasons
-    # The 27,207 must not become the official headline target.
     assert policy.target_price_vnd is None
+
+
+def test_cross_check_scatter_does_not_block_market_consistent_dcf():
+    """A sound DCF (BLEND +2% vs market, FCFF≈FCFE) must publish even when the
+    rough P/E cross-checks scatter widely (the DHG-like over-block case)."""
+    art = _artifact(
+        current_price=93700.0,
+        fcff=_fcff(target=102000.0),
+        fcfe=_fcfe(target=95000.0),
+        confidence={"fcff_dcf": "high", "fcfe_dcf": "high"},
+        blend={"price_fcff_vnd": 102000.0, "price_fcfe_vnd": 95000.0,
+               "target_price_dcf_vnd": 95500.0, "is_draft_only": False},
+        pe_forward={"target_price_vnd": 150000.0},   # diverges from DCF
+        core_pe={"target_price_vnd": 60000.0},        # diverges from DCF
+    )
+    policy = _build(art)
+    assert "valuation_method_divergence_critical" not in policy.blocking_reasons
+    assert policy.target_price_publishable is True
+    # The scatter is disclosed, not hidden.
+    assert "valuation_cross_check_divergence_warning" in policy.warnings
 
 
 def test_market_sanity_break_without_bridge_blocks_recommendation():
@@ -275,10 +299,92 @@ def test_excluded_methods_are_not_recommendation_drivers():
     assert policy.primary_method not in {"PE_FORWARD", "CORE_PE_NET_CASH"}
 
 
+def _failing_dcf_artifact(*, multiples=None, current_price=100000.0):
+    """All DCF legs unpublishable (incomplete FCFF, blocked FCFE, draft blend)."""
+    art = _artifact(
+        fcff=_fcff(target=None, bridge=False, trace=False),
+        fcfe=_fcfe(blocked=True),
+        confidence={"fcff_dcf": "low", "fcfe_dcf": "blocked"},
+        blend={"price_fcff_vnd": None, "price_fcfe_vnd": None,
+               "target_price_dcf_vnd": None, "is_draft_only": True},
+        current_price=current_price,
+    )
+    art["multiples"] = multiples
+    return art
+
+
+def _peer_multiples(implied_pe=110000.0, peer_backed=True):
+    return {
+        "implied_price_pe": implied_pe,
+        "relative_valuation_status": "peer_data_available" if peer_backed else "pending_peer_dataset",
+        "peer_data_source": "vnstock: 5 VN pharma peers" if peer_backed else "",
+    }
+
+
+def test_relative_pe_is_fallback_primary_when_no_dcf_publishable():
+    art = _failing_dcf_artifact(multiples=_peer_multiples(implied_pe=110000.0))
+    policy = _build(art)
+    assert policy.primary_method == "RELATIVE_PE"
+    assert policy.target_price_publishable is True
+    assert policy.target_price_vnd == 110000.0
+    assert policy.status == "review_required"
+    assert any("relative_valuation_fallback_pe" in w for w in policy.warnings)
+
+
+def test_relative_pe_not_used_when_dcf_publishable():
+    art = _artifact()  # fully publishable DCF
+    art["multiples"] = _peer_multiples(implied_pe=120000.0)
+    policy = _build(art)
+    assert policy.primary_method in {"BLEND", "FCFF", "FCFE"}
+    assert policy.target_price_vnd != 120000.0
+
+
+def test_relative_pe_blocked_without_peer_dataset():
+    art = _failing_dcf_artifact(multiples=_peer_multiples(implied_pe=110000.0, peer_backed=False))
+    policy = _build(art)
+    assert policy.primary_method is None
+    assert policy.target_price_publishable is False
+    assert policy.target_price_vnd is None
+
+
+def test_publishable_but_market_inconsistent_dcf_falls_back_to_relative():
+    # FCFF is fully computed/publishable but its target is 50% below market with no
+    # bridge (market-inconsistent). A peer-backed relative target near market exists.
+    # The policy must fall back to RELATIVE_PE rather than blank the headline.
+    art = _artifact(
+        fcff=_fcff(target=100000.0),
+        fcfe=_fcfe(blocked=True),
+        confidence={"fcff_dcf": "high", "fcfe_dcf": "blocked"},
+        blend={"price_fcff_vnd": 100000.0, "price_fcfe_vnd": None,
+               "target_price_dcf_vnd": 100000.0, "is_draft_only": True},
+        current_price=200000.0,
+    )
+    art["multiples"] = _peer_multiples(implied_pe=190000.0)
+    policy = _build(art)
+    assert policy.primary_method == "RELATIVE_PE"
+    assert policy.target_price_publishable is True
+    assert policy.target_price_vnd == 190000.0
+    assert "market_sanity_bridge_missing" not in policy.blocking_reasons
+    assert "dcf_market_inconsistent_relative_fallback_used" in policy.warnings
+
+
+def test_relative_pe_deviation_from_market_is_disclosure_not_block():
+    # Stock cheap vs peers: peer-implied target 60% above market. Must still publish
+    # (re-rating thesis), with a disclosure rather than a market-sanity hard block.
+    art = _failing_dcf_artifact(multiples=_peer_multiples(implied_pe=160000.0), current_price=100000.0)
+    policy = _build(art)
+    assert policy.primary_method == "RELATIVE_PE"
+    assert policy.target_price_publishable is True
+    assert "market_sanity_bridge_missing" not in policy.blocking_reasons
+    assert "relative_target_deviates_from_market" in policy.warnings
+
+
 def test_to_dict_is_json_serialisable():
     import json
     policy = _build(_artifact())
     payload = policy.to_dict()
     json.dumps(payload)
     assert payload["status"] == "publishable"
+    assert payload["headline_target_governance"]["headline_target_vnd"] == 99_200
+    assert payload["headline_target_governance"]["target_adjustment"] == "none"
     assert "method_diagnostics" in payload

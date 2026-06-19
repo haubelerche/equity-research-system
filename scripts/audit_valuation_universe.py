@@ -94,12 +94,19 @@ def _write_audit(path: Path, output_dir: Path) -> dict[str, Any]:
     out_path = output_dir / f"valuation_audit_{audit['ticker']}_{audit['run_id']}.json"
     out_path.write_text(json.dumps(audit, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
     summary = dict(audit["summary"])
+    headline = (audit.get("policy") or {}).get("headline_target_governance") or {}
     summary.update({
         "ticker": audit["ticker"],
         "run_id": audit["run_id"],
         "audit_path": str(out_path),
         "recommendation": audit["recommendation_status"]["recommendation"],
         "report_status": audit["recommendation_status"]["report_status"],
+        "raw_model_target": headline.get("raw_model_target_vnd"),
+        "headline_target": headline.get("headline_target_vnd"),
+        "headline_upside": headline.get("headline_upside"),
+        "target_adjustment": headline.get("target_adjustment"),
+        "target_band_low": headline.get("target_band_low_vnd"),
+        "target_band_high": headline.get("target_band_high_vnd"),
         "data_quality_status": (audit.get("gate_results") or {}).get("DATA_QUALITY_GATE", {}).get("status"),
         "primary_method": audit["policy"].get("primary_method"),
         "wacc": ((audit["valuation_results"].get("fcff") or {}).get("wacc")),
@@ -122,7 +129,9 @@ def _write_summary(rows: list[dict[str, Any]], output_dir: Path) -> tuple[Path, 
     json_path.write_text(json.dumps(rows, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
     fieldnames = [
         "ticker", "run_id", "market_price", "target_price", "upside_downside",
-        "recommendation", "report_status", "data_quality_status", "primary_method",
+        "raw_model_target", "headline_target", "headline_upside", "target_adjustment",
+        "target_band_low", "target_band_high", "recommendation", "report_status",
+        "data_quality_status", "primary_method",
         "method_count_passed", "wacc", "terminal_growth", "fcff_price",
         "fcfe_price", "pe_price", "critical_warning_count", "draft_only",
         "critical_error_codes", "audit_path",

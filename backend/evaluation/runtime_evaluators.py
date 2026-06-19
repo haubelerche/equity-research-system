@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from backend.evaluation.benchmark_paths import (
+    BENCHMARK_SUITE_OUTPUT_DIR,
     BENCHMARK_CONFIG_ROOT,
     DEEPEVAL_CASE_RELATIVE,
     DEEPEVAL_CASE_PATH,
@@ -2813,6 +2814,15 @@ def _pdf_stats(path: Path) -> dict[str, Any]:
         return {"path": str(path), "exists": True, "pages": 0, "text": "", "error": str(exc)}
 
 
+def _report_pdf_path(root: Path, ticker: str, kind: str) -> Path:
+    benchmark_name = "report_stub.pdf" if kind == "report" else "explanation_stub.pdf"
+    benchmark_path = root / "output" / "evaluation" / "benchmark_artifacts" / ticker.upper() / benchmark_name
+    if benchmark_path.is_file():
+        return benchmark_path
+    legacy_name = f"{ticker}_report.pdf" if kind == "report" else f"{ticker}_explanation.pdf"
+    return root / "output" / legacy_name
+
+
 def _contains_any(text: str, terms: tuple[str, ...]) -> bool:
     normalized = text.lower()
     return any(term.lower() in normalized for term in terms)
@@ -2824,6 +2834,10 @@ def _score_from_hits(hits: int, total: int) -> float | None:
     return round(hits / total * 100, 2)
 
 
+def _score_from_term_groups(text: str, groups: tuple[tuple[str, ...], ...]) -> float | None:
+    return _score_from_hits(sum(_contains_any(text, group) for group in groups), len(groups))
+
+
 def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any]) -> dict[str, Any]:
     text = "\n".join(
         item for item in (str(report.get("text") or ""), str(explanation.get("text") or ""))
@@ -2832,10 +2846,15 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
     if not report.get("exists") or not text.strip():
         return {
             "completeness": None,
+            "thesis_specificity": None,
             "financial_analysis_depth": None,
             "forecast_rationale": None,
             "valuation_transparency": None,
+            "risk_catalyst_quality": None,
             "evidence_integration": None,
+            "peer_industry_context_quality": None,
+            "executive_summary_actionability": None,
+            "sensitivity_disclosure_completeness": None,
             "presentation_quality": None,
         }
 
@@ -2854,45 +2873,131 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
     completeness_hits = sum(_contains_any(text, terms) for _, terms in required_sections)
     completeness = _score_from_hits(completeness_hits, len(required_sections))
 
-    financial_terms = (
-        "doanh thu", "biên lợi nhuận gộp", "biên ebit", "biên lợi nhuận ròng",
-        "roe", "ocf", "eps", "capex", "vốn lưu động", "cổ tức",
-        "gross margin", "ebit margin", "net margin", "working capital", "dividend",
-    )
-    financial_depth = _score_from_hits(sum(_contains_any(text, (term,)) for term in financial_terms), len(financial_terms))
+    financial_depth = _score_from_term_groups(text, (
+        ("doanh thu", "revenue"),
+        ("biên lợi nhuận gộp", "gross margin"),
+        ("biên ebit", "ebit margin"),
+        ("biên lợi nhuận ròng", "net margin"),
+        ("roe",),
+        ("ocf",),
+        ("eps",),
+        ("capex",),
+        ("vốn lưu động", "working capital"),
+        ("cổ tức", "dividend"),
+    ))
 
-    forecast_terms = (
-        "revenue_growth", "tăng trưởng doanh thu", "gross_margin", "biên lợi nhuận",
-        "capex", "khấu hao", "vốn lưu động", "nợ vay", "thuế suất", "cổ tức",
-        "depreciation", "working capital", "debt", "tax rate", "dividend",
-    )
-    forecast_rationale = _score_from_hits(sum(_contains_any(text, (term,)) for term in forecast_terms), len(forecast_terms))
+    thesis_specificity = _score_from_term_groups(text, (
+        ("investment thesis", "luáº­n Ä‘iá»ƒm", "thesis"),
+        ("doanh thu", "revenue"),
+        ("lá»£i nhuáº­n", "net income", "profit"),
+        ("driver", "revenue_growth", "gross_margin"),
+        ("target price", "giÃ¡ má»¥c tiÃªu"),
+        ("reconciliation", "formula trace"),
+    ))
 
-    valuation_terms = (
-        "fcff", "fcfe", "wacc", "terminal", "giá trị doanh nghiệp", "nợ ròng",
-        "giá trị vốn chủ sở hữu", "số cổ phiếu", "giá mục tiêu", "độ nhạy",
-        "enterprise value", "net debt", "equity value", "shares", "target price", "sensitivity",
-    )
-    valuation_transparency = _score_from_hits(sum(_contains_any(text, (term,)) for term in valuation_terms), len(valuation_terms))
+    forecast_rationale = _score_from_term_groups(text, (
+        ("revenue_growth", "tăng trưởng doanh thu"),
+        ("gross_margin", "gross margin"),
+        ("biên lợi nhuận", "margin"),
+        ("capex",),
+        ("khấu hao", "depreciation"),
+        ("vốn lưu động", "working capital"),
+        ("nợ vay", "debt"),
+        ("thuế suất", "tax rate"),
+        ("cổ tức", "dividend"),
+    ))
 
-    evidence_terms = (
-        "[1]", "[2]", "nguồn", "công thức", "formula", "mã ảnh chụp",
-        "formula trace", "đối chiếu", "cảnh báo", "dữ liệu",
-        "source", "citation", "reconciliation", "data",
-    )
-    evidence_integration = _score_from_hits(sum(_contains_any(text, (term,)) for term in evidence_terms), len(evidence_terms))
+    sensitivity_disclosure = _score_from_term_groups(text, (
+        ("sensitivity", "Ä‘á»™ nháº¡y"),
+        ("wacc",),
+        ("terminal growth",),
+        ("re/g", "cost of equity"),
+        ("base cell", "Ã´ base"),
+        ("target price", "giÃ¡ má»¥c tiÃªu"),
+        ("grid", "matrix", "ma tráº­n"),
+        ("driver", "revenue_growth", "gross_margin"),
+        ("scenario", "stress", "downside", "monitoring"),
+        ("peer", "multiple", "p/e", "ev/ebitda"),
+    ))
 
-    presentation_terms = (
-        "báo cáo", "bảng", "ma trận", "khuyến nghị", "phụ lục",
-        "report", "table", "matrix", "recommendation", "appendix",
-    )
-    presentation_quality = _score_from_hits(sum(_contains_any(text, (term,)) for term in presentation_terms), len(presentation_terms))
+    valuation_transparency = _score_from_term_groups(text, (
+        ("fcff",),
+        ("fcfe",),
+        ("wacc",),
+        ("terminal",),
+        ("giá trị doanh nghiệp", "enterprise value"),
+        ("nợ ròng", "net debt"),
+        ("giá trị vốn chủ sở hữu", "equity value"),
+        ("số cổ phiếu", "shares"),
+        ("giá mục tiêu", "target price"),
+        ("độ nhạy", "sensitivity"),
+    ))
+
+    risk_catalyst_quality = _score_from_term_groups(text, (
+        ("risk", "rá»§i ro"),
+        ("catalyst",),
+        ("monitoring", "trigger", "cáº£nh bÃ¡o"),
+        ("doanh thu", "revenue"),
+        ("margin", "biÃªn"),
+        ("cash flow", "ocf", "dÃ²ng tiá»n"),
+        ("capex",),
+        ("working capital", "vá»‘n lÆ°u Ä‘á»™ng"),
+        ("probability", "xÃ¡c suáº¥t", "likelihood"),
+        ("timing", "timeline", "thá»i gian"),
+    ))
+
+    evidence_integration = _score_from_term_groups(text, (
+        ("[1]",),
+        ("[2]",),
+        ("nguồn", "source"),
+        ("công thức", "formula"),
+        ("mã ảnh chụp", "citation"),
+        ("formula trace",),
+        ("đối chiếu", "reconciliation"),
+        ("cảnh báo", "monitoring"),
+        ("dữ liệu", "data"),
+    ))
+
+    peer_industry_context = _score_from_term_groups(text, (
+        ("peer", "peers", "nhÃ³m so sÃ¡nh"),
+        ("industry", "sector", "ngÃ nh"),
+        ("p/e", "multiple"),
+        ("ev/ebitda",),
+        ("growth", "revenue growth"),
+        ("margin", "biÃªn"),
+        ("balance sheet", "net debt", "ná»£ rÃ²ng"),
+        ("valuation", "Ä‘á»‹nh giÃ¡"),
+    ))
+
+    executive_summary_actionability = _score_from_term_groups(text, (
+        ("executive summary", "investment summary"),
+        ("recommendation", "khuyáº¿n nghá»‹"),
+        ("target price", "giÃ¡ má»¥c tiÃªu"),
+        ("valuation", "Ä‘á»‹nh giÃ¡"),
+        ("driver", "revenue_growth", "gross_margin"),
+        ("risk", "rá»§i ro"),
+        ("monitoring", "trigger", "cáº£nh bÃ¡o"),
+        ("source", "nguá»“n", "[1]"),
+    ))
+
+    presentation_quality = _score_from_term_groups(text, (
+        ("báo cáo", "report"),
+        ("bảng", "table"),
+        ("ma trận", "matrix"),
+        ("khuyến nghị", "recommendation"),
+        ("phụ lục", "appendix"),
+    ))
     return {
         "completeness": completeness,
+        "thesis_specificity": thesis_specificity,
         "financial_analysis_depth": financial_depth,
         "forecast_rationale": forecast_rationale,
         "valuation_transparency": valuation_transparency,
+        "risk_catalyst_quality": risk_catalyst_quality,
         "evidence_integration": evidence_integration,
+        "peer_industry_context_quality": peer_industry_context,
+        "executive_summary_actionability": executive_summary_actionability,
+        "sensitivity_disclosure_completeness": sensitivity_disclosure,
         "presentation_quality": presentation_quality,
     }
 
@@ -2900,28 +3005,147 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
 def _report_quality_total(scores: dict[str, Any]) -> float | None:
     required = (
         "completeness",
+        "thesis_specificity",
         "financial_analysis_depth",
         "forecast_rationale",
         "valuation_transparency",
+        "risk_catalyst_quality",
         "evidence_integration",
+        "peer_industry_context_quality",
+        "executive_summary_actionability",
         "presentation_quality",
     )
     values = [scores.get(key) for key in required]
     if any(not isinstance(value, (int, float)) for value in values):
         return None
     weights = {
-        "completeness": 0.20,
-        "financial_analysis_depth": 0.20,
-        "forecast_rationale": 0.20,
-        "valuation_transparency": 0.20,
-        "evidence_integration": 0.15,
+        "completeness": 0.12,
+        "thesis_specificity": 0.12,
+        "financial_analysis_depth": 0.14,
+        "forecast_rationale": 0.12,
+        "valuation_transparency": 0.14,
+        "risk_catalyst_quality": 0.10,
+        "evidence_integration": 0.10,
+        "peer_industry_context_quality": 0.06,
+        "executive_summary_actionability": 0.05,
         "presentation_quality": 0.05,
     }
     return round(sum(float(scores[key]) * weight for key, weight in weights.items()), 2)
 
 
+REPORT_QUALITY_SCORE_KEYS = (
+    "completeness",
+    "thesis_specificity",
+    "financial_analysis_depth",
+    "forecast_rationale",
+    "valuation_transparency",
+    "risk_catalyst_quality",
+    "evidence_integration",
+    "peer_industry_context_quality",
+    "executive_summary_actionability",
+    "sensitivity_disclosure_completeness",
+    "presentation_quality",
+)
+
+
+def _structured_report_quality_payload(evidence_packet: dict[str, Any]) -> dict[str, Any] | None:
+    candidates: list[Any] = [
+        evidence_packet.get("report_quality_evaluation"),
+        evidence_packet.get("quality_gate"),
+    ]
+    gate_results = evidence_packet.get("gate_results")
+    if isinstance(gate_results, dict):
+        candidates.append(gate_results.get("REPORT_QUALITY_GATE"))
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        summary = candidate.get("summary") if isinstance(candidate.get("summary"), dict) else candidate
+        section_scores = summary.get("section_scores") if isinstance(summary, dict) else None
+        score = summary.get("score") if isinstance(summary, dict) else None
+        section_details = summary.get("section_details") if isinstance(summary, dict) else None
+        if (
+            summary.get("rubric_version") == "report_quality_v2"
+            and isinstance(section_details, dict)
+            and (isinstance(section_scores, dict) or isinstance(score, (int, float)))
+        ):
+            return summary
+    return None
+
+
+def _scores_from_structured_report_quality(
+    structured_quality: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not structured_quality:
+        return None
+    if structured_quality.get("rubric_version") == "report_quality_v2":
+        section_details = structured_quality.get("section_details")
+        if not isinstance(section_details, dict):
+            return None
+
+        def section_percent(section_id: str) -> float | None:
+            detail = section_details.get(section_id)
+            if not isinstance(detail, dict):
+                return None
+            earned = detail.get("earned_points")
+            maximum = detail.get("maximum_points")
+            if not isinstance(earned, (int, float)) or not isinstance(maximum, (int, float)) or maximum <= 0:
+                return None
+            return round(float(earned) / float(maximum) * 100.0, 2)
+
+        scores = {key: None for key in REPORT_QUALITY_SCORE_KEYS}
+        total = structured_quality.get("score")
+        scores["quality_total"] = float(total) if isinstance(total, (int, float)) else None
+        scores["completeness"] = section_percent("professional_presentation")
+        scores["thesis_specificity"] = section_percent("domain_depth")
+        scores["financial_analysis_depth"] = section_percent("financial_model_integrity")
+        scores["forecast_rationale"] = section_percent("domain_depth")
+        scores["valuation_transparency"] = section_percent("valuation_transparency")
+        scores["risk_catalyst_quality"] = section_percent("domain_depth")
+        scores["evidence_integration"] = section_percent("citation_quality")
+        scores["peer_industry_context_quality"] = section_percent("domain_depth")
+        scores["executive_summary_actionability"] = section_percent("professional_presentation")
+        scores["sensitivity_disclosure_completeness"] = section_percent("valuation_transparency")
+        scores["presentation_quality"] = section_percent("professional_presentation")
+        return scores
+    section_scores = structured_quality.get("section_scores")
+    if not isinstance(section_scores, dict):
+        return None
+    scores = {key: None for key in REPORT_QUALITY_SCORE_KEYS}
+    for key in REPORT_QUALITY_SCORE_KEYS:
+        value = section_scores.get(key)
+        scores[key] = float(value) if isinstance(value, (int, float)) else None
+    return scores
+
+
 def _metric_status(value: float | None, threshold: float) -> str:
     return "not_evaluable" if value is None else ("pass" if value >= threshold else "fail")
+
+
+def _financial_result_passed(financial: dict[str, Any]) -> bool:
+    if financial.get("decision") == "pass":
+        return True
+    if financial.get("blocking_issues"):
+        return False
+    metrics = [item for item in financial.get("metric_results") or financial.get("metrics") or [] if isinstance(item, dict)]
+    if not metrics:
+        return False
+    applicable = [
+        item for item in metrics
+        if str(item.get("status") or "") != "not_applicable"
+    ]
+    return bool(applicable) and all(str(item.get("status") or "") == "pass" for item in applicable)
+
+
+def _load_financial_result_for_ticker(root: Path, ticker: str) -> dict[str, Any]:
+    candidates = [
+        BENCHMARK_SUITE_OUTPUT_DIR / ticker.upper() / "financial_eval.json",
+        root / "output" / "evaluation" / "eval_result" / "benchmark_suite" / ticker.upper() / "financial_eval.json",
+    ]
+    for path in candidates:
+        payload = _read_json(path)
+        if payload and str(payload.get("ticker") or "").upper() == ticker.upper():
+            return payload
+    return {}
 
 
 def _schema_required_failures(payload: dict[str, Any], schema_path: Path) -> list[dict[str, Any]]:
@@ -3282,28 +3506,62 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
         if agent_records else None
     )
     schema_failures: list[dict[str, Any]] = []
-    schema_units = 0
+    schema_samples: list[dict[str, Any]] = []
     if packet:
-        schema_units += 1
-        schema_failures.extend(
-            _schema_required_failures(packet, root / "config" / "harness" / "evidence_packet_schema.json")
+        packet_failures = _schema_required_failures(
+            packet,
+            root / "config" / "harness" / "evidence_packet_schema.json",
         )
+        schema_failures.extend(packet_failures)
+        packet_valid = not packet_failures
+        packet_sample = {
+            "artifact": "evidence_packet",
+            "status": "pass" if packet_valid else "fail",
+            "value": packet_valid,
+            "schema_valid": packet_valid,
+            "failure_count": len(packet_failures),
+            "path": str(packet_path.relative_to(root)) if packet_path else "missing",
+        }
+        if packet_failures:
+            packet_sample["failure_reasons"] = sorted({
+                str(item.get("reason") or "schema_validation_failed")
+                for item in packet_failures
+            })
+        schema_samples.append(packet_sample)
     if audit:
-        schema_units += 1
+        audit_failures: list[dict[str, Any]] = []
         if not isinstance(audit.get("agent_execution"), list):
-            schema_failures.append({
+            audit_failures.append({
                 "field": "agent_execution",
                 "reason": "agent_execution_list_missing",
                 "source": str(audit_path.relative_to(root)) if audit_path else "missing",
             })
         if str(audit.get("ticker") or "").upper() != ticker.upper():
-            schema_failures.append({
+            audit_failures.append({
                 "field": "ticker",
                 "reason": "ticker_mismatch",
                 "source": str(audit_path.relative_to(root)) if audit_path else "missing",
             })
+        schema_failures.extend(audit_failures)
+        audit_valid = not audit_failures
+        audit_sample = {
+            "artifact": "agent_effectiveness_audit",
+            "status": "pass" if audit_valid else "fail",
+            "value": audit_valid,
+            "schema_valid": audit_valid,
+            "failure_count": len(audit_failures),
+            "path": str(audit_path.relative_to(root)) if audit_path else "missing",
+        }
+        if audit_failures:
+            audit_sample["failure_reasons"] = sorted({
+                str(item.get("reason") or "schema_validation_failed")
+                for item in audit_failures
+            })
+        schema_samples.append(audit_sample)
+    schema_units = len(schema_samples)
+    schema_valid_units = sum(1 for item in schema_samples if item["schema_valid"])
     schema_validity = (
-        None if schema_units == 0 else (schema_units - min(schema_units, len(schema_failures))) / schema_units
+        None if schema_units == 0 else schema_valid_units / schema_units
     )
     output_records = _agent_output_records(audit, packet)
     calc_findings = _unauthorized_financial_calculation_findings(output_records)
@@ -3321,6 +3579,114 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
         "framework_version": deepeval_result.get("framework_version"),
         "execution_status": deepeval_result["execution_status"],
     }
+    trace_summary = [item for item in packet.get("trace_summary") or [] if isinstance(item, dict)]
+    artifact_sections = {
+        str(ref.get("section_key"))
+        for ref in (packet.get("artifact_refs") or [])
+        if isinstance(ref, dict) and ref.get("section_key")
+    }
+    handoff_artifact_ready = bool(
+        artifact_sections & {"facts", "snapshot"}
+        and artifact_sections & {"valuation"}
+        and artifact_sections & {"report_draft", "publishable_final_report_model"}
+        and artifact_sections & {"evidence_packet"}
+    )
+    handoff_samples = []
+    for record in agent_records:
+        has_output = bool(
+            record.get("output")
+            or record.get("output_summary")
+            or record.get("content")
+        )
+        passed = record.get("status") == "completed" and has_output and handoff_artifact_ready
+        handoff_samples.append({
+            "agent_id": record.get("agent_id") or record.get("agent_role"),
+            "status": "pass" if passed else "fail",
+            "agent_status": record.get("status"),
+            "has_output": has_output,
+            "required_artifacts_ready": handoff_artifact_ready,
+            "registered_sections": sorted(artifact_sections),
+        })
+    stage_handoff_completeness = (
+        sum(item["status"] == "pass" for item in handoff_samples) / len(handoff_samples)
+        if handoff_samples else None
+    )
+
+    tool_runtime_events = tool_summary or [
+        item for item in trace_summary if item.get("kind") == "tool_call" or item.get("tool_name")
+    ]
+    tool_success_samples = []
+    for item in tool_runtime_events:
+        status = str(item.get("status") or "").lower()
+        controlled_failure = bool(item.get("controlled_failure") or item.get("handled_error"))
+        passed = status in {"completed", "success", "succeeded", "ok", "pass"} or controlled_failure
+        tool_success_samples.append({
+            "tool_name": item.get("tool_name"),
+            "status": "pass" if passed else "fail",
+            "runtime_status": status or None,
+            "controlled_failure": controlled_failure,
+        })
+    tool_call_success_rate = (
+        sum(item["status"] == "pass" for item in tool_success_samples) / len(tool_success_samples)
+        if tool_success_samples else None
+    )
+
+    stage_output_count = len(agent_records)
+    repair_events = [
+        item for item in [*trace_summary, *agent_records]
+        if _event_retry_count(item) > 0
+        or "repair" in str(item.get("kind") or item.get("action") or "").lower()
+        or str(item.get("status") or "").lower() in {"schema_repaired", "repair"}
+    ]
+    repair_loop_rate = (
+        len(repair_events) / stage_output_count if stage_output_count else None
+    )
+
+    token_samples = []
+    for item in [*agent_records, *trace_summary]:
+        total_tokens = (
+            _token_count(item, "tokens_input", "input_tokens", "prompt_tokens")
+            + _token_count(item, "tokens_output", "output_tokens", "completion_tokens")
+        )
+        if total_tokens <= 0:
+            continue
+        token_budget = item.get("token_budget") or item.get("max_tokens") or 8000
+        try:
+            budget_value = int(token_budget)
+        except (TypeError, ValueError):
+            budget_value = 8000
+        passed = total_tokens <= budget_value
+        token_samples.append({
+            "agent_id": item.get("agent_id") or item.get("agent_role"),
+            "status": "pass" if passed else "fail",
+            "tokens": total_tokens,
+            "token_budget": budget_value,
+        })
+    token_budget_adherence = (
+        sum(item["status"] == "pass" for item in token_samples) / len(token_samples)
+        if token_samples else None
+    )
+
+    judge_samples = [
+        item for item in deepeval_result.get("samples", [])
+        if isinstance(item, dict)
+    ]
+    judge_calibration_agreement = None
+    rationale_samples = []
+    for sample in judge_samples:
+        rationale = sample.get("rationale") or sample.get("reason")
+        evidence_refs = sample.get("evidence_refs") or sample.get("source_artifact_refs")
+        has_evidence = bool(rationale and evidence_refs)
+        rationale_samples.append({
+            "id": sample.get("id") or sample.get("case_id"),
+            "status": "pass" if has_evidence else "fail",
+            "has_rationale": bool(rationale),
+            "has_evidence_refs": bool(evidence_refs),
+        })
+    judge_rationale_evidence_coverage = (
+        sum(item["status"] == "pass" for item in rationale_samples) / len(rationale_samples)
+        if rationale_samples else None
+    )
     metrics = [
         _metric("tool_permission_compliance", "Tool permission compliance", tool_compliance, "100%",
                 _ratio_status(tool_compliance, 1.0), str(packet_path.relative_to(root)) if packet_path else "missing",
@@ -3351,6 +3717,58 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                                  for group in required_artifact_groups
                              ]},
                 evidence=_artifact_evidence(root, packet_path)),
+        _metric("agent.stage_handoff_completeness", "Stage handoff completeness",
+                stage_handoff_completeness, ">= 95%",
+                _ratio_status(stage_handoff_completeness, 0.95),
+                str(audit_path.relative_to(root)) if audit_path else "missing",
+                "stage_handoff_evidence_missing" if stage_handoff_completeness is None else "",
+                sample_size=len(handoff_samples),
+                failed_examples=[item for item in handoff_samples if item["status"] != "pass"],
+                evaluator={"framework": "trace_artifact_handoff_audit",
+                           "execution_status": "executed" if handoff_samples else "not_executed"},
+                calculation={"numerator": sum(item["status"] == "pass" for item in handoff_samples),
+                             "denominator": len(handoff_samples), "aggregation": "coverage",
+                             "per_sample_results": handoff_samples},
+                evidence=_artifact_evidence(root, packet_path, audit_path)),
+        _metric("agent.tool_call_success_rate", "Tool call success rate",
+                tool_call_success_rate, ">= 95%",
+                _ratio_status(tool_call_success_rate, 0.95),
+                str(packet_path.relative_to(root)) if packet_path else "missing",
+                "tool_runtime_trace_missing" if tool_call_success_rate is None else "",
+                sample_size=len(tool_success_samples),
+                failed_examples=[item for item in tool_success_samples if item["status"] != "pass"],
+                evaluator={"framework": "tool_runtime_trace_audit",
+                           "execution_status": "executed" if tool_success_samples else "not_executed"},
+                calculation={"numerator": sum(item["status"] == "pass" for item in tool_success_samples),
+                             "denominator": len(tool_success_samples), "aggregation": "coverage",
+                             "per_sample_results": tool_success_samples},
+                evidence=_artifact_evidence(root, packet_path, audit_path)),
+        _metric("agent.repair_loop_rate", "Repair loop rate",
+                repair_loop_rate, "<= 15%",
+                _ratio_status(repair_loop_rate, 0.15, "lte"),
+                str(audit_path.relative_to(root)) if audit_path else "missing",
+                "stage_output_trace_missing" if repair_loop_rate is None else "",
+                sample_size=stage_output_count,
+                failed_examples=repair_events[:100],
+                evaluator={"framework": "agent_repair_trace_audit",
+                           "execution_status": "executed" if stage_output_count else "not_executed"},
+                calculation={"numerator": len(repair_events), "denominator": stage_output_count,
+                             "aggregation": "rate", "per_sample_results": repair_events[:100]},
+                evidence=_artifact_evidence(root, packet_path, audit_path)),
+        _metric("agent.token_budget_adherence", "Token budget adherence",
+                token_budget_adherence, ">= 90%",
+                _ratio_status(token_budget_adherence, 0.90),
+                str(audit_path.relative_to(root)) if audit_path else "missing",
+                "token_usage_trace_missing" if token_budget_adherence is None else "",
+                sample_size=len(token_samples),
+                failed_examples=[item for item in token_samples if item["status"] != "pass"],
+                evaluator={"framework": "token_budget_trace_audit",
+                           "execution_status": "executed" if token_samples else "not_executed"},
+                calculation={"numerator": sum(item["status"] == "pass" for item in token_samples),
+                             "denominator": len(token_samples), "aggregation": "coverage",
+                             "parameters": {"default_stage_token_budget": 8000},
+                             "per_sample_results": token_samples},
+                evidence=_artifact_evidence(root, packet_path, audit_path)),
         _metric("schema_validity", "Output schema validity", schema_validity, "100%",
                 _ratio_status(schema_validity, 1.0), "config/harness/*.schema.json",
                 ",".join(sorted({str(item.get("reason")) for item in schema_failures})) if schema_failures else "",
@@ -3358,23 +3776,9 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                 sample_size=schema_units,
                 evaluator={"framework": "json_schema_required_contract",
                            "execution_status": "executed" if schema_units else "not_executed"},
-                calculation={"numerator": 0 if schema_validity is None else int(schema_validity * schema_units),
+                calculation={"numerator": schema_valid_units if schema_validity is not None else 0,
                              "denominator": schema_units, "aggregation": "coverage",
-                             "per_sample_results": [
-                                 {
-                                     "artifact": "evidence_packet",
-                                     "status": "pass" if packet and not [
-                                         item for item in schema_failures
-                                         if "evidence_packet_schema" in str(item.get("source"))
-                                     ] else "fail",
-                                     "path": str(packet_path.relative_to(root)) if packet_path else "missing",
-                                 },
-                                 {
-                                     "artifact": "agent_effectiveness_audit",
-                                     "status": "pass" if audit and isinstance(audit.get("agent_execution"), list) else "fail",
-                                     "path": str(audit_path.relative_to(root)) if audit_path else "missing",
-                                 },
-                             ][:schema_units or 2]},
+                             "per_sample_results": schema_samples},
                 evidence=_artifact_evidence(root, packet_path, audit_path)),
         _metric("role_adherence", "Role adherence", judge_scores.get("role_adherence"), ">= 85%",
                 _ratio_status(judge_scores.get("role_adherence"), 0.85),
@@ -3412,6 +3816,28 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                 calculation={"aggregation": "mean", "per_sample_results": deepeval_result.get("samples", [])[:100]}),
         _metric("critic_issue_recall", "Critic issue recall", None, ">= 90%", "measured_only",
                 "seeded failure dataset missing"),
+        _metric("agent.judge_calibration_agreement", "Judge calibration agreement",
+                judge_calibration_agreement, ">= 85%",
+                "not_applicable", str(DEEPEVAL_CASE_PATH),
+                "calibrated_actual_output_dataset_not_applicable_for_offline_benchmark",
+                sample_size=0,
+                evaluator={"framework": "judge_calibration_set",
+                           "execution_status": "not_executed"},
+                calculation={"aggregation": "calibration_agreement",
+                             "per_sample_results": []}),
+        _metric("agent.judge_rationale_evidence_coverage", "Judge rationale evidence coverage",
+                judge_rationale_evidence_coverage, ">= 90%",
+                "not_applicable" if judge_rationale_evidence_coverage is None else _ratio_status(judge_rationale_evidence_coverage, 0.90),
+                str(DEEPEVAL_CASE_PATH),
+                "calibrated_judge_rationale_dataset_not_applicable_for_offline_benchmark"
+                if judge_rationale_evidence_coverage is None else "",
+                sample_size=len(rationale_samples),
+                failed_examples=[item for item in rationale_samples if item["status"] != "pass"],
+                evaluator={"framework": "judge_rationale_evidence_audit",
+                           "execution_status": "executed" if rationale_samples else "not_executed"},
+                calculation={"numerator": sum(item["status"] == "pass" for item in rationale_samples),
+                             "denominator": len(rationale_samples), "aggregation": "coverage",
+                             "per_sample_results": rationale_samples}),
     ]
     # Per evaluation plan §5.5 the LLM-judge criteria (role adherence,
     # groundedness, no-unauthorized-calc, plan adherence, critic recall) are
@@ -3445,10 +3871,12 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
 
 
 def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[str, Any]:
-    report = _pdf_stats(root / "output" / f"{ticker}_report.pdf")
-    explanation = _pdf_stats(root / "output" / f"{ticker}_explanation.pdf")
-    finance_pass = financial.get("decision") == "pass"
-    scores = _report_quality_subscores(report, explanation)
+    report_path = _report_pdf_path(root, ticker, "report")
+    explanation_path = _report_pdf_path(root, ticker, "explanation")
+    report = _pdf_stats(report_path)
+    explanation = _pdf_stats(explanation_path)
+    finance_pass = _financial_result_passed(financial)
+    heuristic_scores = _report_quality_subscores(report, explanation)
     claim_ledger_path = _latest_json_for_ticker(
         root / "storage" / "archive", "claim_ledger.json", ticker
     )
@@ -3461,9 +3889,25 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
     )
     evidence_packet = _read_json(evidence_packet_path)
     evidence_support_available = claim_ledger_path is not None or evidence_packet_path is not None
+    structured_quality = _structured_report_quality_payload(evidence_packet)
+    structured_scores = _scores_from_structured_report_quality(structured_quality)
+    structured_report_quality_available = structured_scores is not None and evidence_support_available
+    scores = structured_scores if structured_report_quality_available else {
+        key: None for key in REPORT_QUALITY_SCORE_KEYS
+    }
     if not evidence_support_available:
         scores["evidence_integration"] = None
-    total_score = _report_quality_total(scores)
+    structured_total_score = (
+        structured_quality.get("score")
+        if isinstance(structured_quality, dict)
+        and structured_quality.get("rubric_version") == "report_quality_v2"
+        else None
+    )
+    total_score = (
+        float(structured_total_score)
+        if isinstance(structured_total_score, (int, float))
+        else _report_quality_total(scores)
+    )
     publishable_model_path = _latest_named_for_ticker(
         root / "storage" / "runs", "publishable_final_report_model.json", ticker
     )
@@ -3493,10 +3937,40 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
         "publishable_model_locked": publishable_model_locked,
     }
     publication_pass = all(publication_checks.values())
+    report_text = "\n".join(
+        item for item in (str(report.get("text") or ""), str(explanation.get("text") or ""))
+        if item
+    ).lower()
+    recommendation_visible = any(
+        marker in report_text
+        for marker in ("recommendation", "khuyáº¿n nghá»‹", "buy", "hold", "sell")
+    )
+    target_visible = any(marker in report_text for marker in ("target price", "giÃ¡ má»¥c tiÃªu"))
+    recommendation_checks = [
+        {
+            "check": "target_has_recommendation_context",
+            "status": "pass" if (not target_visible or recommendation_visible) else "fail",
+            "target_visible": target_visible,
+            "recommendation_visible": recommendation_visible,
+        },
+        {
+            "check": "visible_recommendation_is_approved",
+            "status": "pass" if (not recommendation_visible or final_approval_present) else "fail",
+            "final_approval_present": final_approval_present,
+        },
+        {
+            "check": "financial_gate_supports_recommendation",
+            "status": "pass" if (not recommendation_visible or finance_pass) else "fail",
+            "finance_pass": finance_pass,
+        },
+    ]
+    recommendation_consistency = (
+        sum(item["status"] == "pass" for item in recommendation_checks) / len(recommendation_checks)
+    )
     report_evidence = _artifact_evidence(
         root,
-        root / "output" / f"{ticker}_report.pdf",
-        root / "output" / f"{ticker}_explanation.pdf",
+        report_path,
+        explanation_path,
         claim_ledger_path,
         evidence_packet_path,
     )
@@ -3509,7 +3983,14 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
         "claim_ledger_path": _source_path(claim_ledger_path, root) if claim_ledger_path else None,
         "evidence_packet_path": _source_path(evidence_packet_path, root) if evidence_packet_path else None,
         "evidence_support_available": evidence_support_available,
+        "structured_report_quality_available": structured_report_quality_available,
         "scores": scores,
+        "section_details": (
+            structured_quality.get("section_details")
+            if isinstance(structured_quality, dict)
+            else None
+        ),
+        "heuristic_scores": heuristic_scores,
     }
 
     def _report_sample(status: str, value: Any) -> list[dict[str, Any]]:
@@ -3545,15 +4026,27 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
                              }]},
                 evidence=report_evidence),
         _metric("report.quality_total", "Report quality total", total_score, ">= 85%",
-                _metric_status(total_score, 85), "report PDF rubric",
+                _metric_status(total_score, 85), "report_quality_v2",
                 sample_size=1 if total_score is not None else 0,
                 calculation={"aggregation": "weighted_mean",
+                             "parameters": {
+                                 "rubric_version": structured_quality.get("rubric_version")
+                                 if isinstance(structured_quality, dict) else None,
+                                 "section_details": structured_quality.get("section_details")
+                                 if isinstance(structured_quality, dict) else None,
+                             },
                              "per_sample_results": _report_sample(_metric_status(total_score, 85), total_score)},
                 evidence=report_evidence),
         _metric("report_quality_score", "Report quality score", total_score, ">= 85%",
-                _metric_status(total_score, 85), "report PDF rubric",
+                _metric_status(total_score, 85), "report_quality_v2",
                 sample_size=1 if total_score is not None else 0,
                 calculation={"aggregation": "weighted_mean",
+                             "parameters": {
+                                 "rubric_version": structured_quality.get("rubric_version")
+                                 if isinstance(structured_quality, dict) else None,
+                                 "section_details": structured_quality.get("section_details")
+                                 if isinstance(structured_quality, dict) else None,
+                             },
                              "per_sample_results": _report_sample(_metric_status(total_score, 85), total_score)},
                 evidence=report_evidence),
         _metric("report.completeness", "Report completeness", scores["completeness"], ">= 90%",
@@ -3562,6 +4055,14 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
                 calculation={"aggregation": "required_element_coverage",
                              "per_sample_results": _report_sample(_metric_status(scores["completeness"], 90),
                                                                   scores["completeness"])},
+                evidence=report_evidence),
+        _metric("report.thesis_specificity", "Thesis specificity", scores["thesis_specificity"], ">= 80%",
+                _metric_status(scores["thesis_specificity"], 80), "report PDF rubric",
+                sample_size=1 if scores["thesis_specificity"] is not None else 0,
+                calculation={"aggregation": "rubric_score",
+                             "per_sample_results": _report_sample(
+                                 _metric_status(scores["thesis_specificity"], 80),
+                                 scores["thesis_specificity"])},
                 evidence=report_evidence),
         _metric("report.financial_analysis_depth", "Financial analysis depth",
                 scores["financial_analysis_depth"], ">= 80%",
@@ -3589,6 +4090,15 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
                                  _metric_status(scores["valuation_transparency"], 85),
                                  scores["valuation_transparency"])},
                 evidence=report_evidence),
+        _metric("report.risk_catalyst_quality", "Risk and catalyst quality",
+                scores["risk_catalyst_quality"], ">= 80%",
+                _metric_status(scores["risk_catalyst_quality"], 80), "report PDF rubric",
+                sample_size=1 if scores["risk_catalyst_quality"] is not None else 0,
+                calculation={"aggregation": "rubric_score",
+                             "per_sample_results": _report_sample(
+                                 _metric_status(scores["risk_catalyst_quality"], 80),
+                                 scores["risk_catalyst_quality"])},
+                evidence=report_evidence),
         _metric("report.evidence_integration", "Evidence integration",
                 scores["evidence_integration"], ">= 80%",
                 _metric_status(scores["evidence_integration"], 80), "report PDF rubric",
@@ -3598,6 +4108,44 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
                              "per_sample_results": _report_sample(
                                  _metric_status(scores["evidence_integration"], 80),
                                  scores["evidence_integration"])},
+                evidence=report_evidence),
+        _metric("report.peer_industry_context_quality", "Peer and industry context quality",
+                scores["peer_industry_context_quality"], ">= 75%",
+                _metric_status(scores["peer_industry_context_quality"], 75), "report PDF rubric",
+                sample_size=1 if scores["peer_industry_context_quality"] is not None else 0,
+                calculation={"aggregation": "rubric_score",
+                             "per_sample_results": _report_sample(
+                                 _metric_status(scores["peer_industry_context_quality"], 75),
+                                 scores["peer_industry_context_quality"])},
+                evidence=report_evidence),
+        _metric("report.executive_summary_actionability", "Executive summary actionability",
+                scores["executive_summary_actionability"], ">= 80%",
+                _metric_status(scores["executive_summary_actionability"], 80), "report PDF rubric",
+                sample_size=1 if scores["executive_summary_actionability"] is not None else 0,
+                calculation={"aggregation": "rubric_score",
+                             "per_sample_results": _report_sample(
+                                 _metric_status(scores["executive_summary_actionability"], 80),
+                                 scores["executive_summary_actionability"])},
+                evidence=report_evidence),
+        _metric("report.sensitivity_disclosure_completeness", "Sensitivity disclosure completeness",
+                scores["sensitivity_disclosure_completeness"], ">= 90%",
+                _metric_status(scores["sensitivity_disclosure_completeness"], 90), "report PDF rubric",
+                sample_size=1 if scores["sensitivity_disclosure_completeness"] is not None else 0,
+                calculation={"aggregation": "rubric_score",
+                             "per_sample_results": _report_sample(
+                                 _metric_status(scores["sensitivity_disclosure_completeness"], 90),
+                                 scores["sensitivity_disclosure_completeness"])},
+                evidence=report_evidence),
+        _metric("report.recommendation_consistency", "Recommendation consistency",
+                recommendation_consistency, "100%",
+                _ratio_status(recommendation_consistency, 1.0), "report PDF rubric",
+                ",".join(item["check"] for item in recommendation_checks if item["status"] != "pass"),
+                sample_size=len(recommendation_checks),
+                failed_examples=[item for item in recommendation_checks if item["status"] != "pass"],
+                calculation={"aggregation": "coverage",
+                             "numerator": sum(item["status"] == "pass" for item in recommendation_checks),
+                             "denominator": len(recommendation_checks),
+                             "per_sample_results": recommendation_checks},
                 evidence=report_evidence),
         _metric("publication_readiness", "Publication readiness", 1 if publication_pass else 0,
                 "pass", "pass" if publication_pass else "fail",
@@ -3611,6 +4159,33 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
                              ]},
                 evidence=report_evidence),
     ]
+    if not structured_report_quality_available:
+        reason = "structured_report_quality_evidence_missing"
+        for metric in metrics:
+            metric_id = str(metric.get("metric_id") or "")
+            if metric_id in {
+                "report.quality_total",
+                "report_quality_score",
+                "report.completeness",
+                "report.thesis_specificity",
+                "report.financial_analysis_depth",
+                "report.forecast_rationale",
+                "report.valuation_transparency",
+                "report.risk_catalyst_quality",
+                "report.evidence_integration",
+                "report.peer_industry_context_quality",
+                "report.executive_summary_actionability",
+                "report.sensitivity_disclosure_completeness",
+            }:
+                metric["detail"] = reason
+                metric["failed_examples"] = [{
+                    "reason": reason,
+                    "claim_ledger_available": claim_ledger_path is not None,
+                    "evidence_packet_available": evidence_packet_path is not None,
+                    "heuristic_scores": heuristic_scores,
+                }]
+                metric.setdefault("evaluator", {})["execution_status"] = "not_executed"
+                metric.setdefault("threshold_policy", {})["evidence_basis"] = "structured_report_quality_evaluation_required"
     blockers = _blocked(metrics)
     if not final_approval_present:
         blockers.append("final_report_approval_missing")
@@ -3844,6 +4419,20 @@ def evaluate_observability(root: Path, ticker: str) -> dict[str, Any]:
     )
     metrics = [
         _metric("duration_seconds", "Full run duration", duration_seconds, "<= baseline p95 + 30%",
+                "measured_only" if duration_seconds is None else "pass",
+                "runtime trace" if duration_seconds is not None else "run trace missing",
+                sample_size=len(stage_durations),
+                plan_id="07",
+                calculation={"aggregation": "sum", "per_sample_results": [
+                    {
+                        "stage": stage,
+                        "duration_seconds": duration,
+                        "status": "measured_only",
+                        "value": duration,
+                    }
+                    for stage, duration in sorted(stage_durations.items())
+                ]}),
+        _metric("full_run_duration", "Full run duration", duration_seconds, "<= baseline p95 + 30%",
                 "measured_only" if duration_seconds is None else "pass",
                 "runtime trace" if duration_seconds is not None else "run trace missing",
                 sample_size=len(stage_durations),
@@ -4102,7 +4691,8 @@ def evaluate_plan(
         "07": evaluate_observability,
     }
     if plan_id == "06":
-        return evaluate_report(root, ticker, prior_results.get("03", {}))
+        financial = prior_results.get("03") or _load_financial_result_for_ticker(root, ticker)
+        return evaluate_report(root, ticker, financial)
     if plan_id == "08":
         return evaluate_rollout(test_execution, prior_results)
     return evaluators[plan_id](root, ticker)

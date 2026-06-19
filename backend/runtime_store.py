@@ -256,6 +256,13 @@ class RuntimeStore:
         substep: str | None = None,
         detail: str | None = None,
         blocking_reason: str | None = None,
+        stage_started_at: str | None = None,
+        last_heartbeat_at: str | None = None,
+        operation: str | None = None,
+        mode: str | None = None,
+        source_run_id: str | None = None,
+        render_error: str | None = None,
+        **diagnostics: Any,
     ) -> None:
         """Merge fine-grained progress detail into research.runs.progress_json.
 
@@ -270,6 +277,21 @@ class RuntimeStore:
             patch["detail"] = detail
         if blocking_reason is not None:
             patch["blocking_reason"] = blocking_reason
+        if stage_started_at is not None:
+            patch["stage_started_at"] = stage_started_at
+        if last_heartbeat_at is not None:
+            patch["last_heartbeat_at"] = last_heartbeat_at
+        if operation is not None:
+            patch["operation"] = operation
+        if mode is not None:
+            patch["mode"] = mode
+        if source_run_id is not None:
+            patch["source_run_id"] = source_run_id
+        if render_error is not None:
+            patch["render_error"] = render_error
+        for key, value in diagnostics.items():
+            if value is not None:
+                patch[key] = value
         if not patch:
             return
 

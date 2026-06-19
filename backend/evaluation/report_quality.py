@@ -503,6 +503,74 @@ _WEIGHTS = {
 }
 
 
+def _gate_checks(gate_name: str, gate: dict[str, Any]) -> list[dict[str, Any]]:
+    issues = gate.get("issues") if isinstance(gate.get("issues"), list) else []
+    blocking_reasons = gate.get("blocking_reasons") or []
+    if not issues and not blocking_reasons:
+        return [{
+            "id": f"{gate_name}:passed",
+            "passed": True,
+            "actual": "pass",
+            "expected": "pass",
+            "evidence_refs": [],
+        }]
+    checks: list[dict[str, Any]] = []
+    for index, issue in enumerate(issues):
+        if not isinstance(issue, dict):
+            continue
+        checks.append({
+            "id": str(issue.get("issue_id") or f"{gate_name}:issue:{index + 1}"),
+            "passed": not bool(issue.get("blocking", True)),
+            "actual": issue.get("message") or issue.get("reason") or "issue",
+            "expected": "no blocking issue",
+            "evidence_refs": issue.get("evidence_refs") or issue.get("artifact_refs") or [],
+        })
+    for reason in blocking_reasons:
+        checks.append({
+            "id": f"{gate_name}:{reason}",
+            "passed": False,
+            "actual": reason,
+            "expected": "no blocking reason",
+            "evidence_refs": [],
+        })
+    return checks
+
+
+def _status_for_section(checks: list[dict[str, Any]]) -> str:
+    if any("missing" in str(check.get("actual") or "").lower() for check in checks):
+        return "not_evaluable"
+    return "pass" if all(bool(check.get("passed")) for check in checks) else "fail"
+
+
+def _section_detail(
+    *,
+    section_id: str,
+    maximum_points: int,
+    gates: list[tuple[str, dict[str, Any]]],
+) -> dict[str, Any]:
+    checks = [
+        check
+        for gate_name, gate in gates
+        for check in _gate_checks(gate_name, gate)
+    ]
+    status = _status_for_section(checks)
+    earned_points = maximum_points if status == "pass" else (None if status == "not_evaluable" else 0)
+    evidence_artifact_ids = sorted({
+        str(ref)
+        for check in checks
+        for ref in check.get("evidence_refs") or []
+        if ref
+    })
+    return {
+        "id": section_id,
+        "maximum_points": maximum_points,
+        "earned_points": earned_points,
+        "status": status,
+        "checks": checks,
+        "evidence_artifact_ids": evidence_artifact_ids,
+    }
+
+
 def evaluate_report_quality(
     *,
     forecast: dict[str, Any],
@@ -521,39 +589,71 @@ def evaluate_report_quality(
         "recommendation_consistency": recommendation_consistency_gate(report, approval_status),
         "professional_presentation": professional_presentation_gate(report),
     }
-    section_scores = {
-        "data_correctness": _WEIGHTS["data_correctness"] if gates["financial_model_integrity"]["passed"] else 0,
-        "financial_model_integrity": _WEIGHTS["financial_model_integrity"] if gates["financial_model_integrity"]["passed"] else 0,
-        "domain_depth": (
-            _WEIGHTS["domain_depth"]
-            if (
-                gates["forecast_reasonableness"]["passed"]
-                and gates["company_research_depth"]["passed"]
-                and gates["analyst_insight"]["passed"]
-            )
-            else 0
+    section_details = {
+        "data_correctness": _section_detail(
+            section_id="data_correctness",
+            maximum_points=_WEIGHTS["data_correctness"],
+            gates=[("FINANCIAL_MODEL_INTEGRITY_GATE", gates["financial_model_integrity"])],
         ),
-        "valuation_transparency": _WEIGHTS["valuation_transparency"] if gates["valuation_completeness"]["passed"] else 0,
-        "citation_quality": _WEIGHTS["citation_quality"] if gates["citation_coverage"]["passed"] else 0,
-        "professional_presentation": (
-            _WEIGHTS["professional_presentation"]
-            if (
-                gates["recommendation_consistency"]["passed"]
-                and gates["professional_presentation"]["passed"]
-            )
-            else 0
+        "financial_model_integrity": _section_detail(
+            section_id="financial_model_integrity",
+            maximum_points=_WEIGHTS["financial_model_integrity"],
+            gates=[("FINANCIAL_MODEL_INTEGRITY_GATE", gates["financial_model_integrity"])],
+        ),
+        "domain_depth": _section_detail(
+            section_id="domain_depth",
+            maximum_points=_WEIGHTS["domain_depth"],
+            gates=[
+                ("FORECAST_REASONABLENESS_GATE", gates["forecast_reasonableness"]),
+                ("COMPANY_RESEARCH_DEPTH_GATE", gates["company_research_depth"]),
+                ("ANALYST_INSIGHT_GATE", gates["analyst_insight"]),
+            ],
+        ),
+        "valuation_transparency": _section_detail(
+            section_id="valuation_transparency",
+            maximum_points=_WEIGHTS["valuation_transparency"],
+            gates=[("VALUATION_COMPLETENESS_GATE", gates["valuation_completeness"])],
+        ),
+        "citation_quality": _section_detail(
+            section_id="citation_quality",
+            maximum_points=_WEIGHTS["citation_quality"],
+            gates=[("CITATION_COVERAGE_GATE", gates["citation_coverage"])],
+        ),
+        "professional_presentation": _section_detail(
+            section_id="professional_presentation",
+            maximum_points=_WEIGHTS["professional_presentation"],
+            gates=[
+                ("RECOMMENDATION_CONSISTENCY_GATE", gates["recommendation_consistency"]),
+                ("PROFESSIONAL_PRESENTATION_GATE", gates["professional_presentation"]),
+            ],
         ),
     }
-    score = sum(section_scores.values())
+    section_scores = {
+        key: detail["earned_points"]
+        for key, detail in section_details.items()
+    }
+    score = (
+        None
+        if any(detail["earned_points"] is None for detail in section_details.values())
+        else sum(int(detail["earned_points"]) for detail in section_details.values())
+    )
     failed = [name for name, gate in gates.items() if not gate["passed"]]
-    decision = "allow_export" if score >= 85 and not failed else "draft_only" if score >= 70 else "block_export"
+    decision = (
+        "allow_export"
+        if isinstance(score, (int, float)) and score >= 85 and not failed
+        else "draft_only"
+        if isinstance(score, (int, float)) and score >= 70
+        else "block_export"
+    )
     return {
-        "rubric": "report_quality_v1",
+        "rubric": "report_quality_v2",
+        "rubric_version": "report_quality_v2",
         "score": score,
         "maximum_score": 100,
         "decision": decision,
         "passed": decision == "allow_export",
         "section_scores": section_scores,
+        "section_details": section_details,
         "failed_gates": failed,
         "gates": gates,
     }

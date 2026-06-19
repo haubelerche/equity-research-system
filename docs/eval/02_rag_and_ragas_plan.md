@@ -56,10 +56,15 @@ Mot report co citation van co the sai neu retrieved context khong lien quan, cit
 | Metric | Tool | Threshold P0 | Threshold P1 |
 |---|---|---:|---:|
 | Hit-rate@5 | Custom pytest | >= 90% golden queries | >= 95% |
-| MRR@5 | Custom pytest | >= 0.70 | >= 0.80 |
-| Context precision | Ragas | >= 0.75 | >= 0.85 |
-| Context recall | Ragas | >= 0.75 | >= 0.85 |
-| Faithfulness | Ragas | >= 0.85 | >= 0.90 |
+| MRR@5 | Custom pytest | >= 75% | >= 80% |
+| Context precision | Ragas | >= 80% | >= 85% |
+| Context recall | Ragas | >= 80% | >= 85% |
+| Faithfulness | Ragas | >= 85% | >= 90% |
+| nDCG@10 | Custom pytest/Ragas ranking export | >= 80% | >= 85% |
+| Metadata filter accuracy | Custom pytest | >= 95% | >= 98% |
+| Unanswerable abstention accuracy | Negative query set | >= 95% | >= 98% |
+| Evidence span overlap | Custom span matcher | >= 75% | >= 85% |
+| Retrieval noise rate | Custom top-k audit | <= 20% | <= 10% |
 | Noise sensitivity | Ragas | <= agreed baseline | Improve by 20% |
 | Unsupported claim rate | Custom validator | 0% for final | 0% |
 | Tier-3-only material claim | Source gate | 0 | 0 |

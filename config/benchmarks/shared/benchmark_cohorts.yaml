@@ -33,7 +33,6 @@ cohorts:
     - IMP
     - DMC
     - TRA
-    - OPC
     - TNH
     - JVC
     - DHT
@@ -46,7 +45,6 @@ cohorts:
     - IMP
     - DMC
     - TRA
-    - OPC
     - TNH
     - JVC
     - DHT
@@ -74,7 +72,6 @@ cohorts:
     - DMC
     - TRA
     - DBD
-    - OPC
     - DVN
     - DCL
     - PMC

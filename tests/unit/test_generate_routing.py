@@ -53,7 +53,9 @@ def test_fast_render_marks_failed_with_blocking_reason(monkeypatch):
     _orchestrator(store)._fast_render(_ctx({"generate_mode": "fast_render", "source_run_id": "src1"}))
 
     assert store.states[-1] == ("failed", "PUBLISH", True)
-    assert any("blocking_reason" in p for p in store.progress)
+    failure = next(p for p in store.progress if "blocking_reason" in p)
+    assert failure["source_run_id"] == "src1"
+    assert "render exploded" in failure["render_error"]
 
 
 def test_fast_render_uses_existing_export_when_rerender_fails(monkeypatch):
@@ -67,6 +69,10 @@ def test_fast_render_uses_existing_export_when_rerender_fails(monkeypatch):
 
     assert store.states[-1] == ("auto_exported", "PUBLISH", True)
     assert any(p.get("substep") == "export_available" for p in store.progress)
+    fallback = next(p for p in store.progress if p.get("substep") == "export_available")
+    assert fallback["source_run_id"] == "src1"
+    assert "run artifacts unavailable" in fallback["render_error"]
+    assert "ghi đè" in fallback["detail"]
     assert not any("blocking_reason" in p for p in store.progress)
 
 

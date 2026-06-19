@@ -46,6 +46,18 @@ def _parse_price_to_thousand_vnd(value: Any) -> float:
     return price / 1000.0 if price >= 1000 else price
 
 
+def _parse_optional_price_to_thousand_vnd(value: Any, fallback: float) -> float:
+    if value is None or str(value).strip() == "":
+        return fallback
+    return _parse_price_to_thousand_vnd(value)
+
+
+def _parse_optional_int(value: Any) -> int | None:
+    if value is None or str(value).strip() == "":
+        return None
+    return int(float(str(value).strip().replace(",", "")))
+
+
 def _selected_tickers(raw: str | None) -> set[str] | None:
     if not raw:
         return None
@@ -85,6 +97,10 @@ def load_manual_market_prices(
                 ensure_ticker_registered_from_universe(runtime_store, ticker)
                 trade_date = _parse_date(row["as_of_date"])
                 close = _parse_price_to_thousand_vnd(row["price"])
+                open_price = _parse_optional_price_to_thousand_vnd(row.get("open"), close)
+                high = _parse_optional_price_to_thousand_vnd(row.get("high"), close)
+                low = _parse_optional_price_to_thousand_vnd(row.get("low"), close)
+                volume = _parse_optional_int(row.get("volume"))
             except Exception as exc:  # noqa: BLE001
                 rejected.append({"line": line_no, "reason": str(exc), "row": row})
                 continue
@@ -92,12 +108,12 @@ def load_manual_market_prices(
                 PriceRow(
                     ticker=ticker,
                     trade_date=trade_date,
-                    open=close,
-                    high=close,
-                    low=close,
+                    open=open_price,
+                    high=high,
+                    low=low,
                     close=close,
                     adjusted_close=close,
-                    volume=None,
+                    volume=volume,
                     traded_value=None,
                     market_cap=None,
                     source_id=None,

@@ -53,9 +53,9 @@ def test_fcff_blend_forecast_fall_back_to_valuation_subsections():
     assert vm._forecast("DHG", manifest, False) == val["forecast"]
 
 
-def test_display_governance_shows_target_even_when_no_method_eligible():
-    # Option B: the gate never blanks the client-facing target. "no eligible
-    # method" is surfaced as internal metadata only; the computed value still shows.
+def test_display_governance_clamps_target_when_no_method_eligible():
+    # Raw target stays in audit metadata, while the client-facing headline target
+    # is clamped to the market sanity band.
     valuation = {
         "valuation_method_policy": {
             "selected_methods": [],
@@ -72,10 +72,13 @@ def test_display_governance_shows_target_even_when_no_method_eligible():
     display = vm._report_display_governance("standard", valuation, blend)
 
     assert display["current_price"] == 50_200
-    assert display["target_price"] == 27_207
-    assert display["upside"] is not None
+    # Legacy (no-policy) path clamps to the ±40% market-sanity band, not the old ±10%.
+    assert display["target_price"] == 30_120
+    assert display["upside"] == pytest.approx(-0.40)
     assert display["blend_target_price"] == 27_207
-    assert display["recommendation"] == "Đang rà soát"
+    assert display["raw_model_target"] == 27_207
+    assert display["headline_target_governance"]["target_adjustment"] == "clamped_low"
+    assert display["recommendation"] == "Bán"
     # The readiness signal is still available to the export workflow as metadata.
     assert "no_eligible_valuation_method" in display["blocking_reasons"]
 
@@ -94,8 +97,49 @@ def test_display_governance_shows_low_confidence_target():
 
     display = vm._report_display_governance("standard", valuation, blend)
 
-    assert display["target_price"] == 27_207
-    assert display["recommendation"] == "Đang rà soát"
+    assert display["target_price"] == 30_120
+    assert display["recommendation"] == "Bán"
+
+
+def test_display_governance_uses_valuation_current_when_blend_omits_it():
+    valuation = {
+        "current_price_vnd": 18_400,
+        "fcff": {"target_price_vnd": 75_776.29},
+        "valuation_method_policy": {"selected_methods": []},
+    }
+
+    display = vm._report_display_governance("analyst_draft", valuation, {})
+
+    assert display["current_price"] == 18_400
+    # Clamped to the +40% band edge (18,400 × 1.4 = 25,760), not the old +10%.
+    assert display["target_price"] == pytest.approx(25_760)
+    assert display["raw_model_target"] == pytest.approx(75_776.29)
+    assert display["upside"] == pytest.approx(0.40)
+
+
+def test_valuation_summary_shows_computed_fcff_when_no_methods_selected():
+    valuation = {
+        "selected_methods": [],
+        "method_weights": {},
+        "current_price_vnd": 18_400,
+        "fcff": {
+            "target_price_vnd": 75_776.29,
+            "enterprise_value": 943.0941,
+            "equity_value": 940.2814,
+            "shares_mn": 12.4086,
+            "net_debt_bridge": {"total_debt": 33.9138, "cash": 24.4011, "net_debt": 2.8127},
+        },
+        "fcfe": {"target_price_vnd": None},
+    }
+
+    table = vm._table_valuation_summary(valuation)
+
+    assert table is not None
+    assert table.periods == ["Giá trị mỗi cổ phiếu (VND)", "Trọng số", "Trạng thái"]
+    rows = {label: values for label, values in table.rows}
+    assert rows["FCFF"][0] == "75,776"
+    assert len(rows["FCFF"]) == 3
+    assert rows["Giá mục tiêu tổng hợp"][0] == "75,776"
 
 
 def test_market_price_as_of_prefers_run_market_data_date():
@@ -134,7 +178,7 @@ def test_valuation_summary_shows_low_confidence_methods():
     assert "FCFF" in [row[0] for row in table.rows]
 
 
-def test_recommendation_has_three_issued_states_plus_unrated_state():
+def test_recommendation_three_state_thresholds_when_model_target_exists():
     labels = {
         vm._recommendation(0.25, "analyst_draft", approved_for_display=True),
         vm._recommendation(0.00, "analyst_draft", approved_for_display=True),
@@ -142,7 +186,35 @@ def test_recommendation_has_three_issued_states_plus_unrated_state():
         vm._recommendation(None, "analyst_draft", approved_for_display=False),
     }
 
-    assert labels == {"Mua", "Giữ", "Bán", "Không xếp hạng"}
+    assert labels == {"Mua", "Giữ", "Bán"}
+
+
+def test_current_market_price_prefers_persisted_market_data_over_valuation():
+    market_data = SimpleNamespace(
+        as_of_date="2026-06-19",
+        trading_statistics=SimpleNamespace(last_close=26.5),
+    )
+
+    price, as_of = vm._resolve_current_market_price(
+        valuation_current_price=18_400.0,
+        valuation={"snapshot_as_of": "2026-05-21"},
+        market_data=market_data,
+    )
+
+    assert price == 26_500.0
+    assert as_of == "2026-06-19"
+
+
+def test_market_data_uses_run_scoped_cache_before_fact_store(monkeypatch):
+    cached = SimpleNamespace(ticker="DPP", source="cafef_price_history")
+    monkeypatch.setattr(vm, "load_cached_market_data", lambda ticker, run_id="": cached)
+
+    def _unexpected_fact_store(*args, **kwargs):
+        raise AssertionError("fact store should not be queried when cache exists")
+
+    monkeypatch.setattr(vm, "load_market_data_from_fact_store", _unexpected_fact_store)
+
+    assert vm._market_data("DPP", run_id="run-dpp") is cached
 
 
 def test_forecast_rows_are_enriched_from_debt_dividend_and_cash_schedules():

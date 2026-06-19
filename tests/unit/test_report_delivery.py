@@ -6,6 +6,10 @@ from backend.reporting import report_delivery
 from backend.storage.layout import client_report_key
 
 
+def _client_pdf_bytes(label: bytes = b"report") -> bytes:
+    return b"%PDF-1.4\n" + label + (b"\n0" * 6000)
+
+
 class FakeStorage:
     def __init__(self) -> None:
         self.uploads: list[tuple] = []
@@ -29,13 +33,13 @@ class FakeMissingStorage:
 
 def _fake_render_client(*, run_id, ticker, mode, output_dir):
     pdf = Path(output_dir) / f"{ticker}_report.pdf"
-    pdf.write_bytes(b"%PDF-1.4 report")
+    pdf.write_bytes(_client_pdf_bytes(b"report"))
     return pdf.with_suffix(".html"), pdf, object()
 
 
 def _fake_render_explanation(*, run_id, ticker, view_model, output_dir):
     pdf = Path(output_dir) / f"{ticker}_explanation.pdf"
-    pdf.write_bytes(b"%PDF-1.4 explanation")
+    pdf.write_bytes(_client_pdf_bytes(b"explanation"))
     return pdf.with_suffix(".html"), pdf
 
 
@@ -72,9 +76,19 @@ def test_existing_client_report_available_uses_export_storage(tmp_path):
 
 
 def test_existing_client_report_available_uses_local_output(tmp_path):
-    (tmp_path / "TRA_report.pdf").write_bytes(b"%PDF-1.4 report")
+    (tmp_path / "TRA_report.pdf").write_bytes(_client_pdf_bytes(b"report"))
 
     assert report_delivery.existing_client_report_available(
+        "tra",
+        storage=FakeMissingStorage(),
+        output_dir=tmp_path,
+    )
+
+
+def test_existing_client_report_available_rejects_local_benchmark_stub(tmp_path):
+    (tmp_path / "TRA_report.pdf").write_bytes(b"%PDF-1.4\nbenchmark_valuation_v1 analyst draft\n")
+
+    assert not report_delivery.existing_client_report_available(
         "tra",
         storage=FakeMissingStorage(),
         output_dir=tmp_path,

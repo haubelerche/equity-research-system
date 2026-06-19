@@ -4,7 +4,6 @@ IMP,Cong ty Co phan Duoc pham Imexpharm,HOSE,pharma,true,
 DMC,Cong ty Co phan Xuat nhap khau Y te Domesco,HOSE,pharma,true,
 TRA,Cong ty Co phan Traphaco,HOSE,pharma,true,MVP core
 DBD,Cong ty Co phan Duoc - Trang thiet bi Y te Binh Dinh,HOSE,pharma,true,
-OPC,Cong ty Co phan Duoc pham OPC,HOSE,pharma,false,
 MKP,Cong ty Co phan Hoa - Duoc pham Mekophar,HOSE,pharma,false,
 TNH,Cong ty Co phan Benh vien Quoc te Thai Nguyen,HOSE,healthcare_services,false,
 JVC,Cong ty Co phan Thiet bi Y te Viet Nhat,HOSE,medical_equipment,false,
@@ -36,10 +35,8 @@ CNC,Cong ty Co phan Cong nghe Cao Traphaco,UPCOM,pharma,false,identity-verified 
 DAN,Cong ty Co phan Duoc Danapha,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
 DBM,Cong ty Co phan Duoc - Vat tu Y te Dak Lak,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
 DDN,Cong ty Co phan Duoc va Thiet bi Y te Da Nang,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
-DHD,Cong ty Co phan Duoc Vat tu Y te Hai Duong,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
 DHN,Cong ty Co phan Duoc pham Ha Noi,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
 DP2,Cong ty Co phan Duoc pham Trung uong 2,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
-DPH,Cong ty Co phan Duoc pham Hai Phong,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
 DTG,Cong ty Co phan Duoc pham Tipharco,HNX,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
 HDP,Cong ty Co phan Duoc Ha Tinh,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
 MTP,Cong ty Co phan Duoc Medipharco,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready

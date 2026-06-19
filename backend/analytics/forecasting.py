@@ -355,10 +355,34 @@ def run_forecast(
         rev = _get(fact_table, "revenue.net", p)
         if sga is not None and rev and rev > 0:
             sga_ratios.append(abs(sga) / rev)
-    sga_to_rev = (
-        assumptions.sga_to_revenue_override
-        or (statistics.median(sga_ratios) if sga_ratios else 0.20)
+    # Historical EBIT margin (ground truth) — the anchor for SG&A when the
+    # sga.total line item is unavailable. The old 20%-of-revenue default drove
+    # EBIT negative for low-gross-margin companies (e.g. pharma distributors),
+    # flipping historically profitable firms into forecast losses and a
+    # negative DCF equity value. Anchoring to actual EBIT prevents that.
+    ebit_margin_hist = (
+        _median_ratio("ebit.total", "revenue.net", fact_table, fy_periods)
+        or _median_ratio("operating_profit.total", "revenue.net", fact_table, fy_periods)
     )
+    if assumptions.sga_to_revenue_override is not None:
+        sga_to_rev = assumptions.sga_to_revenue_override
+        sga_method = "manual_override"
+    elif sga_ratios:
+        sga_to_rev = statistics.median(sga_ratios)
+        sga_method = "historical_median"
+    elif ebit_margin_hist is not None:
+        # Back-solve SG&A from the gross-profit-to-EBIT bridge so the forecast
+        # EBIT margin equals the historically observed EBIT margin.
+        sga_to_rev = max(gross_margin - ebit_margin_hist, 0.0)
+        sga_method = "backsolved_from_ebit_margin"
+        warnings.append(
+            f"SG&A not reported — derived from historical EBIT margin "
+            f"({ebit_margin_hist * 100:.1f}%) so forecast EBIT stays anchored to actuals."
+        )
+    else:
+        sga_to_rev = 0.20
+        sga_method = "default_20pct_no_sga_or_ebit_history"
+        warnings.append("No SG&A or EBIT history — using default SG&A of 20% of revenue")
 
     dep_to_rev = (
         assumptions.depreciation_to_revenue_override
@@ -376,6 +400,19 @@ def run_forecast(
         assumptions.capex_to_revenue_override
         or (statistics.median(capex_ratios) if capex_ratios else 0.03)
     )
+    # The CAPEX taper starts from the RECENT level (last up-to-2 years), not the
+    # full-history median: a one-time investment spike years ago must not anchor
+    # the whole forecast high and crush FCFF. Falls back to the median.
+    _recent_capex = capex_ratios[-2:] if capex_ratios else []
+    recent_capex_to_rev = (
+        assumptions.capex_to_revenue_override
+        or (statistics.mean(_recent_capex) if _recent_capex else capex_to_rev)
+    )
+    if capex_ratios and abs(recent_capex_to_rev - capex_to_rev) > 0.005:
+        warnings.append(
+            f"CAPEX/revenue forecast starts from recent level {recent_capex_to_rev:.1%} "
+            f"instead of full-history median {capex_to_rev:.1%}; then tapers to maintenance D&A."
+        )
 
     # Effective tax rate — unified TaxPolicy module
     tax_policy = build_tax_policy(
@@ -556,9 +593,14 @@ def run_forecast(
     drivers = {
         "revenue_growth": {y: round(rev_growth, 4) for y in forecast_years},
         "gross_margin": {"method": "historical_median", "value": round(gross_margin, 4)},
-        "sga_to_revenue": {"method": "historical_median", "value": round(sga_to_rev, 4)},
+        "sga_to_revenue": {"method": sga_method, "value": round(sga_to_rev, 4)},
         "depreciation_to_revenue": {"method": "historical_median", "value": round(dep_to_rev, 4)},
-        "capex_to_revenue": {"method": "historical_median", "value": round(capex_to_rev, 4)},
+        "capex_to_revenue": {
+            "method": "recent_to_maintenance_taper",
+            "value": round(recent_capex_to_rev, 4),
+            "historical_median": round(capex_to_rev, 4),
+            "terminal_maintenance_ratio": round(dep_to_rev, 4),
+        },
         "effective_tax_rate": {"method": "historical_median", "value": round(tax_rate, 4)},
         "cost_of_debt": {"method": cod_method, "value": round(cost_of_debt, 4)},
         "other_items_to_revenue": {"method": "historical_median", "value": other_items_to_rev},
@@ -572,7 +614,8 @@ def run_forecast(
     forecast_period_labels: list[str] = []
     forecast_net_incomes: dict[str, float] = {}
 
-    for year in forecast_years:
+    _n_forecast = len(forecast_years)
+    for _idx, year in enumerate(forecast_years):
         label = f"{year}F"
         forecast_period_labels.append(label)
 
@@ -629,7 +672,13 @@ def run_forecast(
         net_income = pbt + tax_expense
         net_margin = net_income / revenue if revenue else None
 
-        capex = -revenue * capex_to_rev
+        # CAPEX tapers from the historical level toward maintenance CAPEX (≈ D&A)
+        # across the explicit forecast; the terminal (last) year sits at
+        # maintenance so a one-time investment spike can't suppress FCFF — and
+        # the terminal value — in perpetuity.
+        _taper_w = (_idx / (_n_forecast - 1)) if _n_forecast > 1 else 1.0
+        capex_ratio_y = recent_capex_to_rev * (1 - _taper_w) + dep_to_rev * _taper_w
+        capex = -revenue * capex_ratio_y
         forecast_net_incomes[label] = net_income
 
         eps = (net_income * 1_000) / shares_mn if shares_mn else None

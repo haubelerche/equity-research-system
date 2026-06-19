@@ -17,6 +17,7 @@ from backend.reporting.final_report_renderer import (
     render_client_report_to_directory,
     render_report_explanation_to_directory,
 )
+from backend.reporting.pdf_quality_gate import is_client_pdf_safe, require_client_pdf_safe
 from backend.storage import EXPORTS_BUCKET, SupabaseStorageAdapter, client_report_key
 
 
@@ -42,7 +43,7 @@ def existing_client_report_available(
         pass
 
     local_report = Path(output_dir) / f"{ticker}_report.pdf"
-    return local_report.is_file()
+    return is_client_pdf_safe(local_report)
 
 
 def latest_renderable_run_id(ticker: str) -> str | None:
@@ -127,6 +128,8 @@ def render_and_store(
             view_model=view_model,
             output_dir=temp_dir,
         )
+        require_client_pdf_safe(pdf_path)
+        require_client_pdf_safe(exp_pdf)
         storage.upload_file(EXPORTS_BUCKET, report_key, pdf_path, "application/pdf", upsert=True)
         storage.upload_file(EXPORTS_BUCKET, explanation_key, exp_pdf, "application/pdf", upsert=True)
 

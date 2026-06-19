@@ -51,13 +51,19 @@ def _load_metric_registry() -> dict[str, Any]:
                 continue
             threshold = item.get("threshold")
             operator = str(item.get("threshold_operator") or "").strip()
+            formatted_threshold = _format_registry_threshold(
+                operator=operator,
+                threshold=threshold,
+                unit=str(item.get("unit") or ""),
+                metric_type=str(item.get("metric_type") or ""),
+            )
             policy = {
-                "threshold": _format_registry_threshold(
-                    operator=operator,
-                    threshold=threshold,
-                    unit=str(item.get("unit") or ""),
-                    metric_type=str(item.get("metric_type") or ""),
-                ),
+                "threshold": formatted_threshold,
+                "threshold_operator": operator,
+                "metric_type": item.get("metric_type"),
+                "severity": item.get("severity"),
+                "blocks_publish": item.get("blocks_publish"),
+                "unit": item.get("unit"),
                 "framework": item.get("framework"),
                 "formula": item.get("formula"),
                 "rationale": item.get("rationale") or item.get("remediation_hint"),
@@ -99,10 +105,22 @@ def _format_compact_number(value: float) -> str:
 
 METRIC_REGISTRY = _load_metric_registry()
 
+METRIC_POLICY_ALIASES = {
+    "schema_validity": "agent.json_schema_validity",
+    "no_unauthorized_calc": "agent.no_unauthorized_financial_calculation",
+    "groundedness": "agent.groundedness_judge_score",
+    "plan_adherence": "agent.plan_compliance",
+    "critic_issue_recall": "agent.seeded_issue_detection",
+}
+
 
 def metric_policy(metric_id: str) -> dict[str, Any]:
     metrics = METRIC_REGISTRY.get("metrics") or {}
-    policy = metrics.get(metric_id) if isinstance(metrics, dict) else None
+    policy = None
+    if isinstance(metrics, dict):
+        policy = metrics.get(metric_id)
+        if policy is None:
+            policy = metrics.get(METRIC_POLICY_ALIASES.get(metric_id, ""))
     return dict(policy) if isinstance(policy, dict) else {}
 
 
@@ -552,7 +570,7 @@ def evaluate_metric_threshold(
 ) -> str:
     """Evaluate a metric value against the metric's own threshold contract."""
     if value is None:
-        return "not_evaluable"
+        return fallback_status
     operator = str(
         metric.get("threshold_operator")
         or _operator_from_threshold(str(metric.get("threshold") or ""))
@@ -630,6 +648,11 @@ def standard_metric(
     metadata = metadata_for(metric_id, plan_id)
     policy = metric_policy(metric_id)
     governed_threshold = str(policy.get("threshold") or threshold)
+    governed_blocks_publish = (
+        policy.get("blocks_publish")
+        if policy.get("blocks_publish") is not None
+        else metadata.blocks_publish
+    )
     benchmark_status = _standard_status(status)
     examples = list(failed_examples or [])
     if benchmark_status in {"fail", "not_evaluable"} and not examples:
@@ -674,14 +697,14 @@ def standard_metric(
         "metric_name": metric_name,
         "category": metadata.category,
         "layer": metadata.layer,
-        "metric_type": metadata.metric_type,
+        "metric_type": policy.get("metric_type") or metadata.metric_type,
         "scope": metadata.scope,
-        "severity": metadata.severity,
-        "blocks_publish": metadata.blocks_publish,
+        "severity": policy.get("severity") or metadata.severity,
+        "blocks_publish": governed_blocks_publish,
         "value": value,
         "threshold": governed_threshold,
         "threshold_operator": _operator_from_threshold(governed_threshold),
-        "unit": metadata.unit,
+        "unit": policy.get("unit") or metadata.unit,
         "status": benchmark_status,
         "legacy_status": status,
         "sample_size": 0 if sample_size is None and value is None else (
@@ -701,6 +724,7 @@ def standard_metric(
             "profile": (METRIC_REGISTRY.get("profiles") or {}).get("active", "mvp"),
             "rationale": policy.get("rationale"),
             "registry_version": METRIC_REGISTRY.get("version"),
+            "source": "metric_registry_v3" if policy else "legacy/fallback",
         },
         "evidence": evidence_payload,
         "evaluated_at": None,

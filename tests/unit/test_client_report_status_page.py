@@ -81,21 +81,56 @@ def test_methodology_page_explains_data_calculation_and_decision_without_warning
     assert "<strong>[2]</strong>" in html
     assert "Số vết công thức" in html
     assert "VN pharma peers: IMP, DMC, TRA" in html
-    assert "served from cache; live fetch failed" in html
+    assert "Dữ liệu thị trường đang dùng bản đã lưu gần nhất" not in html
     assert "market_sanity_bridge_missing" not in html
     assert "blend_is_draft_only" not in html
     assert "target_pe=15.0x is model default" not in html
     assert "Relative valuation is PENDING" not in html
-    assert "Giá trị mô hình lệch đáng kể so với thị giá" in html
-    assert "P/E mục tiêu đang là giả định mặc định" in html
-    assert "Định giá tương đối chưa đủ điều kiện" in html
+    assert "Giá trị mô hình lệch đáng kể so với thị giá" not in html
+    assert "P/E mục tiêu đang là giả định mặc định" not in html
+    assert "Định giá tương đối thiếu bộ doanh nghiệp so sánh" not in html
+    assert "Dữ liệu và kiểm định cần bổ sung trước khi phát hành" not in html
+    assert "Cảnh báo mô hình và dữ liệu" not in html
+    assert "Cần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp" not in html
     assert "thuộc về người đọc" not in html
     # The hedging "sensitive points to check" warning list is gone.
     assert "Các điểm nhạy cảm" not in html
     # No internal jargon / leaked artifacts.
     assert "backend/news" not in html
+    assert "recommendation_gate_not_allowed" not in html
+    assert "valuation_result_not_publishable" not in html
+    assert "peer_data_source" not in html
+    assert "BLOCKED" not in html
+    assert "blocked" not in html
+    assert "bị chặn" not in html
+    assert "Cảnh báo chặn phát hành" not in html
     assert "chưa công bố chính thức" not in html.lower()
     assert "English reviewer note" not in html
+
+
+def test_methodology_page_explains_missing_target_price_without_dash_vnd():
+    vm = SimpleNamespace(
+        current_price=SimpleNamespace(amount=12_300),
+        target_price=None,
+        upside_downside=None,
+        total_return=None,
+        display_blocking_reasons=["no_eligible_valuation_method"],
+        missing_required_fields=["target_price"],
+        key_sources=[],
+        news_citations=[],
+        disclaimer="Báo cáo này chỉ nhằm mục đích cung cấp thông tin.",
+        critic_findings=[],
+        report_generated_at="2026-06-18T10:15:00+07:00",
+        market_price_as_of="2026-06-18",
+        valuation_evidence={"display_blocking_reasons": ["no_eligible_valuation_method"]},
+    )
+
+    html = csb._report_status_page(vm)
+
+    assert "giá mục tiêu chưa được công bố" in html
+    assert "Thiếu phương pháp định giá chính" in html
+    assert "— VND" not in html
+    assert "â€” VND" not in html
 
 
 def test_low_news_coverage_note_when_no_articles():
