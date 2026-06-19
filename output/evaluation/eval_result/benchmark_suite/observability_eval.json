@@ -50,7 +50,7 @@
     "MTP",
     "NDC"
   ],
-  "generated_at": "2026-06-19T09:12:45.407835+00:00",
+  "generated_at": "2026-06-19T10:24:16.435454+00:00",
   "plan_id": "07",
   "name": "Observability, cost, and latency",
   "artifact": "observability_eval.json",
@@ -2253,7 +2253,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "cold_full_report_p95_latency",
@@ -6110,7 +6110,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "cost_per_report",
@@ -18426,7 +18426,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "duration_seconds",
@@ -20796,7 +20796,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "final_ocr_error_count",
@@ -22581,7 +22581,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "flash_memo_cold_retrieval_p95_latency",
@@ -24728,7 +24728,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "flash_memo_warm_p95_latency",
@@ -26875,7 +26875,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "full_run_duration",
@@ -29245,7 +29245,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "latency_regression_ratio",
@@ -39850,7 +39850,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "llm_retry_rate",
@@ -43525,7 +43525,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "ocr_failure_rate",
@@ -45310,7 +45310,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "pdf_render_failures",
@@ -47500,7 +47500,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "render_only_p95_latency",
@@ -49647,7 +49647,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "retrieval_fallback_rate",
@@ -51882,7 +51882,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "warm_full_report_p95_latency",
@@ -58439,7 +58439,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     }
   ],
   "blocking_issues": []

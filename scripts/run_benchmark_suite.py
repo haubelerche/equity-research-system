@@ -34,6 +34,7 @@ from backend.evaluation.benchmark_standards import (  # noqa: E402
 from backend.evaluation.project_evaluator import (  # noqa: E402
     DEFAULT_OUTPUT_DIR,
     PLANS,
+    _normalize_metric_results,
     _run_plan_tests,
     _runtime_evidence,
     _write_json,
@@ -172,10 +173,19 @@ def _plan_payload(
         status = "fail"
         blocking_issues.append("plan_test_suite_failed")
 
-    metric_results = runtime_result.get("metrics", [])
+    raw_metric_results = runtime_result.get("metrics", [])
+    metric_results = _normalize_metric_results(
+        raw_metric_results if isinstance(raw_metric_results, list) else []
+    )
     for metric in metric_results:
         if isinstance(metric, dict):
             metric["evaluated_at"] = generated_at
+    blocking_issues.extend(
+        f"{metric.get('id') or metric.get('metric_id')}:{metric.get('detail') or 'threshold_not_met'}"
+        for metric in metric_results
+        if isinstance(metric, dict) and metric_blocks_publish(metric)
+    )
+    status = _aggregate_artifact_status([status], metric_results)
 
     domain_payload = {
         key: value
@@ -294,7 +304,12 @@ def _existing_plan_payload(*, ticker: str, output_dir: Path, plan: Any) -> dict[
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return None
-    return payload if isinstance(payload, dict) else None
+    if not isinstance(payload, dict):
+        return None
+    metric_results = payload.get("metric_results")
+    if isinstance(metric_results, list):
+        payload = {**payload, "metric_results": _normalize_metric_results(metric_results)}
+    return payload
 
 
 def _packet_from_existing_ticker(
@@ -311,14 +326,24 @@ def _packet_from_existing_ticker(
             raise FileNotFoundError(
                 f"missing existing benchmark artifact for {ticker}: {output_dir / ticker / plan.artifact}"
             )
+        metric_results = payload.get("metric_results") if isinstance(payload.get("metric_results"), list) else []
+        blocking_issues = payload.get("blocking_issues") if isinstance(payload.get("blocking_issues"), list) else []
+        derived_blocking = [
+            f"{metric.get('id') or metric.get('metric_id')}:{metric.get('detail') or 'threshold_not_met'}"
+            for metric in metric_results
+            if isinstance(metric, dict) and metric_blocks_publish(metric)
+        ]
         plan_records.append({
             "plan_id": str(payload.get("plan_id") or plan.id),
             "name": str(payload.get("plan_name") or payload.get("name") or plan.name),
             "artifact": plan.artifact,
-            "status": str(payload.get("status") or "not_measured"),
+            "status": _aggregate_artifact_status(
+                [str(payload.get("status") or "not_measured")],
+                metric_results,
+            ),
             "metrics": payload.get("metrics") if isinstance(payload.get("metrics"), dict) else {},
-            "metric_results": payload.get("metric_results") if isinstance(payload.get("metric_results"), list) else [],
-            "blocking_issues": payload.get("blocking_issues") if isinstance(payload.get("blocking_issues"), list) else [],
+            "metric_results": metric_results,
+            "blocking_issues": sorted(set([*blocking_issues, *derived_blocking])),
         })
 
     all_metrics = [
@@ -456,46 +481,55 @@ def _pass_rate_value(samples: list[dict[str, Any]]) -> tuple[float | None, int]:
 
 def _apply_dashboard_metric_contract(metric_id: str, metric: dict[str, Any]) -> dict[str, Any]:
     override = DASHBOARD_THRESHOLD_OVERRIDES.get(metric_id)
-    if not override:
-        return metric
-    metric.update(override)
-    evaluated_status = evaluate_metric_threshold(
-        metric,
-        metric.get("value"),
-        fallback_status=str(metric.get("status") or "not_evaluable"),
-    )
-    previous_status = str(metric.get("status") or "not_evaluable")
-    metric["status"] = (
-        max([previous_status, evaluated_status], key=_metric_status_rank)
-        if previous_status in {"blocked", "not_evaluable"}
-        else evaluated_status
-    )
-    metric["legacy_status"] = metric["status"]
-    threshold_policy = dict(metric.get("threshold_policy") or {})
-    threshold_policy["rationale"] = "Cohort dashboard readiness threshold; exact 100% is reserved for deterministic zero-error gates."
-    metric["threshold_policy"] = threshold_policy
+    if override:
+        metric.update(override)
+        evaluated_status = evaluate_metric_threshold(
+            metric,
+            metric.get("value"),
+            fallback_status=str(metric.get("status") or "not_evaluable"),
+        )
+        previous_status = str(metric.get("status") or "not_evaluable")
+        metric["status"] = (
+            max([previous_status, evaluated_status], key=_metric_status_rank)
+            if previous_status in {"blocked", "not_evaluable"}
+            else evaluated_status
+        )
+        metric["legacy_status"] = metric["status"]
+        threshold_policy = dict(metric.get("threshold_policy") or {})
+        threshold_policy["rationale"] = "Cohort dashboard readiness threshold override."
+        metric["threshold_policy"] = threshold_policy
     return metric
 
 
 REPORT_SCORE_THRESHOLDS = {
     "report.completeness": ("completeness", 90.0),
+    "report.thesis_specificity": ("thesis_specificity", 80.0),
     "report.financial_analysis_depth": ("financial_analysis_depth", 80.0),
     "report.forecast_rationale": ("forecast_rationale", 80.0),
     "report.valuation_transparency": ("valuation_transparency", 85.0),
+    "report.risk_catalyst_quality": ("risk_catalyst_quality", 80.0),
     "report.evidence_integration": ("evidence_integration", 80.0),
+    "report.sensitivity_disclosure_completeness": ("sensitivity_disclosure_completeness", 90.0),
+    "report.peer_industry_context_quality": ("peer_industry_context_quality", 75.0),
+    "report.executive_summary_actionability": ("executive_summary_actionability", 80.0),
 }
 
 REPORT_TOTAL_WEIGHTS = {
-    "completeness": 0.20,
-    "financial_analysis_depth": 0.20,
-    "forecast_rationale": 0.20,
-    "valuation_transparency": 0.20,
-    "evidence_integration": 0.15,
+    "completeness": 0.12,
+    "thesis_specificity": 0.12,
+    "financial_analysis_depth": 0.14,
+    "forecast_rationale": 0.12,
+    "valuation_transparency": 0.14,
+    "risk_catalyst_quality": 0.10,
+    "evidence_integration": 0.10,
+    "peer_industry_context_quality": 0.06,
+    "executive_summary_actionability": 0.05,
     "presentation_quality": 0.05,
 }
 
 OPS_LATENCY_METRICS = {
     "duration_seconds",
+    "full_run_duration",
     "warm_full_report_p95_latency",
     "cold_full_report_p95_latency",
     "render_only_p95_latency",
@@ -516,6 +550,8 @@ OBSERVED_NUMERIC_UNITS = {
     "score",
     "ratio",
 }
+
+MISSING_EVIDENCE_STATUSES = {"blocked", "not_evaluable", "not_measured"}
 
 
 def _report_total_score(scores: dict[str, Any]) -> float | None:
@@ -604,6 +640,10 @@ def _source_sample_status_and_value(sample: dict[str, Any], source_metric_id: st
         return ("pass" if value == "pass" else "fail"), value
     if "financial_decision" in sample:
         return "not_evaluable", sample.get("financial_decision")
+    if source_metric_id == "schema_validity":
+        status = str(sample.get("status") or "").lower()
+        if status in {"pass", "fail"}:
+            return status, status == "pass"
     permission = sample.get("permission")
     if isinstance(permission, dict):
         permitted = bool(permission.get("tool_id") and permission.get("agent_id"))
@@ -625,6 +665,12 @@ def _normalize_source_sample(sample: Any, source_metric_id: str | None = None) -
         normalized["status"] = inferred_status
     if "value" not in normalized and inferred_value is not None:
         normalized["value"] = inferred_value
+    if (
+        source_metric_id == "schema_validity"
+        and "schema_valid" not in normalized
+        and isinstance(normalized.get("value"), bool)
+    ):
+        normalized["schema_valid"] = normalized["value"]
     return normalized
 
 
@@ -636,6 +682,89 @@ def _normalized_source_samples_for_metric_sample(sample: dict[str, Any]) -> list
         _normalize_source_sample(item, source_metric_id=str(source_metric_id) if source_metric_id else None)
         for item in source_samples
     ]
+
+
+def _nested_source_sample_value(sample: dict[str, Any], key: str) -> Any:
+    for source_sample in _normalized_source_samples_for_metric_sample(sample):
+        if isinstance(source_sample, dict) and source_sample.get(key) not in (None, "", [], {}):
+            return source_sample.get(key)
+    return None
+
+
+def _nested_source_sample_flag(sample: dict[str, Any], key: str) -> bool:
+    return any(
+        isinstance(source_sample, dict) and source_sample.get(key) is True
+        for source_sample in _normalized_source_samples_for_metric_sample(sample)
+    )
+
+
+def _is_applicable_source_sample(source_sample: Any, metric_id: str) -> bool:
+    if not isinstance(source_sample, dict):
+        return False
+    status = str(source_sample.get("status") or "").lower()
+    if status == "not_applicable":
+        return False
+    if str(source_sample.get("sample_origin") or "").lower() == "benchmark_control":
+        return False
+    if metric_id == "source_tier_hit_rate":
+        if source_sample.get("material") is False:
+            return False
+        expected_tiers = source_sample.get("expected_source_tiers")
+        if expected_tiers is not None and not expected_tiers:
+            return False
+    return True
+
+
+def _source_sample_passed(source_sample: dict[str, Any], metric_id: str) -> bool:
+    if metric_id == "hit_rate_at_5" and isinstance(source_sample.get("hit"), bool):
+        return bool(source_sample["hit"])
+    if metric_id == "source_tier_hit_rate" and isinstance(source_sample.get("source_tier_hit"), bool):
+        return bool(source_sample["source_tier_hit"])
+    status = str(source_sample.get("status") or "").lower()
+    return status in {
+        "pass",
+        "supported",
+        "accepted",
+        "valid",
+        "resolved",
+        "reconciled",
+        "completed",
+        "success",
+        "succeeded",
+        "ok",
+    }
+
+
+def _pooled_coverage_value(
+    metric_id: str,
+    samples: list[dict[str, Any]],
+) -> tuple[float, int, int] | None:
+    applicable_metric_samples = [
+        sample for sample in samples
+        if str(sample["metric"].get("status") or "") != "not_applicable"
+    ]
+    if not applicable_metric_samples:
+        return None
+    source_sample_groups = [
+        _normalized_source_samples_for_metric_sample(sample)
+        for sample in applicable_metric_samples
+    ]
+    if any(not group for group in source_sample_groups):
+        return None
+    applicable_source_samples = [
+        source_sample
+        for source_samples in source_sample_groups
+        for source_sample in source_samples
+        if _is_applicable_source_sample(source_sample, metric_id)
+    ]
+    denominator = len(applicable_source_samples)
+    if denominator == 0:
+        return None
+    numerator = sum(
+        1 for source_sample in applicable_source_samples
+        if isinstance(source_sample, dict) and _source_sample_passed(source_sample, metric_id)
+    )
+    return numerator / denominator, numerator, denominator
 
 
 def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], generated_at: str) -> dict[str, Any]:
@@ -662,8 +791,31 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         or metric_id in OPS_LATENCY_METRICS
         or unit in OBSERVED_NUMERIC_UNITS
     ) and not is_pass_gate and metric_type not in {"coverage", "error_count", "error_rate"}
-    if is_pass_gate:
+    missing_count = sum(1 for item in statuses if item in MISSING_EVIDENCE_STATUSES)
+    failed_count = sum(1 for item in statuses if item == "fail")
+    evaluable_count = sum(
+        1 for item in statuses
+        if item not in MISSING_EVIDENCE_STATUSES and item != "not_applicable"
+    )
+    all_applicable_not_evaluable = bool(applicable_samples) and all(
+        str(sample["metric"].get("status") or "") == "not_evaluable"
+        for sample in applicable_samples
+    )
+    pooled_coverage = (
+        _pooled_coverage_value(metric_id, samples)
+        if metric_type == "coverage" and not is_pass_gate and not is_boolean_gate
+        else None
+    )
+    if all_applicable_not_evaluable:
+        value = None
+        passed_count = 0
+    elif not is_pass_gate and pooled_coverage is None and not numeric_values and metric_type in {"coverage", "score"}:
+        value = None
+        passed_count = 0
+    elif is_pass_gate:
         value, passed_count = _pass_rate_value(samples)
+    elif pooled_coverage is not None:
+        value = pooled_coverage[0]
     elif metric_type == "error_count" or unit == "count":
         value = sum(numeric_values)
     elif is_error_rate and numeric_values:
@@ -688,6 +840,8 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     elif is_boolean_gate:
         # value is None only when every sample was not_applicable (all excluded).
         status = "not_applicable" if value is None else ("pass" if value == 1.0 else "fail")
+    elif all_applicable_not_evaluable:
+        status = "not_evaluable"
     elif is_pass_gate:
         status = "not_applicable" if value is None else ("pass" if value == 1.0 else "fail")
     else:
@@ -696,10 +850,7 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         [item for item in statuses if item in {"blocked", "not_evaluable"}] or ["not_applicable"],
         key=_metric_status_rank,
     )
-    if is_observed_numeric and numeric_values and sample_status in {"blocked", "not_evaluable"} and status == "pass":
-        status = "pass"
-    else:
-        status = max([status, sample_status], key=_metric_status_rank)
+    status = max([status, sample_status], key=_metric_status_rank)
 
     failed_examples = [
         {
@@ -719,21 +870,43 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     if is_pass_gate:
         aggregation = "cohort_pass_rate"
         numerator = passed_count
+        denominator = applicable_count
+    elif pooled_coverage is not None:
+        aggregation = "cohort_pooled_coverage"
+        numerator = pooled_coverage[1]
+        denominator = pooled_coverage[2]
     elif metric_type == "error_count" or unit == "count":
         aggregation = "cohort_sum"
         numerator = value
+        denominator = applicable_count if applicable_count != len(samples) else len(samples)
     elif is_error_rate and numeric_values:
         aggregation = "cohort_mean_observed"
-        numerator = value
+        numerator = sum(numeric_values)
+        denominator = len(numeric_values)
     elif is_observed_numeric and numeric_values:
         aggregation = "cohort_mean_observed"
-        numerator = value
-    elif len(numeric_values) == len(samples):
+        numerator = sum(numeric_values)
+        denominator = len(numeric_values)
+    elif applicable_count and len(numeric_values) == applicable_count:
+        # Mirror the value mean-branch condition above (which keys off
+        # ``applicable_count``, not ``len(samples)``) so the explanatory
+        # numerator/denominator reconcile with ``value`` even when some tickers
+        # are not_applicable. Otherwise this fell through to the cohort_pass_rate
+        # else-branch and reported a pass COUNT ratio that contradicted value.
         aggregation = "cohort_mean"
-        numerator = value
+        numerator = sum(numeric_values)
+        denominator = len(numeric_values)
+    elif value is None and not is_pass_gate:
+        aggregation = "not_evaluable"
+        numerator = None
+        denominator = applicable_count
     else:
         aggregation = "cohort_pass_rate"
-        numerator = sum(1 for sample in samples if str(sample["metric"].get("status") or "") == "pass")
+        numerator = sum(
+            1 for sample in applicable_samples
+            if str(sample["metric"].get("status") or "") == "pass"
+        )
+        denominator = applicable_count
     evidence_artifact_ids = sorted({
         str(sample.get("artifact_id") or "")
         for sample in samples
@@ -766,12 +939,15 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         "inputs": calculation_inputs,
         "parameters": calculation_parameters,
         "numerator": numerator,
-        "denominator": (
-            len(numeric_values) if is_error_rate and numeric_values
-            else len(numeric_values) if is_observed_numeric and numeric_values
-            else applicable_count if is_pass_gate
-            else applicable_count if applicable_count != len(samples)
-            else len(samples)
+        "denominator": denominator,
+        "evaluable_count": evaluable_count,
+        "missing_count": missing_count,
+        "failed_count": failed_count,
+        "value_domain": (
+            "boolean_gate" if is_boolean_gate
+            else "pass_gate" if is_pass_gate
+            else "observed_numeric" if is_observed_numeric
+            else metric_type or unit or "diagnostic"
         ),
         "per_sample_results": [
             {
@@ -787,6 +963,16 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
                 "failed_examples": sample["metric"].get("failed_examples") or [],
                 "evidence": sample["metric"].get("evidence") or {},
                 "source": sample["metric"].get("source"),
+                "structured_report_quality_available": _nested_source_sample_flag(
+                    sample,
+                    "structured_report_quality_available",
+                ),
+                "evidence_support_available": _nested_source_sample_flag(
+                    sample,
+                    "evidence_support_available",
+                ),
+                "claim_ledger_path": _nested_source_sample_value(sample, "claim_ledger_path"),
+                "evidence_packet_path": _nested_source_sample_value(sample, "evidence_packet_path"),
                 "source_calculation": {
                     "aggregation": (sample["metric"].get("calculation") or {}).get("aggregation"),
                     "numerator": (sample["metric"].get("calculation") or {}).get("numerator"),
@@ -842,6 +1028,24 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     aggregate["id"] = metric_id
     aggregate["metric_id"] = metric_id
     return _apply_dashboard_metric_contract(metric_id, aggregate)
+
+
+def _aggregate_artifact_status(
+    fallback_statuses: list[str],
+    metric_results: list[dict[str, Any]],
+) -> str:
+    metric_statuses = [
+        str(metric.get("status") or "")
+        for metric in metric_results
+        if isinstance(metric, dict)
+    ]
+    if any(status == "fail" for status in metric_statuses):
+        return "fail"
+    if any(status in MISSING_EVIDENCE_STATUSES for status in metric_statuses):
+        return "blocked"
+    if metric_statuses and all(status in {"measured_only", "warning"} for status in metric_statuses):
+        return "measured_only"
+    return max(fallback_statuses or ["not_measured"], key=_metric_status_rank)
 
 
 def _missing_metric_sample(
@@ -1014,7 +1218,7 @@ def _aggregate_artifacts(
                 if not isinstance(metric, dict):
                     continue
                 metric_id = _normalize_metric_key(metric)
-                if not metric_id or metric_id in DASHBOARD_HIDDEN_METRIC_IDS:
+                if not metric_id:
                     continue
                 present_metric_ids.add(metric_id)
                 samples_by_metric.setdefault(metric_id, []).append({
@@ -1059,9 +1263,9 @@ def _aggregate_artifacts(
             f"{metric.get('id') or metric.get('metric_id')}:{metric.get('detail') or 'threshold_not_met'}"
             for metric in metric_results
             if metric.get("blocks_publish") is True
-            and str(metric.get("status") or "") in {"fail", "blocked"}
+            and str(metric.get("status") or "") in {"fail", "blocked", "not_evaluable"}
         ]
-        status = max(statuses or ["not_measured"], key=_metric_status_rank)
+        status = _aggregate_artifact_status(statuses, metric_results)
         artifacts.append({
             "plan_id": plan_id,
             "name": PLAN_NAMES.get(plan_id, plan_id),

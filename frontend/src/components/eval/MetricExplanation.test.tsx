@@ -95,4 +95,36 @@ describe("MetricExplanation", () => {
 
     expect(screen.getByText(/Tỷ lệ đạt = 45 \/ 45 = 100%; giá trị dashboard = 94%\./)).toBeInTheDocument();
   });
+
+  it("formats a reconciled cohort mean in dashboard units without a redundant dashboard tail", () => {
+    const coverageMeanDef: MetricDef = {
+      ...passRateDef,
+      id: "period_completeness",
+      metricType: "coverage",
+    };
+    const coverageMeanResult: BenchmarkMetricResult = {
+      metric_id: "period_completeness",
+      metric_name: "Period completeness",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 0.975,
+      threshold: ">= 95%",
+      threshold_operator: ">=",
+      status: "pass",
+      sample_size: 3,
+      calculation: {
+        aggregation: "cohort_mean",
+        numerator: 1.95,
+        denominator: 2,
+        per_sample_results: [],
+      },
+    };
+
+    render(<MetricExplanation def={coverageMeanDef} result={coverageMeanResult} />);
+
+    // Mean is shown in the same unit as the dashboard (97.5%), and because it
+    // reconciles with the published value the redundant tail is suppressed.
+    expect(screen.getByText(/1\.95 \/ 2 = 97\.5%\.$/)).toBeInTheDocument();
+    expect(screen.queryByText(/97\.5%; giá trị dashboard/)).not.toBeInTheDocument();
+  });
 });

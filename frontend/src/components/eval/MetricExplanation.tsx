@@ -644,6 +644,15 @@ function formulaResult(def: MetricDef, result: BenchmarkMetricResult | undefined
   return formatRuntimeMetricResult(def, result, undefined, { includeFormula: false });
 }
 
+// Format a reconstructed numeric (e.g. a cohort mean) exactly the way the
+// dashboard formats the published ``value`` so the "Thay số" substitution and the
+// dashboard reading use the same units. When they reconcile, ``dashboardValueNote``
+// then suppresses the redundant "; giá trị dashboard = ..." tail.
+function formatValueLikeDashboard(def: MetricDef, result: BenchmarkMetricResult | undefined, value: number): string {
+  const shadow = { ...(result ?? {}), value } as BenchmarkMetricResult;
+  return formatRuntimeMetricResult(def, shadow, undefined, { includeFormula: false });
+}
+
 type FormulaExplanation = {
   observedVariable: string;
   theory: string;
@@ -709,8 +718,9 @@ function calculationFormulaExplanation(def: MetricDef, result: BenchmarkMetricRe
 
   if (aggregation === "mean" || aggregation === "cohort_mean" || aggregation === "cohort_mean_observed") {
     const mean = numerator !== null && denominator ? numerator / denominator : null;
-    const substitution = mean !== null
-      ? `Điểm trung bình = tổng điểm quan sát / số sample = ${formatCalculationNumber(numerator)} / ${formatCalculationNumber(denominator)} = ${formatCalculationNumber(mean)}; giá trị dashboard = ${resultText}.`
+    const meanText = mean !== null ? formatValueLikeDashboard(def, result, mean) : null;
+    const substitution = mean !== null && meanText !== null
+      ? `Điểm trung bình = tổng điểm quan sát / số sample = ${formatCalculationNumber(numerator)} / ${formatCalculationNumber(denominator)} = ${meanText}${dashboardValueNote(meanText, resultText)}.`
       : `Điểm trung bình được lấy trên ${formatCalculationNumber(sampleCount)} sample đánh giá được; giá trị dashboard = ${resultText}.`;
     return {
       observedVariable: "Điểm trung bình trên cohort đánh giá",

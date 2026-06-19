@@ -50,7 +50,7 @@
     "MTP",
     "NDC"
   ],
-  "generated_at": "2026-06-19T09:12:45.407835+00:00",
+  "generated_at": "2026-06-19T10:24:16.435454+00:00",
   "plan_id": "04",
   "name": "Citation and source provenance",
   "artifact": "citation_eval.json",
@@ -4012,7 +4012,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "generic_citations",
@@ -6476,7 +6476,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "official_source_coverage",
@@ -9570,7 +9570,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "pdf_source_mentions",
@@ -12034,7 +12034,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "quantitative_citation_coverage",
@@ -15983,7 +15983,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "source_id_validity",
@@ -19392,7 +19392,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     }
   ],
   "blocking_issues": []

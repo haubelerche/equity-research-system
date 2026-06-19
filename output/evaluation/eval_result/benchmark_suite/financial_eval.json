@@ -50,7 +50,7 @@
     "MTP",
     "NDC"
   ],
-  "generated_at": "2026-06-19T09:12:45.407835+00:00",
+  "generated_at": "2026-06-19T10:24:16.435454+00:00",
   "plan_id": "03",
   "name": "Financial calculation",
   "artifact": "financial_eval.json",
@@ -3292,7 +3292,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "fcfe",
@@ -9021,7 +9021,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "fcfe_sensitivity",
@@ -11440,7 +11440,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "fcff",
@@ -16990,7 +16990,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "formula_trace",
@@ -19364,7 +19364,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "golden_drift_out_of_tolerance",
@@ -21552,7 +21552,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "gordon_growth",
@@ -23971,7 +23971,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "net_debt",
@@ -26615,7 +26615,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "sensitivity_varies",
@@ -29034,7 +29034,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "target_price",
@@ -31588,7 +31588,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "target_price_bridge_error",
@@ -31962,7 +31962,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "wacc_terminal_growth_violation",
@@ -32336,7 +32336,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "net_debt_reconciliation_error",
@@ -32710,7 +32710,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     }
   ],
   "blocking_issues": []

@@ -50,7 +50,7 @@
     "MTP",
     "NDC"
   ],
-  "generated_at": "2026-06-19T09:12:45.407835+00:00",
+  "generated_at": "2026-06-19T10:24:16.435454+00:00",
   "plan_id": "05",
   "name": "Agent workflow and LLM judge",
   "artifact": "agent_eval.json",
@@ -2369,7 +2369,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "agent.judge_rationale_evidence_coverage",
@@ -4675,7 +4675,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "agent.repair_loop_rate",
@@ -6915,7 +6915,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "agent.stage_handoff_completeness",
@@ -11225,7 +11225,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "agent.token_budget_adherence",
@@ -13781,7 +13781,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "agent.tool_call_success_rate",
@@ -16606,7 +16606,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "artifact_manifest_compliance",
@@ -22625,7 +22625,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "critic_issue_recall",
@@ -25311,7 +25311,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "groundedness",
@@ -27997,7 +27997,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "no_unauthorized_calc",
@@ -31767,7 +31767,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00",
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00",
       "legacy_threshold": "100%"
     },
     {
@@ -34454,7 +34454,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "role_adherence",
@@ -37140,7 +37140,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "schema_validity",
@@ -40055,7 +40055,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00",
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00",
       "legacy_threshold": "100%"
     },
     {
@@ -43015,7 +43015,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     },
     {
       "id": "tool_permission_compliance",
@@ -46064,7 +46064,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-19T09:12:45.407835+00:00"
+      "evaluated_at": "2026-06-19T10:24:16.435454+00:00"
     }
   ],
   "blocking_issues": []
