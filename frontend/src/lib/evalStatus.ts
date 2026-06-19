@@ -51,6 +51,11 @@ export function parseRuntimeThreshold(threshold: unknown, unit?: string | null):
   if (typeof threshold === "boolean") return threshold ? 1 : 0;
   if (typeof threshold !== "string") return null;
 
+  // Relative contracts need their reference series to be evaluated correctly.
+  // Parsing the percentage delta as an absolute threshold (for example,
+  // "<= baseline p95 + 30%" -> 0.3 seconds) produces a false failure.
+  if (/\bbaseline\b/i.test(threshold)) return null;
+
   const ratio = threshold.match(/(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)/);
   if (ratio) {
     const numerator = Number(ratio[1]);

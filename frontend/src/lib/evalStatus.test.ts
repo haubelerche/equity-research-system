@@ -81,6 +81,18 @@ describe("evalMetricStatus", () => {
     expect(resolveMetricStatus(gte, { value: 0, threshold: "present", status: "blocked" })).toBe("blocked");
   });
 
+  it("trusts backend status for relative baseline thresholds", () => {
+    expect(parseRuntimeThreshold("<= baseline p95 + 30%", "seconds")).toBeNull();
+    expect(resolveMetricStatus(lte, {
+      value: 6.1,
+      threshold: "<= baseline p95 + 30%",
+      status: "pass",
+      metric_type: "latency_percentile",
+      unit: "seconds",
+      calculation: { aggregation: "cohort_mean_observed", numerator: 6.1, denominator: 45 },
+    })).toBe("pass");
+  });
+
   it("preserves fail-closed status for partially observed aggregate metrics", () => {
     expect(resolveMetricStatus(lte, {
       value: 0.378,
