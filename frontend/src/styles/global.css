@@ -702,6 +702,70 @@ td.num {
   margin-bottom: var(--space-2);
 }
 
+.explanation-metric-row.is-expanded {
+  background: var(--color-surface-2);
+}
+
+.explanation-metric-toggle {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.explanation-metric-toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.explanation-metric-detail-row > td {
+  padding: var(--space-4);
+  background: var(--color-surface-0);
+}
+
+.explanation-metric-detail-row .metric-explanation {
+  gap: var(--space-3);
+}
+
+.explanation-metric-detail-row .metric-explanation__section,
+.explanation-metric-detail-row .metric-explanation__summary {
+  background: var(--color-surface-1);
+}
+
+.metric-explanation__formula-list {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-0);
+}
+
+.metric-explanation__formula-list > div {
+  padding: var(--space-3);
+}
+
+.metric-explanation__formula-list > div + div {
+  border-top: 1px solid var(--color-border);
+}
+
+.metric-explanation__formula-list dt {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.metric-explanation__formula-list dd {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text);
+  line-height: 1.55;
+}
+
 .benchmark-run-details {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

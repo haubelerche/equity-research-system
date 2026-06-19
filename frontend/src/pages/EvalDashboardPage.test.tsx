@@ -379,6 +379,66 @@ describe("EvalDashboardPage", () => {
     expect(screen.queryByText("Legacy thesis specificity")).not.toBeInTheDocument();
   });
 
+  it("keeps report quality rows visible when the evaluator is not evaluable", async () => {
+    const stalledPacket = JSON.parse(JSON.stringify(packet));
+    const reportArtifact = stalledPacket.artifacts.find((artifact: any) => artifact.artifact === "report_eval.json");
+    reportArtifact.status = "blocked";
+    reportArtifact.metric_results = [
+      {
+        metric_id: "report.quality_total",
+        metric_name: "Report quality total",
+        metric_type: "score",
+        value: null,
+        threshold: ">= 85/100",
+        status: "not_evaluable",
+        sample_size: 0,
+        detail: "structured_report_quality_evidence_missing",
+        calculation: { denominator: 0, aggregation: "not_evaluable" },
+      },
+      {
+        metric_id: "report.completeness",
+        metric_name: "Report completeness",
+        metric_type: "coverage",
+        unit: "percent",
+        value: null,
+        threshold: ">= 90%",
+        status: "not_evaluable",
+        sample_size: 0,
+        detail: "structured_report_quality_evidence_missing",
+        calculation: { denominator: 0, aggregation: "not_evaluable" },
+      },
+      {
+        metric_id: "report.valuation_transparency",
+        metric_name: "Valuation transparency",
+        metric_type: "score",
+        value: null,
+        threshold: ">= 85/100",
+        status: "not_evaluable",
+        sample_size: 0,
+        detail: "structured_report_quality_evidence_missing",
+        calculation: { denominator: 0, aggregation: "not_evaluable" },
+      },
+    ];
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(stalledPacket), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })));
+
+    render(<EvalDashboardPage />);
+
+    const totalRow = (await screen.findAllByText("Report quality total"))[0].closest("tr");
+    const completenessRow = screen.getAllByText("Report completeness")[0].closest("tr");
+    const transparencyRow = screen.getAllByText("Valuation transparency")[0].closest("tr");
+
+    expect(totalRow).not.toBeNull();
+    expect(completenessRow).not.toBeNull();
+    expect(transparencyRow).not.toBeNull();
+    expect(totalRow!.querySelector('[data-status="not_evaluable"]')).toBeInTheDocument();
+    expect(completenessRow!.querySelector('[data-status="not_evaluable"]')).toBeInTheDocument();
+    expect(transparencyRow!.querySelector('[data-status="not_evaluable"]')).toBeInTheDocument();
+    expect(within(totalRow!).getByText(/structured_report_quality_evidence_missing/)).toBeInTheDocument();
+  });
+
   it("opens publication blocking details from the suite status banner", async () => {
     render(<EvalDashboardPage />);
     await userEvent.click(await screen.findByRole("button", { name: /P0/ }));

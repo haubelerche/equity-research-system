@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import type { BenchmarkMetricResult, EvaluationPacket } from "../api/types";
 import { fetchEvaluationPacket } from "../api/client";
 import { EVAL_LAYERS, type EvalLayer } from "../data/evalFramework";
 import {
-  formatFailCondition,
   formatMetricNumber,
   formatRoundedNumber,
   formatRuntimeMetricResult,
@@ -158,7 +157,7 @@ function metricsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): Met
   const results = resultsForLayer(packet, layer);
   const configured = layer.metrics.filter((metric) => (
     metricIsVisibleForLayer(layer, metric.id)
-    && !isNotApplicableResult(results[metric.id])
+    && (layer.id === "report_quality" || !isNotApplicableResult(results[metric.id]))
   ));
   const configuredIds = new Set(configured.flatMap((metric) => [metric.id, ...(metric.aliases ?? [])]));
   const dynamic = Object.entries(results)
@@ -310,6 +309,7 @@ export function EvalDashboardPage() {
   const [modal, setModal] = useState<ModalState>(null);
   const [packet, setPacket] = useState<EvaluationPacket | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [expandedExplanationMetricId, setExpandedExplanationMetricId] = useState<string | null>(null);
 
   useEffect(() => {
     const runId = new URLSearchParams(window.location.search).get("run_id") ?? undefined;
@@ -327,6 +327,10 @@ export function EvalDashboardPage() {
   const publicationTitle = useMemo(() => publicationStatusTitle(packet), [packet]);
   const publicationIssues = useMemo(() => collectPublicationIssues(packet), [packet]);
   const blockingIssues = publicationIssues.length || blockingIssueCount(packet);
+
+  useEffect(() => {
+    if (modal?.kind !== "explanation") setExpandedExplanationMetricId(null);
+  }, [modal?.kind]);
 
   return (
     <section>
@@ -519,12 +523,25 @@ export function EvalDashboardPage() {
                       const calculation = result?.calculation;
                       const status = resolveMetricStatus(metric, result, values[metric.id]);
                       const failedCount = (result?.failed_examples ?? []).length;
+                      const isExpanded = expandedExplanationMetricId === metric.id;
 
                       return (
-                        <tr key={metric.id}>
+                        <Fragment key={metric.id}>
+                          <tr
+                            className={"explanation-metric-row " + (isExpanded ? "is-expanded" : "")}
+                            key={metric.id}
+                          >
                           <td>
-                            <strong>{metric.label}</strong>
-                            <span className="metric-technology">{metric.englishLabel ?? metric.technology}</span>
+                            <button
+                              type="button"
+                              className="explanation-metric-toggle"
+                              aria-expanded={isExpanded}
+                              aria-controls={"explanation-detail-" + metric.id}
+                              onClick={() => setExpandedExplanationMetricId(isExpanded ? null : metric.id)}
+                            >
+                              <strong>{metric.label}</strong>
+                              <span className="metric-technology">{metric.englishLabel ?? metric.technology}</span>
+                            </button>
                           </td>
                           <td>{displayRuntimeValue(calculation?.aggregation ?? result?.detail ?? "Chưa có")}</td>
                           <td className="num">{displayRuntimeValue(calculation?.numerator)}</td>
@@ -535,7 +552,15 @@ export function EvalDashboardPage() {
                             <span>sample={displayRuntimeValue(result?.sample_size)}</span>
                             <span className="metric-technology">failed_examples={formatRoundedNumber(failedCount)}</span>
                           </td>
-                        </tr>
+                          </tr>
+                          {isExpanded && (
+                            <tr className="explanation-metric-detail-row">
+                              <td colSpan={7} id={"explanation-detail-" + metric.id}>
+                                <MetricExplanation def={metric} result={result} />
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
                       );
                     })}
                   </tbody>
@@ -543,22 +568,6 @@ export function EvalDashboardPage() {
               </div>
             );
           })()}
-          <table>
-            <thead><tr><th>Chỉ số</th><th>Framework</th><th>Công thức hoặc phương pháp</th><th>Chưa đạt khi</th></tr></thead>
-            <tbody>
-              {modal.layer.metrics.map((metric) => (
-                <tr key={metric.id}>
-                  <td>
-                    <strong>{metric.label}</strong>
-                    <span className="metric-technology">{metric.englishLabel ?? metric.technology}</span>
-                  </td>
-                  <td>{metric.technology}</td>
-                  <td>{metric.formula}</td>
-                  <td className="num">{formatFailCondition(metric)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </EvalModal>
       )}
 

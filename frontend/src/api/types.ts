@@ -92,7 +92,9 @@ export interface BenchmarkMetricResult {
   calculation?: {
     formula?: string | null;
     inputs?: Record<string, unknown>;
-    parameters?: Record<string, unknown>;
+    parameters?: Record<string, unknown> & {
+      section_details?: Record<string, SectionScoreDetail>;
+    };
     aggregation?: string | null;
     numerator?: number | null;
     denominator?: number | null;
@@ -108,6 +110,21 @@ export interface BenchmarkMetricResult {
     dataset_version?: string | null;
     trace_url?: string | null;
   };
+}
+
+export interface SectionScoreDetail {
+  id?: string;
+  maximum_points?: number | null;
+  earned_points?: number | null;
+  status?: string;
+  checks?: Array<{
+    id?: string;
+    passed?: boolean;
+    actual?: unknown;
+    expected?: unknown;
+    evidence_refs?: unknown[];
+  }>;
+  evidence_artifact_ids?: string[];
 }
 
 export interface EvaluationArtifactSummary {
