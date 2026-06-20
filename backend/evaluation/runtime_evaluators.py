@@ -3969,9 +3969,9 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
     ).lower()
     recommendation_visible = any(
         marker in report_text
-        for marker in ("recommendation", "khuyến nghị", "buy", "hold", "sell")
+        for marker in ("recommendation", "khuyáº¿n nghá»‹", "buy", "hold", "sell")
     )
-    target_visible = any(marker in report_text for marker in ("target price", "giá mục tiêu"))
+    target_visible = any(marker in report_text for marker in ("target price", "giÃ¡ má»¥c tiÃªu"))
     recommendation_checks = [
         {
             "check": "target_has_recommendation_context",
