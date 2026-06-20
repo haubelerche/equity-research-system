@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ACCEPTANCE_EXPLANATION, EVAL_LAYERS, PIPELINE_ORDER } from "./evalFramework";
+import { ACCEPTANCE_EXPLANATION, EVAL_LAYERS, LAYER_VISIBLE_METRIC_IDS, PIPELINE_ORDER } from "./evalFramework";
 
 describe("evalFramework", () => {
   it("contains the benchmark evaluation groups exposed by the dashboard", () => {
@@ -83,14 +83,79 @@ describe("evalFramework", () => {
     expect(metricIds).not.toContain("judge_rationale_evidence_coverage");
   });
 
-  it("exposes only the three current report quality metrics", () => {
-    const report = EVAL_LAYERS.find((layer) => layer.id === "report_quality")!;
-
-    expect(report.metrics.map((metric) => metric.id)).toEqual([
+  it("exposes the curated dashboard visibility allowlist for every layer", () => {
+    expect(Object.keys(LAYER_VISIBLE_METRIC_IDS)).toEqual([
+      "data_reliability",
+      "rag_evidence",
+      "financial",
+      "agent",
+      "report_quality",
+      "observability",
+    ]);
+    expect(LAYER_VISIBLE_METRIC_IDS.data_reliability).toEqual([
+      "data_reliability_score",
+      "core_metric_coverage",
+      "material_ocr_error_count",
+      "duplicate_fact_count",
+      "dataframe_schema_validity",
+      "raw_bctc_non_empty",
+    ]);
+    expect(LAYER_VISIBLE_METRIC_IDS.rag_evidence).toEqual([
+      "hit_rate_at_5",
+      "mrr_at_5",
+      "context_precision",
+      "context_recall",
+      "faithfulness",
+      "response_relevancy",
+      "source_tier_hit_rate",
+    ]);
+    expect(LAYER_VISIBLE_METRIC_IDS.financial).toEqual([
+      "accounting_invariant_violations",
+      "fcff",
+      "target_price",
+      "gordon_growth",
+      "net_debt",
+      "formula_trace",
+    ]);
+    expect(LAYER_VISIBLE_METRIC_IDS.agent).toEqual([
+      "tool_permission_compliance",
+      "schema_validity",
+      "no_unauthorized_calc",
+      "stage_handoff_completeness",
+      "tool_call_success_rate",
+      "repair_loop_rate",
+      "token_budget_adherence",
+    ]);
+    expect(LAYER_VISIBLE_METRIC_IDS.report_quality).toEqual([
       "report.quality_total",
       "report.completeness",
       "report.valuation_transparency",
     ]);
+    expect(LAYER_VISIBLE_METRIC_IDS.observability).toEqual([
+      "llm_retry_rate",
+      "retrieval_fallback_rate",
+      "final_ocr_error_count",
+      "artifact_upload_failures",
+      "pdf_render_failures",
+      "warm_full_report_p95_latency",
+      "cost_per_report",
+      "full_run_duration",
+    ]);
+  });
+
+  it("keeps every visible non-dynamic metric backed by a static definition", () => {
+    const dynamicOnly = new Set([
+      "dataframe_schema_validity",
+      "raw_bctc_non_empty",
+      "full_run_duration",
+    ]);
+    for (const layer of EVAL_LAYERS) {
+      const staticIds = new Set(layer.metrics.map((metric) => metric.id));
+      for (const id of LAYER_VISIBLE_METRIC_IDS[layer.id] ?? []) {
+        if (dynamicOnly.has(id)) continue;
+        expect(staticIds.has(id)).toBe(true);
+      }
+    }
   });
 
   it("keeps the evaluation pipeline and acceptance explanation in Vietnamese", () => {

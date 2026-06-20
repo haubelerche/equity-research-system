@@ -32,6 +32,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     subtitle: "Kiểm tra tính đầy đủ, nguồn gốc, đối soát và tính nhất quán của dữ liệu đầu vào",
     artifact: "data_quality.json",
     metrics: [
+      metric("data.benchmark_hardness_score", "Diem hard-mode du lieu", "Data benchmark hardness score", "%", "gte", 0.85, "Hard-mode Data Reliability Audit", "Weighted stress score phat confidence thap, lineage/OCR depth yeu, raw BCTC thieu file hoac provenance chua sau", { thresholdLabel: ">= 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("data_reliability_score", "Điểm tin cậy dữ liệu tổng hợp", "Data reliability score", "%", "gte", 0.9, "Pandera + Financial Fact Reconciliation + OCR Validation Gate", "Weighted score từ coverage, reconciliation, provenance, period completeness, schema validity, fact confidence và OCR health", { thresholdLabel: "≥ 90%", metricType: "score", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("core_metric_coverage", "Độ bao phủ chỉ số cốt lõi", "Core metric coverage", "%", "gte", 0.95, "Valuation Data Requirements", "Số fact bắt buộc cho các phương pháp định giá có dữ liệu accepted / Tổng fact bắt buộc", { thresholdLabel: "≥ 95%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("valuation_method_data_readiness", "Mức sẵn sàng dữ liệu cho phương pháp định giá", "Valuation method data readiness", "%", "gte", 0.8, "Valuation Data Requirements + Pandera", "Tỷ lệ mã đủ dữ liệu cho ít nhất một phương pháp định giá chính", { thresholdLabel: "≥ 80%", metricType: "coverage", scope: "benchmark_suite", severity: "P1", blocksPublish: false }),
@@ -52,6 +53,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     subtitle: "Đánh giá chất lượng truy xuất và mức độ bám sát bằng chứng của câu trả lời",
     artifact: "retrieval_eval.json",
     metrics: [
+      metric("rag.retrieval_difficulty_score", "Diem hard-mode truy xuat", "Retrieval difficulty-adjusted score", "%", "gte", 0.85, "Hard-mode Golden Retrieval Audit", "Weighted stress score uu tien first-rank authoritative hit, source-tier match, MRR@5, query density va material query share", { thresholdLabel: ">= 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("hit_rate_at_5", "Tỷ lệ truy vấn có bằng chứng đúng trong top 5", "Hit-rate@5", "%", "gte", 0.9, "Golden Retrieval Set", "Số truy vấn có ít nhất một evidence đúng trong top 5 / Tổng số truy vấn", { thresholdLabel: "≥ 90%", metricType: "coverage", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("mrr_at_5", "Thứ hạng nghịch đảo trung bình trong top 5", "MRR@5", "%", "gte", 0.75, "Golden Retrieval Set", "Trung bình nghịch đảo thứ hạng của evidence đúng đầu tiên trong top 5", { thresholdLabel: "≥ 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("context_precision", "Độ chính xác của ngữ cảnh truy xuất", "Context Precision", "%", "gte", 0.8, "Ragas", "Tỷ lệ context retrieved thực sự liên quan", { thresholdLabel: "≥ 80%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
@@ -71,6 +73,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     subtitle: "Kiểm tra tất định các công thức, bất biến kế toán và sai lệch định giá",
     artifact: "financial_eval.json",
     metrics: [
+      metric("finance.model_quality_score", "Diem hard-mode mo hinh tai chinh", "Financial model quality stress score", "%", "gte", 0.75, "Hard-mode Financial Model Audit", "Weighted stress score phat method publishability thap, trace method thieu, sensitivity grid mong, forecast horizon ngan hoac khong co golden regression", { thresholdLabel: ">= 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("accounting_invariant_violations", "Số vi phạm bất biến kế toán nghiêm trọng", "Critical accounting invariant violations", "", "lte", 0, "Deterministic Finance Gates", "Số lỗi như tài sản không khớp nợ phải trả cộng vốn chủ sở hữu hoặc cash flow không khớp biến động tiền", { aliases: ["critical_failures"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("fcff", "Số mã đạt công thức FCFF", "FCFF formula pass count", "", "gte", 10, "DCF Formula Gate", "FCFF = EBIT(1-tax) + D&A - CAPEX - delta NWC cho từng forecast row", { thresholdLabel: "pass", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("fcfe", "Số mã đạt công thức FCFE", "FCFE formula pass count", "", "gte", 10, "FCFE Formula Gate", "FCFE = NI + D&A - CAPEX - delta NWC + net borrowing cho từng forecast row", { thresholdLabel: "pass", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
@@ -98,6 +101,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     subtitle: "Đánh giá tuân thủ vai trò, quyền công cụ, cấu trúc đầu ra và chất lượng lập luận",
     artifact: "agent_eval.json",
     metrics: [
+      metric("agent.workflow_quality_score", "Diem hard-mode workflow agent", "Agent workflow quality stress score", "%", "gte", 0.75, "Hard-mode Agent Workflow Audit", "Weighted stress score phat trace thieu, token telemetry thieu, judge readiness thap, handoff yeu hoac repair loop cao", { thresholdLabel: ">= 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("tool_permission_compliance", "Tỷ lệ tuân thủ quyền sử dụng công cụ", "Tool permission compliance", "%", "gte", 1, "Agent Tool Permission Gate", "Số lượt gọi công cụ đúng quyền / Tổng lượt gọi công cụ", { thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("schema_validity", "Tỷ lệ cấu trúc JSON đầu ra hợp lệ", "JSON schema validity", "%", "gte", 1, "JSON Schema Validator", "Số output hợp lệ theo schema / Tổng output bắt buộc", { thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("no_unauthorized_calc", "Tỷ lệ không tự ý tính toán tài chính bằng LLM", "No unauthorized LLM financial calculation", "%", "gte", 1, "Agent Governance Gate", "Số lượt tuân thủ quy tắc / Tổng lượt cần kiểm tra", { thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
@@ -123,6 +127,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     artifact: "report_eval.json",
     artifactAliases: ["report_quality_eval.json"],
     metrics: [
+      metric("report.benchmark_hardness_score", "Diem hard-mode bao cao", "Report hard-mode benchmark score", "", "gte", 75, "Hard-mode Report Quality Rubric", "Weighted score phat diem yeu nhat trong thesis, evidence, risk, valuation va sensitivity disclosure", { thresholdLabel: ">= 75%", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
       metric("report.quality_total", "Điểm chất lượng báo cáo tổng hợp", "Report quality total", "", "gte", 85, "Report Quality Rubric", "Tổng điểm rubric report quality trên các section bắt buộc", { aliases: ["report_quality_score"], thresholdLabel: "≥ 85%", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
       metric("report.completeness", "Độ đầy đủ của báo cáo", "Report completeness", "%", "gte", 90, "Report Completeness Gate", "Số section, bảng và chart bắt buộc đã có / Tổng yêu cầu", { thresholdLabel: "≥ 90%", metricType: "coverage", scope: "report_run", severity: "P1", blocksPublish: true }),
       metric("report.valuation_transparency", "Tính minh bạch định giá", "Valuation transparency", "", "gte", 85, "Valuation Transparency Gate", "Điểm rubric cho method selection, assumptions, WACC, bridge và sensitivity", { thresholdLabel: "≥ 85%", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: true }),
@@ -138,13 +143,14 @@ export const EVAL_LAYERS: EvalLayer[] = [
     subtitle: "Theo dõi độ ổn định, phương án dự phòng và lỗi trong quá trình tạo báo cáo",
     artifact: "observability_eval.json",
     metrics: [
+      metric("ops.telemetry_quality_score", "Diem hard-mode telemetry", "Telemetry quality stress score", "%", "gte", 0.8, "Hard-mode Operations Telemetry Audit", "Weighted stress score phat trace missing cho latency, retrieval, upload, render, cost, retry, fallback va OCR health", { thresholdLabel: ">= 80%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("llm_retry_rate", "Tỷ lệ gọi LLM phải thử lại", "LLM retry rate", "%", "lte", 0.05, "Langfuse Tracing", "Số lượt gọi LLM phải retry / Tổng lượt gọi LLM", { aliases: ["ops.llm_retry_rate"], thresholdLabel: "≤ 5%", metricType: "error_rate", scope: "system_window", severity: "P3", blocksPublish: false }),
       metric("retrieval_fallback_rate", "Tỷ lệ truy xuất dùng fallback", "Retrieval fallback rate", "%", "lte", 0.2, "Retrieval Telemetry", "Số truy vấn dùng fallback / Tổng truy vấn retrieval", { aliases: ["ops.retrieval_fallback_rate"], thresholdLabel: "≤ 20%", metricType: "error_rate", scope: "system_window", severity: "P2", blocksPublish: false }),
       metric("ocr_failure_rate", "Tỷ lệ OCR thất bại trên tài liệu trọng yếu", "Material OCR failure rate", "%", "lte", 0.05, "OCR Runtime Metrics", "Số tài liệu OCR trọng yếu thất bại / Tổng tài liệu OCR trọng yếu", { aliases: ["ops.material_ocr_failure_rate"], thresholdLabel: "≤ 5%", metricType: "error_rate", scope: "system_window", severity: "P1", blocksPublish: true }),
       metric("final_ocr_error_count", "Số lỗi OCR ảnh hưởng số liệu final", "Final numeric OCR error count", "", "lte", 0, "OCR Final Artifact Gate", "Số lỗi OCR làm sai số liệu trong final report", { aliases: ["ops.final_ocr_error_count"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("artifact_upload_failures", "Số lỗi upload artifact cuối", "Final artifact upload failure", "", "lte", 0, "Artifact Storage Gate", "Số artifact cuối tải lên thất bại", { aliases: ["ops.artifact_upload_failure"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("pdf_render_failures", "Số lỗi render PDF cuối", "Final PDF render failure", "", "lte", 0, "PDF Render Gate", "Số lần render PDF cuối thất bại", { aliases: ["ops.pdf_render_failure"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
-      metric("warm_full_report_p95_latency", "Độ trễ p95 full report khi warm run", "Full report p95 latency, warm run", "phút", "lte", 10, "Runtime Latency Window", "p95 thời gian tạo full report khi dữ liệu/artifact đã có sẵn", { aliases: ["full_run_duration", "ops.full_report_p95_warm_seconds"], thresholdLabel: "≤ 10 phút", metricType: "latency_percentile", scope: "system_window", severity: "P3", blocksPublish: false }),
+      metric("warm_full_report_p95_latency", "Độ trễ p95 full report khi warm run", "Full report p95 latency, warm run", "phút", "lte", 10, "Runtime Latency Window", "p95 thời gian tạo full report khi dữ liệu/artifact đã có sẵn", { aliases: ["ops.full_report_p95_warm_seconds"], thresholdLabel: "≤ 10 phút", metricType: "latency_percentile", scope: "system_window", severity: "P3", blocksPublish: false }),
       metric("cold_full_report_p95_latency", "Độ trễ p95 full report khi cold run", "Full report p95 latency, cold run", "phút", "lte", 30, "Runtime Latency Window", "p95 thời gian tạo full report khi cần ingest/OCR/xử lý lại", { aliases: ["ops.full_report_p95_cold_seconds"], thresholdLabel: "≤ 30 phút", metricType: "latency_percentile", scope: "system_window", severity: "P3", blocksPublish: false }),
       metric("render_only_p95_latency", "Độ trễ p95 dựng PDF từ artifact đã khóa", "Render-only p95 latency", "phút", "lte", 2, "PDF Render Telemetry", "p95 thời gian dựng PDF từ artifact đã khóa", { aliases: ["ops.render_only_p95_seconds"], thresholdLabel: "≤ 2 phút", metricType: "latency_percentile", scope: "system_window", severity: "P1", blocksPublish: true }),
       metric("flash_memo_warm_p95_latency", "Độ trễ p95 flash memo khi warm run", "Flash memo p95 latency, warm run", "giây", "lte", 90, "Runtime Latency Window", "p95 thời gian tạo flash memo khi dữ liệu đã có sẵn", { aliases: ["ops.flash_memo_warm_p95_seconds"], thresholdLabel: "≤ 90 giây", metricType: "latency_percentile", scope: "system_window", severity: "P3", blocksPublish: false }),
@@ -173,3 +179,61 @@ export const ACCEPTANCE_EXPLANATION: string[] = [
   "Chỉ số dùng điều kiện ≥ sẽ Chưa đạt khi thấp hơn ngưỡng; chỉ số dùng điều kiện ≤ sẽ Chưa đạt khi cao hơn ngưỡng.",
   "Thiếu dữ liệu benchmark được xem là Chưa đạt vì hệ thống không có đủ bằng chứng để xác nhận chất lượng.",
 ];
+
+// Curated, ordered visibility allowlist per dashboard layer. The dashboard shows
+// EXACTLY these metric IDs, in this order. IDs not listed here are hidden (e.g.
+// hard-mode stress scores and redundant error-count duplicates). Use the bare
+// static metric ID when a static MetricDef exists (aliases are resolved upstream
+// by resultsForLayer); use the packet metric_id for dynamic-only metrics
+// (dataframe_schema_validity, raw_bctc_non_empty, full_run_duration).
+export const LAYER_VISIBLE_METRIC_IDS: Record<string, string[]> = {
+  data_reliability: [
+    "data_reliability_score",
+    "core_metric_coverage",
+    "material_ocr_error_count",
+    "duplicate_fact_count",
+    "dataframe_schema_validity",
+    "raw_bctc_non_empty",
+  ],
+  rag_evidence: [
+    "hit_rate_at_5",
+    "mrr_at_5",
+    "context_precision",
+    "context_recall",
+    "faithfulness",
+    "response_relevancy",
+    "source_tier_hit_rate",
+  ],
+  financial: [
+    "accounting_invariant_violations",
+    "fcff",
+    "target_price",
+    "gordon_growth",
+    "net_debt",
+    "formula_trace",
+  ],
+  agent: [
+    "tool_permission_compliance",
+    "schema_validity",
+    "no_unauthorized_calc",
+    "stage_handoff_completeness",
+    "tool_call_success_rate",
+    "repair_loop_rate",
+    "token_budget_adherence",
+  ],
+  report_quality: [
+    "report.quality_total",
+    "report.completeness",
+    "report.valuation_transparency",
+  ],
+  observability: [
+    "llm_retry_rate",
+    "retrieval_fallback_rate",
+    "final_ocr_error_count",
+    "artifact_upload_failures",
+    "pdf_render_failures",
+    "warm_full_report_p95_latency",
+    "cost_per_report",
+    "full_run_duration",
+  ],
+};
