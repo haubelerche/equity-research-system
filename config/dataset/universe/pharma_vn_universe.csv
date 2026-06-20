@@ -41,3 +41,6 @@ DTG,Cong ty Co phan Duoc pham Tipharco,HNX,pharma,false,identity-verified 2026-0
 HDP,Cong ty Co phan Duoc Ha Tinh,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
 MTP,Cong ty Co phan Duoc Medipharco,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
 NDC,Cong ty Co phan Nam Duoc,UPCOM,pharma,false,identity-verified 2026-06-17; AGM+OCR ready
+DHD,CTCP Duoc Vat tu Y te Hai Duong,UPCOM,pharma,false,identity-verified 2026-06-20; added for benchmark coverage
+DPH,CTCP Duoc pham Hai Phong,UPCOM,pharma,false,identity-verified 2026-06-20; added for benchmark coverage
+OPC,CTCP Duoc pham OPC,HOSE,pharma,false,identity-verified 2026-06-20; added for benchmark coverage
