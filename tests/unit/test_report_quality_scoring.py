@@ -3,6 +3,7 @@ from __future__ import annotations
 from backend.evaluation.runtime_evaluators import (
     _concept_tier,
     _score_from_concept_tiers,
+    _report_quality_subscores,
 )
 
 
@@ -44,3 +45,60 @@ def test_score_from_concept_tiers_empty_groups_returns_none():
 def test_concept_tier_quantified_when_number_precedes_mention():
     # number BEFORE the concept term must also count as quantified (both-sides window)
     assert _concept_tier("đạt 18,2% ROE trong năm", ("roe",)) == 1.0
+
+
+def _rich_report_text() -> str:
+    return (
+        "Luận điểm đầu tư: khuyến nghị MUA, giá mục tiêu 120.000đ. "
+        "Doanh thu 2025 đạt 5.200 tỷ (+12%), biên lợi nhuận gộp 42%, biên EBIT 18%, "
+        "biên lợi nhuận ròng 15%, ROE 22%, OCF 800 tỷ, EPS 6.500đ, capex 300 tỷ, "
+        "vốn lưu động 1.100 tỷ, cổ tức 2.000đ. "
+        "Dự phóng: tăng trưởng doanh thu 12%, gross margin 42%, khấu hao 4% doanh thu, "
+        "nợ vay 500 tỷ, thuế suất 20%. "
+        "Định giá FCFF/FCFE, WACC 12,5%, terminal growth 3%, giá trị doanh nghiệp 9.000 tỷ, "
+        "nợ ròng 200 tỷ, giá trị vốn chủ sở hữu 8.800 tỷ, số cổ phiếu 130 triệu. "
+        "Độ nhạy theo WACC và terminal growth, ô base 120.000đ, ma trận grid. "
+        "Rủi ro và cảnh báo monitoring, catalyst, xác suất 60%, thời gian 12 tháng. "
+        "Nguồn [1] [2], công thức formula trace, đối chiếu reconciliation. "
+        "Nhóm so sánh peers ngành dược, P/E 15x, EV/EBITDA 9x. "
+        "Phụ lục: bảng chỉ tiêu, giá trị, thành phần."
+    )
+
+
+def _thin_report_text() -> str:
+    return (
+        "Báo cáo về công ty. Khuyến nghị mua. Doanh thu tăng trưởng tốt. "
+        "Định giá hợp lý. Có một số rủi ro cần theo dõi. Nguồn nội bộ."
+    )
+
+
+def test_rich_report_scores_high_but_not_flat_100():
+    scores = _report_quality_subscores({"exists": True, "text": _rich_report_text()}, {})
+    dims = [v for k, v in scores.items() if isinstance(v, (int, float))]
+    assert dims, "expected numeric dimension scores"
+    assert max(dims) <= 100.0
+    assert sum(v >= 70 for v in dims) >= len(dims) // 2
+
+
+def test_thin_report_scores_materially_lower_than_rich():
+    rich = _report_quality_subscores({"exists": True, "text": _rich_report_text()}, {})
+    thin = _report_quality_subscores({"exists": True, "text": _thin_report_text()}, {})
+    assert thin["financial_analysis_depth"] < rich["financial_analysis_depth"]
+    assert thin["valuation_transparency"] < rich["valuation_transparency"]
+    assert thin["thesis_specificity"] < rich["thesis_specificity"]
+
+
+def test_missing_report_returns_all_none():
+    scores = _report_quality_subscores({"exists": False, "text": ""}, {})
+    assert all(value is None for value in scores.values())
+
+
+def test_dimensions_are_independent_not_identical():
+    scores = _report_quality_subscores({"exists": True, "text": _rich_report_text()}, {})
+    distinct = {
+        scores["thesis_specificity"],
+        scores["forecast_rationale"],
+        scores["risk_catalyst_quality"],
+        scores["financial_analysis_depth"],
+    }
+    assert len(distinct) >= 2

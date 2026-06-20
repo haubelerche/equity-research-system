@@ -2834,10 +2834,6 @@ def _score_from_hits(hits: int, total: int) -> float | None:
     return round(hits / total * 100, 2)
 
 
-def _score_from_term_groups(text: str, groups: tuple[tuple[str, ...], ...]) -> float | None:
-    return _score_from_hits(sum(_contains_any(text, group) for group in groups), len(groups))
-
-
 # A value-like numeric token: percentage, year tag (2025A/2025F), decimal, or integer.
 _QUANT_TOKEN = re.compile(r"\d+(?:[.,]\d+)?\s?%|\b\d{4}\s?[aAfFeE]?\b|\b\d+(?:[.,]\d+)?\b")
 # Window (chars) on each side of a concept mention to look for an adjacent number.
@@ -2880,19 +2876,7 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
         if item
     )
     if not report.get("exists") or not text.strip():
-        return {
-            "completeness": None,
-            "thesis_specificity": None,
-            "financial_analysis_depth": None,
-            "forecast_rationale": None,
-            "valuation_transparency": None,
-            "risk_catalyst_quality": None,
-            "evidence_integration": None,
-            "peer_industry_context_quality": None,
-            "executive_summary_actionability": None,
-            "sensitivity_disclosure_completeness": None,
-            "presentation_quality": None,
-        }
+        return {key: None for key in REPORT_QUALITY_SCORE_KEYS}
 
     required_sections = (
         ("investment_summary", ("luận điểm", "khuyến nghị", "investment summary")),
@@ -2909,7 +2893,7 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
     completeness_hits = sum(_contains_any(text, terms) for _, terms in required_sections)
     completeness = _score_from_hits(completeness_hits, len(required_sections))
 
-    financial_depth = _score_from_term_groups(text, (
+    financial_depth = _score_from_concept_tiers(text, (
         ("doanh thu", "revenue"),
         ("biên lợi nhuận gộp", "gross margin"),
         ("biên ebit", "ebit margin"),
@@ -2922,16 +2906,16 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
         ("cổ tức", "dividend"),
     ))
 
-    thesis_specificity = _score_from_term_groups(text, (
-        ("investment thesis", "luáº­n Ä‘iá»ƒm", "thesis"),
+    thesis_specificity = _score_from_concept_tiers(text, (
+        ("investment thesis", "luận điểm", "thesis"),
         ("doanh thu", "revenue"),
-        ("lá»£i nhuáº­n", "net income", "profit"),
+        ("lợi nhuận", "net income", "profit"),
         ("driver", "revenue_growth", "gross_margin"),
-        ("target price", "giÃ¡ má»¥c tiÃªu"),
+        ("target price", "giá mục tiêu"),
         ("reconciliation", "formula trace"),
     ))
 
-    forecast_rationale = _score_from_term_groups(text, (
+    forecast_rationale = _score_from_concept_tiers(text, (
         ("revenue_growth", "tăng trưởng doanh thu"),
         ("gross_margin", "gross margin"),
         ("biên lợi nhuận", "margin"),
@@ -2943,20 +2927,20 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
         ("cổ tức", "dividend"),
     ))
 
-    sensitivity_disclosure = _score_from_term_groups(text, (
-        ("sensitivity", "Ä‘á»™ nháº¡y"),
+    sensitivity_disclosure = _score_from_concept_tiers(text, (
+        ("sensitivity", "độ nhạy"),
         ("wacc",),
         ("terminal growth",),
         ("re/g", "cost of equity"),
-        ("base cell", "Ã´ base"),
-        ("target price", "giÃ¡ má»¥c tiÃªu"),
-        ("grid", "matrix", "ma tráº­n"),
+        ("base cell", "ô base"),
+        ("target price", "giá mục tiêu"),
+        ("grid", "matrix", "ma trận"),
         ("driver", "revenue_growth", "gross_margin"),
         ("scenario", "stress", "downside", "monitoring"),
         ("peer", "multiple", "p/e", "ev/ebitda"),
     ))
 
-    valuation_transparency = _score_from_term_groups(text, (
+    valuation_transparency = _score_from_concept_tiers(text, (
         ("fcff",),
         ("fcfe",),
         ("wacc",),
@@ -2969,20 +2953,20 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
         ("độ nhạy", "sensitivity"),
     ))
 
-    risk_catalyst_quality = _score_from_term_groups(text, (
-        ("risk", "rá»§i ro"),
+    risk_catalyst_quality = _score_from_concept_tiers(text, (
+        ("risk", "rủi ro"),
         ("catalyst",),
-        ("monitoring", "trigger", "cáº£nh bÃ¡o"),
+        ("monitoring", "trigger", "cảnh báo"),
         ("doanh thu", "revenue"),
-        ("margin", "biÃªn"),
-        ("cash flow", "ocf", "dÃ²ng tiá»n"),
+        ("margin", "biên"),
+        ("cash flow", "ocf", "dòng tiền"),
         ("capex",),
-        ("working capital", "vá»‘n lÆ°u Ä‘á»™ng"),
-        ("probability", "xÃ¡c suáº¥t", "likelihood"),
-        ("timing", "timeline", "thá»i gian"),
+        ("working capital", "vốn lưu động"),
+        ("probability", "xác suất", "likelihood"),
+        ("timing", "timeline", "thời gian"),
     ))
 
-    evidence_integration = _score_from_term_groups(text, (
+    evidence_integration = _score_from_concept_tiers(text, (
         ("[1]",),
         ("[2]",),
         ("nguồn", "source"),
@@ -2994,29 +2978,29 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
         ("dữ liệu", "data"),
     ))
 
-    peer_industry_context = _score_from_term_groups(text, (
-        ("peer", "peers", "nhÃ³m so sÃ¡nh"),
-        ("industry", "sector", "ngÃ nh"),
+    peer_industry_context = _score_from_concept_tiers(text, (
+        ("peer", "peers", "nhóm so sánh"),
+        ("industry", "sector", "ngành"),
         ("p/e", "multiple"),
         ("ev/ebitda",),
         ("growth", "revenue growth"),
-        ("margin", "biÃªn"),
-        ("balance sheet", "net debt", "ná»£ rÃ²ng"),
-        ("valuation", "Ä‘á»‹nh giÃ¡"),
+        ("margin", "biên"),
+        ("balance sheet", "net debt", "nợ ròng"),
+        ("valuation", "định giá"),
     ))
 
-    executive_summary_actionability = _score_from_term_groups(text, (
+    executive_summary_actionability = _score_from_concept_tiers(text, (
         ("executive summary", "investment summary"),
-        ("recommendation", "khuyáº¿n nghá»‹"),
-        ("target price", "giÃ¡ má»¥c tiÃªu"),
-        ("valuation", "Ä‘á»‹nh giÃ¡"),
+        ("recommendation", "khuyến nghị"),
+        ("target price", "giá mục tiêu"),
+        ("valuation", "định giá"),
         ("driver", "revenue_growth", "gross_margin"),
-        ("risk", "rá»§i ro"),
-        ("monitoring", "trigger", "cáº£nh bÃ¡o"),
-        ("source", "nguá»“n", "[1]"),
+        ("risk", "rủi ro"),
+        ("monitoring", "trigger", "cảnh báo"),
+        ("source", "nguồn", "[1]"),
     ))
 
-    presentation_quality = _score_from_term_groups(text, (
+    presentation_quality = _score_from_concept_tiers(text, (
         ("báo cáo", "report"),
         ("bảng", "table"),
         ("ma trận", "matrix"),
@@ -3036,8 +3020,6 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
         "sensitivity_disclosure_completeness": sensitivity_disclosure,
         "presentation_quality": presentation_quality,
     }
-
-
 def _report_quality_total(scores: dict[str, Any]) -> float | None:
     required = (
         "completeness",
