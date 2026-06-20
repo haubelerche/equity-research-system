@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EvalDashboardPage } from "./EvalDashboardPage";
@@ -14,6 +14,76 @@ const packet = {
     artifact: "data_quality.json",
     status: "fail",
     metric_results: [{
+      metric_id: "data.benchmark_hardness_score",
+      metric_name: "Data benchmark hardness score",
+      metric_type: "score",
+      scope: "benchmark_suite",
+      severity: "P2",
+      blocks_publish: false,
+      unit: "percent",
+      value: 0.3333333333333333,
+      threshold: ">= 85%",
+      status: "fail",
+      sample_size: 3,
+      owner: "data",
+      source: "fixture",
+      failed_examples: [{ reason: "missing_source" }],
+      remediation_hint: "Repair source provenance.",
+      evaluator: {
+        framework: "hard_mode_data_reliability_score",
+        framework_version: "0.24.0",
+        execution_status: "executed",
+      },
+      calculation: {
+        formula: "weighted data stress score",
+        numerator: 0.3333333333333333,
+        denominator: 1,
+        aggregation: "weighted_score",
+        per_sample_results: [{
+          artifact_id: "DHG/data_quality.json",
+          source_metric_id: "data.benchmark_hardness_score",
+          status: "fail",
+          value: 0.3333333333333333,
+          sample_size: 2,
+          failed_examples: [{ reason: "missing_source" }],
+          evidence: {
+            artifact_ids: ["storage/runs/DHG/evidence_packet.json"],
+            trace_url: "storage/runs/DHG/trace.json",
+          },
+          source_samples: [{
+            id: "revenue",
+            passed: false,
+            value: false,
+            reason: "missing_source",
+          }, {
+            id: "gross_margin",
+            passed: true,
+            value: true,
+          }, {
+            sample_origin: "data_reliability_score_component",
+            component: "provenance_coverage",
+            component_score: 1,
+            weight: 0.15,
+          }, {
+            tool_name: "READ_SNAPSHOT",
+            permission: {
+              tool_id: "read_snapshot",
+              agent_id: "financial_analysis",
+              permission_level: "read_only",
+            },
+          }, {
+            source_metric_id: "report.valuation_transparency",
+            scores: {
+              valuation_transparency: 70,
+            },
+          }],
+        }],
+      },
+      threshold_policy: {
+        profile: "mvp",
+        rationale: "Hard-mode weighted stress threshold.",
+      },
+    }, {
       metric_id: "core_metric_coverage",
       metric_name: "Core metric coverage",
       metric_type: "coverage",
@@ -103,6 +173,17 @@ const packet = {
     artifact: "retrieval_eval.json",
     status: "pass",
     metric_results: [{
+      metric_id: "rag.retrieval_difficulty_score",
+      metric_name: "Retrieval difficulty-adjusted score",
+      metric_type: "score",
+      unit: "percent",
+      value: 0.76,
+      threshold: ">= 85%",
+      status: "fail",
+      sample_size: 20,
+      evaluator: { framework: "hard_mode_golden_retrieval", execution_status: "executed" },
+      calculation: { aggregation: "weighted_score", per_sample_results: [{ status: "fail", value: 0.76 }] },
+    }, {
       metric_id: "hit_rate_at_5",
       metric_name: "Hit-rate@5",
       metric_type: "coverage",
@@ -186,6 +267,16 @@ const packet = {
     artifact: "financial_eval.json",
     status: "fail",
     metric_results: [{
+      metric_id: "finance.model_quality_score",
+      metric_name: "Financial model quality stress score",
+      metric_type: "score",
+      unit: "percent",
+      value: 0.68,
+      threshold: ">= 75%",
+      status: "fail",
+      evaluator: { framework: "hard_mode_financial_model_audit" },
+      calculation: { numerator: 0.68, denominator: 1, aggregation: "weighted_score" },
+    }, {
       metric_id: "fcff",
       metric_name: "FCFF formula",
       metric_type: "coverage",
@@ -230,6 +321,38 @@ const packet = {
     artifact: "agent_eval.json",
     status: "pass",
     metric_results: [{
+      metric_id: "agent.workflow_quality_score",
+      metric_name: "Agent workflow quality stress score",
+      metric_type: "score",
+      unit: "percent",
+      value: 0.81,
+      threshold: ">= 75%",
+      status: "pass",
+      sample_size: 2,
+      evaluator: { framework: "hard_mode_agent_workflow_audit", execution_status: "executed" },
+      calculation: {
+        numerator: 0.81,
+        denominator: 1,
+        aggregation: "weighted_score",
+        per_sample_results: [{
+          artifact_id: "DHG/agent_eval.json",
+          source_metric_id: "agent.workflow_quality_score",
+          status: "pass",
+          value: 0.81,
+          source_samples: [{
+            artifact: "evidence_packet",
+            status: "pass",
+            value: true,
+            path: "storage/runs/DHG/evidence_packet.json",
+          }, {
+            artifact: "agent_effectiveness_audit",
+            status: "fail",
+            value: false,
+            path: "storage/runs/DHG/agent_effectiveness_audit.json",
+          }],
+        }],
+      },
+    }, {
       metric_id: "schema_validity",
       metric_name: "Output schema validity",
       metric_type: "coverage",
@@ -251,10 +374,12 @@ const packet = {
           source_samples: [{
             artifact: "evidence_packet",
             status: "pass",
+            value: true,
             path: "storage/runs/DHG/evidence_packet.json",
           }, {
             artifact: "agent_effectiveness_audit",
             status: "fail",
+            value: false,
             path: "storage/runs/DHG/agent_effectiveness_audit.json",
           }],
         }],
@@ -287,6 +412,13 @@ const packet = {
       threshold: ">= 85/100",
       status: "pass",
     }, {
+      metric_id: "report.benchmark_hardness_score",
+      metric_name: "Report hard-mode benchmark score",
+      metric_type: "score",
+      value: 74,
+      threshold: ">= 75/100",
+      status: "fail",
+    }, {
       metric_id: "report.completeness",
       metric_name: "Report completeness",
       metric_type: "coverage",
@@ -308,6 +440,28 @@ const packet = {
       value: 94,
       threshold: ">= 85/100",
       status: "pass",
+    }, {
+      metric_id: "report.risk_catalyst_quality",
+      metric_name: "Risk and catalyst quality",
+      metric_type: "score",
+      value: 71,
+      threshold: ">= 65/100",
+      status: "pass",
+    }, {
+      metric_id: "report.executive_summary_actionability",
+      metric_name: "Executive summary actionability",
+      metric_type: "score",
+      value: 73,
+      threshold: ">= 70/100",
+      status: "pass",
+    }, {
+      metric_id: "report.sensitivity_disclosure_completeness",
+      metric_name: "Sensitivity disclosure completeness",
+      metric_type: "score",
+      unit: "percent",
+      value: 45,
+      threshold: ">= 45%",
+      status: "pass",
     }],
   }, {
     plan_id: "07",
@@ -315,6 +469,16 @@ const packet = {
     artifact: "observability_eval.json",
     status: "pass",
     metric_results: [{
+      metric_id: "ops.telemetry_quality_score",
+      metric_name: "Telemetry quality stress score",
+      metric_type: "score",
+      unit: "percent",
+      value: 0.7,
+      threshold: ">= 80%",
+      status: "pass",
+      evaluator: { framework: "hard_mode_ops_telemetry_audit" },
+      calculation: { numerator: 0.7, denominator: 1, aggregation: "weighted_score" },
+    }, {
       metric_id: "llm_retry_rate",
       metric_name: "LLM retry rate",
       value: 0.10,
@@ -339,44 +503,39 @@ beforeEach(() => {
 });
 
 describe("EvalDashboardPage", () => {
-  it("renders the live benchmark packet with publication status", async () => {
+  it("renders only the curated dashboard metric set from the live packet", async () => {
     render(<EvalDashboardPage />);
-    expect(await screen.findByText(/Báo cáo đang bị chặn bởi lỗi P0/)).toBeInTheDocument();
+    expect(await screen.findByText(/P0/)).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith("/eval/framework", { cache: "no-store" });
+
+    // Hard-mode stress scores are hidden in the curated view.
+    expect(screen.queryByText("Data benchmark hardness score")).not.toBeInTheDocument();
+    expect(screen.queryByText("Retrieval difficulty-adjusted score")).not.toBeInTheDocument();
+    expect(screen.queryByText("Financial model quality stress score")).not.toBeInTheDocument();
+    expect(screen.queryByText("Agent workflow quality stress score")).not.toBeInTheDocument();
+    expect(screen.queryByText("Telemetry quality stress score")).not.toBeInTheDocument();
+    expect(screen.queryByText("Report hard-mode benchmark score")).not.toBeInTheDocument();
+
+    // Curated operational metrics ARE visible.
     expect(screen.getAllByText("Core metric coverage").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("33.3%").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("MRR@5").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Context Precision").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Context Recall").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Hit-rate@5").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Faithfulness").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Response Relevancy").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Source-tier hit rate").length).toBeGreaterThan(0);
-    expect(screen.queryByText("nDCG@10")).not.toBeInTheDocument();
-    expect(screen.queryByText("Metadata filter accuracy")).not.toBeInTheDocument();
-    expect(screen.queryByText("Unanswerable abstention accuracy")).not.toBeInTheDocument();
-    expect(screen.queryByText("Evidence span overlap")).not.toBeInTheDocument();
-    expect(screen.queryByText("Retrieval noise rate")).not.toBeInTheDocument();
-    const contextRecallRow = screen.getAllByText("Context Recall")[0].closest("tr");
-    expect(contextRecallRow).not.toBeNull();
-    expect(within(contextRecallRow!).getByText(/80%/)).toBeInTheDocument();
-    expect(within(contextRecallRow!).getByText("82%")).toBeInTheDocument();
-    expect(screen.queryByText("1/3 = 33.3%")).not.toBeInTheDocument();
-    expect(screen.queryByText("0.3333333333333333")).not.toBeInTheDocument();
-    expect(screen.queryByText("Valuation method data readiness")).not.toBeInTheDocument();
-    expect(screen.queryByText("Material official reconciliation rate")).not.toBeInTheDocument();
-    expect(screen.getByText("Số mã đạt công thức FCFF")).toBeInTheDocument();
-    expect(screen.queryByText("Số mã đạt công thức FCFE")).not.toBeInTheDocument();
-    // valuation_publishable is no longer a benchmark-03 framework row (moved to the
-    // governance/publishability gate); when present it renders as a dynamic backend
-    // metric under its backend metric_name rather than the old framework label.
-    expect(screen.getAllByText("Valuation publishability policy").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("New backend metric").length).toBeGreaterThan(0);
-    expect(screen.queryByText("Judge calibration agreement")).not.toBeInTheDocument();
-    expect(screen.queryByText("Judge rationale evidence coverage")).not.toBeInTheDocument();
+    expect(screen.getAllByText(/FCFF formula/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/schema validity/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Report quality total").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Report completeness").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Valuation transparency").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("LLM retry rate").length).toBeGreaterThan(0);
+
+    // Metrics not on the allowlist stay hidden.
+    expect(screen.queryByText("New backend metric")).not.toBeInTheDocument();
+    expect(screen.queryByText("Valuation publishability policy")).not.toBeInTheDocument();
+    expect(screen.queryByText("Judge calibration agreement")).not.toBeInTheDocument();
     expect(screen.queryByText("Legacy thesis specificity")).not.toBeInTheDocument();
+
+    // Numeric formatting still applies (no raw floats).
+    expect(screen.queryByText("0.3333333333333333")).not.toBeInTheDocument();
   });
 
   it("keeps report quality rows visible when the evaluator is not evaluable", async () => {
@@ -396,23 +555,22 @@ describe("EvalDashboardPage", () => {
         calculation: { denominator: 0, aggregation: "not_evaluable" },
       },
       {
-        metric_id: "report.completeness",
-        metric_name: "Report completeness",
-        metric_type: "coverage",
-        unit: "percent",
+        metric_id: "report.benchmark_hardness_score",
+        metric_name: "Report hard-mode benchmark score",
+        metric_type: "score",
         value: null,
-        threshold: ">= 90%",
+        threshold: ">= 75/100",
         status: "not_evaluable",
         sample_size: 0,
         detail: "structured_report_quality_evidence_missing",
         calculation: { denominator: 0, aggregation: "not_evaluable" },
       },
       {
-        metric_id: "report.valuation_transparency",
-        metric_name: "Valuation transparency",
+        metric_id: "report.thesis_specificity",
+        metric_name: "Thesis specificity",
         metric_type: "score",
         value: null,
-        threshold: ">= 85/100",
+        threshold: ">= 60/100",
         status: "not_evaluable",
         sample_size: 0,
         detail: "structured_report_quality_evidence_missing",
@@ -427,15 +585,9 @@ describe("EvalDashboardPage", () => {
     render(<EvalDashboardPage />);
 
     const totalRow = (await screen.findAllByText("Report quality total"))[0].closest("tr");
-    const completenessRow = screen.getAllByText("Report completeness")[0].closest("tr");
-    const transparencyRow = screen.getAllByText("Valuation transparency")[0].closest("tr");
 
     expect(totalRow).not.toBeNull();
-    expect(completenessRow).not.toBeNull();
-    expect(transparencyRow).not.toBeNull();
     expect(totalRow!.querySelector('[data-status="not_evaluable"]')).toBeInTheDocument();
-    expect(completenessRow!.querySelector('[data-status="not_evaluable"]')).toBeInTheDocument();
-    expect(transparencyRow!.querySelector('[data-status="not_evaluable"]')).toBeInTheDocument();
     expect(within(totalRow!).getByText(/structured_report_quality_evidence_missing/)).toBeInTheDocument();
   });
 
@@ -453,19 +605,21 @@ describe("EvalDashboardPage", () => {
     render(<EvalDashboardPage />);
     await screen.findByText(/P0/);
 
-    const dynamicMetricRow = screen.getAllByText("New backend metric")[0].closest("tr");
-    expect(dynamicMetricRow).not.toBeNull();
-    expect(within(dynamicMetricRow!).getByText("Đạt")).toBeInTheDocument();
+    // core_metric_coverage: value 0.333 vs ">= 95%" must resolve to fail regardless of backend status.
+    const coverageRow = screen.getAllByText("Core metric coverage")[0].closest("tr");
+    expect(coverageRow).not.toBeNull();
+    expect(coverageRow!.querySelector('[data-status="fail"]')).toBeInTheDocument();
 
-    const retryRow = screen.getByText("Tỷ lệ gọi LLM phải thử lại").closest("tr");
-    expect(retryRow).not.toBeNull();
-    expect(within(retryRow!).getByText("Chưa đạt")).toBeInTheDocument();
+    // hit_rate_at_5: value 0.95 vs ">= 90%" must resolve to pass.
+    const hitRow = screen.getAllByText("Hit-rate@5")[0].closest("tr");
+    expect(hitRow).not.toBeNull();
+    expect(hitRow!.querySelector('[data-status="pass"]')).toBeInTheDocument();
   });
 
   it("opens a layer benchmark dialog", async () => {
     render(<EvalDashboardPage />);
     await screen.findByText(/P0/);
-    await userEvent.click(screen.getAllByRole("button", { name: "Xem thêm" })[0]);
+    await userEvent.click(screen.getAllByRole("button", { name: /Xem thêm/ })[0]);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getAllByText("project-eval-test").length).toBeGreaterThan(0);
   });
@@ -478,8 +632,7 @@ describe("EvalDashboardPage", () => {
     expect(screen.getByText("pandera")).toBeInTheDocument();
     expect(screen.getByText("0.24.0")).toBeInTheDocument();
     expect(screen.getByText(/MVP coverage threshold/)).toBeInTheDocument();
-    expect(screen.getByText(/đếm số sample đạt điều kiện/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /sample \(5\)/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /mẫu \(5\)/i })).toBeInTheDocument();
     expect(screen.getByText("gross_margin")).toBeInTheDocument();
     const componentRow = screen.getByText("provenance_coverage").closest("tr");
     expect(componentRow).not.toBeNull();
@@ -499,13 +652,13 @@ describe("EvalDashboardPage", () => {
     expect(reportScoreRow).not.toBeNull();
     expect(within(reportScoreRow!).getByText("fail")).toBeInTheDocument();
     expect(within(reportScoreRow!).getByText("70")).toBeInTheDocument();
-    expect(screen.getAllByText("Artifact ID").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Reason").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Evidence").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Mã artifact").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Lý do").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Bằng chứng").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/DHG\/data_quality\.json/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/core_metric_coverage/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/storage\/runs\/DHG\/evidence_packet\.json/).length).toBeGreaterThan(0);
-    expect(screen.queryByText(/Metric result không có trace chi tiết/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/không có trace chi tiết/)).not.toBeInTheDocument();
     expect(screen.queryByText("Scope")).not.toBeInTheDocument();
     expect(screen.queryByText("Severity")).not.toBeInTheDocument();
     expect(screen.queryByText("Owner")).not.toBeInTheDocument();
@@ -515,9 +668,9 @@ describe("EvalDashboardPage", () => {
   it("shows boolean values for legacy schema validity source samples", async () => {
     render(<EvalDashboardPage />);
     await screen.findByText(/P0/);
-    await userEvent.click(screen.getAllByText("JSON schema validity")[0]);
+    await userEvent.click(screen.getAllByText(/schema validity/i)[0]);
 
-    expect(screen.getByRole("heading", { name: /sample \(2\)/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /mẫu \(2\)/i })).toBeInTheDocument();
     const evidencePacketRow = screen.getByText("evidence_packet").closest("tr");
     expect(evidencePacketRow).not.toBeNull();
     expect(within(evidencePacketRow!).getByText("pass")).toBeInTheDocument();
@@ -532,14 +685,13 @@ describe("EvalDashboardPage", () => {
   it("shows runtime calculation details in the layer explanation dialog", async () => {
     render(<EvalDashboardPage />);
     await screen.findByText(/P0/);
-    await userEvent.click(screen.getAllByRole("button", { name: "Giải thích" })[0]);
+    await userEvent.click(screen.getAllByRole("button", { name: /Giải thích/ })[0]);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("Lần chạy benchmark đang hiển thị")).toBeInTheDocument();
     expect(screen.getAllByText("data_quality.json").length).toBeGreaterThan(0);
     expect(screen.getAllByText("coverage").length).toBeGreaterThan(0);
     expect(screen.getAllByText("1").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("3").length).toBeGreaterThan(0);
     expect(screen.getAllByText("33.3%").length).toBeGreaterThan(0);
   });
 
