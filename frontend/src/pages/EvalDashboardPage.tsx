@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import type { BenchmarkMetricResult, EvaluationPacket } from "../api/types";
 import { fetchEvaluationPacket } from "../api/client";
-import { EVAL_LAYERS, type EvalLayer } from "../data/evalFramework";
+import { EVAL_LAYERS, LAYER_VISIBLE_METRIC_IDS, type EvalLayer } from "../data/evalFramework";
 import {
   formatMetricNumber,
   formatRoundedNumber,
@@ -27,63 +27,6 @@ type ModalState =
 
 type MetricResultMap = Record<string, BenchmarkMetricResult>;
 
-const HIDDEN_DASHBOARD_METRIC_IDS = new Set([
-  "period_completeness",
-  "provenance_coverage",
-  "source_provenance_coverage",
-  "accepted_facts_source_coverage",
-  "ocr_unresolved_rate",
-  "corpus_ocr_unresolved_rate",
-  "official_reconciliation_rate",
-  "valuation_method_data_readiness",
-  "ndcg_at_10",
-  "metadata_filter_accuracy",
-  "unanswerable_abstention_accuracy",
-  "evidence_span_overlap",
-  "retrieval_noise_rate",
-  "valuation_artifact",
-  "fcfe",
-  "sensitivity_varies",
-  "fcfe_sensitivity",
-  "golden_drift_out_of_tolerance",
-  "target_price_bridge_error",
-  "wacc_terminal_growth_violation",
-  "net_debt_reconciliation_error",
-  "role_adherence",
-  "groundedness",
-  "task_completion",
-  "plan_adherence",
-  "critic_issue_recall",
-  "artifact_manifest_compliance",
-  "judge_calibration_agreement",
-  "agent.judge_calibration_agreement",
-  "judge_rationale_evidence_coverage",
-  "agent.judge_rationale_evidence_coverage",
-  "report.financial_analysis_depth",
-  "report.forecast_rationale",
-  "report.evidence_integration",
-  "explanation_pdf_rendered",
-  "deterministic_finance_gate",
-  "publication_readiness",
-  "ocr_failure_rate",
-  "cold_full_report_p95_latency",
-  "render_only_p95_latency",
-  "flash_memo_warm_p95_latency",
-  "flash_memo_cold_retrieval_p95_latency",
-  "latency_regression_ratio",
-]);
-
-const REPORT_QUALITY_METRIC_IDS = new Set([
-  "report.quality_total",
-  "report_quality_score",
-  "report.completeness",
-  "report.valuation_transparency",
-]);
-
-function metricIsVisibleForLayer(layer: EvalLayer, metricId: string): boolean {
-  if (layer.id === "report_quality") return REPORT_QUALITY_METRIC_IDS.has(metricId);
-  return !HIDDEN_DASHBOARD_METRIC_IDS.has(metricId);
-}
 
 type PublicationIssue = {
   artifact: string;
@@ -146,29 +89,22 @@ function metricFromResult(result: BenchmarkMetricResult): MetricDef {
   };
 }
 
-function isNotApplicableResult(result: BenchmarkMetricResult | undefined): boolean {
-  const status = String(result?.status ?? "").toLowerCase();
-  return ["not_applicable", "not_evaluable"].includes(status)
-    && (result?.value === null || result?.value === undefined)
-    && (result?.calculation?.denominator === 0 || result?.sample_size === 0);
-}
-
 function metricsForLayer(packet: EvaluationPacket | null, layer: EvalLayer): MetricDef[] {
+  const visibleIds = LAYER_VISIBLE_METRIC_IDS[layer.id] ?? [];
   const results = resultsForLayer(packet, layer);
-  const configured = layer.metrics.filter((metric) => (
-    metricIsVisibleForLayer(layer, metric.id)
-    && (layer.id === "report_quality" || !isNotApplicableResult(results[metric.id]))
-  ));
-  const configuredIds = new Set(configured.flatMap((metric) => [metric.id, ...(metric.aliases ?? [])]));
-  const dynamic = Object.entries(results)
-    .filter(([id, result]) => (
-      id
-      && !configuredIds.has(id)
-      && metricIsVisibleForLayer(layer, id)
-      && !isNotApplicableResult(result)
-    ))
-    .map(([, result]) => metricFromResult(result));
-  return [...configured, ...dynamic];
+  const staticById = new Map(layer.metrics.map((metric) => [metric.id, metric] as const));
+  const metrics: MetricDef[] = [];
+  for (const id of visibleIds) {
+    const staticDef = staticById.get(id);
+    if (staticDef) {
+      metrics.push(staticDef);
+      continue;
+    }
+    // Dynamic-only metric (no static MetricDef): synthesize from the live packet.
+    const result = results[id];
+    if (result) metrics.push(metricFromResult(result));
+  }
+  return metrics;
 }
 
 function layerWithRuntimeMetrics(packet: EvaluationPacket | null, layer: EvalLayer): EvalLayer {
@@ -328,12 +264,31 @@ export function EvalDashboardPage() {
   const publicationIssues = useMemo(() => collectPublicationIssues(packet), [packet]);
   const blockingIssues = publicationIssues.length || blockingIssueCount(packet);
 
+  // While the (large) evaluation packet is still downloading/parsing, the layer grid
+  // would otherwise render every metric as "Thiếu dữ liệu / Chưa đạt" because no values
+  // have merged in yet. Block the view with a loading overlay so the empty skeleton is
+  // never mistaken for a failing benchmark.
+  const isLoading = packet === null && loadError === null;
+
   useEffect(() => {
     if (modal?.kind !== "explanation") setExpandedExplanationMetricId(null);
   }, [modal?.kind]);
 
   return (
     <section>
+      {isLoading && (
+        <div className="eval-loading-overlay" role="status" aria-live="polite" aria-busy="true">
+          <div className="eval-loading-card">
+            <span className="eval-loading-spinner" aria-hidden="true" />
+            <p className="eval-loading-title">Đang tải dữ liệu đánh giá…</p>
+            <p className="eval-loading-sub">
+              Bộ chỉ số benchmark khá lớn nên cần vài giây để tải đầy đủ. Vui lòng đợi — điểm và trạng thái
+              sẽ hiển thị ngay khi dữ liệu lên xong.
+            </p>
+          </div>
+        </div>
+      )}
+
       <header>
         <h1>Khung đánh giá chất lượng hệ thống</h1>
       </header>
@@ -422,12 +377,12 @@ export function EvalDashboardPage() {
                   </header>
                   <dl>
                     <div><dt>Lỗi</dt><dd>{issue.reason}</dd></div>
-                    <div><dt>Metric ID</dt><dd><code>{issue.metricId}</code></dd></div>
-                    <div><dt>Severity</dt><dd>{displayRuntimeValue(issue.severity)}</dd></div>
-                    <div><dt>Trạng thái metric</dt><dd>{displayRuntimeValue(issue.status)}</dd></div>
+                    <div><dt>Mã chỉ số</dt><dd><code>{issue.metricId}</code></dd></div>
+                    <div><dt>Mức độ</dt><dd>{displayRuntimeValue(issue.severity)}</dd></div>
+                    <div><dt>Trạng thái chỉ số</dt><dd>{displayRuntimeValue(issue.status)}</dd></div>
                     <div><dt>Kết quả</dt><dd>{displayRuntimeValue(issue.value)}</dd></div>
                     <div><dt>Ngưỡng đạt</dt><dd>{displayRuntimeValue(issue.threshold)}</dd></div>
-                    <div><dt>Failed examples</dt><dd>{formatRoundedNumber(issue.failedExamples)}</dd></div>
+                    <div><dt>Ví dụ chưa đạt</dt><dd>{formatRoundedNumber(issue.failedExamples)}</dd></div>
                   </dl>
                 </article>
               ))}
@@ -445,13 +400,13 @@ export function EvalDashboardPage() {
           <table>
             <thead>
               <tr>
-                <th>Run</th>
+                <th>Lần chạy</th>
                 <th>Chỉ số</th>
                 <th>Loại</th>
                 <th>Ngưỡng</th>
                 <th>Kết quả</th>
                 <th>Trạng thái</th>
-                <th>Failed examples</th>
+                <th>Ví dụ chưa đạt</th>
               </tr>
             </thead>
             <tbody>
