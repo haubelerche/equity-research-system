@@ -3910,21 +3910,23 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
     structured_quality = _structured_report_quality_payload(evidence_packet)
     structured_scores = _scores_from_structured_report_quality(structured_quality)
     structured_report_quality_available = structured_scores is not None and evidence_support_available
-    scores = structured_scores if structured_report_quality_available else {
+
+    # Displayed dimensions: graded scorer is authoritative (independent per-dimension spread).
+    display_scores = dict(heuristic_scores)
+    if not evidence_support_available:
+        display_scores["evidence_integration"] = None
+    scores = display_scores
+    total_score = _report_quality_total(display_scores)
+
+    # Blocking decision: keep the structured binary gate authoritative (publication safety).
+    gate_scores = structured_scores if structured_report_quality_available else {
         key: None for key in REPORT_QUALITY_SCORE_KEYS
     }
-    if not evidence_support_available:
-        scores["evidence_integration"] = None
     structured_total_score = (
         structured_quality.get("score")
         if isinstance(structured_quality, dict)
         and structured_quality.get("rubric_version") == "report_quality_v2"
         else None
-    )
-    total_score = (
-        float(structured_total_score)
-        if isinstance(structured_total_score, (int, float))
-        else _report_quality_total(scores)
     )
     publishable_model_path = _latest_named_for_ticker(
         root / "storage" / "runs", "publishable_final_report_model.json", ticker
@@ -3941,11 +3943,11 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
     )
     publishable_model_locked = bool(publishable_model.get("locked"))
     report_quality_allow_export = (
-        isinstance(total_score, (int, float))
-        and total_score >= 85
+        isinstance(structured_total_score, (int, float))
+        and structured_total_score >= 85
         and finance_pass
-        and scores.get("completeness", 0) >= 90
-        and scores.get("valuation_transparency", 0) >= 85
+        and (gate_scores.get("completeness") or 0) >= 90
+        and (gate_scores.get("valuation_transparency") or 0) >= 85
     )
     publication_checks = {
         "run_approved": run_approved,
