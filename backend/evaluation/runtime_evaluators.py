@@ -2815,12 +2815,14 @@ def _pdf_stats(path: Path) -> dict[str, Any]:
 
 
 def _report_pdf_path(root: Path, ticker: str, kind: str) -> Path:
+    # Prefer the real generated report so report-quality reflects actual report content;
+    # fall back to the synthetic benchmark stub only when the real PDF is absent.
+    real_name = f"{ticker.upper()}_report.pdf" if kind == "report" else f"{ticker.upper()}_explanation.pdf"
+    real_path = root / "output" / real_name
+    if real_path.is_file():
+        return real_path
     benchmark_name = "report_stub.pdf" if kind == "report" else "explanation_stub.pdf"
-    benchmark_path = root / "output" / "evaluation" / "benchmark_artifacts" / ticker.upper() / benchmark_name
-    if benchmark_path.is_file():
-        return benchmark_path
-    legacy_name = f"{ticker}_report.pdf" if kind == "report" else f"{ticker}_explanation.pdf"
-    return root / "output" / legacy_name
+    return root / "output" / "evaluation" / "benchmark_artifacts" / ticker.upper() / benchmark_name
 
 
 def _contains_any(text: str, terms: tuple[str, ...]) -> bool:

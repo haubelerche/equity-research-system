@@ -114,3 +114,16 @@ def test_evaluate_report_wiring_uses_graded_for_display_and_structured_for_gate(
     assert "display_scores = dict(heuristic_scores)" in source
     assert "scores = display_scores if structured_report_quality_available" in source
     assert "structured_total_score >= 85" in source
+
+
+def test_report_pdf_path_prefers_real_report_over_stub(tmp_path):
+    out = tmp_path / "output"
+    stub = out / "evaluation" / "benchmark_artifacts" / "TST" / "report_stub.pdf"
+    stub.parent.mkdir(parents=True)
+    stub.write_bytes(b"%PDF stub")
+    # Only the stub exists -> stub is used as fallback.
+    assert runtime_evaluators._report_pdf_path(tmp_path, "TST", "report") == stub
+    # Real report present -> it wins.
+    real = out / "TST_report.pdf"
+    real.write_bytes(b"%PDF real")
+    assert runtime_evaluators._report_pdf_path(tmp_path, "TST", "report") == real
