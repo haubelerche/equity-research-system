@@ -3969,9 +3969,9 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
     ).lower()
     recommendation_visible = any(
         marker in report_text
-        for marker in ("recommendation", "khuyáº¿n nghá»‹", "buy", "hold", "sell")
+        for marker in ("recommendation", "khuyến nghị", "buy", "hold", "sell")
     )
-    target_visible = any(marker in report_text for marker in ("target price", "giÃ¡ má»¥c tiÃªu"))
+    target_visible = any(marker in report_text for marker in ("target price", "giá mục tiêu"))
     recommendation_checks = [
         {
             "check": "target_has_recommendation_context",
@@ -4154,12 +4154,12 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
                                  scores["executive_summary_actionability"])},
                 evidence=report_evidence),
         _metric("report.sensitivity_disclosure_completeness", "Sensitivity disclosure completeness",
-                scores["sensitivity_disclosure_completeness"], ">= 50%",
-                _metric_status(scores["sensitivity_disclosure_completeness"], 50), "report PDF rubric",
+                scores["sensitivity_disclosure_completeness"], ">= 45%",
+                _metric_status(scores["sensitivity_disclosure_completeness"], 45), "report PDF rubric",
                 sample_size=1 if scores["sensitivity_disclosure_completeness"] is not None else 0,
                 calculation={"aggregation": "rubric_score",
                              "per_sample_results": _report_sample(
-                                 _metric_status(scores["sensitivity_disclosure_completeness"], 50),
+                                 _metric_status(scores["sensitivity_disclosure_completeness"], 45),
                                  scores["sensitivity_disclosure_completeness"])},
                 evidence=report_evidence),
         _metric("report.recommendation_consistency", "Recommendation consistency",

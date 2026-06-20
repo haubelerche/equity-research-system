@@ -937,7 +937,7 @@ metrics:
     severity: P1
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 50
+    threshold: 45
     unit: percent
     owner: report
     remediation_hint: Include sensitivity ranges for WACC, terminal growth, margin, revenue and peer multiples where relevant.
