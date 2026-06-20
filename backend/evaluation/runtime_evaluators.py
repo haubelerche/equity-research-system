@@ -3911,12 +3911,16 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
     structured_scores = _scores_from_structured_report_quality(structured_quality)
     structured_report_quality_available = structured_scores is not None and evidence_support_available
 
-    # Displayed dimensions: graded scorer is authoritative (independent per-dimension spread).
+    # Displayed dimensions: graded scorer is authoritative when structured evidence is
+    # available (independent per-dimension spread). When evidence is missing, scores stay
+    # None so the fail-closed "structured_report_quality_evidence_missing" contract holds.
     display_scores = dict(heuristic_scores)
     if not evidence_support_available:
         display_scores["evidence_integration"] = None
-    scores = display_scores
-    total_score = _report_quality_total(display_scores)
+    scores = display_scores if structured_report_quality_available else {
+        key: None for key in REPORT_QUALITY_SCORE_KEYS
+    }
+    total_score = _report_quality_total(scores)
 
     # Blocking decision: keep the structured binary gate authoritative (publication safety).
     gate_scores = structured_scores if structured_report_quality_available else {

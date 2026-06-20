@@ -111,6 +111,6 @@ from backend.evaluation import runtime_evaluators
 def test_evaluate_report_wiring_uses_graded_for_display_and_structured_for_gate():
     """Guard the decoupling: display scores from graded heuristic, blocking from structured."""
     source = inspect.getsource(runtime_evaluators.evaluate_report)
-    assert "display_scores" in source
-    assert "_report_quality_total(display_scores)" in source
+    assert "display_scores = dict(heuristic_scores)" in source
+    assert "scores = display_scores if structured_report_quality_available" in source
     assert "structured_total_score >= 85" in source
