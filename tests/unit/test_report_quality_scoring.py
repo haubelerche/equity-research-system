@@ -24,10 +24,15 @@ def test_concept_tier_quantified_uses_nearest_mention():
 
 
 def test_score_from_concept_tiers_averages_groups():
-    text = "ROE 18% và doanh thu tăng"  # roe quantified (1.0), revenue mentioned (0.5)
+    text = "ROE 18% và doanh thu tăng"  # roe quantified (1.0), revenue quantified (1.0) - number is within window on both sides
     score = _score_from_concept_tiers(text, (("roe",), ("doanh thu", "revenue")))
-    assert score == 75.0
+    assert score == 100.0
 
 
 def test_score_from_concept_tiers_empty_groups_returns_none():
     assert _score_from_concept_tiers("anything", ()) is None
+
+
+def test_concept_tier_quantified_when_number_precedes_mention():
+    # number BEFORE the concept term must also count as quantified (both-sides window)
+    assert _concept_tier("đạt 18,2% ROE trong năm", ("roe",)) == 1.0

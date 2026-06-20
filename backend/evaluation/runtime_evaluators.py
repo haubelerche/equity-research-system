@@ -2848,8 +2848,7 @@ def _concept_tier(text: str, terms: tuple[str, ...]) -> float:
     """Graded credit for one concept: 0.0 absent / 0.5 mentioned / 1.0 quantified.
 
     "Quantified" means a concept term occurs within ``_QUANT_WINDOW`` characters of a
-    value-like numeric token (looking only after the mention). Returns the best tier
-    across all alias terms.
+    value-like numeric token. Returns the best tier across all alias terms.
     """
     normalized = text.lower()
     best = 0.0
@@ -2858,9 +2857,8 @@ def _concept_tier(text: str, terms: tuple[str, ...]) -> float:
         idx = normalized.find(token)
         while idx != -1:
             best = max(best, 0.5)
-            # Only look forward (after the concept mention)
-            start = idx + len(token)
-            end = min(len(normalized), start + _QUANT_WINDOW)
+            start = max(0, idx - _QUANT_WINDOW)
+            end = min(len(normalized), idx + len(token) + _QUANT_WINDOW)
             if _QUANT_TOKEN.search(normalized[start:end]):
                 return 1.0
             idx = normalized.find(token, idx + 1)
