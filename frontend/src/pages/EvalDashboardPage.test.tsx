@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EvalDashboardPage } from "./EvalDashboardPage";
@@ -703,5 +703,37 @@ describe("EvalDashboardPage", () => {
     expect(await screen.findByText(/không hiển thị số liệu thay thế/i)).toBeInTheDocument();
     expect(screen.getByText(/Chưa có kết quả đánh giá/)).toBeInTheDocument();
     expect(screen.queryByText("70.0%")).not.toBeInTheDocument();
+  });
+
+  it("renders dynamic-only allowlisted metrics that have no static definition", async () => {
+    const dynamicPacket = {
+      run_id: "dynamic-only-test",
+      publication_status: "BLOCKED_BY_P0",
+      artifacts: [{
+        plan_id: "01",
+        name: "Data reliability",
+        artifact: "data_quality.json",
+        status: "pass",
+        metric_results: [{
+          metric_id: "raw_bctc_non_empty",
+          metric_name: "Raw BCTC files contain rows",
+          metric_type: "coverage",
+          unit: "percent",
+          value: 0.96,
+          threshold: ">= 90%",
+          status: "pass",
+        }],
+      }],
+    };
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(dynamicPacket), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })));
+
+    render(<EvalDashboardPage />);
+
+    // raw_bctc_non_empty has no static MetricDef; it must render via the
+    // dynamic-only synthesis branch in metricsForLayer.
+    expect((await screen.findAllByText("Raw BCTC files contain rows")).length).toBeGreaterThan(0);
   });
 });
