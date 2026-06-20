@@ -2838,6 +2838,44 @@ def _score_from_term_groups(text: str, groups: tuple[tuple[str, ...], ...]) -> f
     return _score_from_hits(sum(_contains_any(text, group) for group in groups), len(groups))
 
 
+# A value-like numeric token: percentage, year tag (2025A/2025F), decimal, or integer.
+_QUANT_TOKEN = re.compile(r"\d+(?:[.,]\d+)?\s?%|\b\d{4}\s?[aAfFeE]?\b|\b\d+(?:[.,]\d+)?\b")
+# Window (chars) on each side of a concept mention to look for an adjacent number.
+_QUANT_WINDOW = 25
+
+
+def _concept_tier(text: str, terms: tuple[str, ...]) -> float:
+    """Graded credit for one concept: 0.0 absent / 0.5 mentioned / 1.0 quantified.
+
+    "Quantified" means a concept term occurs within ``_QUANT_WINDOW`` characters of a
+    value-like numeric token (looking only after the mention). Returns the best tier
+    across all alias terms.
+    """
+    normalized = text.lower()
+    best = 0.0
+    for term in terms:
+        token = term.lower()
+        idx = normalized.find(token)
+        while idx != -1:
+            best = max(best, 0.5)
+            # Only look forward (after the concept mention)
+            start = idx + len(token)
+            end = min(len(normalized), start + _QUANT_WINDOW)
+            if _QUANT_TOKEN.search(normalized[start:end]):
+                return 1.0
+            idx = normalized.find(token, idx + 1)
+    return best
+
+
+def _score_from_concept_tiers(
+    text: str, groups: tuple[tuple[str, ...], ...]
+) -> float | None:
+    """Average per-concept tier across ``groups``, scaled to 0-100."""
+    if not groups:
+        return None
+    return round(sum(_concept_tier(text, group) for group in groups) / len(groups) * 100, 2)
+
+
 def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any]) -> dict[str, Any]:
     text = "\n".join(
         item for item in (str(report.get("text") or ""), str(explanation.get("text") or ""))
