@@ -29,6 +29,14 @@ def test_score_from_concept_tiers_averages_groups():
     assert score == 100.0
 
 
+def test_score_from_concept_tiers_mixed_tiers_below_100():
+    # Re-saturation canary: one concept quantified (roe near 18%), one only mentioned
+    # (thương hiệu has no number within the window) -> average must be below 100.
+    text = "ROE đạt 18%. Chiến lược dài hạn của doanh nghiệp tập trung vào thương hiệu."
+    score = _score_from_concept_tiers(text, (("roe",), ("thương hiệu",)))
+    assert score == 75.0
+
+
 def test_score_from_concept_tiers_empty_groups_returns_none():
     assert _score_from_concept_tiers("anything", ()) is None
 
