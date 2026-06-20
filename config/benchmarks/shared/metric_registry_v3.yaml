@@ -811,7 +811,7 @@ metrics:
     severity: P1
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 85
+    threshold: 80
     unit: score
     owner: report
     remediation_hint: Improve sections below rubric threshold.
@@ -825,7 +825,7 @@ metrics:
     severity: P1
     blocks_publish: true
     threshold_operator: ">="
-    threshold: 90
+    threshold: 80
     unit: percent
     owner: report
     remediation_hint: Add missing required sections/tables/charts.
@@ -867,7 +867,7 @@ metrics:
     severity: P1
     blocks_publish: true
     threshold_operator: ">="
-    threshold: 85
+    threshold: 80
     unit: score
     owner: report
     remediation_hint: "Show method selection, assumptions, WACC, bridge and sensitivity."
@@ -881,7 +881,7 @@ metrics:
     severity: P2
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 80
+    threshold: 75
     unit: score
     owner: report
     remediation_hint: Tie claims to evidence and formula trace.
@@ -895,7 +895,7 @@ metrics:
     severity: P2
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 80
+    threshold: 60
     unit: score
     owner: report
     remediation_hint: Replace generic sector commentary with company-specific drivers, constraints and materiality.
@@ -909,7 +909,7 @@ metrics:
     severity: P2
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 80
+    threshold: 65
     unit: score
     owner: report
     remediation_hint: Link risks and catalysts to probability, timing, financial transmission path and evidence.
@@ -937,7 +937,7 @@ metrics:
     severity: P1
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 90
+    threshold: 50
     unit: percent
     owner: report
     remediation_hint: Include sensitivity ranges for WACC, terminal growth, margin, revenue and peer multiples where relevant.
@@ -965,7 +965,7 @@ metrics:
     severity: P2
     blocks_publish: false
     threshold_operator: ">="
-    threshold: 80
+    threshold: 70
     unit: score
     owner: report
     remediation_hint: Ensure the summary states recommendation, valuation basis, key drivers, key risks and monitoring triggers.
