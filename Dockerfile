@@ -43,6 +43,16 @@ RUN python -m pip install --upgrade pip setuptools wheel && \
 # ── Application code ───────────────────────────────────────────────────────────
 COPY . .
 
+# ── Build-time import canary ───────────────────────────────────────────────────
+# Fail the BUILD here — loudly, with the offending module name — rather than
+# crashing the runtime healthcheck minutes later if a package didn't make it into
+# the image. This also keeps the COPY layer honest across rebuilds: if a stale
+# build cache ever serves an image missing these modules, the build stops here
+# instead of shipping. Imports the exact startup chain (backend.api ->
+# backend.reporting.output_inventory -> backend.storage.layout).
+RUN python -c "import backend.storage.layout; import backend.reporting.output_inventory" \
+    && echo "[build] backend import canary passed"
+
 # ── Data directories (created at build time so they exist in container) ────────
 RUN mkdir -p \
     data/raw \
