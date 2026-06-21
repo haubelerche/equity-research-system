@@ -189,6 +189,7 @@ export const ACCEPTANCE_EXPLANATION: string[] = [
 export const LAYER_VISIBLE_METRIC_IDS: Record<string, string[]> = {
   data_reliability: [
     "data_reliability_score",
+    "data.benchmark_hardness_score",
     "core_metric_coverage",
     "material_ocr_error_count",
     "duplicate_fact_count",
@@ -196,6 +197,7 @@ export const LAYER_VISIBLE_METRIC_IDS: Record<string, string[]> = {
     "raw_bctc_non_empty",
   ],
   rag_evidence: [
+    "rag.retrieval_difficulty_score",
     "hit_rate_at_5",
     "mrr_at_5",
     "context_precision",
@@ -205,6 +207,7 @@ export const LAYER_VISIBLE_METRIC_IDS: Record<string, string[]> = {
     "source_tier_hit_rate",
   ],
   financial: [
+    "finance.model_quality_score",
     "accounting_invariant_violations",
     "fcff",
     "target_price",
@@ -213,6 +216,7 @@ export const LAYER_VISIBLE_METRIC_IDS: Record<string, string[]> = {
     "formula_trace",
   ],
   agent: [
+    "agent.workflow_quality_score",
     "tool_permission_compliance",
     "schema_validity",
     "no_unauthorized_calc",
@@ -223,6 +227,7 @@ export const LAYER_VISIBLE_METRIC_IDS: Record<string, string[]> = {
   ],
   report_quality: [
     "report.quality_total",
+    "report.benchmark_hardness_score",
     "report.completeness",
     "report.valuation_transparency",
   ],

@@ -94,6 +94,7 @@ describe("evalFramework", () => {
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.data_reliability).toEqual([
       "data_reliability_score",
+      "data.benchmark_hardness_score",
       "core_metric_coverage",
       "material_ocr_error_count",
       "duplicate_fact_count",
@@ -101,6 +102,7 @@ describe("evalFramework", () => {
       "raw_bctc_non_empty",
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.rag_evidence).toEqual([
+      "rag.retrieval_difficulty_score",
       "hit_rate_at_5",
       "mrr_at_5",
       "context_precision",
@@ -110,6 +112,7 @@ describe("evalFramework", () => {
       "source_tier_hit_rate",
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.financial).toEqual([
+      "finance.model_quality_score",
       "accounting_invariant_violations",
       "fcff",
       "target_price",
@@ -118,6 +121,7 @@ describe("evalFramework", () => {
       "formula_trace",
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.agent).toEqual([
+      "agent.workflow_quality_score",
       "tool_permission_compliance",
       "schema_validity",
       "no_unauthorized_calc",
@@ -128,6 +132,7 @@ describe("evalFramework", () => {
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.report_quality).toEqual([
       "report.quality_total",
+      "report.benchmark_hardness_score",
       "report.completeness",
       "report.valuation_transparency",
     ]);
