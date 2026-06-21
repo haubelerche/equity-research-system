@@ -94,7 +94,6 @@ describe("evalFramework", () => {
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.data_reliability).toEqual([
       "data_reliability_score",
-      "data.benchmark_hardness_score",
       "core_metric_coverage",
       "material_ocr_error_count",
       "duplicate_fact_count",
@@ -128,7 +127,6 @@ describe("evalFramework", () => {
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.report_quality).toEqual([
       "report.quality_total",
-      "report.benchmark_hardness_score",
       "report.completeness",
       "report.valuation_transparency",
     ]);

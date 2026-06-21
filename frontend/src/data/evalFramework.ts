@@ -53,7 +53,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     subtitle: "Đánh giá chất lượng truy xuất và mức độ bám sát bằng chứng của câu trả lời",
     artifact: "retrieval_eval.json",
     metrics: [
-      metric("rag.retrieval_difficulty_score", "Điểm truy xuất (chuẩn hoá độ khó)", "Retrieval quality (difficulty-adjusted)", "%", "gte", 0.85, "Hard-mode Golden Retrieval Audit", "Weighted stress score uu tien first-rank authoritative hit, source-tier match, MRR@5, query density va material query share", { thresholdLabel: ">= 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
+      metric("rag.retrieval_difficulty_score", "Điểm chất lượng truy xuất", "Retrieval quality score", "%", "gte", 0.85, "Hard-mode Golden Retrieval Audit", "Weighted stress score uu tien first-rank authoritative hit, source-tier match, MRR@5, query density va material query share", { thresholdLabel: ">= 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("hit_rate_at_5", "Tỷ lệ truy vấn có bằng chứng đúng trong top 5", "Hit-rate@5", "%", "gte", 0.9, "Golden Retrieval Set", "Số truy vấn có ít nhất một evidence đúng trong top 5 / Tổng số truy vấn", { thresholdLabel: "≥ 90%", metricType: "coverage", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("mrr_at_5", "Thứ hạng nghịch đảo trung bình trong top 5", "MRR@5", "%", "gte", 0.75, "Golden Retrieval Set", "Trung bình nghịch đảo thứ hạng của evidence đúng đầu tiên trong top 5", { thresholdLabel: "≥ 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("context_precision", "Độ chính xác của ngữ cảnh truy xuất", "Context Precision", "%", "gte", 0.8, "Ragas", "Tỷ lệ context retrieved thực sự liên quan", { thresholdLabel: "≥ 80%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
@@ -189,7 +189,6 @@ export const ACCEPTANCE_EXPLANATION: string[] = [
 export const LAYER_VISIBLE_METRIC_IDS: Record<string, string[]> = {
   data_reliability: [
     "data_reliability_score",
-    "data.benchmark_hardness_score",
     "core_metric_coverage",
     "material_ocr_error_count",
     "duplicate_fact_count",
@@ -223,7 +222,6 @@ export const LAYER_VISIBLE_METRIC_IDS: Record<string, string[]> = {
   ],
   report_quality: [
     "report.quality_total",
-    "report.benchmark_hardness_score",
     "report.completeness",
     "report.valuation_transparency",
   ],
