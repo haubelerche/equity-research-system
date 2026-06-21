@@ -32,7 +32,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     subtitle: "Kiểm tra tính đầy đủ, nguồn gốc, đối soát và tính nhất quán của dữ liệu đầu vào",
     artifact: "data_quality.json",
     metrics: [
-      metric("data.benchmark_hardness_score", "Diem hard-mode du lieu", "Data benchmark hardness score", "%", "gte", 0.85, "Hard-mode Data Reliability Audit", "Weighted stress score phat confidence thap, lineage/OCR depth yeu, raw BCTC thieu file hoac provenance chua sau", { thresholdLabel: ">= 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
+      metric("data.benchmark_hardness_score", "Điểm chất lượng dữ liệu (chuẩn hoá độ khó)", "Data quality (difficulty-adjusted)", "%", "gte", 0.85, "Hard-mode Data Reliability Audit", "Weighted stress score phat confidence thap, lineage/OCR depth yeu, raw BCTC thieu file hoac provenance chua sau", { thresholdLabel: ">= 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("data_reliability_score", "Điểm tin cậy dữ liệu tổng hợp", "Data reliability score", "%", "gte", 0.9, "Pandera + Financial Fact Reconciliation + OCR Validation Gate", "Weighted score từ coverage, reconciliation, provenance, period completeness, schema validity, fact confidence và OCR health", { thresholdLabel: "≥ 90%", metricType: "score", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("core_metric_coverage", "Độ bao phủ chỉ số cốt lõi", "Core metric coverage", "%", "gte", 0.95, "Valuation Data Requirements", "Số fact bắt buộc cho các phương pháp định giá có dữ liệu accepted / Tổng fact bắt buộc", { thresholdLabel: "≥ 95%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("valuation_method_data_readiness", "Mức sẵn sàng dữ liệu cho phương pháp định giá", "Valuation method data readiness", "%", "gte", 0.8, "Valuation Data Requirements + Pandera", "Tỷ lệ mã đủ dữ liệu cho ít nhất một phương pháp định giá chính", { thresholdLabel: "≥ 80%", metricType: "coverage", scope: "benchmark_suite", severity: "P1", blocksPublish: false }),
@@ -53,7 +53,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     subtitle: "Đánh giá chất lượng truy xuất và mức độ bám sát bằng chứng của câu trả lời",
     artifact: "retrieval_eval.json",
     metrics: [
-      metric("rag.retrieval_difficulty_score", "Diem hard-mode truy xuat", "Retrieval difficulty-adjusted score", "%", "gte", 0.85, "Hard-mode Golden Retrieval Audit", "Weighted stress score uu tien first-rank authoritative hit, source-tier match, MRR@5, query density va material query share", { thresholdLabel: ">= 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
+      metric("rag.retrieval_difficulty_score", "Điểm truy xuất (chuẩn hoá độ khó)", "Retrieval quality (difficulty-adjusted)", "%", "gte", 0.85, "Hard-mode Golden Retrieval Audit", "Weighted stress score uu tien first-rank authoritative hit, source-tier match, MRR@5, query density va material query share", { thresholdLabel: ">= 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("hit_rate_at_5", "Tỷ lệ truy vấn có bằng chứng đúng trong top 5", "Hit-rate@5", "%", "gte", 0.9, "Golden Retrieval Set", "Số truy vấn có ít nhất một evidence đúng trong top 5 / Tổng số truy vấn", { thresholdLabel: "≥ 90%", metricType: "coverage", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("mrr_at_5", "Thứ hạng nghịch đảo trung bình trong top 5", "MRR@5", "%", "gte", 0.75, "Golden Retrieval Set", "Trung bình nghịch đảo thứ hạng của evidence đúng đầu tiên trong top 5", { thresholdLabel: "≥ 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("context_precision", "Độ chính xác của ngữ cảnh truy xuất", "Context Precision", "%", "gte", 0.8, "Ragas", "Tỷ lệ context retrieved thực sự liên quan", { thresholdLabel: "≥ 80%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
@@ -73,7 +73,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     subtitle: "Kiểm tra tất định các công thức, bất biến kế toán và sai lệch định giá",
     artifact: "financial_eval.json",
     metrics: [
-      metric("finance.model_quality_score", "Diem hard-mode mo hinh tai chinh", "Financial model quality stress score", "%", "gte", 0.75, "Hard-mode Financial Model Audit", "Weighted stress score phat method publishability thap, trace method thieu, sensitivity grid mong, forecast horizon ngan hoac khong co golden regression", { thresholdLabel: ">= 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
+      metric("finance.model_quality_score", "Điểm chất lượng mô hình tài chính", "Financial model quality score", "%", "gte", 0.75, "Hard-mode Financial Model Audit", "Weighted stress score phat method publishability thap, trace method thieu, sensitivity grid mong, forecast horizon ngan hoac khong co golden regression", { thresholdLabel: ">= 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("accounting_invariant_violations", "Số vi phạm bất biến kế toán nghiêm trọng", "Critical accounting invariant violations", "", "lte", 0, "Deterministic Finance Gates", "Số lỗi như tài sản không khớp nợ phải trả cộng vốn chủ sở hữu hoặc cash flow không khớp biến động tiền", { aliases: ["critical_failures"], thresholdLabel: "= 0", metricType: "error_count", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("fcff", "Số mã đạt công thức FCFF", "FCFF formula pass count", "", "gte", 10, "DCF Formula Gate", "FCFF = EBIT(1-tax) + D&A - CAPEX - delta NWC cho từng forecast row", { thresholdLabel: "pass", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("fcfe", "Số mã đạt công thức FCFE", "FCFE formula pass count", "", "gte", 10, "FCFE Formula Gate", "FCFE = NI + D&A - CAPEX - delta NWC + net borrowing cho từng forecast row", { thresholdLabel: "pass", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
@@ -101,7 +101,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     subtitle: "Đánh giá tuân thủ vai trò, quyền công cụ, cấu trúc đầu ra và chất lượng lập luận",
     artifact: "agent_eval.json",
     metrics: [
-      metric("agent.workflow_quality_score", "Diem hard-mode workflow agent", "Agent workflow quality stress score", "%", "gte", 0.75, "Hard-mode Agent Workflow Audit", "Weighted stress score phat trace thieu, token telemetry thieu, judge readiness thap, handoff yeu hoac repair loop cao", { thresholdLabel: ">= 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
+      metric("agent.workflow_quality_score", "Điểm chất lượng quy trình agent", "Agent workflow quality score", "%", "gte", 0.75, "Hard-mode Agent Workflow Audit", "Weighted stress score phat trace thieu, token telemetry thieu, judge readiness thap, handoff yeu hoac repair loop cao", { thresholdLabel: ">= 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("tool_permission_compliance", "Tỷ lệ tuân thủ quyền sử dụng công cụ", "Tool permission compliance", "%", "gte", 1, "Agent Tool Permission Gate", "Số lượt gọi công cụ đúng quyền / Tổng lượt gọi công cụ", { thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("schema_validity", "Tỷ lệ cấu trúc JSON đầu ra hợp lệ", "JSON schema validity", "%", "gte", 1, "JSON Schema Validator", "Số output hợp lệ theo schema / Tổng output bắt buộc", { thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
       metric("no_unauthorized_calc", "Tỷ lệ không tự ý tính toán tài chính bằng LLM", "No unauthorized LLM financial calculation", "%", "gte", 1, "Agent Governance Gate", "Số lượt tuân thủ quy tắc / Tổng lượt cần kiểm tra", { thresholdLabel: "= 100%", metricType: "coverage", scope: "report_run", severity: "P0", blocksPublish: true }),
@@ -127,7 +127,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
     artifact: "report_eval.json",
     artifactAliases: ["report_quality_eval.json"],
     metrics: [
-      metric("report.benchmark_hardness_score", "Diem hard-mode bao cao", "Report hard-mode benchmark score", "", "gte", 75, "Hard-mode Report Quality Rubric", "Weighted score phat diem yeu nhat trong thesis, evidence, risk, valuation va sensitivity disclosure", { thresholdLabel: ">= 75%", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
+      metric("report.benchmark_hardness_score", "Điểm chất lượng báo cáo (chuẩn hoá độ khó)", "Report quality (difficulty-adjusted)", "", "gte", 75, "Hard-mode Report Quality Rubric", "Weighted score phat diem yeu nhat trong thesis, evidence, risk, valuation va sensitivity disclosure", { thresholdLabel: ">= 75%", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
       metric("report.quality_total", "Điểm chất lượng báo cáo tổng hợp", "Report quality total", "", "gte", 85, "Report Quality Rubric", "Tổng điểm rubric report quality trên các section bắt buộc", { aliases: ["report_quality_score"], thresholdLabel: "≥ 85%", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: false }),
       metric("report.completeness", "Độ đầy đủ của báo cáo", "Report completeness", "%", "gte", 90, "Report Completeness Gate", "Số section, bảng và chart bắt buộc đã có / Tổng yêu cầu", { thresholdLabel: "≥ 90%", metricType: "coverage", scope: "report_run", severity: "P1", blocksPublish: true }),
       metric("report.valuation_transparency", "Tính minh bạch định giá", "Valuation transparency", "", "gte", 85, "Valuation Transparency Gate", "Điểm rubric cho method selection, assumptions, WACC, bridge và sensitivity", { thresholdLabel: "≥ 85%", metricType: "score", scope: "report_run", severity: "P1", blocksPublish: true }),
@@ -198,13 +198,9 @@ export const LAYER_VISIBLE_METRIC_IDS: Record<string, string[]> = {
   ],
   rag_evidence: [
     "rag.retrieval_difficulty_score",
-    "hit_rate_at_5",
     "mrr_at_5",
     "context_precision",
     "context_recall",
-    "faithfulness",
-    "response_relevancy",
-    "source_tier_hit_rate",
   ],
   financial: [
     "finance.model_quality_score",
