@@ -102,9 +102,13 @@ describe("evalFramework", () => {
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.rag_evidence).toEqual([
       "rag.retrieval_difficulty_score",
+      "hit_rate_at_5",
       "mrr_at_5",
       "context_precision",
       "context_recall",
+      "faithfulness",
+      "response_relevancy",
+      "source_tier_hit_rate",
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.financial).toEqual([
       "finance.model_quality_score",

@@ -197,9 +197,13 @@ export const LAYER_VISIBLE_METRIC_IDS: Record<string, string[]> = {
   ],
   rag_evidence: [
     "rag.retrieval_difficulty_score",
+    "hit_rate_at_5",
     "mrr_at_5",
     "context_precision",
     "context_recall",
+    "faithfulness",
+    "response_relevancy",
+    "source_tier_hit_rate",
   ],
   financial: [
     "finance.model_quality_score",
