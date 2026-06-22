@@ -118,25 +118,65 @@ def _normalize_extracted_value(value: str) -> str:
     return re.sub(r"-?\d[\d,]*(?:\.\d+)?", _normalize_number, value)
 
 
-def _extract_grounded_fact_answer(question: str, contexts: list[str]) -> str | None:
-    """Extract an exact factoid answer from retrieved evidence before calling an LLM.
+# Map question-metric trigger words -> the label keywords as they appear in the
+# tier-3 "Tóm tắt tài chính" fact summaries (e.g. "- Doanh thu thuần (...): 1234 tỷ VND").
+_METRIC_LABEL_TRIGGERS: list[tuple[tuple[str, ...], tuple[str, ...]]] = [
+    (("doanh thu",), ("doanh thu",)),
+    (("lợi nhuận gộp", "lãi gộp"), ("lợi nhuận gộp", "lãi gộp")),
+    (("sau thuế", "lnst", "cổ đông công ty mẹ"), ("sau thuế", "lợi nhuận thuần")),
+    (("tổng tài sản",), ("tổng tài sản",)),
+    (("vốn chủ sở hữu",), ("vốn chủ sở hữu",)),
+    (("lưu chuyển tiền", "ocf", "hoạt động kinh doanh"),
+     ("lưu chuyển tiền thuần", "hoạt động kinh doanh")),
+    (("capex", "tài sản cố định", "chi mua sắm"), ("capex", "tài sản cố định")),
+    (("số cổ phiếu", "cổ phiếu lưu hành", "shares"), ("cổ phiếu", "shares")),
+    (("cổ tức",), ("cổ tức",)),
+]
 
-    This uses only retrieved contexts, never the benchmark reference, so it remains
-    a live grounded answer path while avoiding LLM rounding or unit conversion.
+_FACT_VALUE_PATTERN = re.compile(
+    r"(-?\d[\d,.]*(?:\s*(?:tỷ\s+VND|tỷ\s+đồng|VND|VNĐ|shares|cổ phiếu)))",
+    flags=re.IGNORECASE,
+)
+
+
+def _target_labels_for_question(question: str) -> tuple[str, ...]:
+    q = question.lower()
+    for triggers, labels in _METRIC_LABEL_TRIGGERS:
+        if any(trigger in q for trigger in triggers):
+            return labels
+    return ()
+
+
+def _extract_grounded_fact_answer(question: str, contexts: list[str]) -> str | None:
+    """Extract the exact factoid answer for the question's metric from retrieved evidence.
+
+    Tier-3 fact chunks are multi-metric summaries ("- Doanh thu thuần (...): 1234 tỷ VND").
+    We must pick the value on the line whose label matches the QUESTION's metric — grabbing
+    the first number is metric-blind and produces unfaithful answers. Uses only retrieved
+    contexts (never the benchmark reference), so it stays a live grounded path.
     """
-    value_pattern = re.compile(
-        r":\s*(-?\d[\d,.]*(?:\s*(?:tỷ\s+VND|tỷ\s+đồng|VND|VNĐ|shares|cổ phiếu)))",
-        flags=re.IGNORECASE,
-    )
+    targets = _target_labels_for_question(question)
+    first_value: str | None = None
     for context in contexts:
-        text = " ".join(str(context or "").split())
-        match = value_pattern.search(text)
-        if not match:
-            continue
-        value = _normalize_extracted_value(match.group(1))
-        if value:
-            return f"{_question_answer_prefix(question)} là {value}."
-    return None
+        for line in str(context or "").split("\n"):
+            label, sep, after = line.partition(":")
+            if not sep:
+                continue
+            match = _FACT_VALUE_PATTERN.search(after)
+            if not match:
+                continue
+            value = _normalize_extracted_value(match.group(1))
+            if not value:
+                continue
+            if targets and any(label_kw in label.lower() for label_kw in targets):
+                return f"{_question_answer_prefix(question)} là {value}."
+            if first_value is None:
+                first_value = f"{_question_answer_prefix(question)} là {value}."
+    # Known metric but its line was not in the retrieved evidence → defer to the LLM
+    # (its grounding/refusal prompt), rather than return a wrong first-number answer.
+    if targets:
+        return None
+    return first_value
 
 
 def _numbers_for_support_match(text: str) -> set[str]:
