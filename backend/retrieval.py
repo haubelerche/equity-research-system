@@ -145,6 +145,10 @@ class RetrievalService:
         except ImportError:
             return []
 
+        import os as _os
+        from backend.retrieval_enhance import expand_query as _expand_query
+        _variants = _expand_query(query) if _os.getenv("RAG_QUERY_EXPANSION") == "1" else [query]
+
         ticker = ticker.strip().upper()
         query_embedding = _embed_query(query)
 
@@ -154,7 +158,7 @@ class RetrievalService:
             return []
 
         try:
-            def _run_search(use_vector: bool) -> list[dict[str, Any]]:
+            def _run_search(use_vector: bool, _q: str = query, _qe: list[float] | None = query_embedding) -> list[dict[str, Any]]:
                 with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                     # Params MUST be appended in the same left-to-right order the %s
                     # placeholders appear in the final SQL: rank_expr (SELECT), then the
@@ -174,8 +178,8 @@ class RetrievalService:
                     # chunk can surface. So we drop the tier-first prefix there.
                     tier_order = "s.source_tier ASC, "
 
-                    if use_vector and query_embedding is not None:
-                        vector_param = _vector_literal(query_embedding)
+                    if use_vector and _qe is not None:
+                        vector_param = _vector_literal(_qe)
                         rank_expr = "(1 - (dc.embedding <=> %s::vector))"
                         order_expr = (
                             f"((dc.embedding <=> %s::vector) "
@@ -186,7 +190,7 @@ class RetrievalService:
                         rank_param = vector_param
                         order_param = vector_param
                         tier_order = ""
-                    elif query and query.strip():
+                    elif _q and _q.strip():
                         # Use simple dictionary for cross-language Vietnamese + number support.
                         fts_clause = (
                             "AND to_tsvector('simple', dc.chunk_text) "
@@ -198,8 +202,8 @@ class RetrievalService:
                         )
                         order_expr = "fts_rank DESC"
                         extra_where = ""
-                        rank_param = query
-                        fts_where_param = query
+                        rank_param = _q
+                        fts_where_param = _q
                     else:
                         rank_expr = "0.0"
                         order_expr = "fts_rank DESC"
@@ -264,9 +268,20 @@ class RetrievalService:
                     cur.execute(sql, params)
                     return cur.fetchall()
 
-            rows = _run_search(query_embedding is not None)
-            if not rows and query and query.strip() and query_embedding is not None:
-                rows = _run_search(False)
+            # Run search for each query variant; merge results deduped by chunk_id.
+            all_rows: list[dict[str, Any]] = []
+            seen_ids: set[int] = set()
+            for _variant in _variants:
+                _variant_embedding = _embed_query(_variant) if _variant != query else query_embedding
+                _variant_rows = _run_search(_variant_embedding is not None, _variant, _variant_embedding)
+                if not _variant_rows and _variant and _variant.strip() and _variant_embedding is not None:
+                    _variant_rows = _run_search(False, _variant, None)
+                for _r in _variant_rows:
+                    _cid = _r["chunk_id"]
+                    if _cid not in seen_ids:
+                        seen_ids.add(_cid)
+                        all_rows.append(_r)
+            rows = all_rows[:top_k]
 
         except Exception:
             conn.close()
