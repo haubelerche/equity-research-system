@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from backend.analytics._entry import entry_value
+from backend.analytics.net_debt_bridge import build_net_debt_bridge
 from backend.analytics.shares import explicit_shares_mn
 from backend.analytics.forecasting import ForecastArtifact, ForecastYear  # noqa: F401
 
@@ -283,8 +284,21 @@ def compute_fcfe(
         pv_tv = 0.0
         warnings.append("Terminal value = 0 due to missing FCFE in final forecast year")
 
-    # FCFE → Equity Value directly (no net debt subtraction)
-    equity_val = sum_pv + pv_tv
+    # FCFE → equity value of the levered operating business (debt is serviced inside
+    # the flows, so we never subtract debt again). But the company's non-operating
+    # liquid assets (cash + short-term investments) belong to equity holders and are
+    # NOT captured in the operating FCFE stream. FCFF credits exactly these via its
+    # EV − net_debt bridge (net_debt = total_debt − cash − STI), so for a consistent
+    # equity value FCFE must add the same cash + STI back. Without it FCFE
+    # systematically understates equity for cash-rich firms and diverges from FCFF
+    # even when WACC == Re (e.g. DHG net cash ≈ 2.2tn VND → ~33% FCFF/FCFE gap).
+    non_operating_cash = 0.0
+    try:
+        _ndb = build_net_debt_bridge(fact_table, latest_fy or "")
+        non_operating_cash = (_ndb.cash or 0.0) + (_ndb.short_term_investments or 0.0)
+    except Exception:  # noqa: BLE001 — cash bridge is additive; never block FCFE on it
+        non_operating_cash = 0.0
+    equity_val = sum_pv + pv_tv + non_operating_cash
 
     target_price: float | None = None
     if _debt_block_reason:

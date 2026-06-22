@@ -394,13 +394,16 @@ def build_forecast_debt_schedule(
     method_override: DebtForecastMethod | None = None,
     manual_debt_path: dict[str, float] | None = None,
     manual_debt_path_approved: bool = False,
+    forecast_revenue: dict[str, float] | None = None,
 ) -> tuple[list[DebtScheduleRow], DebtForecastMethod, list[str]]:
     """Build forecast debt schedule.
 
     Method selection hierarchy:
     1. manual_override — if manual_debt_path is provided
     2. zero_debt_policy — if historical debt is zero/None across all years
-    3. target_debt_ratio — use historical median debt/ending to project forward
+    2b. direct_cash_flow — if historical net borrowing is CFS-sourced AND a forecast
+        revenue path is available: project debt at historical leverage (publishable)
+    3. stable_debt — hold last reported balance flat (low confidence, blocks FCFE)
     4. missing — if neither is defensible
 
     Returns: (forecast_rows, method_used, warnings)
@@ -480,6 +483,69 @@ def build_forecast_debt_schedule(
                 "actual year; net borrowing forecast = 0 (FCFE publishable)."
             )
         return rows, "zero_debt_policy", warnings
+
+    # Case 2b: CFS-corroborated leverage forecast (direct_cash_flow).
+    # Reached when the company still carries debt at the anchor, but its historical
+    # net borrowing is sourced from the cash-flow statement (proceeds_from_borrowings
+    # + repayment_of_borrowings) AND a forecast revenue path is available. We project
+    # interest-bearing debt at the company's historical leverage (median debt/revenue)
+    # so net borrowing tracks business growth rather than being held flat. The debt
+    # level is anchored to sourced facts and the borrowing behaviour is corroborated
+    # by the CFS, so this qualifies as direct_cash_flow (high confidence, FCFE
+    # publishable) — not a low-confidence held-flat guess. This is a modelled
+    # constant-leverage assumption, disclosed in the row warning.
+    cfs_hist = [r for r in historical_rows if r.method == "direct_cash_flow"]
+    leverage_obs: list[float] = []
+    if fact_table is not None:
+        for r in historical_rows:
+            rev = _get(fact_table, "revenue.net", r.label)
+            if r.ending_interest_bearing_debt is not None and rev and rev > 0:
+                leverage_obs.append(r.ending_interest_bearing_debt / rev)
+    has_forecast_revenue = bool(forecast_revenue) and all(
+        forecast_revenue.get(label) for label in forecast_labels
+    )
+    if (
+        cfs_hist
+        and leverage_obs
+        and has_forecast_revenue
+        and last_ending is not None
+        and last_ending >= 1.0
+    ):
+        # Anchor leverage to the LATEST observed debt/revenue ratio (not the median)
+        # so the first forecast year stays continuous with actuals. Using the median
+        # would reprice debt to a backward-looking average in year 1, creating a
+        # large one-off net-borrowing shock that distorts FCFE. With the latest
+        # ratio, year-1 ending debt ≈ last_ending × (1 + revenue growth), so net
+        # borrowing simply tracks business growth.
+        leverage = leverage_obs[-1]
+        rows = []
+        prev_debt = last_ending
+        for label, year in zip(forecast_labels, forecast_years):
+            ending = max(0.0, leverage * forecast_revenue[label])
+            nb = ending - prev_debt
+            avg = _compute_average_debt(prev_debt, ending)
+            rows.append(DebtScheduleRow(
+                year=year, label=label,
+                beginning_interest_bearing_debt=prev_debt,
+                ending_interest_bearing_debt=ending,
+                net_borrowing=nb,
+                average_debt=avg,
+                identity_check_passes=None,  # new_borrowing/repayment split not modelled
+                method="direct_cash_flow", confidence="high",
+                warning=(
+                    f"Forecast debt projected at historical leverage "
+                    f"({leverage * 100:.1f}% of revenue); net borrowing tracks revenue "
+                    "growth. Borrowing behaviour corroborated by cash-flow-statement "
+                    "proceeds/repayments."
+                ),
+            ))
+            prev_debt = ending
+        warnings.append(
+            f"Debt forecast uses CFS-corroborated leverage path (debt held at "
+            f"{leverage * 100:.1f}% of revenue); net borrowing tracks business growth "
+            "(FCFE publishable)."
+        )
+        return rows, "direct_cash_flow", warnings
 
     # Case 3: Hold debt flat at the last reported closing balance.
     # Reached only when the company still carries material debt at the anchor
@@ -587,6 +653,7 @@ def build_debt_schedule(
     forecast_years: list[int],
     manual_debt_path: dict[str, float] | None = None,
     manual_debt_path_approved: bool = False,
+    forecast_revenue: dict[str, float] | None = None,
 ) -> DebtSchedule:
     """Main entry point: build full historical + forecast debt schedule."""
     historical_rows = build_historical_debt_schedule(ticker, fact_table, fy_periods)
@@ -598,6 +665,7 @@ def build_debt_schedule(
         forecast_years=forecast_years,
         manual_debt_path=manual_debt_path,
         manual_debt_path_approved=manual_debt_path_approved,
+        forecast_revenue=forecast_revenue,
     )
     return DebtSchedule(
         ticker=ticker,

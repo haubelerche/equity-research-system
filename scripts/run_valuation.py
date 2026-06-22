@@ -587,11 +587,21 @@ def run_valuation(
     print(f"\n[run_valuation] {ticker} — FCFF valuation (EBIT(1-T)+D&A-CAPEX-DeltaNWC, discounted at WACC)")
     # Wire forecast.tax_policy → WACCAssumptions so FCFF EBIT(1-T) uses the same
     # effective tax rate as the forecast P&L (avoids silent rate mismatch).
+    # Size the cost-of-equity size premium by market cap: large, liquid blue-chips
+    # (e.g. DHG ~12,300 VND bn) must not carry a small-cap premium, which otherwise
+    # over-discounts them well below market/analyst valuations.
+    from backend.analytics.fcff import vn_size_premium
+    _market_cap_vnd_bn = (
+        (_shares_mn * current_price) / 1_000.0
+        if _shares_mn and current_price
+        else None
+    )
     wacc_assumptions = WACCAssumptions(
         assumption_status=assumption_status,
         wacc_override=valuation_input_pack.wacc_assumptions.get("wacc")
         or valuation_input_pack.wacc_assumptions.get("wacc_override"),
         tax_policy=forecast.tax_policy,
+        size_premium=vn_size_premium(_market_cap_vnd_bn),
     )
     fcff_result = compute_fcff(
         ticker=ticker,
@@ -610,10 +620,14 @@ def run_valuation(
 
     # ── FCFE valuation (Net Income+D&A-CAPEX-DeltaNWC+NetBorrowing, discounted at Re) ──
     print(f"\n[run_valuation] {ticker} — FCFE valuation (NI+D&A-CAPEX-DeltaNWC+NetBorr, discounted at Re)")
+    # FCFE's cost of equity must use the same market-cap-scaled size premium as the
+    # FCFF WACC — it is the same company's equity. Otherwise FCFE keeps over-
+    # discounting large caps and diverges from a (correctly de-premiumed) FCFF.
     coe_assumptions = CostOfEquityAssumptions(
         assumption_status=assumption_status,
         re_override=valuation_input_pack.wacc_assumptions.get("cost_of_equity")
         or valuation_input_pack.wacc_assumptions.get("re_override"),
+        size_premium=vn_size_premium(_market_cap_vnd_bn),
     )
     fcfe_result = compute_fcfe(
         ticker=ticker,

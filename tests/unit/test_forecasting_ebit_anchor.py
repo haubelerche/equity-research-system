@@ -15,6 +15,8 @@ from __future__ import annotations
 
 import statistics
 
+import pytest
+
 from backend.analytics.forecasting import run_forecast
 from backend.facts.normalizer import FactTable
 
@@ -49,6 +51,45 @@ def _dht_like_missing_sga() -> FactTable:
             "2022FY": -24.6, "2023FY": -22.1, "2024FY": -19.0, "2025FY": -14.7,
         },
         # sga.total intentionally omitted — the source facts lack it.
+    }
+
+
+def _dhg_like_partial_sga_with_operating_profit() -> FactTable:
+    """DHG-like shape where sga.total carries selling expense only.
+
+    The operating-profit bridge provides a cleaner pure EBIT anchor:
+    pure EBIT = operating_profit - financial_income - financial_expense.
+    """
+    return {
+        "revenue.net": {
+            "2023FY": 1000.0, "2024FY": 1100.0, "2025FY": 1210.0,
+        },
+        "gross_profit.total": {
+            "2023FY": 500.0, "2024FY": 550.0, "2025FY": 605.0,
+        },
+        # Partial SG&A: selling expense only. If consumed directly, forecast EBIT
+        # margin would be 40%, materially above the pure operating margin below.
+        "sga.total": {
+            "2023FY": -100.0, "2024FY": -110.0, "2025FY": -121.0,
+        },
+        "operating_profit.total": {
+            "2023FY": 265.0, "2024FY": 291.5, "2025FY": 320.65,
+        },
+        "financial_income.total": {
+            "2023FY": 20.0, "2024FY": 22.0, "2025FY": 24.2,
+        },
+        "financial_expense.total": {
+            "2023FY": -5.0, "2024FY": -5.5, "2025FY": -6.05,
+        },
+        "interest_expense.total": {
+            "2023FY": -2.0, "2024FY": -2.2, "2025FY": -2.42,
+        },
+        "profit_before_tax.total": {
+            "2023FY": 260.0, "2024FY": 286.0, "2025FY": 314.6,
+        },
+        "tax_expense.total": {
+            "2023FY": -52.0, "2024FY": -57.2, "2025FY": -62.92,
+        },
     }
 
 
@@ -90,4 +131,28 @@ class TestEbitAnchoredToHistoryWhenSgaMissing:
         assert sga_ratio != 0.20, "SG&A should not fall back to the 20% default"
         assert sga_ratio < 0.10, (
             f"SG&A ratio should be small for a ~10% gross-margin distributor, got {sga_ratio}"
+        )
+
+
+class TestPartialSgaAnchoredToOperatingProfitBridge:
+    def test_partial_sga_is_backsolved_from_pure_operating_ebit(self):
+        table = _dhg_like_partial_sga_with_operating_profit()
+        artifact = run_forecast("DHG", table, n_years=2)
+
+        assert artifact.drivers["sga_to_revenue"]["method"] == (
+            "backsolved_from_pure_operating_ebit_margin"
+        )
+        assert artifact.drivers["sga_to_revenue"]["value"] == pytest.approx(0.25)
+
+        for fy in artifact.forecast_years:
+            assert fy.ebit_margin == pytest.approx(0.25)
+
+    def test_other_items_uses_same_pure_operating_ebit_basis(self):
+        table = _dhg_like_partial_sga_with_operating_profit()
+        artifact = run_forecast("DHG", table, n_years=1)
+        fy = artifact.forecast_years[0]
+
+        assert fy.other_items is not None
+        assert fy.profit_before_tax == pytest.approx(
+            (fy.ebit or 0.0) + (fy.interest_expense or 0.0) + fy.other_items
         )

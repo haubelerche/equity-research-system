@@ -350,26 +350,91 @@ def run_forecast(
         warnings.append("No gross margin history — using default 40%")
 
     sga_ratios = []
+    split_sga_ratios = []
+    pure_operating_ebit_by_period: dict[str, float] = {}
+    pure_operating_ebit_ratios: list[float] = []
     for p in fy_periods:
-        sga = _get(fact_table, "sga.total", p)
         rev = _get(fact_table, "revenue.net", p)
-        if sga is not None and rev and rev > 0:
+        if not rev or rev <= 0:
+            continue
+        selling = _get(fact_table, "selling_expense.total", p)
+        admin = _get(fact_table, "admin_expense.total", p)
+        if selling is not None and admin is not None:
+            split_sga = selling + admin
+            split_sga_ratios.append(abs(split_sga) / rev)
+
+        sga = _get(fact_table, "sga.total", p)
+        if sga is not None:
             sga_ratios.append(abs(sga) / rev)
+
+        # VAS operating_profit.total includes financial income/expense. Strip
+        # those lines to recover a cleaner operating EBIT anchor when the stored
+        # sga.total line is incomplete (DHG raw cache maps selling expense only).
+        operating_profit = _get(fact_table, "operating_profit.total", p)
+        financial_income = _get(fact_table, "financial_income.total", p)
+        financial_expense = _get(fact_table, "financial_expense.total", p)
+        if (
+            operating_profit is not None
+            and financial_income is not None
+            and financial_expense is not None
+        ):
+            pure_ebit = operating_profit - financial_income - financial_expense
+            pure_operating_ebit_by_period[p] = pure_ebit
+            pure_operating_ebit_ratios.append(pure_ebit / rev)
+        else:
+            # Fallback when operating_profit.total is absent (~half the universe):
+            # strip financial items from PBT to recover an operating-earnings anchor.
+            # PBT − fin_income − fin_expense ≈ operating profit + small net other —
+            # still far more accurate than gross_profit + an incomplete sga.total,
+            # which overstates EBIT and pushes FCFF well above FCFE. The financial
+            # income remains represented by the equity cash bridge, not capitalised
+            # again here (other_items stays 0 for these periods).
+            pbt_f = _get(fact_table, "profit_before_tax.total", p)
+            if (
+                pbt_f is not None
+                and financial_income is not None
+                and financial_expense is not None
+            ):
+                pure_ebit = pbt_f - financial_income - financial_expense
+                pure_operating_ebit_by_period[p] = pure_ebit
+                pure_operating_ebit_ratios.append(pure_ebit / rev)
+
     # Historical EBIT margin (ground truth) — the anchor for SG&A when the
     # sga.total line item is unavailable. The old 20%-of-revenue default drove
     # EBIT negative for low-gross-margin companies (e.g. pharma distributors),
     # flipping historically profitable firms into forecast losses and a
     # negative DCF equity value. Anchoring to actual EBIT prevents that.
+    pure_ebit_margin_hist = (
+        statistics.median(pure_operating_ebit_ratios)
+        if pure_operating_ebit_ratios else None
+    )
     ebit_margin_hist = (
-        _median_ratio("ebit.total", "revenue.net", fact_table, fy_periods)
-        or _median_ratio("operating_profit.total", "revenue.net", fact_table, fy_periods)
+        pure_ebit_margin_hist
+        if pure_ebit_margin_hist is not None
+        else (
+            _median_ratio("ebit.total", "revenue.net", fact_table, fy_periods)
+            or _median_ratio("operating_profit.total", "revenue.net", fact_table, fy_periods)
+        )
     )
     if assumptions.sga_to_revenue_override is not None:
         sga_to_rev = assumptions.sga_to_revenue_override
         sga_method = "manual_override"
+    elif split_sga_ratios:
+        sga_to_rev = statistics.median(split_sga_ratios)
+        sga_method = "split_selling_admin_historical_median"
     elif sga_ratios:
         sga_to_rev = statistics.median(sga_ratios)
         sga_method = "historical_median"
+        if pure_ebit_margin_hist is not None:
+            implied_margin = gross_margin - sga_to_rev
+            if abs(implied_margin - pure_ebit_margin_hist) > 0.02:
+                sga_to_rev = max(gross_margin - pure_ebit_margin_hist, 0.0)
+                sga_method = "backsolved_from_pure_operating_ebit_margin"
+                warnings.append(
+                    "SG&A historical median did not reconcile to operating EBIT; "
+                    f"using pure operating EBIT margin ({pure_ebit_margin_hist * 100:.1f}%) "
+                    "back-solved from operating_profit minus financial income/expense."
+                )
     elif ebit_margin_hist is not None:
         # Back-solve SG&A from the gross-profit-to-EBIT bridge so the forecast
         # EBIT margin equals the historically observed EBIT margin.
@@ -442,12 +507,26 @@ def run_forecast(
     other_items_ratios: list[float] = []
     for p in fy_periods:
         pbt_h = _get(fact_table, "profit_before_tax.total", p)
-        gp_h  = _get(fact_table, "gross_profit.total", p)
-        sga_h = _get(fact_table, "sga.total", p)
         ie_h  = _get(fact_table, "interest_expense.total", p)
         rev_h = _get(fact_table, "revenue.net", p)
-        if all(v is not None for v in [pbt_h, gp_h, sga_h, ie_h, rev_h]) and rev_h > 0:
-            ebit_model = gp_h + sga_h
+        if pbt_h is None or rev_h is None or rev_h <= 0:
+            continue
+        if pure_operating_ebit_by_period:
+            operating_profit_h = _get(fact_table, "operating_profit.total", p)
+            if operating_profit_h is not None:
+                # When cash/STI is added through the equity bridge, do not also
+                # capitalize the financial income embedded in VAS operating profit.
+                # Retain only the residual below operating profit (other income/expense).
+                other_items_ratios.append((pbt_h - operating_profit_h) / rev_h)
+            continue
+
+        ebit_model = None
+        if not pure_operating_ebit_by_period:
+            gp_h  = _get(fact_table, "gross_profit.total", p)
+            sga_h = _get(fact_table, "sga.total", p)
+            if gp_h is not None and sga_h is not None:
+                ebit_model = gp_h + sga_h
+        if all(v is not None for v in [ebit_model, ie_h]):
             gap = pbt_h - (ebit_model + ie_h)
             other_items_ratios.append(gap / rev_h)
 
@@ -542,6 +621,17 @@ def run_forecast(
                 "facts or latest debt balance are missing; FCFE remains draft-only."
             )
 
+    # Forecast revenue path (last actual compounded at the forecast growth rate).
+    # Lets the debt schedule project interest-bearing debt at the company's historical
+    # leverage so net borrowing tracks business growth (CFS-corroborated FCFE path).
+    _last_actual_rev = next((v for v in reversed(rev_vals) if v is not None), None)
+    forecast_revenue: dict[str, float] | None = None
+    if _last_actual_rev is not None:
+        forecast_revenue = {
+            label: _last_actual_rev * ((1.0 + rev_growth) ** (i + 1))
+            for i, label in enumerate(forecast_labels_order)
+        }
+
     debt_sched = build_debt_schedule(
         ticker=ticker,
         fact_table=fact_table,
@@ -550,6 +640,7 @@ def run_forecast(
         forecast_years=forecast_years,
         manual_debt_path=manual_debt_path,
         manual_debt_path_approved=manual_debt_path_approved,
+        forecast_revenue=forecast_revenue,
     )
     # NOTE: An approval flag alone must NOT upgrade a model-generated debt path
     # (e.g. target_debt_ratio) into an "approved manual_override". Approval is only

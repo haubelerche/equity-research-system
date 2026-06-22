@@ -20,6 +20,30 @@ from backend.analytics.tax_policy import TaxPolicy
 
 from backend.facts.normalizer import FactTable
 
+# Market-cap thresholds (VND bn) for the size premium. A size premium compensates
+# small-cap risk (Fama-French SMB); large, liquid blue-chips should not carry one.
+_LARGE_CAP_VND_BN = 10_000.0   # >= this → large cap, no size premium
+_MID_CAP_VND_BN = 1_000.0      # >= this (and < large) → mid cap, modest premium
+_SIZE_PREMIUM_LARGE = 0.0
+_SIZE_PREMIUM_MID = 0.01
+_SIZE_PREMIUM_SMALL = 0.02
+
+
+def vn_size_premium(market_cap_vnd_bn: float | None) -> float:
+    """Return the cost-of-equity size premium for a given market cap (VND bn).
+
+    Large caps (>= 10,000 bn) carry none; mid caps a modest 1%; small caps the
+    full 2%. When market cap is unknown, fall back to the conservative small-cap
+    default rather than zeroing it out.
+    """
+    if market_cap_vnd_bn is None:
+        return _SIZE_PREMIUM_SMALL
+    if market_cap_vnd_bn >= _LARGE_CAP_VND_BN:
+        return _SIZE_PREMIUM_LARGE
+    if market_cap_vnd_bn >= _MID_CAP_VND_BN:
+        return _SIZE_PREMIUM_MID
+    return _SIZE_PREMIUM_SMALL
+
 
 @dataclass
 class WACCAssumptions:
