@@ -693,6 +693,10 @@ def _write_runtime_artifacts(ticker: str, rows: list[dict[str, str]], valuation:
         "ticker": ticker,
         "run_id": run_id,
         "trace_url": f"local://storage/runs/{run_id}/run_log.json",
+        # Marks this as a valuation-only deterministic benchmark fixture, not a
+        # real 6-agent run. evaluate_agent reads this to report agent-workflow
+        # compliance metrics as not_applicable instead of a phantom 100%.
+        "trace_provenance": "synthetic_deterministic_benchmark",
         "agent_execution": [
             {"agent_id": "data_reliability", "status": "completed", "latency_ms": 200, "output": "Loaded accepted canonical facts with provenance."},
             {"agent_id": "valuation_engine", "status": "completed", "latency_ms": 300, "output": "Produced valuation artifact through deterministic engine trace."},

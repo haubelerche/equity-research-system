@@ -3713,6 +3713,42 @@ def evaluate_citation(root: Path, ticker: str) -> dict[str, Any]:
     }
 
 
+# Deterministic agent-workflow metrics that are only meaningful against a REAL
+# multi-agent run trace. When the only trace available is the synthetic
+# deterministic-benchmark fixture (a valuation-only artifact hand-built to pass),
+# these would be 100% by construction — a phantom signal. We mark them
+# ``not_applicable`` so the dashboard reports "no real agent run to measure"
+# instead of a fabricated perfect score. (The LLM-judge dims are already
+# not_evaluable/not_applicable; this only covers the deterministic gates.)
+_SYNTHETIC_AGENT_NA_METRIC_IDS = frozenset({
+    "agent.workflow_quality_score",
+    "tool_permission_compliance",
+    "artifact_manifest_compliance",
+    "agent.stage_handoff_completeness",
+    "agent.tool_call_success_rate",
+    "agent.repair_loop_rate",
+    "agent.token_budget_adherence",
+    "schema_validity",
+    "no_unauthorized_calc",
+    "task_completion",
+})
+
+
+def _is_synthetic_benchmark_trace(audit: dict[str, Any], packet: dict[str, Any]) -> bool:
+    """True when the agent trace is the synthetic deterministic-benchmark fixture.
+
+    Detected via an explicit ``trace_provenance`` marker on the audit, or the
+    valuation-only fixture's ``deterministic_benchmark_artifacts`` quality-gate
+    key on the evidence packet (which a real pipeline run never emits).
+    """
+    if isinstance(audit, dict) and str(audit.get("trace_provenance") or "").strip() == "synthetic_deterministic_benchmark":
+        return True
+    quality_gates = packet.get("quality_gate_results") if isinstance(packet, dict) else None
+    if isinstance(quality_gates, dict) and "deterministic_benchmark_artifacts" in quality_gates:
+        return True
+    return False
+
+
 def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
     audit_path = _latest_scoped_json_artifact_for_ticker(
         archive_root=root / "storage" / "archive",
@@ -4170,6 +4206,27 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
                              "denominator": len(rationale_samples), "aggregation": "coverage",
                              "per_sample_results": rationale_samples}),
     ]
+    synthetic_trace = _is_synthetic_benchmark_trace(audit, packet)
+    if synthetic_trace:
+        # The benchmark cohort ships valuation-only deterministic fixtures, not
+        # real 6-agent runs. Scoring them would pin every compliance gate at
+        # 100% by construction. Report them honestly as not_applicable.
+        for item in metrics:
+            if item.get("id") in _SYNTHETIC_AGENT_NA_METRIC_IDS:
+                item["status"] = "not_applicable"
+                item["legacy_status"] = "not_applicable"
+                item["value"] = None
+                item["detail"] = "synthetic_benchmark_fixture_no_real_agent_run"
+                evaluator_meta = dict(item.get("evaluator") or {})
+                evaluator_meta["execution_status"] = "not_executed"
+                item["evaluator"] = evaluator_meta
+        tool_compliance = None
+        manifest_compliance = None
+        schema_validity = None
+        unauthorized_calc_score = None
+        task_completion = None
+        workflow_quality_score = None
+
     # Per evaluation plan §5.5 the LLM-judge criteria (role adherence,
     # groundedness, no-unauthorized-calc, plan adherence, critic recall) are
     # ADVISORY and must not override the deterministic gates. The judge is

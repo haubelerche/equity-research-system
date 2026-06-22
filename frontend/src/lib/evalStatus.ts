@@ -1,5 +1,5 @@
 export type Comparator = "gte" | "lte";
-export type MetricStatus = "pass" | "fail" | "warning" | "not_evaluable" | "blocked" | "not_measured";
+export type MetricStatus = "pass" | "fail" | "warning" | "not_evaluable" | "blocked" | "not_measured" | "not_applicable";
 
 export interface MetricDef {
   id: string;
@@ -163,7 +163,7 @@ export function resolveMetricStatus(
   fallbackValue?: number | null | undefined,
 ): MetricStatus {
   const runtimeStatus = result?.status ? normalizeMetricStatus(String(result.status)) : null;
-  if (runtimeStatus && ["blocked", "not_evaluable", "not_measured"].includes(runtimeStatus)) {
+  if (runtimeStatus && ["blocked", "not_evaluable", "not_measured", "not_applicable"].includes(runtimeStatus)) {
     return runtimeStatus;
   }
   const rawValue = result && Object.prototype.hasOwnProperty.call(result, "value")
@@ -300,6 +300,9 @@ export function formatRuntimeMetricResult(
   const numerator = result?.calculation?.numerator;
   const denominator = result?.calculation?.denominator;
 
+  if (normalizeMetricStatus(result?.status) === "not_applicable") {
+    return "Không áp dụng";
+  }
   if (value === null || value === undefined || value === "") {
     const reason = missingMetricReason(result);
     return reason ? `Thiếu dữ liệu: ${reason}` : "Thiếu dữ liệu";
@@ -372,6 +375,7 @@ export function normalizeMetricStatus(status: string | null | undefined): Metric
   if (normalized === "blocked") return "blocked";
   if (normalized === "not_measured") return "not_measured";
   if (normalized === "not_evaluable") return "not_evaluable";
+  if (normalized === "not_applicable" || normalized === "n/a" || normalized === "na") return "not_applicable";
   return "fail";
 }
 
