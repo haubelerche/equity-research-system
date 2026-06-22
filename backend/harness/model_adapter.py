@@ -86,6 +86,36 @@ def score_relevance(query: str, chunk_text: str) -> float:
         return 0.0
 
 
+def score_relevance_batch(query: str, chunk_texts: list[str]) -> list[float]:
+    """Score relevance of each chunk to the query in ONE LLM call (0..1 per chunk, in order)."""
+    n = len(chunk_texts)
+    if n == 0:
+        return []
+    numbered = "\n\n".join(f"[{i}] {str(t)[:800]}" for i, t in enumerate(chunk_texts))
+    prompt = (
+        "Cho CÂU HỎI và danh sách ĐOẠN BẰNG CHỨNG đánh số. Với MỖI đoạn, chấm mức độ liên quan "
+        "0..1 (1 = chứa trực tiếp câu trả lời, 0 = không liên quan). Trả về DUY NHẤT một mảng JSON "
+        "các số theo đúng thứ tự và đúng số lượng, vd [0.9,0.1,0.5]. Không giải thích.\n\n"
+        f"CÂU HỎI: {query}\n\n{numbered}\n\nMảng JSON:"
+    )
+    try:
+        client, _ = _resolve_openai_client(60)
+        response = client.chat.completions.create(
+            model=CHEAP_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            max_completion_tokens=max(64, n * 6),
+        )
+        raw = (response.choices[0].message.content or "").strip()
+        import json
+        import re
+        match = re.search(r"\[.*\]", raw, re.S)
+        values = json.loads(match.group()) if match else []
+        out = [max(0.0, min(1.0, float(v))) for v in values][:n]
+        return out + [0.0] * (n - len(out))
+    except Exception:
+        return [0.0] * n
+
+
 def _langfuse_configured() -> bool:
     """True when both Langfuse keys are present — enables the tracing drop-in."""
     return bool(os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY"))
