@@ -164,6 +164,14 @@ METRIC_METADATA: dict[str, MetricMeta] = {
     "gross_profit.total": _m(SemanticType.MONETARY),
     "selling_expense.total": _m(SemanticType.MONETARY),
     "admin_expense.total": _m(SemanticType.MONETARY),
+    # Aggregated selling + general & admin expense. This is the canonical key
+    # vnstock/production_facts emit for most issuers (the separate selling_expense
+    # / admin_expense lines are rarely broken out). Without registering it,
+    # validate_and_normalize rejected it as "unknown metric" and build_fact_table
+    # dropped it → EBIT (= gross_profit + sga) could not be derived → forecasting
+    # used a 20%-of-revenue SG&A default that drove forecast EBIT negative for
+    # thin-margin distributors, flipping profitable firms to negative DCF equity.
+    "sga.total": _m(SemanticType.MONETARY),
     "operating_expense.total": _m(SemanticType.MONETARY),
     "operating_profit.total": _m(SemanticType.MONETARY),
     "ebit.total": _m(SemanticType.MONETARY),

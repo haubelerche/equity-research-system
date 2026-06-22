@@ -653,10 +653,10 @@ def _section_fcff(fcff: Mapping[str, Any]) -> str:
         ("− Nợ ròng", _num(_first(fcff, "net_debt"))),
         ("= Giá trị vốn chủ sở hữu", _num(_first(fcff, "equity_value"))),
         ("÷ Số cổ phiếu (triệu)", _num(_first(fcff, "shares_outstanding", "shares_mn"))),
-        ("= Giá/cổ phiếu (FCFF, VND)", _num(_first(fcff, "implied_price"))),
+        ("= Giá/cổ phiếu (FCFF, VND)", _num(_first(fcff, "implied_price", "target_price_vnd"))),
     ])
     note = ""
-    if _first(fcff, "implied_price") is None:
+    if _first(fcff, "implied_price", "target_price_vnd") is None:
         equity = _first(fcff, "equity_value")
         if _non_positive(equity):
             note = (
@@ -676,10 +676,10 @@ def _section_fcfe(fcfe: Mapping[str, Any]) -> str:
         ("Tăng trưởng dài hạn (g)", _pct(_first(fcfe, "terminal_growth"))),
         ("Giá trị vốn chủ sở hữu", _num(_first(fcfe, "equity_value"))),
         ("÷ Số cổ phiếu (triệu)", _num(_first(fcfe, "shares_outstanding", "shares_mn"))),
-        ("= Giá/cổ phiếu (FCFE, VND)", _num(_first(fcfe, "implied_price"))),
+        ("= Giá/cổ phiếu (FCFE, VND)", _num(_first(fcfe, "implied_price", "target_price_vnd"))),
     ])
     note = ""
-    if _first(fcfe, "implied_price") is None:
+    if _first(fcfe, "implied_price", "target_price_vnd") is None:
         equity = _first(fcfe, "equity_value")
         if _non_positive(equity):
             note = (
@@ -875,7 +875,7 @@ def _section_crosschecks(
     include_evidence: bool = True,
 ) -> str:
     lines = ["**Đối chiếu nhất quán số:**", ""]
-    implied = _first(fcff, "implied_price")
+    implied = _first(fcff, "implied_price", "target_price_vnd")
     price_fcff = _first(blend, "price_fcff_vnd")
     if implied is not None and price_fcff is not None:
         match = abs(float(implied) - float(price_fcff)) <= max(1.0, 0.01 * abs(float(price_fcff)))
@@ -1042,8 +1042,8 @@ def _section_report_decision_basis(
         ("Giá mục tiêu tính được", _num(target)),
         ("Tăng/giảm so với giá thị trường", _pct(upside)),
         ("Khuyến nghị trong báo cáo chính", str(recommendation)),
-        ("Giá trị theo FCFF", _num(_first(blend, "price_fcff_vnd") or _first(fcff, "implied_price"))),
-        ("Giá trị theo FCFE", _num(_first(blend, "price_fcfe_vnd") or _first(fcfe, "implied_price"))),
+        ("Giá trị theo FCFF", _num(_first(blend, "price_fcff_vnd") or _first(fcff, "implied_price", "target_price_vnd"))),
+        ("Giá trị theo FCFE", _num(_first(blend, "price_fcfe_vnd") or _first(fcfe, "implied_price", "target_price_vnd"))),
         ("Trọng số FCFF / FCFE", f"{_pct(_first(blend, 'fcff_weight') or 0.6)} / {_pct(_first(blend, 'fcfe_weight') or 0.4)}"),
         ("Độ lệch FCFF/FCFE", _pct(_first(blend, "fcff_fcfe_gap_pct"))),
         ("WACC", _pct(_first(fcff, "wacc") or assumptions.get("wacc"))),

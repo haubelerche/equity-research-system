@@ -85,6 +85,19 @@ class TestRegistry:
         assert "short_term_debt.ending" in METRIC_METADATA
         assert "total_liabilities.total" not in METRIC_METADATA  # old buggy key is gone
 
+    def test_sga_total_is_accepted_not_rejected(self):
+        """Regression: ``sga.total`` (aggregated selling+admin) is the canonical key
+        emitted by vnstock/production_facts for most issuers. If unregistered,
+        validate_and_normalize rejects it as 'unknown metric' and build_fact_table
+        drops it → EBIT cannot be derived (ebit = gross_profit + sga) → forecasting
+        falls back to a 20%-of-revenue SG&A default → negative forecast EBIT →
+        negative DCF equity → no target price for profitable distributors."""
+        assert "sga.total" in METRIC_METADATA
+        # SG&A is stored with the accounting (negative) sign; both signs must pass.
+        for value in (-121.8, 121.8):
+            r = validate_and_normalize("sga.total", value, "vnd_bn")
+            assert r.status == "ok", f"sga.total {value} rejected: {r.reason}"
+
     def test_get_semantic_type(self):
         assert get_semantic_type("revenue.net") is SemanticType.MONETARY
         assert get_semantic_type("eps.basic") is SemanticType.PER_SHARE

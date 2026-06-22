@@ -308,6 +308,30 @@ def test_fcfe_blank_price_reason_matches_negative_equity():
     assert "thiếu dữ liệu vay ròng hoặc số cổ phiếu" not in md
 
 
+def test_fcff_fcfe_price_read_from_engine_target_price_vnd_schema():
+    """The live engine emits `target_price_vnd`, never `implied_price`.
+
+    The workings renderer must read that key, otherwise every real report shows
+    blank FCFF/FCFE per-share prices and the consistency block falsely reports
+    "thiếu dữ liệu để đối chiếu" even when both DCF prices are present.
+    """
+    val = _sample_valuation()
+    # Mimic the live FCFFResult/FCFEResult schema: no implied_price key at all.
+    val["fcff_dcf"].pop("implied_price", None)
+    val["fcff_dcf"]["target_price_vnd"] = 88294.0
+    val["fcfe_dcf"].pop("implied_price", None)
+    val["fcfe_dcf"]["target_price_vnd"] = 91000.0
+
+    md = _build(valuation=val)
+
+    # FCFF per-share price surfaces from target_price_vnd.
+    assert "88,294" in md
+    # FCFE per-share price surfaces too.
+    assert "91,000" in md
+    # Consistency block recognises the FCFF price instead of bailing out.
+    assert "thiếu dữ liệu để đối chiếu" not in md
+
+
 def test_blend_explains_missing_when_component_price_absent():
     val = _sample_valuation()
     val["blend"]["price_fcff_vnd"] = None
