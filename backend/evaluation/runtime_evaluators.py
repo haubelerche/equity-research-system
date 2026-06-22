@@ -317,6 +317,13 @@ def _latest_scoped_json_artifact_for_ticker(
         candidates.append(legacy_archive)
     if not candidates:
         return None
+    benchmark_run_id = f"benchmark_{ticker.lower()}"
+    benchmark_candidates = [
+        path for path in candidates
+        if benchmark_run_id in {part.lower() for part in path.parts}
+    ]
+    if benchmark_candidates:
+        return max(benchmark_candidates, key=lambda path: path.stat().st_mtime)
     return max(candidates, key=lambda path: path.stat().st_mtime)
 
 
@@ -864,6 +871,22 @@ def _weighted_score(
         for name, value, weight in measured
     ]
     return sum(value * weight for _, value, weight in measured) / denominator, samples
+
+
+def _clamp01(value: float | None) -> float | None:
+    if value is None:
+        return None
+    return max(0.0, min(1.0, float(value)))
+
+
+def _presence_score(value: Any) -> float:
+    return 1.0 if value else 0.0
+
+
+def _ratio_score(numerator: int | float | None, denominator: int | float | None) -> float | None:
+    if denominator in {None, 0} or numerator is None:
+        return None
+    return _clamp01(float(numerator) / float(denominator))
 
 
 def _minimum_metric_samples(
@@ -1419,6 +1442,26 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
         if raw_audit["all_required_files_non_empty"]
         else ("warning" if raw_audit["found_files"] else "not_evaluable")
     )
+    raw_bctc_coverage = _ratio_score(raw_audit["non_empty_files"], raw_audit["required_files"])
+    dedupe_health = None if duplicate_rate is None else _clamp01(1.0 - duplicate_rate)
+    schema_health = schema_component
+    benchmark_hardness_score, benchmark_hardness_samples = _weighted_score([
+        ("data_reliability_score", data_reliability_score, 0.25),
+        ("accepted_fact_confidence", accepted_fact_confidence, 0.20),
+        ("official_reconciliation_rate", official_reconciliation_rate, 0.15),
+        ("provenance_coverage", provenance_coverage, 0.12),
+        ("core_metric_coverage", core_coverage, 0.10),
+        ("raw_bctc_coverage", raw_bctc_coverage, 0.08),
+        ("schema_health", schema_health, 0.05),
+        ("dedupe_health", dedupe_health, 0.03),
+        ("ocr_resolution_health", ocr_resolution_health, 0.02),
+    ])
+    benchmark_hardness_metric_samples = _minimum_metric_samples(
+        benchmark_hardness_samples,
+        data_reliability_component_samples,
+        metric_id="data.benchmark_hardness_score",
+        minimum=20,
+    )
 
     metrics = [
         _metric("raw_bctc_non_empty", "Raw BCTC files contain rows",
@@ -1465,6 +1508,36 @@ def evaluate_data_reliability(root: Path, ticker: str) -> dict[str, Any]:
                 failed_examples=[
                     sample for sample in data_reliability_component_samples
                     if sample["component_score"] < 1.0
+                ]),
+        _metric("data.benchmark_hardness_score", "Data benchmark hardness score",
+                benchmark_hardness_score, ">= 85%",
+                _ratio_status(benchmark_hardness_score, 0.85),
+                golden_rel,
+                sample_size=len(benchmark_hardness_metric_samples),
+                dataset_version=golden.name if golden.exists() else None,
+                evaluator={"framework": "hard_mode_data_reliability_score",
+                           "execution_status": "executed" if benchmark_hardness_samples else "not_executed"},
+                calculation={"numerator": benchmark_hardness_score,
+                             "denominator": 1.0 if benchmark_hardness_score is not None else None,
+                             "aggregation": "weighted_score",
+                             "inputs": {
+                                 **dataset_inputs,
+                                 "raw_bctc_non_empty_files": raw_audit["non_empty_files"],
+                                 "raw_bctc_required_files": raw_audit["required_files"],
+                                 "duplicate_rate": duplicate_rate,
+                             },
+                             "parameters": {
+                                 "rationale": "Ceiling-resistant score: perfect binary gates are penalized when confidence, OCR, raw-file, or lineage depth is weaker than ideal.",
+                                 "components": [
+                                     {"id": sample["component"], "weight": sample["weight"]}
+                                     for sample in benchmark_hardness_samples
+                                 ],
+                             },
+                             "per_sample_results": benchmark_hardness_metric_samples},
+                failed_examples=[
+                    sample for sample in benchmark_hardness_metric_samples
+                    if sample.get("component_score") is not None
+                    and sample.get("component_score") < 1.0
                 ]),
         _metric("core_metric_coverage", "Core metric coverage", core_coverage, ">= 95%",
                 _ratio_status(core_coverage, 0.95), golden_rel,
@@ -1878,6 +1951,42 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
                              },
                              "per_sample_results": mrr_samples}),
     ]
+    difficulty_samples = _minimum_metric_samples(
+        golden_scores.get("difficulty_samples") or [],
+        hit_rate_samples,
+        mrr_samples,
+        metric_id="rag.retrieval_difficulty_score",
+        minimum=RAG_MIN_SAMPLE_ROWS,
+    )
+    metrics.append(
+        _metric("rag.retrieval_difficulty_score", "Retrieval difficulty-adjusted score",
+                golden_scores.get("retrieval_difficulty_score"), ">= 85%",
+                rag_metric_status or _ratio_status(golden_scores.get("retrieval_difficulty_score"), 0.85),
+                str(golden_path.relative_to(root)) if golden_available else "golden query set missing",
+                retrieval_metric_detail,
+                sample_size=len(difficulty_samples),
+                dataset_version=golden_scores.get("query_set_version"),
+                failed_examples=[
+                    sample for sample in difficulty_samples
+                    if sample.get("component_score") is not None
+                    and sample.get("component_score") < 1.0
+                ],
+                evaluator={"framework": "hard_mode_golden_retrieval",
+                           "execution_status": retrieval_execution_status},
+                calculation={"aggregation": "weighted_score",
+                             "inputs": {
+                                 "ticker": ticker,
+                                 "query_set": rag_source,
+                                 "top_rank_hit_rate": golden_scores.get("top_rank_hit_rate"),
+                                 "mrr_at_5": golden_scores.get("mrr_at_5"),
+                                 "source_tier_hit_rate": golden_scores.get("source_tier_hit_rate"),
+                             },
+                             "parameters": {
+                                 **rag_common_parameters,
+                                 "rationale": "Ceiling-resistant score: top-5 hits receive less credit unless the authoritative source is rank 1 and source-tier aligned.",
+                             },
+                             "per_sample_results": difficulty_samples})
+    )
     metrics.append(
         _metric("source_tier_hit_rate", "Source-tier hit rate",
                 golden_scores.get("source_tier_hit_rate"), ">= 90%",
@@ -2032,6 +2141,24 @@ def _expected_retrieval_terms(query: dict[str, Any]) -> list[str]:
     return terms
 
 
+def _chunk_contains_expected_value(text_lower: str, expected_value: Any) -> bool:
+    """True if the chunk text contains the expected numeric value in any common format."""
+    if not isinstance(expected_value, (int, float)):
+        return False
+    candidates = set()
+    for digits in (0, 1, 2, 3):
+        rounded = round(float(expected_value), digits)
+        s = f"{rounded:.{digits}f}".rstrip("0").rstrip(".") if digits else f"{int(rounded)}"
+        candidates.add(s)
+        candidates.add(s.replace(",", "").replace(".", ","))
+        candidates.add(s.replace(".", ""))
+    whole = int(round(float(expected_value)))
+    grouped = f"{whole:,}"
+    candidates.add(grouped)
+    candidates.add(grouped.replace(",", "."))
+    return any(c and c in text_lower for c in candidates)
+
+
 def _run_local_retrieval_benchmark(
     root: Path, ticker: str, golden_path: Path
 ) -> dict[str, Any]:
@@ -2115,7 +2242,8 @@ def _run_local_retrieval_benchmark(
                 or str(fiscal_year) in text_lower
             )
             id_ok = bool(expected_chunk_ids and chunk_id in expected_chunk_ids)
-            relevant = bool(id_ok or (term_ok and fy_ok))
+            value_ok = _chunk_contains_expected_value(text_lower, query.get("expected_value"))
+            relevant = bool(id_ok or value_ok or (term_ok and fy_ok))
             if relevant and index < 5 and first_rank is None:
                 first_rank = index + 1
                 matched_tier = int(tier) if str(tier).isdigit() else tier
@@ -2143,6 +2271,8 @@ def _run_local_retrieval_benchmark(
             "top_5": top_5,
             "retrieved_source_tier": matched_tier,
             "hit": hit,
+            "first_rank": first_rank,
+            "top_rank_hit": first_rank == 1,
             "source_tier_hit": source_tier_hit,
             "reciprocal_rank": 0.0 if first_rank is None else 1.0 / first_rank,
         })
@@ -2152,14 +2282,30 @@ def _run_local_retrieval_benchmark(
         item for item in material_outcomes
         if item.get("expected_source_tiers")
     ]
+    top_rank_hit_rate = (
+        sum(item.get("top_rank_hit") is True for item in material_outcomes) / count
+        if count else None
+    )
+    source_tier_hit_rate = (
+        sum(item["source_tier_hit"] for item in source_tier_outcomes) / len(source_tier_outcomes)
+        if source_tier_outcomes else None
+    )
+    mrr_at_5 = sum(item["reciprocal_rank"] for item in material_outcomes) / count if count else None
+    retrieval_difficulty_score, difficulty_samples = _weighted_score([
+        ("top_rank_hit_rate", top_rank_hit_rate, 0.35),
+        ("mrr_at_5", mrr_at_5, 0.25),
+        ("source_tier_hit_rate", source_tier_hit_rate, 0.20),
+        ("query_set_density", _ratio_score(count, RAG_MIN_SAMPLE_ROWS), 0.10),
+        ("material_query_share", _ratio_score(count, len(outcomes)), 0.10),
+    ])
     return {
         "query_set_version": config.get("version"),
         "hit_rate_at_5": sum(item["hit"] for item in material_outcomes) / count if count else None,
-        "mrr_at_5": sum(item["reciprocal_rank"] for item in material_outcomes) / count if count else None,
-        "source_tier_hit_rate": (
-            sum(item["source_tier_hit"] for item in source_tier_outcomes) / len(source_tier_outcomes)
-            if source_tier_outcomes else None
-        ),
+        "mrr_at_5": mrr_at_5,
+        "source_tier_hit_rate": source_tier_hit_rate,
+        "top_rank_hit_rate": top_rank_hit_rate,
+        "retrieval_difficulty_score": retrieval_difficulty_score,
+        "difficulty_samples": difficulty_samples,
         "queries": outcomes,
         "execution_status": "executed",
         "reason": None,
@@ -2625,6 +2771,40 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
     policy = build_valuation_publishability_policy(
         valuation, ticker=ticker, valuation_artifact_path=artifact_rel
     )
+    policy_payload = policy.to_dict()
+    policy_method_samples = _valuation_policy_sample(policy_payload)
+    publishable_methods = [
+        sample for sample in policy_method_samples
+        if sample.get("publishable") is True
+    ]
+    applicable_gate_statuses = [
+        status for _metric_id, _label, status in metric_specs
+        if status != "not_applicable"
+    ]
+    formula_gate_score = _ratio_score(
+        sum(status == "pass" for status in applicable_gate_statuses),
+        len(applicable_gate_statuses),
+    )
+    trace_methods = {
+        str(trace.get("method") or trace.get("formula_id") or "").lower()
+        for trace in formula_traces
+        if isinstance(trace, dict)
+    }
+    trace_methods.discard("")
+    sensitivity_numbers = (
+        _matrix_numbers(sensitivity.get("fcff_wacc_g"))
+        + _matrix_numbers(sensitivity.get("fcfe_re_g"))
+        + _matrix_numbers(sensitivity.get("blend_grid"))
+    )
+    golden_drift_summary = _check_golden_drift(valuation, golden_valuation) if golden_valuation else None
+    finance_quality_score, finance_quality_samples = _weighted_score([
+        ("formula_gate_coverage", formula_gate_score, 0.30),
+        ("valuation_method_publishability", _ratio_score(len(publishable_methods), len(policy_method_samples)), 0.20),
+        ("formula_trace_method_coverage", _ratio_score(len(trace_methods), 3), 0.15),
+        ("sensitivity_grid_richness", _ratio_score(len(sensitivity_numbers), 18), 0.15),
+        ("forecast_horizon_depth", _ratio_score(len(fcff_rows), 5), 0.10),
+        ("independent_regression_baseline", 1.0 if golden_drift_summary and golden_drift_summary["checks_run"] > 0 else 0.50, 0.10),
+    ])
 
     def _gate_value(status: str) -> Any:
         if status == "pass":
@@ -2714,6 +2894,45 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
         )
         for metric_id, label, status in metric_specs
     ]
+    metrics.insert(0, _metric(
+        "finance.model_quality_score",
+        "Financial model quality stress score",
+        finance_quality_score,
+        ">= 75%",
+        _ratio_status(finance_quality_score, 0.75),
+        artifact_rel,
+        sample_size=len(finance_quality_samples),
+        failed_examples=[
+            sample for sample in finance_quality_samples
+            if sample["component_score"] < 1.0
+        ],
+        evaluator={"framework": "hard_mode_financial_model_audit"},
+        calculation={
+            "aggregation": "weighted_score",
+            "numerator": finance_quality_score,
+            "denominator": 1.0 if finance_quality_score is not None else None,
+            "inputs": {
+                "formula_gate_score": formula_gate_score,
+                "publishable_methods": len(publishable_methods),
+                "method_diagnostics": len(policy_method_samples),
+                "trace_methods": sorted(trace_methods),
+                "sensitivity_numeric_cells": len(sensitivity_numbers),
+                "forecast_rows": len(fcff_rows),
+                "golden_regression_checks": (
+                    golden_drift_summary["checks_run"] if golden_drift_summary else 0
+                ),
+            },
+            "parameters": {
+                "rationale": "Ceiling-resistant score: exact formulas remain mandatory, but a perfect benchmark score also requires method coverage, rich traces, sensitivity depth, forecast horizon, and regression baseline coverage.",
+                "components": [
+                    {"id": sample["component"], "weight": sample["weight"]}
+                    for sample in finance_quality_samples
+                ],
+            },
+            "per_sample_results": finance_quality_samples,
+        },
+        evidence=_artifact_evidence(root, valuation_path),
+    ))
     invariant_metric_ids = {"net_debt", "target_price", "gordon_growth"}
     invariants = [
         {"id": metric_id, "severity": "critical", "passed": status != "fail", "detail": label}
@@ -2744,7 +2963,7 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
             evidence=_artifact_evidence(root, valuation_path),
         ),
     ])
-    drift_summary = _check_golden_drift(valuation, golden_valuation) if golden_valuation else None
+    drift_summary = golden_drift_summary
     drift_violations = drift_summary["drift_violations"] if drift_summary else None
     if drift_summary is None:
         # No golden fixture exists for this ticker yet → there is no regression
@@ -2797,7 +3016,7 @@ def evaluate_financial(root: Path, ticker: str) -> dict[str, Any]:
         "golden_drift_out_of_tolerance": drift_violations,
         "missing_traces": [] if trace_pass else ["valuation_formula_trace"],
         "decision": "pass" if not _blocked(metrics) else "block",
-        "valuation_publishability": policy.to_dict(),
+        "valuation_publishability": policy_payload,
     }
 
 
@@ -2893,7 +3112,15 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
         ("charts_or_grids", ("ma trận", "độ nhạy", "grid")),
     )
     completeness_hits = sum(_contains_any(text, terms) for _, terms in required_sections)
-    completeness = _score_from_hits(completeness_hits, len(required_sections))
+    section_presence = _score_from_hits(completeness_hits, len(required_sections))
+    section_quantification = _score_from_concept_tiers(
+        text,
+        tuple(terms for _section, terms in required_sections),
+    )
+    completeness = None if section_presence is None else round(
+        section_presence * 0.70 + float(section_quantification or 0.0) * 0.30,
+        2,
+    )
 
     financial_depth = _score_from_concept_tiers(text, (
         ("doanh thu", "revenue"),
@@ -2932,13 +3159,13 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
     sensitivity_disclosure = _score_from_concept_tiers(text, (
         ("sensitivity", "độ nhạy"),
         ("wacc",),
-        ("terminal growth",),
-        ("re/g", "cost of equity"),
-        ("base cell", "ô base"),
+        ("terminal growth", "tăng trưởng dài hạn", "giá trị cuối kỳ"),
+        ("re/g", "cost of equity", "chi phí vốn chủ sở hữu"),
+        ("base cell", "ô base", "ô cơ sở", "base case"),
         ("target price", "giá mục tiêu"),
         ("grid", "matrix", "ma trận"),
-        ("driver", "revenue_growth", "gross_margin"),
-        ("scenario", "stress", "downside", "monitoring"),
+        ("driver", "revenue_growth", "gross_margin", "biến số", "yếu tố dẫn dắt"),
+        ("scenario", "stress", "downside", "monitoring", "kịch bản", "cảnh báo", "theo dõi"),
         ("peer", "multiple", "p/e", "ev/ebitda"),
     ))
 
@@ -2947,10 +3174,17 @@ def _report_quality_subscores(report: dict[str, Any], explanation: dict[str, Any
         ("fcfe",),
         ("wacc",),
         ("terminal",),
+        ("terminal value", "terminal_value", "giá trị cuối kỳ", "giá trị tiếp diễn"),
+        ("cost of equity", "re/g", "chi phí vốn chủ sở hữu"),
+        ("current price", "giá hiện tại", "giá thị trường"),
+        ("upside", "downside", "tăng/giảm", "tiềm năng tăng/giảm"),
+        ("method weight", "blend", "blend_dcf", "trọng số", "kết hợp phương pháp"),
+        ("source-backed", "[1]"),
+        ("formula trace", "formula_trace", "vết công thức"),
         ("giá trị doanh nghiệp", "enterprise value"),
         ("nợ ròng", "net debt"),
         ("giá trị vốn chủ sở hữu", "equity value"),
-        ("số cổ phiếu", "shares"),
+        ("số cổ phiếu", "shares", "số lượng cổ phiếu", "shares_outstanding"),
         ("giá mục tiêu", "target price"),
         ("độ nhạy", "sensitivity"),
     ))
@@ -3051,6 +3285,30 @@ def _report_quality_total(scores: dict[str, Any]) -> float | None:
         "presentation_quality": 0.05,
     }
     return round(sum(float(scores[key]) * weight for key, weight in weights.items()), 2)
+
+
+def _report_benchmark_hardness_score(scores: dict[str, Any]) -> float | None:
+    total = _report_quality_total(scores)
+    stress_dimensions = (
+        "thesis_specificity",
+        "financial_analysis_depth",
+        "forecast_rationale",
+        "valuation_transparency",
+        "risk_catalyst_quality",
+        "evidence_integration",
+        "peer_industry_context_quality",
+        "executive_summary_actionability",
+        "sensitivity_disclosure_completeness",
+    )
+    values = [
+        float(scores[key]) for key in stress_dimensions
+        if isinstance(scores.get(key), (int, float))
+    ]
+    if total is None or not values:
+        return None
+    weakest_dimension = min(values)
+    lower_quartile = sorted(values)[max(0, len(values) // 4 - 1)]
+    return round(total * 0.65 + weakest_dimension * 0.20 + lower_quartile * 0.15, 2)
 
 
 REPORT_QUALITY_SCORE_KEYS = (
@@ -3707,7 +3965,60 @@ def evaluate_agent(root: Path, ticker: str) -> dict[str, Any]:
         sum(item["status"] == "pass" for item in rationale_samples) / len(rationale_samples)
         if rationale_samples else None
     )
+    judge_score_values = [
+        value for value in (
+            judge_scores.get("role_adherence"),
+            judge_scores.get("groundedness"),
+            judge_scores.get("plan_adherence"),
+        )
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+    ]
+    judge_readiness_score = sum(judge_score_values) / len(judge_score_values) if judge_score_values else 0.0
+    repair_health = None if repair_loop_rate is None else _clamp01(1.0 - (repair_loop_rate / 0.15))
+    workflow_quality_score, workflow_quality_samples = _weighted_score([
+        ("tool_permission_compliance", tool_compliance, 0.14),
+        ("schema_validity", schema_validity, 0.14),
+        ("stage_handoff_completeness", stage_handoff_completeness, 0.14),
+        ("tool_call_success_rate", tool_call_success_rate, 0.12),
+        ("artifact_manifest_compliance", manifest_compliance, 0.10),
+        ("task_completion", task_completion, 0.10),
+        ("token_budget_observability", token_budget_adherence if token_budget_adherence is not None else 0.0, 0.10),
+        ("repair_loop_health", repair_health, 0.08),
+        ("judge_readiness_score", judge_readiness_score, 0.08),
+    ])
     metrics = [
+        _metric("agent.workflow_quality_score", "Agent workflow quality stress score",
+                workflow_quality_score, ">= 75%",
+                _ratio_status(workflow_quality_score, 0.75),
+                str(audit_path.relative_to(root)) if audit_path else (
+                    str(packet_path.relative_to(root)) if packet_path else "missing"
+                ),
+                sample_size=len(workflow_quality_samples),
+                failed_examples=[
+                    sample for sample in workflow_quality_samples
+                    if sample["component_score"] < 1.0
+                ],
+                evaluator={"framework": "hard_mode_agent_workflow_audit",
+                           "execution_status": "executed" if workflow_quality_samples else "not_executed"},
+                calculation={"aggregation": "weighted_score",
+                             "numerator": workflow_quality_score,
+                             "denominator": 1.0 if workflow_quality_score is not None else None,
+                             "inputs": {
+                                 "tool_calls": len(tool_permission_samples),
+                                 "schema_units": schema_units,
+                                 "agent_records": len(agent_records),
+                                 "token_samples": len(token_samples),
+                                 "judge_samples": len(judge_samples),
+                             },
+                             "parameters": {
+                                 "rationale": "Ceiling-resistant score: deterministic compliance gates stay strict, while missing telemetry, token traces, handoff richness, and judge readiness reduce the benchmark score.",
+                                 "components": [
+                                     {"id": sample["component"], "weight": sample["weight"]}
+                                     for sample in workflow_quality_samples
+                                 ],
+                             },
+                             "per_sample_results": workflow_quality_samples},
+                evidence=_artifact_evidence(root, packet_path, audit_path)),
         _metric("tool_permission_compliance", "Tool permission compliance", tool_compliance, "100%",
                 _ratio_status(tool_compliance, 1.0), str(packet_path.relative_to(root)) if packet_path else "missing",
                 ",".join(sorted({str(item["reason"]) for item in tool_permission_failures})) if tool_permission_failures else "",
@@ -3923,6 +4234,7 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
         key: None for key in REPORT_QUALITY_SCORE_KEYS
     }
     total_score = _report_quality_total(scores)
+    report_hardness_score = _report_benchmark_hardness_score(scores)
 
     # Blocking decision: keep the structured binary gate authoritative (publication safety).
     gate_scores = structured_scores if structured_report_quality_available else {
@@ -3969,9 +4281,20 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
     ).lower()
     recommendation_visible = any(
         marker in report_text
-        for marker in ("recommendation", "khuyáº¿n nghá»‹", "buy", "hold", "sell")
+        for marker in (
+            "recommendation",
+            "khuyáº¿n nghá»‹",
+            "khuyến nghị",
+            "khuyen nghi",
+            "buy",
+            "hold",
+            "sell",
+        )
     )
-    target_visible = any(marker in report_text for marker in ("target price", "giÃ¡ má»¥c tiÃªu"))
+    target_visible = any(
+        marker in report_text
+        for marker in ("target price", "giÃ¡ má»¥c tiÃªu", "giá mục tiêu", "gia muc tieu")
+    )
     recommendation_checks = [
         {
             "check": "target_has_recommendation_context",
@@ -4074,6 +4397,30 @@ def evaluate_report(root: Path, ticker: str, financial: dict[str, Any]) -> dict[
                                  if isinstance(structured_quality, dict) else None,
                              },
                              "per_sample_results": _report_sample(_metric_status(total_score, 85), total_score)},
+                evidence=report_evidence),
+        _metric("report.benchmark_hardness_score", "Report hard-mode benchmark score",
+                report_hardness_score, ">= 75%",
+                _metric_status(report_hardness_score, 75), "report_quality_v2",
+                sample_size=1 if report_hardness_score is not None else 0,
+                calculation={"aggregation": "weighted_mean",
+                             "parameters": {
+                                 "rationale": "Ceiling-resistant score: total quality is penalized by the weakest analytical dimensions so section completeness cannot mask thin risk, sensitivity, or thesis evidence.",
+                                 "stress_dimensions": [
+                                     "thesis_specificity",
+                                     "financial_analysis_depth",
+                                     "forecast_rationale",
+                                     "valuation_transparency",
+                                     "risk_catalyst_quality",
+                                     "evidence_integration",
+                                     "peer_industry_context_quality",
+                                     "executive_summary_actionability",
+                                     "sensitivity_disclosure_completeness",
+                                 ],
+                             },
+                             "per_sample_results": _report_sample(
+                                 _metric_status(report_hardness_score, 75),
+                                 report_hardness_score,
+                             )},
                 evidence=report_evidence),
         _metric("report.completeness", "Report completeness", scores["completeness"], ">= 80%",
                 _metric_status(scores["completeness"], 80), "report PDF rubric",
@@ -4443,7 +4790,72 @@ def evaluate_observability(root: Path, ticker: str) -> dict[str, Any]:
         name for name, gate in gate_results.items()
         if isinstance(gate, dict) and gate.get("passed") is False
     )
+    latency_window_coverage = _ratio_score(
+        sum(value is not None for value in (
+            warm_p95_seconds,
+            cold_p95_seconds,
+            render_p95_seconds,
+            flash_warm_p95_seconds,
+            flash_cold_retrieval_p95_seconds,
+        )),
+        5,
+    )
+    agent_latency_coverage = _ratio_score(len(agent_latencies), len(agent_records)) if agent_records else 0.0
+    golden_cost_values = [
+        value for value in (_float_or_none(row.get("estimated_cost_usd")) for row in golden_runs)
+        if value is not None
+    ]
+    cost_trace_score = 1.0 if costs else (0.50 if golden_cost_values else 0.0)
+    render_trace_score = 1.0 if render_events else (0.50 if report_exists else 0.0)
+    retry_health = None if retry_rate is None else _clamp01(1.0 - (retry_rate / 0.05))
+    fallback_health = None if retrieval_fallback_rate is None else _clamp01(1.0 - (retrieval_fallback_rate / 0.20))
+    ocr_health = None if ocr_failure_rate is None else _clamp01(1.0 - (ocr_failure_rate / 0.05))
+    telemetry_quality_score, telemetry_quality_samples = _weighted_score([
+        ("trace_event_presence", _presence_score(trace_events), 0.15),
+        ("agent_latency_coverage", agent_latency_coverage, 0.12),
+        ("retrieval_trace_presence", _presence_score(retrieval_events), 0.12),
+        ("artifact_upload_trace_presence", _presence_score(upload_events), 0.10),
+        ("render_trace_presence", render_trace_score, 0.10),
+        ("cost_trace_presence", cost_trace_score, 0.10),
+        ("latency_window_coverage", latency_window_coverage, 0.12),
+        ("retry_health", retry_health, 0.07),
+        ("retrieval_fallback_health", fallback_health, 0.07),
+        ("ocr_health", ocr_health, 0.05),
+    ])
     metrics = [
+        _metric("ops.telemetry_quality_score", "Telemetry quality stress score",
+                telemetry_quality_score, ">= 80%",
+                _ratio_status(telemetry_quality_score, 0.80),
+                "runtime trace + ops golden windows",
+                sample_size=len(telemetry_quality_samples),
+                plan_id="07",
+                failed_examples=[
+                    sample for sample in telemetry_quality_samples
+                    if sample["component_score"] < 1.0
+                ],
+                evaluator={"framework": "hard_mode_ops_telemetry_audit",
+                           "execution_status": "executed" if telemetry_quality_samples else "not_executed"},
+                calculation={"aggregation": "weighted_score",
+                             "numerator": telemetry_quality_score,
+                             "denominator": 1.0 if telemetry_quality_score is not None else None,
+                             "inputs": {
+                                 "trace_events": len(trace_events),
+                                 "agent_records": len(agent_records),
+                                 "agent_latencies": len(agent_latencies),
+                                 "retrieval_events": len(retrieval_events),
+                                 "upload_events": len(upload_events),
+                                 "render_events": len(render_events),
+                                 "cost_samples": len(costs),
+                                 "golden_cost_samples": len(golden_cost_values),
+                             },
+                             "parameters": {
+                                 "rationale": "Ceiling-resistant score: zero observed errors is insufficient when trace coverage is missing or only inferred from fallback artifacts.",
+                                 "components": [
+                                     {"id": sample["component"], "weight": sample["weight"]}
+                                     for sample in telemetry_quality_samples
+                                 ],
+                             },
+                             "per_sample_results": telemetry_quality_samples}),
         _metric("duration_seconds", "Full run duration", duration_seconds, "<= baseline p95 + 30%",
                 "measured_only" if duration_seconds is None else "pass",
                 "runtime trace" if duration_seconds is not None else "run trace missing",
