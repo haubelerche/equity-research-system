@@ -64,6 +64,28 @@ def create_model_adapter(model: str | None = None):
     return OpenAIModelAdapter()
 
 
+def score_relevance(query: str, chunk_text: str) -> float:
+    """Return a 0..1 relevance score of chunk_text to query, judged by the production model."""
+    prompt = (
+        "Chấm mức độ liên quan của ĐOẠN BẰNG CHỨNG với CÂU HỎI, chỉ trả về MỘT số thực 0..1 "
+        "(1 = chứa trực tiếp câu trả lời, 0 = không liên quan). Không giải thích.\n\n"
+        f"CÂU HỎI: {query}\n\nĐOẠN: {chunk_text[:1200]}\n\nĐiểm:"
+    )
+    try:
+        client, _ = _resolve_openai_client(30)
+        response = client.chat.completions.create(
+            model=CHEAP_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            max_completion_tokens=8,
+        )
+        raw = (response.choices[0].message.content or "").strip()
+        import re
+        m = re.search(r"[01](?:\.\d+)?", str(raw))
+        return max(0.0, min(1.0, float(m.group()))) if m else 0.0
+    except Exception:
+        return 0.0
+
+
 def _langfuse_configured() -> bool:
     """True when both Langfuse keys are present — enables the tracing drop-in."""
     return bool(os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY"))

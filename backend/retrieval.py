@@ -148,6 +148,8 @@ class RetrievalService:
         import os as _os
         from backend.retrieval_enhance import expand_query as _expand_query
         _variants = _expand_query(query) if _os.getenv("RAG_QUERY_EXPANSION") == "1" else [query]
+        _rerank = _os.getenv("RAG_RERANK") == "1"
+        _pool_size = max(20, top_k) if _rerank else top_k
 
         ticker = ticker.strip().upper()
         query_embedding = _embed_query(query)
@@ -237,7 +239,7 @@ class RetrievalService:
                         params.extend(extraction_methods)  # {method_clause}
                     if order_param is not None:
                         params.append(order_param)         # {order_expr} in ORDER BY
-                    params.append(top_k)                   # LIMIT %s
+                    params.append(_pool_size)               # LIMIT %s
 
                     sql = f"""
                         SELECT
@@ -298,6 +300,9 @@ class RetrievalService:
                     if _cid not in seen_ids:
                         seen_ids.add(_cid)
                         all_rows.append(_r)
+            if _rerank and all_rows:
+                from backend.retrieval_enhance import llm_rerank as _llm_rerank
+                all_rows = _llm_rerank(query, all_rows, top_k=top_k)
             rows = all_rows[:top_k]
 
         except Exception:

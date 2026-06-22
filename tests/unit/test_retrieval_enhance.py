@@ -23,3 +23,16 @@ def test_rrf_promotes_chunks_ranked_high_in_both_lists():
     ids = [c["chunk_id"] for c in fused]
     assert ids[0] in {"A", "B"} and ids[1] in {"A", "B"}
     assert set(ids) == {"A", "B", "C", "D"}
+
+
+from backend.retrieval_enhance import llm_rerank
+
+
+def test_llm_rerank_orders_by_injected_scores():
+    cands = [{"chunk_id": "A", "text": "irrelevant"},
+             {"chunk_id": "B", "text": "the answer 4676"},
+             {"chunk_id": "C", "text": "somewhat"}]
+    def fake_scorer(query, chunk_text):
+        return {"the answer 4676": 0.9, "somewhat": 0.5, "irrelevant": 0.1}[chunk_text]
+    out = llm_rerank("doanh thu", cands, top_k=2, scorer=fake_scorer)
+    assert [c["chunk_id"] for c in out] == ["B", "C"]

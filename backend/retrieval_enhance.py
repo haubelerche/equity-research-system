@@ -44,3 +44,20 @@ def reciprocal_rank_fusion(
             first_seen.setdefault(ident, item)
     ordered = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)
     return [first_seen[ident] for ident, _ in ordered]
+
+
+def _default_llm_scorer(query: str, chunk_text: str) -> float:
+    """Score chunk relevance 0..1 with the production LLM. Imported lazily to stay test-pure."""
+    from backend.harness.model_adapter import score_relevance
+    return score_relevance(query, chunk_text)
+
+
+def llm_rerank(
+    query: str, candidates: list[dict[str, Any]], *, top_k: int = 5,
+    scorer: Callable[[str, str], float] | None = None,
+) -> list[dict[str, Any]]:
+    """Re-order candidates by an LLM relevance score; return the top_k."""
+    score = scorer or _default_llm_scorer
+    scored = [(c, score(query, str(c.get("text") or ""))) for c in candidates]
+    scored.sort(key=lambda cs: cs[1], reverse=True)
+    return [c for c, _ in scored[:top_k]]
