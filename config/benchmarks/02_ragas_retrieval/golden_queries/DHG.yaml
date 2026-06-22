@@ -428,7 +428,7 @@ queries:
   fiscal_year: 2026
   expected_chunk_ids: []
   expected_answer_policy: insufficient_evidence_or_not_ingested
-  expected_source_tiers:
-  - 1
+  # Refusal control: there is no official source for unreleased 2026 guidance, so this
+  # query is intentionally excluded from source_tier scope (no expected_source_tiers).
   material: true
   must_not_answer_without_context: true

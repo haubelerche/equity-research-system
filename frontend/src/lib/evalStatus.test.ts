@@ -76,6 +76,35 @@ describe("evalMetricStatus", () => {
     expect(resolveMetricStatus(lte, { value: 0.01, threshold: "<= 5%", status: "fail" })).toBe("pass");
   });
 
+  it("compares percent thresholds on the same scale as rubric score values", () => {
+    const rubric: MetricDef = {
+      id: "report.valuation_transparency",
+      label: "Valuation transparency",
+      unit: "",
+      comparator: "gte",
+      threshold: 80,
+      technology: "rubric",
+      formula: "rubric score",
+      metricType: "score",
+    };
+
+    expect(parseRuntimeThreshold(">= 80%", "score", 70.982)).toBe(80);
+    expect(resolveMetricStatus(rubric, {
+      value: 70.982,
+      threshold: ">= 80%",
+      status: "pass",
+      metric_type: "score",
+      unit: "score",
+    })).toBe("fail");
+    expect(resolveMetricStatus(rubric, {
+      value: 83.128,
+      threshold: ">= 80%",
+      status: "fail",
+      metric_type: "score",
+      unit: "score",
+    })).toBe("pass");
+  });
+
   it("trusts backend status for non-numeric runtime threshold contracts", () => {
     expect(resolveMetricStatus(gte, { value: 0, threshold: "pass", status: "fail" })).toBe("fail");
     expect(resolveMetricStatus(gte, { value: 0, threshold: "present", status: "blocked" })).toBe("blocked");
@@ -139,7 +168,7 @@ describe("evalMetricStatus", () => {
       value: 9.35,
       sample_size: 45,
       calculation: { aggregation: "cohort_mean_observed", numerator: 9.35, denominator: 17 },
-    })).toBe("17/45 samples");
+    })).toBe("17/45 mã được đo");
   });
 
   it("does not render a numerator formula when the ratio disagrees with value", () => {
@@ -189,7 +218,7 @@ describe("evalMetricStatus", () => {
       value: 13 / 14,
       threshold: ">= 90%",
       calculation: { aggregation: "cohort_pooled_coverage", numerator: 13, denominator: 14 },
-    })).toBe("14 eligible samples");
+    })).toBe("14 mẫu hợp lệ");
   });
 
   it("classifies cohort means as score-like metrics instead of pass rates", () => {
@@ -209,6 +238,28 @@ describe("evalMetricStatus", () => {
       threshold: ">= 90%",
       calculation: { aggregation: "cohort_mean", numerator: 43.47, denominator: 45 },
     })).toBe("96.6%");
+    // Per-ticker mean: scope is the number of stocks ("mã"), not generic "giá trị".
+    expect(formatMetricScope(coverageMetric, {
+      metric_id: "context_precision",
+      metric_type: "score",
+      unit: "percent",
+      value: 0.852,
+      threshold: ">= 80%",
+      calculation: { aggregation: "cohort_mean", numerator: 8.52, denominator: 10 },
+    })).toBe("10 mã");
+  });
+
+  it("uses sampleUnit to label pooled RAG metrics as truy vấn (queries)", () => {
+    const queryMetric: MetricDef = { ...coverageMetric, id: "hit_rate_at_5", sampleUnit: "truy vấn" };
+    // Pooled per-query coverage measured on the query set, not on stocks.
+    expect(formatMetricScope(queryMetric, {
+      metric_id: "hit_rate_at_5",
+      metric_type: "coverage",
+      unit: "percent",
+      value: 165 / 200,
+      threshold: ">= 80%",
+      calculation: { aggregation: "cohort_pooled_coverage", numerator: 165, denominator: 200 },
+    })).toBe("200 truy vấn");
   });
 
   it("formats normalized score metrics as percentages without changing threshold semantics", () => {

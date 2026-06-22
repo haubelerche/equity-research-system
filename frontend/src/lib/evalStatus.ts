@@ -16,6 +16,12 @@ export interface MetricDef {
   scope?: string;
   severity?: string;
   blocksPublish?: boolean;
+  /**
+   * Đơn vị của mẫu được đo, dùng cho nhãn phạm vi (vd "mã" cho điểm theo cổ phiếu,
+   * "truy vấn" cho RAG đo trên tập query gộp). Mặc định: cohort_mean → "mã",
+   * cohort_pooled_coverage → "mẫu hợp lệ".
+   */
+  sampleUnit?: string;
 }
 
 interface RuntimeMetricFields {
@@ -46,7 +52,11 @@ export function coerceMetricValue(value: unknown): number | null {
   return null;
 }
 
-export function parseRuntimeThreshold(threshold: unknown, unit?: string | null): number | null {
+export function parseRuntimeThreshold(
+  threshold: unknown,
+  unit?: string | null,
+  comparedValue?: number | null,
+): number | null {
   if (typeof threshold === "number") return Number.isFinite(threshold) ? threshold : null;
   if (typeof threshold === "boolean") return threshold ? 1 : 0;
   if (typeof threshold !== "string") return null;
@@ -61,6 +71,9 @@ export function parseRuntimeThreshold(threshold: unknown, unit?: string | null):
     const numerator = Number(ratio[1]);
     const denominator = Number(ratio[2]);
     if (Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0) {
+      if (comparedValue !== null && comparedValue !== undefined && Math.abs(comparedValue) > 1) {
+        return numerator;
+      }
       return numerator / denominator;
     }
   }
@@ -72,6 +85,9 @@ export function parseRuntimeThreshold(threshold: unknown, unit?: string | null):
   if (!Number.isFinite(parsed)) return null;
 
   const isPercent = threshold.includes("%") || unit === "%" || unit === "percent";
+  if (isPercent && comparedValue !== null && comparedValue !== undefined && Math.abs(comparedValue) > 1) {
+    return parsed;
+  }
   return isPercent && Math.abs(parsed) > 1 ? parsed / 100 : parsed;
 }
 
@@ -158,7 +174,7 @@ export function resolveMetricStatus(
     return runtimeStatus ?? "fail";
   }
 
-  const threshold = parseRuntimeThreshold(result?.threshold, result?.unit) ?? def.threshold;
+  const threshold = parseRuntimeThreshold(result?.threshold, result?.unit, value) ?? def.threshold;
   if (
     result
     && Object.prototype.hasOwnProperty.call(result, "threshold")
@@ -243,13 +259,13 @@ export function formatMetricScope(def: MetricDef, result?: RuntimeMetricFields):
     && result?.sample_size !== null
     && result?.sample_size !== undefined
   ) {
-    return `${formatRoundedNumber(denominator)}/${formatRoundedNumber(result.sample_size)} samples`;
+    return `${formatRoundedNumber(denominator)}/${formatRoundedNumber(result.sample_size)} mã được đo`;
   }
   if (aggregation === "cohort_mean" && denominator !== null && denominator !== undefined) {
-    return `${formatRoundedNumber(denominator)} values`;
+    return `${formatRoundedNumber(denominator)} ${def.sampleUnit ?? "mã"}`;
   }
   if (aggregation === "cohort_pooled_coverage" && denominator !== null && denominator !== undefined) {
-    return `${formatRoundedNumber(denominator)} eligible samples`;
+    return `${formatRoundedNumber(denominator)} ${def.sampleUnit ?? "mẫu hợp lệ"}`;
   }
   if ((type === "pass_rate" || type === "error_rate") && denominator !== null && denominator !== undefined) {
     return `${formatRoundedNumber(denominator)} case đủ điều kiện`;
@@ -267,8 +283,8 @@ export function formatMetricScope(def: MetricDef, result?: RuntimeMetricFields):
     return `${formatRoundedNumber(numerator)}/${formatRoundedNumber(denominator)}`;
   }
   return result?.sample_size !== null && result?.sample_size !== undefined
-    ? `${formatRoundedNumber(result.sample_size)} samples`
-    : "runtime metric";
+    ? `${formatRoundedNumber(result.sample_size)} mẫu`
+    : "chỉ số runtime";
 }
 
 export function formatRuntimeMetricResult(

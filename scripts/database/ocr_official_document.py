@@ -42,7 +42,10 @@ def _find_poppler_bin() -> str:
 def _tesseract_config() -> str:
     tessdata_dir = ROOT / "storage" / "tessdata"
     if tessdata_dir.is_dir():
-        return f'--tessdata-dir "{tessdata_dir}"'
+        # pytesseract splits the config string on whitespace, so quoting the path
+        # leaves literal quotes in the argument and tesseract fails to open the
+        # tessdata directory. Pass the unquoted path (no spaces in the repo path).
+        return f"--tessdata-dir {tessdata_dir}"
     return ""
 
 
