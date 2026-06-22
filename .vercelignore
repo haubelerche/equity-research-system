@@ -1,0 +1,14 @@
+/.pytest_cache
+/.venv
+/.worktrees
+/__pycache__
+/artifacts
+/audits
+/data
+/output
+/storage
+/tests
+/frontend/node_modules
+/frontend/dist
+/frontend/*.tsbuildinfo
+*.pyc

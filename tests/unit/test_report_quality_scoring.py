@@ -88,6 +88,34 @@ def test_thin_report_scores_materially_lower_than_rich():
     assert thin["thesis_specificity"] < rich["thesis_specificity"]
 
 
+def test_valuation_transparency_scores_vietnamese_pdf_terms():
+    text = (
+        "FCFF 95.467 và FCFE 78.993 được kết hợp theo trọng số FCFF / FCFE 60.0% / 40.0%. "
+        "WACC 13.8%, chi phí vốn chủ sở hữu Re 13.8%, terminal_value 10.200 và terminal value 10.200. "
+        "Giá hiện tại 93.400, giá thị trường 93.400, giá mục tiêu 88.877 và tiềm năng tăng/giảm -4.8%. "
+        "Bảng định giá trình bày giá trị doanh nghiệp 12.000, nợ ròng 500, "
+        "giá trị vốn chủ sở hữu 11.500 và số lượng cổ phiếu 131 triệu. "
+        "Vết công thức 6 dòng, formula_trace, source-backed [1], độ nhạy WACC/g và sensitivity matrix."
+    )
+
+    scores = _report_quality_subscores({"exists": True, "text": text}, {})
+
+    assert scores["valuation_transparency"] >= 85.0
+
+
+def test_sensitivity_disclosure_scores_vietnamese_pdf_terms():
+    text = (
+        "Phân tích độ nhạy WACC 13.2%, tăng trưởng dài hạn 3.0% và chi phí vốn chủ sở hữu Re 13.8%. "
+        "Ô cơ sở base case dùng giá mục tiêu 88.877 VND trong ma trận độ nhạy grid. "
+        "Các biến số doanh thu, gross_margin và yếu tố dẫn dắt được kiểm tra theo kịch bản downside, "
+        "stress, cảnh báo monitoring, peer multiple P/E 15x và EV/EBITDA 9x."
+    )
+
+    scores = _report_quality_subscores({"exists": True, "text": text}, {})
+
+    assert scores["sensitivity_disclosure_completeness"] >= 75.0
+
+
 def test_missing_report_returns_all_none():
     scores = _report_quality_subscores({"exists": False, "text": ""}, {})
     assert all(value is None for value in scores.values())

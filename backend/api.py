@@ -287,7 +287,7 @@ def create_app(
     @app.get("/reports")
     def list_reports() -> dict:
         universe = load_universe(_universe_csv())
-        items = scan_report_inventory(_output_dir(), universe, storage=_export_storage())
+        items = scan_report_inventory(_output_dir(), universe, storage=_export_storage_for_inventory())
         try:
             from scripts.generate_fast_report import _latest_report_run_ids
         except Exception:  # noqa: BLE001 - report inventory must keep local fallback alive
@@ -326,21 +326,37 @@ def create_app(
     _FILE_KINDS = {"report": "_report.pdf", "explanation": "_explanation.pdf"}
     _EXPORT_NAMES = {"report": "report.pdf", "explanation": "explanation.pdf"}
 
-    def _export_storage():
+    def _export_storage(*, request_timeout: float | None = None, max_attempts: int | None = None):
         """Supabase exports adapter, or None when storage is unconfigured (dev)."""
         try:
             from backend.storage import SupabaseStorageAdapter
 
-            return SupabaseStorageAdapter()
+            try:
+                return SupabaseStorageAdapter(request_timeout=request_timeout, max_attempts=max_attempts)
+            except TypeError:
+                # Tests may monkeypatch SupabaseStorageAdapter with a no-arg fake.
+                return SupabaseStorageAdapter()
         except Exception:
             return None
+
+    def _export_storage_for_inventory():
+        return _export_storage(
+            request_timeout=settings.storage_inventory_timeout_sec,
+            max_attempts=settings.storage_api_max_attempts,
+        )
+
+    def _export_storage_for_file():
+        return _export_storage(
+            request_timeout=settings.storage_file_timeout_sec,
+            max_attempts=settings.storage_api_max_attempts,
+        )
 
     def _serve_from_exports(ticker: str, kind: str) -> Response | None:
         """Stream the durable PDF from Supabase exports, or None to fall back."""
         export_name = _EXPORT_NAMES.get(kind)
         if export_name is None:
             return None
-        storage = _export_storage()
+        storage = _export_storage_for_file()
         if storage is None:
             return None
         try:

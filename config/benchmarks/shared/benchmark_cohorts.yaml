@@ -2,8 +2,9 @@ version: benchmark_cohorts_20260615_v2
 default_cohort: full_universe
 cohorts:
   full_universe:
-    description: All tickers currently retained in config/dataset/universe/pharma_vn_universe.csv.
+    description: All benchmark-ready tickers retained in config/dataset/universe/pharma_vn_universe.csv with deterministic golden financials available.
     source: universe
+    requires_golden_financials: true
   diversified_core:
     description: Compact core smoke cohort across pharma leaders, hospital services, and report-ready issuers.
     tickers:
@@ -33,6 +34,7 @@ cohorts:
     - IMP
     - DMC
     - TRA
+    - OPC
     - TNH
     - JVC
     - DHT
@@ -45,6 +47,7 @@ cohorts:
     - IMP
     - DMC
     - TRA
+    - OPC
     - TNH
     - JVC
     - DHT

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { MetricExplanation } from "./MetricExplanation";
 import type { BenchmarkMetricResult } from "../../api/types";
@@ -126,5 +127,30 @@ describe("MetricExplanation", () => {
     // reconciles with the published value the redundant tail is suppressed.
     expect(screen.getByText(/1\.95 \/ 2 = 97\.5%\.$/)).toBeInTheDocument();
     expect(screen.queryByText(/97\.5%; giá trị dashboard/)).not.toBeInTheDocument();
+  });
+
+  it("collapses long execution evidence artifact lists behind the existing show-more control", async () => {
+    const longEvidenceResult: BenchmarkMetricResult = {
+      ...result,
+      evidence: {
+        artifact_ids: [
+          "AAA/agent_eval.json",
+          "BBB/agent_eval.json",
+          "CCC/agent_eval.json",
+          "DDD/agent_eval.json",
+          "EEE/agent_eval.json",
+        ],
+      },
+    };
+
+    render(<MetricExplanation def={def} result={longEvidenceResult} />);
+
+    expect(screen.getByText(/AAA\/agent_eval\.json/)).toBeInTheDocument();
+    expect(screen.queryByText(/DDD\/agent_eval\.json/)).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: /Xem th.m 2 artifact/i }));
+
+    expect(screen.getByText(/DDD\/agent_eval\.json/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Thu g.n/i })).toBeInTheDocument();
   });
 });

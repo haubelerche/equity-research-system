@@ -250,6 +250,10 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
         "data_quality", "release_gate", "score", "report_run", "P0", True,
         "score", "data", "Inspect weighted data reliability components and repair the weakest measured gate.",
     ),
+    "data.benchmark_hardness_score": MetricMetadata(
+        "data_quality", "diagnostic", "score", "benchmark_suite", "P2", False,
+        "percent", "data", "Improve confidence, provenance depth, OCR resolution, raw file coverage, and reconciliation quality.",
+    ),
     "snapshot_id": MetricMetadata(
         "data_quality", "release_gate", "boolean", "report_run", "P0", True,
         "boolean", "data", "Create or attach an immutable snapshot before evaluation.",
@@ -303,6 +307,10 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
         "rag", "diagnostic", "coverage", "benchmark_suite", "P2", False,
         "percent", "retrieval", "Tune source-tier preferences so material queries retrieve priority sources.",
     ),
+    "rag.retrieval_difficulty_score": MetricMetadata(
+        "rag", "diagnostic", "score", "benchmark_suite", "P2", False,
+        "percent", "retrieval", "Raise first-rank authoritative hits and source-tier alignment instead of relying only on top-k presence.",
+    ),
     "evidence_packet_completeness": MetricMetadata(
         "rag", "release_gate", "coverage", "report_run", "P0", True,
         "percent", "retrieval", "Attach source documents, citation map, and formula traces to the evidence packet.",
@@ -326,6 +334,10 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
     "formula_trace": PLAN_DEFAULTS["03"],
     "valuation_artifact": PLAN_DEFAULTS["03"],
     "valuation_publishable": PLAN_DEFAULTS["03"],
+    "finance.model_quality_score": MetricMetadata(
+        "financial_model", "diagnostic", "score", "benchmark_suite", "P2", False,
+        "percent", "valuation", "Improve method publishability, formula trace coverage, sensitivity richness, forecast horizon, and regression fixture coverage.",
+    ),
     "critical_failures": PLAN_DEFAULTS["03"],
     "sensitivity_base_cell": PLAN_DEFAULTS["03"],
     "golden_drift_out_of_tolerance": PLAN_DEFAULTS["03"],
@@ -401,22 +413,74 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
         "agent_llm", "diagnostic", "coverage", "benchmark_suite", "P2", False,
         "percent", "reviewer", "Expand seeded issue fixtures and compare critic recall against expected labels.",
     ),
+    "agent.workflow_quality_score": MetricMetadata(
+        "agent_llm", "diagnostic", "score", "benchmark_suite", "P2", False,
+        "percent", "platform", "Improve trace richness, token telemetry, judge readiness, handoff completeness, and controlled repair behavior.",
+    ),
     "report_quality_score": PLAN_DEFAULTS["06"],
+    "report.quality_total": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P1", False,
+        "score", "reviewer", "Improve sections below rubric threshold.",
+    ),
+    "report.benchmark_hardness_score": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P1", False,
+        "score", "reviewer", "Improve the weakest analytical report dimensions instead of relying on section presence alone.",
+    ),
+    "report.completeness": MetricMetadata(
+        "report_quality", "release_gate", "score", "report_run", "P1", True,
+        "percent", "reviewer", "Complete required report sections and add quantified content, tables, and charts.",
+    ),
     "report_completeness": MetricMetadata(
         "report_quality", "release_gate", "coverage", "report_run", "P1", True,
         "percent", "reviewer", "Complete required report sections or mark the report as not exportable.",
+    ),
+    "report.financial_analysis_depth": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P2", False,
+        "score", "reviewer", "Improve ratio analysis, trend explanation, and comparable financial interpretation.",
     ),
     "financial_analysis_depth": MetricMetadata(
         "report_quality", "diagnostic", "score", "report_run", "P1", False,
         "score", "reviewer", "Improve ratio analysis, trend explanation, and comparable financial interpretation.",
     ),
+    "report.forecast_rationale": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P1", False,
+        "score", "reviewer", "Add explicit drivers, assumptions, and evidence for the forecast.",
+    ),
     "forecast_rationale": MetricMetadata(
         "report_quality", "diagnostic", "score", "report_run", "P1", False,
         "score", "reviewer", "Add explicit drivers, assumptions, and evidence for the forecast.",
     ),
+    "report.valuation_transparency": MetricMetadata(
+        "report_quality", "release_gate", "score", "report_run", "P1", True,
+        "score", "valuation", "Attach valuation bridge, method weights, sensitivity grid, and formula traces.",
+    ),
     "valuation_transparency": MetricMetadata(
         "report_quality", "release_gate", "score", "report_run", "P0", True,
         "score", "valuation", "Attach valuation bridge, method weights, sensitivity grid, and formula traces.",
+    ),
+    "report.evidence_integration": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P2", False,
+        "score", "report", "Tie claims to evidence and formula trace.",
+    ),
+    "report.thesis_specificity": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P2", False,
+        "score", "reviewer", "Replace generic sector commentary with company-specific drivers, constraints, and materiality.",
+    ),
+    "report.risk_catalyst_quality": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P2", False,
+        "score", "reviewer", "Link risks and catalysts to probability, timing, financial transmission path, and evidence.",
+    ),
+    "report.peer_industry_context_quality": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P2", False,
+        "score", "reviewer", "Add peer-relative valuation, margin, growth, and balance-sheet context.",
+    ),
+    "report.executive_summary_actionability": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P2", False,
+        "score", "reviewer", "State recommendation, valuation basis, key drivers, key risks, and monitoring triggers.",
+    ),
+    "report.sensitivity_disclosure_completeness": MetricMetadata(
+        "report_quality", "diagnostic", "score", "report_run", "P1", False,
+        "percent", "reviewer", "Include sensitivity ranges for WACC, terminal growth, margin, revenue, and peer multiples where relevant.",
     ),
     "report_pdf_rendered": MetricMetadata(
         "report_quality", "release_gate", "boolean", "report_run", "P0", True,
@@ -496,6 +560,10 @@ METRIC_OVERRIDES: dict[str, MetricMetadata] = {
     "cost_per_report": MetricMetadata(
         "operations", "observability", "score", "system_window", "P2", False,
         "usd", "platform", "Apply budget policy, cache reuse, and model routing when report cost exceeds the soft budget.",
+    ),
+    "ops.telemetry_quality_score": MetricMetadata(
+        "operations", "observability", "score", "benchmark_suite", "P2", False,
+        "percent", "platform", "Increase runtime trace coverage for latency, retrieval, upload, render, cost, retry, fallback, and OCR health.",
     ),
     "cost_per_full_report": MetricMetadata(
         "operations", "observability", "score", "system_window", "P2", False,

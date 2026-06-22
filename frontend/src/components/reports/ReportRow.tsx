@@ -13,6 +13,8 @@ const SEGMENT_LABEL: Record<string, string> = {
   healthcare_services: "Dịch vụ y tế",
   medical_equipment: "Thiết bị y tế",
   medical_distribution: "Phân phối",
+  vaccine_biologic: "Vaccine / sinh phẩm",
+  pharma_distribution: "Phân phối dược",
 };
 
 export function ReportRow({ item, onPreview, onGenerated }: Props) {
@@ -46,7 +48,7 @@ export function ReportRow({ item, onPreview, onGenerated }: Props) {
                   Tải giải thích
                 </a>
               )}
-              <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Cập nhật" />
+              <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Cập nhật" forceFull />
             </>
           ) : (
             <GenerateButton ticker={item.ticker} onComplete={onGenerated} label="Sinh báo cáo" />

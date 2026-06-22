@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Báo cáo nghiên cứu cổ phiếu — DHG">
+  <title>DHG — Báo cáo nghiên cứu cổ phiếu | 2026-06-01</title>
+  <style>
+/* Báo cáo nghiên cứu cổ phiếu — A4 report stylesheet */
+
+/*
+ * Unicode font stack — required for Vietnamese diacritics (ắ ổ ị ề ử ộ ụ ằ etc.)
+ * Priority: Noto Sans (Google Fonts, embeds all Vietnamese) → DejaVu Sans (Linux)
+ *           → Arial Unicode MS (Windows/macOS fallback) → Arial → sans-serif.
+ * If none of these embed Vietnamese glyphs, PDF export will show boxes.
+ * To guarantee correct PDF rendering: install Noto Sans or use Playwright/WeasyPrint.
+ */
+
+@page {
+    size: 210mm 297mm;
+    margin: 18mm 16mm 18mm 16mm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Noto Sans", "DejaVu Sans", "Segoe UI", "Arial Unicode MS", Arial, sans-serif;
+    font-size: 8.8pt;
+    line-height: 1.38;
+    color: #232323;
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+/* ── Typography ─────────────────────────────────────────── */
+
+h1 {
+    font-size: 16pt;
+    font-weight: 700;
+    color: #0b4f8a;
+    margin: 0 0 7pt 0;
+    padding-bottom: 4pt;
+    border-bottom: 1.2px solid #0b4f8a;
+}
+
+h2 {
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: #0b4f8a;
+    border-bottom: 1px solid #0b4f8a;
+    padding-bottom: 3pt;
+    margin: 11pt 0 5pt 0;
+}
+
+h3 {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: #2c5282;
+    margin: 10pt 0 4pt 0;
+}
+
+h4 {
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 8pt 0 3pt 0;
+}
+
+p {
+    margin: 4pt 0 6pt 0;
+}
+
+strong {
+    font-weight: 700;
+    color: #1a202c;
+}
+
+em {
+    font-style: italic;
+    color: #4a5568;
+}
+
+/* ── Tables ─────────────────────────────────────────────── */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin: 8pt 0;
+    page-break-inside: avoid;
+}
+
+thead th {
+    background-color: #0b4f8a;
+    color: #ffffff;
+    padding: 4pt 6pt;
+    text-align: left;
+    font-weight: 600;
+    font-size: 8.5pt;
+}
+
+tbody td {
+    padding: 3pt 6pt;
+    border-bottom: 0.5px solid #d0d7de;
+    vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f6f8fa;
+}
+
+tbody tr:hover {
+    background-color: #eef2f7;
+}
+
+/* Numeric columns — right-align by convention */
+td:last-child,
+th:last-child {
+    text-align: right;
+}
+
+/* Exception: first column (labels) left-align */
+td:first-child,
+th:first-child {
+    text-align: left;
+}
+
+/* ── Images / Charts ─────────────────────────────────────── */
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 6pt auto;
+    page-break-inside: avoid;
+}
+
+/* ── Blockquotes ─────────────────────────────────────────── */
+
+blockquote {
+    border-left: 3px solid #cbd5e0;
+    margin: 6pt 0;
+    padding: 4pt 8pt;
+    color: #4a5568;
+    background: #f7fafc;
+    font-size: 9pt;
+}
+
+blockquote p {
+    margin: 0;
+}
+
+/* ── Code ─────────────────────────────────────────────────── */
+
+code {
+    font-family: "Courier New", monospace;
+    font-size: 8pt;
+    background: #f0f4f8;
+    padding: 1pt 3pt;
+    border-radius: 2px;
+    color: #2d3748;
+}
+
+pre {
+    background: #f0f4f8;
+    padding: 6pt 8pt;
+    border-radius: 3px;
+    overflow-x: auto;
+    font-size: 8pt;
+    line-height: 1.4;
+    margin: 6pt 0;
+    page-break-inside: avoid;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+}
+
+/* ── Lists ───────────────────────────────────────────────── */
+
+ul, ol {
+    margin: 4pt 0 6pt 0;
+    padding-left: 18pt;
+}
+
+li {
+    margin-bottom: 2pt;
+}
+
+/* ── Horizontal rule ─────────────────────────────────────── */
+
+hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 10pt 0;
+}
+
+/* ── Page structure ──────────────────────────────────────── */
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1.5px solid #0b4f8a;
+    padding-bottom: 4pt;
+    margin-bottom: 8pt;
+}
+
+.report-header-left {
+    font-size: 8pt;
+    color: #4a5568;
+}
+
+.report-header-ticker {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #0b4f8a;
+    letter-spacing: 1px;
+}
+
+.report-header-date {
+    font-size: 8pt;
+    color: #718096;
+    text-align: right;
+}
+
+.report-section {
+    margin-bottom: 0;
+}
+
+.acbs-page-header {
+    display: flex;
+    justify-content: space-between;
+    color: #0b4f8a;
+    font-size: 8.5pt;
+    font-weight: 700;
+    border-bottom: 1px solid #0b4f8a;
+    padding-bottom: 3pt;
+    margin-bottom: 10pt;
+}
+
+.page-break {
+    page-break-after: always;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+/* ── Disclaimer ──────────────────────────────────────────── */
+
+.disclaimer {
+    font-size: 7.5pt;
+    color: #555555;
+    border-top: 1px solid #cccccc;
+    padding-top: 6pt;
+    margin-top: 10pt;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* ── Report footer ───────────────────────────────────────── */
+
+.report-footer {
+    font-size: 7pt;
+    color: #718096;
+    text-align: center;
+    border-top: 0.5px solid #e2e8f0;
+    padding-top: 4pt;
+    margin-top: 8pt;
+}
+
+/* ── Rating badge ─────────────────────────────────────────── */
+
+.rating-badge {
+    display: inline-block;
+    padding: 2pt 8pt;
+    border-radius: 3px;
+    font-weight: 700;
+    font-size: 9pt;
+    letter-spacing: 0.5px;
+}
+
+.rating-buy    { background: #c6f6d5; color: #22543d; }
+.rating-hold   { background: #fefcbf; color: #744210; }
+.rating-sell   { background: #fed7d7; color: #742a2a; }
+.rating-review { background: #e9d8fd; color: #44337a; }
+
+/* ── Snapshot table special styling ──────────────────────── */
+
+.snapshot-table td:first-child {
+    color: #2d3748;
+    font-weight: 500;
+    width: 55%;
+}
+
+.snapshot-table td:last-child {
+    font-weight: 700;
+    color: #1a3a6b;
+    text-align: right;
+}
+
+/* ── Missing-value content ────────────────────────────────── */
+
+.value-na {
+    color: #718096;
+    font-style: italic;
+}
+
+/* ── ACBS-style broker update layout ─────────────────────── */
+
+.acbs-page {
+    width: 100%;
+}
+
+.acbs-titlebar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 8pt;
+    align-items: flex-start;
+    border-bottom: 1.8px solid #0b4f8a;
+    padding-bottom: 5pt;
+    margin-bottom: 10pt;
+}
+
+.acbs-report-kicker {
+    color: #0b4f8a;
+    font-size: 15pt;
+    font-weight: 800;
+    letter-spacing: 0.1pt;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+}
+
+.acbs-date {
+    color: #555;
+    font-size: 8.5pt;
+    margin-top: 2pt;
+}
+
+.acbs-brand {
+    color: #0b4f8a;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-align: right;
+    max-width: 88pt;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.acbs-layout {
+    display: grid;
+    grid-template-columns: 36% minmax(0, 1fr);
+    column-gap: 10pt;
+    align-items: start;
+}
+
+.acbs-sidebar {
+    border-right: 1px solid #c7d7e8;
+    padding-right: 10pt;
+    font-size: 8pt;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.snapshot-page .acbs-sidebar .report-chart {
+    margin: 5pt 0 7pt;
+}
+
+.snapshot-page .acbs-sidebar .report-chart img {
+    max-height: 148pt;
+}
+
+.snapshot-page .acbs-sidebar .report-chart figcaption {
+    font-size: 7.2pt;
+}
+
+.snapshot-page .acbs-sidebar .broker-side-table {
+    margin: 5pt 0 8pt;
+}
+
+.snapshot-page .acbs-sidebar .broker-side-table td {
+    padding: 3pt 0;
+}
+
+.snapshot-page .acbs-sidebar .side-section-title {
+    margin: 7pt 0 4pt;
+}
+
+.analyst-card {
+    color: #333;
+    margin-bottom: 10pt;
+    line-height: 1.35;
+}
+
+.analyst-name {
+    color: #0b4f8a;
+    font-weight: 700;
+    font-size: 9pt;
+}
+
+.recommendation-card {
+    border-top: 2px solid #0b4f8a;
+    border-bottom: 1px solid #0b4f8a;
+    padding: 6pt 0;
+    margin-bottom: 8pt;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+}
+
+.recommendation-card .rec-label {
+    font-size: 8pt;
+    color: #555;
+}
+
+.recommendation-card .rec-value {
+    font-size: 15.5pt;
+    line-height: 1.1;
+    color: #0b4f8a;
+    font-weight: 800;
+    margin-top: 2pt;
+    overflow-wrap: anywhere;
+}
+
+.recommendation-card.buy .rec-value { color: #087f5b; }
+.recommendation-card.hold .rec-value { color: #9a6700; }
+.recommendation-card.sell .rec-value { color: #b42318; }
+.recommendation-card.review .rec-value { color: #0b4f8a; }
+
+.rec-sub,
+.rec-sector,
+.rec-raw {
+    font-size: 8pt;
+    color: #333;
+    margin-top: 3pt;
+    line-height: 1.28;
+    overflow-wrap: anywhere;
+}
+
+.rec-raw {
+    color: #667085;
+    font-size: 7.2pt;
+}
+
+.broker-side-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.4pt;
+    margin: 6pt 0 10pt 0;
+    /* Fixed layout pins the label/value columns. Without it, the sidebar's
+       overflow-wrap:anywhere lets a long value (e.g. the as-of timestamp) collapse
+       the label column to 1-char min-content → labels wrap one character per line. */
+    table-layout: fixed;
+}
+
+.broker-side-table td {
+    border-bottom: 0.4px solid #d7e0ea;
+    padding: 3pt 0;
+    vertical-align: top;
+}
+
+.broker-side-table td:first-child {
+    color: #333;
+    width: 56%;
+    /* Wrap labels at word boundaries, not per character. */
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.broker-side-table td:last-child {
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.broker-side-table td:last-child {
+    color: #111;
+    font-weight: 700;
+    text-align: right;
+}
+
+.broker-side-table.compact td {
+    font-size: 7.9pt;
+}
+
+.side-section-title {
+    color: #0b4f8a;
+    font-weight: 800;
+    font-size: 8.2pt;
+    border-bottom: 1px solid #0b4f8a;
+    margin: 9pt 0 5pt;
+    padding-bottom: 2pt;
+}
+
+.mini-chart img {
+    max-height: 130pt;
+    object-fit: contain;
+}
+
+.acbs-sidebar .model-table-block h2 {
+    color: #0b4f8a;
+    font-size: 8.2pt;
+    margin: 7pt 0 4pt;
+    padding-bottom: 2pt;
+    border-bottom: 1px solid #0b4f8a;
+}
+
+.trading-performance-table {
+    margin: 0;
+    table-layout: fixed;
+}
+
+.trading-performance-table th,
+.trading-performance-table td {
+    font-size: 7.5pt;
+    padding: 2.4pt;
+}
+
+.table-source-note {
+    color: #667085;
+    font-size: 7.3pt;
+    line-height: 1.3;
+    margin-top: 2pt;
+}
+
+.chart-placeholder {
+    border: 1px dashed #a8b8c8;
+    color: #667085;
+    background: #f6f9fc;
+    padding: 14pt 8pt;
+    text-align: center;
+    font-size: 7.6pt;
+}
+
+.acbs-main {
+    font-size: 8.7pt;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.acbs-main h1 {
+    font-size: 11.7pt;
+    line-height: 1.18;
+    color: #0b4f8a;
+    border-bottom: none;
+    margin-bottom: 7pt;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.acbs-main h2 {
+    color: #0b4f8a;
+    font-size: 10.5pt;
+    border-bottom: none;
+    margin: 9pt 0 4pt;
+}
+
+.lead-thesis {
+    font-size: 9pt;
+    line-height: 1.45;
+    color: #222;
+    margin-bottom: 9pt;
+}
+
+.acbs-fin-table {
+    font-size: 8pt;
+    margin-top: 4pt;
+}
+
+.acbs-fin-table th {
+    background: #0b4f8a;
+    color: #fff;
+}
+
+/* ── Client-facing IMP/ACBS financial tables ─────────────── */
+
+/* Phase 1: allow large sections to flow across pages naturally.
+ * page-break-inside: avoid was pushing tall sections to new pages, creating
+ * blank pages. Individual tables/charts still have their own avoid rules. */
+.client-report-page {
+    break-inside: auto;
+}
+
+/* Chapter-break: explicit hard page-break before a major section. */
+.chapter-break {
+    break-before: page;
+    page-break-before: always;
+}
+
+.model-table-block {
+    margin: 8pt 0 12pt;
+}
+
+.model-table-block h2 {
+    margin-bottom: 2pt;
+}
+
+.table-unit {
+    color: #475467;
+    font-size: 7.5pt;
+    margin-bottom: 3pt;
+}
+
+.financial-model-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+    table-layout: fixed;
+    page-break-inside: avoid;
+}
+
+.financial-model-table thead {
+    display: table-header-group;
+}
+
+.financial-model-table th {
+    background: #ffffff;
+    color: #0b4f8a;
+    font-weight: 800;
+    border-top: 1.2pt solid #0b4f8a;
+    border-bottom: 1.2pt solid #0b4f8a;
+    padding: 3pt 3.4pt;
+}
+
+.financial-model-table td {
+    border-bottom: 0.5pt solid #b8d2e8;
+    padding: 2.8pt 3.4pt;
+    vertical-align: top;
+}
+
+.financial-model-table th:first-child,
+.financial-model-table td:first-child {
+    width: 32%;
+    font-weight: 600;
+}
+
+.financial-model-table .numeric {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.report-chart {
+    margin: 6pt 0 8pt;
+    page-break-inside: avoid;
+}
+
+.report-chart img {
+    width: 100%;
+    max-height: 150pt;
+    object-fit: contain;
+}
+
+.report-chart figcaption {
+    color: #667085;
+    font-size: 7.8pt;
+    margin-top: 2pt;
+}
+
+.two-chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 12pt;
+    align-items: start;
+}
+
+/* ── Key sources list (Nguồn tham khảo chính) ────────────── */
+
+.source-list {
+    margin: 4pt 0 8pt 0;
+    padding-left: 16pt;
+    font-size: 7.8pt;
+    color: #333;
+    line-height: 1.45;
+}
+
+.source-list li {
+    margin-bottom: 3pt;
+    padding-left: 2pt;
+}
+
+.source-caption {
+    color: #667085;
+    font-size: 7pt;
+    font-style: italic;
+    margin-top: 2pt;
+}
+
+/* ── Sensitivity / valuation matrix: full-width is allowed ── */
+
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+    page-break-inside: avoid;
+}
+
+.matrix-table th {
+    background: #0b4f8a;
+    color: #fff;
+    padding: 3pt 4pt;
+    text-align: center;
+}
+
+.matrix-table td {
+    text-align: right;
+    padding: 2.4pt 4pt;
+    border-bottom: 0.5pt solid #cdddee;
+}
+
+/* ── Variance / growth colouring ─────────────────────────── */
+
+/* Positive value (revenue growth, margin expansion, etc.) */
+.variance-positive {
+    color: #087f5b;
+    font-weight: 600;
+}
+
+/* Negative value (decline, cost overrun, etc.) */
+.variance-negative {
+    color: #b42318;
+    font-weight: 600;
+}
+
+/* Subtotal / section-break row inside a financial table */
+tr.row-subtotal td {
+    border-top: 1px solid #0b4f8a;
+    border-bottom: 1px solid #0b4f8a;
+    font-weight: 700;
+    background: #f0f4fa;
+}
+
+/* Total / Grand-total row */
+tr.row-total td {
+    border-top: 1.5px solid #0b4f8a;
+    border-bottom: 1.5px solid #0b4f8a;
+    font-weight: 800;
+    background: #e8eef8;
+}
+
+/* Indented line item (level 1) — used in KQKD sub-rows */
+.row-indent-1 td:first-child {
+    padding-left: 12pt;
+    font-weight: 400;
+    color: #4a5568;
+}
+
+/* Indented line item (level 2) */
+.row-indent-2 td:first-child {
+    padding-left: 22pt;
+    font-weight: 400;
+    color: #718096;
+    font-size: 7pt;
+}
+
+/* Sensitivity matrix: colour cells by upside/downside magnitude */
+.matrix-cell-high    { background: #c6f6d5; color: #22543d; }
+.matrix-cell-mid     { background: #e9d8fd; color: #44337a; }
+.matrix-cell-low     { background: #fed7d7; color: #742a2a; }
+.matrix-cell-neutral { background: #f7fafc; color: #2d3748; }
+
+/* ── Running footer (Phase 6) ─────────────────────────────── */
+
+/* Hidden on screen; shown on every printed page via position:fixed.
+ * Works for Chrome headless print.  WeasyPrint uses @page margin boxes below. */
+.print-running-footer {
+    display: none;
+}
+
+/* ── Print overrides ─────────────────────────────────────── */
+
+@media print {
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .page-break {
+        page-break-after: always;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    /* Risk 6: Prevent headings from being orphaned at the bottom of a page. */
+    h1, h2, h3 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    /* Running footer — fixed element visible on every printed page (Chrome). */
+    .print-running-footer {
+        display: block;
+        position: fixed;
+        bottom: 6mm;
+        left: 16mm;
+        right: 16mm;
+        font-size: 7pt;
+        color: #718096;
+        border-top: 0.5px solid #e2e8f0;
+        padding-top: 3pt;
+        text-align: center;
+        font-family: "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+    }
+}
+
+/* ── WeasyPrint page margin boxes (page number + brand) ──── */
+/* counter(page) / @page margin boxes are WeasyPrint-only;
+ * Chrome headless uses the .print-running-footer element above. */
+
+@page {
+    @bottom-left {
+        content: "Nghiên cứu cổ phiếu";
+        font-family: "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+        font-size: 7pt;
+        color: #718096;
+    }
+    @bottom-right {
+        content: counter(page);
+        font-family: "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+        font-size: 7pt;
+        color: #718096;
+    }
+}
+
+/* Suppress footer on cover page (first page) */
+@page :first {
+    @bottom-left  { content: ""; }
+    @bottom-right { content: ""; }
+}
+
+/* FPTS-inspired research layout overrides.
+ * These rules intentionally sit last so older report components inherit a
+ * cleaner broker-report style without a broad template rewrite. */
+
+:root {
+    --research-blue: #005596;
+    --research-blue-dark: #003f73;
+    --research-green: #008060;
+    --research-red: #b42318;
+    --research-gray-050: #f5f7fa;
+    --research-gray-100: #eef2f6;
+    --research-gray-300: #d8dee6;
+    --research-text: #1f2933;
+}
+
+@page {
+    size: 210mm 297mm;
+    margin: 13mm 12mm 22mm 12mm;
+}
+
+body {
+    font-size: 8.9pt;
+    line-height: 1.34;
+    color: var(--research-text);
+}
+
+h1 {
+    color: var(--research-blue);
+    font-size: 14pt;
+    line-height: 1.16;
+    border-bottom: none;
+    padding-bottom: 0;
+    margin: 0 0 7pt;
+}
+
+h2 {
+    color: var(--research-blue);
+    font-size: 10.4pt;
+    border-bottom: none;
+    padding-bottom: 0;
+    margin: 8pt 0 4pt;
+}
+
+p {
+    margin: 3pt 0 5pt;
+}
+
+table,
+.financial-model-table,
+.matrix-table {
+    page-break-inside: auto;
+    break-inside: auto;
+}
+
+thead th,
+.financial-model-table th,
+.matrix-table th {
+    background: var(--research-blue);
+    color: #ffffff;
+    border: none;
+    font-size: 8.2pt;
+    padding: 3.3pt 4pt;
+}
+
+tbody td,
+.financial-model-table td,
+.matrix-table td {
+    border-bottom: 0.35pt solid var(--research-gray-300);
+    padding: 3pt 4pt;
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--research-gray-050);
+}
+
+.report-section {
+    margin-bottom: 0;
+}
+
+.report-section:first-of-type {
+    break-before: auto;
+    page-break-before: auto;
+}
+
+.chapter-break {
+    break-before: page;
+    page-break-before: always;
+}
+
+.acbs-page-header {
+    border-bottom: none;
+    color: var(--research-blue);
+    font-size: 7.8pt;
+    margin-bottom: 6pt;
+    padding-bottom: 0;
+}
+
+.fpts-cover-topline {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    color: var(--research-blue);
+    font-weight: 800;
+    margin-bottom: 4pt;
+}
+
+.fpts-cover-brand {
+    font-size: 13.5pt;
+}
+
+.fpts-cover-report-type {
+    font-size: 9pt;
+    text-align: right;
+}
+
+.fpts-cover-meta {
+    display: flex;
+    justify-content: space-between;
+    background: #e6ebf1;
+    color: #24364a;
+    font-size: 8.2pt;
+    font-weight: 800;
+    padding: 3pt 5pt;
+    margin-bottom: 0;
+}
+
+.fpts-company-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 8pt;
+    align-items: center;
+    background: var(--research-blue);
+    color: #ffffff;
+    font-size: 12.4pt;
+    font-weight: 800;
+    line-height: 1.2;
+    padding: 5pt 7pt;
+    margin-bottom: 8pt;
+    text-transform: uppercase;
+}
+
+.fpts-company-bar div:last-child {
+    font-size: 8.5pt;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.acbs-layout {
+    grid-template-columns: 34% minmax(0, 1fr);
+    column-gap: 11pt;
+}
+
+.acbs-sidebar {
+    border-right: 0.6pt solid var(--research-gray-300);
+    padding-right: 9pt;
+    font-size: 8.1pt;
+}
+
+.analyst-card {
+    margin-bottom: 7pt;
+}
+
+.analyst-name,
+.side-section-title {
+    color: var(--research-blue);
+    font-weight: 800;
+}
+
+.side-section-title {
+    border-bottom: none;
+    margin: 8pt 0 3pt;
+    padding-bottom: 0;
+}
+
+.broker-side-table {
+    font-size: 8.2pt;
+    margin: 5pt 0 7pt;
+}
+
+.broker-side-table td {
+    border-bottom: 0.3pt solid var(--research-gray-300);
+    padding: 2.8pt 0;
+}
+
+.broker-side-table.compact td {
+    font-size: 7.8pt;
+}
+
+.snapshot-page .acbs-sidebar .report-chart img {
+    max-height: 132pt;
+}
+
+.recommendation-card {
+    border-top: none;
+    border-bottom: none;
+    background: #f1f5f9;
+    border-left: 4pt solid var(--research-blue);
+    padding: 6pt 8pt;
+    margin: 0 0 8pt;
+}
+
+.recommendation-card.buy {
+    border-left-color: var(--research-green);
+}
+
+.recommendation-card.sell,
+.recommendation-card.underperform {
+    border-left-color: var(--research-red);
+}
+
+.recommendation-card .rec-value {
+    font-size: 19pt;
+    color: var(--research-green);
+}
+
+.lead-thesis {
+    font-size: 9.2pt;
+    line-height: 1.42;
+    margin-bottom: 7pt;
+}
+
+.fpts-section {
+    margin: 7pt 0 10pt;
+}
+
+.fpts-section-title {
+    background: var(--research-blue);
+    color: #ffffff;
+    font-size: 9pt;
+    font-weight: 800;
+    line-height: 1.2;
+    padding: 3.2pt 5pt;
+    margin: 0 0 5pt;
+    text-transform: uppercase;
+    break-after: avoid;
+    page-break-after: avoid;
+}
+
+.model-table-block {
+    margin: 6pt 0 9pt;
+}
+
+.model-table-block h2 {
+    color: var(--research-blue);
+    font-size: 9.2pt;
+    border-bottom: none;
+    margin: 0 0 3pt;
+    padding-bottom: 0;
+}
+
+.main-financial-table,
+.driver-table,
+.matrix-table {
+    font-size: 8.2pt;
+    table-layout: fixed;
+}
+
+.appendix-financial-table {
+    font-size: 5.8pt;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.appendix-financial-table th,
+.appendix-financial-table td {
+    padding: 1.4pt 1.3pt;
+    overflow-wrap: anywhere;
+}
+
+.financial-model-table th:first-child,
+.financial-model-table td:first-child {
+    width: 30%;
+}
+
+.main-financial-table .numeric,
+.appendix-financial-table .numeric {
+    text-align: right;
+    white-space: normal;
+    font-size: 5.6pt;
+}
+
+.table-unit,
+.table-source-note,
+.report-chart figcaption {
+    color: #667085;
+    font-size: 7.3pt;
+    line-height: 1.25;
+}
+
+.report-chart {
+    margin: 5pt 0 8pt;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.report-chart img {
+    max-height: 176pt;
+}
+
+.two-chart-grid {
+    column-gap: 9pt;
+    margin: 4pt 0 7pt;
+}
+
+.two-chart-grid .report-chart img {
+    max-height: 142pt;
+}
+
+.matrix-table th,
+.matrix-table td {
+    text-align: center;
+}
+
+.matrix-cell-high {
+    background: #dff4ea;
+    color: #05603a;
+}
+
+.matrix-cell-low {
+    background: #fde7e9;
+    color: #9f1239;
+}
+
+.matrix-cell-neutral {
+    background: #f6f8fb;
+    color: #24364a;
+}
+
+.source-list {
+    font-size: 8pt;
+}
+
+.report-footer,
+.print-running-footer {
+    border-top: 0.4pt solid var(--research-gray-300);
+}
+
+.sensitivity-section {
+    break-before: page;
+    page-break-before: always;
+}
+
+.driver-section {
+    break-before: page;
+    page-break-before: always;
+}
+
+.report-footer {
+    display: none;
+}
+
+@media print {
+    body {
+        padding-bottom: 8mm;
+    }
+
+    .print-running-footer {
+        display: none !important;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * READABILITY FLOOR — 11pt body text in the rendered PDF.
+ *
+ * The report has no page budget, so nothing is shrunk to fit a page count.
+ * This block sits last so it overrides every earlier (smaller) font-size.
+ * The final table wrapping and @page overrides prevent Chrome from applying
+ * shrink-to-fit, so CSS point values map directly to the extracted PDF text
+ * layer. Headings stay proportionally larger.
+ * Only the marginal page-number chrome (@page boxes) stays small.
+ * ════════════════════════════════════════════════════════════════════ */
+
+body {
+    font-size: 11pt !important;
+    line-height: 1.5;
+}
+
+h1, .acbs-main h1 { font-size: 19pt !important; line-height: 1.2; }
+h2, .acbs-main h2, .model-table-block h2,
+.acbs-sidebar .model-table-block h2 { font-size: 14pt !important; }
+h3 { font-size: 12.5pt !important; }
+h4, h5, h6 { font-size: 11.5pt !important; }
+
+/* All running text, tables, sidebars, captions, lists and notes are 11pt. */
+p, li, td, th, span, div, a, strong, em, blockquote,
+table, thead th, tbody td,
+.financial-model-table, .financial-model-table th, .financial-model-table td,
+.main-financial-table, .main-financial-table .numeric,
+.appendix-financial-table, .appendix-financial-table th,
+.appendix-financial-table td, .appendix-financial-table .numeric,
+.driver-table, .matrix-table, .matrix-table th, .matrix-table td,
+.broker-side-table, .broker-side-table td, .broker-side-table.compact td,
+.trading-performance-table, .trading-performance-table th, .trading-performance-table td,
+.acbs-sidebar, .acbs-main, .acbs-page-header, .acbs-date, .acbs-brand,
+.analyst-name, .analyst-card, .side-section-title,
+.recommendation-card .rec-label, .rec-sub, .rec-sector, .rec-raw,
+.lead-thesis, .table-unit, .table-source-note, .report-chart figcaption,
+.source-list, .source-list li, .citation-legend, .citation-ref,
+.report-status-table td, .report-status-table th,
+.fpts-section-title, .fpts-cover-meta, .fpts-cover-report-type,
+.fpts-company-bar div:last-child, .disclaimer {
+    font-size: 11pt !important;
+}
+
+/* Cover hero recommendation and section banners can be a touch larger. */
+.recommendation-card .rec-value { font-size: 22pt !important; }
+.fpts-section-title { font-size: 13pt !important; }
+.fpts-company-bar { font-size: 15pt !important; }
+.fpts-cover-brand { font-size: 16pt !important; }
+
+/* Wide multi-year appendix tables: keep cells from overflowing the page
+ * now that every cell renders at 11pt — allow long labels to wrap and numbers
+ * to use tight horizontal padding. */
+.appendix-financial-table { table-layout: fixed; width: 100%; }
+.appendix-financial-table th,
+.appendix-financial-table td { padding: 3pt 2pt; overflow-wrap: anywhere; }
+.appendix-financial-table .numeric { white-space: normal; }
+
+/* Compact final PDF flow.
+ * The report should read like a continuous research note, not a slide deck.
+ * These final overrides remove forced page cuts and reduce whitespace while
+ * preserving readable body text and table density. */
+.chapter-break,
+.sensitivity-section,
+.driver-section,
+.report-section {
+    break-before: auto !important;
+    page-break-before: auto !important;
+}
+
+.report-section {
+    margin-bottom: 8pt !important;
+}
+
+body {
+    font-size: 11pt !important;
+    line-height: 1.36 !important;
+}
+
+h1, .acbs-main h1 { font-size: 17pt !important; line-height: 1.15 !important; margin-bottom: 5pt !important; }
+h2, .acbs-main h2, .model-table-block h2,
+.acbs-sidebar .model-table-block h2 { font-size: 12.5pt !important; margin: 6pt 0 3pt !important; }
+h3 { font-size: 11.5pt !important; margin: 6pt 0 3pt !important; }
+h4, h5, h6 { font-size: 11pt !important; margin: 5pt 0 2pt !important; }
+
+p, li, td, th, span, div, a, strong, em, blockquote,
+table, thead th, tbody td,
+.financial-model-table, .financial-model-table th, .financial-model-table td,
+.main-financial-table, .main-financial-table .numeric,
+.driver-table, .matrix-table, .matrix-table th, .matrix-table td,
+.broker-side-table, .broker-side-table td, .broker-side-table.compact td,
+.trading-performance-table, .trading-performance-table th, .trading-performance-table td,
+.acbs-sidebar, .acbs-main, .acbs-page-header, .acbs-date, .acbs-brand,
+.analyst-name, .analyst-card, .side-section-title,
+.recommendation-card .rec-label, .rec-sub, .rec-sector, .rec-raw,
+.lead-thesis, .table-unit, .table-source-note, .report-chart figcaption,
+.source-list, .source-list li, .citation-legend, .citation-ref,
+.report-status-table td, .report-status-table th,
+.fpts-section-title, .fpts-cover-meta, .fpts-cover-report-type,
+.fpts-company-bar div:last-child, .disclaimer {
+    font-size: 11pt !important;
+}
+
+table,
+.financial-model-table,
+.matrix-table,
+.appendix-financial-table {
+    margin: 4pt 0 6pt !important;
+}
+
+thead th,
+tbody td,
+.financial-model-table th,
+.financial-model-table td,
+.matrix-table th,
+.matrix-table td,
+.appendix-financial-table th,
+.appendix-financial-table td {
+    padding: 2.2pt 2.8pt !important;
+}
+
+.fpts-section,
+.model-table-block,
+.report-chart,
+.two-chart-grid {
+    margin-top: 4pt !important;
+    margin-bottom: 6pt !important;
+}
+
+.recommendation-card .rec-value { font-size: 18pt !important; }
+.fpts-section-title { font-size: 11pt !important; padding: 2.5pt 4pt !important; }
+.fpts-company-bar { font-size: 13pt !important; padding: 4pt 5pt !important; margin-bottom: 5pt !important; }
+.fpts-cover-brand { font-size: 14pt !important; }
+
+.report-chart img { max-height: 205pt !important; }
+.snapshot-page .acbs-sidebar .report-chart img { max-height: 165pt !important; }
+.two-chart-grid .report-chart img { max-height: 175pt !important; }
+
+@page {
+    size: 210mm 297mm;
+    margin: 11mm 8mm 20mm 8mm;
+}
+
+table,
+.financial-model-table,
+.matrix-table,
+.appendix-financial-table {
+    max-width: 100% !important;
+}
+
+.financial-model-table .numeric,
+.matrix-table .numeric,
+.driver-table .numeric,
+.broker-side-table td:last-child {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+.acbs-page-header {
+    display: none !important;
+}
+
+.fpts-section,
+.model-table-block,
+.report-chart,
+.two-chart-grid {
+    margin-top: 8pt !important;
+    margin-bottom: 12pt !important;
+}
+
+table,
+.financial-model-table,
+.matrix-table,
+.appendix-financial-table {
+    border-spacing: 0 !important;
+    line-height: 1.42 !important;
+    margin: 7pt 0 11pt !important;
+}
+
+thead th,
+tbody td,
+.financial-model-table th,
+.financial-model-table td,
+.matrix-table th,
+.matrix-table td,
+.appendix-financial-table th,
+.appendix-financial-table td {
+    padding: 4.2pt 5pt !important;
+    line-height: 1.42 !important;
+}
+
+.fpts-section-title {
+    margin-top: 4pt !important;
+    margin-bottom: 7pt !important;
+}
+
+p {
+    margin: 4pt 0 7pt !important;
+}
+
+/* Final report-polish overrides requested from DHG visual QA. */
+h1,
+.acbs-main h1 {
+    font-size: 19pt !important;
+    line-height: 1.18 !important;
+    margin: 10pt 0 7pt !important;
+}
+
+h2,
+.acbs-main h2 {
+    font-size: 14pt !important;
+    line-height: 1.22 !important;
+    margin: 9pt 0 5pt !important;
+}
+
+h3 {
+    font-size: 12.5pt !important;
+    line-height: 1.24 !important;
+    margin: 7pt 0 4pt !important;
+}
+
+.model-table-block h2,
+.acbs-sidebar .model-table-block h2 {
+    font-size: 12pt !important;
+    line-height: 1.2 !important;
+    margin: 6pt 0 4pt !important;
+}
+
+.fpts-section-title {
+    font-size: 11.5pt !important;
+    line-height: 1.18 !important;
+    margin-top: 7pt !important;
+    margin-bottom: 8pt !important;
+}
+
+.two-chart-grid {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+    column-gap: 0 !important;
+}
+
+.report-chart {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin: 9pt 0 5pt !important;
+}
+
+.report-chart img,
+.two-chart-grid .report-chart img {
+    display: block !important;
+    width: 100% !important;
+    max-height: 245pt !important;
+    object-fit: contain !important;
+}
+
+.snapshot-page .acbs-sidebar .report-chart img {
+    max-height: 180pt !important;
+}
+
+.chart-commentary {
+    color: var(--research-text) !important;
+    font-size: 11pt !important;
+    line-height: 1.42 !important;
+    margin: 2pt 0 11pt !important;
+}
+
+.financial-model-table th:not(:first-child),
+.financial-model-table td.numeric,
+.appendix-financial-table th:not(:first-child),
+.appendix-financial-table td.numeric,
+.matrix-table th,
+.matrix-table td,
+.driver-table th:not(:first-child),
+.driver-table td.numeric,
+.broker-side-table td:last-child,
+.trading-performance-table th,
+.trading-performance-table td.numeric {
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+}
+
+.financial-model-table th:first-child,
+.financial-model-table td:first-child,
+.appendix-financial-table th:first-child,
+.appendix-financial-table td:first-child,
+.driver-table th:first-child,
+.driver-table td:first-child {
+    overflow-wrap: anywhere !important;
+}
+
+.trading-performance-table {
+    table-layout: auto !important;
+}
+
+.trading-performance-table th:first-child,
+.trading-performance-table td:first-child {
+    width: 34% !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+}
+
+.driver-section .model-table-block {
+    break-before: page !important;
+    page-break-before: always !important;
+}
+
+body,
+p, li, td, th, span, div, a, strong, em, blockquote,
+table, thead th, tbody td,
+.financial-model-table, .financial-model-table th, .financial-model-table td,
+.main-financial-table, .main-financial-table .numeric,
+.appendix-financial-table, .appendix-financial-table th,
+.appendix-financial-table td, .appendix-financial-table .numeric,
+.driver-table, .matrix-table, .matrix-table th, .matrix-table td,
+.broker-side-table, .broker-side-table td, .broker-side-table.compact td,
+.trading-performance-table, .trading-performance-table th, .trading-performance-table td,
+.acbs-sidebar, .acbs-main, .analyst-name, .analyst-card, .side-section-title,
+.recommendation-card .rec-label, .rec-sub, .rec-sector, .rec-raw,
+.lead-thesis, .table-unit, .table-source-note, .report-chart figcaption,
+.chart-commentary, .chart-takeaway, .source-list, .source-list li,
+.citation-legend, .citation-ref, .report-status-table td, .report-status-table th,
+.fpts-cover-meta, .fpts-cover-report-type, .fpts-company-bar div:last-child, .disclaimer {
+    font-size: 11pt !important;
+}
+
+.profit-bridge-table {
+    table-layout: fixed !important;
+}
+
+.profit-bridge-table .bridge-metric-col { width: 27%; }
+.profit-bridge-table .bridge-period-col { width: 12%; }
+.profit-bridge-table .bridge-delta-col { width: 14%; }
+.profit-bridge-table .bridge-comment-col { width: 35%; }
+
+.profit-bridge-table th,
+.profit-bridge-table td {
+    min-width: 0 !important;
+}
+
+.profit-bridge-table th:last-child,
+.profit-bridge-table td.bridge-comment {
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    text-align: left !important;
+}
+
+.section-insights {
+    margin: 4pt 0 8pt;
+}
+
+.section-insight {
+    border-left: 2pt solid #0b4f8a;
+    padding-left: 6pt;
+    margin: 4pt 0 6pt !important;
+}
+
+.full-financial-table th,
+.full-financial-table td,
+.appendix-financial-table th,
+.appendix-financial-table td {
+    padding-left: 1.5pt !important;
+    padding-right: 1.5pt !important;
+}
+
+h1, .acbs-main h1 { font-size: 19pt !important; }
+h2, .acbs-main h2 { font-size: 14pt !important; }
+h3 { font-size: 12.5pt !important; }
+.fpts-section-title,
+.model-table-block h2,
+.acbs-sidebar .model-table-block h2 {
+    font-size: 11pt !important;
+}
+
+.driver-table {
+    table-layout: fixed !important;
+}
+
+.driver-table th:last-child,
+.driver-table td:last-child {
+    width: 36% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+/* The five-column stock-performance table is the only compact sidebar
+ * exception; keep it inside the original broker-style two-column cover. */
+.snapshot-page .trading-performance-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+.snapshot-page .trading-performance-table th,
+.snapshot-page .trading-performance-table td {
+    font-size: 9.5pt !important;
+    padding-left: 1pt !important;
+    padding-right: 1pt !important;
+    white-space: normal !important;
+    overflow-wrap: normal !important;
+}
+
+.snapshot-page .trading-performance-table th:first-child,
+.snapshot-page .trading-performance-table td:first-child {
+    width: 32% !important;
+}
+
+.news-materiality-table {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    table-layout: fixed !important;
+}
+
+.news-materiality-table th,
+.news-materiality-table td {
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    vertical-align: top !important;
+}
+
+.news-materiality-table th:nth-child(1),
+.news-materiality-table td:nth-child(1) {
+    width: 36% !important;
+}
+
+.news-materiality-table th:nth-child(2),
+.news-materiality-table td:nth-child(2) {
+    width: 24% !important;
+}
+
+.news-materiality-table th:nth-child(3),
+.news-materiality-table td:nth-child(3) {
+    width: 40% !important;
+    text-align: left !important;
+}
+
+.snapshot-page .broker-side-table {
+    table-layout: fixed !important;
+}
+
+.snapshot-page .broker-side-table td:first-child {
+    width: 48% !important;
+}
+
+.snapshot-page .broker-side-table td:last-child {
+    width: 52% !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+}
+
+  </style>
+  <!-- Recommendation colour classes (not in base CSS) -->
+  <style>
+.recommendation-buy        { background: #e6f4ea; border-left: 4px solid #34a853; }
+.recommendation-hold       { background: #fef7e0; border-left: 4px solid #fbbc04; }
+.recommendation-sell       { background: #fce8e6; border-left: 4px solid #ea4335; }
+.recommendation-accumulate { background: #e8f0fe; border-left: 4px solid #1a73e8; }
+.recommendation-reduce     { background: #fff3e0; border-left: 4px solid #ff9800; }
+.recommendation-review     { background: #f5f5f5; border-left: 4px solid #9e9e9e; }
+/* Override recommendation-card base when a colour modifier is present */
+.standalone-recommendation-card.recommendation-buy,
+.standalone-recommendation-card.recommendation-hold,
+.standalone-recommendation-card.recommendation-sell,
+.standalone-recommendation-card.recommendation-accumulate,
+.standalone-recommendation-card.recommendation-reduce,
+.standalone-recommendation-card.recommendation-review {
+  border-top: none;
+  border-bottom: none;
+  padding: 10px 16px;
+  margin: 12px 0;
+  border-radius: 4px;
+  font-size: 11pt;
+}
+  </style>
+</head>
+<body>
+
+  <!-- ── Rating → CSS class mapping ───────────────────────── -->
+  
+  
+
+  <!-- ── Recommendation summary banner
+       Suppressed when the first section (snapshot cover page) already contains
+       an embedded recommendation hero — avoids a near-blank banner page. -->
+  
+
+  <!-- ── Report Sections ───────────────────────────────── -->
+  
+  <div class="report-section" id="section-snapshot">
+    
+    <p>Gi?? m???c ti??u hi???n t???i ??? c???n r?? so??t.</p>
+  </div>
+  
+
+  <!-- ── Report Footer ─────────────────────────────────── -->
+  <div class="report-footer">
+    Nghiên cứu cổ phiếu | DHG | 2026-06-01 |
+    Tài liệu này chỉ dành cho mục đích nghiên cứu học thuật.
+  </div>
+
+  <!-- ── Running footer — every printed page (Chrome headless) ── -->
+  <!-- Hidden on screen; position:fixed makes it appear on all print pages.
+       WeasyPrint uses @page margin boxes in the CSS instead. -->
+  <div class="print-running-footer" aria-hidden="true">
+    Nghiên cứu cổ phiếu &nbsp;·&nbsp; DHG &nbsp;·&nbsp; 2026-06-01
+  </div>
+
+</body>
+</html>

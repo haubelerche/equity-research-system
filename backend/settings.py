@@ -34,6 +34,9 @@ class Settings:
         "REPORT_UNIVERSE_CSV",
         "config/dataset/universe/pharma_vn_universe.csv",
     )
+    storage_inventory_timeout_sec: float = float(os.getenv("STORAGE_INVENTORY_TIMEOUT_SEC", "2.5"))
+    storage_file_timeout_sec: float = float(os.getenv("STORAGE_FILE_TIMEOUT_SEC", "15.0"))
+    storage_api_max_attempts: int = int(os.getenv("STORAGE_API_MAX_ATTEMPTS", "1"))
     cors_allow_origins: tuple[str, ...] = _csv_env(
         "CORS_ALLOW_ORIGINS",
         "http://localhost:5173,http://localhost:4173,https://multi-agent-equity-research.vercel.app",

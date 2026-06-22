@@ -31,7 +31,7 @@ data/candidate_facts/
 data/reconciliation/
 reports/
 artifacts/
-storage/
+/storage/
 output/
 
 # Frontend dev/build artifacts are served by Vercel, not the Railway API image.

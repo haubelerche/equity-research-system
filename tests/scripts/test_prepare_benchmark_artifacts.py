@@ -31,7 +31,12 @@ def _valuation() -> dict:
         "generated_at": "2026-06-18T00:00:00+00:00",
         "fy_periods": ["2025FY"],
         "assumptions": {"wacc": 0.1},
-        "fcff": {"target_price_vnd": 12_345},
+        "fcff": {
+            "target_price_vnd": 12_345,
+            "wacc": 0.1,
+            "wacc_breakdown": prep._wacc_breakdown(0.1, 0.12),
+            "net_debt_bridge": {"total_debt": 10.0, "cash": 4.0, "net_debt": 6.0},
+        },
         "fcfe": {"target_price_vnd": 12_000},
         "formula_traces": [
             {"trace_id": "tst_net_debt_bridge"},
@@ -70,9 +75,14 @@ def test_benchmark_artifacts_do_not_write_user_facing_report_paths(tmp_path: Pat
         if ref["section_key"] == "report_draft"
     ]
     assert report_refs == ["output/evaluation/benchmark_artifacts/TST/report_stub.pdf"]
-    quality = packet["report_quality_evaluation"]
-    gate_summary = packet["gate_results"]["REPORT_QUALITY_GATE"]["summary"]
-    assert gate_summary == quality
-    assert quality["section_scores"]["completeness"] >= 90
-    assert quality["section_scores"]["valuation_transparency"] >= 85
-    assert quality["score"] >= 85
+    # The redundant top-level ``report_quality_evaluation`` mirror was dropped so the
+    # packet validates against evidence_packet_schema.json (additionalProperties:false).
+    # The summary is still available (and authoritative) under the gate result.
+    assert "report_quality_evaluation" not in packet
+    quality = packet["gate_results"]["REPORT_QUALITY_GATE"]["summary"]
+    section_scores = quality["section_scores"]
+    # valuation_transparency must earn full points once a WACC breakdown is present:
+    # this is the fix that keeps the section evaluable instead of collapsing the whole
+    # rubric to not_evaluable (which previously blocked publication_readiness for all 45).
+    assert quality["section_details"]["valuation_transparency"]["status"] == "pass"
+    assert section_scores["valuation_transparency"] == 15

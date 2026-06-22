@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { BenchmarkMetricResult, SectionScoreDetail } from "../../api/types";
 import type { MetricDef } from "../../lib/evalStatus";
 import {
@@ -74,64 +75,65 @@ const SUMMARY_KEYS = new Set([
 ]);
 
 const FIELD_LABELS: Record<string, string> = {
-  actual: "Actual",
-  add_keys: "Formula add keys",
-  agent_id: "Agent ID",
-  agent_role: "Agent role",
-  artifact_id: "Artifact ID",
-  artifact_ids: "Artifact IDs",
-  artifact_producer_key: "Artifact producer",
-  artifact_upload_failures: "Artifact upload failures",
-  calculation_steps: "Calculation steps",
-  cash: "Cash",
-  claim_ledger_path: "Claim ledger path",
-  components: "Components",
-  expected: "Expected",
-  expected_source_tiers: "Expected source tiers",
-  expected_terms: "Expected terms",
-  explanation_exists: "Explanation exists",
-  explanation_pdf: "Explanation PDF",
-  extraction_method: "Extraction method",
-  failure: "Failure",
-  fiscal_year: "Fiscal year",
-  formula_id: "Formula ID",
-  formula_version: "Formula version",
-  has_complete_provenance: "Complete provenance",
-  has_value: "Has value",
-  material: "Material query",
-  output_hash: "Output hash",
-  output_key: "Output key",
-  path: "Path",
-  pdf_render_failures: "PDF render failures",
-  permission: "Permission",
-  permission_level: "Permission level",
-  query: "Query",
-  question: "Question",
-  reason: "Reason",
-  reported: "Reported",
-  report_exists: "Report exists",
-  report_path: "Report path",
-  report_pdf: "Report PDF",
-  retrieved_chunks: "Retrieved chunks",
-  run_id: "Run ID",
-  run_type: "Run type",
-  sample_origin: "Sample origin",
-  source: "Source",
-  source_metric_id: "Source metric ID",
-  source_title: "Source title",
-  source_type: "Source type",
-  source_tier_hit: "Source tier hit",
-  statement_type: "Statement type",
-  terminal_status: "Terminal status",
-  tolerance: "Tolerance",
-  tool_id: "Tool ID",
-  tool_name: "Tool name",
-  top_5: "Top-k evidence",
-  total_debt: "Total debt",
-  total_duration_seconds: "Total duration seconds",
-  total_tokens: "Total tokens",
-  trace_url: "Trace URL",
-  validation_status: "Validation status",
+  actual: "Giá trị thực tế",
+  add_keys: "Khóa cộng trong công thức",
+  agent_id: "Mã tác nhân",
+  agent_role: "Vai trò tác nhân",
+  artifact_id: "Mã artifact",
+  artifact_ids: "Danh sách mã artifact",
+  artifact_producer_key: "Nguồn tạo artifact",
+  artifact_upload_failures: "Số lần tải artifact thất bại",
+  calculation_steps: "Các bước tính",
+  cash: "Tiền mặt",
+  claim_ledger_path: "Đường dẫn sổ luận điểm",
+  components: "Thành phần",
+  evidence: "Bằng chứng",
+  expected: "Giá trị kỳ vọng",
+  expected_source_tiers: "Hạng nguồn kỳ vọng",
+  expected_terms: "Từ khóa kỳ vọng",
+  explanation_exists: "Có bản giải trình",
+  explanation_pdf: "PDF giải trình",
+  extraction_method: "Phương pháp trích xuất",
+  failure: "Lỗi",
+  fiscal_year: "Năm tài chính",
+  formula_id: "Mã công thức",
+  formula_version: "Phiên bản công thức",
+  has_complete_provenance: "Đủ truy xuất nguồn gốc",
+  has_value: "Có giá trị",
+  material: "Truy vấn trọng yếu",
+  output_hash: "Mã băm đầu ra",
+  output_key: "Khóa đầu ra",
+  path: "Đường dẫn",
+  pdf_render_failures: "Số lần render PDF thất bại",
+  permission: "Quyền truy cập",
+  permission_level: "Cấp quyền",
+  query: "Truy vấn",
+  question: "Câu hỏi",
+  reason: "Lý do",
+  reported: "Giá trị báo cáo",
+  report_exists: "Có báo cáo",
+  report_path: "Đường dẫn báo cáo",
+  report_pdf: "PDF báo cáo",
+  retrieved_chunks: "Đoạn truy hồi",
+  run_id: "Mã lần chạy",
+  run_type: "Loại lần chạy",
+  sample_origin: "Nguồn mẫu",
+  source: "Nguồn",
+  source_metric_id: "Mã metric nguồn",
+  source_title: "Tiêu đề nguồn",
+  source_type: "Loại nguồn",
+  source_tier_hit: "Hạng nguồn khớp",
+  statement_type: "Loại báo cáo tài chính",
+  terminal_status: "Trạng thái kết thúc",
+  tolerance: "Dung sai",
+  tool_id: "Mã công cụ",
+  tool_name: "Tên công cụ",
+  top_5: "Bằng chứng hàng đầu",
+  total_debt: "Tổng nợ",
+  total_duration_seconds: "Tổng thời lượng (giây)",
+  total_tokens: "Tổng số token",
+  trace_url: "Đường dẫn trace",
+  validation_status: "Trạng thái kiểm định",
 };
 
 const FIELD_PRIORITY = [
@@ -172,47 +174,6 @@ function listOrDash(values: unknown[] | undefined): string {
 
 function runtimeField(result: BenchmarkMetricResult | undefined, key: string): unknown {
   return result ? (result as Record<string, unknown>)[key] : undefined;
-}
-
-function nestedSampleResults(sample: unknown): unknown[] {
-  const record = asRecord(sample);
-  if (!record) return [];
-  if (Array.isArray(record.source_samples)) return record.source_samples;
-  const sourceCalculation = asRecord(record.source_calculation);
-  return Array.isArray(sourceCalculation?.per_sample_results)
-    ? sourceCalculation.per_sample_results
-    : [];
-}
-
-function expandSampleResults(samples: unknown[]): unknown[] {
-  return samples.flatMap((sample, sampleIndex) => {
-    const record = asRecord(sample);
-    const nestedSamples = nestedSampleResults(sample);
-    if (!record || nestedSamples.length === 0) return [sample];
-    return nestedSamples.map((nestedSample, nestedIndex) => {
-      const nestedRecord = asRecord(nestedSample);
-      if (!nestedRecord) {
-        return {
-          cohort_ticker: record.ticker,
-          artifact_id: record.artifact_id,
-          source_metric_id: record.source_metric_id,
-          evidence: record.evidence,
-          sample_index: nestedIndex + 1,
-          sample_origin: `nested_${sampleIndex + 1}`,
-          value: nestedSample,
-        };
-      }
-      return {
-        cohort_ticker: record.ticker,
-        artifact_id: record.artifact_id,
-        source_metric_id: record.source_metric_id,
-        ...nestedRecord,
-        evidence: nestedRecord.evidence ?? record.evidence,
-        sample_index: nestedRecord.sample_index ?? nestedIndex + 1,
-        sample_origin: nestedRecord.sample_origin ?? `nested_${sampleIndex + 1}`,
-      };
-    });
-  });
 }
 
 function hasStructuredTrace(samples: unknown[]): boolean {
@@ -516,7 +477,7 @@ function sectionDetailsFromResult(result: BenchmarkMetricResult | undefined): Re
 function SectionDetailsTable({ details }: { details: Record<string, SectionScoreDetail> }) {
   const entries = Object.entries(details);
   if (entries.length === 0) {
-    return <p>Metric result chưa có section_details; chỉ hiển thị calculation payload gốc.</p>;
+    return <p>Kết quả chỉ số chưa có chi tiết thành phần điểm; chỉ hiển thị dữ liệu tính toán gốc.</p>;
   }
   return (
     <div className="metric-explanation__table-scroll">
@@ -539,7 +500,7 @@ function SectionDetailsTable({ details }: { details: Record<string, SectionScore
               <td>{valueOrDash(detail.status)}</td>
               <td>
                 <details>
-                  <summary>{detail.checks?.length ?? 0} check</summary>
+                  <summary>{detail.checks?.length ?? 0} kiểm tra</summary>
                   <EvidenceFieldList fields={(detail.checks ?? []).map((check, index) => ({
                     key: check.id ?? "check_" + String(index + 1),
                     label: check.id ?? "Check " + String(index + 1),
@@ -661,12 +622,27 @@ type FormulaExplanation = {
   reviewMeaning: string;
 };
 
+// Where the formula and numbers come from, stated in plain Vietnamese so a
+// reviewer can see this is not an arbitrary number but the output of a named
+// evaluator over a declared aggregation.
+function formulaProvenance(def: MetricDef, result: BenchmarkMetricResult | undefined): string {
+  const evaluator = result?.evaluator?.framework ?? def.technology ?? "bộ đánh giá nội bộ";
+  const metricId = result?.metric_id ?? def.id;
+  const aggregation = result?.calculation?.aggregation;
+  const aggregationText = aggregation
+    ? `cách tổng hợp “${aggregationLabel(aggregation)}”`
+    : "cách tổng hợp do bộ đánh giá khai báo";
+  const samples = result?.sample_size;
+  const sampleText = typeof samples === "number" ? ` trên ${formatRoundedNumber(samples)} mẫu` : "";
+  return `Công thức và các con số bên dưới do bộ đánh giá “${evaluator}” (mã metric ${valueOrDash(metricId)}) tính ra theo ${aggregationText}${sampleText}; dashboard chỉ trình bày lại đúng payload đó, không tự suy diễn thêm.`;
+}
+
 function thresholdRule(def: MetricDef, result: BenchmarkMetricResult | undefined): string {
   const threshold = formatRuntimeThreshold(def, result);
   const comparator = def.comparator === "lte" || String(result?.threshold_operator ?? result?.threshold ?? "").includes("<=")
     ? "không vượt quá"
     : "tối thiểu";
-  return `Metric đạt khi giá trị quan sát ${comparator} ${threshold}; trạng thái cuối cùng được đối chiếu với threshold_policy ${valueOrDash(result?.threshold_policy?.profile)} nếu artifact có khai báo.`;
+  return `Metric đạt khi giá trị quan sát ${comparator} ${threshold}; trạng thái cuối cùng được đối chiếu với hồ sơ ngưỡng ${valueOrDash(result?.threshold_policy?.profile)} nếu kết quả có khai báo.`;
 }
 
 function calculationFormulaExplanation(def: MetricDef, result: BenchmarkMetricResult | undefined): FormulaExplanation {
@@ -684,7 +660,7 @@ function calculationFormulaExplanation(def: MetricDef, result: BenchmarkMetricRe
       theory: "Không có calculation payload chi tiết trong artifact, nên dashboard chỉ xác nhận được value, status và threshold đã được evaluator phát hành.",
       substitution: `Kết quả hiển thị = ${resultText}.`,
       thresholdRule: thresholdRule(def, result),
-      reviewMeaning: "Hội đồng cần xem artifact nguồn hoặc evaluator log nếu muốn tái lập phép tính ngoài dashboard.",
+      reviewMeaning: "Muốn tái lập phép tính ngoài dashboard, hãy đối chiếu artifact nguồn hoặc nhật ký của bộ đánh giá.",
     };
   }
 
@@ -747,7 +723,7 @@ function calculationFormulaExplanation(def: MetricDef, result: BenchmarkMetricRe
       theory: "Công thức lý thuyết: rubric_score = sum(earned_points_i) / sum(maximum_points_i) * scale, trong đó mỗi check phải có tiêu chí expected và evidence tương ứng.",
       substitution: `Điểm rubric đã chuẩn hóa = ${resultText}; chi tiết từng section/check được hiển thị trong phần Thành phần điểm nếu evaluator xuất section_details.`,
       thresholdRule: thresholdRule(def, result),
-      reviewMeaning: "Metric này phù hợp để hội đồng kiểm tra tính đầy đủ, minh bạch và bằng chứng của báo cáo thay vì chỉ xem một điểm tổng.",
+      reviewMeaning: "Chỉ số này dùng để kiểm tra tính đầy đủ, minh bạch và bằng chứng của báo cáo, thay vì chỉ nhìn một điểm tổng.",
     };
   }
 
@@ -800,7 +776,7 @@ function calculationFormulaExplanation(def: MetricDef, result: BenchmarkMetricRe
     theory: `Aggregation '${aggregation || "không khai báo"}' được phát hành bởi evaluator. Dashboard không tự suy diễn công thức ngoài payload để tránh làm sai logic kiểm định.`,
     substitution: `Kết quả hiển thị = ${resultText}; numerator = ${valueOrDash(calculation?.numerator)}, denominator = ${valueOrDash(calculation?.denominator)}.`,
     thresholdRule: thresholdRule(def, result),
-    reviewMeaning: "Reviewer nên kiểm tra calculation.inputs, calculation.parameters và per-sample results bên dưới để tái lập phép tính.",
+    reviewMeaning: "Nên kiểm tra calculation.inputs, calculation.parameters và kết quả từng mẫu bên dưới để tái lập phép tính.",
   };
 }
 
@@ -826,7 +802,7 @@ function calculationNarrative(def: MetricDef, result: BenchmarkMetricResult | un
     return `${metricName}: kiểm tra từng điều kiện bắt buộc theo dạng đạt/không đạt. Metric chỉ đạt khi các điều kiện bắt buộc hoặc artifact cần thiết hiện diện đầy đủ; kết quả được so với ngưỡng ${threshold}.`;
   }
   if (aggregation === "error_count") {
-    return `${metricName}: đếm tổng số lỗi phát hiện trong các sample kiểm tra. Giá trị tốt là càng thấp càng tốt; thông thường ngưỡng đạt là ${threshold}. Failed examples và bảng sample cho biết lỗi nằm ở artifact, claim, công thức hoặc trace nào.`;
+    return `${metricName}: đếm tổng số lỗi phát hiện trong các sample kiểm tra. Giá trị tốt là càng thấp càng tốt; thông thường ngưỡng đạt là ${threshold}. Mục ví dụ chưa đạt và bảng mẫu cho biết lỗi nằm ở artifact, luận điểm, công thức hoặc trace nào.`;
   }
   if (aggregation === "error_rate" || aggregation === "rate") {
     return `${metricName}: lấy số sự kiện lỗi hoặc fallback chia cho tổng số sự kiện quan sát được. Tử số là ${numerator}, mẫu số là ${denominator}; kết quả được so với ngưỡng ${threshold}.`;
@@ -855,16 +831,45 @@ function calculationNarrative(def: MetricDef, result: BenchmarkMetricResult | un
   if (aggregation === "ratio") {
     return `${metricName}: tính tỷ số giữa tử số ${numerator} và mẫu số ${denominator}, rồi so với ngưỡng ${threshold}.`;
   }
-  return `${metricName}: aggregation '${aggregation || "không khai báo"}' được ghi trong artifact. Dashboard hiển thị numerator, denominator, parameters và từng sample bên dưới để reviewer kiểm tra lại phép tính.`;
+  return `${metricName}: cách tổng hợp '${aggregation || "không khai báo"}' được ghi trong artifact. Dashboard hiển thị tử số, mẫu số, tham số và từng mẫu bên dưới để kiểm tra lại phép tính.`;
+}
+
+const SAMPLE_PREVIEW = 5;
+const FAILED_PREVIEW = 3;
+const ARTIFACT_PREVIEW = 3;
+
+// Centered toggle that collapses long evidence lists by default and reveals the
+// full detail only when the reviewer asks for it.
+function ShowMoreToggle({
+  expanded,
+  hiddenCount,
+  noun,
+  onToggle,
+}: {
+  expanded: boolean;
+  hiddenCount: number;
+  noun: string;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="metric-explanation__show-more">
+      <button type="button" className="metric-explanation__show-more-btn" onClick={onToggle}>
+        {expanded ? "Thu gọn" : `Xem thêm ${hiddenCount} ${noun}`}
+      </button>
+    </div>
+  );
 }
 
 export function MetricExplanation({ def, result }: { def: MetricDef; result?: BenchmarkMetricResult }) {
   const status = resolveMetricStatus(def, result);
+  const [artifactsExpanded, setArtifactsExpanded] = useState(false);
+  const [samplesExpanded, setSamplesExpanded] = useState(false);
+  const [failuresExpanded, setFailuresExpanded] = useState(false);
   const calculation = result?.calculation;
   const failures = result?.failed_examples ?? [];
   const rawSamples = calculation?.per_sample_results ?? [];
   const samples = rawSamples.length > 0
-    ? expandSampleResults(rawSamples)
+    ? rawSamples
     : failures.map((failure, index) => ({
       sample_origin: "failed_example",
       sample_index: index + 1,
@@ -878,42 +883,61 @@ export function MetricExplanation({ def, result }: { def: MetricDef; result?: Be
   const hasDeepTrace = hasStructuredTrace(samples);
   const sectionDetails = sectionDetailsFromResult(result);
   const formula = calculationFormulaExplanation(def, result);
+  const visibleSamples = samplesExpanded ? samples : samples.slice(0, SAMPLE_PREVIEW);
+  const hiddenSampleCount = Math.max(samples.length - SAMPLE_PREVIEW, 0);
+  const visibleFailures = failuresExpanded ? failures : failures.slice(0, FAILED_PREVIEW);
+  const hiddenFailureCount = Math.max(failures.length - FAILED_PREVIEW, 0);
+  const visibleArtifactIds = artifactsExpanded ? artifactIds : artifactIds.slice(0, ARTIFACT_PREVIEW);
+  const hiddenArtifactCount = Math.max(artifactIds.length - ARTIFACT_PREVIEW, 0);
 
   return (
     <div className="metric-explanation">
       <div className="metric-explanation__summary">
         <dl>
-          <div><dt>Metric</dt><dd>{def.label}</dd></div>
-          <div><dt>Technology</dt><dd>{def.englishLabel ?? def.technology}</dd></div>
+          <div><dt>Chỉ số</dt><dd>{def.label}</dd></div>
+          <div><dt>Phương pháp đánh giá</dt><dd>{def.englishLabel ?? def.technology}</dd></div>
           <div><dt>Trạng thái</dt><dd><StatusPill status={status} /></dd></div>
           <div><dt>Kết quả</dt><dd><code>{formatRuntimeMetricResult(def, result)}</code></dd></div>
           <div><dt>Ngưỡng đạt</dt><dd><code>{formatRuntimeThreshold(def, result)}</code></dd></div>
-          <div><dt>Sample size</dt><dd>{valueOrDash(result?.sample_size)}</dd></div>
+          <div><dt>Cỡ mẫu</dt><dd>{valueOrDash(result?.sample_size)}</dd></div>
         </dl>
       </div>
 
       <section className="metric-explanation__section">
         <h3>Bằng chứng thực thi</h3>
         <dl>
-          <div><dt>Evaluator</dt><dd>{result?.evaluator?.framework ?? def.technology}</dd></div>
-          <div><dt>Framework version</dt><dd>{valueOrDash(result?.evaluator?.framework_version)}</dd></div>
-          <div><dt>Implementation version</dt><dd>{valueOrDash(result?.evaluator?.implementation_version)}</dd></div>
-          <div><dt>Execution status</dt><dd>{valueOrDash(result?.evaluator?.execution_status)}</dd></div>
-          <div><dt>Metric ID</dt><dd><code>{result?.metric_id ?? def.id}</code></dd></div>
-          <div><dt>Evaluated at</dt><dd>{valueOrDash(evaluatedAt)}</dd></div>
-          <div><dt>Dataset version</dt><dd>{valueOrDash(result?.dataset_version ?? result?.evidence?.dataset_version)}</dd></div>
-          <div><dt>Source artifact</dt><dd>{valueOrDash(result?.artifact_id ?? result?.source)}</dd></div>
-          <div><dt>Evidence artifacts</dt><dd>{listOrDash(artifactIds)}</dd></div>
-          <div><dt>Trace URL</dt><dd>{valueOrDash(traceUrl)}</dd></div>
+          <div><dt>Bộ đánh giá</dt><dd>{result?.evaluator?.framework ?? def.technology}</dd></div>
+          <div><dt>Phiên bản framework</dt><dd>{valueOrDash(result?.evaluator?.framework_version)}</dd></div>
+          <div><dt>Phiên bản triển khai</dt><dd>{valueOrDash(result?.evaluator?.implementation_version)}</dd></div>
+          <div><dt>Trạng thái thực thi</dt><dd>{valueOrDash(result?.evaluator?.execution_status)}</dd></div>
+          <div><dt>Mã chỉ số</dt><dd><code>{result?.metric_id ?? def.id}</code></dd></div>
+          <div><dt>Thời điểm đánh giá</dt><dd>{valueOrDash(evaluatedAt)}</dd></div>
+          <div><dt>Phiên bản dữ liệu</dt><dd>{valueOrDash(result?.dataset_version ?? result?.evidence?.dataset_version)}</dd></div>
+          <div><dt>Artifact nguồn</dt><dd>{valueOrDash(result?.artifact_id ?? result?.source)}</dd></div>
+          <div>
+            <dt>Artifact bằng chứng</dt>
+            <dd>
+              {listOrDash(visibleArtifactIds)}
+              {hiddenArtifactCount > 0 && (
+                <ShowMoreToggle
+                  expanded={artifactsExpanded}
+                  hiddenCount={hiddenArtifactCount}
+                  noun="artifact"
+                  onToggle={() => setArtifactsExpanded((value) => !value)}
+                />
+              )}
+            </dd>
+          </div>
+          <div><dt>Đường dẫn trace</dt><dd>{valueOrDash(traceUrl)}</dd></div>
         </dl>
         {!hasEvidence && (
           <p className="metric-explanation__warning">
-            Metric result này chưa chứa artifact id, trace URL, sample result hoặc failed example; vì vậy dashboard chỉ xác nhận được trạng thái tổng hợp, chưa xác nhận được bằng chứng chi tiết.
+            Kết quả chỉ số này chưa kèm mã artifact, đường dẫn trace, kết quả mẫu hay ví dụ chưa đạt; vì vậy dashboard chỉ xác nhận được trạng thái tổng hợp, chưa xác nhận được bằng chứng chi tiết.
           </p>
         )}
         {hasEvidence && !hasDeepTrace && (
           <p className="metric-explanation__warning">
-            Packet đang hiển thị là cohort summary; sample hiện có thể không chứa trace cấp truy vấn/chunk, nhưng bảng dưới đây vẫn hiển thị artifact nguồn và payload sample để audit sâu hơn.
+            Dữ liệu đang hiển thị là bản tổng hợp theo cohort; các mẫu có thể không kèm trace ở cấp truy vấn/đoạn văn, nhưng bảng bên dưới vẫn cho thấy artifact nguồn và payload mẫu để kiểm tra sâu hơn.
           </p>
         )}
       </section>
@@ -923,18 +947,19 @@ export function MetricExplanation({ def, result }: { def: MetricDef; result?: Be
         <p>{calculationNarrative(def, result)}</p>
         <dl className="metric-explanation__formula-list">
           <div><dt>Đại lượng đo</dt><dd>{formula.observedVariable}</dd></div>
+          <div><dt>Nguồn công thức</dt><dd>{formulaProvenance(def, result)}</dd></div>
           <div><dt>Công thức lý thuyết</dt><dd>{formula.theory}</dd></div>
           <div><dt>Thay số từ benchmark</dt><dd>{formula.substitution}</dd></div>
           <div><dt>Quy tắc ngưỡng</dt><dd>{formula.thresholdRule}</dd></div>
           <div><dt>Ý nghĩa khi review</dt><dd>{formula.reviewMeaning}</dd></div>
         </dl>
         <dl>
-          <div><dt>Aggregation</dt><dd>{aggregationLabel(calculation?.aggregation)}</dd></div>
-          <div><dt>Numerator</dt><dd>{valueOrDash(calculation?.numerator)}</dd></div>
-          <div><dt>Denominator</dt><dd>{valueOrDash(calculation?.denominator)}</dd></div>
-          <div><dt>Threshold profile</dt><dd>{valueOrDash(result?.threshold_policy?.profile)}</dd></div>
+          <div><dt>Cách tổng hợp</dt><dd>{aggregationLabel(calculation?.aggregation)}</dd></div>
+          <div><dt>Tử số</dt><dd>{valueOrDash(calculation?.numerator)}</dd></div>
+          <div><dt>Mẫu số</dt><dd>{valueOrDash(calculation?.denominator)}</dd></div>
+          <div><dt>Bộ ngưỡng áp dụng</dt><dd>{valueOrDash(result?.threshold_policy?.profile)}</dd></div>
         </dl>
-        <p>{result?.threshold_policy?.rationale ?? "Chưa có giải trình threshold trong registry."}</p>
+        <p>{result?.threshold_policy?.rationale ?? "Chưa có thuyết minh ngưỡng trong sổ đăng ký chỉ số."}</p>
       </section>
 
       <section className="metric-explanation__section">
@@ -943,9 +968,9 @@ export function MetricExplanation({ def, result }: { def: MetricDef; result?: Be
       </section>
 
       <section className="metric-explanation__section">
-        <h3>Arguments và parameters</h3>
+        <h3>Tham số đầu vào và cấu hình</h3>
         {Object.keys(calculation?.inputs ?? {}).length === 0 && Object.keys(calculation?.parameters ?? {}).length === 0 ? (
-          <p>Evaluator không ghi thêm input/parameter runtime trong metric result này.</p>
+          <p>Bộ đánh giá không ghi thêm tham số đầu vào hay cấu hình runtime cho kết quả này.</p>
         ) : (
           <pre>{valueOrDash({
             inputs: calculation?.inputs ?? {},
@@ -955,48 +980,68 @@ export function MetricExplanation({ def, result }: { def: MetricDef; result?: Be
       </section>
 
       <section className="metric-explanation__section">
-        <h3>Kết quả từng sample ({samples.length})</h3>
+        <h3>Kết quả từng mẫu ({samples.length})</h3>
         {samples.length === 0 ? (
-          <p>Metric result không có per-sample evidence.</p>
+          <p>Kết quả chỉ số này không có bằng chứng theo từng mẫu.</p>
         ) : (
-          <div className="metric-explanation__table-scroll">
-            <table className="metric-explanation__sample-table">
-              <thead>
-                <tr>
-                  <th>Sample</th>
-                  <th>Status</th>
-                  <th>Value</th>
-                  <th>Bằng chứng / trace</th>
-                </tr>
-              </thead>
-              <tbody>
-                {samples.map((sample, index) => (
-                  <tr key={`${sampleLabel(sample, index)}-${index}`}>
-                    <td>{sampleLabel(sample, index)}</td>
-                    <td>{sampleStatus(sample)}</td>
-                    <td className="num">{sampleValue(sample)}</td>
-                    <td><EvidenceFieldList fields={sampleEvidenceFields(sample)} /></td>
+          <>
+            <div className="metric-explanation__table-scroll">
+              <table className="metric-explanation__sample-table">
+                <thead>
+                  <tr>
+                    <th>Mẫu</th>
+                    <th>Trạng thái</th>
+                    <th>Giá trị</th>
+                    <th>Bằng chứng / trace</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {visibleSamples.map((sample, index) => (
+                    <tr key={`${sampleLabel(sample, index)}-${index}`}>
+                      <td>{sampleLabel(sample, index)}</td>
+                      <td>{sampleStatus(sample)}</td>
+                      <td className="num">{sampleValue(sample)}</td>
+                      <td><EvidenceFieldList fields={sampleEvidenceFields(sample)} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {hiddenSampleCount > 0 && (
+              <ShowMoreToggle
+                expanded={samplesExpanded}
+                hiddenCount={hiddenSampleCount}
+                noun="mẫu"
+                onToggle={() => setSamplesExpanded((value) => !value)}
+              />
+            )}
+          </>
         )}
       </section>
 
       <section className="metric-explanation__section">
-        <h3>Failed examples ({failures.length})</h3>
+        <h3>Ví dụ chưa đạt ({failures.length})</h3>
         {failures.length === 0 ? (
-          <p>Không có failed example trong metric result.</p>
+          <p>Không có ví dụ chưa đạt trong kết quả chỉ số này.</p>
         ) : (
-          <div className="metric-explanation__failed-list">
-            {failures.map((failure, index) => (
-              <article className="metric-explanation__failed-item" key={`${failedExampleLabel(failure, index)}-${index}`}>
-                <h4>{failedExampleLabel(failure, index)}</h4>
-                <EvidenceFieldList fields={failedExampleFields(failure)} />
-              </article>
-            ))}
-          </div>
+          <>
+            <div className="metric-explanation__failed-list">
+              {visibleFailures.map((failure, index) => (
+                <article className="metric-explanation__failed-item" key={`${failedExampleLabel(failure, index)}-${index}`}>
+                  <h4>{failedExampleLabel(failure, index)}</h4>
+                  <EvidenceFieldList fields={failedExampleFields(failure)} />
+                </article>
+              ))}
+            </div>
+            {hiddenFailureCount > 0 && (
+              <ShowMoreToggle
+                expanded={failuresExpanded}
+                hiddenCount={hiddenFailureCount}
+                noun="ví dụ"
+                onToggle={() => setFailuresExpanded((value) => !value)}
+              />
+            )}
+          </>
         )}
         <p>{result?.remediation_hint ?? "Chưa có hướng khắc phục."}</p>
       </section>

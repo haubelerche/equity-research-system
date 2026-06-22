@@ -8,8 +8,18 @@ export interface GenerationRun {
   status: RunStatus | "INIT";
   phase: RunPhase;
   stage: string;
+  mode?: string | null;
+  sourceRunId?: string | null;
+  executorState?: string | null;
   substep?: string;
+  detail?: string;
   blockingReason?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  stageStartedAt?: string | null;
+  lastHeartbeatAt?: string | null;
+  elapsedSeconds?: number | null;
+  pollErrorCount?: number;
 }
 
 export interface Toast {
@@ -25,7 +35,7 @@ export interface GenerationContextValue {
   activeTicker: string | null;
   toasts: Toast[];
   /** Begin (or restart) generation for a ticker and open its progress modal. */
-  start: (ticker: string, label: string, onComplete?: () => void) => void;
+  start: (ticker: string, label: string, onComplete?: () => void, options?: { forceFull?: boolean }) => void;
   openModal: (ticker: string) => void;
   /** Hide the modal WITHOUT stopping generation (polling continues). */
   hideModal: () => void;

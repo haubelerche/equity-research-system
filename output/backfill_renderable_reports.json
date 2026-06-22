@@ -1,0 +1,25 @@
+{
+  "summary": {
+    "processed": 1,
+    "rendered": 1,
+    "backfilled": 0,
+    "failed": 0,
+    "missing_price_history": []
+  },
+  "results": [
+    {
+      "ticker": "DBD",
+      "run_id": "run_dbd_20260619T190712_06f1ec3cad",
+      "status": "rendered",
+      "has_price_history": true,
+      "manifest_path": "run_dbd_20260619T190712_06f1ec3cad/manifest.json",
+      "warnings": [],
+      "rendered": {
+        "ticker": "DBD",
+        "run_id": "run_dbd_20260619T190712_06f1ec3cad",
+        "report_key": "client_reports/DBD/report.pdf",
+        "explanation_key": "client_reports/DBD/explanation.pdf"
+      }
+    }
+  ]
+}

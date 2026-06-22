@@ -48,17 +48,31 @@ DASHBOARD_HIDDEN_METRIC_IDS = {
     "provenance_coverage",
     "source_provenance_coverage",
     "accepted_facts_source_coverage",
+    "core_metric_coverage",
+    "dataframe_schema_validity",
+    "material_ocr_error_count",
+    "duplicate_fact_count",
     "ocr_unresolved_rate",
     "corpus_ocr_unresolved_rate",
     "official_reconciliation_rate",
     "valuation_method_data_readiness",
+    "hit_rate_at_5",
+    "faithfulness",
+    "response_relevancy",
+    "source_tier_hit_rate",
     "ndcg_at_10",
     "metadata_filter_accuracy",
     "unanswerable_abstention_accuracy",
     "evidence_span_overlap",
     "retrieval_noise_rate",
     "valuation_artifact",
+    "accounting_invariant_violations",
+    "fcff",
     "fcfe",
+    "target_price",
+    "gordon_growth",
+    "net_debt",
+    "formula_trace",
     "sensitivity_varies",
     "fcfe_sensitivity",
     "golden_drift_out_of_tolerance",
@@ -76,14 +90,25 @@ DASHBOARD_HIDDEN_METRIC_IDS = {
     "task_completion",
     "plan_adherence",
     "critic_issue_recall",
+    "tool_permission_compliance",
+    "schema_validity",
+    "no_unauthorized_calc",
     "artifact_manifest_compliance",
+    "agent.stage_handoff_completeness",
+    "agent.tool_call_success_rate",
+    "agent.token_budget_adherence",
     "report.financial_analysis_depth",
     "report.forecast_rationale",
     "report.evidence_integration",
     "explanation_pdf_rendered",
     "deterministic_finance_gate",
     "publication_readiness",
+    "llm_retry_rate",
+    "retrieval_fallback_rate",
     "ocr_failure_rate",
+    "final_ocr_error_count",
+    "artifact_upload_failures",
+    "pdf_render_failures",
     "cold_full_report_p95_latency",
     "render_only_p95_latency",
     "flash_memo_warm_p95_latency",
@@ -466,17 +491,10 @@ def _is_runtime_pass_gate(metric: dict[str, Any]) -> bool:
 
 
 def _pass_rate_value(samples: list[dict[str, Any]]) -> tuple[float | None, int]:
-    # ``not_applicable`` samples (a method the model legitimately did not produce
-    # for this ticker) are excluded from both numerator and denominator so the
-    # cohort pass-rate reflects only cases where the gate genuinely applies.
-    applicable = [
-        sample for sample in samples
-        if str(sample["metric"].get("status") or "") != "not_applicable"
-    ]
-    if not applicable:
+    if not samples:
         return None, 0
-    passed = sum(1 for sample in applicable if str(sample["metric"].get("status") or "") == "pass")
-    return passed / len(applicable), passed
+    passed = sum(1 for sample in samples if str(sample["metric"].get("status") or "") == "pass")
+    return passed / len(samples), passed
 
 
 def _apply_dashboard_metric_contract(metric_id: str, metric: dict[str, Any]) -> dict[str, Any]:
@@ -771,11 +789,8 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     prototype = samples[0]["metric"]
     statuses = [str(sample["metric"].get("status") or "not_evaluable") for sample in samples]
     status = max(statuses, key=_metric_status_rank)
-    applicable_count = sum(1 for s in statuses if s != "not_applicable")
-    applicable_samples = [
-        sample for sample in samples
-        if str(sample["metric"].get("status") or "") != "not_applicable"
-    ]
+    applicable_count = len(samples)
+    applicable_samples = list(samples)
     numeric_values = [
         metric.get("value")
         for metric in (sample["metric"] for sample in applicable_samples)
@@ -791,7 +806,8 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         or metric_id in OPS_LATENCY_METRICS
         or unit in OBSERVED_NUMERIC_UNITS
     ) and not is_pass_gate and metric_type not in {"coverage", "error_count", "error_rate"}
-    missing_count = sum(1 for item in statuses if item in MISSING_EVIDENCE_STATUSES)
+    is_latency_metric = metric_type == "latency_percentile" or metric_id in OPS_LATENCY_METRICS
+    missing_count = sum(1 for item in statuses if item in MISSING_EVIDENCE_STATUSES or item == "not_applicable")
     failed_count = sum(1 for item in statuses if item == "fail")
     evaluable_count = sum(
         1 for item in statuses
@@ -820,16 +836,19 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         value = sum(numeric_values)
     elif is_error_rate and numeric_values:
         value = sum(numeric_values) / len(numeric_values)
-    elif is_observed_numeric and numeric_values:
+    elif is_latency_metric and numeric_values:
         value = sum(numeric_values) / len(numeric_values)
+    elif metric_type == "coverage" and numeric_values:
+        value = sum(numeric_values) / len(samples)
+    elif is_observed_numeric and numeric_values:
+        value = sum(numeric_values) / len(samples)
     elif applicable_count and len(numeric_values) == applicable_count:
         value = sum(numeric_values) / len(numeric_values) if numeric_values else None
     else:
-        # Cohort dashboard metrics must remain numeric even when some tickers
-        # lack applicable runtime evidence. Not-applicable samples are excluded;
-        # non-evaluable/failing applicable samples remain zero so the aggregate
-        # value is an honest readiness/compliance rate, while failed_examples
-        # retain the exact missing-evidence reason per ticker.
+        # Cohort dashboard metrics are full-cohort by policy: every ticker in
+        # the benchmark cohort contributes to the denominator. Missing or
+        # not-applicable samples remain zero so the aggregate exposes coverage
+        # gaps instead of reporting a selective observed-only pass rate.
         pass_equivalents = [
             1.0 if str(sample["metric"].get("status") or "") == "pass" else 0.0
             for sample in applicable_samples
@@ -864,7 +883,7 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
             "failed_examples": sample["metric"].get("failed_examples") or [],
         }
         for sample in samples
-        if str(sample["metric"].get("status") or "") in {"fail", "blocked", "not_evaluable"}
+        if str(sample["metric"].get("status") or "") in {"fail", "blocked", "not_evaluable", "not_applicable"}
     ]
     calculation = dict(prototype.get("calculation") or {})
     if is_pass_gate:
@@ -883,16 +902,19 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         aggregation = "cohort_mean_observed"
         numerator = sum(numeric_values)
         denominator = len(numeric_values)
-    elif is_observed_numeric and numeric_values:
+    elif is_latency_metric and numeric_values:
         aggregation = "cohort_mean_observed"
         numerator = sum(numeric_values)
         denominator = len(numeric_values)
+    elif metric_type == "coverage" and numeric_values:
+        aggregation = "cohort_mean"
+        numerator = sum(numeric_values)
+        denominator = len(samples)
+    elif is_observed_numeric and numeric_values:
+        aggregation = "cohort_mean"
+        numerator = sum(numeric_values)
+        denominator = len(samples)
     elif applicable_count and len(numeric_values) == applicable_count:
-        # Mirror the value mean-branch condition above (which keys off
-        # ``applicable_count``, not ``len(samples)``) so the explanatory
-        # numerator/denominator reconcile with ``value`` even when some tickers
-        # are not_applicable. Otherwise this fell through to the cohort_pass_rate
-        # else-branch and reported a pass COUNT ratio that contradicted value.
         aggregation = "cohort_mean"
         numerator = sum(numeric_values)
         denominator = len(numeric_values)
@@ -932,7 +954,7 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     calculation_parameters.update({
         "source_metric_ids": source_metric_ids,
         "cohort_size": len(samples),
-        "aggregation_policy": "aggregate per-ticker benchmark metric results",
+        "aggregation_policy": "full cohort denominator; missing or not_applicable score samples count as zero",
     })
     calculation.update({
         "aggregation": aggregation,

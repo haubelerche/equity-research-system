@@ -1,0 +1,460 @@
+{
+  "generated_at": "2026-06-19T20:36:23.934352+00:00",
+  "cohort": "full_universe",
+  "tickers": [
+    "DHG",
+    "IMP",
+    "DMC",
+    "TRA",
+    "DBD",
+    "OPC",
+    "MKP",
+    "TNH",
+    "JVC",
+    "DVN",
+    "DHT",
+    "LDP",
+    "PPP",
+    "DP3",
+    "DP1",
+    "TW3",
+    "MED",
+    "PMC",
+    "AMV",
+    "YTC",
+    "VHE",
+    "VDP",
+    "DCL",
+    "SPM",
+    "VMD",
+    "DNM",
+    "DBT",
+    "DPP",
+    "DTP",
+    "AMP",
+    "BCP",
+    "BIO",
+    "CDP",
+    "CNC",
+    "DAN",
+    "DBM",
+    "DDN",
+    "DHD",
+    "DHN",
+    "DP2",
+    "DPH",
+    "DTG",
+    "HDP",
+    "MTP",
+    "NDC"
+  ],
+  "golden_build": {
+    "generated_at": "2026-06-19T20:36:23.934527+00:00",
+    "universe_count": 42,
+    "built_count": 0,
+    "missing_count": 0,
+    "skipped_count": 42,
+    "built": [],
+    "missing": [],
+    "skipped": [
+      {
+        "ticker": "DHG",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "IMP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DMC",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "TRA",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DBD",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "MKP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "TNH",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "JVC",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DVN",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DHT",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "LDP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "PPP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DP3",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DP1",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "TW3",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "MED",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "PMC",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "AMV",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "YTC",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "VHE",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "VDP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DCL",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "SPM",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "VMD",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DNM",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DBT",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DPP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DTP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "AMP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "BCP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "BIO",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "CDP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "CNC",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DAN",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DBM",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DDN",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DHN",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DP2",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "DTG",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "HDP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "MTP",
+        "reason": "golden_csv_exists"
+      },
+      {
+        "ticker": "NDC",
+        "reason": "golden_csv_exists"
+      }
+    ]
+  },
+  "prepared_count": 45,
+  "blocked_count": 0,
+  "prepared": [
+    {
+      "ticker": "DHG",
+      "golden_rows": 122,
+      "target_price_vnd": 227001.77
+    },
+    {
+      "ticker": "IMP",
+      "golden_rows": 128,
+      "target_price_vnd": 53353.83
+    },
+    {
+      "ticker": "DMC",
+      "golden_rows": 128,
+      "target_price_vnd": 113035.48
+    },
+    {
+      "ticker": "TRA",
+      "golden_rows": 128,
+      "target_price_vnd": 155070.56
+    },
+    {
+      "ticker": "DBD",
+      "golden_rows": 128,
+      "target_price_vnd": 136561.52
+    },
+    {
+      "ticker": "OPC",
+      "golden_rows": 128,
+      "target_price_vnd": 41481.04
+    },
+    {
+      "ticker": "MKP",
+      "golden_rows": 128,
+      "target_price_vnd": 49737.72
+    },
+    {
+      "ticker": "TNH",
+      "golden_rows": 128,
+      "target_price_vnd": 39894.42
+    },
+    {
+      "ticker": "JVC",
+      "golden_rows": 128,
+      "target_price_vnd": 10949.3
+    },
+    {
+      "ticker": "DVN",
+      "golden_rows": 128,
+      "target_price_vnd": 66909.35
+    },
+    {
+      "ticker": "DHT",
+      "golden_rows": 128,
+      "target_price_vnd": 65280.03
+    },
+    {
+      "ticker": "LDP",
+      "golden_rows": 128,
+      "target_price_vnd": 10204.84
+    },
+    {
+      "ticker": "PPP",
+      "golden_rows": 128,
+      "target_price_vnd": 50507.32
+    },
+    {
+      "ticker": "DP3",
+      "golden_rows": 128,
+      "target_price_vnd": 124370.68
+    },
+    {
+      "ticker": "DP1",
+      "golden_rows": 128,
+      "target_price_vnd": 54030.92
+    },
+    {
+      "ticker": "TW3",
+      "golden_rows": 128,
+      "target_price_vnd": 83748.7
+    },
+    {
+      "ticker": "MED",
+      "golden_rows": 128,
+      "target_price_vnd": 75776.29
+    },
+    {
+      "ticker": "PMC",
+      "golden_rows": 128,
+      "target_price_vnd": 405513.9
+    },
+    {
+      "ticker": "AMV",
+      "golden_rows": 128,
+      "target_price_vnd": 30186.63
+    },
+    {
+      "ticker": "YTC",
+      "golden_rows": 128,
+      "target_price_vnd": 215211.64
+    },
+    {
+      "ticker": "VHE",
+      "golden_rows": 128,
+      "target_price_vnd": 10591.44
+    },
+    {
+      "ticker": "VDP",
+      "golden_rows": 128,
+      "target_price_vnd": 110272.18
+    },
+    {
+      "ticker": "DCL",
+      "golden_rows": 128,
+      "target_price_vnd": 64255.97
+    },
+    {
+      "ticker": "SPM",
+      "golden_rows": 128,
+      "target_price_vnd": 32585.5
+    },
+    {
+      "ticker": "VMD",
+      "golden_rows": 128,
+      "target_price_vnd": 121852.64
+    },
+    {
+      "ticker": "DNM",
+      "golden_rows": 128,
+      "target_price_vnd": 25186.32
+    },
+    {
+      "ticker": "DBT",
+      "golden_rows": 128,
+      "target_price_vnd": 16429.88
+    },
+    {
+      "ticker": "DPP",
+      "golden_rows": 128,
+      "target_price_vnd": 67077.54
+    },
+    {
+      "ticker": "DTP",
+      "golden_rows": 128,
+      "target_price_vnd": 292364.22
+    },
+    {
+      "ticker": "AMP",
+      "golden_rows": 128,
+      "target_price_vnd": 18182.78
+    },
+    {
+      "ticker": "BCP",
+      "golden_rows": 128,
+      "target_price_vnd": 14266.42
+    },
+    {
+      "ticker": "BIO",
+      "golden_rows": 128,
+      "target_price_vnd": 43538.17
+    },
+    {
+      "ticker": "CDP",
+      "golden_rows": 128,
+      "target_price_vnd": 10792.61
+    },
+    {
+      "ticker": "CNC",
+      "golden_rows": 128,
+      "target_price_vnd": 136731.5
+    },
+    {
+      "ticker": "DAN",
+      "golden_rows": 128,
+      "target_price_vnd": 259376.08
+    },
+    {
+      "ticker": "DBM",
+      "golden_rows": 128,
+      "target_price_vnd": 92842.67
+    },
+    {
+      "ticker": "DDN",
+      "golden_rows": 128,
+      "target_price_vnd": 27614.14
+    },
+    {
+      "ticker": "DHD",
+      "golden_rows": 128,
+      "target_price_vnd": 162121.27
+    },
+    {
+      "ticker": "DHN",
+      "golden_rows": 128,
+      "target_price_vnd": 58399.35
+    },
+    {
+      "ticker": "DP2",
+      "golden_rows": 128,
+      "target_price_vnd": 31742.17
+    },
+    {
+      "ticker": "DPH",
+      "golden_rows": 128,
+      "target_price_vnd": 198927.26
+    },
+    {
+      "ticker": "DTG",
+      "golden_rows": 128,
+      "target_price_vnd": 55759.94
+    },
+    {
+      "ticker": "HDP",
+      "golden_rows": 128,
+      "target_price_vnd": 104336.9
+    },
+    {
+      "ticker": "MTP",
+      "golden_rows": 128,
+      "target_price_vnd": 52300.96
+    },
+    {
+      "ticker": "NDC",
+      "golden_rows": 128,
+      "target_price_vnd": 498787.37
+    }
+  ],
+  "blocked": []
+}

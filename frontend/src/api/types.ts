@@ -35,17 +35,32 @@ export interface RunProgress {
   substep?: string;
   detail?: string;
   blocking_reason?: string;
+  operation?: string;
+  mode?: string;
+  source_run_id?: string | null;
+  render_error?: string;
+  stage_started_at?: string | null;
+  last_heartbeat_at?: string | null;
 }
 
 export interface RunStatusResponse {
   run_id: string;
   ticker: string;
+  run_type?: string;
   status: RunStatus;
   current_stage: string;
   progress?: RunProgress;
   blocking_reason?: string | null;
+  flags?: Record<string, unknown>;
+  created_at?: string;
   updated_at: string;
   finished_at: string | null;
+  mode?: string | null;
+  source_run_id?: string | null;
+  executor_state?: string | null;
+  stage_started_at?: string | null;
+  last_heartbeat_at?: string | null;
+  elapsed_seconds?: number | null;
 }
 
 export type BenchmarkMetricStatus =

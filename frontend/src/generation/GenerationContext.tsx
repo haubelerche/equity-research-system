@@ -59,6 +59,14 @@ export function GenerationProvider({ children, pollMs = 4000 }: { children: Reac
     try {
       res = await fetchRunStatus(runId);
     } catch {
+      setRuns((prev) => ({
+        ...prev,
+        [ticker]: {
+          ...prev[ticker],
+          runId,
+          pollErrorCount: (prev[ticker]?.pollErrorCount ?? 0) + 1,
+        },
+      }));
       // Transient error; keep polling rather than failing the run.
       timers.current[ticker] = setTimeout(() => void poll(ticker, runId), pollMs);
       return;
@@ -73,8 +81,18 @@ export function GenerationProvider({ children, pollMs = 4000 }: { children: Reac
         status: res.status,
         phase,
         stage: res.current_stage ?? "",
+        mode: res.mode ?? res.progress?.mode ?? prev[ticker]?.mode ?? null,
+        sourceRunId: res.source_run_id ?? res.progress?.source_run_id ?? prev[ticker]?.sourceRunId ?? null,
+        executorState: res.executor_state ?? null,
         substep: res.progress?.substep,
+        detail: res.progress?.detail,
         blockingReason,
+        createdAt: res.created_at ?? prev[ticker]?.createdAt,
+        updatedAt: res.updated_at,
+        stageStartedAt: res.stage_started_at ?? res.progress?.stage_started_at ?? null,
+        lastHeartbeatAt: res.last_heartbeat_at ?? res.progress?.last_heartbeat_at ?? res.updated_at,
+        elapsedSeconds: res.elapsed_seconds ?? null,
+        pollErrorCount: 0,
       },
     }));
 
@@ -92,18 +110,21 @@ export function GenerationProvider({ children, pollMs = 4000 }: { children: Reac
     timers.current[ticker] = setTimeout(() => void poll(ticker, runId), pollMs);
   }, [pollMs, pushToast]);
 
-  const start = useCallback((ticker: string, label: string, onComplete?: () => void) => {
+  const start = useCallback((ticker: string, label: string, onComplete?: () => void, options?: { forceFull?: boolean }) => {
     clearTimer(ticker);
     onCompletes.current[ticker] = onComplete;
     setRuns((prev) => ({
       ...prev,
-      [ticker]: { ticker, label, runId: null, status: "INIT", phase: "running", stage: "" },
+      [ticker]: { ticker, label, runId: null, status: "INIT", phase: "running", stage: "", pollErrorCount: 0 },
     }));
     setActiveTicker(ticker);
 
-    startRun(ticker)
+    startRun(ticker, { forceFull: options?.forceFull })
       .then((res) => {
-        setRuns((prev) => ({ ...prev, [ticker]: { ...prev[ticker], runId: res.run_id } }));
+        setRuns((prev) => ({
+          ...prev,
+          [ticker]: { ...prev[ticker], runId: res.run_id, mode: res.mode },
+        }));
         timers.current[ticker] = setTimeout(() => void poll(ticker, res.run_id), Math.min(pollMs, 250));
       })
       .catch(() => {

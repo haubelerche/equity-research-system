@@ -1,0 +1,3645 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "source": "benchmark_suite",
+  "run_id": "benchmark-suite:default:2026-06-18T14:37:07.445573+00:00",
+  "generated_at": "2026-06-18T14:37:07.445573+00:00",
+  "cohort": "default",
+  "tickers": [
+    "DHG",
+    "IMP",
+    "DMC"
+  ],
+  "plan_ids": [
+    "06"
+  ],
+  "fail_closed": true,
+  "overall_status": "pass",
+  "publication_status": "DRAFT_PUBLISHABLE",
+  "client_final_authorized": false,
+  "artifacts": [
+    {
+      "plan_id": "06",
+      "name": "Report quality",
+      "artifact": "report_eval.json",
+      "status": "pass",
+      "metrics": {
+        "cohort_tickers": 3,
+        "ticker_status_counts": {
+          "pass": 3,
+          "fail": 0,
+          "blocked": 0,
+          "not_measured": 0
+        }
+      },
+      "metric_results": [
+        {
+          "id": "financial_gate_passed",
+          "label": "Deterministic finance gate",
+          "source": "benchmark_suite",
+          "detail": "cohort_pass_rate=3/3",
+          "metric_id": "financial_gate_passed",
+          "metric_name": "Deterministic finance gate",
+          "category": "financial_model",
+          "layer": "release_gate",
+          "metric_type": "coverage",
+          "scope": "report_run",
+          "severity": "P0",
+          "blocks_publish": true,
+          "value": 1.0,
+          "threshold": "= 100%",
+          "threshold_operator": "=",
+          "unit": "percent",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "valuation",
+          "failed_examples": [],
+          "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+          "evaluator": {
+            "id": "financial_gate_passed",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "financial_gate_passed",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "financial_gate_passed"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_pass_rate",
+            "numerator": 3,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "financial_gate_passed",
+                "status": "pass",
+                "value": 1,
+                "threshold": "pass",
+                "evaluator": {
+                  "id": "financial_gate_passed",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "financial_eval.json",
+                "source_calculation": {
+                  "aggregation": "boolean_gate",
+                  "numerator": 1,
+                  "denominator": 1,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "financial_decision": "pass",
+                    "blocking_issues": [],
+                    "status": "pass",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "financial_gate_passed",
+                "status": "pass",
+                "value": 1,
+                "threshold": "pass",
+                "evaluator": {
+                  "id": "financial_gate_passed",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "financial_eval.json",
+                "source_calculation": {
+                  "aggregation": "boolean_gate",
+                  "numerator": 1,
+                  "denominator": 1,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "financial_decision": "pass",
+                    "blocking_issues": [],
+                    "status": "pass",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "financial_gate_passed",
+                "status": "pass",
+                "value": 1,
+                "threshold": "pass",
+                "evaluator": {
+                  "id": "financial_gate_passed",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "financial_eval.json",
+                "source_calculation": {
+                  "aggregation": "boolean_gate",
+                  "numerator": 1,
+                  "denominator": 1,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "financial_decision": "pass",
+                    "blocking_issues": [],
+                    "status": "pass",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": null,
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report.completeness",
+          "label": "Report completeness",
+          "source": "benchmark_suite",
+          "detail": "cohort_size=3",
+          "metric_id": "report.completeness",
+          "metric_name": "Report completeness",
+          "category": "operations",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": 100.0,
+          "threshold": ">= 90%",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+          "evaluator": {
+            "id": "report.completeness",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report.completeness",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report.completeness"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_mean_observed",
+            "numerator": 100.0,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report.completeness",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 90%",
+                "evaluator": {
+                  "id": "report.completeness",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "required_element_coverage",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DHG",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report.completeness",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 90%",
+                "evaluator": {
+                  "id": "report.completeness",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "required_element_coverage",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "IMP",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report.completeness",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 90%",
+                "evaluator": {
+                  "id": "report.completeness",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "required_element_coverage",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DMC",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Add missing required sections/tables/charts.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report.executive_summary_actionability",
+          "label": "Executive summary actionability",
+          "source": "benchmark_suite",
+          "detail": "cohort_size=3",
+          "metric_id": "report.executive_summary_actionability",
+          "metric_name": "Executive summary actionability",
+          "category": "operations",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": 100.0,
+          "threshold": ">= 80%",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+          "evaluator": {
+            "id": "report.executive_summary_actionability",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report.executive_summary_actionability",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report.executive_summary_actionability"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_mean_observed",
+            "numerator": 100.0,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report.executive_summary_actionability",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 80%",
+                "evaluator": {
+                  "id": "report.executive_summary_actionability",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DHG",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report.executive_summary_actionability",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 80%",
+                "evaluator": {
+                  "id": "report.executive_summary_actionability",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "IMP",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report.executive_summary_actionability",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 80%",
+                "evaluator": {
+                  "id": "report.executive_summary_actionability",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DMC",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Ensure the summary states recommendation, valuation basis, key drivers, key risks and monitoring triggers.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report.peer_industry_context_quality",
+          "label": "Peer and industry context quality",
+          "source": "benchmark_suite",
+          "detail": "cohort_size=3",
+          "metric_id": "report.peer_industry_context_quality",
+          "metric_name": "Peer and industry context quality",
+          "category": "operations",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": 100.0,
+          "threshold": ">= 75%",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+          "evaluator": {
+            "id": "report.peer_industry_context_quality",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report.peer_industry_context_quality",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report.peer_industry_context_quality"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_mean_observed",
+            "numerator": 100.0,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report.peer_industry_context_quality",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 75%",
+                "evaluator": {
+                  "id": "report.peer_industry_context_quality",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DHG",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report.peer_industry_context_quality",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 75%",
+                "evaluator": {
+                  "id": "report.peer_industry_context_quality",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "IMP",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report.peer_industry_context_quality",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 75%",
+                "evaluator": {
+                  "id": "report.peer_industry_context_quality",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DMC",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Add peer-relative valuation, margin, growth and balance-sheet context rather than isolated company facts.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report.quality_total",
+          "label": "Report quality total",
+          "source": "benchmark_suite",
+          "detail": "cohort_size=3",
+          "metric_id": "report.quality_total",
+          "metric_name": "Report quality total",
+          "category": "operations",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": 100.0,
+          "threshold": ">= 85%",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+          "evaluator": {
+            "id": "report.quality_total",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report.quality_total",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report.quality_total"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_mean_observed",
+            "numerator": 100.0,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report.quality_total",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 85%",
+                "evaluator": {
+                  "id": "report.quality_total",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "weighted_mean",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DHG",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report.quality_total",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 85%",
+                "evaluator": {
+                  "id": "report.quality_total",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "weighted_mean",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "IMP",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report.quality_total",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 85%",
+                "evaluator": {
+                  "id": "report.quality_total",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "weighted_mean",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DMC",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Improve sections below rubric threshold.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report.recommendation_consistency",
+          "label": "Recommendation consistency",
+          "source": "benchmark_suite",
+          "detail": "cohort_size=3",
+          "metric_id": "report.recommendation_consistency",
+          "metric_name": "Recommendation consistency",
+          "category": "operations",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": 1.0,
+          "threshold": "= 100%",
+          "threshold_operator": "=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+          "evaluator": {
+            "id": "report.recommendation_consistency",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report.recommendation_consistency",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report.recommendation_consistency"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_mean_observed",
+            "numerator": 1.0,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report.recommendation_consistency",
+                "status": "pass",
+                "value": 1.0,
+                "threshold": "= 100%",
+                "evaluator": {
+                  "id": "report.recommendation_consistency",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 3,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "coverage",
+                  "numerator": 3,
+                  "denominator": 3,
+                  "per_sample_count": 3
+                },
+                "source_samples": [
+                  {
+                    "check": "target_has_recommendation_context",
+                    "status": "pass",
+                    "target_visible": true,
+                    "recommendation_visible": true
+                  },
+                  {
+                    "check": "visible_recommendation_is_approved",
+                    "status": "pass",
+                    "final_approval_present": true
+                  },
+                  {
+                    "check": "financial_gate_supports_recommendation",
+                    "status": "pass",
+                    "finance_pass": true
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report.recommendation_consistency",
+                "status": "pass",
+                "value": 1.0,
+                "threshold": "= 100%",
+                "evaluator": {
+                  "id": "report.recommendation_consistency",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 3,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "coverage",
+                  "numerator": 3,
+                  "denominator": 3,
+                  "per_sample_count": 3
+                },
+                "source_samples": [
+                  {
+                    "check": "target_has_recommendation_context",
+                    "status": "pass",
+                    "target_visible": true,
+                    "recommendation_visible": true
+                  },
+                  {
+                    "check": "visible_recommendation_is_approved",
+                    "status": "pass",
+                    "final_approval_present": true
+                  },
+                  {
+                    "check": "financial_gate_supports_recommendation",
+                    "status": "pass",
+                    "finance_pass": true
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report.recommendation_consistency",
+                "status": "pass",
+                "value": 1.0,
+                "threshold": "= 100%",
+                "evaluator": {
+                  "id": "report.recommendation_consistency",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 3,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "coverage",
+                  "numerator": 3,
+                  "denominator": 3,
+                  "per_sample_count": 3
+                },
+                "source_samples": [
+                  {
+                    "check": "target_has_recommendation_context",
+                    "status": "pass",
+                    "target_visible": true,
+                    "recommendation_visible": true
+                  },
+                  {
+                    "check": "visible_recommendation_is_approved",
+                    "status": "pass",
+                    "final_approval_present": true
+                  },
+                  {
+                    "check": "financial_gate_supports_recommendation",
+                    "status": "pass",
+                    "finance_pass": true
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Align rating, target price, current price, upside/downside and risk language.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report.risk_catalyst_quality",
+          "label": "Risk and catalyst quality",
+          "source": "benchmark_suite",
+          "detail": "cohort_size=3",
+          "metric_id": "report.risk_catalyst_quality",
+          "metric_name": "Risk and catalyst quality",
+          "category": "operations",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": 100.0,
+          "threshold": ">= 80%",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+          "evaluator": {
+            "id": "report.risk_catalyst_quality",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report.risk_catalyst_quality",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report.risk_catalyst_quality"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_mean_observed",
+            "numerator": 100.0,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report.risk_catalyst_quality",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 80%",
+                "evaluator": {
+                  "id": "report.risk_catalyst_quality",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DHG",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report.risk_catalyst_quality",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 80%",
+                "evaluator": {
+                  "id": "report.risk_catalyst_quality",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "IMP",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report.risk_catalyst_quality",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 80%",
+                "evaluator": {
+                  "id": "report.risk_catalyst_quality",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DMC",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Link risks and catalysts to probability, timing, financial transmission path and evidence.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report.sensitivity_disclosure_completeness",
+          "label": "Sensitivity disclosure completeness",
+          "source": "benchmark_suite",
+          "detail": "cohort_size=3",
+          "metric_id": "report.sensitivity_disclosure_completeness",
+          "metric_name": "Sensitivity disclosure completeness",
+          "category": "operations",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": 90.0,
+          "threshold": ">= 90%",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+          "evaluator": {
+            "id": "report.sensitivity_disclosure_completeness",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report.sensitivity_disclosure_completeness",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report.sensitivity_disclosure_completeness"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_mean_observed",
+            "numerator": 90.0,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report.sensitivity_disclosure_completeness",
+                "status": "pass",
+                "value": 90.0,
+                "threshold": ">= 90%",
+                "evaluator": {
+                  "id": "report.sensitivity_disclosure_completeness",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DHG",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 90.0
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report.sensitivity_disclosure_completeness",
+                "status": "pass",
+                "value": 90.0,
+                "threshold": ">= 90%",
+                "evaluator": {
+                  "id": "report.sensitivity_disclosure_completeness",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "IMP",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 90.0
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report.sensitivity_disclosure_completeness",
+                "status": "pass",
+                "value": 90.0,
+                "threshold": ">= 90%",
+                "evaluator": {
+                  "id": "report.sensitivity_disclosure_completeness",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DMC",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 90.0
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Include sensitivity ranges for WACC, terminal growth, margin, revenue and peer multiples where relevant.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report.thesis_specificity",
+          "label": "Thesis specificity",
+          "source": "benchmark_suite",
+          "detail": "cohort_size=3",
+          "metric_id": "report.thesis_specificity",
+          "metric_name": "Thesis specificity",
+          "category": "operations",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": 100.0,
+          "threshold": ">= 80%",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+          "evaluator": {
+            "id": "report.thesis_specificity",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report.thesis_specificity",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report.thesis_specificity"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_mean_observed",
+            "numerator": 100.0,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report.thesis_specificity",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 80%",
+                "evaluator": {
+                  "id": "report.thesis_specificity",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DHG",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report.thesis_specificity",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 80%",
+                "evaluator": {
+                  "id": "report.thesis_specificity",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "IMP",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report.thesis_specificity",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 80%",
+                "evaluator": {
+                  "id": "report.thesis_specificity",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DMC",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Replace generic sector commentary with company-specific drivers, constraints and materiality.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report.valuation_transparency",
+          "label": "Valuation transparency",
+          "source": "benchmark_suite",
+          "detail": "cohort_size=3",
+          "metric_id": "report.valuation_transparency",
+          "metric_name": "Valuation transparency",
+          "category": "operations",
+          "layer": "diagnostic",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P2",
+          "blocks_publish": false,
+          "value": 100.0,
+          "threshold": ">= 85%",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "platform",
+          "failed_examples": [],
+          "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+          "evaluator": {
+            "id": "report.valuation_transparency",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report.valuation_transparency",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report.valuation_transparency"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_mean_observed",
+            "numerator": 100.0,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report.valuation_transparency",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 85%",
+                "evaluator": {
+                  "id": "report.valuation_transparency",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DHG",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report.valuation_transparency",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 85%",
+                "evaluator": {
+                  "id": "report.valuation_transparency",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "IMP",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report.valuation_transparency",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 85%",
+                "evaluator": {
+                  "id": "report.valuation_transparency",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "rubric_score",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DMC",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": "Show method selection, assumptions, WACC, bridge and sensitivity.",
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report_pdf_rendered",
+          "label": "Report PDF rendered",
+          "source": "benchmark_suite",
+          "detail": "cohort_boolean_pass_rate=3/3",
+          "metric_id": "report_pdf_rendered",
+          "metric_name": "Report PDF rendered",
+          "category": "report_quality",
+          "layer": "release_gate",
+          "metric_type": "coverage",
+          "scope": "report_run",
+          "severity": "P0",
+          "blocks_publish": true,
+          "value": 1.0,
+          "threshold": "= 100%",
+          "threshold_operator": "=",
+          "unit": "percent",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "report",
+          "failed_examples": [],
+          "remediation_hint": "Render the analyst draft and client-final artifacts from a validated report model.",
+          "evaluator": {
+            "id": "report_pdf_rendered",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report_pdf_rendered",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report_pdf_rendered"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_pass_rate",
+            "numerator": 3,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report_pdf_rendered",
+                "status": "pass",
+                "value": 1,
+                "threshold": "pass",
+                "evaluator": {
+                  "id": "report_pdf_rendered",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                "source_calculation": {
+                  "aggregation": "presence",
+                  "numerator": 1,
+                  "denominator": 1,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DHG",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report_pdf_rendered",
+                "status": "pass",
+                "value": 1,
+                "threshold": "pass",
+                "evaluator": {
+                  "id": "report_pdf_rendered",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                "source_calculation": {
+                  "aggregation": "presence",
+                  "numerator": 1,
+                  "denominator": 1,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "IMP",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report_pdf_rendered",
+                "status": "pass",
+                "value": 1,
+                "threshold": "pass",
+                "evaluator": {
+                  "id": "report_pdf_rendered",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                "source_calculation": {
+                  "aggregation": "presence",
+                  "numerator": 1,
+                  "denominator": 1,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DMC",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": null,
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        },
+        {
+          "id": "report_quality_score",
+          "label": "Report quality score",
+          "source": "benchmark_suite",
+          "detail": "cohort_size=3",
+          "metric_id": "report_quality_score",
+          "metric_name": "Report quality score",
+          "category": "report_quality",
+          "layer": "release_gate",
+          "metric_type": "score",
+          "scope": "report_run",
+          "severity": "P1",
+          "blocks_publish": true,
+          "value": 100.0,
+          "threshold": ">= 85%",
+          "threshold_operator": ">=",
+          "unit": "score",
+          "status": "pass",
+          "legacy_status": "pass",
+          "sample_size": 3,
+          "artifact_id": null,
+          "artifact_version": null,
+          "dataset_version": null,
+          "benchmark_suite_version": "benchmark_standards_v1",
+          "metric_registry_version": "20260615_v3",
+          "owner": "reviewer",
+          "failed_examples": [],
+          "remediation_hint": "Improve required sections, forecast rationale, valuation transparency, and presentation quality.",
+          "evaluator": {
+            "id": "report_quality_score",
+            "framework": "custom",
+            "framework_version": null,
+            "implementation_version": "2.1",
+            "execution_status": "executed"
+          },
+          "calculation": {
+            "formula": null,
+            "inputs": {
+              "metric_id": "report_quality_score",
+              "cohort_tickers": [
+                "DHG",
+                "IMP",
+                "DMC"
+              ],
+              "source_artifacts": [
+                "DHG/report_eval.json",
+                "DMC/report_eval.json",
+                "IMP/report_eval.json"
+              ]
+            },
+            "parameters": {
+              "source_metric_ids": [
+                "report_quality_score"
+              ],
+              "cohort_size": 3,
+              "aggregation_policy": "aggregate per-ticker benchmark metric results"
+            },
+            "aggregation": "cohort_mean_observed",
+            "numerator": 100.0,
+            "denominator": 3,
+            "per_sample_results": [
+              {
+                "ticker": "DHG",
+                "artifact_id": "DHG/report_eval.json",
+                "source_metric_id": "report_quality_score",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 85%",
+                "evaluator": {
+                  "id": "report_quality_score",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+                    "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+                    "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+                    "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "weighted_mean",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DHG",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "IMP",
+                "artifact_id": "IMP/report_eval.json",
+                "source_metric_id": "report_quality_score",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 85%",
+                "evaluator": {
+                  "id": "report_quality_score",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf": 26669,
+                    "storage\\archive\\benchmark_imp\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "weighted_mean",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "IMP",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_imp\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              },
+              {
+                "ticker": "DMC",
+                "artifact_id": "DMC/report_eval.json",
+                "source_metric_id": "report_quality_score",
+                "status": "pass",
+                "value": 100.0,
+                "threshold": ">= 85%",
+                "evaluator": {
+                  "id": "report_quality_score",
+                  "framework": "custom",
+                  "framework_version": null,
+                  "implementation_version": "2.1",
+                  "execution_status": "executed"
+                },
+                "detail": "",
+                "sample_size": 1,
+                "failed_examples": [],
+                "evidence": {
+                  "artifact_ids": [
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+                  ],
+                  "dataset_version": null,
+                  "trace_url": null,
+                  "artifact_sizes_bytes": {
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+                    "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+                    "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+                    "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+                  },
+                  "evidence_available": true
+                },
+                "source": "report PDF rubric",
+                "source_calculation": {
+                  "aggregation": "weighted_mean",
+                  "numerator": null,
+                  "denominator": null,
+                  "per_sample_count": 1
+                },
+                "source_samples": [
+                  {
+                    "ticker": "DMC",
+                    "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+                    "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+                    "report_exists": true,
+                    "explanation_exists": true,
+                    "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+                    "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                    "evidence_support_available": true,
+                    "scores": {
+                      "completeness": 100.0,
+                      "thesis_specificity": 100.0,
+                      "financial_analysis_depth": 100.0,
+                      "forecast_rationale": 100.0,
+                      "valuation_transparency": 100.0,
+                      "risk_catalyst_quality": 100.0,
+                      "evidence_integration": 100.0,
+                      "peer_industry_context_quality": 100.0,
+                      "executive_summary_actionability": 100.0,
+                      "sensitivity_disclosure_completeness": 90.0,
+                      "presentation_quality": 100.0
+                    },
+                    "status": "pass",
+                    "value": 100.0
+                  }
+                ]
+              }
+            ]
+          },
+          "threshold_policy": {
+            "profile": "mvp",
+            "rationale": null,
+            "registry_version": "20260615_v3"
+          },
+          "evidence": {
+            "artifact_ids": [
+              "DHG/report_eval.json",
+              "DMC/report_eval.json",
+              "IMP/report_eval.json",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\explanation_stub.pdf",
+              "output\\evaluation\\benchmark_artifacts\\IMP\\report_stub.pdf",
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json",
+              "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+              "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+              "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+              "storage\\archive\\benchmark_imp\\claim_ledger.json"
+            ],
+            "dataset_version": null,
+            "trace_url": null,
+            "artifact_sizes_bytes": {
+              "output\\evaluation\\benchmark_artifacts\\DHG\\report_stub.pdf": 26631,
+              "output\\evaluation\\benchmark_artifacts\\DHG\\explanation_stub.pdf": 26673,
+              "storage\\archive\\benchmark_dhg\\claim_ledger.json": 2672,
+              "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+            },
+            "evidence_available": true
+          },
+          "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+        }
+      ],
+      "blocking_issues": []
+    }
+  ],
+  "summary": {
+    "tickers": 3,
+    "packets_written": 3
+  },
+  "plan_stats": {
+    "06": {
+      "pass": 3,
+      "fail": 0,
+      "blocked": 0,
+      "not_measured": 0
+    }
+  },
+  "packets": [
+    {
+      "ticker": "DHG",
+      "overall_status": "pass",
+      "publication_status": "DRAFT_PUBLISHABLE"
+    },
+    {
+      "ticker": "IMP",
+      "overall_status": "pass",
+      "publication_status": "DRAFT_PUBLISHABLE"
+    },
+    {
+      "ticker": "DMC",
+      "overall_status": "pass",
+      "publication_status": "DRAFT_PUBLISHABLE"
+    }
+  ]
+}

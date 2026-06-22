@@ -1,10 +1,12 @@
 import { useGeneration } from "../../generation/GenerationContext";
 
+const DEFAULT_GENERATE_LABEL = "Sinh báo cáo";
+
 interface Props {
   ticker: string;
   onComplete: () => void;
-  /** Idle-state button label. "Sinh báo cáo" for new, "Cập nhật" for refresh. */
   label?: string;
+  forceFull?: boolean;
 }
 
 /**
@@ -12,7 +14,7 @@ interface Props {
  * completion toast all live in GenerationProvider, so the run keeps going even
  * if this button unmounts or the modal is hidden.
  */
-export function GenerateButton({ ticker, onComplete, label = "Sinh báo cáo" }: Props) {
+export function GenerateButton({ ticker, onComplete, label = DEFAULT_GENERATE_LABEL, forceFull = false }: Props) {
   const gen = useGeneration();
   const run = gen.runs[ticker];
 
@@ -29,7 +31,7 @@ export function GenerateButton({ ticker, onComplete, label = "Sinh báo cáo" }:
   }
 
   return (
-    <button type="button" className="btn-generate" onClick={() => gen.start(ticker, label, onComplete)}>
+    <button type="button" className="btn-generate" onClick={() => gen.start(ticker, label, onComplete, { forceFull })}>
       {label}
     </button>
   );

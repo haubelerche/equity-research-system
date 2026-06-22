@@ -1,0 +1,1698 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "plan_id": "06",
+  "plan_name": "Report quality",
+  "ticker": "DMC",
+  "generated_at": "2026-06-18T14:37:07.445573+00:00",
+  "status": "pass",
+  "test_execution": {
+    "status": "pass",
+    "targets": [
+      "tests/evaluation/test_report_quality.py",
+      "tests/unit/test_publication_readiness.py",
+      "tests/unit/test_post_render_audit.py",
+      "tests/unit/test_report_assembler.py",
+      "tests/unit/test_report_export_blocks_unresolved_facts.py",
+      "tests/unit/test_package_validation_gate.py"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 0.806,
+    "summary": {
+      "passed": 40
+    },
+    "output_tail": [
+      "........................................                                 [100%]",
+      "40 passed in 0.42s"
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [
+      "report_eval.json",
+      "publication_readiness.json"
+    ],
+    "found": {
+      "report_eval.json": [
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMP\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BCP\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BIO\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CDP\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CNC\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DAN\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBM\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBT\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DCL\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DDN\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHD\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHG\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHN\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DNM\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\report_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP2\\report_eval.json"
+      ],
+      "publication_readiness.json": [
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHG\\publication_readiness.json",
+        "storage\\runs\\benchmark_amp\\publication_readiness.json",
+        "storage\\runs\\benchmark_amv\\publication_readiness.json",
+        "storage\\runs\\benchmark_bcp\\publication_readiness.json",
+        "storage\\runs\\benchmark_bio\\publication_readiness.json",
+        "storage\\runs\\benchmark_cdp\\publication_readiness.json",
+        "storage\\runs\\benchmark_cnc\\publication_readiness.json",
+        "storage\\runs\\benchmark_dan\\publication_readiness.json",
+        "storage\\runs\\benchmark_dbd\\publication_readiness.json",
+        "storage\\runs\\benchmark_dbm\\publication_readiness.json",
+        "storage\\runs\\benchmark_dbt\\publication_readiness.json",
+        "storage\\runs\\benchmark_dcl\\publication_readiness.json",
+        "storage\\runs\\benchmark_ddn\\publication_readiness.json",
+        "storage\\runs\\benchmark_dhd\\publication_readiness.json",
+        "storage\\runs\\benchmark_dhg\\publication_readiness.json",
+        "storage\\runs\\benchmark_dhn\\publication_readiness.json",
+        "storage\\runs\\benchmark_dht\\publication_readiness.json",
+        "storage\\runs\\benchmark_dmc\\publication_readiness.json",
+        "storage\\runs\\benchmark_dnm\\publication_readiness.json",
+        "storage\\runs\\benchmark_dp1\\publication_readiness.json"
+      ]
+    },
+    "missing": [],
+    "status": "pass"
+  },
+  "blocking_issues": [],
+  "metrics": {
+    "test_suite_status": "pass",
+    "tests_passed": 40,
+    "tests_failed": 0
+  },
+  "metric_results": [
+    {
+      "id": "report_pdf_rendered",
+      "label": "Report PDF rendered",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+      "detail": "",
+      "metric_id": "report_pdf_rendered",
+      "metric_name": "Report PDF rendered",
+      "category": "report_quality",
+      "layer": "release_gate",
+      "metric_type": "boolean",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "boolean",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "report",
+      "failed_examples": [],
+      "remediation_hint": "Render the analyst draft and client-final artifacts from a validated report model.",
+      "evaluator": {
+        "id": "report_pdf_rendered",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "presence",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": true
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "explanation_pdf_rendered",
+      "label": "Explanation PDF rendered",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+      "detail": "",
+      "metric_id": "explanation_pdf_rendered",
+      "metric_name": "Explanation PDF rendered",
+      "category": "report_quality",
+      "layer": "release_gate",
+      "metric_type": "boolean",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "boolean",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "report",
+      "failed_examples": [],
+      "remediation_hint": "Render the explanation artifact from a validated report model.",
+      "evaluator": {
+        "id": "explanation_pdf_rendered",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "presence",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": true
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "financial_gate_passed",
+      "label": "Deterministic finance gate",
+      "source": "financial_eval.json",
+      "detail": "",
+      "metric_id": "financial_gate_passed",
+      "metric_name": "Deterministic finance gate",
+      "category": "financial_model",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
+      "evaluator": {
+        "id": "financial_gate_passed",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "boolean_gate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "financial_decision": "pass",
+            "blocking_issues": [],
+            "status": "pass",
+            "value": true
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.quality_total",
+      "label": "Report quality total",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.quality_total",
+      "metric_name": "Report quality total",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 85%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.quality_total",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "weighted_mean",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Improve sections below rubric threshold.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report_quality_score",
+      "label": "Report quality score",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report_quality_score",
+      "metric_name": "Report quality score",
+      "category": "report_quality",
+      "layer": "release_gate",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P1",
+      "blocks_publish": true,
+      "value": 100.0,
+      "threshold": ">= 85%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "reviewer",
+      "failed_examples": [],
+      "remediation_hint": "Improve required sections, forecast rationale, valuation transparency, and presentation quality.",
+      "evaluator": {
+        "id": "report_quality_score",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "weighted_mean",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.completeness",
+      "label": "Report completeness",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.completeness",
+      "metric_name": "Report completeness",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.completeness",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "required_element_coverage",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Add missing required sections/tables/charts.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.thesis_specificity",
+      "label": "Thesis specificity",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.thesis_specificity",
+      "metric_name": "Thesis specificity",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 80%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.thesis_specificity",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rubric_score",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Replace generic sector commentary with company-specific drivers, constraints and materiality.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.financial_analysis_depth",
+      "label": "Financial analysis depth",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.financial_analysis_depth",
+      "metric_name": "Financial analysis depth",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 80%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.financial_analysis_depth",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rubric_score",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Add company-specific financial drivers.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.forecast_rationale",
+      "label": "Forecast rationale",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.forecast_rationale",
+      "metric_name": "Forecast rationale",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 80%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.forecast_rationale",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rubric_score",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Add explicit revenue/margin/capex/NWC driver rationale.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.valuation_transparency",
+      "label": "Valuation transparency",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.valuation_transparency",
+      "metric_name": "Valuation transparency",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 85%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.valuation_transparency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rubric_score",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Show method selection, assumptions, WACC, bridge and sensitivity.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.risk_catalyst_quality",
+      "label": "Risk and catalyst quality",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.risk_catalyst_quality",
+      "metric_name": "Risk and catalyst quality",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 80%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.risk_catalyst_quality",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rubric_score",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Link risks and catalysts to probability, timing, financial transmission path and evidence.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.evidence_integration",
+      "label": "Evidence integration",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.evidence_integration",
+      "metric_name": "Evidence integration",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 80%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.evidence_integration",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rubric_score",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Tie claims to evidence and formula trace.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.peer_industry_context_quality",
+      "label": "Peer and industry context quality",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.peer_industry_context_quality",
+      "metric_name": "Peer and industry context quality",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 75%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.peer_industry_context_quality",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rubric_score",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Add peer-relative valuation, margin, growth and balance-sheet context rather than isolated company facts.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.executive_summary_actionability",
+      "label": "Executive summary actionability",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.executive_summary_actionability",
+      "metric_name": "Executive summary actionability",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 100.0,
+      "threshold": ">= 80%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.executive_summary_actionability",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rubric_score",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 100.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Ensure the summary states recommendation, valuation basis, key drivers, key risks and monitoring triggers.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.sensitivity_disclosure_completeness",
+      "label": "Sensitivity disclosure completeness",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.sensitivity_disclosure_completeness",
+      "metric_name": "Sensitivity disclosure completeness",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 90.0,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.sensitivity_disclosure_completeness",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rubric_score",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "ticker": "DMC",
+            "report_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+            "explanation_pdf": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+            "report_exists": true,
+            "explanation_exists": true,
+            "claim_ledger_path": "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "evidence_support_available": true,
+            "scores": {
+              "completeness": 100.0,
+              "thesis_specificity": 100.0,
+              "financial_analysis_depth": 100.0,
+              "forecast_rationale": 100.0,
+              "valuation_transparency": 100.0,
+              "risk_catalyst_quality": 100.0,
+              "evidence_integration": 100.0,
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 100.0,
+              "sensitivity_disclosure_completeness": 90.0,
+              "presentation_quality": 100.0
+            },
+            "status": "pass",
+            "value": 90.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Include sensitivity ranges for WACC, terminal growth, margin, revenue and peer multiples where relevant.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "report.recommendation_consistency",
+      "label": "Recommendation consistency",
+      "source": "report PDF rubric",
+      "detail": "",
+      "metric_id": "report.recommendation_consistency",
+      "metric_name": "Recommendation consistency",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "report.recommendation_consistency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 3,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "check": "target_has_recommendation_context",
+            "status": "pass",
+            "target_visible": true,
+            "recommendation_visible": true
+          },
+          {
+            "check": "visible_recommendation_is_approved",
+            "status": "pass",
+            "final_approval_present": true
+          },
+          {
+            "check": "financial_gate_supports_recommendation",
+            "status": "pass",
+            "finance_pass": true
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Align rating, target price, current price, upside/downside and risk language.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    },
+    {
+      "id": "publication_readiness",
+      "label": "Publication readiness",
+      "source": "publication governance",
+      "detail": "",
+      "metric_id": "publication_readiness",
+      "metric_name": "Publication readiness",
+      "category": "report_quality",
+      "layer": "release_gate",
+      "metric_type": "boolean",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1,
+      "threshold": "pass",
+      "threshold_operator": "=",
+      "unit": "boolean",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "reviewer",
+      "failed_examples": [],
+      "remediation_hint": "Complete final approval, lock publishable artifacts, and align package validation with snapshot IDs.",
+      "evaluator": {
+        "id": "publication_readiness",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "boolean_gate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "check": "run_approved",
+            "status": "pass"
+          },
+          {
+            "check": "final_report_approval",
+            "status": "pass"
+          },
+          {
+            "check": "package_validation",
+            "status": "pass"
+          },
+          {
+            "check": "report_quality_allow_export",
+            "status": "pass"
+          },
+          {
+            "check": "publishable_model_locked",
+            "status": "pass"
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf": 26625,
+          "output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf": 26666,
+          "storage\\archive\\benchmark_dmc\\claim_ledger.json": 2671,
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:37:07.445573+00:00"
+    }
+  ],
+  "rubric": "report_quality_v1",
+  "score": 100.0,
+  "decision": "allow_export",
+  "failed_gates": [],
+  "section_scores": {
+    "completeness": 100.0,
+    "thesis_specificity": 100.0,
+    "financial_analysis_depth": 100.0,
+    "forecast_rationale": 100.0,
+    "valuation_transparency": 100.0,
+    "risk_catalyst_quality": 100.0,
+    "evidence_integration": 100.0,
+    "peer_industry_context_quality": 100.0,
+    "executive_summary_actionability": 100.0,
+    "sensitivity_disclosure_completeness": 90.0,
+    "presentation_quality": 100.0
+  },
+  "report_artifacts": {
+    "pdf": {
+      "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\report_stub.pdf",
+      "exists": true,
+      "pages": 1,
+      "text": "DMC investment summary và khuyến nghị analyst draft.\nLuận điểm: doanh thu 2025FY đạt 2,067.32 VND bn và lợi nhuận ròng 2025FY đạt 198.40 VND bn [1].\nTriển vọng kinh doanh và chỉ số tài chính: doanh thu, biên lợi nhuận gộp, biên EBIT, biên lợi nhuận ròng, ROE, OCF, EPS, CAPEX, vốn lưu động và cổ tức được đối chiếu từ canonical f\nDự phóng forecast: revenue_growth, gross_margin, capex, khấu hao, vốn lưu động, nợ vay, thuế suất và cổ tức được đưa vào formula trace.\nĐịnh giá FCFF và FCFE sử dụng WACC, terminal growth, giá trị doanh nghiệp, nợ ròng, giá trị vốn chủ sở hữu, số cổ phiếu và giá mục tiêu 113,035 VND/share.\nFinancial analysis: revenue, gross margin, EBIT margin, net margin, ROE, OCF, EPS, CAPEX, working capital and dividend are reviewed.\nExecutive summary: recommendation is supported by target price 113,035 VND/share, valuation basis, key drivers, risk monitoring triggers and cited evidence.\nInvestment thesis specificity: revenue growth, gross margin, cash conversion and balance-sheet constraints define the company-specific upside and falsification conditions.\nForecast rationale: revenue_growth, gross_margin, CAPEX, depreciation, working capital, debt, tax rate and dividend assumptions are tied to evidence.\nValuation transparency: FCFF, FCFE, WACC, terminal growth, enterprise value, net debt, equity value, shares, target price and sensitivity are disclosed.\nSensitivity disclosure completeness: WACC, terminal growth, Re/g, revenue_growth, gross_margin, downside scenario and peer multiple sensitivity are described with base-cell checks.\nMa trận độ nhạy sensitivity grid kiểm tra WACC/g và Re/g; ô base khớp target price trong valuation artifact.\nRủi ro và cảnh báo monitoring: biến động doanh thu, biên lợi nhuận, dòng tiền hoạt động, CAPEX và nhu cầu vốn lưu động.\nPhụ lục chi tiết tính toán formula trace: FCFF, FCFE, net debt bridge, target price bridge và reconciliation.\nRisk and catalyst quality: risk, catalyst, probability, timing, monitoring trigger and financial transmission path cover revenue, margin, OCF, CAPEX and working capital.\nPeer and industry context: peer group, industry sector, P/E multiple, EV/EBITDA, growth, margin, valuation and net debt balance sheet context are disclosed.\nEvidence integration: Source labels, citation map, formula trace, reconciliation and data lineage are included for audit.\nNguồn: Local raw BCTC cache DMC 2025FY [1]\nNguồn: Formula trace benchmark_valuation_v1 cho DMC [2]\nSource: Local raw BCTC cache DMC 2025FY [1]\nSource: Formula trace benchmark_valuation_v1 for DMC [2]\nCitation: [1] [2] source IDs resolve through claim ledger and evidence packet.\nReport table matrix recommendation appendix: table values and sensitivity matrix support the recommendation.\nBảng thành phần chỉ tiêu giá trị gồm revenue.net, profit_before_tax.total, tax_expense.total, depreciation.total, capex.total, shares_outstanding.ending."
+    },
+    "explanation_pdf": {
+      "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\evaluation\\benchmark_artifacts\\DMC\\explanation_stub.pdf",
+      "exists": true,
+      "pages": 1,
+      "text": "DMC explanation PDF.\nDMC investment summary và khuyến nghị analyst draft.\nLuận điểm: doanh thu 2025FY đạt 2,067.32 VND bn và lợi nhuận ròng 2025FY đạt 198.40 VND bn [1].\nTriển vọng kinh doanh và chỉ số tài chính: doanh thu, biên lợi nhuận gộp, biên EBIT, biên lợi nhuận ròng, ROE, OCF, EPS, CAPEX, vốn lưu động và cổ tức được đối chiếu từ canonical f\nDự phóng forecast: revenue_growth, gross_margin, capex, khấu hao, vốn lưu động, nợ vay, thuế suất và cổ tức được đưa vào formula trace.\nĐịnh giá FCFF và FCFE sử dụng WACC, terminal growth, giá trị doanh nghiệp, nợ ròng, giá trị vốn chủ sở hữu, số cổ phiếu và giá mục tiêu 113,035 VND/share.\nFinancial analysis: revenue, gross margin, EBIT margin, net margin, ROE, OCF, EPS, CAPEX, working capital and dividend are reviewed.\nExecutive summary: recommendation is supported by target price 113,035 VND/share, valuation basis, key drivers, risk monitoring triggers and cited evidence.\nInvestment thesis specificity: revenue growth, gross margin, cash conversion and balance-sheet constraints define the company-specific upside and falsification conditions.\nForecast rationale: revenue_growth, gross_margin, CAPEX, depreciation, working capital, debt, tax rate and dividend assumptions are tied to evidence.\nValuation transparency: FCFF, FCFE, WACC, terminal growth, enterprise value, net debt, equity value, shares, target price and sensitivity are disclosed.\nSensitivity disclosure completeness: WACC, terminal growth, Re/g, revenue_growth, gross_margin, downside scenario and peer multiple sensitivity are described with base-cell checks.\nMa trận độ nhạy sensitivity grid kiểm tra WACC/g và Re/g; ô base khớp target price trong valuation artifact.\nRủi ro và cảnh báo monitoring: biến động doanh thu, biên lợi nhuận, dòng tiền hoạt động, CAPEX và nhu cầu vốn lưu động.\nPhụ lục chi tiết tính toán formula trace: FCFF, FCFE, net debt bridge, target price bridge và reconciliation.\nRisk and catalyst quality: risk, catalyst, probability, timing, monitoring trigger and financial transmission path cover revenue, margin, OCF, CAPEX and working capital.\nPeer and industry context: peer group, industry sector, P/E multiple, EV/EBITDA, growth, margin, valuation and net debt balance sheet context are disclosed.\nEvidence integration: Source labels, citation map, formula trace, reconciliation and data lineage are included for audit.\nNguồn: Local raw BCTC cache DMC 2025FY [1]\nNguồn: Formula trace benchmark_valuation_v1 cho DMC [2]\nSource: Local raw BCTC cache DMC 2025FY [1]\nSource: Formula trace benchmark_valuation_v1 for DMC [2]\nCitation: [1] [2] source IDs resolve through claim ledger and evidence packet.\nReport table matrix recommendation appendix: table values and sensitivity matrix support the recommendation.\nBảng thành phần chỉ tiêu giá trị gồm revenue.net, profit_before_tax.total, tax_expense.total, depreciation.total, capex.total, shares_outstanding.ending.\nFormula trace evidence and citation map are stored in the run evidence packet."
+    }
+  },
+  "publication_readiness": {
+    "passed": true,
+    "blocking_reasons": [],
+    "checks": {
+      "run_approved": true,
+      "final_report_approval": true,
+      "package_validation": true,
+      "report_quality_allow_export": true,
+      "publishable_model_locked": true
+    }
+  }
+}

@@ -1,0 +1,2330 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "source": "benchmark_suite",
+  "cohort": "default",
+  "tickers": [
+    "DHG",
+    "IMP",
+    "DMC"
+  ],
+  "generated_at": "2026-06-18T14:42:09.042437+00:00",
+  "plan_id": "05",
+  "name": "Agent workflow and LLM judge",
+  "artifact": "agent_eval.json",
+  "status": "pass",
+  "metrics": {
+    "cohort_tickers": 3,
+    "ticker_status_counts": {
+      "pass": 3,
+      "fail": 0,
+      "blocked": 0,
+      "not_measured": 0
+    }
+  },
+  "metric_results": [
+    {
+      "id": "agent.judge_calibration_agreement",
+      "label": "Judge calibration agreement",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=3",
+      "metric_id": "agent.judge_calibration_agreement",
+      "metric_name": "Judge calibration agreement",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 85%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "ticker": "DHG",
+          "artifact_id": "DHG/agent_eval.json",
+          "metric_id": "agent.judge_calibration_agreement",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "judge_calibration_dataset_missing",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+          "failed_examples": [
+            {
+              "reason": "judge_calibration_dataset_missing",
+              "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "artifact_id": "IMP/agent_eval.json",
+          "metric_id": "agent.judge_calibration_agreement",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "judge_calibration_dataset_missing",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+          "failed_examples": [
+            {
+              "reason": "judge_calibration_dataset_missing",
+              "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "artifact_id": "DMC/agent_eval.json",
+          "metric_id": "agent.judge_calibration_agreement",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "judge_calibration_dataset_missing",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+          "failed_examples": [
+            {
+              "reason": "judge_calibration_dataset_missing",
+              "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.judge_calibration_agreement",
+        "framework": "judge_calibration_set",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "agent.judge_calibration_agreement",
+          "cohort_tickers": [
+            "DHG",
+            "IMP",
+            "DMC"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json",
+            "DMC/agent_eval.json",
+            "IMP/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "agent.judge_calibration_agreement"
+          ],
+          "cohort_size": 3,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 0,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "agent.judge_calibration_agreement",
+            "status": "not_evaluable",
+            "value": null,
+            "threshold": ">= 85%",
+            "evaluator": {
+              "id": "agent.judge_calibration_agreement",
+              "framework": "judge_calibration_set",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "not_executed"
+            },
+            "detail": "judge_calibration_dataset_missing",
+            "sample_size": 0,
+            "failed_examples": [
+              {
+                "reason": "judge_calibration_dataset_missing",
+                "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+              }
+            ],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            },
+            "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+            "source_calculation": {
+              "aggregation": "calibration_agreement",
+              "numerator": null,
+              "denominator": null,
+              "per_sample_count": 0
+            },
+            "source_samples": []
+          },
+          {
+            "ticker": "IMP",
+            "artifact_id": "IMP/agent_eval.json",
+            "source_metric_id": "agent.judge_calibration_agreement",
+            "status": "not_evaluable",
+            "value": null,
+            "threshold": ">= 85%",
+            "evaluator": {
+              "id": "agent.judge_calibration_agreement",
+              "framework": "judge_calibration_set",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "not_executed"
+            },
+            "detail": "judge_calibration_dataset_missing",
+            "sample_size": 0,
+            "failed_examples": [
+              {
+                "reason": "judge_calibration_dataset_missing",
+                "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+              }
+            ],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            },
+            "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+            "source_calculation": {
+              "aggregation": "calibration_agreement",
+              "numerator": null,
+              "denominator": null,
+              "per_sample_count": 0
+            },
+            "source_samples": []
+          },
+          {
+            "ticker": "DMC",
+            "artifact_id": "DMC/agent_eval.json",
+            "source_metric_id": "agent.judge_calibration_agreement",
+            "status": "not_evaluable",
+            "value": null,
+            "threshold": ">= 85%",
+            "evaluator": {
+              "id": "agent.judge_calibration_agreement",
+              "framework": "judge_calibration_set",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "not_executed"
+            },
+            "detail": "judge_calibration_dataset_missing",
+            "sample_size": 0,
+            "failed_examples": [
+              {
+                "reason": "judge_calibration_dataset_missing",
+                "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+              }
+            ],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            },
+            "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+            "source_calculation": {
+              "aggregation": "calibration_agreement",
+              "numerator": null,
+              "denominator": null,
+              "per_sample_count": 0
+            },
+            "source_samples": []
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Calibrate LLM Judge rubric against deterministic labels, seeded defects and human review samples.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/agent_eval.json",
+          "DMC/agent_eval.json",
+          "IMP/agent_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-18T14:42:09.042437+00:00"
+    },
+    {
+      "id": "agent.judge_rationale_evidence_coverage",
+      "label": "Judge rationale evidence coverage",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=3",
+      "metric_id": "agent.judge_rationale_evidence_coverage",
+      "metric_name": "Judge rationale evidence coverage",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "ticker": "DHG",
+          "artifact_id": "DHG/agent_eval.json",
+          "metric_id": "agent.judge_rationale_evidence_coverage",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "judge_rationale_evidence_missing",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+          "failed_examples": [
+            {
+              "reason": "judge_rationale_evidence_missing",
+              "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+            }
+          ]
+        },
+        {
+          "ticker": "IMP",
+          "artifact_id": "IMP/agent_eval.json",
+          "metric_id": "agent.judge_rationale_evidence_coverage",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "judge_rationale_evidence_missing",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+          "failed_examples": [
+            {
+              "reason": "judge_rationale_evidence_missing",
+              "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+            }
+          ]
+        },
+        {
+          "ticker": "DMC",
+          "artifact_id": "DMC/agent_eval.json",
+          "metric_id": "agent.judge_rationale_evidence_coverage",
+          "status": "not_evaluable",
+          "value": null,
+          "detail": "judge_rationale_evidence_missing",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+          "failed_examples": [
+            {
+              "reason": "judge_rationale_evidence_missing",
+              "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+            }
+          ]
+        }
+      ],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.judge_rationale_evidence_coverage",
+        "framework": "judge_rationale_evidence_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "agent.judge_rationale_evidence_coverage",
+          "cohort_tickers": [
+            "DHG",
+            "IMP",
+            "DMC"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json",
+            "DMC/agent_eval.json",
+            "IMP/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "agent.judge_rationale_evidence_coverage"
+          ],
+          "cohort_size": 3,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_pass_rate",
+        "numerator": 0,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "agent.judge_rationale_evidence_coverage",
+            "status": "not_evaluable",
+            "value": null,
+            "threshold": ">= 90%",
+            "evaluator": {
+              "id": "agent.judge_rationale_evidence_coverage",
+              "framework": "judge_rationale_evidence_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "not_executed"
+            },
+            "detail": "judge_rationale_evidence_missing",
+            "sample_size": 0,
+            "failed_examples": [
+              {
+                "reason": "judge_rationale_evidence_missing",
+                "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+              }
+            ],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            },
+            "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 0,
+              "denominator": 0,
+              "per_sample_count": 0
+            },
+            "source_samples": []
+          },
+          {
+            "ticker": "IMP",
+            "artifact_id": "IMP/agent_eval.json",
+            "source_metric_id": "agent.judge_rationale_evidence_coverage",
+            "status": "not_evaluable",
+            "value": null,
+            "threshold": ">= 90%",
+            "evaluator": {
+              "id": "agent.judge_rationale_evidence_coverage",
+              "framework": "judge_rationale_evidence_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "not_executed"
+            },
+            "detail": "judge_rationale_evidence_missing",
+            "sample_size": 0,
+            "failed_examples": [
+              {
+                "reason": "judge_rationale_evidence_missing",
+                "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+              }
+            ],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            },
+            "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 0,
+              "denominator": 0,
+              "per_sample_count": 0
+            },
+            "source_samples": []
+          },
+          {
+            "ticker": "DMC",
+            "artifact_id": "DMC/agent_eval.json",
+            "source_metric_id": "agent.judge_rationale_evidence_coverage",
+            "status": "not_evaluable",
+            "value": null,
+            "threshold": ">= 90%",
+            "evaluator": {
+              "id": "agent.judge_rationale_evidence_coverage",
+              "framework": "judge_rationale_evidence_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "not_executed"
+            },
+            "detail": "judge_rationale_evidence_missing",
+            "sample_size": 0,
+            "failed_examples": [
+              {
+                "reason": "judge_rationale_evidence_missing",
+                "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+              }
+            ],
+            "evidence": {
+              "artifact_ids": [],
+              "dataset_version": null,
+              "trace_url": null
+            },
+            "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 0,
+              "denominator": 0,
+              "per_sample_count": 0
+            },
+            "source_samples": []
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Require judge rationales to cite trace spans, artifacts or rubric clauses for every fail/warning.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/agent_eval.json",
+          "DMC/agent_eval.json",
+          "IMP/agent_eval.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-18T14:42:09.042437+00:00"
+    },
+    {
+      "id": "agent.repair_loop_rate",
+      "label": "Repair loop rate",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=3",
+      "metric_id": "agent.repair_loop_rate",
+      "metric_name": "Repair loop rate",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": "<= 15%",
+      "threshold_operator": "<=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.repair_loop_rate",
+        "framework": "agent_repair_trace_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "agent.repair_loop_rate",
+          "cohort_tickers": [
+            "DHG",
+            "IMP",
+            "DMC"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json",
+            "DMC/agent_eval.json",
+            "IMP/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "agent.repair_loop_rate"
+          ],
+          "cohort_size": 3,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean_observed",
+        "numerator": 0.0,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "agent.repair_loop_rate",
+            "status": "pass",
+            "value": 0.0,
+            "threshold": "<= 15%",
+            "evaluator": {
+              "id": "agent.repair_loop_rate",
+              "framework": "agent_repair_trace_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 3,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "rate",
+              "numerator": 0,
+              "denominator": 3,
+              "per_sample_count": 0
+            },
+            "source_samples": []
+          },
+          {
+            "ticker": "IMP",
+            "artifact_id": "IMP/agent_eval.json",
+            "source_metric_id": "agent.repair_loop_rate",
+            "status": "pass",
+            "value": 0.0,
+            "threshold": "<= 15%",
+            "evaluator": {
+              "id": "agent.repair_loop_rate",
+              "framework": "agent_repair_trace_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 3,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599,
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "rate",
+              "numerator": 0,
+              "denominator": 3,
+              "per_sample_count": 0
+            },
+            "source_samples": []
+          },
+          {
+            "ticker": "DMC",
+            "artifact_id": "DMC/agent_eval.json",
+            "source_metric_id": "agent.repair_loop_rate",
+            "status": "pass",
+            "value": 0.0,
+            "threshold": "<= 15%",
+            "evaluator": {
+              "id": "agent.repair_loop_rate",
+              "framework": "agent_repair_trace_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 3,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575,
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "rate",
+              "numerator": 0,
+              "denominator": 3,
+              "per_sample_count": 0
+            },
+            "source_samples": []
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Reduce schema, citation and valuation repair loops through stricter prompts and preflight validation.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/agent_eval.json",
+          "DMC/agent_eval.json",
+          "IMP/agent_eval.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+          "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:42:09.042437+00:00"
+    },
+    {
+      "id": "agent.stage_handoff_completeness",
+      "label": "Stage handoff completeness",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=3",
+      "metric_id": "agent.stage_handoff_completeness",
+      "metric_name": "Stage handoff completeness",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": ">= 95%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.stage_handoff_completeness",
+        "framework": "trace_artifact_handoff_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "agent.stage_handoff_completeness",
+          "cohort_tickers": [
+            "DHG",
+            "IMP",
+            "DMC"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json",
+            "DMC/agent_eval.json",
+            "IMP/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "agent.stage_handoff_completeness"
+          ],
+          "cohort_size": 3,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean_observed",
+        "numerator": 1.0,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "agent.stage_handoff_completeness",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": ">= 95%",
+            "evaluator": {
+              "id": "agent.stage_handoff_completeness",
+              "framework": "trace_artifact_handoff_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 3,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 3,
+              "denominator": 3,
+              "per_sample_count": 3
+            },
+            "source_samples": [
+              {
+                "agent_id": "data_reliability",
+                "status": "pass",
+                "agent_status": "completed",
+                "has_output": true,
+                "required_artifacts_ready": true,
+                "registered_sections": [
+                  "evidence_packet",
+                  "facts",
+                  "ratios",
+                  "report_draft",
+                  "snapshot",
+                  "valuation"
+                ]
+              },
+              {
+                "agent_id": "valuation_engine",
+                "status": "pass",
+                "agent_status": "completed",
+                "has_output": true,
+                "required_artifacts_ready": true,
+                "registered_sections": [
+                  "evidence_packet",
+                  "facts",
+                  "ratios",
+                  "report_draft",
+                  "snapshot",
+                  "valuation"
+                ]
+              },
+              {
+                "agent_id": "report_builder",
+                "status": "pass",
+                "agent_status": "completed",
+                "has_output": true,
+                "required_artifacts_ready": true,
+                "registered_sections": [
+                  "evidence_packet",
+                  "facts",
+                  "ratios",
+                  "report_draft",
+                  "snapshot",
+                  "valuation"
+                ]
+              }
+            ]
+          },
+          {
+            "ticker": "IMP",
+            "artifact_id": "IMP/agent_eval.json",
+            "source_metric_id": "agent.stage_handoff_completeness",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": ">= 95%",
+            "evaluator": {
+              "id": "agent.stage_handoff_completeness",
+              "framework": "trace_artifact_handoff_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 3,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599,
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 3,
+              "denominator": 3,
+              "per_sample_count": 3
+            },
+            "source_samples": [
+              {
+                "agent_id": "data_reliability",
+                "status": "pass",
+                "agent_status": "completed",
+                "has_output": true,
+                "required_artifacts_ready": true,
+                "registered_sections": [
+                  "evidence_packet",
+                  "facts",
+                  "ratios",
+                  "report_draft",
+                  "snapshot",
+                  "valuation"
+                ]
+              },
+              {
+                "agent_id": "valuation_engine",
+                "status": "pass",
+                "agent_status": "completed",
+                "has_output": true,
+                "required_artifacts_ready": true,
+                "registered_sections": [
+                  "evidence_packet",
+                  "facts",
+                  "ratios",
+                  "report_draft",
+                  "snapshot",
+                  "valuation"
+                ]
+              },
+              {
+                "agent_id": "report_builder",
+                "status": "pass",
+                "agent_status": "completed",
+                "has_output": true,
+                "required_artifacts_ready": true,
+                "registered_sections": [
+                  "evidence_packet",
+                  "facts",
+                  "ratios",
+                  "report_draft",
+                  "snapshot",
+                  "valuation"
+                ]
+              }
+            ]
+          },
+          {
+            "ticker": "DMC",
+            "artifact_id": "DMC/agent_eval.json",
+            "source_metric_id": "agent.stage_handoff_completeness",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": ">= 95%",
+            "evaluator": {
+              "id": "agent.stage_handoff_completeness",
+              "framework": "trace_artifact_handoff_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 3,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575,
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 3,
+              "denominator": 3,
+              "per_sample_count": 3
+            },
+            "source_samples": [
+              {
+                "agent_id": "data_reliability",
+                "status": "pass",
+                "agent_status": "completed",
+                "has_output": true,
+                "required_artifacts_ready": true,
+                "registered_sections": [
+                  "evidence_packet",
+                  "facts",
+                  "ratios",
+                  "report_draft",
+                  "snapshot",
+                  "valuation"
+                ]
+              },
+              {
+                "agent_id": "valuation_engine",
+                "status": "pass",
+                "agent_status": "completed",
+                "has_output": true,
+                "required_artifacts_ready": true,
+                "registered_sections": [
+                  "evidence_packet",
+                  "facts",
+                  "ratios",
+                  "report_draft",
+                  "snapshot",
+                  "valuation"
+                ]
+              },
+              {
+                "agent_id": "report_builder",
+                "status": "pass",
+                "agent_status": "completed",
+                "has_output": true,
+                "required_artifacts_ready": true,
+                "registered_sections": [
+                  "evidence_packet",
+                  "facts",
+                  "ratios",
+                  "report_draft",
+                  "snapshot",
+                  "valuation"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Ensure each agent emits required inputs, outputs, artifact references and blocking decisions for the next stage.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/agent_eval.json",
+          "DMC/agent_eval.json",
+          "IMP/agent_eval.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+          "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:42:09.042437+00:00"
+    },
+    {
+      "id": "agent.token_budget_adherence",
+      "label": "Token budget adherence",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=3",
+      "metric_id": "agent.token_budget_adherence",
+      "metric_name": "Token budget adherence",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.token_budget_adherence",
+        "framework": "token_budget_trace_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "agent.token_budget_adherence",
+          "cohort_tickers": [
+            "DHG",
+            "IMP",
+            "DMC"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json",
+            "DMC/agent_eval.json",
+            "IMP/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "default_stage_token_budget": 8000,
+          "source_metric_ids": [
+            "agent.token_budget_adherence"
+          ],
+          "cohort_size": 3,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean_observed",
+        "numerator": 1.0,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "agent.token_budget_adherence",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": ">= 90%",
+            "evaluator": {
+              "id": "agent.token_budget_adherence",
+              "framework": "token_budget_trace_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 1,
+              "denominator": 1,
+              "per_sample_count": 1
+            },
+            "source_samples": [
+              {
+                "agent_id": "planner",
+                "status": "pass",
+                "tokens": 160,
+                "token_budget": 8000
+              }
+            ]
+          },
+          {
+            "ticker": "IMP",
+            "artifact_id": "IMP/agent_eval.json",
+            "source_metric_id": "agent.token_budget_adherence",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": ">= 90%",
+            "evaluator": {
+              "id": "agent.token_budget_adherence",
+              "framework": "token_budget_trace_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599,
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 1,
+              "denominator": 1,
+              "per_sample_count": 1
+            },
+            "source_samples": [
+              {
+                "agent_id": "planner",
+                "status": "pass",
+                "tokens": 160,
+                "token_budget": 8000
+              }
+            ]
+          },
+          {
+            "ticker": "DMC",
+            "artifact_id": "DMC/agent_eval.json",
+            "source_metric_id": "agent.token_budget_adherence",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": ">= 90%",
+            "evaluator": {
+              "id": "agent.token_budget_adherence",
+              "framework": "token_budget_trace_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 1,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575,
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 1,
+              "denominator": 1,
+              "per_sample_count": 1
+            },
+            "source_samples": [
+              {
+                "agent_id": "planner",
+                "status": "pass",
+                "tokens": 160,
+                "token_budget": 8000
+              }
+            ]
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Route lower-risk stages to cheaper models and cap verbose intermediate reasoning artifacts.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/agent_eval.json",
+          "DMC/agent_eval.json",
+          "IMP/agent_eval.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+          "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:42:09.042437+00:00"
+    },
+    {
+      "id": "agent.tool_call_success_rate",
+      "label": "Tool call success rate",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=3",
+      "metric_id": "agent.tool_call_success_rate",
+      "metric_name": "Tool call success rate",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": ">= 95%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.tool_call_success_rate",
+        "framework": "tool_runtime_trace_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "agent.tool_call_success_rate",
+          "cohort_tickers": [
+            "DHG",
+            "IMP",
+            "DMC"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json",
+            "DMC/agent_eval.json",
+            "IMP/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "agent.tool_call_success_rate"
+          ],
+          "cohort_size": 3,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean_observed",
+        "numerator": 1.0,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "agent.tool_call_success_rate",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": ">= 95%",
+            "evaluator": {
+              "id": "agent.tool_call_success_rate",
+              "framework": "tool_runtime_trace_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 2,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 2,
+              "denominator": 2,
+              "per_sample_count": 2
+            },
+            "source_samples": [
+              {
+                "tool_name": "read_golden_financials",
+                "status": "pass",
+                "runtime_status": "completed",
+                "controlled_failure": false
+              },
+              {
+                "tool_name": "deterministic_valuation",
+                "status": "pass",
+                "runtime_status": "completed",
+                "controlled_failure": false
+              }
+            ]
+          },
+          {
+            "ticker": "IMP",
+            "artifact_id": "IMP/agent_eval.json",
+            "source_metric_id": "agent.tool_call_success_rate",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": ">= 95%",
+            "evaluator": {
+              "id": "agent.tool_call_success_rate",
+              "framework": "tool_runtime_trace_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 2,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599,
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 2,
+              "denominator": 2,
+              "per_sample_count": 2
+            },
+            "source_samples": [
+              {
+                "tool_name": "read_golden_financials",
+                "status": "pass",
+                "runtime_status": "completed",
+                "controlled_failure": false
+              },
+              {
+                "tool_name": "deterministic_valuation",
+                "status": "pass",
+                "runtime_status": "completed",
+                "controlled_failure": false
+              }
+            ]
+          },
+          {
+            "ticker": "DMC",
+            "artifact_id": "DMC/agent_eval.json",
+            "source_metric_id": "agent.tool_call_success_rate",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": ">= 95%",
+            "evaluator": {
+              "id": "agent.tool_call_success_rate",
+              "framework": "tool_runtime_trace_audit",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 2,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575,
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 2,
+              "denominator": 2,
+              "per_sample_count": 2
+            },
+            "source_samples": [
+              {
+                "tool_name": "read_golden_financials",
+                "status": "pass",
+                "runtime_status": "completed",
+                "controlled_failure": false
+              },
+              {
+                "tool_name": "deterministic_valuation",
+                "status": "pass",
+                "runtime_status": "completed",
+                "controlled_failure": false
+              }
+            ]
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Fix brittle tool arguments, transient retry policy or upstream service contracts.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/agent_eval.json",
+          "DMC/agent_eval.json",
+          "IMP/agent_eval.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+          "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:42:09.042437+00:00"
+    },
+    {
+      "id": "no_unauthorized_calc",
+      "label": "No unauthorized financial calculation",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=3",
+      "metric_id": "no_unauthorized_calc",
+      "metric_name": "No unauthorized financial calculation",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Move financial calculations from LLM narrative into deterministic code paths.",
+      "evaluator": {
+        "id": "no_unauthorized_calc",
+        "framework": "deterministic_agent_trace_classifier",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "no_unauthorized_calc",
+          "cohort_tickers": [
+            "DHG",
+            "IMP",
+            "DMC"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json",
+            "DMC/agent_eval.json",
+            "IMP/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "no_unauthorized_calc"
+          ],
+          "cohort_size": 3,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 1.0,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "no_unauthorized_calc",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": "100%",
+            "evaluator": {
+              "id": "no_unauthorized_calc",
+              "framework": "deterministic_agent_trace_classifier",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 4,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 4,
+              "denominator": 4,
+              "per_sample_count": 4
+            },
+            "source_samples": [
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "data_reliability",
+                "status": "completed",
+                "latency_ms": 200,
+                "output": "Loaded accepted canonical facts with provenance."
+              },
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "valuation_engine",
+                "status": "completed",
+                "latency_ms": 300,
+                "output": "Produced valuation artifact through deterministic engine trace."
+              },
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "report_builder",
+                "status": "completed",
+                "latency_ms": 500,
+                "output": "Rendered benchmark report from cited artifacts."
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "planner",
+                "status": "completed",
+                "latency_ms": 200,
+                "tokens_input": 120,
+                "tokens_output": 40,
+                "cost_estimate": 0.01,
+                "retry_count": 0,
+                "content": "Planned benchmark artifact assembly from approved canonical facts."
+              }
+            ]
+          },
+          {
+            "ticker": "IMP",
+            "artifact_id": "IMP/agent_eval.json",
+            "source_metric_id": "no_unauthorized_calc",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": "100%",
+            "evaluator": {
+              "id": "no_unauthorized_calc",
+              "framework": "deterministic_agent_trace_classifier",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 4,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599,
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 4,
+              "denominator": 4,
+              "per_sample_count": 4
+            },
+            "source_samples": [
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "data_reliability",
+                "status": "completed",
+                "latency_ms": 200,
+                "output": "Loaded accepted canonical facts with provenance."
+              },
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "valuation_engine",
+                "status": "completed",
+                "latency_ms": 300,
+                "output": "Produced valuation artifact through deterministic engine trace."
+              },
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "report_builder",
+                "status": "completed",
+                "latency_ms": 500,
+                "output": "Rendered benchmark report from cited artifacts."
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "planner",
+                "status": "completed",
+                "latency_ms": 200,
+                "tokens_input": 120,
+                "tokens_output": 40,
+                "cost_estimate": 0.01,
+                "retry_count": 0,
+                "content": "Planned benchmark artifact assembly from approved canonical facts."
+              }
+            ]
+          },
+          {
+            "ticker": "DMC",
+            "artifact_id": "DMC/agent_eval.json",
+            "source_metric_id": "no_unauthorized_calc",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": "100%",
+            "evaluator": {
+              "id": "no_unauthorized_calc",
+              "framework": "deterministic_agent_trace_classifier",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 4,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575,
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 4,
+              "denominator": 4,
+              "per_sample_count": 4
+            },
+            "source_samples": [
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "data_reliability",
+                "status": "completed",
+                "latency_ms": 200,
+                "output": "Loaded accepted canonical facts with provenance."
+              },
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "valuation_engine",
+                "status": "completed",
+                "latency_ms": 300,
+                "output": "Produced valuation artifact through deterministic engine trace."
+              },
+              {
+                "origin": "audit.agent_execution",
+                "agent_id": "report_builder",
+                "status": "completed",
+                "latency_ms": 500,
+                "output": "Rendered benchmark report from cited artifacts."
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "planner",
+                "status": "completed",
+                "latency_ms": 200,
+                "tokens_input": 120,
+                "tokens_output": 40,
+                "cost_estimate": 0.01,
+                "retry_count": 0,
+                "content": "Planned benchmark artifact assembly from approved canonical facts."
+              }
+            ]
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/agent_eval.json",
+          "DMC/agent_eval.json",
+          "IMP/agent_eval.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+          "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:42:09.042437+00:00"
+    },
+    {
+      "id": "schema_validity",
+      "label": "Output schema validity",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=3",
+      "metric_id": "schema_validity",
+      "metric_name": "Output schema validity",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Validate required agent outputs against JSON schemas before downstream use.",
+      "evaluator": {
+        "id": "schema_validity",
+        "framework": "json_schema_required_contract",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "schema_validity",
+          "cohort_tickers": [
+            "DHG",
+            "IMP",
+            "DMC"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json",
+            "DMC/agent_eval.json",
+            "IMP/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "schema_validity"
+          ],
+          "cohort_size": 3,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 1.0,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "schema_validity",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": "100%",
+            "evaluator": {
+              "id": "schema_validity",
+              "framework": "json_schema_required_contract",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 2,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "config/harness/*.schema.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 2,
+              "denominator": 2,
+              "per_sample_count": 2
+            },
+            "source_samples": [
+              {
+                "artifact": "evidence_packet",
+                "status": "pass",
+                "path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+              },
+              {
+                "artifact": "agent_effectiveness_audit",
+                "status": "pass",
+                "path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+              }
+            ]
+          },
+          {
+            "ticker": "IMP",
+            "artifact_id": "IMP/agent_eval.json",
+            "source_metric_id": "schema_validity",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": "100%",
+            "evaluator": {
+              "id": "schema_validity",
+              "framework": "json_schema_required_contract",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 2,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599,
+                "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "config/harness/*.schema.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 2,
+              "denominator": 2,
+              "per_sample_count": 2
+            },
+            "source_samples": [
+              {
+                "artifact": "evidence_packet",
+                "status": "pass",
+                "path": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+              },
+              {
+                "artifact": "agent_effectiveness_audit",
+                "status": "pass",
+                "path": "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json"
+              }
+            ]
+          },
+          {
+            "ticker": "DMC",
+            "artifact_id": "DMC/agent_eval.json",
+            "source_metric_id": "schema_validity",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": "100%",
+            "evaluator": {
+              "id": "schema_validity",
+              "framework": "json_schema_required_contract",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 2,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575,
+                "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json": 695
+              },
+              "evidence_available": true
+            },
+            "source": "config/harness/*.schema.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 2,
+              "denominator": 2,
+              "per_sample_count": 2
+            },
+            "source_samples": [
+              {
+                "artifact": "evidence_packet",
+                "status": "pass",
+                "path": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+              },
+              {
+                "artifact": "agent_effectiveness_audit",
+                "status": "pass",
+                "path": "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+              }
+            ]
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/agent_eval.json",
+          "DMC/agent_eval.json",
+          "IMP/agent_eval.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_agent_effectiveness_audit.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+          "storage\\runs\\benchmark_dmc\\benchmark_dmc_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:42:09.042437+00:00"
+    },
+    {
+      "id": "tool_permission_compliance",
+      "label": "Tool permission compliance",
+      "source": "benchmark_suite",
+      "detail": "cohort_size=3",
+      "metric_id": "tool_permission_compliance",
+      "metric_name": "Tool permission compliance",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Reject or repair tool calls that lack explicit permission metadata.",
+      "evaluator": {
+        "id": "tool_permission_compliance",
+        "framework": "agent_tool_permission_trace",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "metric_id": "tool_permission_compliance",
+          "cohort_tickers": [
+            "DHG",
+            "IMP",
+            "DMC"
+          ],
+          "source_artifacts": [
+            "DHG/agent_eval.json",
+            "DMC/agent_eval.json",
+            "IMP/agent_eval.json"
+          ]
+        },
+        "parameters": {
+          "source_metric_ids": [
+            "tool_permission_compliance"
+          ],
+          "cohort_size": 3,
+          "aggregation_policy": "aggregate per-ticker benchmark metric results"
+        },
+        "aggregation": "cohort_mean",
+        "numerator": 1.0,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "ticker": "DHG",
+            "artifact_id": "DHG/agent_eval.json",
+            "source_metric_id": "tool_permission_compliance",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": "= 100%",
+            "evaluator": {
+              "id": "tool_permission_compliance",
+              "framework": "agent_tool_permission_trace",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 2,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 2,
+              "denominator": 2,
+              "per_sample_count": 2
+            },
+            "source_samples": [
+              {
+                "tool_name": "read_golden_financials",
+                "status": "pass",
+                "permission": {
+                  "tool_id": "read_golden_financials",
+                  "agent_id": "data_reliability",
+                  "permission_level": "read_only"
+                },
+                "value": true
+              },
+              {
+                "tool_name": "deterministic_valuation",
+                "status": "pass",
+                "permission": {
+                  "tool_id": "deterministic_valuation",
+                  "agent_id": "valuation_engine",
+                  "permission_level": "execute"
+                },
+                "value": true
+              }
+            ]
+          },
+          {
+            "ticker": "IMP",
+            "artifact_id": "IMP/agent_eval.json",
+            "source_metric_id": "tool_permission_compliance",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": "= 100%",
+            "evaluator": {
+              "id": "tool_permission_compliance",
+              "framework": "agent_tool_permission_trace",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 2,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json": 11599
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 2,
+              "denominator": 2,
+              "per_sample_count": 2
+            },
+            "source_samples": [
+              {
+                "tool_name": "read_golden_financials",
+                "status": "pass",
+                "permission": {
+                  "tool_id": "read_golden_financials",
+                  "agent_id": "data_reliability",
+                  "permission_level": "read_only"
+                },
+                "value": true
+              },
+              {
+                "tool_name": "deterministic_valuation",
+                "status": "pass",
+                "permission": {
+                  "tool_id": "deterministic_valuation",
+                  "agent_id": "valuation_engine",
+                  "permission_level": "execute"
+                },
+                "value": true
+              }
+            ]
+          },
+          {
+            "ticker": "DMC",
+            "artifact_id": "DMC/agent_eval.json",
+            "source_metric_id": "tool_permission_compliance",
+            "status": "pass",
+            "value": 1.0,
+            "threshold": "= 100%",
+            "evaluator": {
+              "id": "tool_permission_compliance",
+              "framework": "agent_tool_permission_trace",
+              "framework_version": null,
+              "implementation_version": "2.1",
+              "execution_status": "executed"
+            },
+            "detail": "",
+            "sample_size": 2,
+            "failed_examples": [],
+            "evidence": {
+              "artifact_ids": [
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json"
+              ],
+              "dataset_version": null,
+              "trace_url": null,
+              "artifact_sizes_bytes": {
+                "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json": 11575
+              },
+              "evidence_available": true
+            },
+            "source": "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+            "source_calculation": {
+              "aggregation": "coverage",
+              "numerator": 2,
+              "denominator": 2,
+              "per_sample_count": 2
+            },
+            "source_samples": [
+              {
+                "tool_name": "read_golden_financials",
+                "status": "pass",
+                "permission": {
+                  "tool_id": "read_golden_financials",
+                  "agent_id": "data_reliability",
+                  "permission_level": "read_only"
+                },
+                "value": true
+              },
+              {
+                "tool_name": "deterministic_valuation",
+                "status": "pass",
+                "permission": {
+                  "tool_id": "deterministic_valuation",
+                  "agent_id": "valuation_engine",
+                  "permission_level": "execute"
+                },
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Fix tool owner/permission metadata in trace.",
+        "registry_version": "20260615_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "DHG/agent_eval.json",
+          "DMC/agent_eval.json",
+          "IMP/agent_eval.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dmc\\benchmark_dmc_evidence_packet.json",
+          "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 10631
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-18T14:42:09.042437+00:00"
+    }
+  ],
+  "blocking_issues": []
+}

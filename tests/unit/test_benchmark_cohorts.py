@@ -8,24 +8,37 @@ from backend.evaluation.benchmark_cohorts import (
     available_benchmark_cohorts,
     resolve_benchmark_tickers,
 )
+from backend.evaluation.benchmark_paths import GOLDEN_FINANCIALS_DIR
 from scripts import run_benchmark_suite
+
+
+def _golden_financial_tickers() -> set[str]:
+    return {
+        path.stem.upper()
+        for path in GOLDEN_FINANCIALS_DIR.glob("*.csv")
+        if not path.stem.lower().startswith("all_")
+    }
 
 
 def test_default_benchmark_cohort_is_diverse_and_not_single_ticker() -> None:
     tickers = resolve_benchmark_tickers()
     universe_tickers = load_universe_tickers()
+    benchmark_ready_tickers = _golden_financial_tickers()
 
     assert tickers[0] == "DHG"
-    assert len(tickers) == len(universe_tickers)
+    assert len(tickers) == len(set(universe_tickers) & benchmark_ready_tickers)
     assert len(set(tickers)) == len(tickers)
     assert tickers != ["DBD"]
     assert "DBD" in tickers
+    # AGP was removed from the universe; it must not reappear in either list.
+    assert "AGP" not in universe_tickers
+    assert "AGP" not in tickers
 
 
 def test_available_benchmark_cohorts_expose_more_than_one_archetype() -> None:
     cohorts = available_benchmark_cohorts()
 
-    assert len(cohorts["full_universe"]) == len(load_universe_tickers())
+    assert len(cohorts["full_universe"]) == len(set(load_universe_tickers()) & _golden_financial_tickers())
     assert cohorts["diversified_core"] == ["DHG", "IMP", "DMC", "TRA", "TNH"]
     assert cohorts["diversified_healthcare"] == ["DHG", "IMP", "DMC", "TRA", "JVC", "DBD"]
     assert cohorts["rag_representative_dhg"] == ["DHG"]
@@ -47,8 +60,11 @@ def test_available_benchmark_cohorts_expose_more_than_one_archetype() -> None:
 def test_benchmark_suite_default_plan_ids_focus_evidence_sensitive_plans() -> None:
     assert run_benchmark_suite.DEFAULT_PLAN_IDS == ("01", "02", "03", "04", "05", "06", "07")
     assert "context_recall" not in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
-    assert "response_relevancy" not in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "rag.retrieval_difficulty_score" not in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
     assert "mrr_at_5" not in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "hit_rate_at_5" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "response_relevancy" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
+    assert "source_tier_hit_rate" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
     assert "ndcg_at_10" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
     assert "metadata_filter_accuracy" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
     assert "unanswerable_abstention_accuracy" in run_benchmark_suite.DASHBOARD_HIDDEN_METRIC_IDS
@@ -233,7 +249,7 @@ def test_benchmark_suite_aggregate_metric_exposes_numeric_cohort_rate() -> None:
 
     assert artifact["artifact"] == "agent_eval.json"
     assert metric["value"] == 0.5
-    assert metric["calculation"]["aggregation"] == "cohort_pass_rate"
+    assert metric["calculation"]["aggregation"] == "cohort_mean"
     assert metric["calculation"]["numerator"] == 1
     assert metric["calculation"]["denominator"] == 2
     assert metric["calculation"]["inputs"]["source_artifacts"] == [
@@ -674,16 +690,17 @@ def test_benchmark_suite_score_metric_keeps_observed_mean_but_fails_closed_when_
     )
     metric = summary["artifacts"][0]["metric_results"][0]
 
-    assert metric["value"] == 90.0
-    assert metric["status"] == "not_evaluable"
-    assert metric["calculation"]["aggregation"] == "cohort_mean_observed"
+    assert metric["value"] == 45.0
+    assert metric["status"] == "fail"
+    assert metric["calculation"]["aggregation"] == "cohort_mean"
     assert metric["calculation"]["numerator"] == 90.0
-    assert metric["calculation"]["denominator"] == 1
+    assert metric["calculation"]["denominator"] == 2
     assert metric["calculation"]["evaluable_count"] == 1
     assert metric["calculation"]["missing_count"] == 1
+    assert metric["failed_examples"][0]["ticker"] == "IMP"
 
 
-def test_benchmark_suite_score_metric_excludes_not_applicable_tickers() -> None:
+def test_benchmark_suite_score_metric_counts_not_applicable_tickers_in_full_cohort() -> None:
     packets = [
         {
             "ticker": "DHG",
@@ -733,12 +750,14 @@ def test_benchmark_suite_score_metric_excludes_not_applicable_tickers() -> None:
     )
     metric = summary["artifacts"][0]["metric_results"][0]
 
-    assert metric["value"] == 0.95
-    assert metric["status"] == "pass"
+    assert metric["value"] == 0.475
+    assert metric["status"] == "fail"
     assert metric["sample_size"] == 2
-    assert metric["calculation"]["aggregation"] == "cohort_mean_observed"
-    assert metric["calculation"]["denominator"] == 1
-    assert metric["failed_examples"] == []
+    assert metric["calculation"]["aggregation"] == "cohort_mean"
+    assert metric["calculation"]["numerator"] == 0.95
+    assert metric["calculation"]["denominator"] == 2
+    assert metric["calculation"]["missing_count"] == 1
+    assert metric["failed_examples"][0]["ticker"] == "AMP"
 
 
 def test_benchmark_suite_preserves_corpus_ocr_unresolved_rate_on_dashboard() -> None:
@@ -940,14 +959,14 @@ def test_benchmark_suite_coverage_mean_reconciles_numerator_when_some_tickers_no
     metric = summary["artifacts"][0]["metric_results"][0]
     calculation = metric["calculation"]
 
-    # value is unchanged: still the mean of the two applicable tickers.
-    assert metric["value"] == 0.975
-    assert metric["status"] == "pass"
+    # Full-cohort policy: the not_applicable ticker remains in the denominator.
+    assert metric["value"] == 0.65
+    assert metric["status"] == "fail"
     # The explanatory numerator/denominator must reconcile with value, and the
     # aggregation must be labelled as a mean (not a pass-count ratio).
     assert calculation["aggregation"] == "cohort_mean"
     assert calculation["numerator"] == 1.95
-    assert calculation["denominator"] == 2
+    assert calculation["denominator"] == 3
     assert calculation["numerator"] / calculation["denominator"] == metric["value"]
 
 

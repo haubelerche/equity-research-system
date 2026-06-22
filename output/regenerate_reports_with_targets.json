@@ -1,0 +1,16 @@
+{
+  "total": 1,
+  "ok": 1,
+  "failed": 0,
+  "results": [
+    {
+      "ticker": "AGP",
+      "status": "ok",
+      "exports_uploaded": [
+        "report.pdf",
+        "explanation.pdf"
+      ],
+      "error": null
+    }
+  ]
+}

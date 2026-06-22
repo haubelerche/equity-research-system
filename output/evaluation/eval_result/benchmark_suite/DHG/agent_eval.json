@@ -4,8 +4,8 @@
   "plan_id": "05",
   "plan_name": "Agent workflow and LLM judge",
   "ticker": "DHG",
-  "generated_at": "2026-06-17T15:54:08.954055+00:00",
-  "status": "pass",
+  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "status": "blocked",
   "test_execution": {
     "status": "not_measured",
     "targets": [
@@ -29,14 +29,52 @@
     ],
     "found": {
       "agent_eval.json": [
-        "output\\evaluation\\eval_result\\benchmark_suite\\agent_eval.json"
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMP\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BCP\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BIO\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CDP\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CNC\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DAN\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBM\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBT\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DCL\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DDN\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHD\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHN\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DNM\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP2\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP3\\agent_eval.json"
       ],
-      "run_log.json": []
+      "run_log.json": [
+        "storage\\runs\\benchmark_amp\\run_log.json",
+        "storage\\runs\\benchmark_amv\\run_log.json",
+        "storage\\runs\\benchmark_bcp\\run_log.json",
+        "storage\\runs\\benchmark_bio\\run_log.json",
+        "storage\\runs\\benchmark_cdp\\run_log.json",
+        "storage\\runs\\benchmark_cnc\\run_log.json",
+        "storage\\runs\\benchmark_dan\\run_log.json",
+        "storage\\runs\\benchmark_dbd\\run_log.json",
+        "storage\\runs\\benchmark_dbm\\run_log.json",
+        "storage\\runs\\benchmark_dbt\\run_log.json",
+        "storage\\runs\\benchmark_dcl\\run_log.json",
+        "storage\\runs\\benchmark_ddn\\run_log.json",
+        "storage\\runs\\benchmark_dhd\\run_log.json",
+        "storage\\runs\\benchmark_dhg\\run_log.json",
+        "storage\\runs\\benchmark_dhn\\run_log.json",
+        "storage\\runs\\benchmark_dht\\run_log.json",
+        "storage\\runs\\benchmark_dmc\\run_log.json",
+        "storage\\runs\\benchmark_dnm\\run_log.json",
+        "storage\\runs\\benchmark_dp1\\run_log.json",
+        "storage\\runs\\benchmark_dp2\\run_log.json"
+      ]
     },
-    "missing": [
-      "run_log.json"
-    ],
-    "status": "blocked"
+    "missing": [],
+    "status": "pass"
   },
   "blocking_issues": [],
   "metrics": {
@@ -46,9 +84,222 @@
   },
   "metric_results": [
     {
+      "id": "agent.workflow_quality_score",
+      "label": "Agent workflow quality stress score",
+      "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+      "detail": "",
+      "metric_id": "agent.workflow_quality_score",
+      "metric_name": "Agent workflow quality stress score",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.92,
+      "threshold": ">= 75%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 9,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "judge_readiness_score",
+          "component_score": 0.0,
+          "value": 0.0,
+          "status": "warning",
+          "passed": false,
+          "weight": 0.08,
+          "normalized_weight": 0.08
+        }
+      ],
+      "remediation_hint": "Improve trace richness, token telemetry, judge readiness, handoff completeness, and controlled repair behavior.",
+      "evaluator": {
+        "id": "agent.workflow_quality_score",
+        "framework": "hard_mode_agent_workflow_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "tool_calls": 2,
+          "schema_units": 2,
+          "agent_records": 3,
+          "token_samples": 1,
+          "judge_samples": 0
+        },
+        "parameters": {
+          "rationale": "Ceiling-resistant score: deterministic compliance gates stay strict, while missing telemetry, token traces, handoff richness, and judge readiness reduce the benchmark score.",
+          "components": [
+            {
+              "id": "tool_permission_compliance",
+              "weight": 0.14
+            },
+            {
+              "id": "schema_validity",
+              "weight": 0.14
+            },
+            {
+              "id": "stage_handoff_completeness",
+              "weight": 0.14
+            },
+            {
+              "id": "tool_call_success_rate",
+              "weight": 0.12
+            },
+            {
+              "id": "artifact_manifest_compliance",
+              "weight": 0.1
+            },
+            {
+              "id": "task_completion",
+              "weight": 0.1
+            },
+            {
+              "id": "token_budget_observability",
+              "weight": 0.1
+            },
+            {
+              "id": "repair_loop_health",
+              "weight": 0.08
+            },
+            {
+              "id": "judge_readiness_score",
+              "weight": 0.08
+            }
+          ]
+        },
+        "aggregation": "weighted_score",
+        "numerator": 0.92,
+        "denominator": 1.0,
+        "per_sample_results": [
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "tool_permission_compliance",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.14,
+            "normalized_weight": 0.14
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "schema_validity",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.14,
+            "normalized_weight": 0.14
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "stage_handoff_completeness",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.14,
+            "normalized_weight": 0.14
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "tool_call_success_rate",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.12,
+            "normalized_weight": 0.12
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "artifact_manifest_compliance",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "task_completion",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "token_budget_observability",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "repair_loop_health",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.08,
+            "normalized_weight": 0.08
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "judge_readiness_score",
+            "component_score": 0.0,
+            "value": 0.0,
+            "status": "warning",
+            "passed": false,
+            "weight": 0.08,
+            "normalized_weight": 0.08
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Improve trace richness, token telemetry, judge readiness, handoff completeness, and controlled repair behavior.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 23713,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
       "id": "tool_permission_compliance",
       "label": "Tool permission compliance",
-      "source": "storage\\archive\\run_dhg_20260617T151159_c3f995776a\\run_dhg_20260617T151159_c3f995776a_evidence_packet.json",
+      "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
       "detail": "",
       "metric_id": "tool_permission_compliance",
       "metric_name": "Tool permission compliance",
@@ -59,12 +310,12 @@
       "severity": "P0",
       "blocks_publish": true,
       "value": 1.0,
-      "threshold": "= 100",
+      "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 7,
+      "sample_size": 2,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -85,26 +336,54 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "coverage",
-        "numerator": 7,
-        "denominator": 7,
-        "per_sample_results": []
+        "numerator": 2,
+        "denominator": 2,
+        "per_sample_results": [
+          {
+            "tool_name": "read_golden_financials",
+            "status": "pass",
+            "permission": {
+              "tool_id": "read_golden_financials",
+              "agent_id": "data_reliability",
+              "permission_level": "read_only"
+            },
+            "value": true
+          },
+          {
+            "tool_name": "deterministic_valuation",
+            "status": "pass",
+            "permission": {
+              "tool_id": "deterministic_valuation",
+              "agent_id": "valuation_engine",
+              "permission_level": "execute"
+            },
+            "value": true
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Fix tool owner/permission metadata in trace.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 23713
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "artifact_manifest_compliance",
       "label": "Artifact manifest compliance",
-      "source": "storage\\archive\\run_dhg_20260617T151159_c3f995776a\\run_dhg_20260617T151159_c3f995776a_evidence_packet.json",
+      "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
       "detail": "",
       "metric_id": "artifact_manifest_compliance",
       "metric_name": "Artifact manifest compliance",
@@ -115,7 +394,7 @@
       "severity": "P0",
       "blocks_publish": true,
       "value": 1.0,
-      "threshold": "= 100",
+      "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
       "status": "pass",
@@ -143,19 +422,441 @@
         "aggregation": "coverage",
         "numerator": 6,
         "denominator": 6,
-        "per_sample_results": []
+        "per_sample_results": [
+          {
+            "section_group": [
+              "facts"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "section_group": [
+              "snapshot"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "section_group": [
+              "ratios"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "section_group": [
+              "valuation"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "section_group": [
+              "report_draft",
+              "review_passed_report_model",
+              "publishable_final_report_model"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "section_group": [
+              "evidence_packet"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Ensure all required artifacts have storage path/checksum.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 23713
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.stage_handoff_completeness",
+      "label": "Stage handoff completeness",
+      "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+      "detail": "",
+      "metric_id": "agent.stage_handoff_completeness",
+      "metric_name": "Stage handoff completeness",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P1",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": ">= 95%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.stage_handoff_completeness",
+        "framework": "trace_artifact_handoff_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 3,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "agent_id": "data_reliability",
+            "status": "pass",
+            "agent_status": "completed",
+            "has_output": true,
+            "required_artifacts_ready": true,
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "agent_id": "valuation_engine",
+            "status": "pass",
+            "agent_status": "completed",
+            "has_output": true,
+            "required_artifacts_ready": true,
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "agent_id": "report_builder",
+            "status": "pass",
+            "agent_status": "completed",
+            "has_output": true,
+            "required_artifacts_ready": true,
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Ensure each agent emits required inputs, outputs, artifact references and blocking decisions for the next stage.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 23713,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.tool_call_success_rate",
+      "label": "Tool call success rate",
+      "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+      "detail": "",
+      "metric_id": "agent.tool_call_success_rate",
+      "metric_name": "Tool call success rate",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": ">= 95%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 2,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.tool_call_success_rate",
+        "framework": "tool_runtime_trace_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 2,
+        "denominator": 2,
+        "per_sample_results": [
+          {
+            "tool_name": "read_golden_financials",
+            "status": "pass",
+            "runtime_status": "completed",
+            "controlled_failure": false
+          },
+          {
+            "tool_name": "deterministic_valuation",
+            "status": "pass",
+            "runtime_status": "completed",
+            "controlled_failure": false
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Fix brittle tool arguments, transient retry policy or upstream service contracts.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 23713,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.repair_loop_rate",
+      "label": "Repair loop rate",
+      "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+      "detail": "",
+      "metric_id": "agent.repair_loop_rate",
+      "metric_name": "Repair loop rate",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "error_rate",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": "<= 15%",
+      "threshold_operator": "<=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.repair_loop_rate",
+        "framework": "agent_repair_trace_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rate",
+        "numerator": 0,
+        "denominator": 3,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Reduce schema, citation and valuation repair loops through stricter prompts and preflight validation.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 23713,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.token_budget_adherence",
+      "label": "Token budget adherence",
+      "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
+      "detail": "",
+      "metric_id": "agent.token_budget_adherence",
+      "metric_name": "Token budget adherence",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.token_budget_adherence",
+        "framework": "token_budget_trace_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {
+          "default_stage_token_budget": 8000
+        },
+        "aggregation": "coverage",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "agent_id": "planner",
+            "status": "pass",
+            "tokens": 160,
+            "token_budget": 8000
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Route lower-risk stages to cheaper models and cap verbose intermediate reasoning artifacts.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 23713,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "schema_validity",
@@ -171,7 +872,7 @@
       "severity": "P0",
       "blocks_publish": true,
       "value": 1.0,
-      "threshold": "100%",
+      "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
       "status": "pass",
@@ -199,19 +900,45 @@
         "aggregation": "coverage",
         "numerator": 2,
         "denominator": 2,
-        "per_sample_results": []
+        "per_sample_results": [
+          {
+            "artifact": "evidence_packet",
+            "status": "pass",
+            "value": true,
+            "schema_valid": true,
+            "failure_count": 0,
+            "path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json"
+          },
+          {
+            "artifact": "agent_effectiveness_audit",
+            "status": "pass",
+            "value": true,
+            "schema_valid": true,
+            "failure_count": 0,
+            "path": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
+        "rationale": "Validate structured output with Pydantic/JSON schema.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 23713,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "role_adherence",
@@ -227,7 +954,7 @@
       "severity": "P2",
       "blocks_publish": false,
       "value": null,
-      "threshold": ">= 0.9",
+      "threshold": ">= 85%",
       "threshold_operator": ">=",
       "unit": "score",
       "status": "not_evaluable",
@@ -265,14 +992,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Tune prompt/role context.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "groundedness",
@@ -288,7 +1016,7 @@
       "severity": "P2",
       "blocks_publish": false,
       "value": null,
-      "threshold": ">= 0.85",
+      "threshold": ">= 85%",
       "threshold_operator": ">=",
       "unit": "score",
       "status": "not_evaluable",
@@ -325,20 +1053,21 @@
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
+        "rationale": "Constrain narrative to evidence/artifacts.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "no_unauthorized_calc",
       "label": "No unauthorized financial calculation",
-      "source": "storage\\archive\\run_dhg_20260617T151159_c3f995776a\\run_dhg_20260617T151159_c3f995776a_agent_effectiveness_audit.json",
+      "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "no_unauthorized_calc",
       "metric_name": "No unauthorized financial calculation",
@@ -349,12 +1078,12 @@
       "severity": "P0",
       "blocks_publish": true,
       "value": 1.0,
-      "threshold": "100%",
+      "threshold": "= 100%",
       "threshold_operator": "=",
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 6,
+      "sample_size": 4,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -375,99 +1104,69 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "coverage",
-        "numerator": 6,
-        "denominator": 6,
+        "numerator": 4,
+        "denominator": 4,
         "per_sample_results": [
           {
             "origin": "audit.agent_execution",
-            "agent_id": "financial_analysis",
-            "action": "Create typed financial analysis with traceable diagnostics.",
+            "agent_id": "data_reliability",
             "status": "completed",
-            "latency_ms": 110779,
-            "cost_estimate": 0.05035575,
-            "confidence": 0.72,
-            "warnings": [
-              "schema_validation_relaxed:FinancialAnalysis",
-              "1 validation error for FinancialAnalysis\nlatest_period\n  Field required [type=missing, input_value={'producer': 'financial_a...04c972c77f195e97d29956'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
-            ],
-            "requires_human": false,
-            "fallback_triggered": false,
-            "output_summary": {}
+            "latency_ms": 200,
+            "output": "Loaded accepted canonical facts with provenance."
           },
           {
             "origin": "audit.agent_execution",
-            "agent_id": "thesis_report",
-            "action": "Create the typed grounded report draft from approved artifacts.",
+            "agent_id": "valuation_engine",
             "status": "completed",
-            "latency_ms": 87144,
-            "cost_estimate": 0.09284925,
-            "confidence": 0.0,
-            "warnings": [
-              "schema_validation_relaxed:ReportDraft",
-              "15 validation errors for ReportDraft\nclaims.0.claim_id\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.section\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.text\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.claim_type\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.quantitative\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.claim_id\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.section\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.text\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.claim_type\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.quantitative\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.claim_id\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.section\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.text\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.claim_type\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.quantitative\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
-            ],
-            "requires_human": false,
-            "fallback_triggered": false,
-            "output_summary": {}
+            "latency_ms": 300,
+            "output": "Produced valuation artifact through deterministic engine trace."
           },
           {
             "origin": "audit.agent_execution",
-            "agent_id": "senior_critic",
-            "action": "Create the typed senior critic scorecard and findings.",
+            "agent_id": "report_builder",
             "status": "completed",
-            "latency_ms": 55894,
-            "cost_estimate": 0.0818535,
-            "confidence": 0.0,
-            "warnings": [
-              "schema_validation_relaxed:CriticReview",
-              "42 validation errors for CriticReview\nfindings.0.finding_id\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.target_section\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.target_agent\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.issue_type\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.explanation\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.required_action\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.finding_id\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.target_section\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.target_agent\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.issue_type\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.explanation\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.required_action\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.finding_id\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.target_section\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.target_agent\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.issue_type\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.explanation\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.required_action\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.finding_id\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.target_section\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.target_agent\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.issue_type\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.explanation\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.required_action\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.finding_id\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.target_section\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.target_agent\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.issue_type\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.explanation\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.required_action\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.finding_id\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.target_section\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.target_agent\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.issue_type\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.explanation\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.required_action\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.finding_id\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.target_section\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.target_agent\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.issue_type\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.explanation\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.required_action\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
-            ],
-            "requires_human": false,
-            "fallback_triggered": false,
-            "output_summary": {}
+            "latency_ms": 500,
+            "output": "Rendered benchmark report from cited artifacts."
           },
           {
             "origin": "packet.trace_summary",
             "kind": "agent_message",
-            "agent_role": "financial_analysis",
-            "tool_name": null,
+            "agent_id": "planner",
             "status": "completed",
-            "output_hash": null
-          },
-          {
-            "origin": "packet.trace_summary",
-            "kind": "agent_message",
-            "agent_role": "thesis_report",
-            "tool_name": null,
-            "status": "completed",
-            "output_hash": null
-          },
-          {
-            "origin": "packet.trace_summary",
-            "kind": "agent_message",
-            "agent_role": "senior_critic",
-            "tool_name": null,
-            "status": "completed",
-            "output_hash": null
+            "latency_ms": 200,
+            "tokens_input": 120,
+            "tokens_output": 40,
+            "cost_estimate": 0.01,
+            "retry_count": 0,
+            "content": "Planned benchmark artifact assembly from approved canonical facts."
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
+        "rationale": "Remove LLM-generated numbers not backed by valuation artifact.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json": 23713,
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "task_completion",
       "label": "Task completion",
-      "source": "storage\\archive\\run_dhg_20260617T151159_c3f995776a\\run_dhg_20260617T151159_c3f995776a_agent_effectiveness_audit.json",
+      "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "task_completion",
       "metric_name": "Task completion",
@@ -478,7 +1177,7 @@
       "severity": "P2",
       "blocks_publish": false,
       "value": 1.0,
-      "threshold": ">= 0.85",
+      "threshold": ">= 85%",
       "threshold_operator": ">=",
       "unit": "score",
       "status": "pass",
@@ -506,19 +1205,45 @@
         "aggregation": "coverage",
         "numerator": 3,
         "denominator": 3,
-        "per_sample_results": []
+        "per_sample_results": [
+          {
+            "agent_id": "data_reliability",
+            "status": "completed",
+            "latency_ms": 200,
+            "output": "Loaded accepted canonical facts with provenance."
+          },
+          {
+            "agent_id": "valuation_engine",
+            "status": "completed",
+            "latency_ms": 300,
+            "output": "Produced valuation artifact through deterministic engine trace."
+          },
+          {
+            "agent_id": "report_builder",
+            "status": "completed",
+            "latency_ms": 500,
+            "output": "Rendered benchmark report from cited artifacts."
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Improve stage-specific prompt outputs.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_dhg\\benchmark_dhg_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "plan_adherence",
@@ -534,7 +1259,7 @@
       "severity": "P2",
       "blocks_publish": false,
       "value": null,
-      "threshold": ">= 0.80",
+      "threshold": ">= 80%",
       "threshold_operator": ">=",
       "unit": "score",
       "status": "not_evaluable",
@@ -571,15 +1296,16 @@
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
+        "rationale": "Check fixed plan scope and role boundaries.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "critic_issue_recall",
@@ -592,7 +1318,7 @@
       "layer": "diagnostic",
       "metric_type": "coverage",
       "scope": "benchmark_suite",
-      "severity": "P2",
+      "severity": "P1",
       "blocks_publish": false,
       "value": null,
       "threshold": ">= 90%",
@@ -632,15 +1358,130 @@
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": null,
-        "registry_version": "20260615_v3"
+        "rationale": "Expand SeniorCritic bad-report corpus.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T15:54:08.954055+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.judge_calibration_agreement",
+      "label": "Judge calibration agreement",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+      "detail": "calibrated_actual_output_dataset_not_applicable_for_offline_benchmark",
+      "metric_id": "agent.judge_calibration_agreement",
+      "metric_name": "Judge calibration agreement",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P1",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 85%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_applicable",
+      "legacy_status": "not_applicable",
+      "sample_size": 0,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.judge_calibration_agreement",
+        "framework": "judge_calibration_set",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "calibration_agreement",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Calibrate LLM Judge rubric against deterministic labels, seeded defects and human review samples.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.judge_rationale_evidence_coverage",
+      "label": "Judge rationale evidence coverage",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+      "detail": "calibrated_judge_rationale_dataset_not_applicable_for_offline_benchmark",
+      "metric_id": "agent.judge_rationale_evidence_coverage",
+      "metric_name": "Judge rationale evidence coverage",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "not_applicable",
+      "legacy_status": "not_applicable",
+      "sample_size": 0,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.judge_rationale_evidence_coverage",
+        "framework": "judge_rationale_evidence_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 0,
+        "denominator": 0,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Require judge rationales to cite trace spans, artifacts or rubric clauses for every fail/warning.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     }
   ],
   "advisory_findings": [

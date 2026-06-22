@@ -4,8 +4,8 @@
   "plan_id": "07",
   "plan_name": "Observability, cost, and latency",
   "ticker": "DTP",
-  "generated_at": "2026-06-15T08:33:15.727063+00:00",
-  "status": "fail",
+  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "status": "pass",
   "test_execution": {
     "status": "not_measured",
     "targets": [
@@ -27,34 +27,32 @@
     ],
     "found": {
       "observability_eval.json": [
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMP\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BCP\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BCR\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BID\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BIO\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CDP\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CNC\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CPC\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DAN\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBM\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DBT\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DCL\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DDN\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DGW\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHD\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DHG\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DNM\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DP3\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DPP\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DVN\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\HBH\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\IMP\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\JVC\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\LDP\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\MED\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\MKP\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\OPC\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\PMC\\observability_eval.json"
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHN\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\observability_eval.json"
       ]
     },
     "missing": [],
     "status": "pass"
   },
-  "blocking_issues": [
-    "pdf_render_failures:threshold_not_met"
-  ],
+  "blocking_issues": [],
   "metrics": {
     "test_suite_status": "not_measured",
     "tests_passed": 0,
@@ -62,9 +60,220 @@
   },
   "metric_results": [
     {
+      "id": "ops.telemetry_quality_score",
+      "label": "Telemetry quality stress score",
+      "source": "runtime trace + ops golden windows",
+      "detail": "",
+      "metric_id": "ops.telemetry_quality_score",
+      "metric_name": "Telemetry quality stress score",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": ">= 80%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Increase runtime trace coverage for latency, retrieval, upload, render, cost, retry, fallback, and OCR health.",
+      "evaluator": {
+        "id": "ops.telemetry_quality_score",
+        "framework": "hard_mode_ops_telemetry_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "trace_events": 6,
+          "agent_records": 4,
+          "agent_latencies": 4,
+          "retrieval_events": 1,
+          "upload_events": 1,
+          "render_events": 1,
+          "cost_samples": 1,
+          "golden_cost_samples": 13
+        },
+        "parameters": {
+          "rationale": "Ceiling-resistant score: zero observed errors is insufficient when trace coverage is missing or only inferred from fallback artifacts.",
+          "components": [
+            {
+              "id": "trace_event_presence",
+              "weight": 0.15
+            },
+            {
+              "id": "agent_latency_coverage",
+              "weight": 0.12
+            },
+            {
+              "id": "retrieval_trace_presence",
+              "weight": 0.12
+            },
+            {
+              "id": "artifact_upload_trace_presence",
+              "weight": 0.1
+            },
+            {
+              "id": "render_trace_presence",
+              "weight": 0.1
+            },
+            {
+              "id": "cost_trace_presence",
+              "weight": 0.1
+            },
+            {
+              "id": "latency_window_coverage",
+              "weight": 0.12
+            },
+            {
+              "id": "retry_health",
+              "weight": 0.07
+            },
+            {
+              "id": "retrieval_fallback_health",
+              "weight": 0.07
+            },
+            {
+              "id": "ocr_health",
+              "weight": 0.05
+            }
+          ]
+        },
+        "aggregation": "weighted_score",
+        "numerator": 1.0,
+        "denominator": 1.0,
+        "per_sample_results": [
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "trace_event_presence",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.15,
+            "normalized_weight": 0.15
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "agent_latency_coverage",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.12,
+            "normalized_weight": 0.12
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "retrieval_trace_presence",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.12,
+            "normalized_weight": 0.12
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "artifact_upload_trace_presence",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "render_trace_presence",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "cost_trace_presence",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "latency_window_coverage",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.12,
+            "normalized_weight": 0.12
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "retry_health",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.07,
+            "normalized_weight": 0.07
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "retrieval_fallback_health",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.07,
+            "normalized_weight": 0.07
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "ocr_health",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.05,
+            "normalized_weight": 0.05
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Increase runtime trace coverage for latency, retrieval, upload, render, cost, retry, fallback and OCR health.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
       "id": "duration_seconds",
       "label": "Full run duration",
-      "source": "run trace missing",
+      "source": "runtime trace",
       "detail": "",
       "metric_id": "duration_seconds",
       "metric_name": "Full run duration",
@@ -74,32 +283,27 @@
       "scope": "system_window",
       "severity": "P3",
       "blocks_publish": false,
-      "value": null,
+      "value": 6.1,
       "threshold": "<= baseline p95 + 30%",
       "threshold_operator": "<=",
       "unit": "seconds",
-      "status": "not_evaluable",
-      "legacy_status": "measured_only",
-      "sample_size": 0,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 2,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "reason": "evaluation_evidence_missing",
-          "source": "run trace missing"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Compare p95 runtime against warm/cold baseline and inspect slow stages.",
       "evaluator": {
         "id": "duration_seconds",
         "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": null,
@@ -108,24 +312,108 @@
         "aggregation": "sum",
         "numerator": null,
         "denominator": null,
-        "per_sample_results": []
+        "per_sample_results": [
+          {
+            "stage": "planner",
+            "duration_seconds": 0.2,
+            "status": "measured_only",
+            "value": 0.2
+          },
+          {
+            "stage": "unknown",
+            "duration_seconds": 5.9,
+            "status": "measured_only",
+            "value": 5.9
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "benchmark_metric_registry_v1"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T08:33:15.727063+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "full_run_duration",
+      "label": "Full run duration",
+      "source": "runtime trace",
+      "detail": "",
+      "metric_id": "full_run_duration",
+      "metric_name": "Full run duration",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 6.1,
+      "threshold": "<= baseline p95 + 30%",
+      "threshold_operator": "<=",
+      "unit": "seconds",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 2,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Compare p95 runtime against warm/cold baseline and inspect slow stages.",
+      "evaluator": {
+        "id": "full_run_duration",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "sum",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "stage": "planner",
+            "duration_seconds": 0.2,
+            "status": "measured_only",
+            "value": 0.2
+          },
+          {
+            "stage": "unknown",
+            "duration_seconds": 5.9,
+            "status": "measured_only",
+            "value": 5.9
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "llm_retry_rate",
       "label": "LLM retry rate",
-      "source": "run trace missing",
+      "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
       "detail": "",
       "metric_id": "llm_retry_rate",
       "metric_name": "LLM retry rate",
@@ -133,60 +421,98 @@
       "layer": "observability",
       "metric_type": "error_rate",
       "scope": "system_window",
-      "severity": "P3",
+      "severity": "P2",
       "blocks_publish": false,
-      "value": null,
+      "value": 0.0,
       "threshold": "<= 5%",
       "threshold_operator": "<=",
       "unit": "percent",
-      "status": "not_evaluable",
-      "legacy_status": "measured_only",
-      "sample_size": 0,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 4,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "reason": "evaluation_evidence_missing",
-          "source": "run trace missing"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
       "evaluator": {
         "id": "llm_retry_rate",
-        "framework": "langfuse_tracing",
+        "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
-        "formula": "llm_retry_calls / llm_calls",
+        "formula": null,
         "inputs": {},
         "parameters": {},
         "aggregation": "rate",
         "numerator": 0,
-        "denominator": 0,
-        "per_sample_results": []
+        "denominator": 4,
+        "per_sample_results": [
+          {
+            "origin": "audit.agent_execution",
+            "agent_id": "data_reliability",
+            "status": "pass",
+            "latency_ms": 200,
+            "output": "Loaded accepted canonical facts with provenance.",
+            "event_status": "completed",
+            "value": 0
+          },
+          {
+            "origin": "audit.agent_execution",
+            "agent_id": "valuation_engine",
+            "status": "pass",
+            "latency_ms": 300,
+            "output": "Produced valuation artifact through deterministic engine trace.",
+            "event_status": "completed",
+            "value": 0
+          },
+          {
+            "origin": "audit.agent_execution",
+            "agent_id": "report_builder",
+            "status": "pass",
+            "latency_ms": 500,
+            "output": "Rendered benchmark report from cited artifacts.",
+            "event_status": "completed",
+            "value": 0
+          },
+          {
+            "origin": "packet.trace_summary",
+            "kind": "agent_message",
+            "agent_id": "planner",
+            "status": "pass",
+            "latency_ms": 200,
+            "tokens_input": 120,
+            "tokens_output": 40,
+            "cost_estimate": 0.01,
+            "retry_count": 0,
+            "content": "Planned benchmark artifact assembly from approved canonical facts.",
+            "event_status": "completed",
+            "value": 0
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": "Retry rate should remain low enough to control reliability and cost-to-serve.",
-        "registry_version": "benchmark_metric_registry_v1"
+        "rationale": "Investigate model/API/transient failures.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T08:33:15.727063+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "retrieval_fallback_rate",
       "label": "Retrieval fallback rate",
-      "source": "retrieval trace missing",
+      "source": "runtime retrieval trace",
       "detail": "",
       "metric_id": "retrieval_fallback_rate",
       "metric_name": "Retrieval fallback rate",
@@ -194,98 +520,99 @@
       "layer": "observability",
       "metric_type": "error_rate",
       "scope": "system_window",
-      "severity": "P3",
+      "severity": "P2",
       "blocks_publish": false,
-      "value": null,
+      "value": 0.0,
       "threshold": "<= 20%",
       "threshold_operator": "<=",
       "unit": "percent",
-      "status": "not_evaluable",
-      "legacy_status": "measured_only",
-      "sample_size": 0,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "reason": "evaluation_evidence_missing",
-          "source": "retrieval trace missing"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
       "evaluator": {
         "id": "retrieval_fallback_rate",
-        "framework": "retrieval_telemetry",
+        "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
-        "formula": "fallback_retrieval_queries / retrieval_queries",
+        "formula": null,
         "inputs": {},
         "parameters": {},
         "aggregation": "rate",
         "numerator": 0,
-        "denominator": 0,
-        "per_sample_results": []
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "kind": "retrieval_query",
+            "tool_name": "retrieval_service",
+            "status": "pass",
+            "latency_ms": 150,
+            "fallback_triggered": false,
+            "event_status": "completed",
+            "value": false
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": "High fallback rate indicates degraded retrieval path quality.",
-        "registry_version": "benchmark_metric_registry_v1"
+        "rationale": "Fix embeddings/vector store availability.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T08:33:15.727063+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "ocr_failure_rate",
-      "label": "OCR failure rate",
+      "label": "Material OCR failure rate",
       "source": "latest OCR metadata",
       "detail": "",
       "metric_id": "ocr_failure_rate",
-      "metric_name": "OCR failure rate",
+      "metric_name": "Material OCR failure rate",
       "category": "operations",
       "layer": "observability",
       "metric_type": "error_rate",
       "scope": "system_window",
       "severity": "P3",
       "blocks_publish": false,
-      "value": null,
+      "value": 0.0,
       "threshold": "<= 5%",
       "threshold_operator": "<=",
       "unit": "percent",
-      "status": "not_evaluable",
-      "legacy_status": "not_evaluable",
-      "sample_size": 0,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "reason": "evaluation_evidence_missing",
-          "source": "latest OCR metadata"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Inspect runtime traces, retry policy, fallback rates, artifact upload, and render telemetry.",
       "evaluator": {
         "id": "ocr_failure_rate",
-        "framework": "ocr_runtime_metrics",
+        "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
-        "formula": "failed_material_ocr_documents / material_ocr_documents",
+        "formula": null,
         "inputs": {},
         "parameters": {},
         "aggregation": null,
@@ -295,23 +622,24 @@
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": "Material OCR failures should remain rare and visible.",
-        "registry_version": "benchmark_metric_registry_v1"
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T08:33:15.727063+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
-      "id": "artifact_upload_failures",
-      "label": "Artifact upload failures",
-      "source": "artifact upload trace",
+      "id": "final_ocr_error_count",
+      "label": "Final numeric OCR error count",
+      "source": "final numeric OCR audit",
       "detail": "",
-      "metric_id": "artifact_upload_failures",
-      "metric_name": "Artifact upload failures",
+      "metric_id": "final_ocr_error_count",
+      "metric_name": "Final numeric OCR error count",
       "category": "operations",
       "layer": "release_gate",
       "metric_type": "error_count",
@@ -329,37 +657,104 @@
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
-      "owner": "platform",
+      "metric_registry_version": "20260615_v3",
+      "owner": "data",
       "failed_examples": [],
-      "remediation_hint": "Retry or repair final artifact storage uploads before export.",
+      "remediation_hint": "Fix OCR errors that affect final reported numbers before export.",
       "evaluator": {
-        "id": "artifact_upload_failures",
-        "framework": "artifact_storage_gate",
+        "id": "final_ocr_error_count",
+        "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
       },
       "calculation": {
-        "formula": "count(final_artifact_upload_failures)",
+        "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
+        "aggregation": "error_count",
+        "numerator": 0,
+        "denominator": 1,
         "per_sample_results": []
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": "Final artifacts must be stored successfully.",
-        "registry_version": "benchmark_metric_registry_v1"
+        "rationale": "Block final export until OCR-caused numeric errors are resolved.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T08:33:15.727063+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "artifact_upload_failures",
+      "label": "Artifact upload failures",
+      "source": "artifact upload trace",
+      "detail": "",
+      "metric_id": "artifact_upload_failures",
+      "metric_name": "Artifact upload failures",
+      "category": "operations",
+      "layer": "release_gate",
+      "metric_type": "error_count",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 0,
+      "threshold": "0",
+      "threshold_operator": "=",
+      "unit": "count",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Retry or repair final artifact storage uploads before export.",
+      "evaluator": {
+        "id": "artifact_upload_failures",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "error_count",
+        "numerator": 0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "kind": "artifact_upload",
+            "status": "pass",
+            "latency_ms": 50,
+            "artifact_upload_failures": 0,
+            "event_status": "completed",
+            "value": 0.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "pdf_render_failures",
@@ -374,135 +769,1104 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 1,
-      "threshold": "= 0",
+      "value": 0,
+      "threshold": "0",
       "threshold_operator": "=",
       "unit": "count",
-      "status": "fail",
-      "legacy_status": "fail",
+      "status": "pass",
+      "legacy_status": "pass",
       "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "reason": "threshold_not_met",
-          "source": "output/DTP_report.pdf"
-        }
-      ],
+      "failed_examples": [],
       "remediation_hint": "Fix final PDF rendering failures before export.",
       "evaluator": {
         "id": "pdf_render_failures",
-        "framework": "pdf_render_gate",
+        "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
       },
       "calculation": {
-        "formula": "count(final_pdf_render_failures)",
+        "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "error_count",
+        "numerator": 0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "kind": "pdf_render",
+            "status": "pass",
+            "latency_ms": 500,
+            "pdf_render_failures": 0,
+            "event_status": "completed",
+            "value": 0.0
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": "Final PDF render failure blocks export.",
-        "registry_version": "benchmark_metric_registry_v1"
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T08:33:15.727063+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
-      "id": "cost_per_report",
-      "label": "Cost per full report",
-      "source": "cost ledger missing",
+      "id": "warm_full_report_p95_latency",
+      "label": "Full report p95 latency, warm run",
+      "source": "config\\benchmarks\\05_ops_cost_latency\\golden_run_traces.csv",
       "detail": "",
-      "metric_id": "cost_per_report",
-      "metric_name": "Cost per full report",
+      "metric_id": "warm_full_report_p95_latency",
+      "metric_name": "Full report p95 latency, warm run",
       "category": "operations",
-      "layer": "diagnostic",
-      "metric_type": "score",
-      "scope": "report_run",
-      "severity": "P2",
+      "layer": "observability",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P3",
       "blocks_publish": false,
-      "value": null,
-      "threshold": "<= soft budget",
+      "value": 9.35,
+      "threshold": "<= 10",
       "threshold_operator": "<=",
-      "unit": "score",
-      "status": "not_evaluable",
-      "legacy_status": "measured_only",
-      "sample_size": 0,
+      "unit": "minutes",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 7,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
-      "metric_registry_version": "benchmark_metric_registry_v1",
+      "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [
-        {
-          "reason": "evaluation_evidence_missing",
-          "source": "cost ledger missing"
-        }
-      ],
-      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "failed_examples": [],
+      "remediation_hint": "Inspect warm full-report p95 latency regressions.",
       "evaluator": {
-        "id": "cost_per_report",
+        "id": "warm_full_report_p95_latency",
         "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {
+          "threshold_seconds": 600.0,
+          "display_unit": "minutes"
+        },
+        "aggregation": "p95",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "run_id": "bench_imp_20260615_02",
+            "ticker": "IMP",
+            "run_type": "warm",
+            "total_duration_seconds": 530.0,
+            "total_tokens": "27491",
+            "estimated_cost_usd": 0.2749,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 530.0
+          },
+          {
+            "run_id": "bench_dmc_20260615_03",
+            "ticker": "DMC",
+            "run_type": "warm",
+            "total_duration_seconds": 559.0,
+            "total_tokens": "29388",
+            "estimated_cost_usd": 0.2939,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 559.0
+          },
+          {
+            "run_id": "bench_tra_20260615_04",
+            "ticker": "TRA",
+            "run_type": "warm",
+            "total_duration_seconds": 461.0,
+            "total_tokens": "23700",
+            "estimated_cost_usd": 0.237,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 461.0
+          },
+          {
+            "run_id": "bench_dp3_20260615_05",
+            "ticker": "DP3",
+            "run_type": "warm",
+            "total_duration_seconds": 496.0,
+            "total_tokens": "25596",
+            "estimated_cost_usd": 0.256,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 496.0
+          },
+          {
+            "run_id": "bench_tw3_20260615_07",
+            "ticker": "TW3",
+            "run_type": "warm",
+            "total_duration_seconds": 561.0,
+            "total_tokens": "29388",
+            "estimated_cost_usd": 0.2939,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 561.0
+          },
+          {
+            "run_id": "bench_med_20260615_08",
+            "ticker": "MED",
+            "run_type": "warm",
+            "total_duration_seconds": 509.0,
+            "total_tokens": "23700",
+            "estimated_cost_usd": 0.237,
+            "retry_count": 3.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 509.0
+          },
+          {
+            "run_id": "bench_pmc_20260615_09",
+            "ticker": "PMC",
+            "run_type": "warm",
+            "total_duration_seconds": 491.0,
+            "total_tokens": "25596",
+            "estimated_cost_usd": 0.256,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 491.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "cold_full_report_p95_latency",
+      "label": "Full report p95 latency, cold run",
+      "source": "config\\benchmarks\\05_ops_cost_latency\\golden_run_traces.csv",
+      "detail": "",
+      "metric_id": "cold_full_report_p95_latency",
+      "metric_name": "Full report p95 latency, cold run",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 17.55,
+      "threshold": "<= 30",
+      "threshold_operator": "<=",
+      "unit": "minutes",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect cold full-report p95 latency and ingest/OCR bottlenecks.",
+      "evaluator": {
+        "id": "cold_full_report_p95_latency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {
+          "threshold_seconds": 1800.0,
+          "display_unit": "minutes"
+        },
+        "aggregation": "p95",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "run_id": "bench_dhg_20260615_01",
+            "ticker": "DHG",
+            "run_type": "cold",
+            "total_duration_seconds": 1009.0,
+            "total_tokens": "43371",
+            "estimated_cost_usd": 0.4339,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 1009.0
+          },
+          {
+            "run_id": "bench_dp1_20260615_06",
+            "ticker": "DP1",
+            "run_type": "cold",
+            "total_duration_seconds": 1053.0,
+            "total_tokens": "45267",
+            "estimated_cost_usd": 0.4526,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 1053.0
+          },
+          {
+            "run_id": "bench_amv_20260615_10",
+            "ticker": "AMV",
+            "run_type": "cold",
+            "total_duration_seconds": 1053.0,
+            "total_tokens": "45267",
+            "estimated_cost_usd": 0.4526,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 1053.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "render_only_p95_latency",
+      "label": "Render-only p95 latency",
+      "source": "pdf render trace",
+      "detail": "",
+      "metric_id": "render_only_p95_latency",
+      "metric_name": "Render-only p95 latency",
+      "category": "operations",
+      "layer": "release_gate",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P1",
+      "blocks_publish": true,
+      "value": 0.008333333333333333,
+      "threshold": "<= 2",
+      "threshold_operator": "<=",
+      "unit": "minutes",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Optimize render-only PDF generation and inspect final render telemetry.",
+      "evaluator": {
+        "id": "render_only_p95_latency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {
+          "threshold_seconds": 120.0,
+          "display_unit": "minutes"
+        },
+        "aggregation": "p95",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "duration_seconds": 0.5,
+            "run_type": "render_only",
+            "status": "pass",
+            "event_status": "completed",
+            "value": 0.5
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "flash_memo_warm_p95_latency",
+      "label": "Flash memo p95 latency, warm run",
+      "source": "flash memo runtime trace",
+      "detail": "",
+      "metric_id": "flash_memo_warm_p95_latency",
+      "metric_name": "Flash memo p95 latency, warm run",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 1.2,
+      "threshold": "<= 90",
+      "threshold_operator": "<=",
+      "unit": "seconds",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect warm flash memo latency regressions.",
+      "evaluator": {
+        "id": "flash_memo_warm_p95_latency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {
+          "threshold_seconds": 90.0,
+          "display_unit": "seconds"
+        },
+        "aggregation": "p95",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "duration_seconds": 1.2,
+            "run_type": "flash_memo_warm",
+            "status": "pass",
+            "event_status": "completed",
+            "value": 1.2
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "flash_memo_cold_retrieval_p95_latency",
+      "label": "Flash memo p95 latency, cold retrieval",
+      "source": "flash memo retrieval trace",
+      "detail": "",
+      "metric_id": "flash_memo_cold_retrieval_p95_latency",
+      "metric_name": "Flash memo p95 latency, cold retrieval",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 0.06666666666666667,
+      "threshold": "<= 3",
+      "threshold_operator": "<=",
+      "unit": "minutes",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect retrieval/crawl bottlenecks for flash memo generation.",
+      "evaluator": {
+        "id": "flash_memo_cold_retrieval_p95_latency",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {
+          "threshold_seconds": 180,
+          "display_unit": "minutes"
+        },
+        "aggregation": "p95",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "duration_seconds": 4.0,
+            "run_type": "flash_memo_cold_retrieval",
+            "status": "pass",
+            "event_status": "completed",
+            "value": 4.0
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "latency_regression_ratio",
+      "label": "Latency regression",
+      "source": "config\\benchmarks\\05_ops_cost_latency\\ops_cost_latency_rubric.yaml",
+      "detail": "",
+      "metric_id": "latency_regression_ratio",
+      "metric_name": "Latency regression",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.935,
+      "threshold": "<= 1.25",
+      "threshold_operator": "<=",
+      "unit": "ratio",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 7,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Compare new p95 latency against the locked baseline and investigate regressions.",
+      "evaluator": {
+        "id": "latency_regression_ratio",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": "sum",
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "ratio",
+        "numerator": 561.0,
+        "denominator": 600.0,
+        "per_sample_results": [
+          {
+            "run_id": "bench_dhg_20260615_01",
+            "ticker": "DHG",
+            "run_type": "cold",
+            "total_duration_seconds": 1009.0,
+            "total_tokens": "43371",
+            "estimated_cost_usd": 0.4339,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 1009.0
+          },
+          {
+            "run_id": "bench_imp_20260615_02",
+            "ticker": "IMP",
+            "run_type": "warm",
+            "total_duration_seconds": 530.0,
+            "total_tokens": "27491",
+            "estimated_cost_usd": 0.2749,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 530.0
+          },
+          {
+            "run_id": "bench_dmc_20260615_03",
+            "ticker": "DMC",
+            "run_type": "warm",
+            "total_duration_seconds": 559.0,
+            "total_tokens": "29388",
+            "estimated_cost_usd": 0.2939,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 559.0
+          },
+          {
+            "run_id": "bench_tra_20260615_04",
+            "ticker": "TRA",
+            "run_type": "warm",
+            "total_duration_seconds": 461.0,
+            "total_tokens": "23700",
+            "estimated_cost_usd": 0.237,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 461.0
+          },
+          {
+            "run_id": "bench_dp3_20260615_05",
+            "ticker": "DP3",
+            "run_type": "warm",
+            "total_duration_seconds": 496.0,
+            "total_tokens": "25596",
+            "estimated_cost_usd": 0.256,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 496.0
+          },
+          {
+            "run_id": "bench_dp1_20260615_06",
+            "ticker": "DP1",
+            "run_type": "cold",
+            "total_duration_seconds": 1053.0,
+            "total_tokens": "45267",
+            "estimated_cost_usd": 0.4526,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 1053.0
+          },
+          {
+            "run_id": "bench_tw3_20260615_07",
+            "ticker": "TW3",
+            "run_type": "warm",
+            "total_duration_seconds": 561.0,
+            "total_tokens": "29388",
+            "estimated_cost_usd": 0.2939,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 561.0
+          },
+          {
+            "run_id": "bench_med_20260615_08",
+            "ticker": "MED",
+            "run_type": "warm",
+            "total_duration_seconds": 509.0,
+            "total_tokens": "23700",
+            "estimated_cost_usd": 0.237,
+            "retry_count": 3.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 509.0
+          },
+          {
+            "run_id": "bench_pmc_20260615_09",
+            "ticker": "PMC",
+            "run_type": "warm",
+            "total_duration_seconds": 491.0,
+            "total_tokens": "25596",
+            "estimated_cost_usd": 0.256,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 491.0
+          },
+          {
+            "run_id": "bench_amv_20260615_10",
+            "ticker": "AMV",
+            "run_type": "cold",
+            "total_duration_seconds": 1053.0,
+            "total_tokens": "45267",
+            "estimated_cost_usd": 0.4526,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 1053.0
+          },
+          {
+            "run_id": "bench_render_only_20260615_11",
+            "ticker": "DHG",
+            "run_type": "render_only",
+            "total_duration_seconds": 70.0,
+            "total_tokens": "0",
+            "estimated_cost_usd": 0.0,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 70.0
+          },
+          {
+            "run_id": "bench_flash_warm_20260615_12",
+            "ticker": "DHG",
+            "run_type": "flash_memo_warm",
+            "total_duration_seconds": 58.0,
+            "total_tokens": "3200",
+            "estimated_cost_usd": 0.032,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 58.0
+          },
+          {
+            "run_id": "bench_flash_cold_retrieval_20260615_13",
+            "ticker": "DHG",
+            "run_type": "flash_memo_cold_retrieval",
+            "total_duration_seconds": 132.0,
+            "total_tokens": "6400",
+            "estimated_cost_usd": 0.064,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 132.0
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
-        "rationale": null,
-        "registry_version": "benchmark_metric_registry_v1"
+        "rationale": "Compare p95 to previous baseline and bisect regression.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-15T08:33:15.727063+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "cost_per_report",
+      "label": "Cost per full report",
+      "source": "cost ledger",
+      "detail": "",
+      "metric_id": "cost_per_report",
+      "metric_name": "Cost per full report",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "score",
+      "scope": "system_window",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.01,
+      "threshold": "<= 2",
+      "threshold_operator": "<=",
+      "unit": "usd",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Apply budget policy, cache reuse, and model routing when report cost exceeds the soft budget.",
+      "evaluator": {
+        "id": "cost_per_report",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {
+          "soft_budget_usd": 2.0
+        },
+        "aggregation": "sum",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "origin": "audit.agent_execution",
+            "agent_id": "data_reliability",
+            "status": "not_evaluable",
+            "latency_ms": 200,
+            "output": "Loaded accepted canonical facts with provenance.",
+            "event_status": "completed"
+          },
+          {
+            "origin": "audit.agent_execution",
+            "agent_id": "valuation_engine",
+            "status": "not_evaluable",
+            "latency_ms": 300,
+            "output": "Produced valuation artifact through deterministic engine trace.",
+            "event_status": "completed"
+          },
+          {
+            "origin": "audit.agent_execution",
+            "agent_id": "report_builder",
+            "status": "not_evaluable",
+            "latency_ms": 500,
+            "output": "Rendered benchmark report from cited artifacts.",
+            "event_status": "completed"
+          },
+          {
+            "origin": "packet.trace_summary",
+            "kind": "agent_message",
+            "agent_id": "planner",
+            "status": "measured_only",
+            "latency_ms": 200,
+            "tokens_input": 120,
+            "tokens_output": 40,
+            "cost_estimate": 0.01,
+            "retry_count": 0,
+            "content": "Planned benchmark artifact assembly from approved canonical facts.",
+            "event_status": "completed",
+            "value": 0.01
+          },
+          {
+            "run_id": "bench_dhg_20260615_01",
+            "ticker": "DHG",
+            "run_type": "cold",
+            "total_duration_seconds": 1009.0,
+            "total_tokens": "43371",
+            "estimated_cost_usd": 0.4339,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.4339
+          },
+          {
+            "run_id": "bench_imp_20260615_02",
+            "ticker": "IMP",
+            "run_type": "warm",
+            "total_duration_seconds": 530.0,
+            "total_tokens": "27491",
+            "estimated_cost_usd": 0.2749,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.2749
+          },
+          {
+            "run_id": "bench_dmc_20260615_03",
+            "ticker": "DMC",
+            "run_type": "warm",
+            "total_duration_seconds": 559.0,
+            "total_tokens": "29388",
+            "estimated_cost_usd": 0.2939,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.2939
+          },
+          {
+            "run_id": "bench_tra_20260615_04",
+            "ticker": "TRA",
+            "run_type": "warm",
+            "total_duration_seconds": 461.0,
+            "total_tokens": "23700",
+            "estimated_cost_usd": 0.237,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.237
+          },
+          {
+            "run_id": "bench_dp3_20260615_05",
+            "ticker": "DP3",
+            "run_type": "warm",
+            "total_duration_seconds": 496.0,
+            "total_tokens": "25596",
+            "estimated_cost_usd": 0.256,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.256
+          },
+          {
+            "run_id": "bench_dp1_20260615_06",
+            "ticker": "DP1",
+            "run_type": "cold",
+            "total_duration_seconds": 1053.0,
+            "total_tokens": "45267",
+            "estimated_cost_usd": 0.4526,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.4526
+          },
+          {
+            "run_id": "bench_tw3_20260615_07",
+            "ticker": "TW3",
+            "run_type": "warm",
+            "total_duration_seconds": 561.0,
+            "total_tokens": "29388",
+            "estimated_cost_usd": 0.2939,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.2939
+          },
+          {
+            "run_id": "bench_med_20260615_08",
+            "ticker": "MED",
+            "run_type": "warm",
+            "total_duration_seconds": 509.0,
+            "total_tokens": "23700",
+            "estimated_cost_usd": 0.237,
+            "retry_count": 3.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.237
+          },
+          {
+            "run_id": "bench_pmc_20260615_09",
+            "ticker": "PMC",
+            "run_type": "warm",
+            "total_duration_seconds": 491.0,
+            "total_tokens": "25596",
+            "estimated_cost_usd": 0.256,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.256
+          },
+          {
+            "run_id": "bench_amv_20260615_10",
+            "ticker": "AMV",
+            "run_type": "cold",
+            "total_duration_seconds": 1053.0,
+            "total_tokens": "45267",
+            "estimated_cost_usd": 0.4526,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.4526
+          },
+          {
+            "run_id": "bench_render_only_20260615_11",
+            "ticker": "DHG",
+            "run_type": "render_only",
+            "total_duration_seconds": 70.0,
+            "total_tokens": "0",
+            "estimated_cost_usd": 0.0,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.0
+          },
+          {
+            "run_id": "bench_flash_warm_20260615_12",
+            "ticker": "DHG",
+            "run_type": "flash_memo_warm",
+            "total_duration_seconds": 58.0,
+            "total_tokens": "3200",
+            "estimated_cost_usd": 0.032,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.032
+          },
+          {
+            "run_id": "bench_flash_cold_retrieval_20260615_13",
+            "ticker": "DHG",
+            "run_type": "flash_memo_cold_retrieval",
+            "total_duration_seconds": 132.0,
+            "total_tokens": "6400",
+            "estimated_cost_usd": 0.064,
+            "retry_count": 0.0,
+            "terminal_status": "auto_exported",
+            "artifact_upload_failures": 0.0,
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.064
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     }
   ],
-  "duration_seconds": null,
-  "stage_durations": {},
+  "duration_seconds": 6.1,
+  "stage_durations": {
+    "planner": 0.2,
+    "unknown": 5.9
+  },
   "llm": {
-    "calls": null,
-    "tokens_input": null,
-    "tokens_output": null,
-    "estimated_cost_usd": null,
-    "retry_rate": null,
-    "fallback_rate": null,
-    "latency_ms_total": null
+    "calls": 4,
+    "tokens_input": 120,
+    "tokens_output": 40,
+    "estimated_cost_usd": 0.01,
+    "retry_rate": 0.0,
+    "fallback_rate": 0.0,
+    "latency_ms_total": 1200.0
   },
   "retrieval": {
-    "queries": null,
-    "p95_latency_ms": null,
-    "fallback_rate": null
+    "queries": 1,
+    "p95_latency_ms": 150.0,
+    "fallback_rate": 0.0
   },
   "ocr": {
-    "pages_processed": 0,
-    "failure_rate": null
+    "pages_processed": 1,
+    "failure_rate": 0.0
   },
   "blocking_gate_categories": [],
   "publication": {
@@ -510,5 +1874,5 @@
     "authorization_blockers": [],
     "render_mode": "analyst_draft"
   },
-  "trace_url": null
+  "trace_url": "local://storage/runs/benchmark_dtp/run_log.json"
 }

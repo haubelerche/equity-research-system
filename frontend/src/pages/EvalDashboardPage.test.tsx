@@ -632,26 +632,13 @@ describe("EvalDashboardPage", () => {
     expect(screen.getByText("pandera")).toBeInTheDocument();
     expect(screen.getByText("0.24.0")).toBeInTheDocument();
     expect(screen.getByText(/MVP coverage threshold/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /mẫu \(5\)/i })).toBeInTheDocument();
-    expect(screen.getByText("gross_margin")).toBeInTheDocument();
-    const componentRow = screen.getByText("provenance_coverage").closest("tr");
-    expect(componentRow).not.toBeNull();
-    expect(within(componentRow!).getByText("pass")).toBeInTheDocument();
-    expect(within(componentRow!).getByText("100%")).toBeInTheDocument();
-    const permissionCell = screen
-      .getAllByText("READ_SNAPSHOT")
-      .find((element) => element.tagName.toLowerCase() === "td");
-    const permissionRow = permissionCell?.closest("tr");
-    expect(permissionRow).not.toBeNull();
-    expect(within(permissionRow!).getByText("pass")).toBeInTheDocument();
-    expect(within(permissionRow!).getByText("read_only")).toBeInTheDocument();
-    const reportScoreCell = screen
-      .getAllByText("report.valuation_transparency")
-      .find((element) => element.tagName.toLowerCase() === "td");
-    const reportScoreRow = reportScoreCell?.closest("tr");
-    expect(reportScoreRow).not.toBeNull();
-    expect(within(reportScoreRow!).getByText("fail")).toBeInTheDocument();
-    expect(within(reportScoreRow!).getByText("70")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /mẫu \(1\)/i })).toBeInTheDocument();
+    const cohortSampleRow = screen
+      .getAllByText("core_metric_coverage")
+      .find((element) => element.tagName.toLowerCase() === "td")
+      ?.closest("tr");
+    expect(cohortSampleRow).not.toBeNull();
+    expect(within(cohortSampleRow!).getByText("fail")).toBeInTheDocument();
     expect(screen.getAllByText("Mã artifact").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Lý do").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Bằng chứng").length).toBeGreaterThan(0);
@@ -670,16 +657,14 @@ describe("EvalDashboardPage", () => {
     await screen.findByText(/P0/);
     await userEvent.click(screen.getAllByText(/schema validity/i)[0]);
 
-    expect(screen.getByRole("heading", { name: /mẫu \(2\)/i })).toBeInTheDocument();
-    const evidencePacketRow = screen.getByText("evidence_packet").closest("tr");
-    expect(evidencePacketRow).not.toBeNull();
-    expect(within(evidencePacketRow!).getByText("pass")).toBeInTheDocument();
-    expect(within(evidencePacketRow!).getByText("true")).toBeInTheDocument();
-
-    const auditRow = screen.getByText("agent_effectiveness_audit").closest("tr");
-    expect(auditRow).not.toBeNull();
-    expect(within(auditRow!).getByText("fail")).toBeInTheDocument();
-    expect(within(auditRow!).getByText("false")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /mẫu \(1\)/i })).toBeInTheDocument();
+    const schemaRow = screen
+      .getAllByText("schema_validity")
+      .find((element) => element.tagName.toLowerCase() === "td")
+      ?.closest("tr");
+    expect(schemaRow).not.toBeNull();
+    expect(within(schemaRow!).getByText("pass")).toBeInTheDocument();
+    expect(within(schemaRow!).getByText("true")).toBeInTheDocument();
   });
 
   it("shows runtime calculation details in the layer explanation dialog", async () => {

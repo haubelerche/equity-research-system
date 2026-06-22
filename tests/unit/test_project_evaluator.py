@@ -1520,6 +1520,30 @@ def test_report_quality_uses_structured_rubric_evidence(tmp_path, monkeypatch) -
     assert result["decision"] == "allow_export"
 
 
+def test_report_recommendation_context_detects_vietnamese_labels(tmp_path, monkeypatch) -> None:
+    text = "Giá mục tiêu 100.000 VND. Khuyến nghị Giữ. Giá hiện tại 95.000 VND."
+
+    def fake_pdf_stats(path: Path) -> dict[str, object]:
+        return {"path": str(path), "exists": True, "pages": 1, "text": text}
+
+    run_dir = tmp_path / "storage" / "runs" / "run_aaa"
+    run_dir.mkdir(parents=True)
+    run_dir.joinpath("publishable_final_report_model.json").write_text(
+        json.dumps({"final_approval": True, "locked": True}),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(runtime_evaluators, "_pdf_stats", fake_pdf_stats)
+
+    result = evaluate_report(tmp_path, "AAA", {"decision": "pass", "blocking_issues": []})
+    metrics = {item["id"]: item for item in result["metrics"]}
+
+    assert metrics["report.recommendation_consistency"]["status"] == "pass"
+    checks = metrics["report.recommendation_consistency"]["calculation"]["per_sample_results"]
+    assert checks[0]["target_visible"] is True
+    assert checks[0]["recommendation_visible"] is True
+
+
 def test_agent_evaluator_validates_schema_manifest_and_unauthorized_calc(tmp_path) -> None:
     schema_dir = tmp_path / "config" / "harness"
     schema_dir.mkdir(parents=True)
@@ -1703,6 +1727,68 @@ def test_agent_evaluator_reads_scoped_run_artifacts(tmp_path) -> None:
 
     assert metrics["tool_permission_compliance"]["status"] == "pass"
     assert metrics["artifact_manifest_compliance"]["status"] == "pass"
+
+
+def test_agent_evaluator_prefers_benchmark_artifacts_over_newer_live_runs(tmp_path) -> None:
+    schema_dir = tmp_path / "config" / "harness"
+    schema_dir.mkdir(parents=True)
+    schema_dir.joinpath("evidence_packet_schema.json").write_text(
+        json.dumps({"required": [], "properties": {}, "additionalProperties": True}),
+        encoding="utf-8",
+    )
+
+    benchmark_dir = tmp_path / "storage" / "runs" / "benchmark_ddd"
+    benchmark_dir.mkdir(parents=True)
+    benchmark_dir.joinpath("benchmark_ddd_evidence_packet.json").write_text(
+        json.dumps({
+            "ticker": "DDD",
+            "tool_execution_summary": [
+                {"tool_name": "read_golden_financials", "status": "completed",
+                 "permission": {"tool_id": "read_golden_financials", "agent_id": "data", "permission_level": "read"}},
+            ],
+            "artifact_refs": [
+                {"section_key": "facts"}, {"section_key": "snapshot"}, {"section_key": "ratios"},
+                {"section_key": "valuation"}, {"section_key": "report_draft"},
+                {"section_key": "evidence_packet"},
+            ],
+        }),
+        encoding="utf-8",
+    )
+    benchmark_dir.joinpath("benchmark_ddd_agent_effectiveness_audit.json").write_text(
+        json.dumps({
+            "ticker": "DDD",
+            "agent_execution": [
+                {"agent_id": "data_reliability", "status": "completed", "output": "loaded facts"},
+            ],
+        }),
+        encoding="utf-8",
+    )
+
+    live_dir = tmp_path / "storage" / "archive" / "run_ddd_newer"
+    live_dir.mkdir(parents=True)
+    live_dir.joinpath("run_ddd_newer_evidence_packet.json").write_text(
+        json.dumps({
+            "ticker": "DDD",
+            "tool_execution_summary": [{"tool_name": "broken_tool", "status": "failed"}],
+            "artifact_refs": [],
+        }),
+        encoding="utf-8",
+    )
+    live_dir.joinpath("run_ddd_newer_agent_effectiveness_audit.json").write_text(
+        json.dumps({
+            "ticker": "DDD",
+            "agent_execution": [
+                {"agent_id": "financial_analysis", "status": "completed"},
+            ],
+        }),
+        encoding="utf-8",
+    )
+
+    result = evaluate_agent(tmp_path, "DDD")
+    metrics = {metric["id"]: metric for metric in result["metrics"]}
+
+    assert metrics["agent.stage_handoff_completeness"]["status"] == "pass"
+    assert metrics["agent.tool_call_success_rate"]["status"] == "pass"
 
 
 def test_observability_evaluator_uses_run_trace_cost_latency_and_gate_history(tmp_path) -> None:

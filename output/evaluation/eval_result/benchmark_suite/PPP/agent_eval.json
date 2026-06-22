@@ -1,0 +1,1509 @@
+{
+  "schema_version": "2.1",
+  "benchmark_suite_version": "benchmark_standards_v1",
+  "plan_id": "05",
+  "plan_name": "Agent workflow and LLM judge",
+  "ticker": "PPP",
+  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "status": "blocked",
+  "test_execution": {
+    "status": "not_measured",
+    "targets": [
+      "tests/harness",
+      "tests/unit/test_six_agent_workflow.py",
+      "tests/unit/test_tool_registry.py",
+      "tests/unit/test_agent_lineage_injection.py",
+      "tests/unit/test_package_validation_gate.py"
+    ],
+    "exit_code": null,
+    "duration_seconds": 0.0,
+    "summary": {},
+    "output_tail": [
+      "Skipped by --skip-tests."
+    ]
+  },
+  "runtime_evidence_inventory": {
+    "required": [
+      "agent_eval.json",
+      "run_log.json"
+    ],
+    "found": {
+      "agent_eval.json": [
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMP\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BCP\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BIO\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CDP\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CNC\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DAN\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBM\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBT\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DCL\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DDN\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHD\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHG\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHN\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DNM\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\agent_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DP2\\agent_eval.json"
+      ],
+      "run_log.json": [
+        "storage\\runs\\benchmark_amp\\run_log.json",
+        "storage\\runs\\benchmark_amv\\run_log.json",
+        "storage\\runs\\benchmark_bcp\\run_log.json",
+        "storage\\runs\\benchmark_bio\\run_log.json",
+        "storage\\runs\\benchmark_cdp\\run_log.json",
+        "storage\\runs\\benchmark_cnc\\run_log.json",
+        "storage\\runs\\benchmark_dan\\run_log.json",
+        "storage\\runs\\benchmark_dbd\\run_log.json",
+        "storage\\runs\\benchmark_dbm\\run_log.json",
+        "storage\\runs\\benchmark_dbt\\run_log.json",
+        "storage\\runs\\benchmark_dcl\\run_log.json",
+        "storage\\runs\\benchmark_ddn\\run_log.json",
+        "storage\\runs\\benchmark_dhd\\run_log.json",
+        "storage\\runs\\benchmark_dhg\\run_log.json",
+        "storage\\runs\\benchmark_dhn\\run_log.json",
+        "storage\\runs\\benchmark_dht\\run_log.json",
+        "storage\\runs\\benchmark_dmc\\run_log.json",
+        "storage\\runs\\benchmark_dnm\\run_log.json",
+        "storage\\runs\\benchmark_dp1\\run_log.json",
+        "storage\\runs\\benchmark_dp2\\run_log.json"
+      ]
+    },
+    "missing": [],
+    "status": "pass"
+  },
+  "blocking_issues": [],
+  "metrics": {
+    "test_suite_status": "not_measured",
+    "tests_passed": 0,
+    "tests_failed": 0
+  },
+  "metric_results": [
+    {
+      "id": "agent.workflow_quality_score",
+      "label": "Agent workflow quality stress score",
+      "source": "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json",
+      "detail": "",
+      "metric_id": "agent.workflow_quality_score",
+      "metric_name": "Agent workflow quality stress score",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.92,
+      "threshold": ">= 75%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 9,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "judge_readiness_score",
+          "component_score": 0.0,
+          "value": 0.0,
+          "status": "warning",
+          "passed": false,
+          "weight": 0.08,
+          "normalized_weight": 0.08
+        }
+      ],
+      "remediation_hint": "Improve trace richness, token telemetry, judge readiness, handoff completeness, and controlled repair behavior.",
+      "evaluator": {
+        "id": "agent.workflow_quality_score",
+        "framework": "hard_mode_agent_workflow_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "tool_calls": 2,
+          "schema_units": 2,
+          "agent_records": 3,
+          "token_samples": 1,
+          "judge_samples": 0
+        },
+        "parameters": {
+          "rationale": "Ceiling-resistant score: deterministic compliance gates stay strict, while missing telemetry, token traces, handoff richness, and judge readiness reduce the benchmark score.",
+          "components": [
+            {
+              "id": "tool_permission_compliance",
+              "weight": 0.14
+            },
+            {
+              "id": "schema_validity",
+              "weight": 0.14
+            },
+            {
+              "id": "stage_handoff_completeness",
+              "weight": 0.14
+            },
+            {
+              "id": "tool_call_success_rate",
+              "weight": 0.12
+            },
+            {
+              "id": "artifact_manifest_compliance",
+              "weight": 0.1
+            },
+            {
+              "id": "task_completion",
+              "weight": 0.1
+            },
+            {
+              "id": "token_budget_observability",
+              "weight": 0.1
+            },
+            {
+              "id": "repair_loop_health",
+              "weight": 0.08
+            },
+            {
+              "id": "judge_readiness_score",
+              "weight": 0.08
+            }
+          ]
+        },
+        "aggregation": "weighted_score",
+        "numerator": 0.92,
+        "denominator": 1.0,
+        "per_sample_results": [
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "tool_permission_compliance",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.14,
+            "normalized_weight": 0.14
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "schema_validity",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.14,
+            "normalized_weight": 0.14
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "stage_handoff_completeness",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.14,
+            "normalized_weight": 0.14
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "tool_call_success_rate",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.12,
+            "normalized_weight": 0.12
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "artifact_manifest_compliance",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "task_completion",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "token_budget_observability",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "repair_loop_health",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.08,
+            "normalized_weight": 0.08
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "judge_readiness_score",
+            "component_score": 0.0,
+            "value": 0.0,
+            "status": "warning",
+            "passed": false,
+            "weight": 0.08,
+            "normalized_weight": 0.08
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Improve trace richness, token telemetry, judge readiness, handoff completeness, and controlled repair behavior.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json": 24646,
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "tool_permission_compliance",
+      "label": "Tool permission compliance",
+      "source": "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+      "detail": "",
+      "metric_id": "tool_permission_compliance",
+      "metric_name": "Tool permission compliance",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 2,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Reject or repair tool calls that lack explicit permission metadata.",
+      "evaluator": {
+        "id": "tool_permission_compliance",
+        "framework": "agent_tool_permission_trace",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 2,
+        "denominator": 2,
+        "per_sample_results": [
+          {
+            "tool_name": "read_golden_financials",
+            "status": "pass",
+            "permission": {
+              "tool_id": "read_golden_financials",
+              "agent_id": "data_reliability",
+              "permission_level": "read_only"
+            },
+            "value": true
+          },
+          {
+            "tool_name": "deterministic_valuation",
+            "status": "pass",
+            "permission": {
+              "tool_id": "deterministic_valuation",
+              "agent_id": "valuation_engine",
+              "permission_level": "execute"
+            },
+            "value": true
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Fix tool owner/permission metadata in trace.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json": 24646
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "artifact_manifest_compliance",
+      "label": "Artifact manifest compliance",
+      "source": "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+      "detail": "",
+      "metric_id": "artifact_manifest_compliance",
+      "metric_name": "Artifact manifest compliance",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 6,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Attach storage paths for facts, index, ratios, valuation, report, and evidence packet artifacts.",
+      "evaluator": {
+        "id": "artifact_manifest_compliance",
+        "framework": "artifact_manifest_trace",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 6,
+        "denominator": 6,
+        "per_sample_results": [
+          {
+            "section_group": [
+              "facts"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "section_group": [
+              "snapshot"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "section_group": [
+              "ratios"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "section_group": [
+              "valuation"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "section_group": [
+              "report_draft",
+              "review_passed_report_model",
+              "publishable_final_report_model"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "section_group": [
+              "evidence_packet"
+            ],
+            "status": "pass",
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Ensure all required artifacts have storage path/checksum.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json": 24646
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.stage_handoff_completeness",
+      "label": "Stage handoff completeness",
+      "source": "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json",
+      "detail": "",
+      "metric_id": "agent.stage_handoff_completeness",
+      "metric_name": "Stage handoff completeness",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P1",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": ">= 95%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.stage_handoff_completeness",
+        "framework": "trace_artifact_handoff_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 3,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "agent_id": "data_reliability",
+            "status": "pass",
+            "agent_status": "completed",
+            "has_output": true,
+            "required_artifacts_ready": true,
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "agent_id": "valuation_engine",
+            "status": "pass",
+            "agent_status": "completed",
+            "has_output": true,
+            "required_artifacts_ready": true,
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          },
+          {
+            "agent_id": "report_builder",
+            "status": "pass",
+            "agent_status": "completed",
+            "has_output": true,
+            "required_artifacts_ready": true,
+            "registered_sections": [
+              "evidence_packet",
+              "facts",
+              "ratios",
+              "report_draft",
+              "snapshot",
+              "valuation"
+            ]
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Ensure each agent emits required inputs, outputs, artifact references and blocking decisions for the next stage.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json": 24646,
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.tool_call_success_rate",
+      "label": "Tool call success rate",
+      "source": "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+      "detail": "",
+      "metric_id": "agent.tool_call_success_rate",
+      "metric_name": "Tool call success rate",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": ">= 95%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 2,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.tool_call_success_rate",
+        "framework": "tool_runtime_trace_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 2,
+        "denominator": 2,
+        "per_sample_results": [
+          {
+            "tool_name": "read_golden_financials",
+            "status": "pass",
+            "runtime_status": "completed",
+            "controlled_failure": false
+          },
+          {
+            "tool_name": "deterministic_valuation",
+            "status": "pass",
+            "runtime_status": "completed",
+            "controlled_failure": false
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Fix brittle tool arguments, transient retry policy or upstream service contracts.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json": 24646,
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.repair_loop_rate",
+      "label": "Repair loop rate",
+      "source": "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json",
+      "detail": "",
+      "metric_id": "agent.repair_loop_rate",
+      "metric_name": "Repair loop rate",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "error_rate",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.0,
+      "threshold": "<= 15%",
+      "threshold_operator": "<=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.repair_loop_rate",
+        "framework": "agent_repair_trace_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "rate",
+        "numerator": 0,
+        "denominator": 3,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Reduce schema, citation and valuation repair loops through stricter prompts and preflight validation.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json": 24646,
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.token_budget_adherence",
+      "label": "Token budget adherence",
+      "source": "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json",
+      "detail": "",
+      "metric_id": "agent.token_budget_adherence",
+      "metric_name": "Token budget adherence",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.token_budget_adherence",
+        "framework": "token_budget_trace_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {
+          "default_stage_token_budget": 8000
+        },
+        "aggregation": "coverage",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "agent_id": "planner",
+            "status": "pass",
+            "tokens": 160,
+            "token_budget": 8000
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Route lower-risk stages to cheaper models and cap verbose intermediate reasoning artifacts.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json": 24646,
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "schema_validity",
+      "label": "Output schema validity",
+      "source": "config/harness/*.schema.json",
+      "detail": "",
+      "metric_id": "schema_validity",
+      "metric_name": "Output schema validity",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 2,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Validate required agent outputs against JSON schemas before downstream use.",
+      "evaluator": {
+        "id": "schema_validity",
+        "framework": "json_schema_required_contract",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 2,
+        "denominator": 2,
+        "per_sample_results": [
+          {
+            "artifact": "evidence_packet",
+            "status": "pass",
+            "value": true,
+            "schema_valid": true,
+            "failure_count": 0,
+            "path": "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json"
+          },
+          {
+            "artifact": "agent_effectiveness_audit",
+            "status": "pass",
+            "value": true,
+            "schema_valid": true,
+            "failure_count": 0,
+            "path": "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json"
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Validate structured output with Pydantic/JSON schema.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json": 24646,
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "role_adherence",
+      "label": "Role adherence",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+      "detail": "deepeval_dataset_missing",
+      "metric_id": "role_adherence",
+      "metric_name": "Role adherence",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 85%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 0,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "reason": "deepeval_dataset_missing",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+        }
+      ],
+      "remediation_hint": "Review agent traces, tool permissions, schema validation, and calibrated judge results.",
+      "evaluator": {
+        "id": "role_adherence",
+        "framework": "deepeval",
+        "framework_version": "4.0.6",
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "mean",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Tune prompt/role context.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "groundedness",
+      "label": "Groundedness",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+      "detail": "deepeval_dataset_missing",
+      "metric_id": "groundedness",
+      "metric_name": "Groundedness",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 85%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 0,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "reason": "deepeval_dataset_missing",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+        }
+      ],
+      "remediation_hint": "Review agent traces, tool permissions, schema validation, and calibrated judge results.",
+      "evaluator": {
+        "id": "groundedness",
+        "framework": "deepeval",
+        "framework_version": "4.0.6",
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "mean",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Constrain narrative to evidence/artifacts.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "no_unauthorized_calc",
+      "label": "No unauthorized financial calculation",
+      "source": "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json",
+      "detail": "",
+      "metric_id": "no_unauthorized_calc",
+      "metric_name": "No unauthorized financial calculation",
+      "category": "agent_llm",
+      "layer": "release_gate",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P0",
+      "blocks_publish": true,
+      "value": 1.0,
+      "threshold": "= 100%",
+      "threshold_operator": "=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 4,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [],
+      "remediation_hint": "Move financial calculations from LLM narrative into deterministic code paths.",
+      "evaluator": {
+        "id": "no_unauthorized_calc",
+        "framework": "deterministic_agent_trace_classifier",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 4,
+        "denominator": 4,
+        "per_sample_results": [
+          {
+            "origin": "audit.agent_execution",
+            "agent_id": "data_reliability",
+            "status": "completed",
+            "latency_ms": 200,
+            "output": "Loaded accepted canonical facts with provenance."
+          },
+          {
+            "origin": "audit.agent_execution",
+            "agent_id": "valuation_engine",
+            "status": "completed",
+            "latency_ms": 300,
+            "output": "Produced valuation artifact through deterministic engine trace."
+          },
+          {
+            "origin": "audit.agent_execution",
+            "agent_id": "report_builder",
+            "status": "completed",
+            "latency_ms": 500,
+            "output": "Rendered benchmark report from cited artifacts."
+          },
+          {
+            "origin": "packet.trace_summary",
+            "kind": "agent_message",
+            "agent_id": "planner",
+            "status": "completed",
+            "latency_ms": 200,
+            "tokens_input": 120,
+            "tokens_output": 40,
+            "cost_estimate": 0.01,
+            "retry_count": 0,
+            "content": "Planned benchmark artifact assembly from approved canonical facts."
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Remove LLM-generated numbers not backed by valuation artifact.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json": 24646,
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "task_completion",
+      "label": "Task completion",
+      "source": "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json",
+      "detail": "",
+      "metric_id": "task_completion",
+      "metric_name": "Task completion",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": ">= 85%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 3,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Review incomplete agent trace events and retry policy.",
+      "evaluator": {
+        "id": "task_completion",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 3,
+        "denominator": 3,
+        "per_sample_results": [
+          {
+            "agent_id": "data_reliability",
+            "status": "completed",
+            "latency_ms": 200,
+            "output": "Loaded accepted canonical facts with provenance."
+          },
+          {
+            "agent_id": "valuation_engine",
+            "status": "completed",
+            "latency_ms": 300,
+            "output": "Produced valuation artifact through deterministic engine trace."
+          },
+          {
+            "agent_id": "report_builder",
+            "status": "completed",
+            "latency_ms": 500,
+            "output": "Rendered benchmark report from cited artifacts."
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Improve stage-specific prompt outputs.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\archive\\benchmark_ppp\\benchmark_ppp_agent_effectiveness_audit.json": 695
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "plan_adherence",
+      "label": "Plan adherence",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+      "detail": "deepeval_dataset_missing",
+      "metric_id": "plan_adherence",
+      "metric_name": "Plan adherence",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 80%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
+      "sample_size": 0,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [
+        {
+          "reason": "deepeval_dataset_missing",
+          "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json"
+        }
+      ],
+      "remediation_hint": "Review agent traces, tool permissions, schema validation, and calibrated judge results.",
+      "evaluator": {
+        "id": "plan_adherence",
+        "framework": "deepeval",
+        "framework_version": "4.0.6",
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "mean",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Check fixed plan scope and role boundaries.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "critic_issue_recall",
+      "label": "Critic issue recall",
+      "source": "seeded failure dataset missing",
+      "detail": "",
+      "metric_id": "critic_issue_recall",
+      "metric_name": "Critic issue recall",
+      "category": "agent_llm",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "benchmark_suite",
+      "severity": "P1",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "not_evaluable",
+      "legacy_status": "measured_only",
+      "sample_size": 0,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "reviewer",
+      "failed_examples": [
+        {
+          "reason": "evaluation_evidence_missing",
+          "source": "seeded failure dataset missing"
+        }
+      ],
+      "remediation_hint": "Expand seeded issue fixtures and compare critic recall against expected labels.",
+      "evaluator": {
+        "id": "critic_issue_recall",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": null,
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Expand SeniorCritic bad-report corpus.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.judge_calibration_agreement",
+      "label": "Judge calibration agreement",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+      "detail": "calibrated_actual_output_dataset_not_applicable_for_offline_benchmark",
+      "metric_id": "agent.judge_calibration_agreement",
+      "metric_name": "Judge calibration agreement",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "report_run",
+      "severity": "P1",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 85%",
+      "threshold_operator": ">=",
+      "unit": "score",
+      "status": "not_applicable",
+      "legacy_status": "not_applicable",
+      "sample_size": 0,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.judge_calibration_agreement",
+        "framework": "judge_calibration_set",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "calibration_agreement",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Calibrate LLM Judge rubric against deterministic labels, seeded defects and human review samples.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "agent.judge_rationale_evidence_coverage",
+      "label": "Judge rationale evidence coverage",
+      "source": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\config\\benchmarks\\04_deepeval_agent\\deepeval_cases\\agent_cases.json",
+      "detail": "calibrated_judge_rationale_dataset_not_applicable_for_offline_benchmark",
+      "metric_id": "agent.judge_rationale_evidence_coverage",
+      "metric_name": "Judge rationale evidence coverage",
+      "category": "operations",
+      "layer": "diagnostic",
+      "metric_type": "coverage",
+      "scope": "report_run",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": null,
+      "threshold": ">= 90%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "not_applicable",
+      "legacy_status": "not_applicable",
+      "sample_size": 0,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
+      "evaluator": {
+        "id": "agent.judge_rationale_evidence_coverage",
+        "framework": "judge_rationale_evidence_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "not_executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "coverage",
+        "numerator": 0,
+        "denominator": 0,
+        "per_sample_results": []
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Require judge rationales to cite trace spans, artifacts or rubric clauses for every fail/warning.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    }
+  ],
+  "advisory_findings": [
+    "critic_issue_recall:calibrated_llm_judge_pending"
+  ],
+  "judge_status": "not_executed",
+  "tool_permission_compliance": 1.0,
+  "artifact_manifest_compliance": 1.0,
+  "schema_validity": 1.0,
+  "role_adherence": null,
+  "groundedness": null,
+  "no_unauthorized_calc": 1.0,
+  "task_completion": 1.0,
+  "plan_adherence": null,
+  "critic_issue_recall": null,
+  "rubric_scores": {},
+  "deepeval_execution": {
+    "execution_status": "not_executed",
+    "framework": "deepeval",
+    "framework_version": "4.0.6",
+    "sample_size": 0,
+    "scores": {},
+    "reason": "deepeval_dataset_missing"
+  }
+}

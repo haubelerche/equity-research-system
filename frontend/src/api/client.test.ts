@@ -39,6 +39,17 @@ describe("api client", () => {
     expect(res.mode).toBe("full_pipeline");
   });
 
+  it("startRun can force a full pipeline refresh", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      jsonResponse({ run_id: "r2", mode: "full_pipeline" }, { status: 200 })));
+
+    await startRun("DHG", { forceFull: true });
+
+    const [url, opts] = (globalThis.fetch as any).mock.calls[0];
+    expect(url).toBe("/reports/DHG/generate?force_full=true");
+    expect(opts.method).toBe("POST");
+  });
+
   it("fetchRunStatus hits status route", async () => {
     vi.stubGlobal("fetch", vi.fn(async () =>
       jsonResponse({ run_id: "r1", status: "ANALYZING" }, { status: 200 })));

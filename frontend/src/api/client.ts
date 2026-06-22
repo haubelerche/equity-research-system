@@ -81,9 +81,10 @@ export async function fetchReports(): Promise<ReportsResponse> {
   return getJSON<ReportsResponse>("/reports");
 }
 
-export async function startRun(ticker: string): Promise<GenerateReportResponse> {
+export async function startRun(ticker: string, options: { forceFull?: boolean } = {}): Promise<GenerateReportResponse> {
   assertApiBaseConfigured();
-  const res = await fetch(`${API_BASE}/reports/${encodeURIComponent(ticker)}/generate`, {
+  const suffix = options.forceFull ? "?force_full=true" : "";
+  const res = await fetch(`${API_BASE}/reports/${encodeURIComponent(ticker)}/generate${suffix}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",

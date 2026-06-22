@@ -20,6 +20,7 @@ from backend.storage.layout import REQUIRED_BUCKETS, validate_bucket_path
 # retry, so transient network errors are retried with exponential backoff.
 _STORAGE_MAX_ATTEMPTS = 4
 _STORAGE_BASE_DELAY = 0.5
+_STORAGE_REQUEST_TIMEOUT_SEC = 120.0
 
 
 class SupabaseStorageError(RuntimeError):
@@ -27,7 +28,14 @@ class SupabaseStorageError(RuntimeError):
 
 
 class SupabaseStorageAdapter:
-    def __init__(self, url: str | None = None, service_role_key: str | None = None) -> None:
+    def __init__(
+        self,
+        url: str | None = None,
+        service_role_key: str | None = None,
+        *,
+        request_timeout: float | None = None,
+        max_attempts: int | None = None,
+    ) -> None:
         project_id = os.getenv("SUPABASE_PROJECT_ID", "")
         self.url = (url or os.getenv("SUPABASE_URL") or (f"https://{project_id}.supabase.co" if project_id else "")).rstrip("/")
         self.service_role_key = (
@@ -36,6 +44,8 @@ class SupabaseStorageAdapter:
             or os.getenv("SUPABASE_SECRET_KEY")
             or ""
         )
+        self.request_timeout = request_timeout if request_timeout is not None else _STORAGE_REQUEST_TIMEOUT_SEC
+        self.max_attempts = max(1, max_attempts if max_attempts is not None else _STORAGE_MAX_ATTEMPTS)
         if not self.url or not self.service_role_key:
             raise ValueError("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required")
 
@@ -57,9 +67,9 @@ class SupabaseStorageAdapter:
         headers.update(extra_headers or {})
         request = Request(f"{self.url}/storage/v1/{endpoint}", data=body, headers=headers, method=method)
         last_exc: Exception | None = None
-        for attempt in range(_STORAGE_MAX_ATTEMPTS):
+        for attempt in range(self.max_attempts):
             try:
-                with urlopen(request, timeout=120) as response:
+                with urlopen(request, timeout=self.request_timeout) as response:
                     payload = response.read()
                     if response.status not in expected:
                         raise SupabaseStorageError(f"Unexpected Supabase Storage status {response.status}")
@@ -71,9 +81,9 @@ class SupabaseStorageAdapter:
             except (URLError, ConnectionError, TimeoutError, OSError, IncompleteRead) as exc:
                 # Transient network reset (e.g. WinError 10054, dropped TLS) — retry with backoff.
                 last_exc = exc
-                if attempt == _STORAGE_MAX_ATTEMPTS - 1:
+                if attempt == self.max_attempts - 1:
                     raise SupabaseStorageError(
-                        f"Supabase Storage {method} {endpoint} failed after {_STORAGE_MAX_ATTEMPTS} attempts: {exc}"
+                        f"Supabase Storage {method} {endpoint} failed after {self.max_attempts} attempts: {exc}"
                     ) from exc
                 time.sleep(_STORAGE_BASE_DELAY * (2 ** attempt))
         raise SupabaseStorageError(  # pragma: no cover - loop returns or raises above

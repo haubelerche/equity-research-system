@@ -4,8 +4,8 @@
   "plan_id": "03",
   "plan_name": "Financial calculation",
   "ticker": "OPC",
-  "generated_at": "2026-06-17T14:58:56.067223+00:00",
-  "status": "pass",
+  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "status": "fail",
   "test_execution": {
     "status": "not_measured",
     "targets": [
@@ -60,28 +60,49 @@
         "storage\\runs\\agp_proof_001\\valuation.json",
         "storage\\runs\\agp_proof_002\\valuation.json",
         "storage\\runs\\agp_proof_003\\valuation.json",
-        "storage\\runs\\dhg_verify_stinv\\valuation.json",
-        "storage\\runs\\diag_dbd\\valuation.json",
-        "storage\\runs\\missing_run_id\\valuation.json",
-        "storage\\runs\\run_dbd_eval_20260614T211400\\valuation.json",
-        "storage\\runs\\validation_amv\\valuation.json",
-        "storage\\runs\\validation_dbd\\valuation.json",
-        "storage\\runs\\validation_dgw\\valuation.json",
-        "storage\\runs\\validation_dhg2\\valuation.json",
-        "storage\\runs\\validation_dhg\\valuation.json",
-        "storage\\runs\\validation_dmc\\valuation.json",
-        "storage\\runs\\validation_imp\\valuation.json",
-        "storage\\runs\\validation_jvc\\valuation.json",
-        "storage\\runs\\validation_opc\\valuation.json",
-        "storage\\runs\\validation_tnh\\valuation.json",
-        "storage\\runs\\validation_tra\\valuation.json"
+        "storage\\runs\\benchmark_amp\\valuation.json",
+        "storage\\runs\\benchmark_amv\\valuation.json",
+        "storage\\runs\\benchmark_bcp\\valuation.json",
+        "storage\\runs\\benchmark_bio\\valuation.json",
+        "storage\\runs\\benchmark_cdp\\valuation.json",
+        "storage\\runs\\benchmark_cnc\\valuation.json",
+        "storage\\runs\\benchmark_dan\\valuation.json",
+        "storage\\runs\\benchmark_dbd\\valuation.json",
+        "storage\\runs\\benchmark_dbm\\valuation.json",
+        "storage\\runs\\benchmark_dbt\\valuation.json",
+        "storage\\runs\\benchmark_dcl\\valuation.json",
+        "storage\\runs\\benchmark_ddn\\valuation.json",
+        "storage\\runs\\benchmark_dhd\\valuation.json",
+        "storage\\runs\\benchmark_dhg\\valuation.json",
+        "storage\\runs\\benchmark_dhn\\valuation.json",
+        "storage\\runs\\benchmark_dht\\valuation.json",
+        "storage\\runs\\benchmark_dmc\\valuation.json"
       ],
-      "formula_trace.json": []
+      "formula_trace.json": [
+        "storage\\runs\\benchmark_amp\\formula_trace.json",
+        "storage\\runs\\benchmark_amv\\formula_trace.json",
+        "storage\\runs\\benchmark_bcp\\formula_trace.json",
+        "storage\\runs\\benchmark_bio\\formula_trace.json",
+        "storage\\runs\\benchmark_cdp\\formula_trace.json",
+        "storage\\runs\\benchmark_cnc\\formula_trace.json",
+        "storage\\runs\\benchmark_dan\\formula_trace.json",
+        "storage\\runs\\benchmark_dbd\\formula_trace.json",
+        "storage\\runs\\benchmark_dbm\\formula_trace.json",
+        "storage\\runs\\benchmark_dbt\\formula_trace.json",
+        "storage\\runs\\benchmark_dcl\\formula_trace.json",
+        "storage\\runs\\benchmark_ddn\\formula_trace.json",
+        "storage\\runs\\benchmark_dhd\\formula_trace.json",
+        "storage\\runs\\benchmark_dhg\\formula_trace.json",
+        "storage\\runs\\benchmark_dhn\\formula_trace.json",
+        "storage\\runs\\benchmark_dht\\formula_trace.json",
+        "storage\\runs\\benchmark_dmc\\formula_trace.json",
+        "storage\\runs\\benchmark_dnm\\formula_trace.json",
+        "storage\\runs\\benchmark_dp1\\formula_trace.json",
+        "storage\\runs\\benchmark_dp2\\formula_trace.json"
+      ]
     },
-    "missing": [
-      "formula_trace.json"
-    ],
-    "status": "blocked"
+    "missing": [],
+    "status": "pass"
   },
   "blocking_issues": [],
   "metrics": {
@@ -91,9 +112,203 @@
   },
   "metric_results": [
     {
+      "id": "finance.model_quality_score",
+      "label": "Financial model quality stress score",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
+      "detail": "",
+      "metric_id": "finance.model_quality_score",
+      "metric_name": "Financial model quality stress score",
+      "category": "financial_model",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.73,
+      "threshold": ">= 75%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 6,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "valuation",
+      "failed_examples": [
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "valuation_method_publishability",
+          "component_score": 0.0,
+          "value": 0.0,
+          "status": "warning",
+          "passed": false,
+          "weight": 0.2,
+          "normalized_weight": 0.2
+        },
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "formula_trace_method_coverage",
+          "component_score": 0.6666666666666666,
+          "value": 0.6666666666666666,
+          "status": "warning",
+          "passed": false,
+          "weight": 0.15,
+          "normalized_weight": 0.15
+        },
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "forecast_horizon_depth",
+          "component_score": 0.8,
+          "value": 0.8,
+          "status": "warning",
+          "passed": false,
+          "weight": 0.1,
+          "normalized_weight": 0.1
+        }
+      ],
+      "remediation_hint": "Improve method publishability, formula trace coverage, sensitivity richness, forecast horizon, and regression fixture coverage.",
+      "evaluator": {
+        "id": "finance.model_quality_score",
+        "framework": "hard_mode_financial_model_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "formula_gate_score": 1.0,
+          "publishable_methods": 0,
+          "method_diagnostics": 4,
+          "trace_methods": [
+            "fcff_target_price",
+            "net_debt"
+          ],
+          "sensitivity_numeric_cells": 22,
+          "forecast_rows": 4,
+          "golden_regression_checks": 1
+        },
+        "parameters": {
+          "rationale": "Ceiling-resistant score: exact formulas remain mandatory, but a perfect benchmark score also requires method coverage, rich traces, sensitivity depth, forecast horizon, and regression baseline coverage.",
+          "components": [
+            {
+              "id": "formula_gate_coverage",
+              "weight": 0.3
+            },
+            {
+              "id": "valuation_method_publishability",
+              "weight": 0.2
+            },
+            {
+              "id": "formula_trace_method_coverage",
+              "weight": 0.15
+            },
+            {
+              "id": "sensitivity_grid_richness",
+              "weight": 0.15
+            },
+            {
+              "id": "forecast_horizon_depth",
+              "weight": 0.1
+            },
+            {
+              "id": "independent_regression_baseline",
+              "weight": 0.1
+            }
+          ]
+        },
+        "aggregation": "weighted_score",
+        "numerator": 0.73,
+        "denominator": 1.0,
+        "per_sample_results": [
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "formula_gate_coverage",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.3,
+            "normalized_weight": 0.3
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "valuation_method_publishability",
+            "component_score": 0.0,
+            "value": 0.0,
+            "status": "warning",
+            "passed": false,
+            "weight": 0.2,
+            "normalized_weight": 0.2
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "formula_trace_method_coverage",
+            "component_score": 0.6666666666666666,
+            "value": 0.6666666666666666,
+            "status": "warning",
+            "passed": false,
+            "weight": 0.15,
+            "normalized_weight": 0.15
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "sensitivity_grid_richness",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.15,
+            "normalized_weight": 0.15
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "forecast_horizon_depth",
+            "component_score": 0.8,
+            "value": 0.8,
+            "status": "warning",
+            "passed": false,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "independent_regression_baseline",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Improve method publishability, formula trace coverage, sensitivity richness, forecast horizon, and regression fixture coverage.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
+        "dataset_version": null,
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
       "id": "net_debt",
       "label": "Net debt reconciliation",
-      "source": "storage\\runs\\validation_opc\\valuation.json",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
       "detail": "",
       "metric_id": "net_debt",
       "metric_name": "Net debt reconciliation",
@@ -120,7 +335,7 @@
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "net_debt",
-        "framework": "custom",
+        "framework": "deterministic_finance_formula_trace",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
@@ -129,27 +344,46 @@
         "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "boolean_gate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "sample_origin": "net_debt_bridge",
+            "status": "pass",
+            "reported": -318.3947,
+            "expected": -318.39480000000003,
+            "components": {
+              "total_debt": 0.0,
+              "cash": 222.4258,
+              "short_term_investments": 95.969
+            }
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "fcff",
       "label": "FCFF formula",
-      "source": "storage\\runs\\validation_opc\\valuation.json",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
       "detail": "",
       "metric_id": "fcff",
       "metric_name": "FCFF formula",
@@ -165,7 +399,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 1,
+      "sample_size": 4,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -176,7 +410,7 @@
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "fcff",
-        "framework": "custom",
+        "framework": "deterministic_finance_formula_trace",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
@@ -185,27 +419,111 @@
         "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "boolean_gate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "sample_origin": "formula_row",
+            "row_index": 1,
+            "output_key": "fcff",
+            "status": "pass",
+            "reported": 247.6719,
+            "expected": 247.6719,
+            "error": 0.0,
+            "tolerance": 0.2,
+            "add_keys": {
+              "ebit_after_tax": 217.4538,
+              "depreciation": 22.8187
+            },
+            "subtract_keys": {
+              "capex": -7.3994,
+              "delta_nwc": 0.0
+            },
+            "missing_fields": []
+          },
+          {
+            "sample_origin": "formula_row",
+            "row_index": 2,
+            "output_key": "fcff",
+            "status": "pass",
+            "reported": 209.7628,
+            "expected": 209.7628,
+            "error": 0.0,
+            "tolerance": 0.2,
+            "add_keys": {
+              "ebit_after_tax": 188.3277,
+              "depreciation": 22.8948
+            },
+            "subtract_keys": {
+              "capex": -12.0424,
+              "delta_nwc": 13.5021
+            },
+            "missing_fields": []
+          },
+          {
+            "sample_origin": "formula_row",
+            "row_index": 3,
+            "output_key": "fcff",
+            "status": "pass",
+            "reported": 190.7346,
+            "expected": 190.7347,
+            "error": -0.00010000000000331966,
+            "tolerance": 0.2,
+            "add_keys": {
+              "ebit_after_tax": 164.798,
+              "depreciation": 22.3011
+            },
+            "subtract_keys": {
+              "capex": -11.5779,
+              "delta_nwc": 7.9423
+            },
+            "missing_fields": []
+          },
+          {
+            "sample_origin": "formula_row",
+            "row_index": 4,
+            "output_key": "fcff",
+            "status": "pass",
+            "reported": 118.854,
+            "expected": 118.85400000000001,
+            "error": -1.4210854715202004e-14,
+            "tolerance": 0.2,
+            "add_keys": {
+              "ebit_after_tax": 179.6662,
+              "depreciation": 21.7066
+            },
+            "subtract_keys": {
+              "capex": -18.2534,
+              "delta_nwc": 100.7722
+            },
+            "missing_fields": []
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "fcfe",
       "label": "FCFE formula",
-      "source": "storage\\runs\\validation_opc\\valuation.json",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
       "detail": "",
       "metric_id": "fcfe",
       "metric_name": "FCFE formula",
@@ -221,7 +539,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 1,
+      "sample_size": 4,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -232,7 +550,7 @@
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "fcfe",
-        "framework": "custom",
+        "framework": "deterministic_finance_formula_trace",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
@@ -241,27 +559,115 @@
         "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "boolean_gate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "sample_origin": "formula_row",
+            "row_index": 1,
+            "output_key": "fcfe",
+            "status": "pass",
+            "reported": 278.0554,
+            "expected": 278.0554,
+            "error": 0.0,
+            "tolerance": 0.2,
+            "add_keys": {
+              "net_income": 142.3942,
+              "depreciation": 22.8187,
+              "net_borrowing": 105.4431
+            },
+            "subtract_keys": {
+              "capex": -7.3994,
+              "delta_nwc": 0.0
+            },
+            "missing_fields": []
+          },
+          {
+            "sample_origin": "formula_row",
+            "row_index": 2,
+            "output_key": "fcfe",
+            "status": "pass",
+            "reported": 216.6935,
+            "expected": 216.6935,
+            "error": 0.0,
+            "tolerance": 0.2,
+            "add_keys": {
+              "net_income": 122.3188,
+              "depreciation": 22.8948,
+              "net_borrowing": 72.9396
+            },
+            "subtract_keys": {
+              "capex": -12.0424,
+              "delta_nwc": 13.5021
+            },
+            "missing_fields": []
+          },
+          {
+            "sample_origin": "formula_row",
+            "row_index": 3,
+            "output_key": "fcfe",
+            "status": "pass",
+            "reported": 135.3906,
+            "expected": 135.3907,
+            "error": -0.00010000000000331966,
+            "tolerance": 0.2,
+            "add_keys": {
+              "net_income": 109.454,
+              "depreciation": 22.3011,
+              "net_borrowing": 0.0
+            },
+            "subtract_keys": {
+              "capex": -11.5779,
+              "delta_nwc": 7.9423
+            },
+            "missing_fields": []
+          },
+          {
+            "sample_origin": "formula_row",
+            "row_index": 4,
+            "output_key": "fcfe",
+            "status": "pass",
+            "reported": 55.6081,
+            "expected": 55.60810000000001,
+            "error": -7.105427357601002e-15,
+            "tolerance": 0.2,
+            "add_keys": {
+              "net_income": 116.4203,
+              "depreciation": 21.7066,
+              "net_borrowing": 0.0
+            },
+            "subtract_keys": {
+              "capex": -18.2534,
+              "delta_nwc": 100.7722
+            },
+            "missing_fields": []
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "target_price",
       "label": "Target price reproduction",
-      "source": "storage\\runs\\validation_opc\\valuation.json",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
       "detail": "",
       "metric_id": "target_price",
       "metric_name": "Target price reproduction",
@@ -288,7 +694,7 @@
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "target_price",
-        "framework": "custom",
+        "framework": "deterministic_finance_formula_trace",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
@@ -297,27 +703,44 @@
         "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "boolean_gate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "sample_origin": "target_price_bridge",
+            "status": "pass",
+            "reported": 41481.04,
+            "expected": 41481.04058476087,
+            "equity_value": 3139.9447,
+            "shares_mn": 75.6959,
+            "base_cell_matches_target": true
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "gordon_growth",
       "label": "Discount rate exceeds terminal growth",
-      "source": "storage\\runs\\validation_opc\\valuation.json",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
       "detail": "",
       "metric_id": "gordon_growth",
       "metric_name": "Discount rate exceeds terminal growth",
@@ -344,7 +767,7 @@
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "gordon_growth",
-        "framework": "custom",
+        "framework": "deterministic_finance_formula_trace",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
@@ -353,27 +776,41 @@
         "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "boolean_gate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "sample_origin": "gordon_growth",
+            "status": "pass",
+            "wacc": 0.1,
+            "terminal_growth": 0.03
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "sensitivity_varies",
       "label": "FCFF sensitivity matrix varies",
-      "source": "storage\\runs\\validation_opc\\valuation.json",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
       "detail": "",
       "metric_id": "sensitivity_varies",
       "metric_name": "FCFF sensitivity matrix varies",
@@ -400,7 +837,7 @@
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "sensitivity_varies",
-        "framework": "custom",
+        "framework": "deterministic_finance_formula_trace",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
@@ -409,27 +846,41 @@
         "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "boolean_gate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "sample_origin": "sensitivity_matrix",
+            "status": "pass",
+            "matrix": "fcff_wacc_g",
+            "numeric_cell_count": 11
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "fcfe_sensitivity",
       "label": "FCFE sensitivity matrix varies",
-      "source": "storage\\runs\\validation_opc\\valuation.json",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
       "detail": "",
       "metric_id": "fcfe_sensitivity",
       "metric_name": "FCFE sensitivity matrix varies",
@@ -456,7 +907,7 @@
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "fcfe_sensitivity",
-        "framework": "custom",
+        "framework": "deterministic_finance_formula_trace",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
@@ -465,27 +916,41 @@
         "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "boolean_gate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "sample_origin": "sensitivity_matrix",
+            "status": "pass",
+            "matrix": "fcfe_re_g",
+            "numeric_cell_count": 11
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "formula_trace",
       "label": "Formula trace available",
-      "source": "storage\\runs\\validation_opc\\valuation.json",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
       "detail": "",
       "metric_id": "formula_trace",
       "metric_name": "Formula trace available",
@@ -512,7 +977,7 @@
       "remediation_hint": "Recompute formula traces, valuation bridge, share count, and recommendation policy with deterministic code.",
       "evaluator": {
         "id": "formula_trace",
-        "framework": "custom",
+        "framework": "deterministic_finance_formula_trace",
         "framework_version": null,
         "implementation_version": "2.1",
         "execution_status": "executed"
@@ -521,27 +986,40 @@
         "formula": null,
         "inputs": {},
         "parameters": {},
-        "aggregation": null,
-        "numerator": null,
-        "denominator": null,
-        "per_sample_results": []
+        "aggregation": "boolean_gate",
+        "numerator": 1,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "sample_origin": "formula_trace_manifest",
+            "status": "pass",
+            "trace_count": 2
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "accounting_invariant_violations",
       "label": "Accounting invariant violations",
-      "source": "storage\\runs\\validation_opc\\valuation.json",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
       "detail": "",
       "metric_id": "accounting_invariant_violations",
       "metric_name": "Accounting invariant violations",
@@ -604,19 +1082,26 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Fix balance sheet, cash flow, unit or sign convention.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "golden_drift_out_of_tolerance",
       "label": "Golden valuation drift",
-      "source": "storage\\runs\\validation_opc\\valuation.json",
+      "source": "storage\\runs\\benchmark_opc\\valuation.json",
       "detail": "",
       "metric_id": "golden_drift_out_of_tolerance",
       "metric_name": "Golden valuation drift",
@@ -658,29 +1143,38 @@
         "per_sample_results": [
           {
             "metric": "fcff_target_price_vnd",
-            "live": 25372.0,
+            "live": 41481.04,
             "expected_range": {
-              "min": 24864.56,
-              "max": 25879.44
+              "min": 40651.4192,
+              "max": 42310.660800000005
             },
-            "in_range": true
+            "in_range": true,
+            "status": "pass",
+            "value": true
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
-        "artifact_ids": [],
+        "artifact_ids": [
+          "storage\\runs\\benchmark_opc\\valuation.json"
+        ],
         "dataset_version": null,
-        "trace_url": null
+        "trace_url": null,
+        "artifact_sizes_bytes": {
+          "storage\\runs\\benchmark_opc\\valuation.json": 6941
+        },
+        "evidence_available": true
       },
-      "evaluated_at": "2026-06-17T14:58:56.067223+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     }
   ],
-  "valuation_artifact": "storage\\runs\\validation_opc\\valuation.json",
+  "valuation_artifact": "storage\\runs\\benchmark_opc\\valuation.json",
   "invariants": [
     {
       "id": "net_debt",
@@ -708,39 +1202,28 @@
   "valuation_publishability": {
     "ticker": "OPC",
     "run_id": null,
-    "valuation_artifact_path": "storage\\runs\\validation_opc\\valuation.json",
+    "valuation_artifact_path": "storage\\runs\\benchmark_opc\\valuation.json",
     "computed_methods": [
       "FCFF",
-      "FCFE",
-      "BLEND",
-      "PE_FORWARD",
-      "CORE_PE_NET_CASH"
+      "FCFE"
     ],
     "publishable_methods": [],
     "excluded_methods": [
       {
         "method_name": "FCFF",
-        "reason": "fcff_wacc_or_ev_to_equity_bridge_missing"
+        "reason": "formula_trace_missing"
       },
       {
         "method_name": "FCFE",
-        "reason": "fcfe_low_confidence"
+        "reason": "formula_trace_missing"
       },
       {
         "method_name": "BLEND",
         "reason": "fcfe_unavailable_for_blend"
       },
       {
-        "method_name": "PE_FORWARD",
-        "reason": "cross_check_only_not_primary"
-      },
-      {
-        "method_name": "P/E",
-        "reason": "cross_check_only_not_primary"
-      },
-      {
-        "method_name": "CORE_PE_NET_CASH",
-        "reason": "cross_check_only_not_primary"
+        "method_name": "RELATIVE_PE",
+        "reason": "excluded"
       }
     ],
     "primary_method": null,
@@ -749,30 +1232,50 @@
     "final_report_publishable": false,
     "status": "blocked",
     "severity": "critical",
-    "blocking_reasons": [
-      "critical_warning:Relative valuation is PENDING — no peer_data_source provided. Target P/E, P/B, and EV/EBITDA require a real peer group d",
+    "blocking_reasons": [],
+    "warnings": [
+      "fcfe_low_confidence",
+      "fcff_low_confidence",
       "low_confidence_primary_method",
-      "recommendation_gate_not_allowed",
-      "valuation_method_divergence_critical"
+      "valuation_method_divergence_warning"
     ],
-    "warnings": [],
-    "divergence_pct": 1.4269583293962014,
+    "divergence_pct": 0.6003796369528733,
     "target_price_vnd": null,
+    "headline_target_governance": {
+      "current_price_vnd": null,
+      "raw_model_target_vnd": 41481.04,
+      "headline_target_vnd": null,
+      "target_adjustment": "missing_current_price",
+      "target_band_low_vnd": null,
+      "target_band_high_vnd": null,
+      "headline_downside_band_pct": 0.4,
+      "headline_upside_band_pct": 0.4,
+      "headline_band_pct": 0.4,
+      "raw_upside": null,
+      "headline_upside": null,
+      "raw_model_target_source": "FCFF",
+      "has_raw_model_target": true,
+      "warnings": [
+        "headline_target_missing_current_price"
+      ]
+    },
     "method_diagnostics": {
       "FCFF": {
         "method_name": "FCFF",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 25372.0,
+        "target_price_vnd": 41481.04,
         "confidence": "low",
         "role": "scenario_only",
         "blocking_reasons": [
-          "fcff_wacc_or_ev_to_equity_bridge_missing",
+          "formula_trace_missing",
+          "fcff_wacc_or_ev_to_equity_bridge_missing"
+        ],
+        "warnings": [
           "fcff_low_confidence"
         ],
-        "warnings": [],
         "required_inputs_present": true,
-        "formula_trace_present": true,
+        "formula_trace_present": false,
         "bridge_present": false,
         "sensitivity_present": true,
         "sensitivity_varies": true,
@@ -783,93 +1286,54 @@
         "method_name": "FCFE",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 21166.0,
+        "target_price_vnd": 25919.5,
         "confidence": "low",
         "role": "scenario_only",
         "blocking_reasons": [
+          "formula_trace_missing",
+          "fcfe_equity_bridge_or_net_borrowing_missing"
+        ],
+        "warnings": [
           "fcfe_low_confidence"
         ],
-        "warnings": [],
         "required_inputs_present": true,
-        "formula_trace_present": true,
-        "bridge_present": true,
+        "formula_trace_present": false,
+        "bridge_present": false,
         "sensitivity_present": true,
         "sensitivity_varies": true,
-        "source_backed_assumptions": true,
+        "source_backed_assumptions": false,
         "analyst_approved_assumptions": false
       },
       "BLEND": {
         "method_name": "BLEND",
-        "computed": true,
-        "publishable": false,
-        "target_price_vnd": 23689.0,
-        "confidence": "low",
-        "role": "scenario_only",
-        "blocking_reasons": [
-          "fcfe_unavailable_for_blend"
-        ],
-        "warnings": [],
-        "required_inputs_present": true,
-        "formula_trace_present": true,
-        "bridge_present": false,
-        "sensitivity_present": true,
-        "sensitivity_varies": true,
-        "source_backed_assumptions": false,
-        "analyst_approved_assumptions": false
-      },
-      "PE_FORWARD": {
-        "method_name": "PE_FORWARD",
-        "computed": true,
-        "publishable": false,
-        "target_price_vnd": 37233.625615877,
-        "confidence": "medium",
-        "role": "cross_check",
-        "blocking_reasons": [
-          "cross_check_only_not_primary"
-        ],
-        "warnings": [],
-        "required_inputs_present": true,
-        "formula_trace_present": false,
-        "bridge_present": false,
-        "sensitivity_present": false,
-        "sensitivity_varies": false,
-        "source_backed_assumptions": false,
-        "analyst_approved_assumptions": false
-      },
-      "P/E": {
-        "method_name": "P/E",
         "computed": false,
         "publishable": false,
         "target_price_vnd": null,
-        "confidence": "medium",
-        "role": "cross_check",
+        "confidence": "low",
+        "role": "excluded",
         "blocking_reasons": [
-          "cross_check_only_not_primary",
-          "pe_mapping_blank_with_eps_and_target_pe"
+          "fcfe_unavailable_for_blend",
+          "blend_sensitivity_missing_or_constant"
         ],
-        "warnings": [
-          "EPS and target P/E are present but P/E implied price is blank"
-        ],
+        "warnings": [],
         "required_inputs_present": false,
-        "formula_trace_present": false,
+        "formula_trace_present": true,
         "bridge_present": false,
         "sensitivity_present": false,
         "sensitivity_varies": false,
         "source_backed_assumptions": false,
         "analyst_approved_assumptions": false
       },
-      "CORE_PE_NET_CASH": {
-        "method_name": "CORE_PE_NET_CASH",
-        "computed": true,
+      "RELATIVE_PE": {
+        "method_name": "RELATIVE_PE",
+        "computed": false,
         "publishable": false,
-        "target_price_vnd": 51369.0,
-        "confidence": "medium",
-        "role": "cross_check",
-        "blocking_reasons": [
-          "cross_check_only_not_primary"
-        ],
+        "target_price_vnd": null,
+        "confidence": "low",
+        "role": "excluded",
+        "blocking_reasons": [],
         "warnings": [],
-        "required_inputs_present": true,
+        "required_inputs_present": false,
         "formula_trace_present": false,
         "bridge_present": false,
         "sensitivity_present": false,

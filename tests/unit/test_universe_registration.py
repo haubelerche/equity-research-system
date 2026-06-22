@@ -24,8 +24,23 @@ def test_registers_dp3_from_configured_universe() -> None:
     assert store.registered["DP3"]["peer_group_id"] == "vn_pharma_listed"
 
 
+def test_agp_removed_from_universe_is_not_registerable() -> None:
+    # AGP was dropped from the universe; it must no longer resolve from config.
+    store = FakeStore()
+
+    with pytest.raises(ValueError, match="not present"):
+        ensure_ticker_registered_from_universe(store, "agp")
+
+
 def test_unknown_ticker_fails_before_database_fk_violation() -> None:
     store = FakeStore()
 
     with pytest.raises(ValueError, match="not present"):
         ensure_ticker_registered_from_universe(store, "NO_SUCH_TICKER")
+
+
+def test_non_healthcare_listing_mismatch_is_not_registerable() -> None:
+    store = FakeStore()
+
+    with pytest.raises(ValueError, match="not present"):
+        ensure_ticker_registered_from_universe(store, "DGW")

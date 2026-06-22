@@ -12,7 +12,7 @@ from typing import Any, Iterable
 import yaml
 
 from backend.dataset.config_io import load_universe_tickers
-from backend.evaluation.benchmark_paths import BENCHMARK_COHORTS_PATH
+from backend.evaluation.benchmark_paths import BENCHMARK_COHORTS_PATH, GOLDEN_FINANCIALS_DIR
 
 DEFAULT_BENCHMARK_COHORT = "full_universe"
 
@@ -27,6 +27,23 @@ def _normalize_tickers(tickers: Iterable[str]) -> list[str]:
         seen.add(value)
         normalized.append(value)
     return normalized
+
+
+def _tickers_with_golden_financials(root: Path = GOLDEN_FINANCIALS_DIR) -> set[str]:
+    if not root.exists():
+        return set()
+    return {
+        path.stem.upper()
+        for path in root.glob("*.csv")
+        if path.is_file() and not path.stem.lower().startswith("all_")
+    }
+
+
+def _apply_cohort_filters(tickers: list[str], payload: dict[str, Any]) -> list[str]:
+    if payload.get("requires_golden_financials"):
+        ready = _tickers_with_golden_financials()
+        return [ticker for ticker in tickers if ticker in ready]
+    return tickers
 
 
 def load_benchmark_cohort_config(path: Path = BENCHMARK_COHORTS_PATH) -> dict[str, Any]:
@@ -55,7 +72,10 @@ def available_benchmark_cohorts(path: Path = BENCHMARK_COHORTS_PATH) -> dict[str
         if not isinstance(payload, dict):
             continue
         if payload.get("source") == "universe":
-            result[str(name)] = _normalize_tickers(load_universe_tickers())
+            result[str(name)] = _apply_cohort_filters(
+                _normalize_tickers(load_universe_tickers()),
+                payload,
+            )
         else:
             result[str(name)] = _normalize_tickers(payload.get("tickers") or [])
     return result
@@ -79,7 +99,10 @@ def resolve_benchmark_tickers(
             available = ", ".join(sorted(str(name) for name in cohorts)) or "<none>"
             raise KeyError(f"unknown benchmark cohort {cohort_name!r}; available: {available}")
         if cohort_payload.get("source") == "universe":
-            resolved = _normalize_tickers(load_universe_tickers())
+            resolved = _apply_cohort_filters(
+                _normalize_tickers(load_universe_tickers()),
+                cohort_payload,
+            )
         else:
             resolved = _normalize_tickers(cohort_payload.get("tickers") or [])
 

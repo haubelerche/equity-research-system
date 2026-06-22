@@ -1,0 +1,65 @@
+# Controls what `railway up` uploads. Keeps the upload off heavy/locked dirs
+# (avoids Windows "Access is denied" os error 5) and matches the Docker context.
+#
+# IMPORTANT: patterns WITHOUT a leading slash match at ANY depth (gitignore
+# semantics). Root-only data/artifact dirs are anchored with a leading "/" so
+# they never accidentally exclude source packages like backend/storage/.
+# MUST keep backend/storage/, backend/**, and config/dataset/universe/*.csv.
+
+# Secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# VCS / IDE / tooling (safe to match anywhere)
+.git/
+.gitignore
+.claude/
+.worktrees/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python caches / virtualenvs (safe to match anywhere)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.venv/
+venv/
+.vnstock/
+.vnstock_runtime/
+.deepeval/
+
+# Node / frontend (served by Vercel, not the Railway API image)
+node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+frontend/vite-dev*.log
+.vercel/
+
+# Generated data and runtime artifacts — ROOT-LEVEL ONLY (anchored)
+/data/
+/output/
+/reports/
+/artifacts/
+/storage/
+/audits/
+/dist/
+/build/
+
+# Large source PDFs live in Supabase Storage, not the image
+/config/dataset/DHCD/
+
+# Reference codebases (not needed at runtime)
+/FinRobot/
+/vnstock/

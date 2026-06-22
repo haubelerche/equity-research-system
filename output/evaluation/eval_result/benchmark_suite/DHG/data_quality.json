@@ -4,8 +4,8 @@
   "plan_id": "01",
   "plan_name": "Data reliability",
   "ticker": "DHG",
-  "generated_at": "2026-06-17T17:06:35.363917+00:00",
-  "status": "pass",
+  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "status": "blocked",
   "test_execution": {
     "status": "not_measured",
     "targets": [
@@ -32,25 +32,25 @@
     "found": {
       "data_quality.json": [
         "output\\evaluation\\eval_result\\benchmark_suite\\AGP\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMP\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BCP\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\BCR\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\BID\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BIO\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CDP\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CNC\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\CPC\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DAN\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBM\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DBT\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DCL\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DDN\\data_quality.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DGW\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DNM\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DP3\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DPP\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DRG\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DTP\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DVN\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\HBH\\data_quality.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\HDA\\data_quality.json"
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHD\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHN\\data_quality.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\data_quality.json"
       ]
     },
     "missing": [],
@@ -123,6 +123,7 @@
             "record_count": 25,
             "metric_id": "raw_bctc_non_empty",
             "sample_origin": "fallback_1",
+            "value": "non_empty",
             "sample_index": 1
           },
           {
@@ -132,6 +133,7 @@
             "record_count": 122,
             "metric_id": "raw_bctc_non_empty",
             "sample_origin": "fallback_1",
+            "value": "non_empty",
             "sample_index": 2
           },
           {
@@ -141,6 +143,7 @@
             "record_count": 41,
             "metric_id": "raw_bctc_non_empty",
             "sample_origin": "fallback_1",
+            "value": "non_empty",
             "sample_index": 3
           },
           {
@@ -150,6 +153,7 @@
             "record_count": 54,
             "metric_id": "raw_bctc_non_empty",
             "sample_origin": "fallback_1",
+            "value": "non_empty",
             "sample_index": 4
           },
           {
@@ -167,6 +171,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 5
           },
@@ -185,6 +190,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 6
           },
@@ -203,6 +209,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 7
           },
@@ -221,6 +228,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 8
           },
@@ -239,6 +247,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 9
           },
@@ -257,6 +266,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 10
           },
@@ -275,6 +285,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 11
           },
@@ -293,6 +304,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 12
           },
@@ -311,6 +323,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 13
           },
@@ -329,6 +342,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 14
           },
@@ -347,6 +361,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 15
           },
@@ -365,6 +380,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 16
           },
@@ -383,6 +399,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 17
           },
@@ -401,6 +418,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 18
           },
@@ -419,6 +437,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 19
           },
@@ -437,6 +456,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "raw_bctc_non_empty",
             "sample_index": 20
           }
@@ -445,14 +465,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "data_reliability_score",
@@ -467,8 +488,8 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": 0.9917704918032787,
-      "threshold": ">= 90/100",
+      "value": 0.991337359792925,
+      "threshold": ">= 90%",
       "threshold_operator": ">=",
       "unit": "score",
       "status": "pass",
@@ -485,8 +506,11 @@
           "sample_origin": "data_reliability_score_component",
           "component": "accepted_fact_confidence",
           "component_score": 0.917704918032787,
+          "value": 0.917704918032787,
+          "status": "warning",
+          "passed": false,
           "weight": 0.1,
-          "normalized_weight": 0.1
+          "normalized_weight": 0.10526315789473685
         }
       ],
       "remediation_hint": "Inspect weighted data reliability components and repair the weakest measured gate.",
@@ -532,25 +556,24 @@
             {
               "id": "accepted_fact_confidence",
               "weight": 0.1
-            },
-            {
-              "id": "ocr_resolution_health",
-              "weight": 0.05
             }
           ],
           "score_is_real_measurement": true,
           "perfect_score_not_forced": true
         },
         "aggregation": "weighted_score",
-        "numerator": 0.9917704918032787,
+        "numerator": 0.991337359792925,
         "denominator": 1.0,
         "per_sample_results": [
           {
             "sample_origin": "data_reliability_score_component",
             "component": "core_metric_coverage",
             "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
             "weight": 0.3,
-            "normalized_weight": 0.3,
+            "normalized_weight": 0.3157894736842105,
             "metric_id": "data_reliability_score",
             "sample_index": 1
           },
@@ -558,8 +581,11 @@
             "sample_origin": "data_reliability_score_component",
             "component": "official_reconciliation_rate",
             "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
             "weight": 0.2,
-            "normalized_weight": 0.2,
+            "normalized_weight": 0.2105263157894737,
             "metric_id": "data_reliability_score",
             "sample_index": 2
           },
@@ -567,8 +593,11 @@
             "sample_origin": "data_reliability_score_component",
             "component": "provenance_coverage",
             "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
             "weight": 0.15,
-            "normalized_weight": 0.15,
+            "normalized_weight": 0.15789473684210525,
             "metric_id": "data_reliability_score",
             "sample_index": 3
           },
@@ -576,8 +605,11 @@
             "sample_origin": "data_reliability_score_component",
             "component": "period_completeness",
             "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
             "weight": 0.1,
-            "normalized_weight": 0.1,
+            "normalized_weight": 0.10526315789473685,
             "metric_id": "data_reliability_score",
             "sample_index": 4
           },
@@ -585,8 +617,11 @@
             "sample_origin": "data_reliability_score_component",
             "component": "dataframe_schema_validity",
             "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
             "weight": 0.1,
-            "normalized_weight": 0.1,
+            "normalized_weight": 0.10526315789473685,
             "metric_id": "data_reliability_score",
             "sample_index": 5
           },
@@ -594,19 +629,13 @@
             "sample_origin": "data_reliability_score_component",
             "component": "accepted_fact_confidence",
             "component_score": 0.917704918032787,
+            "value": 0.917704918032787,
+            "status": "warning",
+            "passed": false,
             "weight": 0.1,
-            "normalized_weight": 0.1,
+            "normalized_weight": 0.10526315789473685,
             "metric_id": "data_reliability_score",
             "sample_index": 6
-          },
-          {
-            "sample_origin": "data_reliability_score_component",
-            "component": "ocr_resolution_health",
-            "component_score": 1.0,
-            "weight": 0.05,
-            "normalized_weight": 0.05,
-            "metric_id": "data_reliability_score",
-            "sample_index": 7
           },
           {
             "ticker": "DHG",
@@ -621,9 +650,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 8
+            "sample_index": 7
           },
           {
             "ticker": "DHG",
@@ -638,9 +668,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 9
+            "sample_index": 8
           },
           {
             "ticker": "DHG",
@@ -655,9 +686,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 10
+            "sample_index": 9
           },
           {
             "ticker": "DHG",
@@ -672,9 +704,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 11
+            "sample_index": 10
           },
           {
             "ticker": "DHG",
@@ -689,9 +722,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 12
+            "sample_index": 11
           },
           {
             "ticker": "DHG",
@@ -706,9 +740,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 13
+            "sample_index": 12
           },
           {
             "ticker": "DHG",
@@ -723,9 +758,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 14
+            "sample_index": 13
           },
           {
             "ticker": "DHG",
@@ -740,9 +776,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 15
+            "sample_index": 14
           },
           {
             "ticker": "DHG",
@@ -757,9 +794,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 16
+            "sample_index": 15
           },
           {
             "ticker": "DHG",
@@ -774,9 +812,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 17
+            "sample_index": 16
           },
           {
             "ticker": "DHG",
@@ -791,9 +830,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 18
+            "sample_index": 17
           },
           {
             "ticker": "DHG",
@@ -808,9 +848,10 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
-            "sample_index": 19
+            "sample_index": 18
           },
           {
             "ticker": "DHG",
@@ -825,6 +866,25 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
+            "metric_id": "official_reconciliation_rate",
+            "sample_origin": "fallback_1",
+            "sample_index": 19
+          },
+          {
+            "ticker": "DHG",
+            "period": "2022FY",
+            "statement_type": "income_statement",
+            "canonical_key": "net_income.parent",
+            "value": "988.454646",
+            "unit": "vnd_bn",
+            "source_type": "financial_statement",
+            "source_title": "Local raw BCTC cache DHG 2022FY",
+            "validation_status": "accepted",
+            "verified": true,
+            "official_source": true,
+            "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 20
@@ -834,14 +894,371 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "data.benchmark_hardness_score",
+      "label": "Data benchmark hardness score",
+      "source": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+      "detail": "",
+      "metric_id": "data.benchmark_hardness_score",
+      "metric_name": "Data benchmark hardness score",
+      "category": "data_quality",
+      "layer": "diagnostic",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 0.9809952281171312,
+      "threshold": ">= 85%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 20,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": "DHG.csv",
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "data",
+      "failed_examples": [
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "data_reliability_score",
+          "component_score": 0.991337359792925,
+          "value": 0.991337359792925,
+          "status": "warning",
+          "passed": false,
+          "weight": 0.25,
+          "normalized_weight": 0.25510204081632654,
+          "metric_id": "data.benchmark_hardness_score",
+          "sample_index": 1
+        },
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "accepted_fact_confidence",
+          "component_score": 0.917704918032787,
+          "value": 0.917704918032787,
+          "status": "warning",
+          "passed": false,
+          "weight": 0.2,
+          "normalized_weight": 0.20408163265306123,
+          "metric_id": "data.benchmark_hardness_score",
+          "sample_index": 2
+        },
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "accepted_fact_confidence",
+          "component_score": 0.917704918032787,
+          "value": 0.917704918032787,
+          "status": "warning",
+          "passed": false,
+          "weight": 0.1,
+          "normalized_weight": 0.10526315789473685,
+          "metric_id": "data.benchmark_hardness_score",
+          "sample_index": 14
+        }
+      ],
+      "remediation_hint": "Improve confidence, provenance depth, OCR resolution, raw file coverage, and reconciliation quality.",
+      "evaluator": {
+        "id": "data.benchmark_hardness_score",
+        "framework": "hard_mode_data_reliability_score",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "ticker": "DHG",
+          "golden_csv": "config\\benchmarks\\shared\\golden_financials\\DHG.csv",
+          "golden_provenance": "config\\benchmarks\\shared\\golden_financials\\DHG_golden_provenance.json",
+          "record_count": 122,
+          "accepted_record_count": 122,
+          "raw_bctc_non_empty_files": 4,
+          "raw_bctc_required_files": 4,
+          "duplicate_rate": 0.0
+        },
+        "parameters": {
+          "rationale": "Ceiling-resistant score: perfect binary gates are penalized when confidence, OCR, raw-file, or lineage depth is weaker than ideal.",
+          "components": [
+            {
+              "id": "data_reliability_score",
+              "weight": 0.25
+            },
+            {
+              "id": "accepted_fact_confidence",
+              "weight": 0.2
+            },
+            {
+              "id": "official_reconciliation_rate",
+              "weight": 0.15
+            },
+            {
+              "id": "provenance_coverage",
+              "weight": 0.12
+            },
+            {
+              "id": "core_metric_coverage",
+              "weight": 0.1
+            },
+            {
+              "id": "raw_bctc_coverage",
+              "weight": 0.08
+            },
+            {
+              "id": "schema_health",
+              "weight": 0.05
+            },
+            {
+              "id": "dedupe_health",
+              "weight": 0.03
+            }
+          ]
+        },
+        "aggregation": "weighted_score",
+        "numerator": 0.9809952281171312,
+        "denominator": 1.0,
+        "per_sample_results": [
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "data_reliability_score",
+            "component_score": 0.991337359792925,
+            "value": 0.991337359792925,
+            "status": "warning",
+            "passed": false,
+            "weight": 0.25,
+            "normalized_weight": 0.25510204081632654,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "accepted_fact_confidence",
+            "component_score": 0.917704918032787,
+            "value": 0.917704918032787,
+            "status": "warning",
+            "passed": false,
+            "weight": 0.2,
+            "normalized_weight": 0.20408163265306123,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 2
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "official_reconciliation_rate",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.15,
+            "normalized_weight": 0.15306122448979592,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 3
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "provenance_coverage",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.12,
+            "normalized_weight": 0.12244897959183673,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 4
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "core_metric_coverage",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.10204081632653061,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 5
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "raw_bctc_coverage",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.08,
+            "normalized_weight": 0.0816326530612245,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 6
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "schema_health",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.05,
+            "normalized_weight": 0.05102040816326531,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 7
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "dedupe_health",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.03,
+            "normalized_weight": 0.030612244897959183,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 8
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "core_metric_coverage",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.3,
+            "normalized_weight": 0.3157894736842105,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 9
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "official_reconciliation_rate",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.2,
+            "normalized_weight": 0.2105263157894737,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 10
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "provenance_coverage",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.15,
+            "normalized_weight": 0.15789473684210525,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 11
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "period_completeness",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.10526315789473685,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 12
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "dataframe_schema_validity",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.10526315789473685,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 13
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "accepted_fact_confidence",
+            "component_score": 0.917704918032787,
+            "value": 0.917704918032787,
+            "status": "warning",
+            "passed": false,
+            "weight": 0.1,
+            "normalized_weight": 0.10526315789473685,
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 14
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 15,
+            "status": "not_applicable",
+            "value": "no_additional_runtime_sample_available",
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 15
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 16,
+            "status": "not_applicable",
+            "value": "no_additional_runtime_sample_available",
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 16
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 17,
+            "status": "not_applicable",
+            "value": "no_additional_runtime_sample_available",
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 17
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 18,
+            "status": "not_applicable",
+            "value": "no_additional_runtime_sample_available",
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 18
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 19,
+            "status": "not_applicable",
+            "value": "no_additional_runtime_sample_available",
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 19
+          },
+          {
+            "sample_origin": "benchmark_control",
+            "control_index": 20,
+            "status": "not_applicable",
+            "value": "no_additional_runtime_sample_available",
+            "metric_id": "data.benchmark_hardness_score",
+            "sample_index": 20
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Improve confidence, provenance depth, OCR resolution, raw file coverage, and reconciliation quality.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": "DHG.csv",
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "core_metric_coverage",
@@ -904,6 +1321,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "capex.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -927,6 +1346,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "cash_and_equivalents.ending",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -950,6 +1371,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "depreciation.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -973,6 +1396,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "eps.basic",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -993,6 +1418,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "long_term_debt.ending",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -1016,6 +1443,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "operating_cash_flow.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -1038,6 +1467,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "proceeds_from_borrowings.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -1060,6 +1491,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "profit_before_tax.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -1083,6 +1516,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "repayment_of_borrowings.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -1105,6 +1540,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "revenue.net",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -1125,6 +1562,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "shares_outstanding.ending",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -1150,6 +1589,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "short_term_debt.ending",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -1171,6 +1612,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "tax_expense.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -1202,6 +1645,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "core_metric_coverage",
             "sample_index": 14
           },
@@ -1220,6 +1664,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "core_metric_coverage",
             "sample_index": 15
           },
@@ -1238,6 +1683,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "core_metric_coverage",
             "sample_index": 16
           },
@@ -1256,6 +1702,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "core_metric_coverage",
             "sample_index": 17
           },
@@ -1274,6 +1721,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "core_metric_coverage",
             "sample_index": 18
           },
@@ -1292,6 +1740,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "core_metric_coverage",
             "sample_index": 19
           },
@@ -1310,6 +1759,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "core_metric_coverage",
             "sample_index": 20
           }
@@ -1318,14 +1768,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "period_completeness",
@@ -1384,6 +1835,8 @@
             "accepted_fact_count": 32,
             "complete": true,
             "metric_id": "period_completeness",
+            "status": "pass",
+            "value": true,
             "sample_index": 1
           },
           {
@@ -1392,6 +1845,8 @@
             "accepted_fact_count": 32,
             "complete": true,
             "metric_id": "period_completeness",
+            "status": "pass",
+            "value": true,
             "sample_index": 2
           },
           {
@@ -1400,6 +1855,8 @@
             "accepted_fact_count": 32,
             "complete": true,
             "metric_id": "period_completeness",
+            "status": "pass",
+            "value": true,
             "sample_index": 3
           },
           {
@@ -1408,6 +1865,8 @@
             "accepted_fact_count": 26,
             "complete": true,
             "metric_id": "period_completeness",
+            "status": "pass",
+            "value": true,
             "sample_index": 4
           },
           {
@@ -1425,6 +1884,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 5
           },
@@ -1443,6 +1903,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 6
           },
@@ -1461,6 +1922,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 7
           },
@@ -1479,6 +1941,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 8
           },
@@ -1497,6 +1960,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 9
           },
@@ -1515,6 +1979,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 10
           },
@@ -1533,6 +1998,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 11
           },
@@ -1551,6 +2017,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 12
           },
@@ -1569,6 +2036,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 13
           },
@@ -1587,6 +2055,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 14
           },
@@ -1605,6 +2074,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 15
           },
@@ -1623,6 +2093,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 16
           },
@@ -1641,6 +2112,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 17
           },
@@ -1659,6 +2131,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 18
           },
@@ -1677,6 +2150,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 19
           },
@@ -1695,6 +2169,7 @@
             "has_value": true,
             "accepted": true,
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "period_completeness",
             "sample_index": 20
           }
@@ -1703,14 +2178,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "provenance_coverage",
@@ -1779,6 +2255,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 1
           },
@@ -1794,6 +2271,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 2
           },
@@ -1809,6 +2287,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 3
           },
@@ -1824,6 +2303,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 4
           },
@@ -1839,6 +2319,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 5
           },
@@ -1854,6 +2335,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 6
           },
@@ -1869,6 +2351,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 7
           },
@@ -1884,6 +2367,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 8
           },
@@ -1899,6 +2383,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 9
           },
@@ -1914,6 +2399,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 10
           },
@@ -1929,6 +2415,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 11
           },
@@ -1944,6 +2431,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 12
           },
@@ -1959,6 +2447,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 13
           },
@@ -1974,6 +2463,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 14
           },
@@ -1989,6 +2479,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 15
           },
@@ -2004,6 +2495,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 16
           },
@@ -2019,6 +2511,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 17
           },
@@ -2034,6 +2527,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 18
           },
@@ -2049,6 +2543,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 19
           },
@@ -2064,6 +2559,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "has_complete_provenance": true,
+            "status": "pass",
             "metric_id": "provenance_coverage",
             "sample_index": 20
           }
@@ -2072,14 +2568,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "official_reconciliation_rate",
@@ -2147,6 +2644,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 1
@@ -2164,6 +2662,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 2
@@ -2181,6 +2680,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 3
@@ -2198,6 +2698,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 4
@@ -2215,6 +2716,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 5
@@ -2232,6 +2734,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 6
@@ -2249,6 +2752,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 7
@@ -2266,6 +2770,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 8
@@ -2283,6 +2788,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 9
@@ -2300,6 +2806,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 10
@@ -2317,6 +2824,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 11
@@ -2334,6 +2842,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 12
@@ -2351,6 +2860,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 13
@@ -2368,6 +2878,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 14
@@ -2385,6 +2896,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 15
@@ -2402,6 +2914,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 16
@@ -2419,6 +2932,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 17
@@ -2436,6 +2950,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 18
@@ -2453,6 +2968,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 19
@@ -2470,6 +2986,7 @@
             "verified": true,
             "official_source": true,
             "reconciled": true,
+            "status": "pass",
             "metric_id": "official_reconciliation_rate",
             "sample_origin": "fallback_1",
             "sample_index": 20
@@ -2479,14 +2996,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "material_ocr_error_count",
@@ -2551,6 +3069,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 1
@@ -2567,6 +3086,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 2
@@ -2583,6 +3103,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 3
@@ -2599,6 +3120,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 4
@@ -2615,6 +3137,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 5
@@ -2631,6 +3154,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 6
@@ -2647,6 +3171,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 7
@@ -2663,6 +3188,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 8
@@ -2679,6 +3205,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 9
@@ -2695,6 +3222,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 10
@@ -2711,6 +3239,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 11
@@ -2727,6 +3256,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 12
@@ -2743,6 +3273,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 13
@@ -2759,6 +3290,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 14
@@ -2775,6 +3307,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 15
@@ -2791,6 +3324,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 16
@@ -2807,6 +3341,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 17
@@ -2823,6 +3358,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 18
@@ -2839,6 +3375,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 19
@@ -2855,6 +3392,7 @@
             "validation_status": "accepted",
             "ocr_sourced": false,
             "material_ocr_error": false,
+            "status": "pass",
             "metric_id": "material_ocr_error_count",
             "sample_origin": "fallback_1",
             "sample_index": 20
@@ -2864,14 +3402,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Block OCR-derived material facts until validation/reconciliation passes.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "ocr_unresolved_rate",
@@ -2886,12 +3425,12 @@
       "scope": "benchmark_suite",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 0.0,
+      "value": null,
       "threshold": "<= 5%",
       "threshold_operator": "<=",
       "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
+      "status": "not_evaluable",
+      "legacy_status": "not_evaluable",
       "sample_size": 20,
       "artifact_id": null,
       "artifact_version": null,
@@ -2899,105 +3438,51 @@
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "20260615_v3",
       "owner": "data",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "reason": "evaluation_evidence_missing",
+          "source": "latest OCR metadata"
+        }
+      ],
       "remediation_hint": "Reduce unresolved OCR corpus errors and keep material OCR errors out of final artifacts.",
       "evaluator": {
         "id": "ocr_unresolved_rate",
         "framework": "custom",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "executed"
+        "execution_status": "not_executed"
       },
       "calculation": {
         "formula": null,
         "inputs": {
           "metadata": {
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
             "ticker": "DHG",
-            "fiscal_year": 2025,
-            "source_uri": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHG\\2025\\source_document.pdf",
-            "source_checksum": "abaaac8d3813329db1987e769f325fbee7b8c4776b4205b26a4673f95b589973",
-            "pdf_type": "scanned",
-            "ocr_engine": "tesseract",
-            "ocr_lang": "vie+eng",
-            "dpi": 300,
-            "parser_version": "1.0.0",
-            "started_at": "2026-06-15T07:57:07.330766+00:00",
-            "completed_at": "2026-06-16T12:11:33.386999+00:00",
+            "document_id": "DHG_benchmark_report",
             "status": "completed",
-            "pages_processed": 40,
+            "pages_processed": 1,
             "pages_failed": 0,
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
-            "warnings": [],
-            "errors": []
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0
           },
           "ocr_reconciliation": {
             "ticker": "DHG",
-            "fiscal_year": 2025,
-            "generated_at": "2026-06-16T12:11:33.384520+00:00",
-            "total_records": 3,
+            "generated_at": "2026-06-19T20:36:23.934352+00:00",
+            "source": "benchmark_generated_report_pdf",
             "summary": {
-              "total": 3,
-              "matched": 1,
-              "conflicted": 2,
-              "missing_secondary_source": 0,
-              "promote_eligible_count": 1,
-              "blocked_conflict_count": 2,
-              "needs_review_count": 0
+              "total": 0,
+              "needs_review_count": 0,
+              "matched": 0,
+              "conflicted": 0
             },
-            "records": [
-              {
-                "ticker": "DHG",
-                "fiscal_year": 2025,
-                "metric_id": "current_assets.ending",
-                "period_type": "FY",
-                "ocr_value": 3888.768378,
-                "secondary_value": 3888.768378369,
-                "absolute_diff": 3.6899973565596156e-07,
-                "relative_diff": 9.488858675885573e-11,
-                "ocr_source": "DHG_2025_abaaac8d3813",
-                "secondary_source": "vnstock+raw_bctc",
-                "status": "matched",
-                "decision": "promote_eligible"
-              },
-              {
-                "ticker": "DHG",
-                "fiscal_year": 2025,
-                "metric_id": "total_assets.ending",
-                "period_type": "FY",
-                "ocr_value": 1285.113251,
-                "secondary_value": 5173.881628997,
-                "absolute_diff": 3888.7683779970002,
-                "relative_diff": 0.7516152584942053,
-                "ocr_source": "DHG_2025_abaaac8d3813",
-                "secondary_source": "vnstock+raw_bctc",
-                "status": "conflicted",
-                "decision": "blocked_conflict"
-              },
-              {
-                "ticker": "DHG",
-                "fiscal_year": 2025,
-                "metric_id": "charter_capital.ending",
-                "period_type": "FY",
-                "ocr_value": 1036.616453,
-                "secondary_value": 1307.46071,
-                "absolute_diff": 270.84425699999997,
-                "relative_diff": 0.20715288415817862,
-                "ocr_source": "DHG_2025_abaaac8d3813",
-                "secondary_source": "vnstock+raw_bctc",
-                "status": "conflicted",
-                "decision": "blocked_conflict"
-              }
-            ]
+            "records": []
           },
           "resolution_counts": {
-            "total": 3,
-            "resolved": 3,
+            "total": 0,
+            "resolved": 0,
             "unresolved": 0,
-            "matched": 1,
-            "conflicted": 2
+            "matched": 0,
+            "conflicted": 0
           }
         },
         "parameters": {
@@ -3005,308 +3490,328 @@
         },
         "aggregation": "error_rate",
         "numerator": 0,
-        "denominator": 3,
+        "denominator": 0,
         "per_sample_results": [
           {
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "status": "completed",
-            "pages_processed": 40,
+            "pages_processed": 1,
             "pages_failed": 0,
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
-            "resolved_candidate_count": 3,
-            "matched_candidate_count": 1,
-            "conflicted_candidate_count": 2,
+            "resolved_candidate_count": 0,
+            "matched_candidate_count": 0,
+            "conflicted_candidate_count": 0,
             "resolution_source": "ocr_reconciliation_report",
             "metric_id": "ocr_unresolved_rate",
             "sample_origin": "fallback_1",
+            "value": "completed",
             "sample_index": 1
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 1,
             "unit_type": "page",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 2
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 2,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 3
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 3,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 4
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 4,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 5
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 5,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 6
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 6,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 7
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 7,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 8
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 8,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 9
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 9,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 10
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 10,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 11
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 11,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 12
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 12,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 13
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 13,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 14
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 14,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 15
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 15,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 16
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 16,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 17
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 17,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 18
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 18,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 19
           },
           {
             "sample_origin": "ocr_audit_unit",
             "ticker": "DHG",
-            "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-            "document_id": "DHG_2025_abaaac8d3813",
+            "ocr_run_id": "benchmark_ocr_dhg",
+            "document_id": "DHG_benchmark_report",
             "unit_index": 19,
-            "unit_type": "page",
+            "unit_type": "benchmark_control",
             "status": "checked",
-            "candidate_row_count": 3,
-            "mapped_fact_count": 3,
+            "candidate_row_count": 0,
+            "mapped_fact_count": 0,
             "unresolved_candidate_count": 0,
             "evidence_available": true,
             "metric_id": "ocr_unresolved_rate",
+            "value": "checked",
             "sample_index": 20
           }
         ]
@@ -3314,14 +3819,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "duplicate_fact_count",
@@ -3388,6 +3894,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 1
           },
           {
@@ -3399,6 +3907,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 2
           },
           {
@@ -3410,6 +3920,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 3
           },
           {
@@ -3421,6 +3933,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 4
           },
           {
@@ -3432,6 +3946,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 5
           },
           {
@@ -3443,6 +3959,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 6
           },
           {
@@ -3454,6 +3972,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 7
           },
           {
@@ -3465,6 +3985,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 8
           },
           {
@@ -3476,6 +3998,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 9
           },
           {
@@ -3487,6 +4011,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 10
           },
           {
@@ -3498,6 +4024,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 11
           },
           {
@@ -3509,6 +4037,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 12
           },
           {
@@ -3520,6 +4050,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 13
           },
           {
@@ -3531,6 +4063,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 14
           },
           {
@@ -3542,6 +4076,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 15
           },
           {
@@ -3553,6 +4089,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 16
           },
           {
@@ -3564,6 +4102,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 17
           },
           {
@@ -3575,6 +4115,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 18
           },
           {
@@ -3586,6 +4128,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 19
           },
           {
@@ -3597,6 +4141,8 @@
             "duplicate_count": 1,
             "is_duplicate": false,
             "metric_id": "duplicate_fact_count",
+            "status": "pass",
+            "value": true,
             "sample_index": 20
           }
         ]
@@ -3604,32 +4150,33 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "valuation_method_data_readiness",
       "label": "Valuation method data readiness",
-      "source": "storage\\runs\\validation_dhg\\valuation.json",
+      "source": "storage\\runs\\benchmark_dhg\\valuation.json",
       "detail": "",
       "metric_id": "valuation_method_data_readiness",
       "metric_name": "Valuation method data readiness",
       "category": "data_quality",
       "layer": "release_gate",
-      "metric_type": "boolean",
+      "metric_type": "coverage",
       "scope": "report_run",
-      "severity": "P0",
-      "blocks_publish": true,
+      "severity": "P1",
+      "blocks_publish": false,
       "value": true,
-      "threshold": ">= 80",
+      "threshold": ">= 80%",
       "threshold_operator": ">=",
-      "unit": "boolean",
+      "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
       "sample_size": 20,
@@ -3651,7 +4198,7 @@
       "calculation": {
         "formula": null,
         "inputs": {
-          "valuation_artifact": "storage\\runs\\validation_dhg\\valuation.json",
+          "valuation_artifact": "storage\\runs\\benchmark_dhg\\valuation.json",
           "core_metric_coverage": 1.0,
           "official_reconciliation_rate": 1.0,
           "duplicate_fact_count": 0,
@@ -3671,6 +4218,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "capex.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3694,6 +4243,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "cash_and_equivalents.ending",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3717,6 +4268,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "depreciation.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3740,6 +4293,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "eps.basic",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3760,6 +4315,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "long_term_debt.ending",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3783,6 +4340,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "operating_cash_flow.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3805,6 +4364,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "proceeds_from_borrowings.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3827,6 +4388,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "profit_before_tax.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3850,6 +4413,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "repayment_of_borrowings.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3872,6 +4437,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "revenue.net",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3892,6 +4459,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "shares_outstanding.ending",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3917,6 +4486,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "short_term_debt.ending",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3938,6 +4509,8 @@
             "sample_origin": "valuation_requirement",
             "canonical_key": "tax_expense.total",
             "present": true,
+            "status": "pass",
+            "value": true,
             "accepted_periods": [
               "2022FY",
               "2023FY",
@@ -3958,15 +4531,15 @@
             "sample_origin": "valuation_policy_check",
             "method": "BLEND",
             "check": "computed",
-            "passed": true,
-            "value": true,
+            "passed": false,
+            "value": false,
             "blocking_reasons": [
               "fcfe_unavailable_for_blend",
-              "blend_sensitivity_missing_or_constant",
-              "blend_is_draft_only"
+              "blend_sensitivity_missing_or_constant"
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
+            "status": "fail",
             "sample_index": 14
           },
           {
@@ -3977,26 +4550,26 @@
             "value": false,
             "blocking_reasons": [
               "fcfe_unavailable_for_blend",
-              "blend_sensitivity_missing_or_constant",
-              "blend_is_draft_only"
+              "blend_sensitivity_missing_or_constant"
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
+            "status": "fail",
             "sample_index": 15
           },
           {
             "sample_origin": "valuation_policy_check",
             "method": "BLEND",
             "check": "required_inputs_present",
-            "passed": true,
-            "value": true,
+            "passed": false,
+            "value": false,
             "blocking_reasons": [
               "fcfe_unavailable_for_blend",
-              "blend_sensitivity_missing_or_constant",
-              "blend_is_draft_only"
+              "blend_sensitivity_missing_or_constant"
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
+            "status": "fail",
             "sample_index": 16
           },
           {
@@ -4007,11 +4580,11 @@
             "value": true,
             "blocking_reasons": [
               "fcfe_unavailable_for_blend",
-              "blend_sensitivity_missing_or_constant",
-              "blend_is_draft_only"
+              "blend_sensitivity_missing_or_constant"
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
+            "status": "pass",
             "sample_index": 17
           },
           {
@@ -4022,11 +4595,11 @@
             "value": false,
             "blocking_reasons": [
               "fcfe_unavailable_for_blend",
-              "blend_sensitivity_missing_or_constant",
-              "blend_is_draft_only"
+              "blend_sensitivity_missing_or_constant"
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
+            "status": "fail",
             "sample_index": 18
           },
           {
@@ -4037,11 +4610,11 @@
             "value": false,
             "blocking_reasons": [
               "fcfe_unavailable_for_blend",
-              "blend_sensitivity_missing_or_constant",
-              "blend_is_draft_only"
+              "blend_sensitivity_missing_or_constant"
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
+            "status": "fail",
             "sample_index": 19
           },
           {
@@ -4052,11 +4625,11 @@
             "value": false,
             "blocking_reasons": [
               "fcfe_unavailable_for_blend",
-              "blend_sensitivity_missing_or_constant",
-              "blend_is_draft_only"
+              "blend_sensitivity_missing_or_constant"
             ],
             "confidence": "low",
             "metric_id": "valuation_method_data_readiness",
+            "status": "fail",
             "sample_index": 20
           }
         ]
@@ -4064,14 +4637,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Ensure at least one primary valuation method has sufficient inputs, or explicitly exclude unavailable methods.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "dataframe_schema_validity",
@@ -4154,6 +4728,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 1
           },
@@ -4169,6 +4744,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 2
           },
@@ -4184,6 +4760,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 3
           },
@@ -4199,6 +4776,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 4
           },
@@ -4214,6 +4792,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 5
           },
@@ -4229,6 +4808,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 6
           },
@@ -4244,6 +4824,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 7
           },
@@ -4259,6 +4840,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 8
           },
@@ -4274,6 +4856,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 9
           },
@@ -4289,6 +4872,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 10
           },
@@ -4304,6 +4888,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 11
           },
@@ -4319,6 +4904,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 12
           },
@@ -4334,6 +4920,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 13
           },
@@ -4349,6 +4936,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 14
           },
@@ -4364,6 +4952,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 15
           },
@@ -4379,6 +4968,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 16
           },
@@ -4394,6 +4984,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 17
           },
@@ -4409,6 +5000,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 18
           },
@@ -4424,6 +5016,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 19
           },
@@ -4439,6 +5032,7 @@
             "validation_status": "accepted",
             "sample_origin": "source_row",
             "schema_valid": true,
+            "status": "pass",
             "metric_id": "dataframe_schema_validity",
             "sample_index": 20
           }
@@ -4447,14 +5041,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:06:35.363917+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     }
   ],
   "core_metric_coverage": 1.0,
@@ -4462,10 +5057,10 @@
   "provenance_coverage": 1.0,
   "official_reconciliation_rate": 1.0,
   "material_ocr_error_count": 0,
-  "ocr_unresolved_rate": 0.0,
+  "ocr_unresolved_rate": null,
   "duplicate_fact_count": 0,
   "duplicate_fact_rate": 0.0,
-  "data_reliability_score": 0.9917704918032787,
+  "data_reliability_score": 0.991337359792925,
   "accepted_fact_confidence": 0.917704918032787,
   "valuation_method_data_readiness": true,
   "raw_bctc_non_empty": true,
@@ -4507,38 +5102,28 @@
   "valuation_policy": {
     "ticker": "DHG",
     "run_id": null,
-    "valuation_artifact_path": "storage\\runs\\validation_dhg\\valuation.json",
+    "valuation_artifact_path": "storage\\runs\\benchmark_dhg\\valuation.json",
     "computed_methods": [
       "FCFF",
-      "BLEND",
-      "PE_FORWARD",
-      "CORE_PE_NET_CASH"
+      "FCFE"
     ],
     "publishable_methods": [],
     "excluded_methods": [
       {
         "method_name": "FCFF",
-        "reason": "fcff_wacc_or_ev_to_equity_bridge_missing"
+        "reason": "formula_trace_missing"
       },
       {
         "method_name": "FCFE",
-        "reason": "fcfe_blocked_net_borrowing_unavailable"
+        "reason": "formula_trace_missing"
       },
       {
         "method_name": "BLEND",
         "reason": "fcfe_unavailable_for_blend"
       },
       {
-        "method_name": "PE_FORWARD",
-        "reason": "cross_check_only_not_primary"
-      },
-      {
-        "method_name": "P/E",
-        "reason": "cross_check_only_not_primary"
-      },
-      {
-        "method_name": "CORE_PE_NET_CASH",
-        "reason": "cross_check_only_not_primary"
+        "method_name": "RELATIVE_PE",
+        "reason": "excluded"
       }
     ],
     "primary_method": null,
@@ -4548,31 +5133,50 @@
     "status": "blocked",
     "severity": "critical",
     "blocking_reasons": [
-      "critical_warning:FCFE BLOCKED — debt_schedule.is_fcfe_publishable = False. Reason: Debt forecast holds the last reported balance flat. Ne",
-      "critical_warning:Relative valuation is PENDING — no peer_data_source provided. Target P/E, P/B, and EV/EBITDA require a real peer group d",
-      "critical_warning:[ForecastWarning] Interest expense is single-pass (no convergence iteration). Debt method = 'stable_debt' — FCFE is bloc",
-      "low_confidence_primary_method",
-      "recommendation_gate_not_allowed",
       "valuation_method_divergence_critical"
     ],
-    "warnings": [],
-    "divergence_pct": 0.9399868336979882,
+    "warnings": [
+      "fcfe_low_confidence",
+      "fcff_low_confidence",
+      "low_confidence_primary_method"
+    ],
+    "divergence_pct": 0.8766163365157902,
     "target_price_vnd": null,
+    "headline_target_governance": {
+      "current_price_vnd": null,
+      "raw_model_target_vnd": 227001.77,
+      "headline_target_vnd": null,
+      "target_adjustment": "missing_current_price",
+      "target_band_low_vnd": null,
+      "target_band_high_vnd": null,
+      "headline_downside_band_pct": 0.4,
+      "headline_upside_band_pct": 0.4,
+      "headline_band_pct": 0.4,
+      "raw_upside": null,
+      "headline_upside": null,
+      "raw_model_target_source": "FCFF",
+      "has_raw_model_target": true,
+      "warnings": [
+        "headline_target_missing_current_price"
+      ]
+    },
     "method_diagnostics": {
       "FCFF": {
         "method_name": "FCFF",
         "computed": true,
         "publishable": false,
-        "target_price_vnd": 103294.0,
+        "target_price_vnd": 227001.77,
         "confidence": "low",
         "role": "scenario_only",
         "blocking_reasons": [
-          "fcff_wacc_or_ev_to_equity_bridge_missing",
+          "formula_trace_missing",
+          "fcff_wacc_or_ev_to_equity_bridge_missing"
+        ],
+        "warnings": [
           "fcff_low_confidence"
         ],
-        "warnings": [],
         "required_inputs_present": true,
-        "formula_trace_present": true,
+        "formula_trace_present": false,
         "bridge_present": false,
         "sensitivity_present": true,
         "sensitivity_varies": true,
@@ -4581,17 +5185,20 @@
       },
       "FCFE": {
         "method_name": "FCFE",
-        "computed": false,
+        "computed": true,
         "publishable": false,
-        "target_price_vnd": null,
-        "confidence": "blocked",
-        "role": "excluded",
+        "target_price_vnd": 425995.23,
+        "confidence": "low",
+        "role": "scenario_only",
         "blocking_reasons": [
-          "fcfe_blocked_net_borrowing_unavailable"
+          "formula_trace_missing",
+          "fcfe_equity_bridge_or_net_borrowing_missing"
         ],
-        "warnings": [],
-        "required_inputs_present": false,
-        "formula_trace_present": true,
+        "warnings": [
+          "fcfe_low_confidence"
+        ],
+        "required_inputs_present": true,
+        "formula_trace_present": false,
         "bridge_present": false,
         "sensitivity_present": true,
         "sensitivity_varies": true,
@@ -4600,18 +5207,17 @@
       },
       "BLEND": {
         "method_name": "BLEND",
-        "computed": true,
+        "computed": false,
         "publishable": false,
-        "target_price_vnd": 103294.0,
+        "target_price_vnd": null,
         "confidence": "low",
-        "role": "scenario_only",
+        "role": "excluded",
         "blocking_reasons": [
           "fcfe_unavailable_for_blend",
-          "blend_sensitivity_missing_or_constant",
-          "blend_is_draft_only"
+          "blend_sensitivity_missing_or_constant"
         ],
         "warnings": [],
-        "required_inputs_present": true,
+        "required_inputs_present": false,
         "formula_trace_present": true,
         "bridge_present": false,
         "sensitivity_present": false,
@@ -4619,59 +5225,16 @@
         "source_backed_assumptions": false,
         "analyst_approved_assumptions": false
       },
-      "PE_FORWARD": {
-        "method_name": "PE_FORWARD",
-        "computed": true,
-        "publishable": false,
-        "target_price_vnd": 145617.46525898267,
-        "confidence": "medium",
-        "role": "cross_check",
-        "blocking_reasons": [
-          "cross_check_only_not_primary"
-        ],
-        "warnings": [],
-        "required_inputs_present": true,
-        "formula_trace_present": false,
-        "bridge_present": false,
-        "sensitivity_present": false,
-        "sensitivity_varies": false,
-        "source_backed_assumptions": false,
-        "analyst_approved_assumptions": false
-      },
-      "P/E": {
-        "method_name": "P/E",
+      "RELATIVE_PE": {
+        "method_name": "RELATIVE_PE",
         "computed": false,
         "publishable": false,
         "target_price_vnd": null,
-        "confidence": "medium",
-        "role": "cross_check",
-        "blocking_reasons": [
-          "cross_check_only_not_primary",
-          "pe_mapping_blank_with_eps_and_target_pe"
-        ],
-        "warnings": [
-          "EPS and target P/E are present but P/E implied price is blank"
-        ],
-        "required_inputs_present": false,
-        "formula_trace_present": false,
-        "bridge_present": false,
-        "sensitivity_present": false,
-        "sensitivity_varies": false,
-        "source_backed_assumptions": false,
-        "analyst_approved_assumptions": false
-      },
-      "CORE_PE_NET_CASH": {
-        "method_name": "CORE_PE_NET_CASH",
-        "computed": true,
-        "publishable": false,
-        "target_price_vnd": 200389.0,
-        "confidence": "medium",
-        "role": "cross_check",
-        "blocking_reasons": [
-          "cross_check_only_not_primary"
-        ],
+        "confidence": "low",
+        "role": "excluded",
+        "blocking_reasons": [],
         "warnings": [],
-        "required_inputs_present": true,
+        "required_inputs_present": false,
         "formula_trace_present": false,
         "bridge_present": false,
         "sensitivity_present": false,
@@ -4682,26 +5245,14 @@
     }
   },
   "ocr": {
-    "ocr_run_id": "85827c6bb296423190455bb573ef041e",
-    "document_id": "DHG_2025_abaaac8d3813",
+    "ocr_run_id": "benchmark_ocr_dhg",
     "ticker": "DHG",
-    "fiscal_year": 2025,
-    "source_uri": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\data\\official_documents\\DHG\\2025\\source_document.pdf",
-    "source_checksum": "abaaac8d3813329db1987e769f325fbee7b8c4776b4205b26a4673f95b589973",
-    "pdf_type": "scanned",
-    "ocr_engine": "tesseract",
-    "ocr_lang": "vie+eng",
-    "dpi": 300,
-    "parser_version": "1.0.0",
-    "started_at": "2026-06-15T07:57:07.330766+00:00",
-    "completed_at": "2026-06-16T12:11:33.386999+00:00",
+    "document_id": "DHG_benchmark_report",
     "status": "completed",
-    "pages_processed": 40,
+    "pages_processed": 1,
     "pages_failed": 0,
-    "candidate_row_count": 3,
-    "mapped_fact_count": 3,
-    "warnings": [],
-    "errors": []
+    "candidate_row_count": 0,
+    "mapped_fact_count": 0
   },
   "pandera": {
     "execution_status": "executed",

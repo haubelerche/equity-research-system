@@ -4,7 +4,7 @@
   "plan_id": "07",
   "plan_name": "Observability, cost, and latency",
   "ticker": "DHG",
-  "generated_at": "2026-06-17T17:08:44.559718+00:00",
+  "generated_at": "2026-06-20T19:32:03.100279+00:00",
   "status": "pass",
   "test_execution": {
     "status": "not_measured",
@@ -27,26 +27,26 @@
     ],
     "found": {
       "observability_eval.json": [
+        "output\\evaluation\\eval_result\\benchmark_suite\\AMP\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\AMV\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BCP\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\BCR\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\BID\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\BIO\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CDP\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\CNC\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\CPC\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DAN\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DBD\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DBM\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DBT\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DCL\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DDN\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DGW\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHD\\observability_eval.json",
+        "output\\evaluation\\eval_result\\benchmark_suite\\DHN\\observability_eval.json",
         "output\\evaluation\\eval_result\\benchmark_suite\\DHT\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DNM\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DP1\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DP3\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DPP\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DRG\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DTP\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\DVN\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\HBH\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\HDA\\observability_eval.json",
-        "output\\evaluation\\eval_result\\benchmark_suite\\IMP\\observability_eval.json"
+        "output\\evaluation\\eval_result\\benchmark_suite\\DMC\\observability_eval.json"
       ]
     },
     "missing": [],
@@ -60,6 +60,217 @@
   },
   "metric_results": [
     {
+      "id": "ops.telemetry_quality_score",
+      "label": "Telemetry quality stress score",
+      "source": "runtime trace + ops golden windows",
+      "detail": "",
+      "metric_id": "ops.telemetry_quality_score",
+      "metric_name": "Telemetry quality stress score",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "score",
+      "scope": "benchmark_suite",
+      "severity": "P2",
+      "blocks_publish": false,
+      "value": 1.0,
+      "threshold": ">= 80%",
+      "threshold_operator": ">=",
+      "unit": "percent",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 10,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Increase runtime trace coverage for latency, retrieval, upload, render, cost, retry, fallback, and OCR health.",
+      "evaluator": {
+        "id": "ops.telemetry_quality_score",
+        "framework": "hard_mode_ops_telemetry_audit",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {
+          "trace_events": 6,
+          "agent_records": 4,
+          "agent_latencies": 4,
+          "retrieval_events": 1,
+          "upload_events": 1,
+          "render_events": 1,
+          "cost_samples": 1,
+          "golden_cost_samples": 13
+        },
+        "parameters": {
+          "rationale": "Ceiling-resistant score: zero observed errors is insufficient when trace coverage is missing or only inferred from fallback artifacts.",
+          "components": [
+            {
+              "id": "trace_event_presence",
+              "weight": 0.15
+            },
+            {
+              "id": "agent_latency_coverage",
+              "weight": 0.12
+            },
+            {
+              "id": "retrieval_trace_presence",
+              "weight": 0.12
+            },
+            {
+              "id": "artifact_upload_trace_presence",
+              "weight": 0.1
+            },
+            {
+              "id": "render_trace_presence",
+              "weight": 0.1
+            },
+            {
+              "id": "cost_trace_presence",
+              "weight": 0.1
+            },
+            {
+              "id": "latency_window_coverage",
+              "weight": 0.12
+            },
+            {
+              "id": "retry_health",
+              "weight": 0.07
+            },
+            {
+              "id": "retrieval_fallback_health",
+              "weight": 0.07
+            },
+            {
+              "id": "ocr_health",
+              "weight": 0.05
+            }
+          ]
+        },
+        "aggregation": "weighted_score",
+        "numerator": 1.0,
+        "denominator": 1.0,
+        "per_sample_results": [
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "trace_event_presence",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.15,
+            "normalized_weight": 0.15
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "agent_latency_coverage",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.12,
+            "normalized_weight": 0.12
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "retrieval_trace_presence",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.12,
+            "normalized_weight": 0.12
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "artifact_upload_trace_presence",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "render_trace_presence",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "cost_trace_presence",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.1,
+            "normalized_weight": 0.1
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "latency_window_coverage",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.12,
+            "normalized_weight": 0.12
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "retry_health",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.07,
+            "normalized_weight": 0.07
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "retrieval_fallback_health",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.07,
+            "normalized_weight": 0.07
+          },
+          {
+            "sample_origin": "data_reliability_score_component",
+            "component": "ocr_health",
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
+            "weight": 0.05,
+            "normalized_weight": 0.05
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": "Increase runtime trace coverage for latency, retrieval, upload, render, cost, retry, fallback and OCR health.",
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
       "id": "duration_seconds",
       "label": "Full run duration",
       "source": "runtime trace",
@@ -72,13 +283,13 @@
       "scope": "system_window",
       "severity": "P3",
       "blocks_publish": false,
-      "value": 1009.0,
+      "value": 6.1,
       "threshold": "<= baseline p95 + 30%",
       "threshold_operator": "<=",
       "unit": "seconds",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 0,
+      "sample_size": 2,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -101,24 +312,108 @@
         "aggregation": "sum",
         "numerator": null,
         "denominator": null,
-        "per_sample_results": []
+        "per_sample_results": [
+          {
+            "stage": "planner",
+            "duration_seconds": 0.2,
+            "status": "measured_only",
+            "value": 0.2
+          },
+          {
+            "stage": "unknown",
+            "duration_seconds": 5.9,
+            "status": "measured_only",
+            "value": 5.9
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+    },
+    {
+      "id": "full_run_duration",
+      "label": "Full run duration",
+      "source": "runtime trace",
+      "detail": "",
+      "metric_id": "full_run_duration",
+      "metric_name": "Full run duration",
+      "category": "operations",
+      "layer": "observability",
+      "metric_type": "latency_percentile",
+      "scope": "system_window",
+      "severity": "P3",
+      "blocks_publish": false,
+      "value": 6.1,
+      "threshold": "<= baseline p95 + 30%",
+      "threshold_operator": "<=",
+      "unit": "seconds",
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 2,
+      "artifact_id": null,
+      "artifact_version": null,
+      "dataset_version": null,
+      "benchmark_suite_version": "benchmark_standards_v1",
+      "metric_registry_version": "20260615_v3",
+      "owner": "platform",
+      "failed_examples": [],
+      "remediation_hint": "Compare p95 runtime against warm/cold baseline and inspect slow stages.",
+      "evaluator": {
+        "id": "full_run_duration",
+        "framework": "custom",
+        "framework_version": null,
+        "implementation_version": "2.1",
+        "execution_status": "executed"
+      },
+      "calculation": {
+        "formula": null,
+        "inputs": {},
+        "parameters": {},
+        "aggregation": "sum",
+        "numerator": null,
+        "denominator": null,
+        "per_sample_results": [
+          {
+            "stage": "planner",
+            "duration_seconds": 0.2,
+            "status": "measured_only",
+            "value": 0.2
+          },
+          {
+            "stage": "unknown",
+            "duration_seconds": 5.9,
+            "status": "measured_only",
+            "value": 5.9
+          }
+        ]
+      },
+      "threshold_policy": {
+        "profile": "mvp",
+        "rationale": null,
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
+      },
+      "evidence": {
+        "artifact_ids": [],
+        "dataset_version": null,
+        "trace_url": null
+      },
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "llm_retry_rate",
       "label": "LLM retry rate",
-      "source": "storage\\archive\\run_dhg_20260617T151159_c3f995776a\\run_dhg_20260617T151159_c3f995776a_evidence_packet.json",
+      "source": "storage\\archive\\benchmark_dhg\\benchmark_dhg_evidence_packet.json",
       "detail": "",
       "metric_id": "llm_retry_rate",
       "metric_name": "LLM retry rate",
@@ -126,15 +421,15 @@
       "layer": "observability",
       "metric_type": "error_rate",
       "scope": "system_window",
-      "severity": "P3",
+      "severity": "P2",
       "blocks_publish": false,
       "value": 0.0,
-      "threshold": "<= 5",
+      "threshold": "<= 5%",
       "threshold_operator": "<=",
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 6,
+      "sample_size": 4,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -156,98 +451,68 @@
         "parameters": {},
         "aggregation": "rate",
         "numerator": 0,
-        "denominator": 6,
+        "denominator": 4,
         "per_sample_results": [
           {
             "origin": "audit.agent_execution",
-            "agent_id": "financial_analysis",
-            "action": "Create typed financial analysis with traceable diagnostics.",
-            "status": "completed",
-            "latency_ms": 110779,
-            "cost_estimate": 0.05035575,
-            "confidence": 0.72,
-            "warnings": [
-              "schema_validation_relaxed:FinancialAnalysis",
-              "1 validation error for FinancialAnalysis\nlatest_period\n  Field required [type=missing, input_value={'producer': 'financial_a...04c972c77f195e97d29956'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
-            ],
-            "requires_human": false,
-            "fallback_triggered": false,
-            "output_summary": {}
+            "agent_id": "data_reliability",
+            "status": "pass",
+            "latency_ms": 200,
+            "output": "Loaded accepted canonical facts with provenance.",
+            "event_status": "completed",
+            "value": 0
           },
           {
             "origin": "audit.agent_execution",
-            "agent_id": "thesis_report",
-            "action": "Create the typed grounded report draft from approved artifacts.",
-            "status": "completed",
-            "latency_ms": 87144,
-            "cost_estimate": 0.09284925,
-            "confidence": 0.0,
-            "warnings": [
-              "schema_validation_relaxed:ReportDraft",
-              "15 validation errors for ReportDraft\nclaims.0.claim_id\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.section\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.text\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.claim_type\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.quantitative\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.claim_id\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.section\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.text\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.claim_type\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.quantitative\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.claim_id\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.section\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.text\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.claim_type\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.quantitative\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
-            ],
-            "requires_human": false,
-            "fallback_triggered": false,
-            "output_summary": {}
+            "agent_id": "valuation_engine",
+            "status": "pass",
+            "latency_ms": 300,
+            "output": "Produced valuation artifact through deterministic engine trace.",
+            "event_status": "completed",
+            "value": 0
           },
           {
             "origin": "audit.agent_execution",
-            "agent_id": "senior_critic",
-            "action": "Create the typed senior critic scorecard and findings.",
-            "status": "completed",
-            "latency_ms": 55894,
-            "cost_estimate": 0.0818535,
-            "confidence": 0.0,
-            "warnings": [
-              "schema_validation_relaxed:CriticReview",
-              "42 validation errors for CriticReview\nfindings.0.finding_id\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.target_section\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.target_agent\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.issue_type\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.explanation\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.required_action\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.finding_id\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.target_section\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.target_agent\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.issue_type\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.explanation\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.required_action\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.finding_id\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.target_section\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.target_agent\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.issue_type\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.explanation\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.required_action\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.finding_id\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.target_section\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.target_agent\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.issue_type\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.explanation\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.required_action\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.finding_id\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.target_section\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.target_agent\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.issue_type\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.explanation\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.required_action\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.finding_id\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.target_section\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.target_agent\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.issue_type\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.explanation\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.required_action\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.finding_id\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.target_section\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.target_agent\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.issue_type\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.explanation\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.required_action\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
-            ],
-            "requires_human": false,
-            "fallback_triggered": false,
-            "output_summary": {}
+            "agent_id": "report_builder",
+            "status": "pass",
+            "latency_ms": 500,
+            "output": "Rendered benchmark report from cited artifacts.",
+            "event_status": "completed",
+            "value": 0
           },
           {
             "origin": "packet.trace_summary",
             "kind": "agent_message",
-            "agent_role": "financial_analysis",
-            "tool_name": null,
-            "status": "completed",
-            "output_hash": null
-          },
-          {
-            "origin": "packet.trace_summary",
-            "kind": "agent_message",
-            "agent_role": "thesis_report",
-            "tool_name": null,
-            "status": "completed",
-            "output_hash": null
-          },
-          {
-            "origin": "packet.trace_summary",
-            "kind": "agent_message",
-            "agent_role": "senior_critic",
-            "tool_name": null,
-            "status": "completed",
-            "output_hash": null
+            "agent_id": "planner",
+            "status": "pass",
+            "latency_ms": 200,
+            "tokens_input": 120,
+            "tokens_output": 40,
+            "cost_estimate": 0.01,
+            "retry_count": 0,
+            "content": "Planned benchmark artifact assembly from approved canonical facts.",
+            "event_status": "completed",
+            "value": 0
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Investigate model/API/transient failures.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "retrieval_fallback_rate",
       "label": "Retrieval fallback rate",
-      "source": "retrieval trace missing",
+      "source": "runtime retrieval trace",
       "detail": "",
       "metric_id": "retrieval_fallback_rate",
       "metric_name": "Retrieval fallback rate",
@@ -255,10 +520,10 @@
       "layer": "observability",
       "metric_type": "error_rate",
       "scope": "system_window",
-      "severity": "P3",
+      "severity": "P2",
       "blocks_publish": false,
       "value": 0.0,
-      "threshold": "<= 20",
+      "threshold": "<= 20%",
       "threshold_operator": "<=",
       "unit": "percent",
       "status": "pass",
@@ -288,23 +553,28 @@
         "denominator": 1,
         "per_sample_results": [
           {
-            "sample_origin": "benchmark_control",
-            "status": "no_retrieval_fallback_recorded",
-            "fallback_triggered": false
+            "kind": "retrieval_query",
+            "tool_name": "retrieval_service",
+            "status": "pass",
+            "latency_ms": 150,
+            "fallback_triggered": false,
+            "event_status": "completed",
+            "value": false
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Fix embeddings/vector store availability.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "ocr_failure_rate",
@@ -353,14 +623,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "final_ocr_error_count",
@@ -409,14 +680,15 @@
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Block final export until OCR-caused numeric errors are resolved.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "artifact_upload_failures",
@@ -460,19 +732,29 @@
         "aggregation": "error_count",
         "numerator": 0,
         "denominator": 1,
-        "per_sample_results": []
+        "per_sample_results": [
+          {
+            "kind": "artifact_upload",
+            "status": "pass",
+            "latency_ms": 50,
+            "artifact_upload_failures": 0,
+            "event_status": "completed",
+            "value": 0.0
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "pdf_render_failures",
@@ -516,19 +798,29 @@
         "aggregation": "error_count",
         "numerator": 0,
         "denominator": 1,
-        "per_sample_results": []
+        "per_sample_results": [
+          {
+            "kind": "pdf_render",
+            "status": "pass",
+            "latency_ms": 500,
+            "pdf_render_failures": 0,
+            "event_status": "completed",
+            "value": 0.0
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "warm_full_report_p95_latency",
@@ -586,7 +878,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 530.0
           },
           {
             "run_id": "bench_dmc_20260615_03",
@@ -598,7 +893,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 559.0
           },
           {
             "run_id": "bench_tra_20260615_04",
@@ -610,7 +908,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 461.0
           },
           {
             "run_id": "bench_dp3_20260615_05",
@@ -622,7 +923,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 496.0
           },
           {
             "run_id": "bench_tw3_20260615_07",
@@ -634,7 +938,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 561.0
           },
           {
             "run_id": "bench_med_20260615_08",
@@ -646,7 +953,10 @@
             "retry_count": 3.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 509.0
           },
           {
             "run_id": "bench_pmc_20260615_09",
@@ -658,21 +968,25 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 491.0
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "cold_full_report_p95_latency",
@@ -730,7 +1044,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 1009.0
           },
           {
             "run_id": "bench_dp1_20260615_06",
@@ -742,7 +1059,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 1053.0
           },
           {
             "run_id": "bench_amv_20260615_10",
@@ -754,21 +1074,25 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "pass",
+            "value": 1053.0
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "render_only_p95_latency",
@@ -783,7 +1107,7 @@
       "scope": "system_window",
       "severity": "P1",
       "blocks_publish": true,
-      "value": 1.1666666666666667,
+      "value": 0.008333333333333333,
       "threshold": "<= 2",
       "threshold_operator": "<=",
       "unit": "minutes",
@@ -817,23 +1141,26 @@
         "denominator": null,
         "per_sample_results": [
           {
-            "duration_seconds": 70.0,
+            "duration_seconds": 0.5,
             "run_type": "render_only",
-            "status": "completed"
+            "status": "pass",
+            "event_status": "completed",
+            "value": 0.5
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "flash_memo_warm_p95_latency",
@@ -848,7 +1175,7 @@
       "scope": "system_window",
       "severity": "P3",
       "blocks_publish": false,
-      "value": 58.0,
+      "value": 1.2,
       "threshold": "<= 90",
       "threshold_operator": "<=",
       "unit": "seconds",
@@ -882,23 +1209,26 @@
         "denominator": null,
         "per_sample_results": [
           {
-            "duration_seconds": 58.0,
+            "duration_seconds": 1.2,
             "run_type": "flash_memo_warm",
-            "status": "completed"
+            "status": "pass",
+            "event_status": "completed",
+            "value": 1.2
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "flash_memo_cold_retrieval_p95_latency",
@@ -913,7 +1243,7 @@
       "scope": "system_window",
       "severity": "P3",
       "blocks_publish": false,
-      "value": 2.2,
+      "value": 0.06666666666666667,
       "threshold": "<= 3",
       "threshold_operator": "<=",
       "unit": "minutes",
@@ -947,23 +1277,26 @@
         "denominator": null,
         "per_sample_results": [
           {
-            "duration_seconds": 132.0,
+            "duration_seconds": 4.0,
             "run_type": "flash_memo_cold_retrieval",
-            "status": "completed"
+            "status": "pass",
+            "event_status": "completed",
+            "value": 4.0
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "latency_regression_ratio",
@@ -976,12 +1309,12 @@
       "layer": "observability",
       "metric_type": "score",
       "scope": "benchmark_suite",
-      "severity": "P3",
+      "severity": "P2",
       "blocks_publish": false,
       "value": 0.935,
       "threshold": "<= 1.25",
       "threshold_operator": "<=",
-      "unit": "score",
+      "unit": "ratio",
       "status": "pass",
       "legacy_status": "pass",
       "sample_size": 7,
@@ -1018,7 +1351,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 1009.0
           },
           {
             "run_id": "bench_imp_20260615_02",
@@ -1030,7 +1366,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 530.0
           },
           {
             "run_id": "bench_dmc_20260615_03",
@@ -1042,7 +1381,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 559.0
           },
           {
             "run_id": "bench_tra_20260615_04",
@@ -1054,7 +1396,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 461.0
           },
           {
             "run_id": "bench_dp3_20260615_05",
@@ -1066,7 +1411,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 496.0
           },
           {
             "run_id": "bench_dp1_20260615_06",
@@ -1078,7 +1426,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 1053.0
           },
           {
             "run_id": "bench_tw3_20260615_07",
@@ -1090,7 +1441,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 561.0
           },
           {
             "run_id": "bench_med_20260615_08",
@@ -1102,7 +1456,10 @@
             "retry_count": 3.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 509.0
           },
           {
             "run_id": "bench_pmc_20260615_09",
@@ -1114,7 +1471,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 491.0
           },
           {
             "run_id": "bench_amv_20260615_10",
@@ -1126,7 +1486,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 1053.0
           },
           {
             "run_id": "bench_render_only_20260615_11",
@@ -1138,7 +1501,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 70.0
           },
           {
             "run_id": "bench_flash_warm_20260615_12",
@@ -1150,7 +1516,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 58.0
           },
           {
             "run_id": "bench_flash_cold_retrieval_20260615_13",
@@ -1162,21 +1531,25 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 132.0
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": "Compare p95 to previous baseline and bisect regression.",
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "metric_registry_v3"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     },
     {
       "id": "cost_per_report",
@@ -1191,13 +1564,13 @@
       "scope": "system_window",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 0.2250585,
+      "value": 0.01,
       "threshold": "<= 2",
       "threshold_operator": "<=",
       "unit": "usd",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 3,
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -1225,75 +1598,41 @@
         "per_sample_results": [
           {
             "origin": "audit.agent_execution",
-            "agent_id": "financial_analysis",
-            "action": "Create typed financial analysis with traceable diagnostics.",
-            "status": "completed",
-            "latency_ms": 110779,
-            "cost_estimate": 0.05035575,
-            "confidence": 0.72,
-            "warnings": [
-              "schema_validation_relaxed:FinancialAnalysis",
-              "1 validation error for FinancialAnalysis\nlatest_period\n  Field required [type=missing, input_value={'producer': 'financial_a...04c972c77f195e97d29956'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
-            ],
-            "requires_human": false,
-            "fallback_triggered": false,
-            "output_summary": {}
+            "agent_id": "data_reliability",
+            "status": "not_evaluable",
+            "latency_ms": 200,
+            "output": "Loaded accepted canonical facts with provenance.",
+            "event_status": "completed"
           },
           {
             "origin": "audit.agent_execution",
-            "agent_id": "thesis_report",
-            "action": "Create the typed grounded report draft from approved artifacts.",
-            "status": "completed",
-            "latency_ms": 87144,
-            "cost_estimate": 0.09284925,
-            "confidence": 0.0,
-            "warnings": [
-              "schema_validation_relaxed:ReportDraft",
-              "15 validation errors for ReportDraft\nclaims.0.claim_id\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.section\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.text\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.claim_type\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.0.quantitative\n  Field required [type=missing, input_value={'id': 'C1', 'claim': 'Gi...t'], 'confidence': 0.72}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.claim_id\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.section\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.text\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.claim_type\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.1.quantitative\n  Field required [type=missing, input_value={'id': 'C2', 'claim': 'Bi...n'], 'confidence': 0.68}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.claim_id\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.section\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.text\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.claim_type\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nclaims.2.quantitative\n  Field required [type=missing, input_value={'id': 'C3', 'claim': 'C...rt'], 'confidence': 0.8}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
-            ],
-            "requires_human": false,
-            "fallback_triggered": false,
-            "output_summary": {}
+            "agent_id": "valuation_engine",
+            "status": "not_evaluable",
+            "latency_ms": 300,
+            "output": "Produced valuation artifact through deterministic engine trace.",
+            "event_status": "completed"
           },
           {
             "origin": "audit.agent_execution",
-            "agent_id": "senior_critic",
-            "action": "Create the typed senior critic scorecard and findings.",
-            "status": "completed",
-            "latency_ms": 55894,
-            "cost_estimate": 0.0818535,
-            "confidence": 0.0,
-            "warnings": [
-              "schema_validation_relaxed:CriticReview",
-              "42 validation errors for CriticReview\nfindings.0.finding_id\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.target_section\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.target_agent\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.issue_type\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.explanation\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.0.required_action\n  Field required [type=missing, input_value={'id': 'F1', 'title': 'Mi...)'], 'confidence': 0.88}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.finding_id\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.target_section\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.target_agent\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.issue_type\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.explanation\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.1.required_action\n  Field required [type=missing, input_value={'id': 'F2', 'title': 'Ta...)'], 'confidence': 0.82}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.finding_id\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.target_section\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.target_agent\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.issue_type\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.explanation\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.2.required_action\n  Field required [type=missing, input_value={'id': 'F3', 'title': 'Wo...)'], 'confidence': 0.87}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.finding_id\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.target_section\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.target_agent\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.issue_type\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.explanation\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.3.required_action\n  Field required [type=missing, input_value={'id': 'F4', 'title': '20...)'], 'confidence': 0.78}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.finding_id\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.target_section\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.target_agent\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.issue_type\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.explanation\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.4.required_action\n  Field required [type=missing, input_value={'id': 'F5', 'title': 'Te...n'], 'confidence': 0.86}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.finding_id\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.target_section\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.target_agent\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.issue_type\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.explanation\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.5.required_action\n  Field required [type=missing, input_value={'id': 'F6', 'title': 'Se...R1'], 'confidence': 0.9}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.finding_id\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.target_section\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.target_agent\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.issue_type\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.explanation\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing\nfindings.6.required_action\n  Field required [type=missing, input_value={'id': 'F7', 'title': 'Ma...g)'], 'confidence': 0.7}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing"
-            ],
-            "requires_human": false,
-            "fallback_triggered": false,
-            "output_summary": {}
+            "agent_id": "report_builder",
+            "status": "not_evaluable",
+            "latency_ms": 500,
+            "output": "Rendered benchmark report from cited artifacts.",
+            "event_status": "completed"
           },
           {
             "origin": "packet.trace_summary",
             "kind": "agent_message",
-            "agent_role": "financial_analysis",
-            "tool_name": null,
-            "status": "completed",
-            "output_hash": null
-          },
-          {
-            "origin": "packet.trace_summary",
-            "kind": "agent_message",
-            "agent_role": "thesis_report",
-            "tool_name": null,
-            "status": "completed",
-            "output_hash": null
-          },
-          {
-            "origin": "packet.trace_summary",
-            "kind": "agent_message",
-            "agent_role": "senior_critic",
-            "tool_name": null,
-            "status": "completed",
-            "output_hash": null
+            "agent_id": "planner",
+            "status": "measured_only",
+            "latency_ms": 200,
+            "tokens_input": 120,
+            "tokens_output": 40,
+            "cost_estimate": 0.01,
+            "retry_count": 0,
+            "content": "Planned benchmark artifact assembly from approved canonical facts.",
+            "event_status": "completed",
+            "value": 0.01
           },
           {
             "run_id": "bench_dhg_20260615_01",
@@ -1305,7 +1644,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.4339
           },
           {
             "run_id": "bench_imp_20260615_02",
@@ -1317,7 +1659,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.2749
           },
           {
             "run_id": "bench_dmc_20260615_03",
@@ -1329,7 +1674,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.2939
           },
           {
             "run_id": "bench_tra_20260615_04",
@@ -1341,7 +1689,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.237
           },
           {
             "run_id": "bench_dp3_20260615_05",
@@ -1353,7 +1704,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.256
           },
           {
             "run_id": "bench_dp1_20260615_06",
@@ -1365,7 +1719,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.4526
           },
           {
             "run_id": "bench_tw3_20260615_07",
@@ -1377,7 +1734,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.2939
           },
           {
             "run_id": "bench_med_20260615_08",
@@ -1389,7 +1749,10 @@
             "retry_count": 3.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.237
           },
           {
             "run_id": "bench_pmc_20260615_09",
@@ -1401,7 +1764,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.256
           },
           {
             "run_id": "bench_amv_20260615_10",
@@ -1413,7 +1779,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.4526
           },
           {
             "run_id": "bench_render_only_20260615_11",
@@ -1425,7 +1794,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.0
           },
           {
             "run_id": "bench_flash_warm_20260615_12",
@@ -1437,7 +1809,10 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.032
           },
           {
             "run_id": "bench_flash_cold_retrieval_20260615_13",
@@ -1449,56 +1824,55 @@
             "retry_count": 0.0,
             "terminal_status": "auto_exported",
             "artifact_upload_failures": 0.0,
-            "pdf_render_failures": 0.0
+            "pdf_render_failures": 0.0,
+            "event_status": null,
+            "status": "measured_only",
+            "value": 0.064
           }
         ]
       },
       "threshold_policy": {
         "profile": "mvp",
         "rationale": null,
-        "registry_version": "20260615_v3"
+        "registry_version": "20260615_v3",
+        "source": "legacy/fallback"
       },
       "evidence": {
         "artifact_ids": [],
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-17T17:08:44.559718+00:00"
+      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
     }
   ],
-  "duration_seconds": 1009.0,
-  "stage_durations": {},
+  "duration_seconds": 6.1,
+  "stage_durations": {
+    "planner": 0.2,
+    "unknown": 5.9
+  },
   "llm": {
-    "calls": 6,
-    "tokens_input": 0,
-    "tokens_output": 0,
-    "estimated_cost_usd": 0.2250585,
+    "calls": 4,
+    "tokens_input": 120,
+    "tokens_output": 40,
+    "estimated_cost_usd": 0.01,
     "retry_rate": 0.0,
     "fallback_rate": 0.0,
-    "latency_ms_total": 253817.0
+    "latency_ms_total": 1200.0
   },
   "retrieval": {
-    "queries": null,
-    "p95_latency_ms": null,
+    "queries": 1,
+    "p95_latency_ms": 150.0,
     "fallback_rate": 0.0
   },
   "ocr": {
-    "pages_processed": 40,
+    "pages_processed": 1,
     "failure_rate": 0.0
   },
-  "blocking_gate_categories": [
-    "PACKAGE_VALIDATION_GATE",
-    "REPORT_QUALITY_GATE",
-    "SENIOR_CRITIC_GATE"
-  ],
+  "blocking_gate_categories": [],
   "publication": {
     "readiness_passed": false,
-    "authorization_blockers": [
-      "PACKAGE_VALIDATION_GATE:analyst_insights_incomplete:0/5,artifact_storage_path_missing:DHG_ratio_artifact,company_research_pack_source_map_missing,pharma_driver_channels_insufficient,pharma_driver_product_groups_missing,report_not_linked_to_valuation_snapshot,table_metadata_incomplete:company_overview,business_plan_completion,table_source_map_missing:company_overview,business_plan_completion,upstream_gate_failed:SENIOR_CRITIC_GATE,REPORT_QUALITY_GATE,ARTIFACT_MANIFEST_GATE",
-      "REPORT_QUALITY_GATE:analyst_insights_incomplete:0/5,company_research_pack_source_map_missing,pharma_driver_channels_insufficient,pharma_driver_product_groups_missing,table_metadata_incomplete:company_overview,business_plan_completion,table_source_map_missing:company_overview,business_plan_completion",
-      "SENIOR_CRITIC_GATE:blocking_critic_findings:unidentified_finding,unidentified_finding,unidentified_finding"
-    ],
+    "authorization_blockers": [],
     "render_mode": "analyst_draft"
   },
-  "trace_url": null
+  "trace_url": "local://storage/runs/benchmark_dhg/run_log.json"
 }

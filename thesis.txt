@@ -1,191 +1,418 @@
 CHƯƠNG 4. KẾT QUẢ NGHIÊN CỨU VỀ HỆ THỐNG AI AGENT TRONG ĐỊNH GIÁ CỔ PHIẾU NGÀNH Y TẾ - DƯỢC PHẨM TẠI VIỆT NAM
+4.1. Thiết lập thực nghiệm và nguyên tắc đọc benchmark
+4.1.1. Phạm vi thực nghiệm
+Tập thực nghiệm gồm 45 mã cổ phiếu thuộc nhóm y tế, dược phẩm và các doanh nghiệp có hoạt động liên quan tại Việt Nam. Tập mã này được dùng để đánh giá khả năng vận hành của hệ thống trên nhiều doanh nghiệp có mức độ đầy đủ dữ liệu khác nhau, thay vì chỉ kiểm tra trên một mã cổ phiếu mẫu.
+Đối tượng đánh giá không chỉ là báo cáo cuối cùng, mà là toàn bộ chuỗi xử lý tạo ra báo cáo. Chuỗi này bao gồm dữ liệu tài chính đầu vào, tài liệu nguồn, dữ kiện chuẩn hóa, kho bằng chứng, kết quả truy xuất, mô hình định giá, đầu ra của các tác tử trí tuệ nhân tạo, báo cáo PDF, phụ lục giải trình và các chỉ số vận hành.
+4.1.2. Môi trường thực nghiệm
+4.1.2. Công cụ đánh giá sử dụng trong benchmark
+Hệ thống sử dụng nhiều công cụ đánh giá khác nhau, tương ứng với từng lớp rủi ro của quy trình.
+Bảng 4.1. Công cụ và vai trò trong benchmark
+Nhóm benchmark
+Công cụ/cơ chế đánh giá
+Vai trò
+Chất lượng và độ tin cậy dữ liệu
+Pandera, kiểm tra đối soát nguồn, kiểm tra lỗi OCR, kiểm tra trùng lặp dữ kiện
+Kiểm tra dữ liệu có đúng cấu trúc, đủ trường bắt buộc, có nguồn và đủ điều kiện dùng cho định giá hay không
+RAG
+RAGAS, Hit-rate@5, MRR@5, kiểm tra nguồn ưu tiên
+Đánh giá hệ thống có truy xuất đúng bằng chứng và câu trả lời có bám vào ngữ cảnh hay không
+Mô hình tài chính
+Kiểm thử tất định, kiểm tra công thức, bất biến kế toán, tái lập giá mục tiêu
+Kiểm tra phép tính định giá có đúng công thức, có tái lập được và không vi phạm điều kiện tài chính hay không
+Agent và LLM Judge
+DeepEval, kiểm tra quyền công cụ, kiểm tra schema JSON, kiểm tra handoff
+Đánh giá tác tử có tuân thủ quyền, hoàn thành nhiệm vụ và không tự ý tính toán tài chính bằng LLM hay không
+Chất lượng báo cáo
+Rubric báo cáo, DeepEval, kiểm tra tính nhất quán khuyến nghị
+Đánh giá báo cáo có đầy đủ, mạch lạc, minh bạch định giá và có căn cứ hay không
+Vận hành, chi phí và độ trễ
+Langfuse/log hệ thống, đo p95 latency, retry rate, fallback rate, error count, cost per report
+Đánh giá hệ thống có vận hành ổn định, chi phí thấp và độ trễ nằm trong ngưỡng hay không
+
+4.2. Tổng quan kết quả sáu nhóm benchmark
+Kết quả tổng hợp cho thấy cả sáu nhóm benchmark đều đạt ngưỡng kỹ thuật. Các nhóm dữ liệu, RAG, mô hình tài chính, Agent, báo cáo và vận hành đều có trạng thái đạt. Tuy nhiên, mức độ đạt giữa các nhóm không giống nhau. Nhóm dữ liệu và RAG có nhiều chỉ số đạt rất cao, trong khi nhóm Agent và báo cáo đạt ngưỡng nhưng vẫn còn dư địa cải thiện, đặc biệt ở khả năng bàn giao giữa các chặng, tuân thủ quyền công cụ, minh bạch định giá và tích hợp bằng chứng.
+Bảng 4.2. Tổng quan kết quả sáu nhóm benchmark
+Nhóm benchmark
+Chỉ số đại diện
+Ngưỡng đạt
+Kết quả
+Trạng thái
+Ý nghĩa tổng quát
+1. Chất lượng và độ tin cậy dữ liệu
+Điểm tin cậy dữ liệu tổng hợp
+≥ 90%
+98,9%
+Đạt
+Dữ liệu đầu vào đủ ổn định để phục vụ phân tích và định giá
+2. RAG
+Hit-rate@5
+≥ 90%
+100%
+Đạt
+Hệ thống truy xuất được bằng chứng đúng trong nhóm kết quả đầu
+3. Mô hình tài chính
+FCFF formula pass count
+≥ 85%
+94%
+Đạt
+Công thức tài chính có khả năng tái lập tốt
+4. Agent và LLM Judge
+Tool permission compliance
+≥ 85%
+88%
+Đạt
+Tác tử hoạt động trong phạm vi quyền công cụ nhưng còn dư địa cải thiện
+5. Chất lượng báo cáo
+Report quality total
+≥ 85%
+88%
+Đạt
+Báo cáo đủ điều kiện làm bản tham khảo để chuyên viên rà soát
+6. Vận hành, chi phí và độ trễ
+Cost per full report
+≤ 2 USD
+0,01 USD
+Đạt
+Chi phí vận hành trong benchmark thấp hơn nhiều so với ngưỡng kiểm soát
+
+Nguồn: Nhóm tác giả tổng hợp
+Từ bảng tổng quan có thể thấy hệ thống đạt mục tiêu kỹ thuật ban đầu. Tuy nhiên, kết quả cũng cho thấy không nên mô tả hệ thống là “hoàn hảo”. Một số chỉ số đạt sát ngưỡng hơn các nhóm khác, đặc biệt ở Agent, handoff giữa các chặng, đối chiếu nợ ròng, điều kiện Gordon Growth và chất lượng báo cáo tổng hợp. Đây là các khu vực cần ưu tiên cải thiện nếu hệ thống được mở rộng.
+4.3. Phương thức đánh giá chất lượng và độ tin cậy dữ liệu
+Nhóm benchmark đầu tiên kiểm tra dữ liệu đầu vào có đủ điều kiện để dùng cho phân tích và định giá hay không. Đây là lớp quan trọng nhất vì mọi kết luận tài chính đều phụ thuộc vào chất lượng dữ liệu ban đầu. Các chỉ số trong nhóm này tập trung vào sáu vấn đề: điểm tin cậy dữ liệu tổng hợp, độ bao phủ chỉ tiêu cốt lõi, lỗi OCR ảnh hưởng số liệu trọng yếu, dữ kiện trùng lặp, tính hợp lệ của schema Pandera và tỷ lệ tệp báo cáo tài chính thô có dữ liệu.
+Bảng 4.3. Kết quả benchmark chất lượng và độ tin cậy dữ liệu
+Chỉ số
+Công cụ/cách đo
+Mẫu đánh giá
+Ngưỡng đạt
+Kết quả
+Trạng thái
+Điểm tin cậy dữ liệu tổng hợp
+Data reliability score
+45/45 mã
+≥ 90%
+98,9%
+Đạt
+Độ bao phủ chỉ số cốt lõi
+Core metric coverage
+900 mẫu chỉ tiêu
+≥ 95%
+100%
+Đạt
+Số lỗi OCR ảnh hưởng số liệu trọng yếu
+Material OCR error count
+45 mã
+= 0
+0 lỗi
+Đạt
+Số canonical fact trùng lặp chưa xử lý
+Duplicate canonical fact count
+45 mã
+= 0
+0 lỗi
+Đạt
+Pandera DataFrame schema validity
+Pandera schema validation
+45 mã
+≥ 95%
+100%
+Đạt
+Raw BCTC files contain rows
+Kiểm tra tệp báo cáo tài chính thô có dữ liệu
+45 mã
+≥ 90%
+95,6%
+Đạt
+
+Nguồn: Nhóm tác giả tự tính toán
+Kết quả cho thấy lớp dữ liệu đạt yêu cầu cao. Điểm tin cậy dữ liệu tổng hợp đạt 98,9%, vượt xa ngưỡng 90%. Độ bao phủ chỉ tiêu cốt lõi đạt 100%, nghĩa là các chỉ tiêu tài chính cần thiết cho phân tích và định giá đều có dữ liệu hợp lệ trong phạm vi benchmark. Pandera xác nhận 100% trường hợp đủ điều kiện có schema hợp lệ, cho thấy dữ liệu sau chuẩn hóa đáp ứng hợp đồng dữ liệu của hệ thống.
+Hai chỉ số lỗi nghiêm trọng đều bằng 0: không có lỗi OCR ảnh hưởng đến số liệu trọng yếu và không có dữ kiện chuẩn hóa trùng lặp chưa xử lý. Điều này có ý nghĩa lớn vì lỗi OCR hoặc dữ kiện trùng có thể làm sai lệch trực tiếp các phép tính định giá.
+4.4. Phương thức đánh giá chất lượng RAG
+Nhóm benchmark RAG đánh giá khả năng hệ thống truy xuất đúng bằng chứng và sử dụng bằng chứng đó để sinh nội dung. Đây là nhóm đặc biệt quan trọng trong hệ thống báo cáo tài chính vì báo cáo không chỉ cần viết mạch lạc, mà còn phải có căn cứ từ tài liệu nguồn.
+Benchmark RAG gồm hai lớp. Lớp thứ nhất đo chất lượng truy xuất bằng các chỉ số như Hit-rate@5, MRR@5 và tỷ lệ truy vấn trọng yếu có nguồn ưu tiên. Lớp thứ hai dùng RAGAS để đo chất lượng ngữ cảnh và câu trả lời, gồm mức độ chính xác ngữ cảnh, context recall, faithfulness và response relevancy.
+Bảng 4.4. Kết quả benchmark RAG
+Chỉ số
+Công cụ/cách đo
+Mẫu đánh giá
+Ngưỡng đạt
+Kết quả
+Trạng thái
+Tỷ lệ truy vấn có bằng chứng đúng trong top 5
+Hit-rate@5
+280 truy vấn
+≥ 90%
+100%
+Đạt
+Thứ hạng nghịch đảo trung bình trong top 5
+MRR@5
+14/45 mẫu chấm sâu
+≥ 75%
+96,6%
+Đạt
+Độ chính xác của ngữ cảnh truy xuất
+RAGAS Context Precision
+14/45 mẫu chấm sâu
+≥ 80%
+95,2%
+Đạt
+Độ bao phủ bằng chứng cần thiết
+RAGAS Context Recall
+14/45 mẫu chấm sâu
+≥ 80%
+95,2%
+Đạt
+Mức độ bám sát bằng chứng
+RAGAS Faithfulness
+14/45 mẫu chấm sâu
+≥ 85%
+100%
+Đạt
+Mức độ đúng trọng tâm câu trả lời
+RAGAS Response Relevancy
+14/45 mẫu chấm sâu
+≥ 75%
+100%
+Đạt
+Tỷ lệ truy vấn trọng yếu có nguồn ưu tiên trong top
+Source-tier hit rate
+280 truy vấn
+≥ 90%
+100%
+Đạt
+
+Kết quả Hit-rate@5 đạt 100% cho thấy toàn bộ 280 truy vấn trong tập đánh giá đều tìm được ít nhất một bằng chứng đúng trong năm kết quả đầu. Đây là kết quả tích cực vì tác tử thường chỉ sử dụng các đoạn bằng chứng đầu tiên để viết hoặc phản biện nội dung.
+MRR@5 đạt 96,6%, nghĩa là bằng chứng đúng không chỉ xuất hiện trong top 5, mà còn thường nằm ở vị trí rất cao. Điều này làm giảm khả năng mô hình lấy nhầm ngữ cảnh yếu hoặc ngữ cảnh không liên quan.
+Các chỉ số RAGAS đều vượt ngưỡng. Mức độ chính xác và độ bao phủ ngữ cảnh cùng đạt 95,2%, cho thấy ngữ cảnh truy xuất vừa có độ chính xác cao vừa bao phủ tốt các bằng chứng cần thiết. Faithfulness đạt 100%, phản ánh câu trả lời trong mẫu đánh giá không đi vượt khỏi bằng chứng được cung cấp. Response relevancy đạt 100%, cho thấy câu trả lời phù hợp với truy vấn.
+4.5. Phương thức đánh giá tính chính xác của mô hình tài chính
+Nhóm benchmark tài chính kiểm tra khả năng tái lập công thức, phát hiện vi phạm kế toán và đối chiếu các thành phần định giá. Đây là nhóm benchmark có vai trò quyết định vì giá mục tiêu và kết luận định giá không được phép sinh trực tiếp bởi mô hình ngôn ngữ lớn.
+Các chỉ số tài chính được kiểm tra bằng mô-đun tất định và các quy tắc kiểm thử công thức. Với các lỗi nghiêm trọng như vi phạm bất biến kế toán, ngưỡng đạt được đặt bằng 0 lỗi. Với các chỉ số dạng tỷ lệ đạt, ngưỡng tối thiểu là 85%.
+Bảng 4.5. Kết quả benchmark tính chính xác của mô hình tài chính
+Chỉ số
+Công cụ/cách đo
+Mẫu đánh giá
+Ngưỡng đạt
+Kết quả
+Trạng thái
+Số vi phạm bất biến kế toán nghiêm trọng
+Critical accounting invariant violations
+45 mã
+= 0
+0 lỗi
+Đạt
+Số mã đạt công thức FCFF
+FCFF formula pass count
+45 mã
+≥ 85%
+94%
+Đạt
+Số mã tái lập được giá mục tiêu
+Target price reproduction pass count
+45 mã
+≥ 85%
+91%
+Đạt
+Số mã đạt điều kiện Gordon Growth
+Gordon growth pass count
+45 mã
+≥ 85%
+88%
+Đạt
+Số mã đối chiếu đúng nợ ròng
+Net debt reconciliation pass count
+45 mã
+≥ 85%
+88%
+Đạt
+Số mã có formula trace
+Formula trace availability pass count
+45 mã
+≥ 85%
+94%
+Đạt
+
+Kết quả cho thấy không có vi phạm bất biến kế toán nghiêm trọng trên 45 mã. Đây là điểm quan trọng vì nếu các bất biến kế toán cơ bản bị vi phạm, toàn bộ mô hình định giá phía sau có thể mất ý nghĩa.
+Công thức FCFF đạt 94% và khả năng tái lập giá mục tiêu đạt 91%, chứng minh phần lớn kết quả định giá có thể truy ngược và kiểm tra lại từ công thức. Mức sẵn có của formula trace đạt 94%, cho thấy hệ thống không chỉ tạo ra con số cuối cùng, mà còn lưu lại dấu vết công thức để phục vụ kiểm tra.
+Hai chỉ số thấp hơn là điều kiện Gordon Growth và đối chiếu nợ ròng, cùng đạt 88%. Dù vẫn vượt ngưỡng 85%, đây là hai khu vực cần chú ý. Điều kiện Gordon Growth phụ thuộc vào quan hệ giữa WACC và tốc độ tăng trưởng dài hạn; nếu giả định tăng trưởng quá cao so với WACC, kết quả giá trị cuối kỳ có thể bị phóng đại. Đối chiếu nợ ròng phụ thuộc vào chất lượng dữ liệu tiền, đầu tư ngắn hạn và nợ vay có lãi; đây thường là nhóm dữ liệu dễ phát sinh sai lệch giữa các nguồn. Benchmark tài chính chứng minh hệ thống không để LLM tự tạo giá mục tiêu hoặc tự xác nhận phép tính. Phần định lượng được kiểm tra bằng công thức tất định, nhờ đó giảm rủi ro ảo giác số liệu. Tuy nhiên, các chỉ số 88% ở Gordon Growth và nợ ròng cho thấy hệ thống vẫn cần tăng cường kiểm soát giả định dài hạn và dữ liệu cấu trúc vốn.
+4.6. Phương thức đánh giá hiệu quả Agent và LLM Judge
+Nhóm benchmark này đánh giá tác tử trí tuệ nhân tạo có tuân thủ vai trò, quyền công cụ, cấu trúc đầu ra và quy trình bàn giao hay không. Đây là nhóm quan trọng vì trong hệ thống tài chính, tác tử không được vận hành như chatbot tự do. Tác tử chỉ được phép tổng hợp, diễn giải và phản biện trong phạm vi dữ liệu, công cụ và trạng thái đã được hệ thống cấp.
+Bảng 4.6. Kết quả benchmark Agent và LLM Judge
+Chỉ số
+Công cụ/cách đo
+Mẫu đánh giá
+Ngưỡng đạt
+Kết quả
+Trạng thái
+Tỷ lệ tuân thủ quyền sử dụng công cụ
+Tool permission compliance
+90 mẫu
+≥ 85%
+88%
+Đạt
+Tỷ lệ cấu trúc JSON đầu ra hợp lệ
+JSON schema validity
+90 mẫu
+≥ 85%
+93%
+Đạt
+Tỷ lệ không tự ý tính toán tài chính bằng LLM
+No unauthorized LLM financial calculation
+180 mẫu
+≥ 85%
+93%
+Đạt
+Độ đầy đủ handoff giữa các stage
+Stage handoff completeness
+135 mẫu
+≥ 85%
+89%
+Đạt
+Tỷ lệ tool call thành công
+Tool call success rate
+90 mẫu
+≥ 85%
+89%
+Đạt
+Tỷ lệ vòng sửa lỗi agent
+Repair loop rate
+45 mẫu
+≤ 15%
+0%
+Đạt
+Tỷ lệ tuân thủ token budget
+Token budget adherence
+45 mẫu
+≥ 85%
+92%
+Đạt
+
+Kết quả cho thấy tác tử nhìn chung hoạt động trong phạm vi kiểm soát. Tỷ lệ cấu trúc JSON hợp lệ đạt 93%, cho thấy đầu ra của tác tử đủ ổn định để các mô-đun phía sau xử lý. Tỷ lệ không tự ý tính toán tài chính bằng LLM đạt 93%, chứng minh ranh giới giữa diễn giải ngôn ngữ và tính toán tài chính được kiểm soát tương đối tốt.
+Tỷ lệ tuân thủ quyền sử dụng công cụ đạt 88%, vượt ngưỡng nhưng chưa cao. Điều này cho thấy vẫn có khoảng cải thiện trong việc giới hạn quyền công cụ hoặc thiết kế chính sách công cụ rõ hơn. Handoff giữa các stage đạt 89%, nghĩa là việc bàn giao sản phẩm trung gian giữa các chặng đã đạt yêu cầu nhưng chưa hoàn toàn ổn định. Đây là điểm cần cải thiện vì trong hệ thống nhiều tác tử, lỗi bàn giao có thể làm chặng sau thiếu bằng chứng, thiếu trạng thái hoặc dùng nhầm dữ liệu.
+Tỷ lệ vòng sửa lỗi agent bằng 0% là kết quả tích cực, cho thấy trong benchmark không phát sinh tình trạng tác tử phải lặp lại nhiều vòng sửa lỗi để đạt đầu ra hợp lệ. Tỷ lệ tuân thủ token budget đạt 92%, phản ánh hệ thống kiểm soát được ngân sách xử lý của mô hình. Benchmark Agent cho thấy tác tử có thể vận hành như một thành phần có kiểm soát trong quy trình tài chính. Tuy nhiên, các chỉ số 88%-89% ở quyền công cụ, tool call và handoff cho thấy hệ thống chưa nên tăng mức tự động hóa quá nhanh. Cần tiếp tục cải thiện hợp đồng đầu ra, cơ chế bàn giao và chính sách quyền công cụ trước khi mở rộng quy mô.	
+4.7. Phương thức đánh giá chất lượng báo cáo
+Nhóm benchmark chất lượng báo cáo đánh giá sản phẩm cuối mà người dùng nhìn thấy. Khác với benchmark tài chính chỉ kiểm tra công thức, benchmark báo cáo kiểm tra xem nội dung có đầy đủ, có minh bạch định giá và có đủ chất lượng để làm bản tham khảo phân tích hay không.
+Trong dashboard, nhóm này gồm ba chỉ số chính: điểm chất lượng báo cáo tổng hợp, độ đầy đủ của báo cáo và tính minh bạch định giá.
+Bảng 4.7. Kết quả benchmark chất lượng báo cáo
+Chỉ số
+Công cụ/cách đo
+Mẫu đánh giá
+Ngưỡng đạt
+Kết quả
+Trạng thái
+Điểm chất lượng báo cáo tổng hợp
+Report quality total
+45 báo cáo
+≥ 85%
+88%
+Đạt
+Độ đầy đủ của báo cáo
+Report completeness
+45 báo cáo
+≥ 85%
+93%
+Đạt
+Tính minh bạch định giá
+Valuation transparency
+45 báo cáo
+≥ 85%
+91%
+Đạt
+
+Điểm chất lượng báo cáo tổng hợp đạt 88%, vượt ngưỡng 85%. Kết quả này cho thấy báo cáo đủ điều kiện sử dụng như bản tham khảo nghiên cứu. Tuy nhiên, mức 88% cũng cho thấy báo cáo chưa nên được mô tả là hoàn thiện tuyệt đối. Đây là điểm quan trọng trong cách diễn giải: hệ thống đã tạo được báo cáo có chất lượng chấp nhận được, nhưng vẫn cần chuyên viên phân tích rà soát trước khi phát hành.
+Độ đầy đủ của báo cáo đạt 93%, phản ánh báo cáo đã có các phần chính cần thiết, chẳng hạn tổng quan doanh nghiệp, phân tích tài chính, dự phóng, định giá, rủi ro và kết luận. Đây là kết quả tốt vì một báo cáo thiếu phần quan trọng sẽ làm giảm khả năng sử dụng dù các phép tính phía sau đúng.
+Tính minh bạch định giá đạt 91%, cho thấy báo cáo đã trình bày tương đối rõ cơ sở định giá, giả định và kết quả tính toán. Tuy nhiên, vì đây không phải mức tuyệt đối, hệ thống vẫn cần cải thiện thêm cách giải thích giả định, trọng số phương pháp định giá và mối quan hệ giữa giá mục tiêu, độ nhạy và khuyến nghị. Như vậy, giá trị của hệ thống không chỉ nằm ở việc sinh văn bản, mà nằm ở khả năng tạo báo cáo có cấu trúc, có định giá minh bạch và có thể liên kết lại với dữ liệu, công thức, bằng chứng.
+4.8. Phương thức vận hành, chi phí và độ trễ
+Nhóm benchmark cuối cùng đánh giá khả năng vận hành của hệ thống. Đây là nhóm quan trọng nếu hệ thống không chỉ chạy thử một lần, mà cần vận hành lặp lại trên nhiều mã cổ phiếu. Các chỉ số chính gồm retry rate, fallback rate, lỗi OCR cuối, lỗi upload artifact, lỗi render PDF, độ trễ p95, chi phí mỗi báo cáo và thời gian chạy đầy đủ.
+Bảng 4.8. Kết quả benchmark vận hành, chi phí và độ trễ
+Chỉ số
+Công cụ/cách đo
+Mẫu đánh giá
+Ngưỡng đạt
+Kết quả
+Trạng thái
+Tỷ lệ gọi LLM phải thử lại
+LLM retry rate
+45 lần chạy
+≤ 5%
+0%
+Đạt
+Tỷ lệ truy xuất dùng fallback
+Retrieval fallback rate
+45 lần chạy
+≤ 20%
+0%
+Đạt
+Số lỗi OCR ảnh hưởng số liệu final
+Final numeric OCR error count
+45 lần chạy
+= 0
+0 lỗi
+Đạt
+Số lỗi upload artifact cuối
+Final artifact upload failure
+45 lần chạy
+= 0
+0 lỗi
+Đạt
+Số lỗi render PDF cuối
+Final PDF render failure
+45 lần chạy
+= 0
+0 lỗi
+Đạt
+Độ trễ p95 full report khi warm run
+Full report p95 latency, warm run
+45 lần chạy
+≤ 10 phút
+9,35 phút
+Đạt
+Cost per full report
+Chi phí trung bình mỗi báo cáo
+45 báo cáo
+≤ 2 USD
+0,01 USD
+Đạt
+Full run duration
+Thời gian chạy đầy đủ
+45 lần chạy
+≤ baseline p95 + 30%
+6,1 phút
+Đạt
+
+Kết quả vận hành cho thấy hệ thống ổn định trong phạm vi benchmark. Tỷ lệ gọi lại LLM bằng 0% cho thấy không phát sinh tình trạng mô hình thường xuyên phải retry. Tỷ lệ dùng truy xuất fallback bằng 0% cho thấy luồng truy xuất chính đủ ổn định trong tập đánh giá.
+Các lỗi cuối luồng đều bằng 0, bao gồm lỗi OCR ảnh hưởng số liệu cuối, lỗi upload artifact và lỗi render PDF. Đây là nhóm chỉ số quan trọng vì các lỗi này có thể làm sản phẩm cuối không sử dụng được, dù các bước phân tích trước đó đã hoàn thành.
+Độ trễ p95 khi warm run đạt 9,35 phút, thấp hơn ngưỡng 10 phút. Kết quả này cho thấy trong nhóm 95% trường hợp nhanh hơn hoặc bằng ngưỡng, hệ thống vẫn giữ được thời gian xử lý chấp nhận được. Full run duration đạt 6,1 phút và nằm trong giới hạn so với baseline p95 cộng 30%, cho thấy phiên bản hiện tại không có dấu hiệu hồi quy hiệu năng.
+Chi phí mỗi báo cáo đạt khoảng 0,01 USD, thấp hơn nhiều so với ngưỡng 2 USD. Kết quả này tích cực về mặt sản phẩm, vì hệ thống có tiềm năng mở rộng nếu duy trì được chi phí thấp. Tuy nhiên, cần lưu ý đây là chi phí trong môi trường benchmark; khi triển khai thực tế, chi phí có thể thay đổi theo số lượng người dùng, lượng dữ liệu mới, số lần gọi mô hình, giá dịch vụ mô hình và mức độ tái sử dụng kết quả trung gian.
+4.9. Nhận xét tổng hợp về kết quả benchmark
+Kết quả sáu nhóm benchmark cho thấy hệ thống đạt được ba kết quả chính.
+Thứ nhất, hệ thống có nền dữ liệu tương đối tin cậy. Điểm dữ liệu 98,9%, độ bao phủ chỉ tiêu cốt lõi 100%, schema Pandera hợp lệ 100% và không có lỗi OCR trọng yếu cho thấy dữ liệu đủ điều kiện làm đầu vào cho phân tích và định giá. Tuy nhiên, tỷ lệ raw BCTC files contain rows đạt 95,6% cho thấy vẫn còn một số mã cần bổ sung dữ liệu nguồn.
+Thứ hai, hệ thống kiểm soát tốt bằng chứng và định giá. RAG đạt Hit-rate@5 100% và MRR@5 96,6%, trong khi các chỉ số RAGAS đều vượt ngưỡng. Nhóm tài chính không ghi nhận vi phạm bất biến kế toán nghiêm trọng và các chỉ số công thức đạt từ 88% đến 94%. Điều này chứng minh hệ thống có khả năng truy xuất bằng chứng và tái lập kết quả định giá, thay vì chỉ sinh báo cáo bằng ngôn ngữ.
+Thứ ba, hệ thống vận hành được như một quy trình Agent có kiểm soát. Các chỉ số Agent đều vượt ngưỡng, báo cáo đạt điểm chất lượng 88%, và vận hành đạt các ngưỡng về retry, fallback, lỗi cuối, độ trễ và chi phí. Tuy nhiên, các chỉ số Agent ở mức 88%-89% cho thấy hệ thống vẫn cần cải thiện khả năng bàn giao giữa các chặng, chính sách quyền công cụ và độ ổn định của tool call.
+Bảng 4.9. Ý nghĩa tổng hợp của sáu benchmark
+Nhóm benchmark
+Kết luận chính
+Ý nghĩa đối với hệ thống
+Hướng cải thiện
+Dữ liệu
+Đạt mức tin cậy cao
+Có thể dùng dữ liệu làm nền cho phân tích tài chính
+Bổ sung dữ liệu thô cho các mã còn thiếu
+RAG
+Truy xuất bằng chứng tốt
+Giảm rủi ro báo cáo thiếu căn cứ
+Mở rộng tập chấm sâu RAGAS và thêm truy vấn khó
+Mô hình tài chính
+Công thức tái lập được
+Giảm rủi ro LLM tự tạo số liệu
+Cải thiện đối chiếu nợ ròng và kiểm soát giả định Gordon Growth
+Agent và LLM Judge
+Tác tử vận hành trong phạm vi kiểm soát
+Có thể dùng Agent để tổng hợp và phản biện
+Tăng độ chặt của handoff, schema và quyền công cụ
+Chất lượng báo cáo
+Báo cáo đủ điều kiện làm bản tham khảo
+Hỗ trợ chuyên viên phân tích rà soát nhanh hơn
+Tăng minh bạch giả định, độ sâu lập luận và liên kết bằng chứng
+Vận hành
+Chi phí, độ trễ và lỗi nằm trong ngưỡng
+Có tiềm năng chạy lặp lại trên nhiều mã
+Kiểm thử tải đồng thời và theo dõi chi phí thực tế
 
-4.1. Thiết lập thực nghiệm và phương pháp tạo benchmark
-
-4.1.1. Phạm vi thực nghiệm và đối tượng đánh giá
-
-Thực nghiệm được tiến hành trên tập 45 mã cổ phiếu thuộc nhóm y tế, dược phẩm và các doanh nghiệp có hoạt động liên quan tại Việt Nam. Tập đánh giá này được lựa chọn nhằm kiểm tra hệ thống trên cả các doanh nghiệp có dữ liệu tương đối đầy đủ, như DHG, IMP, DMC, TRA và DBD, lẫn các mã có mức độ sẵn có của tài liệu và dữ liệu tài chính thấp hơn. Cách lựa chọn này giúp kết quả không bị lệ thuộc vào một trường hợp mẫu duy nhất, đồng thời phản ánh đúng thách thức thực tế của bài toán phân tích cổ phiếu, nơi chất lượng tài liệu công bố, lịch sử báo cáo và khả năng đối chiếu nguồn thường không đồng đều giữa các doanh nghiệp.
-
-Đối tượng đánh giá không chỉ là văn bản báo cáo cuối cùng, mà là toàn bộ chuỗi xử lý tạo ra báo cáo, bao gồm dữ liệu tài chính đầu vào, tài liệu nguồn, kết quả trích xuất và chuẩn hóa dữ kiện, cơ chế truy xuất bằng chứng, mô hình tính toán tài chính, quy trình tác tử trí tuệ nhân tạo, chất lượng báo cáo và chỉ số vận hành. Do đó, Chương 4 được trình bày theo logic hệ thống: trước hết kiểm tra dữ liệu có đủ tin cậy để dùng hay không, sau đó kiểm tra hệ thống có tìm đúng bằng chứng và trích dẫn đúng nguồn hay không, tiếp theo kiểm tra phép tính tài chính có tái lập được hay không, cuối cùng mới đánh giá chất lượng nội dung do tác tử sinh ra và khả năng vận hành của toàn bộ quy trình.
-
-4.1.2. Công nghệ và công cụ dùng trong benchmark
-
-Hệ thống benchmark được xây dựng theo hướng kết hợp giữa kiểm định tất định và đánh giá định tính có kiểm soát. Với dữ liệu dạng bảng, hệ thống sử dụng Pandera để kiểm tra cấu trúc DataFrame, kiểu dữ liệu, miền giá trị, mức đầy đủ của trường bắt buộc và tính hợp lệ của dữ kiện trước khi dữ liệu được dùng cho định giá. Pandera phù hợp với lớp này vì dữ liệu tài chính sau chuẩn hóa có dạng bảng và cần được kiểm tra như một hợp đồng dữ liệu, trong đó một dòng dữ kiện không chỉ có giá trị số mà còn phải có mã chỉ tiêu, kỳ báo cáo, đơn vị, nguồn, trạng thái kiểm định và thông tin truy vết.
-
-Đối với lớp truy xuất bằng chứng, hệ thống sử dụng RAGAS kết hợp với bộ câu hỏi vàng và bộ kiểm tra truy xuất tùy biến. RAGAS được dùng để đo các chỉ số ngữ nghĩa như độ chính xác của ngữ cảnh, độ bao phủ ngữ cảnh, mức độ bám sát bằng chứng và mức độ đúng trọng tâm của câu trả lời; trong khi bộ kiểm tra tùy biến đo các chỉ số có tính đặc thù của bài toán tài chính, như tỷ lệ tìm thấy bằng chứng đúng trong top 5, thứ hạng của bằng chứng đúng đầu tiên và tỷ lệ xuất hiện nguồn ưu tiên trong nhóm kết quả truy xuất. Cách kết hợp này cần thiết vì một câu trả lời có thể nghe hợp lý về mặt ngôn ngữ nhưng vẫn không đạt yêu cầu nếu bằng chứng không đến từ tài liệu phù hợp hoặc không hỗ trợ trực tiếp cho nhận định định lượng.
-
-Đối với quy trình tác tử và phần nội dung sinh bởi mô hình ngôn ngữ lớn, hệ thống sử dụng DeepEval ở vai trò lớp đánh giá định tính và sử dụng các kiểm tra tất định để kiểm soát quyền công cụ, cấu trúc JSON đầu ra, việc bàn giao giữa các chặng và nguy cơ mô hình tự ý tạo phép tính tài chính. DeepEval phù hợp để chấm các tiêu chí mềm như mức độ tuân thủ vai trò, mức độ có căn cứ và khả năng hoàn thành nhiệm vụ; tuy nhiên, trong thiết kế của đề tài, điểm chấm bằng mô hình ngôn ngữ không được dùng để ghi đè các cổng kiểm định tài chính hoặc dữ liệu. Ngoài ra, Langfuse được định hướng cho việc ghi nhận trace, chi phí, độ trễ, dữ liệu đánh giá và kết quả thí nghiệm theo từng lần chạy, còn pytest được sử dụng cho các kiểm thử hồi quy, kiểm thử công thức và kiểm thử các trường hợp lỗi đã biết.
-
-4.1.3. Cách tạo benchmark và nguyên tắc tính điểm
-
-Mỗi mã cổ phiếu được đánh giá thành một gói kết quả riêng; sau đó hệ thống tổng hợp các gói này thành kết quả toàn tập. Mỗi chỉ số trong benchmark đều có định danh, nhóm đánh giá, lớp kiểm định, ngưỡng đạt, đơn vị đo, số mẫu hợp lệ, trạng thái và bằng chứng kèm theo. Về nguyên tắc, một chỉ số chỉ được xem là đạt khi có giá trị đo hợp lệ và vượt ngưỡng đã xác định; trường hợp thiếu đầu vào đánh giá không được tự động chuyển thành đạt. Tuy nhiên, hệ thống phân biệt giữa chỉ số bắt buộc, chỉ số chẩn đoán và chỉ số vận hành, nhằm tránh việc một chỉ số tham khảo chưa đủ dữ liệu làm phủ định toàn bộ kết quả khi các cổng kiểm định trọng yếu đã đạt.
-
-Công thức tổng quát của các chỉ số dạng tỷ lệ đạt là: tỷ lệ đạt bằng số mẫu đạt chia cho số mẫu đủ điều kiện đánh giá, nhân với 100%. Với các chỉ số dạng lỗi, kết quả được tính bằng tổng số lỗi xuất hiện trong phạm vi đánh giá và thường có ngưỡng bằng 0 đối với lỗi nghiêm trọng, chẳng hạn lỗi số liệu do OCR, lỗi trích dẫn chung chung, lỗi kết xuất PDF cuối hoặc lỗi công thức định giá. Với các chỉ số dạng điểm, hệ thống chuẩn hóa kết quả về thang 0-1 hoặc 0-100 tùy theo bản chất của chỉ số; trạng thái đạt được xác định bằng cách so sánh điểm đo được với ngưỡng tương ứng. Đối với các chỉ số phân vị, chẳng hạn độ trễ p95, hệ thống sắp xếp thời gian xử lý của các lần chạy và lấy giá trị tại phân vị 95 để phản ánh trải nghiệm chậm nhất của nhóm đa số, thay vì chỉ dùng thời gian trung bình vốn dễ che khuất các trường hợp chậm bất thường.
-
-4.1.4. Các nhóm benchmark và ý nghĩa đánh giá
-
-Benchmark được tổ chức thành sáu nhóm chính tương ứng với sáu câu hỏi chất lượng của hệ thống. Nhóm thứ nhất đánh giá chất lượng và độ tin cậy dữ liệu, trả lời câu hỏi dữ liệu đầu vào có đầy đủ, đúng nguồn, đúng cấu trúc và đủ điều kiện dùng cho định giá hay không. Nhóm thứ hai đánh giá RAG và bằng chứng, trả lời câu hỏi hệ thống có truy xuất đúng tài liệu hỗ trợ cho nhận định hay không. Nhóm thứ ba đánh giá tính chính xác của mô hình tài chính, tập trung vào khả năng tái lập công thức, đối chiếu bất biến kế toán và kiểm soát sai lệch định giá. Nhóm thứ tư đánh giá quy trình tác tử và lớp chấm bằng mô hình ngôn ngữ, nhằm kiểm tra tác tử có tuân thủ vai trò, quyền công cụ và hợp đồng đầu ra hay không. Nhóm thứ năm đánh giá chất lượng báo cáo theo rubric nghiên cứu cổ phiếu. Nhóm thứ sáu đánh giá vận hành, chi phí và độ trễ.
-
-Về mặt kỹ thuật, phần trích dẫn và nguồn được kiểm tra như một lớp riêng nhưng được diễn giải cùng nhóm RAG trong Chương 4, vì cả hai cùng trả lời câu hỏi một nhận định trong báo cáo có được hỗ trợ bởi bằng chứng đúng hay không. Cách phân nhóm này giúp chương thực nghiệm vừa phù hợp với giao diện đánh giá của hệ thống, vừa không làm mất các kiểm soát quan trọng như bao phủ trích dẫn định lượng, phân giải khóa trích dẫn, tính hợp lệ của nguồn và phát hiện trích dẫn chung chung.
-
-4.2. Kết quả benchmark tổng hợp trên tập 45 mã
-
-4.2.1. Kết quả độ tin cậy dữ liệu
-
-Kết quả benchmark cho thấy điểm tin cậy dữ liệu tổng hợp đạt 98,9%, vượt ngưỡng yêu cầu 90%. Chỉ số này được tính bằng cách tổng hợp các thành phần liên quan đến độ bao phủ chỉ tiêu, tính đầy đủ theo kỳ, nguồn gốc dữ kiện, đối chiếu với nguồn chính thức, hợp lệ cấu trúc dữ liệu, lỗi OCR trọng yếu và tình trạng trùng lặp dữ kiện. Nói cách khác, điểm 98,9% không phải là một nhận xét cảm tính về dữ liệu, mà là điểm đo dựa trên các điều kiện có thể kiểm tra được trong từng lớp xử lý.
-
-Độ bao phủ các chỉ tiêu cốt lõi đạt 100%, với 900 mẫu chỉ tiêu đạt trên 900 mẫu yêu cầu; điều này cho thấy các chỉ tiêu cần thiết cho các phương pháp định giá chính đã được chuẩn bị đầy đủ trong phạm vi benchmark. Tính đầy đủ theo kỳ và độ bao phủ nguồn cũng đạt 100%, trong khi tỷ lệ đối chiếu dữ kiện trọng yếu với nguồn chính thức đạt 100% trên các mẫu đủ điều kiện đối chiếu. Pandera xác nhận tính hợp lệ của cấu trúc bảng trên 45/45 trường hợp, tức 100% dữ liệu dạng bảng đủ điều kiện đều đáp ứng hợp đồng dữ liệu đã cấu hình. Không phát hiện lỗi OCR ảnh hưởng đến số liệu trọng yếu và không có dữ kiện chuẩn hóa trùng lặp chưa xử lý, hai chỉ số này đều có ngưỡng bắt buộc bằng 0 lỗi.
-
-Một điểm cần diễn giải thận trọng là tỷ lệ tệp báo cáo tài chính thô có dữ liệu đạt 95,6%, tương đương 43/45 trường hợp, vượt ngưỡng 90% nhưng chưa đạt tuyệt đối. Kết quả này cho thấy hệ thống đã có thể tạo benchmark trên phạm vi rộng, song vẫn còn một số mã cần tiếp tục bổ sung hoặc chuẩn hóa nguồn tài liệu gốc. Ngoài ra, chỉ số về tỷ lệ kết quả OCR chưa xử lý được ghi nhận là chưa đủ điều kiện đo trong toàn tập; chỉ số này được giữ lại như một chỉ báo chẩn đoán, không được suy diễn thành lỗi trọng yếu khi các lỗi OCR ảnh hưởng đến số liệu cuối đã được kiểm tra và bằng 0.
-
-4.2.2. Kết quả RAG, RAGAS và kiểm soát trích dẫn
-
-Nhóm RAG đạt toàn bộ các ngưỡng đánh giá đã đặt ra. Tỷ lệ Hit-rate@5 đạt 100%, được tính bằng số truy vấn có ít nhất một bằng chứng đúng xuất hiện trong năm kết quả đầu chia cho tổng số truy vấn đủ điều kiện; cụ thể, 280/280 truy vấn đạt yêu cầu. MRR@5 đạt 96,6%, trong đó mỗi truy vấn được chấm bằng nghịch đảo thứ hạng của bằng chứng đúng đầu tiên trong top 5, rồi lấy trung bình trên toàn bộ tập truy vấn; chỉ số này không chỉ phản ánh việc hệ thống có tìm thấy bằng chứng hay không, mà còn phản ánh bằng chứng đúng có được xếp ở vị trí đủ cao để tác tử sử dụng ổn định hay không.
-
-Các chỉ số RAGAS cũng vượt ngưỡng. Độ chính xác ngữ cảnh đạt 95,2%, phản ánh tỷ lệ ngữ cảnh truy xuất thực sự có liên quan trong tập ngữ cảnh được đưa cho mô hình. Độ bao phủ ngữ cảnh đạt 95,2%, phản ánh mức độ các bằng chứng cần thiết đã được tìm thấy trong tập kết quả truy xuất. Mức độ bám sát bằng chứng đạt 100%, tức các câu trả lời trong mẫu đánh giá không tạo ra nhận định vượt khỏi bằng chứng được cung cấp; mức độ đúng trọng tâm câu trả lời cũng đạt 100%, cho thấy phản hồi sinh ra phù hợp với ý định truy vấn. Tỷ lệ truy xuất được nguồn ưu tiên đạt 100%, nghĩa là với các truy vấn trọng yếu, hệ thống tìm được nguồn có thứ hạng tin cậy phù hợp trong tập kết quả.
-
-Ở lớp trích dẫn, tỷ lệ bao phủ trích dẫn cho nhận định định lượng đạt 100%, được tính bằng số nhận định định lượng có trích dẫn hợp lệ chia cho tổng số nhận định định lượng cần trích dẫn, với kết quả 180/180. Tỷ lệ phân giải khóa trích dẫn và tính hợp lệ của định danh nguồn cũng đạt 100%, trong khi số trích dẫn chung chung bằng 0. Trung bình mỗi trường hợp có hai lượt liên kết tới nguồn PDF, giúp báo cáo có thể truy ngược từ câu chữ trong nội dung về tài liệu nguồn cụ thể. Một số chỉ số về bao phủ nguồn chính thức được đánh dấu không áp dụng trong những trường hợp thiếu phân tầng nguồn tương ứng; cách xử lý này trung thực hơn việc gán giá trị đạt một cách hình thức.
-
-4.2.3. Kết quả kiểm định mô hình tài chính
-
-Nhóm tài chính được đánh giá bằng các kiểm tra tất định thay vì dùng mô hình ngôn ngữ để xác nhận phép tính. Các kiểm tra chính bao gồm bất biến kế toán, công thức dòng tiền tự do cho doanh nghiệp, công thức dòng tiền tự do cho cổ đông, đối chiếu nợ ròng, điều kiện tăng trưởng dài hạn, tái lập giá mục tiêu, độ nhạy định giá và sự tồn tại của dấu vết công thức. Với các lỗi nghiêm trọng như vi phạm bất biến kế toán, sai cầu nối giá mục tiêu, vi phạm điều kiện tỷ suất chiết khấu lớn hơn tăng trưởng dài hạn hoặc lỗi đối chiếu nợ ròng, công thức đánh giá là đếm số lỗi và yêu cầu kết quả bằng 0.
-
-Kết quả cho thấy không có vi phạm bất biến kế toán nghiêm trọng trên 45 trường hợp; các lỗi cầu nối giá mục tiêu, vi phạm điều kiện tăng trưởng dài hạn và lỗi đối chiếu nợ ròng ở lớp kiểm định cuối cũng đều bằng 0. Đối với các chỉ số dạng tỷ lệ đạt, công thức dòng tiền tự do cho doanh nghiệp đạt 94%, dòng tiền tự do cho cổ đông đạt 90%, khả năng tái lập giá mục tiêu đạt 91%, điều kiện Gordon Growth đạt 88%, đối chiếu nợ ròng đạt 88%, độ biến thiên của ma trận độ nhạy đạt 92%, độ nhạy FCFE đạt 95% và mức sẵn có của dấu vết công thức đạt 94%; tất cả đều vượt ngưỡng 85%.
-
-Kết quả này có ý nghĩa quan trọng vì nó chứng minh giá mục tiêu và các kết luận định giá không phải là sản phẩm do mô hình ngôn ngữ tự suy luận. Các giá trị định lượng được tạo bởi mô-đun tính toán tất định, sau đó được kiểm tra bằng dữ liệu vàng, bất biến tài chính và dấu vết công thức. Việc một số tỷ lệ đạt nằm ở vùng 88%-95% thay vì 100% cũng phản ánh đúng thực tế rằng dữ liệu giữa các doanh nghiệp không đồng đều; hệ thống không che giấu khoảng thiếu dữ liệu, mà đo lường và phân loại chúng trước khi cho phép báo cáo đi tiếp.
-
-4.2.4. Kết quả quy trình tác tử và DeepEval
-
-Quy trình tác tử được đánh giá theo hai lớp. Lớp thứ nhất là các kiểm tra tất định, bao gồm quyền sử dụng công cụ, tính hợp lệ của cấu trúc JSON đầu ra, mức đầy đủ khi bàn giao giữa các chặng, tỷ lệ gọi công cụ thành công, tỷ lệ không tự ý tính toán tài chính bằng mô hình ngôn ngữ và mức tuân thủ ngân sách xử lý. Lớp thứ hai là các chỉ số đánh giá định tính bằng DeepEval hoặc bộ chấm tương đương, như tuân thủ vai trò, mức độ có căn cứ, tuân thủ kế hoạch và khả năng phát hiện lỗi cài trước; các chỉ số này được thiết kế để đánh giá chất lượng lập luận nhưng không được dùng để thay thế kiểm định tài chính.
-
-Các chỉ số tất định trong benchmark đều vượt ngưỡng chấp nhận. Tỷ lệ tuân thủ quyền sử dụng công cụ đạt 88%, tính hợp lệ của cấu trúc đầu ra đạt 93%, tỷ lệ không tự ý tính toán tài chính bằng mô hình ngôn ngữ đạt 93%, mức đầy đủ khi bàn giao giữa các chặng đạt 89%, tỷ lệ gọi công cụ thành công đạt 89%, mức tuân thủ ngân sách xử lý đạt 92% và tỷ lệ vòng sửa lỗi bằng 0%. Những kết quả này cho thấy tác tử hoạt động trong phạm vi được kiểm soát, không tự ý bỏ qua cổng kiểm định và không thay thế mô-đun tính toán tài chính bằng suy luận ngôn ngữ.
-
-Các chỉ số DeepEval mở như tuân thủ vai trò, mức độ có căn cứ, tuân thủ kế hoạch và khả năng phát hiện lỗi cài trước chưa được kết luận như kết quả cuối, do hệ thống chưa có đủ bộ dữ liệu hiệu chuẩn do chuyên gia gán nhãn cho toàn bộ 45 mã. Đây là điểm cần minh bạch trong báo cáo: DeepEval đã được đưa vào kiến trúc benchmark để phục vụ đánh giá định tính, nhưng trong kết quả hiện tại, các chỉ số có khả năng quyết định trạng thái vẫn là các kiểm tra có đầu vào, đầu ra và công thức đo rõ ràng. Cách thiết kế này phù hợp với yêu cầu an toàn của bài toán tài chính, nơi điểm chấm của một mô hình ngôn ngữ không được phép hợp thức hóa số liệu hoặc công thức sai.
-
-4.2.5. Kết quả chất lượng báo cáo
-
-Chất lượng báo cáo được chấm theo rubric 100 điểm, trong đó điểm tổng được tính bằng tổng điểm thành phần nhân với trọng số tương ứng, chia cho tổng trọng số. Các nhóm tiêu chí chính gồm độ đầy đủ của báo cáo, độ cụ thể của luận điểm đầu tư, chiều sâu phân tích tài chính, chất lượng lý giải dự phóng, tính minh bạch của định giá, chất lượng trình bày rủi ro và yếu tố hỗ trợ, mức độ tích hợp bằng chứng, bối cảnh ngành và doanh nghiệp so sánh, tính hữu ích của phần tóm tắt điều hành và tính chuyên nghiệp trong trình bày. Ngưỡng đạt đối với điểm tổng là 85/100.
-
-Kết quả benchmark cho thấy điểm chất lượng báo cáo tổng hợp đạt 88/100, vượt ngưỡng yêu cầu. Độ đầy đủ đạt 93%, chiều sâu phân tích tài chính đạt 95%, chất lượng lý giải dự phóng đạt 92%, tính minh bạch định giá đạt 91%, mức độ tích hợp bằng chứng đạt 91%, độ cụ thể của luận điểm đạt 94%, chất lượng rủi ro và yếu tố hỗ trợ đạt 90%, bối cảnh ngành và doanh nghiệp so sánh đạt 93%, mức độ hữu ích của tóm tắt điều hành đạt 93% và mức đầy đủ của công bố phân tích độ nhạy đạt 91%. Tính nhất quán giữa khuyến nghị, giá mục tiêu, giá thị trường và tỷ suất kỳ vọng đạt 94%.
-
-Ở lớp kết xuất, 100% báo cáo PDF và phụ lục giải trình được tạo thành công, đồng thời 100% trường hợp vượt qua cổng tài chính trước khi được ghi nhận là bản nháp có thể rà soát. Điều này cho thấy hệ thống không chỉ sinh được nội dung văn bản, mà còn tạo được sản phẩm báo cáo có cấu trúc, có phụ lục giải trình, có bằng chứng và có điều kiện kiểm định trước khi trình bày cho người dùng chuyên môn. Tuy nhiên, kết quả này không có nghĩa là tất cả báo cáo đã trở thành khuyến nghị đầu tư cuối cùng; quyền phê duyệt cuối vẫn được tách khỏi benchmark tự động.
-
-4.2.6. Kết quả vận hành, chi phí và độ trễ
-
-Nhóm vận hành đo độ ổn định của hệ thống theo các chỉ số lỗi cuối luồng, tỷ lệ thử lại, tỷ lệ dùng nhánh truy xuất dự phòng, độ trễ và chi phí. Các chỉ số dạng lỗi được tính bằng tổng số lỗi trên 45 trường hợp và có ngưỡng bằng 0 đối với lỗi có thể làm hỏng sản phẩm cuối, chẳng hạn lỗi OCR ảnh hưởng số liệu cuối, lỗi tải sản phẩm cuối hoặc lỗi kết xuất PDF. Các chỉ số dạng tỷ lệ, như tỷ lệ gọi lại mô hình ngôn ngữ và tỷ lệ dùng truy xuất dự phòng, được tính bằng số lần phát sinh sự kiện chia cho số lần chạy hoặc số truy vấn đủ điều kiện. Các chỉ số độ trễ sử dụng p95 để phản ánh trường hợp chậm ở nhóm cuối của phân phối, còn chi phí được tính bằng tổng chi phí ước tính chia cho số báo cáo trong benchmark.
-
-Kết quả cho thấy tỷ lệ gọi lại mô hình ngôn ngữ bằng 0%, tỷ lệ dùng nhánh truy xuất dự phòng bằng 0%, lỗi OCR cuối bằng 0, lỗi tải sản phẩm cuối bằng 0 và lỗi kết xuất PDF bằng 0. Độ trễ p95 của quy trình tạo báo cáo đầy đủ trong điều kiện dữ liệu đã có sẵn đạt 9,35 phút, thấp hơn ngưỡng 10 phút; khi cần xử lý lại dữ liệu, độ trễ p95 đạt 17,55 phút, thấp hơn ngưỡng 30 phút. Thời gian p95 để dựng lại PDF từ kết quả đã khóa chỉ khoảng 0,0083 phút, cho thấy lợi ích rõ rệt của việc tái sử dụng kết quả trung gian thay vì chạy lại toàn bộ quy trình.
-
-Chi phí ước tính trung bình cho một báo cáo đầy đủ là khoảng 0,01 USD trong môi trường benchmark, thấp hơn đáng kể so với ngưỡng kiểm soát 2 USD. Tỷ lệ hồi quy độ trễ đạt 0,935 so với đường cơ sở, tức phiên bản hiện tại không cho thấy suy giảm hiệu năng trong phạm vi đo. Dù vậy, các kết quả này cần được hiểu là kết quả trong môi trường thực nghiệm có kiểm soát; khi triển khai sản xuất, chi phí và độ trễ vẫn cần được tiếp tục theo dõi theo tải đồng thời, biến động nguồn dữ liệu và thay đổi giá dịch vụ mô hình.
-
-4.3. Phân tích trường hợp DHG
-
-4.3.1. Kết quả dữ liệu và truy xuất bằng chứng của DHG
-
-DHG được chọn làm trường hợp phân tích sâu vì đây là doanh nghiệp dược phẩm tiêu biểu, có lịch sử dữ liệu tương đối đầy đủ và có đủ điều kiện để kiểm tra mối liên kết giữa dữ liệu tài chính, tài liệu công bố, bằng chứng truy xuất và báo cáo đầu ra. Đối với DHG, điểm tin cậy dữ liệu đạt khoảng 99,13%; độ bao phủ chỉ tiêu cốt lõi, mức đầy đủ theo kỳ, độ bao phủ nguồn và tỷ lệ đối chiếu với nguồn chính thức đều đạt 100%. Không phát hiện dữ kiện trùng lặp và không có lỗi OCR ảnh hưởng đến số liệu trọng yếu.
-
-Đối với truy xuất bằng chứng, Hit-rate@5 và MRR@5 của DHG cùng đạt khoảng 96,55%; độ chính xác và độ bao phủ ngữ cảnh đạt khoảng 95,15%, trong khi mức độ bám sát bằng chứng và mức độ liên quan của câu trả lời đạt 100%. Các kiểm tra trích dẫn cho DHG cũng đạt yêu cầu: nhận định định lượng có trích dẫn hợp lệ, khóa trích dẫn phân giải được về nguồn, định danh nguồn hợp lệ và không có trích dẫn chung chung. Như vậy, các nhận định về DHG trong báo cáo có thể được truy ngược về đoạn bằng chứng và tài liệu nguồn tương ứng.
-
-4.3.2. Kết quả dự phóng và định giá của DHG
-
-Trong trường hợp DHG, các kiểm tra về dòng tiền tự do cho doanh nghiệp, dòng tiền tự do cho cổ đông, giá mục tiêu, điều kiện tăng trưởng dài hạn, đối chiếu nợ ròng, phân tích độ nhạy và dấu vết công thức đều đạt. Không phát hiện vi phạm bất biến kế toán hoặc sai lệch vượt dung sai so với bộ kết quả chuẩn. Điều này chứng minh kết quả định giá của DHG có thể được tái lập từ dữ liệu đầu vào, giả định và chuỗi phép tính đã lưu lại, thay vì phụ thuộc vào một kết luận do mô hình ngôn ngữ tự tạo ra.
-
-Kết quả đạt ở cấp DHG không đồng nghĩa mọi phương pháp định giá đều luôn phù hợp trong mọi hoàn cảnh. Hệ thống vẫn cần kiểm tra dữ liệu nợ vay, tiền và đầu tư ngắn hạn, vốn lưu hành, số lượng cổ phiếu, điều kiện tỷ suất chiết khấu, giả định tăng trưởng dài hạn và độ nhạy của giá mục tiêu. Vì vậy, báo cáo chỉ nên xem kết quả định giá là đủ điều kiện trình bày khi các cầu nối định giá tái lập được, còn mô hình ngôn ngữ chỉ được dùng để diễn giải cơ sở kinh tế của kết quả đã tính.
-
-4.3.3. Kết quả báo cáo của DHG
-
-Đối với DHG, hệ thống tạo được báo cáo PDF và phụ lục giải trình, đồng thời các tiêu chí chất lượng báo cáo đều đạt ngưỡng. Báo cáo có đủ các thành phần chính của một báo cáo phân tích cổ phiếu, gồm tổng quan doanh nghiệp, phân tích tài chính, dự phóng, định giá, độ nhạy, rủi ro, yếu tố hỗ trợ và cơ sở khuyến nghị. Các nội dung định lượng được gắn với kết quả tính toán và bằng chứng, còn phần diễn giải được ràng buộc bởi dữ kiện đã chuẩn bị trước.
-
-Trường hợp DHG cho thấy quy trình của hệ thống có thể kết nối đầy đủ bốn lớp: dữ liệu chuẩn hóa, công thức định giá, bằng chứng nguồn và văn bản báo cáo. Tuy nhiên, tương tự kết quả toàn tập, báo cáo DHG nên được hiểu là bản nháp phân tích đủ điều kiện để chuyên viên rà soát, không phải sản phẩm đầu tư cuối cùng đã được phê duyệt tự động. Sự phân biệt này là cần thiết để bảo đảm tính đúng đắn về mặt quản trị và trách nhiệm chuyên môn.
-
-4.4. Nhận xét chung về kết quả thực nghiệm
-
-4.4.1. Kết quả xây dựng kho dữ kiện và bằng chứng
-
-Kết quả thực nghiệm cho thấy hệ thống đã xây dựng được kho dữ kiện và bằng chứng có khả năng phục vụ quy trình định giá trên phạm vi nhiều mã cổ phiếu. Dữ kiện tài chính được chuẩn hóa theo mã chỉ tiêu, kỳ báo cáo, đơn vị và nguồn; tài liệu được chia thành các đoạn có thể truy xuất; các nhận định định lượng trong báo cáo được liên kết với trích dẫn và dấu vết công thức. Nhờ đó, báo cáo không phải là văn bản độc lập tách rời khỏi dữ liệu, mà là sản phẩm cuối của một chuỗi xử lý có thể kiểm tra lại.
-
-Điểm mạnh của thiết kế này nằm ở khả năng truy vết. Khi một số liệu xuất hiện trong báo cáo, hệ thống có thể kiểm tra số liệu đó đến từ dữ kiện nào, thuộc kỳ nào, lấy từ nguồn nào và đã qua kiểm định gì. Khi một kết quả định giá được trình bày, hệ thống có thể kiểm tra công thức, biến đầu vào và điều kiện hợp lệ của phương pháp. Khi một nhận định định tính được đưa ra, hệ thống có thể kiểm tra đoạn tài liệu nào đã hỗ trợ cho nhận định đó. Đây là khác biệt quan trọng giữa hệ thống nghiên cứu có kiểm soát và một chatbot tài chính chỉ sinh văn bản dựa trên ngữ cảnh đầu vào.
-
-4.4.2. Kết quả kiểm soát rủi ro sai lệch trong báo cáo
-
-Các kết quả benchmark cho thấy hệ thống đã kiểm soát được ba nhóm sai lệch quan trọng: sai lệch dữ liệu, sai lệch truy xuất và sai lệch định giá. Sai lệch dữ liệu được kiểm soát thông qua Pandera, đối chiếu nguồn và các chỉ số lỗi bằng 0 đối với OCR trọng yếu hoặc dữ kiện trùng lặp. Sai lệch truy xuất được kiểm soát thông qua Hit-rate@5, MRR@5, các chỉ số RAGAS và kiểm tra trích dẫn. Sai lệch định giá được kiểm soát bằng kiểm tra tất định, bất biến tài chính, dữ liệu vàng và dấu vết công thức.
-
-Đặc biệt, việc các cổng tài chính không sử dụng mô hình ngôn ngữ làm người phán xét là lựa chọn phù hợp với bản chất rủi ro của bài toán. Mô hình ngôn ngữ có thể hỗ trợ diễn giải vì sao doanh thu tăng, biên lợi nhuận cải thiện hoặc rủi ro ngành ảnh hưởng đến giả định, nhưng không được tự xác nhận công thức, tự sửa giá mục tiêu hoặc tự bỏ qua lỗi cầu nối định giá. Cách phân quyền này làm giảm nguy cơ một báo cáo nghe thuyết phục nhưng chứa sai số tài chính nghiêm trọng.
-
-4.4.3. Kết quả tự động hóa báo cáo phân tích cổ phiếu
-
-Trên toàn bộ tập 45 mã, hệ thống tạo được gói đánh giá đạt điều kiện kỹ thuật và kết xuất được báo cáo ở dạng PDF cùng phụ lục giải trình. Điểm chất lượng báo cáo 88/100 cho thấy đầu ra đã vượt ngưỡng để sử dụng như bản nháp nghiên cứu, trong khi các chỉ số thành phần như chiều sâu phân tích tài chính, tính minh bạch định giá, tích hợp bằng chứng và tính nhất quán khuyến nghị đều đạt ngưỡng. Điều này chứng minh hệ thống có thể tự động hóa phần đáng kể của quy trình chuẩn bị báo cáo, từ dữ liệu đến phân tích và trình bày.
-
-Tuy nhiên, kết quả thực nghiệm cũng cho thấy vai trò của con người vẫn cần được giữ ở bước phê duyệt cuối. Benchmark có thể xác nhận báo cáo đủ dữ liệu, đủ bằng chứng, công thức tái lập được và không vi phạm các cổng kiểm định đã biết; nhưng benchmark không thể thay thế hoàn toàn đánh giá chuyên môn về bối cảnh thị trường, sự kiện mới ngoài dữ liệu, mức hợp lý của giả định dài hạn hoặc trách nhiệm công bố khuyến nghị đầu tư. Vì vậy, sản phẩm phù hợp nhất của hệ thống ở giai đoạn hiện tại là bản nháp phân tích có kiểm chứng, phục vụ chuyên viên rà soát và hoàn thiện.
-
-4.5. Kết quả vận hành quy trình tác tử trí tuệ nhân tạo
-
-4.5.1. Kết quả phối hợp giữa tác tử và mô-đun tất định
-
-Kết quả benchmark xác nhận kiến trúc tác tử của hệ thống vận hành theo đúng nguyên tắc phân tách trách nhiệm. Các mô-đun tất định chịu trách nhiệm chuẩn hóa dữ liệu, kiểm tra bảng, tính toán tài chính, dựng dấu vết công thức và kết xuất báo cáo; tác tử trí tuệ nhân tạo chịu trách nhiệm tổng hợp thông tin, diễn giải kết quả, tổ chức luận điểm và phản biện nội dung. Nhờ đó, mô hình ngôn ngữ được khai thác ở phần có giá trị cao về ngôn ngữ và tổng hợp tri thức, nhưng không được trao quyền tạo số liệu tài chính hoặc phê duyệt báo cáo cuối.
-
-Các chỉ số tác tử cho thấy quy trình phối hợp đã đạt mức chấp nhận được trên toàn tập: bàn giao giữa các chặng đạt 89%, gọi công cụ thành công đạt 89%, hoàn thành nhiệm vụ đạt 89% và tuân thủ bản kê khai sản phẩm trung gian đạt 92%. Những con số này vượt ngưỡng nhưng chưa đạt mức tuyệt đối, do đó khu vực phối hợp giữa các chặng vẫn là hướng cải thiện quan trọng. Trong các phiên bản tiếp theo, hệ thống cần tiếp tục tăng độ chặt của hợp đồng đầu ra, chuẩn hóa thông điệp lỗi và giảm trường hợp chặng sau phải suy luận lại thông tin đáng lẽ đã được chặng trước bàn giao rõ ràng.
-
-4.5.2. Kết quả quản lý lỗi và điều kiện phê duyệt
-
-Hệ thống quản lý lỗi theo hướng phân biệt lỗi thực thi, lỗi dữ liệu, lỗi tài chính, lỗi trích dẫn, lỗi báo cáo và lỗi vận hành. Thiết kế này giúp một lần chạy không bị đánh giá bằng một nhãn chung chung, mà có thể xác định chặng nào đang gây rủi ro và rủi ro đó có quyền chặn phát hành hay chỉ phục vụ chẩn đoán. Trong kết quả benchmark, không phát hiện lỗi cuối luồng đối với OCR trọng yếu, tải sản phẩm cuối hoặc kết xuất PDF; tỷ lệ vòng sửa lỗi tác tử và tỷ lệ gọi lại mô hình đều bằng 0.
-
-Điểm cần nhấn mạnh là điều kiện kỹ thuật đạt không đồng nghĩa với quyền phát hành cuối cùng. Hệ thống có thể xác nhận báo cáo đủ điều kiện tạo bản nháp, nhưng bản cuối vẫn cần quyết định phê duyệt hợp lệ của người chịu trách nhiệm chuyên môn. Cơ chế này phù hợp với yêu cầu quản trị trong lĩnh vực tài chính, bởi một báo cáo đầu tư không chỉ là kết quả kỹ thuật mà còn là sản phẩm có trách nhiệm pháp lý, đạo đức nghề nghiệp và rủi ro ra quyết định đối với người sử dụng.
-
-4.5.3. Đánh giá vai trò của tác tử trong hệ thống
-
-Kết quả thực nghiệm cho thấy tác tử trí tuệ nhân tạo đóng vai trò hiệu quả nhất ở các nhiệm vụ cần tổng hợp và diễn giải, chẳng hạn biến dữ kiện tài chính thành luận điểm, liên kết rủi ro với giả định dự phóng, giải thích kết quả định giá và tổ chức báo cáo theo ngôn ngữ tự nhiên. Tác tử không thay thế các kiểm tra tất định, nhưng giúp giảm đáng kể khối lượng công việc thủ công trong việc đọc nhiều nguồn, liên kết nhiều lớp thông tin và soạn bản nháp có cấu trúc.
-
-Tuy nhiên, tác tử vẫn cần được ràng buộc bằng quyền công cụ, dữ liệu đầu vào đã khóa, hợp đồng đầu ra và cổng kiểm định. Nếu bỏ các ràng buộc này, mô hình ngôn ngữ có thể tạo ra nhận định nghe hợp lý nhưng không có bằng chứng, hoặc trình bày số liệu không khớp với mô-đun tài chính. Vì vậy, ý nghĩa của kết quả không nằm ở việc chứng minh tác tử có thể tự trị hoàn toàn, mà nằm ở việc chứng minh tác tử có thể trở thành một thành phần có kiểm soát trong quy trình nghiên cứu tài chính.
-
-4.6. Kết quả kiểm định chất lượng hệ thống
-
-4.6.1. Kiểm định dữ liệu và công thức
-
-Kiểm định dữ liệu và công thức là lớp quan trọng nhất của hệ thống vì mọi kết luận đầu tư đều phụ thuộc vào độ đúng của dữ kiện và phép tính. Dữ liệu được kiểm định bằng Pandera, các quy tắc đối chiếu nguồn và các chỉ số bao phủ. Công thức được kiểm định bằng phép tái lập kết quả từ biến đầu vào, bất biến kế toán, kiểm tra điều kiện kinh tế của mô hình và so sánh với bộ kết quả chuẩn trong giới hạn dung sai. Với các lỗi nghiêm trọng, hệ thống dùng công thức đếm lỗi và yêu cầu bằng 0; với các điều kiện bao phủ, hệ thống dùng tỷ lệ đạt trên số mẫu đủ điều kiện.
-
-Kết quả đạt 100% ở độ bao phủ chỉ tiêu cốt lõi, 100% ở tính hợp lệ cấu trúc bảng, 0 lỗi OCR trọng yếu, 0 dữ kiện trùng lặp chưa xử lý, 0 vi phạm bất biến kế toán nghiêm trọng và 0 lỗi cầu nối giá mục tiêu cho thấy nền tảng định lượng của hệ thống đủ vững cho phạm vi benchmark. Các chỉ số tài chính còn lại vượt ngưỡng 85%, chứng minh mô hình đã có khả năng tái lập cao nhưng vẫn cần tiếp tục cải thiện ở các cấu phần nhạy cảm như nợ ròng, điều kiện tăng trưởng dài hạn và độ đầy đủ của dấu vết công thức.
-
-4.6.2. Kiểm định bằng chứng và trích dẫn
-
-Kiểm định bằng chứng được thực hiện bằng hai hướng bổ sung cho nhau. Hướng thứ nhất là đánh giá truy xuất, trong đó hệ thống kiểm tra bằng chứng đúng có xuất hiện trong top 5 hay không và xuất hiện ở thứ hạng nào. Hướng thứ hai là đánh giá chất lượng ngữ cảnh và câu trả lời bằng RAGAS, trong đó hệ thống kiểm tra ngữ cảnh truy xuất có liên quan không, có bao phủ đủ bằng chứng cần thiết không, câu trả lời có bám bằng chứng không và có trả lời đúng trọng tâm truy vấn không. Hai hướng này giúp đo cả lớp tìm kiếm và lớp sử dụng bằng chứng.
-
-Kiểm định trích dẫn tiếp tục kiểm tra nhận định trong báo cáo có gắn được với nguồn hợp lệ hay không. Công thức của tỷ lệ bao phủ trích dẫn định lượng là số nhận định định lượng có trích dẫn hợp lệ chia cho tổng số nhận định định lượng cần trích dẫn; công thức của tỷ lệ phân giải trích dẫn là số khóa trích dẫn phân giải thành công chia cho tổng số khóa trích dẫn; còn số trích dẫn chung chung được tính bằng tổng lỗi và yêu cầu bằng 0. Kết quả 100% ở các tỷ lệ quan trọng và 0 lỗi trích dẫn chung chung cho thấy chuỗi từ truy xuất đến báo cáo đã hoạt động nhất quán trong phạm vi benchmark.
-
-4.6.3. Kiểm định nội dung sinh bởi trí tuệ nhân tạo
-
-Nội dung sinh bởi trí tuệ nhân tạo được kiểm định bằng cách kết hợp kiểm tra cấu trúc, kiểm tra quyền công cụ, kiểm tra không tự ý tính toán tài chính và rubric chất lượng báo cáo. Cấu trúc đầu ra hợp lệ đạt 93%, không tự ý tính toán tài chính đạt 93%, tuân thủ quyền công cụ đạt 88% và chất lượng báo cáo đạt 88/100. Các kết quả này cho thấy nội dung do tác tử sinh ra đủ điều kiện sử dụng như bản nháp có kiểm chứng, nhưng vẫn phải đi qua quy trình rà soát trước khi trở thành báo cáo cuối.
-
-Đối với DeepEval, vai trò hiện tại là khung đánh giá định tính cho các tiêu chí như tuân thủ vai trò, mức độ có căn cứ và chất lượng lập luận. Tuy nhiên, do các chỉ số này cần bộ dữ liệu hiệu chuẩn và nhãn chuyên gia để kết luận chắc chắn, Chương 4 không sử dụng chúng như bằng chứng quyết định thay cho các chỉ số tất định. Đây là cách trình bày trung thực với hệ thống hiện tại và cũng phù hợp với nguyên tắc an toàn: mô hình ngôn ngữ có thể hỗ trợ đánh giá nội dung mềm, nhưng không được thay thế kiểm định dữ liệu, công thức và trích dẫn.
-
-4.6.4. Kiểm định vận hành, chi phí và độ trễ
-
-Kiểm định vận hành cho thấy hệ thống đạt các yêu cầu ban đầu về độ ổn định và chi phí trong môi trường benchmark. Không có lỗi tải sản phẩm cuối, lỗi kết xuất PDF hoặc lỗi OCR ảnh hưởng số liệu cuối. Độ trễ p95 của quy trình đầy đủ nằm dưới ngưỡng kiểm soát ở cả trường hợp dữ liệu đã có sẵn và trường hợp cần xử lý lại dữ liệu. Chi phí trung bình mỗi báo cáo thấp hơn đáng kể so với ngưỡng ngân sách.
-
-Kết quả này có ý nghĩa sản phẩm rõ ràng: hệ thống không chỉ có khả năng tạo báo cáo đúng về mặt kỹ thuật, mà còn có khả năng vận hành với chi phí thấp và thời gian chờ hợp lý trong phạm vi thực nghiệm. Tuy nhiên, benchmark hiện tại chưa thay thế cho kiểm thử tải đồng thời, kiểm thử độ bền dài hạn hoặc đánh giá chi phí khi nguồn dữ liệu bên ngoài thay đổi. Do đó, khi mở rộng hệ thống, cần tiếp tục đo p50, p95, p99 theo từng chặng xử lý, theo dõi chi phí theo loại lần chạy và lưu trace bằng Langfuse để phân tích hồi quy theo phiên bản mô hình, prompt và pipeline.
-
-4.7. Thảo luận kết quả
-
-4.7.1. Mức độ đáp ứng mục tiêu nghiên cứu
-
-Kết quả thực nghiệm cho thấy hệ thống đã đáp ứng mục tiêu xây dựng một quy trình AI Agent hỗ trợ phân tích và định giá cổ phiếu có khả năng kiểm soát dữ liệu, truy xuất bằng chứng, tính toán tài chính tất định, tạo báo cáo và ghi nhận chất lượng vận hành. Trên tập 45 mã, các nhóm đánh giá chính đều vượt ngưỡng đã cấu hình; dữ liệu đạt độ tin cậy cao, RAG và trích dẫn đạt kết quả tốt, mô hình tài chính không ghi nhận lỗi nghiêm trọng, báo cáo vượt ngưỡng chất lượng và các chỉ số vận hành nằm trong giới hạn kiểm soát.
-
-Tuy nhiên, mức đáp ứng này nên được hiểu đúng theo phạm vi nghiên cứu: hệ thống hỗ trợ tạo bản nháp phân tích có kiểm chứng, không thay thế hoàn toàn chuyên viên phân tích và không tự động phát hành khuyến nghị đầu tư cuối cùng. Đây là ranh giới quan trọng, bởi trong lĩnh vực tài chính, khả năng tạo văn bản và khả năng chịu trách nhiệm đối với khuyến nghị là hai vấn đề khác nhau. Đề tài chứng minh hệ thống có thể tự động hóa phần lớn quy trình chuẩn bị và kiểm định, nhưng vẫn cần con người phê duyệt giả định, xem xét bối cảnh và chịu trách nhiệm với sản phẩm cuối.
-
-4.7.2. Ưu điểm của hướng tiếp cận dựa trên dữ kiện kiểm chứng
-
-Ưu điểm lớn nhất của hệ thống là tách rõ dữ kiện, phép tính và diễn giải. Dữ kiện phải có nguồn, phải được chuẩn hóa và phải vượt kiểm định; phép tính tài chính được thực hiện bằng mô-đun tất định và có dấu vết công thức; diễn giải bằng ngôn ngữ tự nhiên chỉ được tạo sau khi dữ kiện và kết quả định giá đã sẵn sàng. Cách tiếp cận này giảm rủi ro thường gặp của các hệ thống sử dụng mô hình ngôn ngữ lớn, trong đó mô hình có thể tạo ra câu trả lời trôi chảy nhưng không đủ căn cứ hoặc chứa số liệu không thể tái lập.
-
-Kết quả benchmark củng cố ưu điểm này. Khi độ tin cậy dữ liệu đạt 98,9%, Hit-rate@5 đạt 100%, MRR@5 đạt 96,6%, điểm báo cáo đạt 88/100 và các lỗi tài chính nghiêm trọng bằng 0, có thể thấy hệ thống đã hình thành được một chuỗi kiểm soát từ đầu vào đến đầu ra. Điều này đặc biệt quan trọng đối với ứng dụng công nghệ tài chính, nơi giá trị của AI không chỉ nằm ở việc viết nhanh hơn, mà còn nằm ở khả năng tạo ra sản phẩm có thể kiểm tra, truy vết và tái lập.
-
-4.7.3. Hạn chế của kết quả thực nghiệm
-
-Hạn chế thứ nhất nằm ở dữ liệu. Mặc dù các chỉ số chính đạt ngưỡng, tỷ lệ tệp báo cáo tài chính thô có dữ liệu mới đạt 95,6%, cho thấy vẫn còn một số trường hợp cần bổ sung nguồn tài liệu. Chỉ số về kết quả OCR chưa xử lý cũng chưa đủ điều kiện đo ở toàn tập, vì vậy cần tiếp tục hoàn thiện quy trình quan sát chất lượng OCR, nhất là với các tài liệu scan, tài liệu có bảng phức tạp hoặc tài liệu có định dạng không nhất quán.
-
-Hạn chế thứ hai nằm ở lớp đánh giá định tính. DeepEval và các bộ chấm bằng mô hình ngôn ngữ đã được đưa vào kiến trúc benchmark, nhưng để kết luận mạnh về chất lượng lập luận của tác tử, hệ thống cần thêm bộ dữ liệu được chuyên gia gán nhãn, bộ lỗi cài trước và quy trình hiệu chuẩn giữa người chấm và mô hình chấm. Hạn chế thứ ba nằm ở vận hành: kết quả chi phí và độ trễ được đo trong môi trường benchmark, nên chưa phản ánh đầy đủ tải đồng thời, biến động nguồn dữ liệu bên ngoài hoặc thay đổi chi phí dịch vụ mô hình theo thời gian.
-
-4.7.4. Ý nghĩa đối với ứng dụng AI trong công nghệ tài chính
-
-Kết quả nghiên cứu cho thấy hướng ứng dụng AI phù hợp trong phân tích cổ phiếu không phải là xây dựng một chatbot đầu tư tự do, mà là xây dựng một quy trình nghiên cứu có kiểm soát, trong đó tác tử trí tuệ nhân tạo hoạt động bên cạnh các lớp dữ liệu, định giá, truy xuất, trích dẫn và kiểm định. Khi được đặt trong kiến trúc này, AI có thể giảm đáng kể công việc thủ công trong tổng hợp thông tin và soạn báo cáo, nhưng vẫn không phá vỡ các yêu cầu về kiểm chứng và trách nhiệm chuyên môn.
-
-Ý nghĩa thực tiễn của kết quả nằm ở khả năng kết hợp ba mục tiêu vốn thường mâu thuẫn: mở rộng phạm vi xử lý nhiều mã cổ phiếu, duy trì độ tin cậy của dữ liệu và giữ chi phí vận hành ở mức thấp. Kết quả benchmark cho thấy hệ thống đã đạt cân bằng ban đầu giữa các yếu tố này trong phạm vi nghiên cứu. Để tiến tới ứng dụng thực tế, hướng phát triển tiếp theo cần tập trung vào mở rộng dữ liệu chính thức, hiệu chuẩn DeepEval bằng nhãn chuyên gia, tăng độ chặt của kiểm soát trích dẫn theo nguồn ưu tiên, bổ sung kiểm thử tải và hoàn thiện quy trình phê duyệt báo cáo cuối.
