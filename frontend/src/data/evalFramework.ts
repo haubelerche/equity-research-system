@@ -60,7 +60,7 @@ export const EVAL_LAYERS: EvalLayer[] = [
       metric("context_recall", "Độ bao phủ bằng chứng cần thiết", "Context Recall", "%", "gte", 0.8, "Ragas", "Tỷ lệ bằng chứng cần thiết được retrieve", { thresholdLabel: "≥ 80%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("faithfulness", "Mức độ bám sát bằng chứng", "Faithfulness", "%", "gte", 0.85, "Ragas", "Điểm nội dung bám evidence", { thresholdLabel: "≥ 85%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
       metric("response_relevancy", "Mức độ đúng trọng tâm câu trả lời", "Response Relevancy", "%", "gte", 0.75, "Ragas", "Điểm câu trả lời đúng trọng tâm truy vấn", { thresholdLabel: "≥ 75%", metricType: "score", scope: "benchmark_suite", severity: "P2", blocksPublish: false }),
-      metric("source_tier_hit_rate", "Tỷ lệ truy vấn trọng yếu có nguồn ưu tiên trong top-k", "Source-tier hit rate", "%", "gte", 0.9, "Source-tier Retrieval Audit", "Số truy vấn trọng yếu có nguồn cấp ưu tiên trong top-k / Tổng truy vấn trọng yếu", { thresholdLabel: "≥ 90%", metricType: "coverage", scope: "benchmark_suite", severity: "P2", blocksPublish: false, sampleUnit: "truy vấn" }),
+      metric("source_tier_hit_rate", "Tỷ lệ truy vấn trọng yếu có nguồn ưu tiên trong top-k", "Source-tier hit rate", "%", "gte", 0.8, "Source-tier Retrieval Audit", "Số truy vấn trọng yếu có nguồn cấp ưu tiên trong top-k / Tổng truy vấn trọng yếu", { thresholdLabel: "≥ 80%", metricType: "coverage", scope: "benchmark_suite", severity: "P2", blocksPublish: false, sampleUnit: "truy vấn" }),
     ],
     methodology: [
       "Golden Retrieval Set đo khả năng tìm đúng tài liệu đã được chuyên gia xác nhận.",

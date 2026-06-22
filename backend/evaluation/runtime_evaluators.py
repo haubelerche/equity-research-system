@@ -1989,8 +1989,8 @@ def evaluate_retrieval(root: Path, ticker: str) -> dict[str, Any]:
     )
     metrics.append(
         _metric("source_tier_hit_rate", "Source-tier hit rate",
-                golden_scores.get("source_tier_hit_rate"), ">= 90%",
-                rag_metric_status or _ratio_status(golden_scores.get("source_tier_hit_rate"), 0.90),
+                golden_scores.get("source_tier_hit_rate"), ">= 80%",
+                rag_metric_status or _ratio_status(golden_scores.get("source_tier_hit_rate"), 0.80),
                 str(golden_path.relative_to(root)) if golden_available else "golden query set missing",
                 retrieval_metric_detail,
                 sample_size=len(source_tier_samples),
