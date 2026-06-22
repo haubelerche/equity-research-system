@@ -76,17 +76,15 @@ def _sample_fiscal_year(sample: dict[str, Any]) -> Any:
 
 def _build_generation_messages(question: str, contexts: list[str]) -> list[dict[str, str]]:
     context_block = "\n\n".join(contexts) if contexts else "(không có bằng chứng truy hồi được)"
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "Bạn là trợ lý phân tích tài chính. Chỉ trả lời dựa trên BẰNG CHỨNG được cung "
-                "cấp. Nếu bằng chứng không đủ, nói rõ là không đủ dữ liệu. Khi câu hỏi yêu cầu "
-                "một chỉ tiêu tài chính, phải trả lời bằng đúng số liệu, đúng năm, đúng đơn vị "
-                "xuất hiện trong bằng chứng; không làm tròn, không đổi đơn vị, không suy diễn "
-                "từ chỉ tiêu khác."
-            ),
-        },
+    system = (
+        "Bạn là trợ lý phân tích tài chính. CHỈ trả lời dựa trên BẰNG CHỨNG được cung cấp. "
+        "Nếu bằng chứng KHÔNG chứa thông tin để trả lời, hãy trả lời đúng một câu: "
+        "'Không có dữ liệu này trong bằng chứng được cung cấp.' "
+        "TUYỆT ĐỐI không bịa số liệu, không suy đoán, không dùng kiến thức ngoài bằng chứng. "
+        "Khi trả lời, trích đúng con số và đơn vị có trong bằng chứng."
+    )
+    return [
+        {"role": "system", "content": system},
         {
             "role": "user",
             "content": (
@@ -96,7 +94,6 @@ def _build_generation_messages(question: str, contexts: list[str]) -> list[dict[
             ),
         },
     ]
-    return messages
 
 
 def _question_answer_prefix(question: str) -> str:
