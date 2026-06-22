@@ -4,7 +4,7 @@
   "plan_id": "06",
   "plan_name": "Report quality",
   "ticker": "LDP",
-  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
   "status": "pass",
   "test_execution": {
     "status": "not_measured",
@@ -134,21 +134,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -174,7 +174,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -204,7 +204,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -350,7 +350,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -448,16 +448,16 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
             "value": true
@@ -475,19 +475,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "explanation_pdf_rendered",
@@ -539,21 +539,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -579,7 +579,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -609,7 +609,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -755,7 +755,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -853,16 +853,16 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
             "value": true
@@ -880,19 +880,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "financial_gate_passed",
@@ -956,19 +956,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.quality_total",
@@ -983,7 +983,7 @@
       "scope": "report_run",
       "severity": "P1",
       "blocks_publish": false,
-      "value": 86.6,
+      "value": 89.47,
       "threshold": ">= 80%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -1034,7 +1034,7 @@
                 {
                   "id": "valuation_generated_at_present",
                   "passed": true,
-                  "actual": "2026-06-19T20:36:23.934352+00:00",
+                  "actual": "2026-06-22T16:31:58.667734+00:00",
                   "expected": "generated_at present",
                   "evidence_refs": [
                     "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -1064,7 +1064,7 @@
                 {
                   "id": "fcff_table_present",
                   "passed": true,
-                  "actual": 4,
+                  "actual": 5,
                   "expected": ">= 1 FCFF row",
                   "evidence_refs": [
                     "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -1210,7 +1210,7 @@
                 {
                   "id": "formula_traces_present",
                   "passed": true,
-                  "actual": 2,
+                  "actual": 3,
                   "expected": "formula traces present",
                   "evidence_refs": [
                     "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -1318,21 +1318,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -1358,7 +1358,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -1388,7 +1388,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -1534,7 +1534,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -1632,19 +1632,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 86.6
+            "value": 89.47
           }
         ]
       },
@@ -1659,19 +1659,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report_quality_score",
@@ -1686,7 +1686,7 @@
       "scope": "report_run",
       "severity": "P1",
       "blocks_publish": true,
-      "value": 86.6,
+      "value": 89.47,
       "threshold": ">= 85%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -1737,7 +1737,7 @@
                 {
                   "id": "valuation_generated_at_present",
                   "passed": true,
-                  "actual": "2026-06-19T20:36:23.934352+00:00",
+                  "actual": "2026-06-22T16:31:58.667734+00:00",
                   "expected": "generated_at present",
                   "evidence_refs": [
                     "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -1767,7 +1767,7 @@
                 {
                   "id": "fcff_table_present",
                   "passed": true,
-                  "actual": 4,
+                  "actual": 5,
                   "expected": ">= 1 FCFF row",
                   "evidence_refs": [
                     "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -1913,7 +1913,7 @@
                 {
                   "id": "formula_traces_present",
                   "passed": true,
-                  "actual": 2,
+                  "actual": 3,
                   "expected": "formula traces present",
                   "evidence_refs": [
                     "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -2021,21 +2021,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -2061,7 +2061,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -2091,7 +2091,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -2237,7 +2237,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -2335,19 +2335,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 86.6
+            "value": 89.47
           }
         ]
       },
@@ -2362,19 +2362,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.benchmark_hardness_score",
@@ -2389,7 +2389,7 @@
       "scope": "report_run",
       "severity": "P1",
       "blocks_publish": false,
-      "value": 80.12,
+      "value": 84.66,
       "threshold": ">= 75%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -2439,21 +2439,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -2479,7 +2479,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -2509,7 +2509,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -2655,7 +2655,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -2753,19 +2753,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 80.12
+            "value": 84.66
           }
         ]
       },
@@ -2780,19 +2780,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.completeness",
@@ -2844,21 +2844,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -2884,7 +2884,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -2914,7 +2914,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -3060,7 +3060,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -3158,16 +3158,16 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
             "value": 100.0
@@ -3185,19 +3185,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.thesis_specificity",
@@ -3212,7 +3212,7 @@
       "scope": "report_run",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 66.67,
+      "value": 83.33,
       "threshold": ">= 60%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -3249,21 +3249,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -3289,7 +3289,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -3319,7 +3319,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -3465,7 +3465,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -3563,19 +3563,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 66.67
+            "value": 83.33
           }
         ]
       },
@@ -3590,19 +3590,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.financial_analysis_depth",
@@ -3654,21 +3654,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -3694,7 +3694,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -3724,7 +3724,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -3870,7 +3870,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -3968,16 +3968,16 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
             "value": 90.0
@@ -3995,19 +3995,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.forecast_rationale",
@@ -4059,21 +4059,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -4099,7 +4099,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -4129,7 +4129,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -4275,7 +4275,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -4373,16 +4373,16 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
             "value": 88.89
@@ -4400,19 +4400,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.valuation_transparency",
@@ -4464,21 +4464,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -4504,7 +4504,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -4534,7 +4534,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -4680,7 +4680,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -4778,16 +4778,16 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
             "value": 100.0
@@ -4805,19 +4805,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.risk_catalyst_quality",
@@ -4869,21 +4869,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -4909,7 +4909,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -4939,7 +4939,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -5085,7 +5085,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -5183,16 +5183,16 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
             "value": 70.0
@@ -5210,19 +5210,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.evidence_integration",
@@ -5274,21 +5274,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -5314,7 +5314,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -5344,7 +5344,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -5490,7 +5490,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -5588,16 +5588,16 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
             "value": 83.33
@@ -5615,19 +5615,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.peer_industry_context_quality",
@@ -5642,7 +5642,7 @@
       "scope": "report_run",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 87.5,
+      "value": 100.0,
       "threshold": ">= 75%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -5679,21 +5679,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -5719,7 +5719,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -5749,7 +5749,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -5895,7 +5895,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -5993,19 +5993,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 87.5
+            "value": 100.0
           }
         ]
       },
@@ -6020,19 +6020,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.executive_summary_actionability",
@@ -6047,7 +6047,7 @@
       "scope": "report_run",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 75.0,
+      "value": 87.5,
       "threshold": ">= 70%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -6084,21 +6084,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -6124,7 +6124,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -6154,7 +6154,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -6300,7 +6300,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -6398,19 +6398,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 75.0
+            "value": 87.5
           }
         ]
       },
@@ -6425,19 +6425,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.sensitivity_disclosure_completeness",
@@ -6452,7 +6452,7 @@
       "scope": "report_run",
       "severity": "P1",
       "blocks_publish": false,
-      "value": 90.0,
+      "value": 85.0,
       "threshold": ">= 45%",
       "threshold_operator": ">=",
       "unit": "percent",
@@ -6489,21 +6489,21 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "section_details": {
               "data_correctness": {
@@ -6529,7 +6529,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -6559,7 +6559,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -6705,7 +6705,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/LDP/balance_sheet_year.json",
@@ -6803,19 +6803,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 66.67,
+              "thesis_specificity": 83.33,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 87.5,
-              "executive_summary_actionability": 75.0,
-              "sensitivity_disclosure_completeness": 90.0,
-              "presentation_quality": 100.0
+              "peer_industry_context_quality": 100.0,
+              "executive_summary_actionability": 87.5,
+              "sensitivity_disclosure_completeness": 85.0,
+              "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 90.0
+            "value": 85.0
           }
         ]
       },
@@ -6830,19 +6830,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.recommendation_consistency",
@@ -6916,19 +6916,19 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "publication_readiness",
@@ -7006,50 +7006,50 @@
           "output\\LDP_report.pdf",
           "output\\LDP_explanation.pdf",
           "storage\\archive\\benchmark_ldp\\claim_ledger.json",
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\LDP_report.pdf": 940373,
-          "output\\LDP_explanation.pdf": 371490,
+          "output\\LDP_report.pdf": 931083,
+          "output\\LDP_explanation.pdf": 367034,
           "storage\\archive\\benchmark_ldp\\claim_ledger.json": 2668,
-          "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 24650
+          "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json": 26232
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "rubric": "report_quality_v1",
-  "score": 86.6,
+  "score": 89.47,
   "decision": "allow_export",
   "failed_gates": [],
   "section_scores": {
     "completeness": 100.0,
-    "thesis_specificity": 66.67,
+    "thesis_specificity": 83.33,
     "financial_analysis_depth": 90.0,
     "forecast_rationale": 88.89,
     "valuation_transparency": 100.0,
     "risk_catalyst_quality": 70.0,
     "evidence_integration": 83.33,
-    "peer_industry_context_quality": 87.5,
-    "executive_summary_actionability": 75.0,
-    "sensitivity_disclosure_completeness": 90.0,
-    "presentation_quality": 100.0
+    "peer_industry_context_quality": 100.0,
+    "executive_summary_actionability": 87.5,
+    "sensitivity_disclosure_completeness": 85.0,
+    "presentation_quality": 90.0
   },
   "report_artifacts": {
     "pdf": {
       "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\LDP_report.pdf",
       "exists": true,
       "pages": 13,
-      "text": "Nghiên cứu cổ phiếu BÁO CÁO CẬP NHẬT ĐỊNH GIÁ\nNGÀNH DƯỢC PHẨM Ngày 2026-06-20\nCONG TY CO PHAN DUOC LAM DONG - LADOPHAR (LDP VN) HNX: LDP\nNhóm phân tích\nKhuyến nghị · HNX: LDP\nBáo cáo cập nhật\nMua\nHNX: LDP\nGiá mục tiêu: 11,620 VND | Tiềm năng tăng/giảm: +40.0% | Ngày\nDược phẩm\ngiá: 2026-06-18 | Tạo: 2026-06-20 02:30\nGiá mục tiêu 11,620 VND\nCong ty Co phan Duoc Lam Dong - Ladophar (LDP) là doanh nghiệp\nGiá hiện tại 8,300 dược phẩm có nền doanh thu 244 tỷ đồng với biên lợi nhuận gộp\n(VND) 33.3%, đủ để hỗ trợ tăng trưởng doanh thu dự phóng 9.2% mà không\ncần mở rộng đòn bẩy vận hành quá mức. Mô hình định giá cho giá mục\nNgày giá thị 2026-06-18\ntiêu 11,620 VND so với thị giá 8,300 VND, biên tiềm năng 40.0%.\ntrường\nKhoảng giá trị hợp lý theo ma trận độ nhạy trải từ 112 VND đến 2,715\nThời điểm tạo 2026-06-20 VND, phản ánh mức độ không chắc chắn của các giả định dài hạn. Luận\nbáo cáo 02:30 điểm đầu tư xoay quanh ba câu hỏi: (i) doanh nghiệp có giữ được biên\ngộp trước áp lực chi phí nguyên liệu API và tỷ giá không? (ii) kỷ luật chi\nTỷ lệ +40.0% phí bán hàng và quản lý có đảm bảo biên EBIT không bị xói mòn khi\ntăng/giảm\ntăng doanh thu? (iii) chi đầu tư dài hạn phục vụ nâng chuẩn nhà máy\nGMP-EU có phá vỡ cấu trúc dòng tiền tự do hay không? Ba câu hỏi này\nTổng tỷ suất lợi +40.0%\nquyết định độ tin cậy của kết quả mô hình FCFF và từ đó quyết định giá\nnhuận\ntrị hợp lý. Rủi ro trọng yếu là kết quả đấu thầu ETC và biến động giá API\n— hai yếu tố này tác động đồng thời lên cả doanh thu lẫn biên, và là\nnguồn sai lệch lớn nhất so với giả định cơ sở. [1][2]\nLuận điểm cập nhật\nCong ty Co phan Duoc Lam Dong - Ladophar hoạt động trên hai kênh\nphân phối ETC (đấu thầu bệnh viện) và OTC (nhà thuốc bán lẻ). Doanh\nthu kỳ gần nhất đạt 244 tỷ đồng, tăng 11.9% so với kỳ trước — tốc độ\nnày phù hợp với quỹ đạo lịch sử (CAGR lịch sử 9.2%). Biên lợi nhuận gộp\n33.3% phản ánh năng lực kiểm soát giá vốn API trong môi trường tỷ giá\nbiến động; đây là chỉ số quan trọng hơn tốc độ tăng doanh thu vì nó xác\nđịnh chất lượng lợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt 0.12 lần\ncho thấy mức độ lợi nhuận kế toán được hỗ trợ bởi dòng tiền vận hành\nNguồn nhóm phân tích thu thập\nthực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải\nNhận định: Thị giá 8,300 VND so thu bệnh viện. Biến số vận hành trọng yếu là sản lượng và giá trúng\nvới giá mục tiêu 11,620 VND, hàm ý thầu ETC, vì kênh này vừa có tỷ trọng doanh thu cao vừa chịu áp lực\n+40.0%; tín hiệu giá chỉ có giá trị khi chính sách đấu thầu định kỳ. Diễn biến giá API và tiến độ nâng chuẩn\nđi cùng thanh khoản và ngày giá nhà máy là hai chỉ báo vận hành cần theo dõi song song với kết quả tài\n2026-06-18. chính quý. [1]\nThông tin giao dịch\nĐộng lực tăng trưởng\nMã giao dịch LDP VN Doanh thu 244 tỷ đồng tăng 11.9% so với kỳ trước, trên nền CAGR lịch\nsử 9.2%. Nguồn tăng trưởng chính là mở rộng sản lượng kênh ETC (đấu\nSàn HNX\nthầu bệnh viện) — kênh này vừa có quy mô lớn vừa bị chi phối bởi chu\nkỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các quý. Kênh\nNgành Dược phẩm\nOTC ổn định hơn nhưng tăng trưởng thấp hơn; nó đóng vai trò giảm\nthiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần theo dõi: tỷ lệ\nGiá đóng cửa 8,300\ntrúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức độ thâm\nGiá cao/thấp 7,000 / 14,900 nhập kênh OTC — ba con số này sẽ xác nhận hoặc bác bỏ giả định tăng\n52 tuần trưởng của mô hình. [1]\nVốn hóa 105\nSố lượng cổ 13\nphiếu\nKLGD bình 153,267\nquân 30 phiên\nTỷ lệ sở hữu N/A\nnước ngoài\nTriển vọng kinh doanh và tài chính\nCẬP NHẬT HOẠT ĐỘNG KINH DOANH\nCong ty Co phan Duoc Lam Dong - Ladophar hoạt động trên hai kênh phân phối ETC (đấu thầu bệnh viện) và\nOTC (nhà thuốc bán lẻ). Doanh thu kỳ gần nhất đạt 244 tỷ đồng, tăng 11.9% so với kỳ trước — tốc độ này phù\nhợp với quỹ đạo lịch sử (CAGR lịch sử 9.2%). Biên lợi nhuận gộp 33.3% phản ánh năng lực kiểm soát giá vốn API\ntrong môi trường tỷ giá biến động; đây là chỉ số quan trọng hơn tốc độ tăng doanh thu vì nó xác định chất lượng\nlợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt 0.12 lần cho thấy mức độ lợi nhuận kế toán được hỗ trợ bởi dòng\ntiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải thu bệnh viện. Biến số vận\nhành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu cao vừa chịu áp lực\nchính sách đấu thầu định kỳ. Diễn biến giá API và tiến độ nâng chuẩn nhà máy là hai chỉ báo vận hành cần theo\ndõi song song với kết quả tài chính quý. [1]\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A doanh thu 244 tỷ đồng, tăng +11.9% so với 2024A; biên EBITDA +6.6 điểm % và biên EBIT\n+7.4 điểm %. Nếu doanh thu tăng nhưng hai biên này không mở rộng, luận điểm tăng trưởng phải dựa vào chất\nlượng chi phí chứ không chỉ vào quy mô.\nNghiên cứu cổ phiếu 2\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A biên gộp 33.3% (+3.8 điểm % so với kỳ trước), biên ròng 11.7% (+8.5 điểm %), ROE 14.9%\n(+7.9 điểm % so với 2024A). Chênh lệch giữa biên lợi nhuận và ROE là tín hiệu về hiệu quả sử dụng vốn, không\nphải chỉ là biến động kế toán.\nKẾT QUẢ TÀI CHÍNH CHÍNH\nDoanh thu 244 tỷ đồng với biên lợi nhuận ròng 11.7% và biên gộp 33.3% vẽ nên bức tranh một doanh nghiệp có\nkhả năng tạo lợi nhuận tương đối ổn định, song phụ thuộc vào kiểm soát chi phí hơn là tăng trưởng sản lượng\nđột biến. Điểm đáng chú ý là tỷ lệ chuyển đổi tiền mặt 0.12 lần. Tỷ lệ này báo hiệu cần kiểm tra chặt hơn chất\nlượng thu tiền và vốn lưu động. Đây là cơ chế giải thích tại sao biên lợi nhuận ròng 11.7% không nhất thiết tương\nđương với khả năng tạo dòng tiền tự do. Biến động lợi nhuận giữa các năm chủ yếu đến từ ba nguồn: (1) thay\nđổi giá vốn API/tỷ giá; (2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí bán hàng và quản lý liên quan đấu thầu. Những\nyếu tố này được chuẩn hóa thành biến số dự phóng (biên gộp 24.8%, chi phí bán hàng và quản lý 20.0% doanh\nthu) và là cơ sở để phân tích độ nhạy — người đọc có thể kiểm tra xem kết quả mô hình thay đổi như thế nào khi\ntừng giả định dịch chuyển. [1]\nNhận định: Lợi nhuận tăng chậm hơn doanh thu, cho thấy doanh thu mới chưa chuyển hóa trọn vẹn thành lợi\nnhuận. Cần rà soát biên gộp, SG&A và đòn bẩy vận hành trước khi nâng giả định tăng trưởng dài hạn. [1][2]\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 187 186 218 244 266 291 317 347 378\nTăng trưởng doanh thu — -0.8% 17.2% 11.9% 9.2% 9.2% 9.2% 9.2% 9.2%\nLợi nhuận ròng -39 -20 7 29 8 10 11 12 14\nTăng trưởng lợi nhuận — -48.3% -134.4% 312.7% -70.6% 14.3% 12.5% 13.0% 12.3%\nEPS điều chỉnh (VND) -3,063 -1,583 545 2,030 597 680 771 869 977\nTăng trưởng EPS — -48.3% -134.4% 272.5% -70.6% 13.9% 13.4% 12.7% 12.4%\nNghiên cứu cổ phiếu 3\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE -34.6% -21.8% 7.0% 14.9% 4.2% 4.6% 4.9% 5.2% 5.6%\nROA -17.0% -10.3% 3.3% 9.3% 2.7% 2.9% 3.2% 3.5% 3.8%\nNợ ròng / EBITDA -3.5x -10.4x 1.7x 0.9x 2.8x 3.3x 3.4x 3.3x 2.8x\nP/E -2.7x -5.2x 15.2x 4.1x 13.9x 12.2x 10.8x 9.6x 8.5x\nP/B 0.9x 1.1x 1.1x 0.6x 0.6x 0.6x 0.5x 0.5x 0.5x\nCẦU NỐI LỢI NHUẬN 2025A-2026F\nĐối chiếu trực tiếp với số liệu công bố trong mô hình định giá.\nChỉ tiêu 2025A 2026F Chênh lệch Nhận định\nDoanh thu thuần 244 266 +9.2% Cơ sở kiểm tra mức tăng lợi nhuận.\nBiên lợi nhuận gộp 33.3% 24.8% -852 bps Biến động biên trong ngưỡng theo\ndõi.\nChi phí bán hàng và quản lý -47 -53 +12.3% Chi phí vận hành tăng cùng quy mô\ndoanh thu.\nBiên lợi nhuận HĐKD / EBIT 13.8% 4.8% -907 bps Biến động biên trong ngưỡng theo\ndõi.\nLNST sau CĐKKS / LNST CĐ 29 8 -70.6% Đối chiếu với tăng trưởng doanh\nmẹ thu và giả định mô hình.\nBiên lợi nhuận ròng 11.7% 3.2% -855 bps Biến động biên trong ngưỡng theo\ndõi.\nEPS 2,030 597 -70.6% Đối chiếu với tăng trưởng doanh\nthu và giả định mô hình.\nĐỘNG LỰC DỰ PHÓNG\nDoanh thu 244 tỷ đồng tăng 11.9% so với kỳ trước, trên nền CAGR lịch sử 9.2%. Nguồn tăng trưởng chính là mở\nrộng sản lượng kênh ETC (đấu thầu bệnh viện) — kênh này vừa có quy mô lớn vừa bị chi phối bởi chu kỳ đấu\nthầu định kỳ, tạo ra sự biến động không đều giữa các quý. Kênh OTC ổn định hơn nhưng tăng trưởng thấp hơn;\nnó đóng vai trò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần theo dõi: tỷ lệ trúng thầu so với\ndự thầu ETC, tiến độ đầu tư công suất và mức độ thâm nhập kênh OTC — ba con số này sẽ xác nhận hoặc bác bỏ\ngiả định tăng trưởng của mô hình. [1]\nBiên lợi nhuận gộp hiện tại 33.3%, mô hình kỳ vọng biên gộp thu hẹp nhẹ so với mức lịch sử (24.8% dự phóng).\nÁp lực chính lên biên gộp là chi phí API nhập khẩu và tỷ giá USD/VND: khi hai yếu tố này tăng cùng chiều, giá\nvốn hàng bán tăng và biên gộp bị thu hẹp ngay trong quý tiếp theo vì chu kỳ nhập khẩu thường ngắn. Dư địa\nhấp thụ cú sốc này bị giới hạn bởi biên lợi nhuận ròng hiện ở mức 11.7% — không đủ đệm để hấp thụ nếu biên\ngộp giảm quá 2–3 điểm phần trăm. Chi phí bán hàng và quản lý 20.0% doanh thu là lớp chi phí quyết định\nkhoảng cách biên gộp đến biên EBIT; đặc biệt chi phí phục vụ đấu thầu ETC có xu hướng không co giãn theo\ndoanh thu. Thuế suất hiệu dụng 0.2% là bước chuyển cuối từ EBIT sang lợi nhuận sau thuế — biến số này ít biến\nđộng nhưng bất kỳ thay đổi ưu đãi thuế nào sẽ tác động trực tiếp. Chỉ báo cần theo dõi: giá API theo chỉ số thị\nNghiên cứu cổ phiếu 4\ntrường nguyên liệu dược, tỷ giá USD/VND, và biên gộp thực tế quý tiếp theo so với giả định — đây là tín hiệu\nsớm cho việc cần điều chỉnh mô hình. [1]\nNhận định: Biên lợi nhuận gộp mở rộng (29.5% -> 33.3%). Biên mở rộng hỗ trợ dự phóng lợi nhuận; cần theo\ndõi giá vốn và cạnh tranh. [1]\nNguồn: Dự phóng của nhóm phân tích dựa trên giả định đã phê duyệt.\nNhận định: 2026F hàm ý doanh thu tăng +9.2% so với 2025A, trong khi biên gộp dự phóng 24.8% so với mức\nthực tế 33.3%. Đây là điểm kiểm tra trọng yếu vì sai lệch nhỏ ở tăng trưởng hoặc biên gộp sẽ truyền trực tiếp vào\nEBIT và FCFF.\nNghiên cứu cổ phiếu 5\nĐỘNG LỰC DỰ PHÓNG CHÍNH\nGiả định biến số chính được hiệu chỉnh từ dữ liệu lịch sử và định hướng kinh doanh hiện tại.\nChỉ tiêu Giả định cơ sở Liên kết tài chính\nTăng trưởng doanh thu 9.2% Doanh thu dẫn tới EBIT và dòng tiền\ntự do\nBiên lợi nhuận gộp 24.8% Giá vốn dẫn tới lợi nhuận gộp\nChi phí bán hàng và quản lý / 20.0% Chi phí vận hành dẫn tới biên EBIT\ndoanh thu\nKhấu hao / doanh thu 3.8% EBIT và lá chắn thuế\nChi đầu tư / doanh thu 13.6% Dòng tiền tự do và mở rộng công suất\nThuế suất hiệu dụng 0.2% LNST và NOPAT\nChuyển đổi dòng tiền 2025 12.1% Bất thường — cần soi vốn lưu động\n(không dùng làm luận điểm bền vững)\nWACC 12.1% Tỷ lệ chiết khấu dòng tiền\nTăng trưởng dài hạn 3.0% Giá trị cuối kỳ trong mô hình chiết\nkhấu dòng tiền\nĐịnh giá và độ nhạy\nLUẬN ĐIỂM ĐỊNH GIÁ\nDự phóng theo phương pháp dự phóng theo biến số, đi từ biến số kinh doanh tới dòng tài chính tới định giá. Giả\nđịnh cơ sở: tăng trưởng doanh thu 9.2% (căn cứ CAGR lịch sử 9.2% và kế hoạch mở rộng ETC/OTC); biên lợi\nnhuận gộp 24.8% (phản ánh áp lực API và cơ cấu sản phẩm); chi phí bán hàng và quản lý 20.0% doanh thu; thuế\nsuất hiệu dụng 0.2%; chi đầu tư 13.6% doanh thu. Biến số có tác động lớn nhất tới giá trị là: (1) tăng trưởng\ndoanh thu — mỗi điểm phần trăm hụt so với giả định cơ sở sẽ kéo EBIT và FCFF giảm theo tỷ lệ; (2) biên lợi\nnhuận gộp — biến động chi phí API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) chi\nđầu tư và vốn lưu động — quyết định bao nhiêu phần EBIT còn lại dưới dạng FCFF sau tái đầu tư. Hai tham số\nđịnh giá quan trọng nhất là WACC 12.1% và tăng trưởng dài hạn 3.0%; chúng xác định cách quy đổi FCFF tương\nlai về hiện giá. Độ nhạy của giá mục tiêu với hai tham số này cao hơn bất kỳ biến số vận hành nào — đây là lý do\nma trận độ nhạy là bắt buộc chứ không phải tùy chọn. Rủi ro sai lệch lớn nhất là khi giả định tăng trưởng lạc\nquan gặp thực tế đấu thầu thắt chặt hoặc giá API tăng đột biến cùng lúc. [1][2]\nNhận định: Tiềm năng tăng/giảm giá theo mô hình định giá là +40.0%. Trạng thái khuyến nghị theo mô hình:\nMua. [2]\nKẾT QUẢ ĐỊNH GIÁ\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nP/E 11,158 — Cần rà soát\nCORE P/E + NET CASH 8,765 — Cần rà soát\nNghiên cứu cổ phiếu 6\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nGiá mục tiêu tổng hợp 11,158 100.0% Cần rà soát\nCẦU NỐI WACC\nChỉ tiêu Giá trị\nLãi suất phi rủi ro 4.0%\nBeta 0.85\nPhần bù rủi ro thị trường 8.0%\nChi phí vốn chủ sở hữu 13.8%\nChi phí nợ vay 8.0%\nThuế suất 0.2%\nWACC 12.1%\nCẦU NỐI ĐỊNH GIÁ FCFF\nChỉ tiêu Giá trị\nPV giá trị cuối kỳ 63\nGiá trị doanh nghiệp 34\nTiền mặt và đầu tư ngắn hạn 19\nNợ vay 57\nGiá trị vốn chủ sở hữu -2\nSố cổ phiếu lưu hành (triệu) 14\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 187 186 218 244 266 291 317 347 378\nTăng trưởng doanh thu — -0.8% 17.2% 11.9% 9.2% 9.2% 9.2% 9.2% 9.2%\nLợi nhuận gộp 38 37 64 81 66 72 79 86 94\nBiên lợi nhuận gộp 20.0% 20.0% 29.5% 33.3% 24.8% 24.8% 24.8% 24.8% 24.8%\nGVHB trừ khấu hao -150 -149 -154 -163 -200 -219 -239 -261 -285\nChi phí bán hàng và quản lý -60 -50 -50 -47 -53 -58 -64 -69 -76\nDoanh thu tài chính 3 1 0 1 — — — — —\nNghiên cứu cổ phiếu 7\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nChi phí tài chính -16 -8 -7 -5 -4 -4 -4 -4 -4\nEBITDA -14 -4 21 39 23 25 27 30 32\nTỷ suất EBITDA -7.2% -2.3% 9.6% 16.2% 8.6% 8.6% 8.6% 8.6% 8.6%\nKhấu hao 9 8 7 6 10 11 12 13 14\nLợi nhuận từ HĐKD / EBIT -22 -12 14 34 13 14 15 17 18\nBiên lợi nhuận HĐKD / EBIT -12.0% -6.7% 6.4% 13.8% 4.8% 4.8% 4.8% 4.8% 4.8%\nLợi nhuận khác -16 -8 -7 -5 0 0 0 0 0\nChi phí lãi vay ròng -8 -7 -5 -4 -4 -4 -4 -4 -4\nThuế 0 0 0 0 0 0 0 0 0\nThuế suất thực tế -0.1% 0.0% 0.0% 0.5% 0.0% 0.0% 0.0% 0.0% 0.0%\nLNST sau CĐKKS / LNST CĐ -39 -20 7 29 8 10 11 12 14\nmẹ\nBiên lợi nhuận ròng -20.8% -10.8% 3.2% 11.7% 3.2% 3.3% 3.4% 3.5% 3.6%\nTiền mặt từ hoạt động kinh -77 6 9 3 10 14 16 18 20\ndoanh\nSố lượng cổ phiếu (triệu) 13 13 13 13 14 14 14 14 14\nEPS -3,063 -1,583 545 2,030 597 680 771 869 977\nEPS hiệu chỉnh -3,063 -1,583 545 2,030 597 680 771 869 977\nTăng trưởng EPS hiệu chỉnh — -48.3% -134.4% 272.5% -70.6% 13.9% 13.4% 12.7% 12.4%\nĐỘ NHẠY GIÁ MỤC TIÊU (WACC × tăng trưởng dài hạn)\nĐơn vị: VND/cp — mô hình chiết khấu dòng tiền FCFF.\ng=2.0% g=2.5% g=3.0% g=3.5% g=4.0%\nWACC 10.1% 773 1,163 1,607 2,119 2,715\nWACC 11.1% — 267 599 975 1,404\nWACC 12.1% — — — 112 433\nWACC 13.1% — — — — —\nWACC 14.1% — — — — —\nNghiên cứu cổ phiếu 8\nRủi ro đầu tư\nYẾU TỐ CẦN THEO DÕI\nRủi ro và yếu tố hỗ trợ của Cong ty Co phan Duoc Lam Dong - Ladophar đều gắn với cơ chế truyền dẫn tài chính\ncụ thể, không đơn thuần là liệt kê định tính. Rủi ro giảm giá theo mức độ ưu tiên: (1) giá trúng thầu ETC thấp hơn\nkỳ vọng — đây là rủi ro trọng yếu nhất vì tác động đồng thời lên doanh thu và biên gộp, tức là thu hẹp FCFF từ\ncả hai phía; (2) giá API nhập khẩu và tỷ giá USD/VND tăng — ảnh hưởng trực tiếp đến giá vốn, thu hẹp biên gộp\n24.8% giả định; (3) kéo dài chu kỳ phải thu bệnh viện — làm tăng ΔNWC và giảm FCFF dù lợi nhuận kế toán vẫn\ncao; (4) cạnh tranh generic gia tăng — tạo áp lực giảm giá trên sản phẩm chủ lực; (5) thay đổi chính sách đăng ký\nlưu hành và tiêu chuẩn GMP. Yếu tố hỗ trợ: trúng thêm thầu ETC mới là yếu tố có tác động lớn nhất và gần nhất\nđến FCFF; cải thiện cơ cấu sản phẩm biên cao (chuyển dần từ generic sang branded generic) nâng biên gộp một\ncách bền vững hơn mở rộng sản lượng thuần túy; hoàn tất đầu tư GMP-EU mở rộng tập khách hàng xuất khẩu,\ngiảm phụ thuộc vào chu kỳ đấu thầu nội địa. Mỗi yếu tố cần gắn với chỉ báo sớm cụ thể: kết quả đấu thầu ETC\nhàng quý, biến động giá API theo chỉ số thị trường nguyên liệu dược, vòng quay phải thu so với cùng kỳ. Khi có\ndữ liệu mới, nhà phân tích nên chạy lại ma trận độ nhạy để xác nhận kết luận định giá còn hiệu lực. [1]\nRỦI RO ĐẦU TƯ\nRủi ro Mức độ Theo dõi\nÁp lực giá thầu thuốc Cao Kết quả đấu thầu ETC\nBiến động nguyên liệu và tỷ Trung bình API, USD/VND\ngiá\nCạnh tranh generic Trung bình Thị phần và giá bán\nPhụ lục bảng tài chính\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 187 186 218 244 266 291 317 347 378\nTăng trưởng doanh thu — -0.8% 17.2% 11.9% 9.2% 9.2% 9.2% 9.2% 9.2%\nLợi nhuận ròng -39 -20 7 29 8 10 11 12 14\nTăng trưởng lợi nhuận — -48.3% -134.4% 312.7% -70.6% 14.3% 12.5% 13.0% 12.3%\nEPS điều chỉnh (VND) -3,063 -1,583 545 2,030 597 680 771 869 977\nTăng trưởng EPS — -48.3% -134.4% 272.5% -70.6% 13.9% 13.4% 12.7% 12.4%\nROE -34.6% -21.8% 7.0% 14.9% 4.2% 4.6% 4.9% 5.2% 5.6%\nROA -17.0% -10.3% 3.3% 9.3% 2.7% 2.9% 3.2% 3.5% 3.8%\nNợ ròng / EBITDA -3.5x -10.4x 1.7x 0.9x 2.8x 3.3x 3.4x 3.3x 2.8x\nP/E -2.7x -5.2x 15.2x 4.1x 13.9x 12.2x 10.8x 9.6x 8.5x\nNghiên cứu cổ phiếu 9\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nP/B 0.9x 1.1x 1.1x 0.6x 0.6x 0.6x 0.5x 0.5x 0.5x\nCÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThay đổi vốn lưu động 47 -6 11 26 8 6 7 7 8\nChi đầu tư 4 0 3 63 36 32 28 22 14\nĐầu tư vào công ty liên kết/liên — — — — — — — — —\ndoanh\nCác khoản mục dòng tiền khác — — — — — — — — —\nDòng tiền tự do -81 6 6 -60 -22 -14 -7 1 10\nPhát hành cổ phiếu — — — — — — — — —\nCổ tức 0 0 0 0 0 0 0 0 0\nTổng nợ phải trả 116 102 108 116 116 116 116 116 116\nThay đổi tổng nợ phải trả — -14 5 8 0 0 0 0 0\nNợ vay có lãi cuối năm 71 66 55 57 57 57 57 57 57\nThay đổi nợ vay có lãi — -5 -11 2 0 0 0 0 0\nTiền và tương đương tiền 23 22 20 21 -8 -26 -37 -41 -35\nNợ ròng cuối năm (nợ vay có lãi 48 44 35 36 64 82 94 98 92\n- tiền)\nThay đổi nợ ròng — -4 -8 1 28 18 12 4 -6\nVốn CSH 112 92 99 191 200 210 220 232 246\nGiá trị sổ sách/cp (VND) 8,854 7,271 7,816 15,075 14,210 14,892 15,660 16,527 17,508\nNợ ròng / VCSH 42.7% 47.3% 35.7% 19.0% 32.3% 39.4% 42.7% 42.0% 37.4%\nNợ ròng / EBITDA -3.5x -10.4x 1.7x 0.9x 2.8x 3.3x 3.4x 3.3x 2.8x\nTổng tài sản 228 195 207 308 316 326 337 349 363\nCHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ\nĐơn vị: lần hoặc %, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE -34.6% -21.8% 7.0% 14.9% 4.2% 4.6% 4.9% 5.2% 5.6%\nROA -17.0% -10.3% 3.3% 9.3% 2.7% 2.9% 3.2% 3.5% 3.8%\nNghiên cứu cổ phiếu 10\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROIC -13.9% -9.1% 10.3% 14.8% 4.8% 4.7% 4.8% 5.0% 5.3%\nWACC 12.1% 12.1% 12.1% 12.1% 12.1% 12.1% 12.1% 12.1% 12.1%\nEVA -26.0% -21.2% -1.8% 2.7% -7.3% -7.4% -7.3% -7.1% -6.8%\nP/E -2.7x -5.2x 15.2x 4.1x 13.9x 12.2x 10.8x 9.6x 8.5x\nEV/EBITDA -11.3x -35.5x 6.7x 3.6x 7.9x 8.0x 7.7x 7.2x 6.4x\nEV/FCF -1.9x 24.9x 24.1x -2.4x -8.3x -14.5x -29.3x 357.4x 21.1x\nP/B 0.9x 1.1x 1.1x 0.6x 0.6x 0.6x 0.5x 0.5x 0.5x\nP/S 0.6x 0.6x 0.5x 0.4x 0.4x 0.4x 0.4x 0.3x 0.3x\nEV/Doanh thu 0.8x 0.8x 0.6x 0.6x 0.7x 0.7x 0.7x 0.6x 0.6x\nPEG — 0.1x -0.1x 0.0x -0.2x 0.9x 0.8x 0.8x 0.7x\nSuất sinh lợi cổ tức 0 0 0 0 0 0 0 0 0\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 187 186 218 244 266 291 317 347 378\nTăng trưởng doanh thu — -0.8% 17.2% 11.9% 9.2% 9.2% 9.2% 9.2% 9.2%\nLợi nhuận gộp 38 37 64 81 66 72 79 86 94\nBiên lợi nhuận gộp 20.0% 20.0% 29.5% 33.3% 24.8% 24.8% 24.8% 24.8% 24.8%\nGVHB trừ khấu hao -150 -149 -154 -163 -200 -219 -239 -261 -285\nChi phí bán hàng và quản lý -60 -50 -50 -47 -53 -58 -64 -69 -76\nDoanh thu tài chính 3 1 0 1 — — — — —\nChi phí tài chính -16 -8 -7 -5 -4 -4 -4 -4 -4\nEBITDA -14 -4 21 39 23 25 27 30 32\nTỷ suất EBITDA -7.2% -2.3% 9.6% 16.2% 8.6% 8.6% 8.6% 8.6% 8.6%\nKhấu hao 9 8 7 6 10 11 12 13 14\nLợi nhuận từ HĐKD / EBIT -22 -12 14 34 13 14 15 17 18\nBiên lợi nhuận HĐKD / EBIT -12.0% -6.7% 6.4% 13.8% 4.8% 4.8% 4.8% 4.8% 4.8%\nLợi nhuận khác -16 -8 -7 -5 0 0 0 0 0\nChi phí lãi vay ròng -8 -7 -5 -4 -4 -4 -4 -4 -4\nNghiên cứu cổ phiếu 11\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThuế 0 0 0 0 0 0 0 0 0\nThuế suất thực tế -0.1% 0.0% 0.0% 0.5% 0.0% 0.0% 0.0% 0.0% 0.0%\nLNST sau CĐKKS / LNST CĐ mẹ -39 -20 7 29 8 10 11 12 14\nBiên lợi nhuận ròng -20.8% -10.8% 3.2% 11.7% 3.2% 3.3% 3.4% 3.5% 3.6%\nTiền mặt từ hoạt động kinh -77 6 9 3 10 14 16 18 20\ndoanh\nSố lượng cổ phiếu (triệu) 13 13 13 13 14 14 14 14 14\nEPS -3,063 -1,583 545 2,030 597 680 771 869 977\nEPS hiệu chỉnh -3,063 -1,583 545 2,030 597 680 771 869 977\nTăng trưởng EPS hiệu chỉnh — -48.3% -134.4% 272.5% -70.6% 13.9% 13.4% 12.7% 12.4%\nPhương pháp định giá và nguồn dữ liệu\nPHƯƠNG PHÁP VÀ GIẢ ĐỊNH CHÍNH\nBáo cáo trình bày nguồn dữ liệu, giả định dự phóng và phương pháp định giá để các kết luận chính có thể được\nđối chiếu. Những khoảng trống dữ liệu trọng yếu được công khai trong bản nháp phân tích và phải được xử lý\ntrước khi phát hành cho khách hàng.\nHạng mục Diễn giải\nSố liệu định lượng lấy từ đâu Doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt và số cổ phiếu lấy trực tiếp\ntừ Báo cáo tài chính (BCTC) đã chuẩn hóa; giá, vốn hóa và thanh khoản lấy từ\ndữ liệu thị trường. Các số liệu được đối chiếu với báo cáo gốc của doanh\nnghiệp. [1]\nVì sao dự phóng theo cách này Mỗi dòng dự phóng nối tiếp số liệu lịch sử: tăng trưởng doanh thu, biên lợi\nnhuận, vốn lưu động, chi đầu tư và thuế được kéo dài từ xu hướng quá khứ\nvà đặc thù ngành dược, để dòng tiền dự phóng bám sát năng lực thực tế của\ndoanh nghiệp thay vì giả định tùy ý. [1][2]\nCách tính giá mục tiêu Từ dự phóng, mô hình tính định giá tương đối theo P/E doanh nghiệp cùng\nngành, chiết khấu về hiện tại bằng chi phí vốn bình quân (WACC), cộng giá\ntrị cuối kỳ, trừ nợ ròng rồi chia cho số cổ phiếu đang lưu hành để ra giá trị\nmỗi cổ phần. [2]\nCách ra khuyến nghị Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. Mua\nnếu >20%, Bán nếu <-10%, còn lại là Giữ; nếu thiếu target mô hình đủ dùng\nthì xếp Theo dõi.\nKết quả hiện tại Giá hiện tại 8,300 VND, giá mục tiêu 11,620 VND, tiềm năng tăng/giảm\n+40.0%, tổng lợi suất kỳ vọng +40.0%, khuyến nghị: Mua.\nThời điểm giá thị trường Giá hiện tại được ghi nhận tại ngày 2026-06-18; báo cáo được tạo lúc 2026-\n06-20 02:30:42+07:00. Báo cáo ưu tiên giá thị trường mới nhất tại thời điểm\nNghiên cứu cổ phiếu 12\nHạng mục Diễn giải\ntạo báo cáo.\nNgười đọc tự kiểm chứng thế Mọi giả định đều hiển thị trong bảng dự phóng, mô hình định giá và ma trận\nnào độ nhạy. Nếu không đồng ý với giả định về chi phí vốn bình quân (WACC),\ntăng trưởng dài hạn, biên lợi nhuận hay vốn lưu động, người đọc có thể thay\nđổi và thấy ngay kết luận định giá thay đổi tương ứng. Mỗi nhận định định\ntính đều có đánh số [n] dẫn về nguồn ở mục Chú giải nguồn trích dẫn bên\ndưới.\nMinh chứng Chi tiết\nSố vết công thức 6 vết; phương pháp: wacc, fcff, fcfe, terminal_value, blend_dcf,\nsensitivity_matrix\nNguồn định giá tương đối vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nKiểm soát giá mục tiêu Raw model=37,920 VND; headline=11,620 VND; band=4,980-11,620 VND;\nđiều chỉnh=neo về cận trên\nTrạng thái dữ liệu và phần còn thiếu\nChưa đủ dữ liệu kiểm chứng cho: lịch dự phóng nợ vay.\nCHÚ GIẢI NGUỒN TRÍCH DẪN\n[1] Dữ liệu tài chính & thị trường — Báo cáo tài chính (BCTC) đã chuẩn hóa và dữ liệu giao dịch thị trường; dùng\ncho mọi số liệu và nhận định về doanh thu, lợi nhuận, dòng tiền, nợ vay, vốn lưu động, biên lợi nhuận và định\ngiá.\n[2] Mô hình định giá nội bộ — dự phóng dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết khấu theo\nchi phí vốn bình quân (WACC), giá trị cuối kỳ, nợ ròng, số cổ phiếu và giá mục tiêu.\nTại thời điểm lập báo cáo, hệ thống chưa thu thập được bài báo bên ngoài phù hợp từ các nguồn được phép.\nPhần nhận định định tính được xây dựng từ báo cáo tài chính, công bố chính thức, dữ liệu định lượng và so sánh\ncùng ngành. Đây là hạn chế về coverage nguồn tin, không phải xác nhận rằng doanh nghiệp không có sự kiện\nmới.\nTUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM\nBáo cáo này chỉ nhằm mục đích cung cấp thông tin và không phải là lời mời mua hoặc bán chứng khoán. Nhà\nđầu tư cần tự đánh giá khẩu vị rủi ro và tham khảo ý kiến chuyên gia được cấp phép trước khi ra quyết định.\nNghiên cứu cổ phiếu 13"
+      "text": "Nghiên cứu cổ phiếu BÁO CÁO CẬP NHẬT ĐỊNH GIÁ\nNGÀNH DƯỢC PHẨM Ngày 2026-06-22\nCONG TY CO PHAN DUOC LAM DONG - LADOPHAR (LDP VN) HNX: LDP\nNhóm phân tích\nKhuyến nghị · HNX: LDP\nBáo cáo cập nhật\nMua\nHNX: LDP\nGiá mục tiêu: 11,620 VND | Tiềm năng tăng/giảm: +40.0% | Ngày\nDược phẩm\ngiá: 2026-06-18 | Tạo: 2026-06-22 16:10\nGiá mục tiêu 11,620 VND\nCong ty Co phan Duoc Lam Dong - Ladophar (LDP) là doanh nghiệp\nGiá hiện tại 8,300 dược phẩm có nền doanh thu 244 tỷ đồng với biên lợi nhuận gộp\n(VND) 33.3%, đủ để hỗ trợ tăng trưởng doanh thu dự phóng 9.2% mà không\ncần mở rộng đòn bẩy vận hành quá mức. Mô hình định giá cho giá mục\nNgày giá thị 2026-06-18\ntiêu 11,620 VND so với thị giá 8,300 VND, biên tiềm năng 40.0%.\ntrường\nKhoảng giá trị hợp lý theo ma trận độ nhạy trải từ chưa đủ dữ liệu công\nThời điểm tạo 2026-06-22 bố đến chưa đủ dữ liệu công bố, phản ánh mức độ không chắc chắn của\nbáo cáo 16:10 các giả định dài hạn. Luận điểm đầu tư xoay quanh ba câu hỏi: (i) doanh\nnghiệp có giữ được biên gộp trước áp lực chi phí nguyên liệu API và tỷ\nTỷ lệ +40.0% giá không? (ii) kỷ luật chi phí bán hàng và quản lý có đảm bảo biên EBIT\ntăng/giảm\nkhông bị xói mòn khi tăng doanh thu? (iii) chi đầu tư dài hạn phục vụ\nnâng chuẩn nhà máy GMP-EU có phá vỡ cấu trúc dòng tiền tự do hay\nTổng tỷ suất lợi +40.0%\nkhông? Ba câu hỏi này quyết định độ tin cậy của kết quả mô hình FCFF\nnhuận\nvà từ đó quyết định giá trị hợp lý. Rủi ro trọng yếu là kết quả đấu thầu\nETC và biến động giá API — hai yếu tố này tác động đồng thời lên cả\ndoanh thu lẫn biên, và là nguồn sai lệch lớn nhất so với giả định cơ sở.\n[1][2]\nLuận điểm cập nhật\nCong ty Co phan Duoc Lam Dong - Ladophar hoạt động trên hai kênh\nphân phối ETC (đấu thầu bệnh viện) và OTC (nhà thuốc bán lẻ). Doanh\nthu kỳ gần nhất đạt 244 tỷ đồng, tăng 11.9% so với kỳ trước — tốc độ\nnày phù hợp với quỹ đạo lịch sử (CAGR lịch sử 9.2%). Biên lợi nhuận gộp\n33.3% phản ánh năng lực kiểm soát giá vốn API trong môi trường tỷ giá\nbiến động; đây là chỉ số quan trọng hơn tốc độ tăng doanh thu vì nó xác\nđịnh chất lượng lợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt 0.12 lần\nNguồn nhóm phân tích thu thập\ncho thấy mức độ lợi nhuận kế toán được hỗ trợ bởi dòng tiền vận hành\nNhận định: Thị giá 8,300 VND so thực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải\nvới giá mục tiêu 11,620 VND, hàm ý thu bệnh viện. Biến số vận hành trọng yếu là sản lượng và giá trúng\n+40.0%; tín hiệu giá chỉ có giá trị khi thầu ETC, vì kênh này vừa có tỷ trọng doanh thu cao vừa chịu áp lực\nđi cùng thanh khoản và ngày giá chính sách đấu thầu định kỳ. Diễn biến giá API và tiến độ nâng chuẩn\n2026-06-18. nhà máy là hai chỉ báo vận hành cần theo dõi song song với kết quả tài\nchính quý. [1]\nThông tin giao dịch\nĐộng lực tăng trưởng\nMã giao dịch LDP VN\nDoanh thu 244 tỷ đồng tăng 11.9% so với kỳ trước, trên nền CAGR lịch\nSàn HNX\nsử 9.2%. Nguồn tăng trưởng chính là mở rộng sản lượng kênh ETC (đấu\nthầu bệnh viện) — kênh này vừa có quy mô lớn vừa bị chi phối bởi chu\nNgành Dược phẩm\nkỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các quý. Kênh\nGiá đóng cửa 8,300\nOTC ổn định hơn nhưng tăng trưởng thấp hơn; nó đóng vai trò giảm\nGiá cao/thấp 7,000 / 14,900 thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần theo dõi: tỷ lệ\n52 tuần trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức độ thâm\nnhập kênh OTC — ba con số này sẽ xác nhận hoặc bác bỏ giả định tăng\nVốn hóa 105\ntrưởng của mô hình. [1]\nSố lượng cổ 13\nphiếu\nKLGD bình 153,267\nquân 30 phiên\nTỷ lệ sở hữu N/A\nnước ngoài\nTriển vọng kinh doanh và tài chính\nCẬP NHẬT HOẠT ĐỘNG KINH DOANH\nCong ty Co phan Duoc Lam Dong - Ladophar hoạt động trên hai kênh phân phối ETC (đấu thầu bệnh viện) và\nOTC (nhà thuốc bán lẻ). Doanh thu kỳ gần nhất đạt 244 tỷ đồng, tăng 11.9% so với kỳ trước — tốc độ này phù\nhợp với quỹ đạo lịch sử (CAGR lịch sử 9.2%). Biên lợi nhuận gộp 33.3% phản ánh năng lực kiểm soát giá vốn API\ntrong môi trường tỷ giá biến động; đây là chỉ số quan trọng hơn tốc độ tăng doanh thu vì nó xác định chất lượng\nlợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt 0.12 lần cho thấy mức độ lợi nhuận kế toán được hỗ trợ bởi dòng\ntiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải thu bệnh viện. Biến số vận\nhành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu cao vừa chịu áp lực\nchính sách đấu thầu định kỳ. Diễn biến giá API và tiến độ nâng chuẩn nhà máy là hai chỉ báo vận hành cần theo\ndõi song song với kết quả tài chính quý. [1]\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A doanh thu 244 tỷ đồng, tăng +11.9% so với 2024A; biên EBITDA +6.6 điểm % và biên EBIT\n+7.4 điểm %. Nếu doanh thu tăng nhưng hai biên này không mở rộng, luận điểm tăng trưởng phải dựa vào chất\nlượng chi phí chứ không chỉ vào quy mô.\nNghiên cứu cổ phiếu 2\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A biên gộp 33.3% (+3.8 điểm % so với kỳ trước), biên ròng 11.7% (+8.5 điểm %), ROE 14.9%\n(+7.9 điểm % so với 2024A). Chênh lệch giữa biên lợi nhuận và ROE là tín hiệu về hiệu quả sử dụng vốn, không\nphải chỉ là biến động kế toán.\nKẾT QUẢ TÀI CHÍNH CHÍNH\nDoanh thu 244 tỷ đồng với biên lợi nhuận ròng 11.7% và biên gộp 33.3% vẽ nên bức tranh một doanh nghiệp có\nkhả năng tạo lợi nhuận tương đối ổn định, song phụ thuộc vào kiểm soát chi phí hơn là tăng trưởng sản lượng\nđột biến. Điểm đáng chú ý là tỷ lệ chuyển đổi tiền mặt 0.12 lần. Tỷ lệ này báo hiệu cần kiểm tra chặt hơn chất\nlượng thu tiền và vốn lưu động. Đây là cơ chế giải thích tại sao biên lợi nhuận ròng 11.7% không nhất thiết tương\nđương với khả năng tạo dòng tiền tự do. Biến động lợi nhuận giữa các năm chủ yếu đến từ ba nguồn: (1) thay\nđổi giá vốn API/tỷ giá; (2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí bán hàng và quản lý liên quan đấu thầu. Những\nyếu tố này được chuẩn hóa thành biến số dự phóng (biên gộp 24.8%, chi phí bán hàng và quản lý 25.2% doanh\nthu) và là cơ sở để phân tích độ nhạy — người đọc có thể kiểm tra xem kết quả mô hình thay đổi như thế nào khi\ntừng giả định dịch chuyển. [1]\nNhận định: Lợi nhuận tăng chậm hơn doanh thu, cho thấy doanh thu mới chưa chuyển hóa trọn vẹn thành lợi\nnhuận. Cần rà soát biên gộp, SG&A và đòn bẩy vận hành trước khi nâng giả định tăng trưởng dài hạn. [1][2]\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 187 186 218 244 266 291 317 347 378\nTăng trưởng doanh thu — -0.8% 17.2% 11.9% 9.2% 9.2% 9.2% 9.2% 9.2%\nLợi nhuận ròng -39 -20 7 29 -6 -6 -7 -7 -8\nTăng trưởng lợi nhuận — -48.3% -134.4% 312.7% -120.0% 8.8% 9.7% 8.8% 9.5%\nEPS điều chỉnh (VND) -3,063 -1,583 545 2,030 -405 -442 -482 -526 -575\nTăng trưởng EPS — -48.3% -134.4% 272.5% -120.0% 9.1% 9.0% 9.1% 9.3%\nNghiên cứu cổ phiếu 3\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE -34.6% -21.8% 7.0% 14.9% -3.1% -3.5% -3.9% -4.5% -5.1%\nROA -17.0% -10.3% 3.3% 9.3% -1.9% -2.0% -2.2% -2.4% -2.7%\nNợ ròng / EBITDA -3.5x -10.4x 1.7x 0.9x 9.3x 12.6x 14.8x 16.1x 16.7x\nP/E -2.7x -5.2x 15.2x 4.1x -20.5x -18.8x -17.2x -15.8x -14.4x\nP/B 0.9x 1.1x 1.1x 0.6x 0.6x 0.7x 0.7x 0.7x 0.7x\nCẦU NỐI LỢI NHUẬN 2025A-2026F\nĐối chiếu trực tiếp với số liệu công bố trong mô hình định giá.\nChỉ tiêu 2025A 2026F Chênh lệch Nhận định\nDoanh thu thuần 244 266 +9.2% Cơ sở kiểm tra mức tăng lợi nhuận.\nBiên lợi nhuận gộp 33.3% 24.8% -852 bps Biến động biên trong ngưỡng theo\ndõi.\nChi phí bán hàng và quản lý -47 -67 +41.5% Chi phí vận hành tăng cùng quy mô\ndoanh thu.\nBiên lợi nhuận HĐKD / EBIT 13.8% -0.5% -1429 bps Biến động biên trong ngưỡng theo\ndõi.\nLNST sau CĐKKS / LNST CĐ 29 -6 -120.0% Đối chiếu với tăng trưởng doanh\nmẹ thu và giả định mô hình.\nBiên lợi nhuận ròng 11.7% -2.1% -1385 bps Biến động biên trong ngưỡng theo\ndõi.\nEPS 2,030 -405 -120.0% Đối chiếu với tăng trưởng doanh\nthu và giả định mô hình.\nĐỘNG LỰC DỰ PHÓNG\nDoanh thu 244 tỷ đồng tăng 11.9% so với kỳ trước, trên nền CAGR lịch sử 9.2%. Nguồn tăng trưởng chính là mở\nrộng sản lượng kênh ETC (đấu thầu bệnh viện) — kênh này vừa có quy mô lớn vừa bị chi phối bởi chu kỳ đấu\nthầu định kỳ, tạo ra sự biến động không đều giữa các quý. Kênh OTC ổn định hơn nhưng tăng trưởng thấp hơn;\nnó đóng vai trò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần theo dõi: tỷ lệ trúng thầu so với\ndự thầu ETC, tiến độ đầu tư công suất và mức độ thâm nhập kênh OTC — ba con số này sẽ xác nhận hoặc bác bỏ\ngiả định tăng trưởng của mô hình. [1]\nBiên lợi nhuận gộp hiện tại 33.3%, mô hình kỳ vọng biên gộp thu hẹp nhẹ so với mức lịch sử (24.8% dự phóng).\nÁp lực chính lên biên gộp là chi phí API nhập khẩu và tỷ giá USD/VND: khi hai yếu tố này tăng cùng chiều, giá\nvốn hàng bán tăng và biên gộp bị thu hẹp ngay trong quý tiếp theo vì chu kỳ nhập khẩu thường ngắn. Dư địa\nhấp thụ cú sốc này bị giới hạn bởi biên lợi nhuận ròng hiện ở mức 11.7% — không đủ đệm để hấp thụ nếu biên\ngộp giảm quá 2–3 điểm phần trăm. Chi phí bán hàng và quản lý 25.2% doanh thu là lớp chi phí quyết định\nkhoảng cách biên gộp đến biên EBIT; đặc biệt chi phí phục vụ đấu thầu ETC có xu hướng không co giãn theo\ndoanh thu. Thuế suất hiệu dụng 0.2% là bước chuyển cuối từ EBIT sang lợi nhuận sau thuế — biến số này ít biến\nđộng nhưng bất kỳ thay đổi ưu đãi thuế nào sẽ tác động trực tiếp. Chỉ báo cần theo dõi: giá API theo chỉ số thị\nNghiên cứu cổ phiếu 4\ntrường nguyên liệu dược, tỷ giá USD/VND, và biên gộp thực tế quý tiếp theo so với giả định — đây là tín hiệu\nsớm cho việc cần điều chỉnh mô hình. [1]\nNhận định: Biên lợi nhuận gộp mở rộng (29.5% -> 33.3%). Biên mở rộng hỗ trợ dự phóng lợi nhuận; cần theo\ndõi giá vốn và cạnh tranh. [1]\nNguồn: Dự phóng của nhóm phân tích dựa trên giả định đã phê duyệt.\nNhận định: 2026F hàm ý doanh thu tăng +9.2% so với 2025A, trong khi biên gộp dự phóng 24.8% so với mức\nthực tế 33.3%. Đây là điểm kiểm tra trọng yếu vì sai lệch nhỏ ở tăng trưởng hoặc biên gộp sẽ truyền trực tiếp vào\nEBIT và FCFF.\nNghiên cứu cổ phiếu 5\nĐỘNG LỰC DỰ PHÓNG CHÍNH\nGiả định biến số chính được hiệu chỉnh từ dữ liệu lịch sử và định hướng kinh doanh hiện tại.\nChỉ tiêu Giả định cơ sở Liên kết tài chính\nTăng trưởng doanh thu 9.2% Doanh thu dẫn tới EBIT và dòng tiền\ntự do\nBiên lợi nhuận gộp 24.8% Giá vốn dẫn tới lợi nhuận gộp\nChi phí bán hàng và quản lý / 25.2% Chi phí vận hành dẫn tới biên EBIT\ndoanh thu\nKhấu hao / doanh thu 3.8% EBIT và lá chắn thuế\nChi đầu tư / doanh thu 13.6% Dòng tiền tự do và mở rộng công suất\nThuế suất hiệu dụng 0.2% LNST và NOPAT\nChuyển đổi dòng tiền 2025 12.1% Bất thường — cần soi vốn lưu động\n(không dùng làm luận điểm bền vững)\nWACC 12.1% Tỷ lệ chiết khấu dòng tiền\nTăng trưởng dài hạn 3.0% Giá trị cuối kỳ trong mô hình chiết\nkhấu dòng tiền\nĐịnh giá và độ nhạy\nLUẬN ĐIỂM ĐỊNH GIÁ\nDự phóng theo phương pháp dự phóng theo biến số, đi từ biến số kinh doanh tới dòng tài chính tới định giá. Giả\nđịnh cơ sở: tăng trưởng doanh thu 9.2% (căn cứ CAGR lịch sử 9.2% và kế hoạch mở rộng ETC/OTC); biên lợi\nnhuận gộp 24.8% (phản ánh áp lực API và cơ cấu sản phẩm); chi phí bán hàng và quản lý 25.2% doanh thu; thuế\nsuất hiệu dụng 0.2%; chi đầu tư 13.6% doanh thu. Biến số có tác động lớn nhất tới giá trị là: (1) tăng trưởng\ndoanh thu — mỗi điểm phần trăm hụt so với giả định cơ sở sẽ kéo EBIT và FCFF giảm theo tỷ lệ; (2) biên lợi\nnhuận gộp — biến động chi phí API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) chi\nđầu tư và vốn lưu động — quyết định bao nhiêu phần EBIT còn lại dưới dạng FCFF sau tái đầu tư. Hai tham số\nđịnh giá quan trọng nhất là WACC 12.1% và tăng trưởng dài hạn 3.0%; chúng xác định cách quy đổi FCFF tương\nlai về hiện giá. Độ nhạy của giá mục tiêu với hai tham số này cao hơn bất kỳ biến số vận hành nào — đây là lý do\nma trận độ nhạy là bắt buộc chứ không phải tùy chọn. Rủi ro sai lệch lớn nhất là khi giả định tăng trưởng lạc\nquan gặp thực tế đấu thầu thắt chặt hoặc giá API tăng đột biến cùng lúc. [1][2]\nNhận định: Tiềm năng tăng/giảm giá theo mô hình định giá là +40.0%. Trạng thái khuyến nghị theo mô hình:\nMua. [2]\nCẦU NỐI WACC\nChỉ tiêu Giá trị\nLãi suất phi rủi ro 4.0%\nBeta 0.85\nNghiên cứu cổ phiếu 6\nChỉ tiêu Giá trị\nPhần bù rủi ro thị trường 8.0%\nChi phí vốn chủ sở hữu 13.8%\nChi phí nợ vay 8.0%\nThuế suất 0.2%\nWACC 12.1%\nCẦU NỐI ĐỊNH GIÁ FCFF\nChỉ tiêu Giá trị\nPV giá trị cuối kỳ -63\nGiá trị doanh nghiệp -151\nTiền mặt và đầu tư ngắn hạn 19\nNợ vay 57\nGiá trị vốn chủ sở hữu -187\nSố cổ phiếu lưu hành (triệu) 14\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 187 186 218 244 266 291 317 347 378\nTăng trưởng doanh thu — -0.8% 17.2% 11.9% 9.2% 9.2% 9.2% 9.2% 9.2%\nLợi nhuận gộp 38 37 64 81 66 72 79 86 94\nBiên lợi nhuận gộp 20.0% 20.0% 29.5% 33.3% 24.8% 24.8% 24.8% 24.8% 24.8%\nGVHB trừ khấu hao -150 -149 -154 -163 -200 -219 -239 -261 -285\nChi phí bán hàng và quản lý -60 -50 -50 -47 -67 -73 -80 -87 -96\nDoanh thu tài chính 3 1 0 1 — — — — —\nChi phí tài chính -16 -8 -7 -5 -4 -5 -5 -6 -6\nEBITDA -14 -4 21 39 9 10 11 12 13\nTỷ suất EBITDA -7.2% -2.3% 9.6% 16.2% 3.4% 3.4% 3.4% 3.4% 3.4%\nKhấu hao 9 8 7 6 10 11 12 13 14\nLợi nhuận từ HĐKD / EBIT -22 -12 14 34 -1 -1 -1 -2 -2\nBiên lợi nhuận HĐKD / EBIT -12.0% -6.7% 6.4% 13.8% -0.5% -0.4% -0.4% -0.4% -0.4%\nNghiên cứu cổ phiếu 7\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nLợi nhuận khác -16 -8 -7 -5 0 0 0 0 0\nChi phí lãi vay ròng -8 -7 -5 -4 -4 -5 -5 -6 -6\nThuế 0 0 0 0 0 0 0 0 0\nThuế suất thực tế -0.1% 0.0% 0.0% 0.5% 0.0% 0.0% 0.0% 0.0% 0.0%\nLNST sau CĐKKS / LNST CĐ -39 -20 7 29 -6 -6 -7 -7 -8\nmẹ\nBiên lợi nhuận ròng -20.8% -10.8% 3.2% 11.7% -2.1% -2.1% -2.1% -2.1% -2.1%\nTiền mặt từ hoạt động kinh -77 6 9 3 -4 -1 -2 -2 -2\ndoanh\nSố lượng cổ phiếu (triệu) 13 13 13 13 14 14 14 14 14\nEPS -3,063 -1,583 545 2,030 -405 -442 -482 -526 -575\nEPS hiệu chỉnh -3,063 -1,583 545 2,030 -405 -442 -482 -526 -575\nTăng trưởng EPS hiệu chỉnh — -48.3% -134.4% 272.5% -120.0% 9.1% 9.0% 9.1% 9.3%\nĐỘ NHẠY THEO DRIVER\nMinh họa độ nhạy theo kịch bản; báo cáo chính thức cần giả định được phê duyệt.\nThận trọng Cơ sở Tích cực\nGiá mục tiêu — — —\nTiềm năng tăng/giảm — — —\nÁp lực tăng trưởng doanh thu 6.2% 9.2% 12.2%\nÁp lực biên lợi nhuận gộp 22.8% 24.8% 26.8%\nÁp lực WACC 13.1% 12.1% 11.1%\nRủi ro đầu tư\nYẾU TỐ CẦN THEO DÕI\nRủi ro và yếu tố hỗ trợ của Cong ty Co phan Duoc Lam Dong - Ladophar đều gắn với cơ chế truyền dẫn tài chính\ncụ thể, không đơn thuần là liệt kê định tính. Rủi ro giảm giá theo mức độ ưu tiên: (1) giá trúng thầu ETC thấp hơn\nkỳ vọng — đây là rủi ro trọng yếu nhất vì tác động đồng thời lên doanh thu và biên gộp, tức là thu hẹp FCFF từ\ncả hai phía; (2) giá API nhập khẩu và tỷ giá USD/VND tăng — ảnh hưởng trực tiếp đến giá vốn, thu hẹp biên gộp\n24.8% giả định; (3) kéo dài chu kỳ phải thu bệnh viện — làm tăng ΔNWC và giảm FCFF dù lợi nhuận kế toán vẫn\ncao; (4) cạnh tranh generic gia tăng — tạo áp lực giảm giá trên sản phẩm chủ lực; (5) thay đổi chính sách đăng ký\nlưu hành và tiêu chuẩn GMP. Yếu tố hỗ trợ: trúng thêm thầu ETC mới là yếu tố có tác động lớn nhất và gần nhất\nđến FCFF; cải thiện cơ cấu sản phẩm biên cao (chuyển dần từ generic sang branded generic) nâng biên gộp một\ncách bền vững hơn mở rộng sản lượng thuần túy; hoàn tất đầu tư GMP-EU mở rộng tập khách hàng xuất khẩu,\ngiảm phụ thuộc vào chu kỳ đấu thầu nội địa. Mỗi yếu tố cần gắn với chỉ báo sớm cụ thể: kết quả đấu thầu ETC\nNghiên cứu cổ phiếu 8\nhàng quý, biến động giá API theo chỉ số thị trường nguyên liệu dược, vòng quay phải thu so với cùng kỳ. Khi có\ndữ liệu mới, nhà phân tích nên chạy lại ma trận độ nhạy để xác nhận kết luận định giá còn hiệu lực. [1]\nRỦI RO ĐẦU TƯ\nRủi ro Mức độ Theo dõi\nÁp lực giá thầu thuốc Cao Kết quả đấu thầu ETC\nBiến động nguyên liệu và tỷ Trung bình API, USD/VND\ngiá\nCạnh tranh generic Trung bình Thị phần và giá bán\nPhụ lục bảng tài chính\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 187 186 218 244 266 291 317 347 378\nTăng trưởng doanh thu — -0.8% 17.2% 11.9% 9.2% 9.2% 9.2% 9.2% 9.2%\nLợi nhuận ròng -39 -20 7 29 -6 -6 -7 -7 -8\nTăng trưởng lợi nhuận — -48.3% -134.4% 312.7% -120.0% 8.8% 9.7% 8.8% 9.5%\nEPS điều chỉnh (VND) -3,063 -1,583 545 2,030 -405 -442 -482 -526 -575\nTăng trưởng EPS — -48.3% -134.4% 272.5% -120.0% 9.1% 9.0% 9.1% 9.3%\nROE -34.6% -21.8% 7.0% 14.9% -3.1% -3.5% -3.9% -4.5% -5.1%\nROA -17.0% -10.3% 3.3% 9.3% -1.9% -2.0% -2.2% -2.4% -2.7%\nNợ ròng / EBITDA -3.5x -10.4x 1.7x 0.9x 9.3x 12.6x 14.8x 16.1x 16.7x\nP/E -2.7x -5.2x 15.2x 4.1x -20.5x -18.8x -17.2x -15.8x -14.4x\nP/B 0.9x 1.1x 1.1x 0.6x 0.6x 0.7x 0.7x 0.7x 0.7x\nCÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThay đổi vốn lưu động 47 -6 11 26 8 6 7 7 8\nChi đầu tư 4 0 3 63 36 32 28 22 14\nĐầu tư vào công ty liên kết/liên — — — — — — — — —\ndoanh\nCác khoản mục dòng tiền khác — — — — — — — — —\nNghiên cứu cổ phiếu 9\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDòng tiền tự do -81 6 6 -60 -36 -29 -24 -18 -10\nPhát hành cổ phiếu — — — — — — — — —\nCổ tức 0 0 0 0 0 0 0 0 0\nTổng nợ phải trả 116 102 108 116 122 127 133 140 148\nThay đổi tổng nợ phải trả — -14 5 8 5 6 6 7 7\nNợ vay có lãi cuối năm 71 66 55 57 62 68 74 81 88\nThay đổi nợ vay có lãi — -5 -11 2 5 6 6 7 7\nTiền và tương đương tiền 23 22 20 21 -22 -55 -84 -108 -124\nNợ ròng cuối năm (nợ vay có lãi 48 44 35 36 84 123 159 189 212\n- tiền)\nThay đổi nợ ròng — -4 -8 1 47 40 35 30 24\nVốn CSH 112 92 99 191 186 180 173 165 157\nGiá trị sổ sách/cp (VND) 8,854 7,271 7,816 15,075 13,207 12,767 12,283 11,757 11,181\nNợ ròng / VCSH 42.7% 47.3% 35.7% 19.0% 45.1% 68.7% 91.8% 114.1% 135.1%\nNợ ròng / EBITDA -3.5x -10.4x 1.7x 0.9x 9.3x 12.6x 14.8x 16.1x 16.7x\nTổng tài sản 228 195 207 308 307 307 306 306 305\nCHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ\nĐơn vị: lần hoặc %, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE -34.6% -21.8% 7.0% 14.9% -3.1% -3.5% -3.9% -4.5% -5.1%\nROA -17.0% -10.3% 3.3% 9.3% -1.9% -2.0% -2.2% -2.4% -2.7%\nROIC -13.9% -9.1% 10.3% 14.8% -0.4% -0.4% -0.4% -0.4% -0.5%\nWACC 12.1% 12.1% 12.1% 12.1% 12.1% 12.1% 12.1% 12.1% 12.1%\nEVA -26.0% -21.2% -1.8% 2.7% -12.5% -12.5% -12.5% -12.5% -12.6%\nP/E -2.7x -5.2x 15.2x 4.1x -20.5x -18.8x -17.2x -15.8x -14.4x\nEV/EBITDA -11.3x -35.5x 6.7x 3.6x 22.3x 24.5x 25.7x 26.1x 25.9x\nEV/FCF -1.9x 24.9x 24.1x -2.4x -5.6x -8.3x -11.6x -17.5x -33.6x\nP/B 0.9x 1.1x 1.1x 0.6x 0.6x 0.7x 0.7x 0.7x 0.7x\nP/S 0.6x 0.6x 0.5x 0.4x 0.4x 0.4x 0.4x 0.3x 0.3x\nNghiên cứu cổ phiếu 10\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nEV/Doanh thu 0.8x 0.8x 0.6x 0.6x 0.8x 0.8x 0.9x 0.9x 0.9x\nPEG — 0.1x -0.1x 0.0x 0.2x -2.1x -1.9x -1.7x -1.5x\nSuất sinh lợi cổ tức 0 0 0 0 0 0 0 0 0\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 187 186 218 244 266 291 317 347 378\nTăng trưởng doanh thu — -0.8% 17.2% 11.9% 9.2% 9.2% 9.2% 9.2% 9.2%\nLợi nhuận gộp 38 37 64 81 66 72 79 86 94\nBiên lợi nhuận gộp 20.0% 20.0% 29.5% 33.3% 24.8% 24.8% 24.8% 24.8% 24.8%\nGVHB trừ khấu hao -150 -149 -154 -163 -200 -219 -239 -261 -285\nChi phí bán hàng và quản lý -60 -50 -50 -47 -67 -73 -80 -87 -96\nDoanh thu tài chính 3 1 0 1 — — — — —\nChi phí tài chính -16 -8 -7 -5 -4 -5 -5 -6 -6\nEBITDA -14 -4 21 39 9 10 11 12 13\nTỷ suất EBITDA -7.2% -2.3% 9.6% 16.2% 3.4% 3.4% 3.4% 3.4% 3.4%\nKhấu hao 9 8 7 6 10 11 12 13 14\nLợi nhuận từ HĐKD / EBIT -22 -12 14 34 -1 -1 -1 -2 -2\nBiên lợi nhuận HĐKD / EBIT -12.0% -6.7% 6.4% 13.8% -0.5% -0.4% -0.4% -0.4% -0.4%\nLợi nhuận khác -16 -8 -7 -5 0 0 0 0 0\nChi phí lãi vay ròng -8 -7 -5 -4 -4 -5 -5 -6 -6\nThuế 0 0 0 0 0 0 0 0 0\nThuế suất thực tế -0.1% 0.0% 0.0% 0.5% 0.0% 0.0% 0.0% 0.0% 0.0%\nLNST sau CĐKKS / LNST CĐ mẹ -39 -20 7 29 -6 -6 -7 -7 -8\nBiên lợi nhuận ròng -20.8% -10.8% 3.2% 11.7% -2.1% -2.1% -2.1% -2.1% -2.1%\nTiền mặt từ hoạt động kinh -77 6 9 3 -4 -1 -2 -2 -2\ndoanh\nSố lượng cổ phiếu (triệu) 13 13 13 13 14 14 14 14 14\nEPS -3,063 -1,583 545 2,030 -405 -442 -482 -526 -575\nNghiên cứu cổ phiếu 11\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nEPS hiệu chỉnh -3,063 -1,583 545 2,030 -405 -442 -482 -526 -575\nTăng trưởng EPS hiệu chỉnh — -48.3% -134.4% 272.5% -120.0% 9.1% 9.0% 9.1% 9.3%\nPhương pháp định giá và nguồn dữ liệu\nPHƯƠNG PHÁP VÀ GIẢ ĐỊNH CHÍNH\nBáo cáo trình bày nguồn dữ liệu, giả định dự phóng và phương pháp định giá để các kết luận chính có thể được\nđối chiếu. Những khoảng trống dữ liệu trọng yếu được công khai trong bản nháp phân tích và phải được xử lý\ntrước khi phát hành cho khách hàng.\nHạng mục Diễn giải\nSố liệu định lượng lấy từ đâu Doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt và số cổ phiếu lấy trực tiếp\ntừ Báo cáo tài chính (BCTC) đã chuẩn hóa; giá, vốn hóa và thanh khoản lấy từ\ndữ liệu thị trường. Các số liệu được đối chiếu với báo cáo gốc của doanh\nnghiệp. [1]\nVì sao dự phóng theo cách này Mỗi dòng dự phóng nối tiếp số liệu lịch sử: tăng trưởng doanh thu, biên lợi\nnhuận, vốn lưu động, chi đầu tư và thuế được kéo dài từ xu hướng quá khứ\nvà đặc thù ngành dược, để dòng tiền dự phóng bám sát năng lực thực tế của\ndoanh nghiệp thay vì giả định tùy ý. [1][2]\nCách tính giá mục tiêu Từ dự phóng, mô hình tính định giá tương đối theo P/E doanh nghiệp cùng\nngành, chiết khấu về hiện tại bằng chi phí vốn bình quân (WACC), cộng giá\ntrị cuối kỳ, trừ nợ ròng rồi chia cho số cổ phiếu đang lưu hành để ra giá trị\nmỗi cổ phần. [2]\nCách ra khuyến nghị Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. Mua\nnếu >20%, Bán nếu <-10%, còn lại là Giữ; nếu thiếu target mô hình đủ dùng\nthì xếp Theo dõi.\nKết quả hiện tại Giá hiện tại 8,300 VND, giá mục tiêu 11,620 VND, tiềm năng tăng/giảm\n+40.0%, tổng lợi suất kỳ vọng +40.0%, khuyến nghị: Mua.\nThời điểm giá thị trường Giá hiện tại được ghi nhận tại ngày 2026-06-18; báo cáo được tạo lúc 2026-\n06-22 16:10:50+07:00. Báo cáo ưu tiên giá thị trường mới nhất tại thời điểm\ntạo báo cáo.\nNgười đọc tự kiểm chứng thế Mọi giả định đều hiển thị trong bảng dự phóng, mô hình định giá và ma trận\nnào độ nhạy. Nếu không đồng ý với giả định về chi phí vốn bình quân (WACC),\ntăng trưởng dài hạn, biên lợi nhuận hay vốn lưu động, người đọc có thể thay\nđổi và thấy ngay kết luận định giá thay đổi tương ứng. Mỗi nhận định định\ntính đều có đánh số [n] dẫn về nguồn ở mục Chú giải nguồn trích dẫn bên\ndưới.\nNghiên cứu cổ phiếu 12\nMinh chứng Chi tiết\nSố vết công thức 6 vết; phương pháp: wacc, fcff, fcfe, terminal_value, blend_dcf,\nsensitivity_matrix\nNguồn định giá tương đối vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nKiểm soát giá mục tiêu Raw model=37,920 VND; headline=11,620 VND; band=4,980-11,620 VND;\nđiều chỉnh=neo về cận trên\nTrạng thái dữ liệu\nKhông ghi nhận khoảng trống dữ liệu trọng yếu trong các mục bắt buộc.\nCHÚ GIẢI NGUỒN TRÍCH DẪN\n[1] Dữ liệu tài chính & thị trường — Báo cáo tài chính (BCTC) đã chuẩn hóa và dữ liệu giao dịch thị trường; dùng\ncho mọi số liệu và nhận định về doanh thu, lợi nhuận, dòng tiền, nợ vay, vốn lưu động, biên lợi nhuận và định\ngiá.\n[2] Mô hình định giá nội bộ — dự phóng dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết khấu theo\nchi phí vốn bình quân (WACC), giá trị cuối kỳ, nợ ròng, số cổ phiếu và giá mục tiêu.\nTại thời điểm lập báo cáo, hệ thống chưa thu thập được bài báo bên ngoài phù hợp từ các nguồn được phép.\nPhần nhận định định tính được xây dựng từ báo cáo tài chính, công bố chính thức, dữ liệu định lượng và so sánh\ncùng ngành. Đây là hạn chế về coverage nguồn tin, không phải xác nhận rằng doanh nghiệp không có sự kiện\nmới.\nTUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM\nBáo cáo này chỉ nhằm mục đích cung cấp thông tin và không phải là lời mời mua hoặc bán chứng khoán. Nhà\nđầu tư cần tự đánh giá khẩu vị rủi ro và tham khảo ý kiến chuyên gia được cấp phép trước khi ra quyết định.\nNghiên cứu cổ phiếu 13"
     },
     "explanation_pdf": {
       "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\LDP_explanation.pdf",
       "exists": true,
-      "pages": 6,
-      "text": "Mã cổ phiếu: LDP\nPhụ lục giải trình định giá - LDP\nDoanh nghiệp được phân tích: Cong ty Co phan Duoc Lam Dong - Ladophar.\nTài liệu này là phụ lục chi tiết của báo cáo định giá. Mục tiêu là giải thích vì sao báo cáo chính đưa ra giá mục tiêu,\nmức tăng/giảm kỳ vọng, khuyến nghị và các nhận định trọng tâm bằng dữ liệu đầu vào, công thức, bước tính trung\ngian và cảnh báo cần đọc kèm.\nTrạng thái và giới hạn\nTrạng thái báo cáo: Có thể đọc, kèm công bố phần dữ liệu còn thiếu\nMã lần chạy: run_ldp_20260619T192934_e6ebd92946\nLịch nợ vay chưa đủ để kiểm tra toàn bộ định giá dòng tiền cho cổ đông.\nCần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\nThiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\nKết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nMinh chứng kiểm định\nThành phần Giá trị\nSố vết công thức 6 (wacc, fcff, fcfe, terminal_value, blend_dcf, sensitivity_matrix)\nNguồn định giá tương đối đối chiếu vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nDữ liệu và kiểm định cần bổ sung trước khi phát hành:\n- headline_target_clamped_high\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo trọng yếu; cần đọc cùng bảng tính chi tiết và phần đối chiếu trước khi sử dụng khuyến\nnghị.\nCảnh báo mô hình và dữ liệu:\n- No SG&A or EBIT history — using default SG&A of 20% of revenue\n- CAPEX/revenue dự phóng starts from recent level 13.6% instead of full-history median 1.6%; then tapers to\nmaintenance D&A.\n- TaxPolicy: 2 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\n- Lịch nợ vay dự phóng đang giữ nguyên dư nợ tại số cuối kỳ gần nhất; mức độ tin cậy thấp và cần chuyên viên phân\ntích rà soát.\n- Chi phí lãi vay mới được tính một vòng, chưa lặp đến hội tụ. Phương pháp giữ dư nợ ổn định khiến FCFE cần bổ\nsung lộ trình nợ vay đã phê duyệt.\n- Thiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\n- Thuế suất trong giả định WACC khác thuế suất hiệu dụng trong chính sách thuế; mô hình đang dùng thuế suất theo\nchính sách thuế để tính EBIT sau thuế.\n- Giá trị vốn chủ sở hữu âm nên không tính được giá mục tiêu theo phương pháp này.\n- FCFE thiếu lịch nợ vay đã xác minh: dư nợ được giữ cố định và vay ròng chưa có nguồn từ báo cáo lưu chuyển\ntiền tệ hoặc lịch đáo hạn. Cần lộ trình nợ vay đã phê duyệt.\n- Giá trị cuối kỳ FCFE bằng 0 do thiếu FCFE ở năm dự phóng cuối cùng.\n- Terminal value chiếm 187.0% EV — kết quả phụ thuộc mạnh vào giả định tăng trưởng dài hạn, bắt buộc có độ nhạy\nanalysis\n- EV/EBITDA thiếu dữ liệu: EBITDA unavailable for EV bridge.\n- Cảnh báo nghiêm trọng: cần rà soát thêm dữ liệu đầu vào và giả định định giá.\n- Cảnh báo nghiêm trọng: cần rà soát thêm dữ liệu đầu vào và giả định định giá.\n- Cảnh báo nghiêm trọng: cần rà soát thêm dữ liệu đầu vào và giả định định giá.\n- Thiếu phê duyệt cuối cho khuyến nghị đầu tư.\n- relative_target_deviates_from_market\n- relative_valuation_fallback_pe\nVì sao báo cáo chính kết luận như vậy\nThành phần Giá trị\nGiá thị trường dùng trong báo cáo 8,300\nGiá mục tiêu tính được 11,620\nTăng/giảm so với giá thị trường 40.0%\nKhuyến nghị trong báo cáo chính Mua\nGiá trị theo FCFF —\nGiá trị theo FCFE —\nTrọng số FCFF / FCFE 60.0% / 40.0%\nĐộ lệch FCFF/FCFE —\nWACC 12.1%\nTăng trưởng dài hạn 3.0%\nDoanh thu năm đầu dự phóng 266\nDoanh thu năm cuối dự phóng 378\nLNST năm đầu dự phóng 8\nLNST năm cuối dự phóng 14\nKết luận trong báo cáo chính được nối trực tiếp từ giá thị trường, giá trị nội tại theo dòng tiền, mức tăng/giảm kỳ vọng\nvà các cảnh báo dữ liệu. Nếu FCFF và FCFE cho kết quả lệch lớn, người đọc phải ưu tiên phần kết hợp phương\npháp, phân tích độ nhạy và đối chiếu cảnh báo thay vì chỉ đọc một giá mục tiêu duy nhất.\nCảnh báo cần đọc kèm kết luận:\n- Lịch nợ vay chưa đủ để kiểm tra toàn bộ định giá dòng tiền cho cổ đông.\n- Cần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nChi tiết tính toán định giá\nPhần này trình bày đầy đủ công thức, dữ liệu đầu vào, bước tính trung gian, bảng dự phóng, cầu nối định giá,\nphân tích độ nhạy và cảnh báo để người đọc kiểm tra lại kết quả trong báo cáo chính.\n1. Thông tin chung\nThành phần Giá trị\nMã cổ phiếu LDP\nCông ty Cong ty Co phan Duoc Lam Dong - Ladophar\nSàn HNX\nNgành Dược phẩm\nMã lần chạy run_ldp_20260619T192934_e6ebd92946\nNgày định giá —\nMã ảnh chụp dữ liệu v2snap_360becd5b840b7b1612f\nNăm gốc —\nMã băm tái lập —\n2. Tóm tắt kết quả định giá\nThành phần Giá trị\nGiá hiện tại (VND) 8,300\nThành phần Giá trị\nGiá mục tiêu kết hợp (VND) —\nTiềm năng tăng/giảm —\nKhuyến nghị Mua\nLuật xếp hạng (tổng tỷ suất sinh lời = mức tăng/giảm giá + lợi suất cổ tức): > 20% → Mua; < −10% → Bán; còn lại\n→ Giữ.\n3. Bảng giả định\nThành phần Giá trị\nWACC 12.1%\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nSố năm dự phóng 5\nThuế suất —\nP/E mục tiêu 18.7x\nMức cộng/trừ định giá —\nCác giả định hiện là giá trị mặc định và phải được rà soát, phê duyệt trước khi sử dụng trong báo cáo chính thức.\n4. Dự phóng theo yếu tố dẫn dắt\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 266 291 317 347 378\nGiá vốn hàng bán (COGS) -200 -219 -239 -261 -285\nLợi nhuận gộp 66 72 79 86 94\nChi phí SG&A -53 -58 -64 -69 -76\nEBIT 13 14 15 17 18\nChi phí lãi vay -4 -4 -4 -4 -4\nLợi nhuận trước thuế 8 10 11 12 14\nChi phí thuế -0 -0 -0 -0 -0\nLNST cổ đông mẹ 8 10 11 12 14\nKhấu hao (D&A) 10 11 12 13 14\nCAPEX -36 -32 -28 -22 -14\nEPS (VND) 597 680 771 869 977\nVay ròng (phát hành nợ − trả nợ) 0 0 0 0 0\nDư nợ vay cuối kỳ 57 57 57 57 57\nCổ tức tiền mặt 0 0 0 0 0\nTỷ lệ chi trả cổ tức 0.0% 0.0% 0.0% 0.0% 0.0%\nLogic yếu tố dẫn dắt: doanh thu theo tăng trưởng giả định; biên lợi nhuận dẫn xuất EBIT/LNST; lịch nợ vay chuyển\ntiếp với vay ròng = phát hành nợ − trả nợ; cổ tức theo tỷ lệ chi trả.\n5. Chỉ số tài chính\nChỉ số Công thức 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận gộp lợi nhuận gộp / doanh thu 24.8% 24.8% 24.8% 24.8% 24.8%\nBiên EBIT EBIT / doanh thu 4.8% 4.8% 4.8% 4.8% 4.8%\nChỉ số Công thức 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận ròng lợi nhuận sau thuế / doanh thu 3.2% 3.3% 3.4% 3.5% 3.6%\nROE lợi nhuận sau thuế / vốn chủ sở hữu 4.2% 4.6% 4.9% 5.2% 5.6%\n6. Định giá FCFF\nCông thức: FCFF = EBIT×(1−t) + D&A − CAPEX − ΔNWC\nWACC = 12.1%; tăng trưởng dài hạn g = 3.0%\nKhoản mục 2026F 2027F 2028F 2029F 2030F\nEBIT 13 14 15 17 18\nThuế suất — — — — —\nD&A 10 11 12 13 14\nCAPEX 36 32 28 22 14\nΔNWC 8 6 7 7 8\nFCFF -22 -14 -7 1 10\nHệ số chiết khấu 89.2% 79.6% 71.0% 63.3% 56.5%\nPV(FCFF) -19 -11 -5 0 6\nThành phần Giá trị\nPV dòng tiền dự phóng (Σ PV FCFF) -29\nGiá trị cuối kỳ (Gordon: FCFFₙ×(1+g)/(WACC−g)) 112\nGiá trị hiện tại của giá trị cuối kỳ 63\nTỷ trọng giá trị cuối kỳ / giá trị doanh nghiệp —\n= Giá trị doanh nghiệp (EV) 34\n− Nợ ròng 36\n= Giá trị vốn chủ sở hữu -2\n÷ Số cổ phiếu (triệu) 14\n= Giá/cổ phiếu (FCFF, VND) —\nGiá/cổ phiếu theo FCFF hiển thị — vì giá trị vốn chủ sở hữu âm (-2): dòng tiền tự do âm kéo giá trị doanh nghiệp và\nphần vốn chủ sở hữu xuống dưới 0, nên không thể quy ra giá dương. Đây là kết quả kinh tế của mô hình, không phải\nthiếu dữ liệu.\n7. Định giá FCFE\nCông thức: FCFE = lợi nhuận sau thuế + khấu hao − CAPEX − ΔNWC + vay ròng, chiết khấu theo chi phí vốn chủ sở\nhữu.\nThành phần Giá trị\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nGiá trị vốn chủ sở hữu 0\n÷ Số cổ phiếu (triệu) 14\n= Giá/cổ phiếu (FCFE, VND) —\nGiá/cổ phiếu theo FCFE hiển thị — vì giá trị vốn chủ sở hữu âm (0): dòng tiền cho cổ đông chiết khấu về giá trị âm nên\nkhông quy ra được giá dương. Đây là kết quả kinh tế của mô hình, không phải thiếu dữ liệu.\n8. Kết hợp phương pháp FCFF và FCFE\nCông thức: Giá mục tiêu = 0.60 × Giá_FCFF + 0.40 × Giá_FCFE\nDiễn giải: Chưa thể kết hợp theo trọng số 60/40 vì giá FCFF, giá FCFE, giá mục tiêu kết hợp chưa có giá trị hợp lệ.\nBảng giữ nguyên từng cấu phần để người đọc thấy rõ ô nào không thể tính.\nThành phần Giá trị\nGiá theo FCFF (VND) —\nGiá theo FCFE (VND) —\nTrọng số FCFF / FCFE 0.60 / 0.40\n= Giá mục tiêu kết hợp (VND) —\nChênh lệch FCFF/FCFE —\nChỉ ở dạng nháp Không\n9. P/E dự phóng để đối chiếu\nThành phần Giá trị\nEPS dự phóng (VND) —\nP/E trung vị nhóm so sánh —\nMức cộng/trừ định giá —\nP/E mục tiêu 18.7x\nGiá mục tiêu (VND) —\n10. Phân tích độ nhạy\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n10.1% 773 1,163 1,607 2,119 2,715\n11.1% — 267 599 975 1,404\n12.1% — — — 112 433\n13.1% — — — — —\n14.1% — — — — —\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n11.8% — — — — —\n12.8% — — — — —\n13.8% — — — — —\n14.8% — — — — —\n15.8% — — — — —\nĐộ nhạy P/E dự phóng — EPS năm dự phóng thứ nhất × P/E mục tiêu\nĐộ nhạy P/E dự phóng 10 12 14 16 18\n508 5,080 6,096 7,112 8,128 9,144\n550 5,500 6,600 7,700 8,800 9,900\n597 5,970 7,164 8,358 9,552 10,746\n645 6,450 7,740 9,030 10,320 11,610\n687 6,870 8,244 9,618 10,992 12,366\nĐộ nhạy EV/EBITDA — Giá = (EBITDA × Hệ số − Nợ ròng − Lợi ích cổ đông không kiểm soát + Tài sản ngoài\nhoạt động) / Số cổ phiếu × 1000\nĐộ nhạy EV/EBITDA 7 8 9 10 11\n20 — — — — —\n21 — — — — —\n23 — — — — —\n25 — — — — —\n26 — — — — —\nĐộ nhạy DCF giản lược\nĐộ nhạy DCF giản lược 2.0% 2.5% 3.0% 3.5% 4.0%\n8.0% — — — — —\n9.0% — — — — —\n10.0% — — — — —\n11.0% — — — — —\n12.0% — — — — —\n11. Đối chiếu & cảnh báo\nĐối chiếu nhất quán số:\nGiá suy ra theo FCFF / giá FCFF: thiếu dữ liệu để đối chiếu (—).\nCảnh báo từ mô hình tính toán:\nTerminal value chiếm 187.0% EV — kết quả phụ thuộc mạnh vào giả định tăng trưởng dài hạn, bắt buộc có độ\nnhạy analysis\nNo SG&A or EBIT history — using default SG&A of 20% of revenue\nCAPEX/revenue dự phóng starts from recent level 13.6% instead of full-history median 1.6%; then tapers to\nmaintenance D&A.\nTaxPolicy: 2 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\nLịch nợ vay dự phóng đang giữ nguyên dư nợ tại số cuối kỳ gần nhất; mức độ tin cậy thấp và cần chuyên viên\nphân tích rà soát.\nChi phí lãi vay mới được tính một vòng, chưa lặp đến hội tụ. Phương pháp giữ dư nợ ổn định khiến FCFE cần\nbổ sung lộ trình nợ vay đã phê duyệt.\nThiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\nThuế suất trong giả định WACC khác thuế suất hiệu dụng trong chính sách thuế; mô hình đang dùng thuế suất\ntheo chính sách thuế để tính EBIT sau thuế.\nGiá trị vốn chủ sở hữu âm nên không tính được giá mục tiêu theo phương pháp này.\nFCFE thiếu lịch nợ vay đã xác minh: dư nợ được giữ cố định và vay ròng chưa có nguồn từ báo cáo lưu\nchuyển tiền tệ hoặc lịch đáo hạn. Cần lộ trình nợ vay đã phê duyệt.\nGiá trị cuối kỳ FCFE bằng 0 do thiếu FCFE ở năm dự phóng cuối cùng.\nMã băm tái lập: —\nNguồn gốc dữ liệu: mọi số định giá được dẫn xuất từ dữ liệu tài chính chuẩn hóa đã khóa và tệp kết quả định giá\nbằng Python; không có số liệu nào do mô hình ngôn ngữ sinh ra."
+      "pages": 7,
+      "text": "Mã cổ phiếu: LDP\nPhụ lục giải trình định giá - LDP\nDoanh nghiệp được phân tích: Cong ty Co phan Duoc Lam Dong - Ladophar.\nTài liệu này là phụ lục chi tiết của báo cáo định giá. Mục tiêu là giải thích vì sao báo cáo chính đưa ra giá mục tiêu,\nmức tăng/giảm kỳ vọng, khuyến nghị và các nhận định trọng tâm bằng dữ liệu đầu vào, công thức, bước tính trung\ngian và cảnh báo cần đọc kèm.\nTrạng thái và giới hạn\nTrạng thái báo cáo: Có thể đọc, kèm công bố phần dữ liệu còn thiếu\nMã lần chạy: run_ldp_20260617T022640_37b154eb70\nCần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\nThiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\nKết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nMinh chứng kiểm định\nThành phần Giá trị\nSố vết công thức 6 (wacc, fcff, fcfe, terminal_value, blend_dcf, sensitivity_matrix)\nNguồn định giá tương đối đối chiếu vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nDữ liệu và kiểm định cần bổ sung trước khi phát hành:\n- headline_target_clamped_high\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo trọng yếu; cần đọc cùng bảng tính chi tiết và phần đối chiếu trước khi sử dụng khuyến\nnghị.\nCảnh báo mô hình và dữ liệu:\n- SG&A historical median did not reconcile to operating EBIT; using pure operating EBIT margin (-0.4%) back-solved\nfrom operating_profit minus financial income/expense.\n- CAPEX/revenue dự phóng starts from recent level 13.6% instead of full-history median 1.6%; then tapers to\nmaintenance D&A.\n- TaxPolicy: 2 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\n- [DebtSchedule] Debt dự phóng uses CFS-corroborated leverage path (debt held at 23.4% of revenue); vay ròng\ntracks business growth (FCFE publishable).\n- Thiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\n- Thuế suất trong giả định WACC khác thuế suất hiệu dụng trong chính sách thuế; mô hình đang dùng thuế suất theo\nchính sách thuế để tính EBIT sau thuế.\n- Giá trị vốn chủ sở hữu âm nên không tính được giá mục tiêu theo phương pháp này.\n- Giá trị vốn chủ sở hữu không dương nên không tính được giá mục tiêu theo phương pháp này.\n- EPS dự phóng và P/E mục tiêu đã có nhưng giá suy ra theo P/E đang bị trống; đây là lỗi mapping cần kiểm tra trong\nbảng định giá tương đối.\n- Thiếu phê duyệt cuối cho khuyến nghị đầu tư.\n- relative_target_deviates_from_market\n- relative_valuation_fallback_pe\nVì sao báo cáo chính kết luận như vậy\nThành phần Giá trị\nGiá thị trường dùng trong báo cáo 8,300\nGiá mục tiêu tính được 11,620\nTăng/giảm so với giá thị trường 40.0%\nKhuyến nghị trong báo cáo chính Mua\nThành phần Giá trị\nGiá trị theo FCFF —\nGiá trị theo FCFE —\nTrọng số FCFF / FCFE 60.0% / 40.0%\nĐộ lệch FCFF/FCFE —\nWACC 12.1%\nTăng trưởng dài hạn 3.0%\nDoanh thu năm đầu dự phóng 266\nDoanh thu năm cuối dự phóng 378\nLNST năm đầu dự phóng -6\nLNST năm cuối dự phóng -8\nKết luận trong báo cáo chính được nối trực tiếp từ giá thị trường, giá trị nội tại theo dòng tiền, mức tăng/giảm kỳ vọng\nvà các cảnh báo dữ liệu. Nếu FCFF và FCFE cho kết quả lệch lớn, người đọc phải ưu tiên phần kết hợp phương\npháp, phân tích độ nhạy và đối chiếu cảnh báo thay vì chỉ đọc một giá mục tiêu duy nhất.\nCảnh báo cần đọc kèm kết luận:\n- Cần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nKết quả phản biện chất lượng phân tích\nPhần này tóm tắt các đánh giá định tính về logic dự phóng, luận điểm đầu tư, chất lượng bằng chứng và tính nhất\nquán của định giá.\n[Critical] FORECAST_QUALITY_GATE failed with blocking reasons 'eps_growth_requires_bridge:2028F' and\n'profit_growth_requires_bridge:2028F'. The dự phóng contains a material step change in 2028 that lacks an\nexplicit driver-level bridge (product launches, contract wins, margin/cost changes).\nDCF và FCFF/FCFE có cảnh báo về dòng tiền tự do lịch sử âm hoặc tỷ trọng giá trị cuối kỳ cao; cần kiểm tra\ntrong phân tích độ nhạy và bước chuẩn hóa giả định.\n[Major] The valuation and dự phóng rely on ratio series and sample facts but several material statements\ncannot be verified because official audited filings and segment-level disclosures for 2023–2025 are not\nprovided (source_tier cảnh báos and 'missing_official').\nTính hợp lý của yếu tố dẫn dắt (8.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định\nliên quan được công bố trong phụ lục.\nĐộ sâu bằng chứng (6.5/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nChất lượng diễn giải (7.5/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nTính toàn vẹn trích dẫn (9.6/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nĐịnh giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt nên P/E và EV/EBITDA chưa cho ra giá đối\nchiếu; báo cáo tạm thiếu một kiểm tra thị trường tiêu chuẩn.\nMức độ đầy đủ của bảng và biểu đồ (8.5/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả\nđịnh liên quan được công bố trong phụ lục.\nChi tiết tính toán định giá\nPhần này trình bày đầy đủ công thức, dữ liệu đầu vào, bước tính trung gian, bảng dự phóng, cầu nối định giá,\nphân tích độ nhạy và cảnh báo để người đọc kiểm tra lại kết quả trong báo cáo chính.\n1. Thông tin chung\nThành phần Giá trị\nMã cổ phiếu LDP\nCông ty Cong ty Co phan Duoc Lam Dong - Ladophar\nSàn HNX\nNgành Dược phẩm\nMã lần chạy run_ldp_20260617T022640_37b154eb70\nNgày định giá —\nMã ảnh chụp dữ liệu v2snap_99e391abb7a90b12f38f\nNăm gốc —\nMã băm tái lập —\n2. Tóm tắt kết quả định giá\nThành phần Giá trị\nGiá hiện tại (VND) 8,300\nGiá mục tiêu kết hợp (VND) —\nTiềm năng tăng/giảm —\nKhuyến nghị Mua\nLuật xếp hạng (tổng tỷ suất sinh lời = mức tăng/giảm giá + lợi suất cổ tức): > 20% → Mua; < −10% → Bán; còn lại\n→ Giữ.\n3. Bảng giả định\nThành phần Giá trị\nWACC 12.1%\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nSố năm dự phóng 5\nThuế suất —\nP/E mục tiêu 18.7x\nMức cộng/trừ định giá —\nCác giả định hiện là giá trị mặc định và phải được rà soát, phê duyệt trước khi sử dụng trong báo cáo chính thức.\n4. Dự phóng theo yếu tố dẫn dắt\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 266 291 317 347 378\nGiá vốn hàng bán (COGS) -200 -219 -239 -261 -285\nLợi nhuận gộp 66 72 79 86 94\nChi phí SG&A -67 -73 -80 -87 -96\nEBIT -1 -1 -1 -2 -2\nChi phí lãi vay -4 -5 -5 -6 -6\nLợi nhuận trước thuế -6 -6 -7 -7 -8\nChi phí thuế 0 0 0 0 0\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nLNST cổ đông mẹ -6 -6 -7 -7 -8\nKhấu hao (D&A) 10 11 12 13 14\nCAPEX -36 -32 -28 -22 -14\nEPS (VND) -405 -442 -482 -526 -575\nVay ròng (phát hành nợ − trả nợ) 5 6 6 7 7\nDư nợ vay cuối kỳ 62 68 74 81 88\nCổ tức tiền mặt -0 -0 -0 -0 -0\nTỷ lệ chi trả cổ tức 0.0% 0.0% 0.0% 0.0% 0.0%\nLogic yếu tố dẫn dắt: doanh thu theo tăng trưởng giả định; biên lợi nhuận dẫn xuất EBIT/LNST; lịch nợ vay chuyển\ntiếp với vay ròng = phát hành nợ − trả nợ; cổ tức theo tỷ lệ chi trả.\nVì sao EBIT âm: chi phí bán hàng và quản lý (SG&A) lớn hơn lợi nhuận gộp ở 2026F, 2027F, 2028F, 2029F,\n2030F, nên EBIT chuyển âm dù lợi nhuận gộp vẫn dương. Đây là hệ quả trực tiếp của giả định chi phí hoạt động\ntrong dự phóng và cần được rà soát trước khi dùng kết quả định giá dòng tiền.\n5. Chỉ số tài chính\nChỉ số Công thức 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận gộp lợi nhuận gộp / doanh thu 24.8% 24.8% 24.8% 24.8% 24.8%\nBiên EBIT EBIT / doanh thu -0.5% -0.4% -0.4% -0.4% -0.4%\nBiên lợi nhuận ròng lợi nhuận sau thuế / doanh thu -2.1% -2.1% -2.1% -2.1% -2.1%\nROE lợi nhuận sau thuế / vốn chủ sở hữu -3.1% -3.5% -3.9% -4.5% -5.1%\n6. Định giá FCFF\nCông thức: FCFF = EBIT×(1−t) + D&A − CAPEX − ΔNWC\nWACC = 12.1%; tăng trưởng dài hạn g = 3.0%\nKhoản mục 2026F 2027F 2028F 2029F 2030F\nEBIT -1 -1 -1 -2 -2\nThuế suất — — — — —\nD&A 10 11 12 13 14\nCAPEX 36 32 28 22 14\nΔNWC 8 6 7 7 8\nFCFF -36 -29 -24 -18 -10\nHệ số chiết khấu 89.2% 79.6% 71.0% 63.3% 56.5%\nPV(FCFF) -32 -23 -17 -11 -6\nThành phần Giá trị\nPV dòng tiền dự phóng (Σ PV FCFF) -88\nGiá trị cuối kỳ (Gordon: FCFFₙ×(1+g)/(WACC−g)) -111\nGiá trị hiện tại của giá trị cuối kỳ -63\nTỷ trọng giá trị cuối kỳ / giá trị doanh nghiệp —\n= Giá trị doanh nghiệp (EV) -151\n− Nợ ròng 36\n= Giá trị vốn chủ sở hữu -187\nThành phần Giá trị\n÷ Số cổ phiếu (triệu) 14\n= Giá/cổ phiếu (FCFF, VND) —\nGiá/cổ phiếu theo FCFF hiển thị — vì giá trị vốn chủ sở hữu âm (-187): dòng tiền tự do âm kéo giá trị doanh nghiệp và\nphần vốn chủ sở hữu xuống dưới 0, nên không thể quy ra giá dương. Đây là kết quả kinh tế của mô hình, không phải\nthiếu dữ liệu.\n7. Định giá FCFE\nCông thức: FCFE = lợi nhuận sau thuế + khấu hao − CAPEX − ΔNWC + vay ròng, chiết khấu theo chi phí vốn chủ sở\nhữu.\nThành phần Giá trị\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nGiá trị vốn chủ sở hữu -106\n÷ Số cổ phiếu (triệu) 14\n= Giá/cổ phiếu (FCFE, VND) —\nGiá/cổ phiếu theo FCFE hiển thị — vì giá trị vốn chủ sở hữu âm (-106): dòng tiền cho cổ đông chiết khấu về giá trị âm\nnên không quy ra được giá dương. Đây là kết quả kinh tế của mô hình, không phải thiếu dữ liệu.\n8. Kết hợp phương pháp FCFF và FCFE\nCông thức: Giá mục tiêu = 0.60 × Giá_FCFF + 0.40 × Giá_FCFE\nDiễn giải: Chưa thể kết hợp theo trọng số 60/40 vì giá FCFF, giá FCFE, giá mục tiêu kết hợp chưa có giá trị hợp lệ.\nBảng giữ nguyên từng cấu phần để người đọc thấy rõ ô nào không thể tính.\nThành phần Giá trị\nGiá theo FCFF (VND) —\nGiá theo FCFE (VND) —\nTrọng số FCFF / FCFE 0.60 / 0.40\n= Giá mục tiêu kết hợp (VND) —\nChênh lệch FCFF/FCFE —\nChỉ ở dạng nháp Không\n9. P/E dự phóng để đối chiếu\nThành phần Giá trị\nEPS dự phóng (VND) —\nP/E trung vị nhóm so sánh —\nMức cộng/trừ định giá —\nP/E mục tiêu 18.7x\nGiá mục tiêu (VND) —\n10. Phân tích độ nhạy\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n10.1% — — — — —\n11.1% — — — — —\n12.1% — — — — —\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n13.1% — — — — —\n14.1% — — — — —\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n11.8% — — — — —\n12.8% — — — — —\n13.8% — — — — —\n14.8% — — — — —\n15.8% — — — — —\nĐộ nhạy EV/EBITDA — Giá = (EBITDA × Hệ số − Nợ ròng − Lợi ích cổ đông không kiểm soát + Tài sản ngoài\nhoạt động) / Số cổ phiếu × 1000\nĐộ nhạy EV/EBITDA 7 8 9 10 11\n8 — — — — —\n8 — — — — —\n9 — — — — —\n10 — — — — —\n10 — — — — —\nĐộ nhạy DCF giản lược\nĐộ nhạy DCF giản lược 2.0% 2.5% 3.0% 3.5% 4.0%\n8.0% — — — — —\n9.0% — — — — —\n10.0% — — — — —\n11.0% — — — — —\n12.0% — — — — —\n11. Đối chiếu & cảnh báo\nĐối chiếu nhất quán số:\nGiá suy ra theo FCFF / giá FCFF: thiếu dữ liệu để đối chiếu (—).\nCảnh báo từ mô hình tính toán:\nSG&A historical median did not reconcile to operating EBIT; using pure operating EBIT margin (-0.4%) back-\nsolved from operating_profit minus financial income/expense.\nCAPEX/revenue dự phóng starts from recent level 13.6% instead of full-history median 1.6%; then tapers to\nmaintenance D&A.\nTaxPolicy: 2 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\n[DebtSchedule] Debt dự phóng uses CFS-corroborated leverage path (debt held at 23.4% of revenue); vay\nròng tracks business growth (FCFE publishable).\nThiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\nThuế suất trong giả định WACC khác thuế suất hiệu dụng trong chính sách thuế; mô hình đang dùng thuế suất\ntheo chính sách thuế để tính EBIT sau thuế.\nGiá trị vốn chủ sở hữu âm nên không tính được giá mục tiêu theo phương pháp này.\nGiá trị vốn chủ sở hữu không dương nên không tính được giá mục tiêu theo phương pháp này.\nMã băm tái lập: —\nNguồn gốc dữ liệu: mọi số định giá được dẫn xuất từ dữ liệu tài chính chuẩn hóa đã khóa và tệp kết quả định giá\nbằng Python; không có số liệu nào do mô hình ngôn ngữ sinh ra."
     }
   },
   "publication_readiness": {

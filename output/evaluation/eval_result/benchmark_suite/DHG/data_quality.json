@@ -4,7 +4,7 @@
   "plan_id": "01",
   "plan_name": "Data reliability",
   "ticker": "DHG",
-  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
   "status": "blocked",
   "test_execution": {
     "status": "not_measured",
@@ -473,7 +473,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "data_reliability_score",
@@ -902,7 +902,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "data.benchmark_hardness_score",
@@ -1258,7 +1258,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "core_metric_coverage",
@@ -1776,7 +1776,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "period_completeness",
@@ -2186,7 +2186,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "provenance_coverage",
@@ -2576,7 +2576,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "official_reconciliation_rate",
@@ -3004,7 +3004,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "material_ocr_error_count",
@@ -3410,7 +3410,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "ocr_unresolved_rate",
@@ -3467,7 +3467,7 @@
           },
           "ocr_reconciliation": {
             "ticker": "DHG",
-            "generated_at": "2026-06-19T20:36:23.934352+00:00",
+            "generated_at": "2026-06-22T16:31:58.667734+00:00",
             "source": "benchmark_generated_report_pdf",
             "summary": {
               "total": 0,
@@ -3827,7 +3827,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "duplicate_fact_count",
@@ -4158,7 +4158,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "valuation_method_data_readiness",
@@ -4645,7 +4645,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "dataframe_schema_validity",
@@ -5049,7 +5049,7 @@
         "dataset_version": "DHG.csv",
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "core_metric_coverage": 1.0,

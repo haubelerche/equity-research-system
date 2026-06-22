@@ -436,6 +436,12 @@ td.num {
   border-color: var(--color-border-default);
 }
 
+.pill--not_applicable {
+  color: var(--color-text-tertiary);
+  background: var(--color-surface-2);
+  border-color: var(--color-border-default);
+}
+
 /* data-status attribute selectors as alternative hook */
 [data-status="pass"]          { color: var(--color-pass);     }
 [data-status="fail"]          { color: var(--color-fail);     }
@@ -443,6 +449,7 @@ td.num {
 [data-status="not_evaluable"] { color: var(--color-text-tertiary); }
 [data-status="blocked"]       { color: var(--color-fail);     }
 [data-status="not_measured"]  { color: var(--color-text-tertiary); }
+[data-status="not_applicable"] { color: var(--color-text-tertiary); }
 
 /* ==========================================================================
    EVAL DASHBOARD — layer grid

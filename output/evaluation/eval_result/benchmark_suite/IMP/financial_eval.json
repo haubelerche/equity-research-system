@@ -4,8 +4,8 @@
   "plan_id": "03",
   "plan_name": "Financial calculation",
   "ticker": "IMP",
-  "generated_at": "2026-06-20T19:32:03.100279+00:00",
-  "status": "fail",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
+  "status": "pass",
   "test_execution": {
     "status": "not_measured",
     "targets": [
@@ -124,12 +124,12 @@
       "scope": "benchmark_suite",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 0.73,
+      "value": 0.8,
       "threshold": ">= 75%",
       "threshold_operator": ">=",
       "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
+      "status": "pass",
+      "legacy_status": "pass",
       "sample_size": 6,
       "artifact_id": null,
       "artifact_version": null,
@@ -147,26 +147,6 @@
           "passed": false,
           "weight": 0.2,
           "normalized_weight": 0.2
-        },
-        {
-          "sample_origin": "data_reliability_score_component",
-          "component": "formula_trace_method_coverage",
-          "component_score": 0.6666666666666666,
-          "value": 0.6666666666666666,
-          "status": "warning",
-          "passed": false,
-          "weight": 0.15,
-          "normalized_weight": 0.15
-        },
-        {
-          "sample_origin": "data_reliability_score_component",
-          "component": "forecast_horizon_depth",
-          "component_score": 0.8,
-          "value": 0.8,
-          "status": "warning",
-          "passed": false,
-          "weight": 0.1,
-          "normalized_weight": 0.1
         }
       ],
       "remediation_hint": "Improve method publishability, formula trace coverage, sensitivity richness, forecast horizon, and regression fixture coverage.",
@@ -184,11 +164,12 @@
           "publishable_methods": 0,
           "method_diagnostics": 4,
           "trace_methods": [
+            "fcfe_target_price",
             "fcff_target_price",
             "net_debt"
           ],
           "sensitivity_numeric_cells": 22,
-          "forecast_rows": 4,
+          "forecast_rows": 5,
           "golden_regression_checks": 1
         },
         "parameters": {
@@ -221,7 +202,7 @@
           ]
         },
         "aggregation": "weighted_score",
-        "numerator": 0.73,
+        "numerator": 0.8,
         "denominator": 1.0,
         "per_sample_results": [
           {
@@ -247,10 +228,10 @@
           {
             "sample_origin": "data_reliability_score_component",
             "component": "formula_trace_method_coverage",
-            "component_score": 0.6666666666666666,
-            "value": 0.6666666666666666,
-            "status": "warning",
-            "passed": false,
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
             "weight": 0.15,
             "normalized_weight": 0.15
           },
@@ -267,10 +248,10 @@
           {
             "sample_origin": "data_reliability_score_component",
             "component": "forecast_horizon_depth",
-            "component_score": 0.8,
-            "value": 0.8,
-            "status": "warning",
-            "passed": false,
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
             "weight": 0.1,
             "normalized_weight": 0.1
           },
@@ -299,11 +280,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "net_debt",
@@ -374,11 +355,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "fcff",
@@ -399,7 +380,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 4,
+      "sample_size": 5,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -498,6 +479,25 @@
               "delta_nwc": 47.0928
             },
             "missing_fields": []
+          },
+          {
+            "sample_origin": "formula_row",
+            "row_index": 5,
+            "output_key": "fcff",
+            "status": "pass",
+            "reported": 697.5575,
+            "expected": 697.5574999999999,
+            "error": 1.1368683772161603e-13,
+            "tolerance": 0.2,
+            "add_keys": {
+              "ebit_after_tax": 586.8261,
+              "depreciation": 113.0953
+            },
+            "subtract_keys": {
+              "capex": -29.0292,
+              "delta_nwc": 31.3931
+            },
+            "missing_fields": []
           }
         ]
       },
@@ -514,11 +514,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "fcfe",
@@ -539,7 +539,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 4,
+      "sample_size": 5,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -642,6 +642,26 @@
               "delta_nwc": 47.0928
             },
             "missing_fields": []
+          },
+          {
+            "sample_origin": "formula_row",
+            "row_index": 5,
+            "output_key": "fcfe",
+            "status": "pass",
+            "reported": 1791.4914,
+            "expected": 1791.4913999999999,
+            "error": 2.2737367544323206e-13,
+            "tolerance": 0.2,
+            "add_keys": {
+              "net_income": 377.069,
+              "depreciation": 113.0953,
+              "net_borrowing": 1303.691
+            },
+            "subtract_keys": {
+              "capex": -29.0292,
+              "delta_nwc": 31.3931
+            },
+            "missing_fields": []
           }
         ]
       },
@@ -658,11 +678,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "target_price",
@@ -731,11 +751,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "gordon_growth",
@@ -801,11 +821,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "sensitivity_varies",
@@ -871,11 +891,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "fcfe_sensitivity",
@@ -941,11 +961,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "formula_trace",
@@ -993,7 +1013,7 @@
           {
             "sample_origin": "formula_trace_manifest",
             "status": "pass",
-            "trace_count": 2
+            "trace_count": 3
           }
         ]
       },
@@ -1010,11 +1030,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "accounting_invariant_violations",
@@ -1092,11 +1112,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "golden_drift_out_of_tolerance",
@@ -1167,11 +1187,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_imp\\valuation.json": 7004
+          "storage\\runs\\benchmark_imp\\valuation.json": 9027
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "valuation_artifact": "storage\\runs\\benchmark_imp\\valuation.json",

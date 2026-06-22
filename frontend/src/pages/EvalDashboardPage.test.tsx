@@ -521,8 +521,15 @@ describe("EvalDashboardPage", () => {
     expect(screen.getAllByText("Hit-rate@5").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Faithfulness").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Source-tier hit rate").length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/FCFF formula/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/schema validity/i).length).toBeGreaterThan(0);
+    // Benchmark 3 headlines on the real graded score; the self-consistency
+    // per-formula pass-counts are no longer shown as accuracy rows.
+    expect(screen.getAllByText("Điểm chất lượng mô hình tài chính").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/FCFF formula/)).not.toBeInTheDocument();
+    // Benchmark 4 leads with the graded workflow composite; the exact-100% P0
+    // safety gates (tool permission, schema validity) are not headline rows.
+    expect(screen.getAllByText("Điểm chất lượng quy trình agent").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/schema validity/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Tool permission compliance/i)).not.toBeInTheDocument();
     expect(screen.getAllByText("Report quality total").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Report completeness").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Valuation transparency").length).toBeGreaterThan(0);
@@ -650,21 +657,6 @@ describe("EvalDashboardPage", () => {
     expect(screen.queryByText("Severity")).not.toBeInTheDocument();
     expect(screen.queryByText("Owner")).not.toBeInTheDocument();
     expect(screen.queryByText("Chặn xuất bản")).not.toBeInTheDocument();
-  });
-
-  it("shows boolean values for legacy schema validity source samples", async () => {
-    render(<EvalDashboardPage />);
-    await screen.findByText(/P0/);
-    await userEvent.click(screen.getAllByText(/schema validity/i)[0]);
-
-    expect(screen.getByRole("heading", { name: /mẫu \(1\)/i })).toBeInTheDocument();
-    const schemaRow = screen
-      .getAllByText("schema_validity")
-      .find((element) => element.tagName.toLowerCase() === "td")
-      ?.closest("tr");
-    expect(schemaRow).not.toBeNull();
-    expect(within(schemaRow!).getByText("pass")).toBeInTheDocument();
-    expect(within(schemaRow!).getByText("true")).toBeInTheDocument();
   });
 
   it("shows runtime calculation details in the layer explanation dialog", async () => {

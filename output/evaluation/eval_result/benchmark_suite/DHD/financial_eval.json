@@ -4,8 +4,8 @@
   "plan_id": "03",
   "plan_name": "Financial calculation",
   "ticker": "DHD",
-  "generated_at": "2026-06-20T19:32:03.100279+00:00",
-  "status": "fail",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
+  "status": "pass",
   "test_execution": {
     "status": "not_measured",
     "targets": [
@@ -124,12 +124,12 @@
       "scope": "benchmark_suite",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 0.6799999999999999,
+      "value": 0.8,
       "threshold": ">= 75%",
       "threshold_operator": ">=",
       "unit": "percent",
-      "status": "fail",
-      "legacy_status": "fail",
+      "status": "pass",
+      "legacy_status": "pass",
       "sample_size": 6,
       "artifact_id": null,
       "artifact_version": null,
@@ -147,36 +147,6 @@
           "passed": false,
           "weight": 0.2,
           "normalized_weight": 0.2
-        },
-        {
-          "sample_origin": "data_reliability_score_component",
-          "component": "formula_trace_method_coverage",
-          "component_score": 0.6666666666666666,
-          "value": 0.6666666666666666,
-          "status": "warning",
-          "passed": false,
-          "weight": 0.15,
-          "normalized_weight": 0.15
-        },
-        {
-          "sample_origin": "data_reliability_score_component",
-          "component": "forecast_horizon_depth",
-          "component_score": 0.8,
-          "value": 0.8,
-          "status": "warning",
-          "passed": false,
-          "weight": 0.1,
-          "normalized_weight": 0.1
-        },
-        {
-          "sample_origin": "data_reliability_score_component",
-          "component": "independent_regression_baseline",
-          "component_score": 0.5,
-          "value": 0.5,
-          "status": "warning",
-          "passed": false,
-          "weight": 0.1,
-          "normalized_weight": 0.1
         }
       ],
       "remediation_hint": "Improve method publishability, formula trace coverage, sensitivity richness, forecast horizon, and regression fixture coverage.",
@@ -194,12 +164,13 @@
           "publishable_methods": 0,
           "method_diagnostics": 4,
           "trace_methods": [
+            "fcfe_target_price",
             "fcff_target_price",
             "net_debt"
           ],
           "sensitivity_numeric_cells": 22,
-          "forecast_rows": 4,
-          "golden_regression_checks": 0
+          "forecast_rows": 5,
+          "golden_regression_checks": 1
         },
         "parameters": {
           "rationale": "Ceiling-resistant score: exact formulas remain mandatory, but a perfect benchmark score also requires method coverage, rich traces, sensitivity depth, forecast horizon, and regression baseline coverage.",
@@ -231,7 +202,7 @@
           ]
         },
         "aggregation": "weighted_score",
-        "numerator": 0.6799999999999999,
+        "numerator": 0.8,
         "denominator": 1.0,
         "per_sample_results": [
           {
@@ -257,10 +228,10 @@
           {
             "sample_origin": "data_reliability_score_component",
             "component": "formula_trace_method_coverage",
-            "component_score": 0.6666666666666666,
-            "value": 0.6666666666666666,
-            "status": "warning",
-            "passed": false,
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
             "weight": 0.15,
             "normalized_weight": 0.15
           },
@@ -277,20 +248,20 @@
           {
             "sample_origin": "data_reliability_score_component",
             "component": "forecast_horizon_depth",
-            "component_score": 0.8,
-            "value": 0.8,
-            "status": "warning",
-            "passed": false,
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
             "weight": 0.1,
             "normalized_weight": 0.1
           },
           {
             "sample_origin": "data_reliability_score_component",
             "component": "independent_regression_baseline",
-            "component_score": 0.5,
-            "value": 0.5,
-            "status": "warning",
-            "passed": false,
+            "component_score": 1.0,
+            "value": 1.0,
+            "status": "pass",
+            "passed": true,
             "weight": 0.1,
             "normalized_weight": 0.1
           }
@@ -309,11 +280,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "net_debt",
@@ -384,11 +355,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "fcff",
@@ -409,7 +380,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 4,
+      "sample_size": 5,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -508,6 +479,25 @@
               "delta_nwc": -33.9017
             },
             "missing_fields": []
+          },
+          {
+            "sample_origin": "formula_row",
+            "row_index": 5,
+            "output_key": "fcff",
+            "status": "pass",
+            "reported": 389.9004,
+            "expected": 389.9004,
+            "error": 0.0,
+            "tolerance": 0.2,
+            "add_keys": {
+              "ebit_after_tax": 90.5341,
+              "depreciation": 30.1499
+            },
+            "subtract_keys": {
+              "capex": -289.921,
+              "delta_nwc": 20.7046
+            },
+            "missing_fields": []
           }
         ]
       },
@@ -524,11 +514,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "fcfe",
@@ -549,7 +539,7 @@
       "unit": "count",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 4,
+      "sample_size": 5,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -652,6 +642,26 @@
               "delta_nwc": -33.9017
             },
             "missing_fields": []
+          },
+          {
+            "sample_origin": "formula_row",
+            "row_index": 5,
+            "output_key": "fcfe",
+            "status": "pass",
+            "reported": 915.7984,
+            "expected": 915.7984,
+            "error": 0.0,
+            "tolerance": 0.2,
+            "add_keys": {
+              "net_income": 60.1595,
+              "depreciation": 30.1499,
+              "net_borrowing": 556.2726
+            },
+            "subtract_keys": {
+              "capex": -289.921,
+              "delta_nwc": 20.7046
+            },
+            "missing_fields": []
           }
         ]
       },
@@ -668,11 +678,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "target_price",
@@ -741,11 +751,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "gordon_growth",
@@ -811,11 +821,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "sensitivity_varies",
@@ -881,11 +891,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "fcfe_sensitivity",
@@ -951,11 +961,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "formula_trace",
@@ -1003,7 +1013,7 @@
           {
             "sample_origin": "formula_trace_manifest",
             "status": "pass",
-            "trace_count": 2
+            "trace_count": 3
           }
         ]
       },
@@ -1020,11 +1030,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "accounting_invariant_violations",
@@ -1102,17 +1112,17 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "golden_drift_out_of_tolerance",
       "label": "Golden valuation drift",
-      "source": "golden valuation fixture missing",
-      "detail": "golden_valuation_fixture_missing_for_ticker",
+      "source": "storage\\runs\\benchmark_dhd\\valuation.json",
+      "detail": "",
       "metric_id": "golden_drift_out_of_tolerance",
       "metric_name": "Golden valuation drift",
       "category": "financial_model",
@@ -1121,13 +1131,13 @@
       "scope": "report_run",
       "severity": "P0",
       "blocks_publish": true,
-      "value": null,
+      "value": 0,
       "threshold": "0",
       "threshold_operator": "=",
       "unit": "count",
-      "status": "not_applicable",
-      "legacy_status": "not_applicable",
-      "sample_size": 0,
+      "status": "pass",
+      "legacy_status": "pass",
+      "sample_size": 1,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -1141,16 +1151,28 @@
         "framework": "golden_valuation_regression",
         "framework_version": null,
         "implementation_version": "2.1",
-        "execution_status": "not_executed"
+        "execution_status": "executed"
       },
       "calculation": {
         "formula": null,
         "inputs": {},
         "parameters": {},
         "aggregation": "drift_violation_count",
-        "numerator": null,
-        "denominator": 0,
-        "per_sample_results": []
+        "numerator": 0,
+        "denominator": 1,
+        "per_sample_results": [
+          {
+            "metric": "fcff_target_price_vnd",
+            "live": 162121.27,
+            "expected_range": {
+              "min": 158878.84459999998,
+              "max": 165363.6954
+            },
+            "in_range": true,
+            "status": "pass",
+            "value": true
+          }
+        ]
       },
       "threshold_policy": {
         "profile": "mvp",
@@ -1165,11 +1187,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\valuation.json": 6978
+          "storage\\runs\\benchmark_dhd\\valuation.json": 8994
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "valuation_artifact": "storage\\runs\\benchmark_dhd\\valuation.json",
@@ -1194,7 +1216,7 @@
     }
   ],
   "critical_failures": 0,
-  "golden_drift_out_of_tolerance": null,
+  "golden_drift_out_of_tolerance": 0,
   "missing_traces": [],
   "decision": "pass",
   "valuation_publishability": {

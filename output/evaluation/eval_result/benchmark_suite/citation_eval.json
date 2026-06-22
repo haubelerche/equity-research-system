@@ -2,7 +2,7 @@
   "schema_version": "2.1",
   "benchmark_suite_version": "benchmark_standards_v1",
   "source": "benchmark_suite",
-  "cohort": "default",
+  "cohort": "full_universe",
   "tickers": [
     "DHG",
     "IMP",
@@ -50,7 +50,7 @@
     "DPH",
     "OPC"
   ],
-  "generated_at": "2026-06-21T16:39:41.027822+00:00",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
   "plan_id": "04",
   "name": "Citation and source provenance",
   "artifact": "citation_eval.json",
@@ -4012,7 +4012,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "generic_citations",
@@ -4183,7 +4183,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DHG_report.pdf": 990620
+                "output\\DHG_report.pdf": 985797
               },
               "evidence_available": true
             },
@@ -4232,7 +4232,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\IMP_report.pdf": 961576
+                "output\\IMP_report.pdf": 956364
               },
               "evidence_available": true
             },
@@ -4281,7 +4281,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DMC_report.pdf": 988531
+                "output\\DMC_report.pdf": 981038
               },
               "evidence_available": true
             },
@@ -4330,7 +4330,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\TRA_report.pdf": 985375
+                "output\\TRA_report.pdf": 973402
               },
               "evidence_available": true
             },
@@ -4379,7 +4379,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DBD_report.pdf": 953116
+                "output\\DBD_report.pdf": 951366
               },
               "evidence_available": true
             },
@@ -4428,7 +4428,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\MKP_report.pdf": 953992
+                "output\\MKP_report.pdf": 949415
               },
               "evidence_available": true
             },
@@ -4477,7 +4477,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\TNH_report.pdf": 969252
+                "output\\TNH_report.pdf": 979796
               },
               "evidence_available": true
             },
@@ -4526,7 +4526,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\JVC_report.pdf": 934375
+                "output\\JVC_report.pdf": 940023
               },
               "evidence_available": true
             },
@@ -4575,7 +4575,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DVN_report.pdf": 991104
+                "output\\DVN_report.pdf": 994050
               },
               "evidence_available": true
             },
@@ -4624,7 +4624,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DHT_report.pdf": 965009
+                "output\\DHT_report.pdf": 966810
               },
               "evidence_available": true
             },
@@ -4673,7 +4673,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\LDP_report.pdf": 940373
+                "output\\LDP_report.pdf": 931083
               },
               "evidence_available": true
             },
@@ -4722,7 +4722,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\PPP_report.pdf": 955068
+                "output\\PPP_report.pdf": 953981
               },
               "evidence_available": true
             },
@@ -4771,7 +4771,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DP3_report.pdf": 948196
+                "output\\DP3_report.pdf": 946814
               },
               "evidence_available": true
             },
@@ -4820,7 +4820,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DP1_report.pdf": 972242
+                "output\\DP1_report.pdf": 962481
               },
               "evidence_available": true
             },
@@ -4869,7 +4869,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\TW3_report.pdf": 927103
+                "output\\TW3_report.pdf": 953528
               },
               "evidence_available": true
             },
@@ -4918,7 +4918,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\MED_report.pdf": 924948
+                "output\\MED_report.pdf": 930369
               },
               "evidence_available": true
             },
@@ -4967,7 +4967,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\PMC_report.pdf": 945675
+                "output\\PMC_report.pdf": 946119
               },
               "evidence_available": true
             },
@@ -5016,7 +5016,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\AMV_report.pdf": 943495
+                "output\\AMV_report.pdf": 954793
               },
               "evidence_available": true
             },
@@ -5065,7 +5065,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\YTC_report.pdf": 930974
+                "output\\YTC_report.pdf": 927602
               },
               "evidence_available": true
             },
@@ -5114,7 +5114,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\VHE_report.pdf": 937730
+                "output\\VHE_report.pdf": 929466
               },
               "evidence_available": true
             },
@@ -5163,7 +5163,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\VDP_report.pdf": 932713
+                "output\\VDP_report.pdf": 939632
               },
               "evidence_available": true
             },
@@ -5212,7 +5212,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DCL_report.pdf": 951936
+                "output\\DCL_report.pdf": 951362
               },
               "evidence_available": true
             },
@@ -5261,7 +5261,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\SPM_report.pdf": 944131
+                "output\\SPM_report.pdf": 945978
               },
               "evidence_available": true
             },
@@ -5310,7 +5310,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\VMD_report.pdf": 954275
+                "output\\VMD_report.pdf": 965370
               },
               "evidence_available": true
             },
@@ -5359,7 +5359,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DNM_report.pdf": 968612
+                "output\\DNM_report.pdf": 962102
               },
               "evidence_available": true
             },
@@ -5408,7 +5408,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DBT_report.pdf": 953140
+                "output\\DBT_report.pdf": 506359
               },
               "evidence_available": true
             },
@@ -5457,7 +5457,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DPP_report.pdf": 931634
+                "output\\DPP_report.pdf": 933579
               },
               "evidence_available": true
             },
@@ -5506,7 +5506,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DTP_report.pdf": 958087
+                "output\\DTP_report.pdf": 957558
               },
               "evidence_available": true
             },
@@ -5555,7 +5555,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\AMP_report.pdf": 941321
+                "output\\AMP_report.pdf": 946797
               },
               "evidence_available": true
             },
@@ -5604,7 +5604,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\BCP_report.pdf": 949844
+                "output\\BCP_report.pdf": 952246
               },
               "evidence_available": true
             },
@@ -5653,7 +5653,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\BIO_report.pdf": 944932
+                "output\\BIO_report.pdf": 942624
               },
               "evidence_available": true
             },
@@ -5702,7 +5702,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\CDP_report.pdf": 937591
+                "output\\CDP_report.pdf": 949686
               },
               "evidence_available": true
             },
@@ -5751,7 +5751,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\CNC_report.pdf": 948956
+                "output\\CNC_report.pdf": 946105
               },
               "evidence_available": true
             },
@@ -5800,7 +5800,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DAN_report.pdf": 933905
+                "output\\DAN_report.pdf": 937017
               },
               "evidence_available": true
             },
@@ -5849,7 +5849,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DBM_report.pdf": 947644
+                "output\\DBM_report.pdf": 965586
               },
               "evidence_available": true
             },
@@ -5898,7 +5898,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DDN_report.pdf": 962013
+                "output\\DDN_report.pdf": 970169
               },
               "evidence_available": true
             },
@@ -5947,7 +5947,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DHN_report.pdf": 938881
+                "output\\DHN_report.pdf": 940540
               },
               "evidence_available": true
             },
@@ -5996,7 +5996,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DP2_report.pdf": 952480
+                "output\\DP2_report.pdf": 945565
               },
               "evidence_available": true
             },
@@ -6045,7 +6045,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DTG_report.pdf": 965857
+                "output\\DTG_report.pdf": 962287
               },
               "evidence_available": true
             },
@@ -6094,7 +6094,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\HDP_report.pdf": 920539
+                "output\\HDP_report.pdf": 922578
               },
               "evidence_available": true
             },
@@ -6143,7 +6143,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\MTP_report.pdf": 928528
+                "output\\MTP_report.pdf": 948282
               },
               "evidence_available": true
             },
@@ -6192,7 +6192,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\NDC_report.pdf": 931407
+                "output\\NDC_report.pdf": 923835
               },
               "evidence_available": true
             },
@@ -6241,7 +6241,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DHD_report.pdf": 935844
+                "output\\DHD_report.pdf": 932909
               },
               "evidence_available": true
             },
@@ -6290,7 +6290,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DPH_report.pdf": 939568
+                "output\\DPH_report.pdf": 945440
               },
               "evidence_available": true
             },
@@ -6339,7 +6339,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\OPC_report.pdf": 965774
+                "output\\OPC_report.pdf": 964046
               },
               "evidence_available": true
             },
@@ -6472,11 +6472,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\DHG_report.pdf": 990620
+          "output\\DHG_report.pdf": 985797
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "official_source_coverage",
@@ -10021,7 +10021,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "pdf_source_mentions",
@@ -10192,7 +10192,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DHG_report.pdf": 990620
+                "output\\DHG_report.pdf": 985797
               },
               "evidence_available": true
             },
@@ -10241,7 +10241,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\IMP_report.pdf": 961576
+                "output\\IMP_report.pdf": 956364
               },
               "evidence_available": true
             },
@@ -10290,7 +10290,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DMC_report.pdf": 988531
+                "output\\DMC_report.pdf": 981038
               },
               "evidence_available": true
             },
@@ -10339,7 +10339,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\TRA_report.pdf": 985375
+                "output\\TRA_report.pdf": 973402
               },
               "evidence_available": true
             },
@@ -10388,7 +10388,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DBD_report.pdf": 953116
+                "output\\DBD_report.pdf": 951366
               },
               "evidence_available": true
             },
@@ -10437,7 +10437,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\MKP_report.pdf": 953992
+                "output\\MKP_report.pdf": 949415
               },
               "evidence_available": true
             },
@@ -10486,7 +10486,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\TNH_report.pdf": 969252
+                "output\\TNH_report.pdf": 979796
               },
               "evidence_available": true
             },
@@ -10535,7 +10535,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\JVC_report.pdf": 934375
+                "output\\JVC_report.pdf": 940023
               },
               "evidence_available": true
             },
@@ -10584,7 +10584,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DVN_report.pdf": 991104
+                "output\\DVN_report.pdf": 994050
               },
               "evidence_available": true
             },
@@ -10633,7 +10633,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DHT_report.pdf": 965009
+                "output\\DHT_report.pdf": 966810
               },
               "evidence_available": true
             },
@@ -10682,7 +10682,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\LDP_report.pdf": 940373
+                "output\\LDP_report.pdf": 931083
               },
               "evidence_available": true
             },
@@ -10731,7 +10731,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\PPP_report.pdf": 955068
+                "output\\PPP_report.pdf": 953981
               },
               "evidence_available": true
             },
@@ -10780,7 +10780,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DP3_report.pdf": 948196
+                "output\\DP3_report.pdf": 946814
               },
               "evidence_available": true
             },
@@ -10829,7 +10829,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DP1_report.pdf": 972242
+                "output\\DP1_report.pdf": 962481
               },
               "evidence_available": true
             },
@@ -10878,7 +10878,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\TW3_report.pdf": 927103
+                "output\\TW3_report.pdf": 953528
               },
               "evidence_available": true
             },
@@ -10927,7 +10927,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\MED_report.pdf": 924948
+                "output\\MED_report.pdf": 930369
               },
               "evidence_available": true
             },
@@ -10976,7 +10976,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\PMC_report.pdf": 945675
+                "output\\PMC_report.pdf": 946119
               },
               "evidence_available": true
             },
@@ -11025,7 +11025,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\AMV_report.pdf": 943495
+                "output\\AMV_report.pdf": 954793
               },
               "evidence_available": true
             },
@@ -11074,7 +11074,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\YTC_report.pdf": 930974
+                "output\\YTC_report.pdf": 927602
               },
               "evidence_available": true
             },
@@ -11123,7 +11123,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\VHE_report.pdf": 937730
+                "output\\VHE_report.pdf": 929466
               },
               "evidence_available": true
             },
@@ -11172,7 +11172,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\VDP_report.pdf": 932713
+                "output\\VDP_report.pdf": 939632
               },
               "evidence_available": true
             },
@@ -11221,7 +11221,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DCL_report.pdf": 951936
+                "output\\DCL_report.pdf": 951362
               },
               "evidence_available": true
             },
@@ -11270,7 +11270,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\SPM_report.pdf": 944131
+                "output\\SPM_report.pdf": 945978
               },
               "evidence_available": true
             },
@@ -11319,7 +11319,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\VMD_report.pdf": 954275
+                "output\\VMD_report.pdf": 965370
               },
               "evidence_available": true
             },
@@ -11368,7 +11368,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DNM_report.pdf": 968612
+                "output\\DNM_report.pdf": 962102
               },
               "evidence_available": true
             },
@@ -11417,7 +11417,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DBT_report.pdf": 953140
+                "output\\DBT_report.pdf": 506359
               },
               "evidence_available": true
             },
@@ -11466,7 +11466,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DPP_report.pdf": 931634
+                "output\\DPP_report.pdf": 933579
               },
               "evidence_available": true
             },
@@ -11515,7 +11515,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DTP_report.pdf": 958087
+                "output\\DTP_report.pdf": 957558
               },
               "evidence_available": true
             },
@@ -11564,7 +11564,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\AMP_report.pdf": 941321
+                "output\\AMP_report.pdf": 946797
               },
               "evidence_available": true
             },
@@ -11613,7 +11613,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\BCP_report.pdf": 949844
+                "output\\BCP_report.pdf": 952246
               },
               "evidence_available": true
             },
@@ -11662,7 +11662,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\BIO_report.pdf": 944932
+                "output\\BIO_report.pdf": 942624
               },
               "evidence_available": true
             },
@@ -11711,7 +11711,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\CDP_report.pdf": 937591
+                "output\\CDP_report.pdf": 949686
               },
               "evidence_available": true
             },
@@ -11760,7 +11760,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\CNC_report.pdf": 948956
+                "output\\CNC_report.pdf": 946105
               },
               "evidence_available": true
             },
@@ -11809,7 +11809,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DAN_report.pdf": 933905
+                "output\\DAN_report.pdf": 937017
               },
               "evidence_available": true
             },
@@ -11858,7 +11858,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DBM_report.pdf": 947644
+                "output\\DBM_report.pdf": 965586
               },
               "evidence_available": true
             },
@@ -11907,7 +11907,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DDN_report.pdf": 962013
+                "output\\DDN_report.pdf": 970169
               },
               "evidence_available": true
             },
@@ -11956,7 +11956,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DHN_report.pdf": 938881
+                "output\\DHN_report.pdf": 940540
               },
               "evidence_available": true
             },
@@ -12005,7 +12005,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DP2_report.pdf": 952480
+                "output\\DP2_report.pdf": 945565
               },
               "evidence_available": true
             },
@@ -12054,7 +12054,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DTG_report.pdf": 965857
+                "output\\DTG_report.pdf": 962287
               },
               "evidence_available": true
             },
@@ -12103,7 +12103,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\HDP_report.pdf": 920539
+                "output\\HDP_report.pdf": 922578
               },
               "evidence_available": true
             },
@@ -12152,7 +12152,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\MTP_report.pdf": 928528
+                "output\\MTP_report.pdf": 948282
               },
               "evidence_available": true
             },
@@ -12201,7 +12201,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\NDC_report.pdf": 931407
+                "output\\NDC_report.pdf": 923835
               },
               "evidence_available": true
             },
@@ -12250,7 +12250,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DHD_report.pdf": 935844
+                "output\\DHD_report.pdf": 932909
               },
               "evidence_available": true
             },
@@ -12299,7 +12299,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\DPH_report.pdf": 939568
+                "output\\DPH_report.pdf": 945440
               },
               "evidence_available": true
             },
@@ -12348,7 +12348,7 @@
               "dataset_version": null,
               "trace_url": null,
               "artifact_sizes_bytes": {
-                "output\\OPC_report.pdf": 965774
+                "output\\OPC_report.pdf": 964046
               },
               "evidence_available": true
             },
@@ -12481,11 +12481,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\DHG_report.pdf": 990620
+          "output\\DHG_report.pdf": 985797
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "quantitative_citation_coverage",
@@ -16434,7 +16434,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "source_id_validity",
@@ -19843,7 +19843,7 @@
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "blocking_issues": []

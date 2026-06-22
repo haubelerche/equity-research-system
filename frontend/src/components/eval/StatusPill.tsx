@@ -7,6 +7,7 @@ const LABEL: Record<MetricStatus, string> = {
   not_evaluable: "Chưa đánh giá",
   blocked: "Bị chặn",
   not_measured: "Chưa đo",
+  not_applicable: "Không áp dụng",
 };
 
 export function StatusPill({ status }: { status: MetricStatus }) {

@@ -4,7 +4,7 @@
   "plan_id": "06",
   "plan_name": "Report quality",
   "ticker": "YTC",
-  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
   "status": "pass",
   "test_execution": {
     "status": "not_measured",
@@ -139,13 +139,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -174,7 +174,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -204,7 +204,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -350,7 +350,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -448,13 +448,13 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -480,14 +480,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "explanation_pdf_rendered",
@@ -544,13 +544,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -579,7 +579,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -609,7 +609,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -755,7 +755,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -853,13 +853,13 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -885,14 +885,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "financial_gate_passed",
@@ -961,14 +961,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.quality_total",
@@ -983,7 +983,7 @@
       "scope": "report_run",
       "severity": "P1",
       "blocks_publish": false,
-      "value": 88.35,
+      "value": 89.73,
       "threshold": ">= 80%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -1034,7 +1034,7 @@
                 {
                   "id": "valuation_generated_at_present",
                   "passed": true,
-                  "actual": "2026-06-19T20:36:23.934352+00:00",
+                  "actual": "2026-06-22T16:31:58.667734+00:00",
                   "expected": "generated_at present",
                   "evidence_refs": [
                     "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -1064,7 +1064,7 @@
                 {
                   "id": "fcff_table_present",
                   "passed": true,
-                  "actual": 4,
+                  "actual": 5,
                   "expected": ">= 1 FCFF row",
                   "evidence_refs": [
                     "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -1210,7 +1210,7 @@
                 {
                   "id": "formula_traces_present",
                   "passed": true,
-                  "actual": 2,
+                  "actual": 3,
                   "expected": "formula traces present",
                   "evidence_refs": [
                     "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -1323,13 +1323,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -1358,7 +1358,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -1388,7 +1388,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -1534,7 +1534,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -1632,19 +1632,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 88.35
+            "value": 89.73
           }
         ]
       },
@@ -1664,14 +1664,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report_quality_score",
@@ -1686,7 +1686,7 @@
       "scope": "report_run",
       "severity": "P1",
       "blocks_publish": true,
-      "value": 88.35,
+      "value": 89.73,
       "threshold": ">= 85%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -1737,7 +1737,7 @@
                 {
                   "id": "valuation_generated_at_present",
                   "passed": true,
-                  "actual": "2026-06-19T20:36:23.934352+00:00",
+                  "actual": "2026-06-22T16:31:58.667734+00:00",
                   "expected": "generated_at present",
                   "evidence_refs": [
                     "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -1767,7 +1767,7 @@
                 {
                   "id": "fcff_table_present",
                   "passed": true,
-                  "actual": 4,
+                  "actual": 5,
                   "expected": ">= 1 FCFF row",
                   "evidence_refs": [
                     "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -1913,7 +1913,7 @@
                 {
                   "id": "formula_traces_present",
                   "passed": true,
-                  "actual": 2,
+                  "actual": 3,
                   "expected": "formula traces present",
                   "evidence_refs": [
                     "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -2026,13 +2026,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -2061,7 +2061,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -2091,7 +2091,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -2237,7 +2237,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -2335,19 +2335,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 88.35
+            "value": 89.73
           }
         ]
       },
@@ -2367,14 +2367,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.benchmark_hardness_score",
@@ -2389,7 +2389,7 @@
       "scope": "report_run",
       "severity": "P1",
       "blocks_publish": false,
-      "value": 83.61,
+      "value": 84.82,
       "threshold": ">= 75%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -2444,13 +2444,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -2479,7 +2479,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -2509,7 +2509,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -2655,7 +2655,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -2753,19 +2753,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 83.61
+            "value": 84.82
           }
         ]
       },
@@ -2785,14 +2785,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.completeness",
@@ -2849,13 +2849,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -2884,7 +2884,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -2914,7 +2914,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -3060,7 +3060,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -3158,13 +3158,13 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -3190,14 +3190,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.thesis_specificity",
@@ -3212,7 +3212,7 @@
       "scope": "report_run",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 83.33,
+      "value": 91.67,
       "threshold": ">= 60%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -3254,13 +3254,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -3289,7 +3289,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -3319,7 +3319,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -3465,7 +3465,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -3563,19 +3563,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 83.33
+            "value": 91.67
           }
         ]
       },
@@ -3595,14 +3595,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.financial_analysis_depth",
@@ -3659,13 +3659,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -3694,7 +3694,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -3724,7 +3724,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -3870,7 +3870,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -3968,13 +3968,13 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -4000,14 +4000,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.forecast_rationale",
@@ -4064,13 +4064,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -4099,7 +4099,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -4129,7 +4129,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -4275,7 +4275,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -4373,13 +4373,13 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -4405,14 +4405,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.valuation_transparency",
@@ -4469,13 +4469,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -4504,7 +4504,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -4534,7 +4534,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -4680,7 +4680,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -4778,13 +4778,13 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -4810,14 +4810,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.risk_catalyst_quality",
@@ -4874,13 +4874,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -4909,7 +4909,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -4939,7 +4939,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -5085,7 +5085,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -5183,13 +5183,13 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -5215,14 +5215,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.evidence_integration",
@@ -5279,13 +5279,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -5314,7 +5314,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -5344,7 +5344,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -5490,7 +5490,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -5588,13 +5588,13 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -5620,14 +5620,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.peer_industry_context_quality",
@@ -5642,7 +5642,7 @@
       "scope": "report_run",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 81.25,
+      "value": 87.5,
       "threshold": ">= 75%",
       "threshold_operator": ">=",
       "unit": "score",
@@ -5684,13 +5684,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -5719,7 +5719,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -5749,7 +5749,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -5895,7 +5895,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -5993,19 +5993,19 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
             },
             "status": "pass",
-            "value": 81.25
+            "value": 87.5
           }
         ]
       },
@@ -6025,14 +6025,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.executive_summary_actionability",
@@ -6089,13 +6089,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -6124,7 +6124,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -6154,7 +6154,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -6300,7 +6300,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -6398,13 +6398,13 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -6430,14 +6430,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.sensitivity_disclosure_completeness",
@@ -6494,13 +6494,13 @@
             "structured_report_quality_available": true,
             "scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -6529,7 +6529,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -6559,7 +6559,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -6705,7 +6705,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/YTC/balance_sheet_year.json",
@@ -6803,13 +6803,13 @@
             },
             "heuristic_scores": {
               "completeness": 100.0,
-              "thesis_specificity": 83.33,
+              "thesis_specificity": 91.67,
               "financial_analysis_depth": 90.0,
               "forecast_rationale": 88.89,
               "valuation_transparency": 100.0,
               "risk_catalyst_quality": 70.0,
               "evidence_integration": 83.33,
-              "peer_industry_context_quality": 81.25,
+              "peer_industry_context_quality": 87.5,
               "executive_summary_actionability": 87.5,
               "sensitivity_disclosure_completeness": 85.0,
               "presentation_quality": 90.0
@@ -6835,14 +6835,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.recommendation_consistency",
@@ -6921,14 +6921,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "publication_readiness",
@@ -7011,29 +7011,29 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\YTC_report.pdf": 930974,
-          "output\\YTC_explanation.pdf": 346203,
+          "output\\YTC_report.pdf": 927602,
+          "output\\YTC_explanation.pdf": 372754,
           "storage\\archive\\benchmark_ytc\\claim_ledger.json": 2668,
-          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 24668
+          "storage\\archive\\benchmark_ytc\\benchmark_ytc_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "rubric": "report_quality_v1",
-  "score": 88.35,
+  "score": 89.73,
   "decision": "allow_export",
   "failed_gates": [],
   "section_scores": {
     "completeness": 100.0,
-    "thesis_specificity": 83.33,
+    "thesis_specificity": 91.67,
     "financial_analysis_depth": 90.0,
     "forecast_rationale": 88.89,
     "valuation_transparency": 100.0,
     "risk_catalyst_quality": 70.0,
     "evidence_integration": 83.33,
-    "peer_industry_context_quality": 81.25,
+    "peer_industry_context_quality": 87.5,
     "executive_summary_actionability": 87.5,
     "sensitivity_disclosure_completeness": 85.0,
     "presentation_quality": 90.0
@@ -7043,13 +7043,13 @@
       "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\YTC_report.pdf",
       "exists": true,
       "pages": 13,
-      "text": "Nghiên cứu cổ phiếu BÁO CÁO CẬP NHẬT ĐỊNH GIÁ\nNGÀNH DƯỢC PHẨM Ngày 2026-06-20\nCONG TY CO PHAN XUAT NHAP KHAU Y TE THANH PHO HO CHI MINH (YTC VN) UPCOM: YTC\nNhóm phân tích\nKhuyến nghị · UPCOM: YTC\nBáo cáo cập nhật\nTheo dõi\nUPCOM: YTC\nGiá mục tiêu: 30,000 VND | Tiềm năng tăng/giảm: +0.0% | Ngày\nDược phẩm\ngiá: 2026-06-16 | Tạo: 2026-06-20 02:40\nGiá mục tiêu 30,000 VND\nCong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh (YTC) là\nGiá hiện tại 30,000 doanh nghiệp dược phẩm có nền doanh thu 917 tỷ đồng với biên lợi\n(VND) nhuận gộp 11.4%, đủ để hỗ trợ tăng trưởng doanh thu dự phóng 10.5%\nmà không cần mở rộng đòn bẩy vận hành quá mức. Mô hình định giá\nNgày giá thị 2026-06-16\ncho giá mục tiêu 30,000 VND so với thị giá 30,000 VND, biên tiềm năng\ntrường\n0.0%. Khoảng giá trị hợp lý theo ma trận độ nhạy trải từ chưa đủ dữ liệu\nThời điểm tạo 2026-06-20 công bố đến chưa đủ dữ liệu công bố, phản ánh mức độ không chắc\nbáo cáo 02:40 chắn của các giả định dài hạn. Luận điểm đầu tư xoay quanh ba câu hỏi:\n(i) doanh nghiệp có giữ được biên gộp trước áp lực chi phí nguyên liệu\nTỷ lệ +0.0% API và tỷ giá không? (ii) kỷ luật chi phí bán hàng và quản lý có đảm bảo\ntăng/giảm\nbiên EBIT không bị xói mòn khi tăng doanh thu? (iii) chi đầu tư dài hạn\nphục vụ nâng chuẩn nhà máy GMP-EU có phá vỡ cấu trúc dòng tiền tự\nTổng tỷ suất lợi +0.0%\ndo hay không? Ba câu hỏi này quyết định độ tin cậy của kết quả mô\nnhuận\nhình FCFF và từ đó quyết định giá trị hợp lý. Rủi ro trọng yếu là kết quả\nđấu thầu ETC và biến động giá API — hai yếu tố này tác động đồng thời\nlên cả doanh thu lẫn biên, và là nguồn sai lệch lớn nhất so với giả định\ncơ sở. [1][2]\nLuận điểm cập nhật\nCong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh hoạt\nđộng trên hai kênh phân phối ETC (đấu thầu bệnh viện) và OTC (nhà\nthuốc bán lẻ). Doanh thu kỳ gần nhất đạt 917 tỷ đồng, tăng 32.2% so với\nkỳ trước — cần theo dõi tính bền vững so với CAGR lịch sử (CAGR lịch sử\n10.5%). Biên lợi nhuận gộp 11.4% phản ánh năng lực kiểm soát giá vốn\nAPI trong môi trường tỷ giá biến động; đây là chỉ số quan trọng hơn tốc\nđộ tăng doanh thu vì nó xác định chất lượng lợi nhuận thực sự. Tỷ lệ\nNguồn nhóm phân tích thu thập\nchuyển đổi tiền mặt -2.58 lần cho thấy mức độ lợi nhuận kế toán được\nNhận định: Thị giá 30,000 VND so hỗ trợ bởi dòng tiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu\nvới giá mục tiêu 30,000 VND, hàm ý áp lực vốn lưu động từ phải thu bệnh viện. Biến số vận hành trọng yếu\n+0.0%; tín hiệu giá chỉ có giá trị khi là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh\nđi cùng thanh khoản và ngày giá thu cao vừa chịu áp lực chính sách đấu thầu định kỳ. Diễn biến giá API\n2026-06-16. và tiến độ nâng chuẩn nhà máy là hai chỉ báo vận hành cần theo dõi\nsong song với kết quả tài chính quý. [1]\nThông tin giao dịch\nĐộng lực tăng trưởng\nMã giao dịch YTC VN\nDoanh thu 917 tỷ đồng tăng 32.2% so với kỳ trước, trên nền CAGR lịch\nSàn UPCOM\nsử 10.5%. Giả định dự phóng 10.5% thận trọng hơn tốc độ gần nhất\n32.2%, phản ánh quan điểm bảo thủ về tính bền vững của động lực tăng\nNgành Dược phẩm\ntrưởng hiện tại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh\nGiá đóng cửa 30,000\nETC (đấu thầu bệnh viện) — kênh này vừa có quy mô lớn vừa bị chi phối\nGiá cao/thấp 21,000 / 54,100 bởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các\n52 tuần quý. Kênh OTC ổn định hơn nhưng tăng trưởng thấp hơn; nó đóng vai\ntrò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần theo\nVốn hóa 285\ndõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức\nđộ thâm nhập kênh OTC — ba con số này sẽ xác nhận hoặc bác bỏ giả\nSố lượng cổ 10\nđịnh tăng trưởng của mô hình. [1]\nphiếu\nKLGD bình 253\nquân 30 phiên\nTỷ lệ sở hữu N/A\nnước ngoài\nTriển vọng kinh doanh và tài chính\nCẬP NHẬT HOẠT ĐỘNG KINH DOANH\nCong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh hoạt động trên hai kênh phân phối ETC (đấu thầu\nbệnh viện) và OTC (nhà thuốc bán lẻ). Doanh thu kỳ gần nhất đạt 917 tỷ đồng, tăng 32.2% so với kỳ trước — cần\ntheo dõi tính bền vững so với CAGR lịch sử (CAGR lịch sử 10.5%). Biên lợi nhuận gộp 11.4% phản ánh năng lực\nkiểm soát giá vốn API trong môi trường tỷ giá biến động; đây là chỉ số quan trọng hơn tốc độ tăng doanh thu vì\nnó xác định chất lượng lợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt -2.58 lần cho thấy mức độ lợi nhuận kế toán\nđược hỗ trợ bởi dòng tiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải thu\nbệnh viện. Biến số vận hành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu\ncao vừa chịu áp lực chính sách đấu thầu định kỳ. Diễn biến giá API và tiến độ nâng chuẩn nhà máy là hai chỉ báo\nvận hành cần theo dõi song song với kết quả tài chính quý. [1]\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A doanh thu 917 tỷ đồng, tăng +32.2% so với 2024A; biên EBITDA -2.2 điểm % và biên EBIT -2.4\nđiểm %. Nếu doanh thu tăng nhưng hai biên này không mở rộng, luận điểm tăng trưởng phải dựa vào chất\nlượng chi phí chứ không chỉ vào quy mô.\nNghiên cứu cổ phiếu 2\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A biên gộp 11.4% (-1.4 điểm % so với kỳ trước), biên ròng 1.4% (+0.0 điểm %), ROE 6.7% (+1.4\nđiểm % so với 2024A). Chênh lệch giữa biên lợi nhuận và ROE là tín hiệu về hiệu quả sử dụng vốn, không phải chỉ\nlà biến động kế toán.\nKẾT QUẢ TÀI CHÍNH CHÍNH\nDoanh thu 917 tỷ đồng với biên lợi nhuận ròng 1.4% và biên gộp 11.4% vẽ nên bức tranh một doanh nghiệp có\nkhả năng tạo lợi nhuận tương đối ổn định, song phụ thuộc vào kiểm soát chi phí hơn là tăng trưởng sản lượng\nđột biến. Điểm đáng chú ý là tỷ lệ chuyển đổi tiền mặt -2.58 lần. Tỷ lệ này báo hiệu cần kiểm tra chặt hơn chất\nlượng thu tiền và vốn lưu động. Đây là cơ chế giải thích tại sao biên lợi nhuận ròng 1.4% không nhất thiết tương\nđương với khả năng tạo dòng tiền tự do. Biến động lợi nhuận giữa các năm chủ yếu đến từ ba nguồn: (1) thay\nđổi giá vốn API/tỷ giá; (2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí bán hàng và quản lý liên quan đấu thầu. Những\nyếu tố này được chuẩn hóa thành biến số dự phóng (biên gộp 11.2%, chi phí bán hàng và quản lý 20.0% doanh\nthu) và là cơ sở để phân tích độ nhạy — người đọc có thể kiểm tra xem kết quả mô hình thay đổi như thế nào khi\ntừng giả định dịch chuyển. [1]\nNhận định: Lợi nhuận tăng chậm hơn doanh thu, cho thấy doanh thu mới chưa chuyển hóa trọn vẹn thành lợi\nnhuận. Cần rà soát biên gộp, SG&A và đòn bẩy vận hành trước khi nâng giả định tăng trưởng dài hạn. [1][2]\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 680 556 694 917 1,013 1,118 1,236 1,365 1,507\nTăng trưởng doanh thu — -18.2% 24.7% 32.2% 10.5% 10.5% 10.5% 10.5% 10.5%\nLợi nhuận ròng 32 7 10 13 -110 -119 -129 -141 -153\nTăng trưởng lợi nhuận — -79.5% 46.3% 33.4% -953.5% 8.6% 8.7% 8.8% 9.0%\nEPS điều chỉnh (VND) 10,388 2,134 1,461 1,344 -11,472 -12,452 -13,535 -14,732 -16,053\nTăng trưởng EPS — -79.5% -31.5% -8.0% -953.6% 8.5% 8.7% 8.8% 9.0%\nNghiên cứu cổ phiếu 3\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE 98.7% 16.9% 5.4% 6.7% -122.9% 563.5% 91.7% 51.8% 37.1%\nROA 3.5% 0.7% 0.9% 1.1% -10.8% -13.1% -16.4% -21.4% -29.7%\nNợ ròng / EBITDA 1.6x 2.1x 0.0x 1.7x -4.5x -6.1x -7.3x -8.1x -8.6x\nP/E 2.9x 14.1x 20.5x 22.3x -2.6x -2.4x -2.2x -2.0x -1.9x\nP/B 8.8x 7.3x 1.6x 1.5x 3.2x -13.6x -2.0x -1.1x -0.7x\nCẦU NỐI LỢI NHUẬN 2025A-2026F\nĐối chiếu trực tiếp với số liệu công bố trong mô hình định giá.\nChỉ tiêu 2025A 2026F Chênh lệch Nhận định\nDoanh thu thuần 917 1,013 +10.5% Cơ sở kiểm tra mức tăng lợi nhuận.\nBiên lợi nhuận gộp 11.4% 11.2% -20 bps Biến động biên trong ngưỡng theo\ndõi.\nChi phí bán hàng và quản lý -44 -202 +360.3% Chi phí vận hành tăng cùng quy mô\ndoanh thu.\nBiên lợi nhuận HĐKD / EBIT 6.6% -8.8% -1539 bps Biến động biên trong ngưỡng theo\ndõi.\nLNST sau CĐKKS / LNST CĐ 13 -110 -953.5% Đối chiếu với tăng trưởng doanh\nmẹ thu và giả định mô hình.\nBiên lợi nhuận ròng 1.4% -10.8% -1221 bps Biến động biên trong ngưỡng theo\ndõi.\nEPS 1,344 -11,472 -953.6% Đối chiếu với tăng trưởng doanh\nthu và giả định mô hình.\nĐỘNG LỰC DỰ PHÓNG\nDoanh thu 917 tỷ đồng tăng 32.2% so với kỳ trước, trên nền CAGR lịch sử 10.5%. Giả định dự phóng 10.5% thận\ntrọng hơn tốc độ gần nhất 32.2%, phản ánh quan điểm bảo thủ về tính bền vững của động lực tăng trưởng hiện\ntại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh ETC (đấu thầu bệnh viện) — kênh này vừa có quy mô\nlớn vừa bị chi phối bởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các quý. Kênh OTC ổn định\nhơn nhưng tăng trưởng thấp hơn; nó đóng vai trò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần\ntheo dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức độ thâm nhập kênh OTC — ba con\nsố này sẽ xác nhận hoặc bác bỏ giả định tăng trưởng của mô hình. [1]\nBiên lợi nhuận gộp hiện tại 11.4%, mô hình kỳ vọng biên gộp duy trì ổn định (11.2% dự phóng). Áp lực chính lên\nbiên gộp là chi phí API nhập khẩu và tỷ giá USD/VND: khi hai yếu tố này tăng cùng chiều, giá vốn hàng bán tăng\nvà biên gộp bị thu hẹp ngay trong quý tiếp theo vì chu kỳ nhập khẩu thường ngắn. Dư địa hấp thụ cú sốc này bị\ngiới hạn bởi biên lợi nhuận ròng hiện ở mức 1.4% — không đủ đệm để hấp thụ nếu biên gộp giảm quá 2–3 điểm\nphần trăm. Chi phí bán hàng và quản lý 20.0% doanh thu là lớp chi phí quyết định khoảng cách biên gộp đến\nbiên EBIT; đặc biệt chi phí phục vụ đấu thầu ETC có xu hướng không co giãn theo doanh thu. Thuế suất hiệu\ndụng 19.6% là bước chuyển cuối từ EBIT sang lợi nhuận sau thuế — biến số này ít biến động nhưng bất kỳ thay\nNghiên cứu cổ phiếu 4\nđổi ưu đãi thuế nào sẽ tác động trực tiếp. Chỉ báo cần theo dõi: giá API theo chỉ số thị trường nguyên liệu dược,\ntỷ giá USD/VND, và biên gộp thực tế quý tiếp theo so với giả định — đây là tín hiệu sớm cho việc cần điều chỉnh\nmô hình. [1]\nNhận định: Biên lợi nhuận gộp thu hẹp (12.7% -> 11.4%). Biên thu hẹp gây áp lực lên dự phóng lợi nhuận; rà\nsoát giả định giá vốn. [1]\nNguồn: Dự phóng của nhóm phân tích dựa trên giả định đã phê duyệt.\nNhận định: 2026F hàm ý doanh thu tăng +10.5% so với 2025A, trong khi biên gộp dự phóng 11.2% so với mức\nthực tế 11.4%. Đây là điểm kiểm tra trọng yếu vì sai lệch nhỏ ở tăng trưởng hoặc biên gộp sẽ truyền trực tiếp vào\nEBIT và FCFF.\nNghiên cứu cổ phiếu 5\nĐỘNG LỰC DỰ PHÓNG CHÍNH\nGiả định biến số chính được hiệu chỉnh từ dữ liệu lịch sử và định hướng kinh doanh hiện tại.\nChỉ tiêu Giả định cơ sở Liên kết tài chính\nTăng trưởng doanh thu 10.5% Doanh thu dẫn tới EBIT và dòng tiền\ntự do\nBiên lợi nhuận gộp 11.2% Giá vốn dẫn tới lợi nhuận gộp\nChi phí bán hàng và quản lý / 20.0% Chi phí vận hành dẫn tới biên EBIT\ndoanh thu\nKhấu hao / doanh thu 0.7% EBIT và lá chắn thuế\nChi đầu tư / doanh thu 8.4% Dòng tiền tự do và mở rộng công suất\nThuế suất hiệu dụng 19.6% LNST và NOPAT\nChuyển đổi dòng tiền 2025 -257.7% Bất thường — cần soi vốn lưu động\n(không dùng làm luận điểm bền vững)\nWACC 9.6% Tỷ lệ chiết khấu dòng tiền\nTăng trưởng dài hạn 3.0% Giá trị cuối kỳ trong mô hình chiết\nkhấu dòng tiền\nĐịnh giá và độ nhạy\nLUẬN ĐIỂM ĐỊNH GIÁ\nDự phóng theo phương pháp dự phóng theo biến số, đi từ biến số kinh doanh tới dòng tài chính tới định giá. Giả\nđịnh cơ sở: tăng trưởng doanh thu 10.5% (căn cứ CAGR lịch sử 10.5% và kế hoạch mở rộng ETC/OTC); biên lợi\nnhuận gộp 11.2% (phản ánh áp lực API và cơ cấu sản phẩm); chi phí bán hàng và quản lý 20.0% doanh thu; thuế\nsuất hiệu dụng 19.6%; chi đầu tư 8.4% doanh thu. Biến số có tác động lớn nhất tới giá trị là: (1) tăng trưởng\ndoanh thu — mỗi điểm phần trăm hụt so với giả định cơ sở sẽ kéo EBIT và FCFF giảm theo tỷ lệ; (2) biên lợi\nnhuận gộp — biến động chi phí API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) chi\nđầu tư và vốn lưu động — quyết định bao nhiêu phần EBIT còn lại dưới dạng FCFF sau tái đầu tư. Hai tham số\nđịnh giá quan trọng nhất là WACC 9.6% và tăng trưởng dài hạn 3.0%; chúng xác định cách quy đổi FCFF tương lai\nvề hiện giá. Độ nhạy của giá mục tiêu với hai tham số này cao hơn bất kỳ biến số vận hành nào — đây là lý do\nma trận độ nhạy là bắt buộc chứ không phải tùy chọn. Rủi ro sai lệch lớn nhất là khi giả định tăng trưởng lạc\nquan gặp thực tế đấu thầu thắt chặt hoặc giá API tăng đột biến cùng lúc. [1][2]\nNhận định: Tiềm năng tăng/giảm giá theo mô hình định giá là +0.0%. Trạng thái khuyến nghị theo mô hình:\nTheo dõi. [2]\nCẦU NỐI WACC\nChỉ tiêu Giá trị\nLãi suất phi rủi ro 4.0%\nBeta 0.85\nNghiên cứu cổ phiếu 6\nChỉ tiêu Giá trị\nPhần bù rủi ro thị trường 8.0%\nChi phí vốn chủ sở hữu 13.8%\nChi phí nợ vay 8.0%\nThuế suất 19.6%\nWACC 9.6%\nCẦU NỐI ĐỊNH GIÁ FCFF\nChỉ tiêu Giá trị\nPV giá trị cuối kỳ -1,159\nGiá trị doanh nghiệp -1,706\nTiền mặt và đầu tư ngắn hạn 79\nNợ vay 245\nGiá trị vốn chủ sở hữu -1,821\nSố cổ phiếu lưu hành (triệu) 10\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 680 556 694 917 1,013 1,118 1,236 1,365 1,507\nTăng trưởng doanh thu — -18.2% 24.7% 32.2% 10.5% 10.5% 10.5% 10.5% 10.5%\nLợi nhuận gộp 62 61 88 104 113 125 138 152 168\nBiên lợi nhuận gộp 9.1% 11.0% 12.7% 11.4% 11.2% 11.2% 11.2% 11.2% 11.2%\nGVHB trừ khấu hao -618 -495 -605 -813 -900 -994 -1,098 -1,212 -1,339\nChi phí bán hàng và quản lý 10 -11 -26 -44 -202 -224 -247 -273 -302\nDoanh thu tài chính 38 40 56 50 — — — — —\nChi phí tài chính -32 -39 -51 -44 -20 -20 -20 -20 -20\nEBITDA 76 54 66 67 -82 -91 -100 -111 -123\nTỷ suất EBITDA 11.2% 9.7% 9.6% 7.3% -8.1% -8.1% -8.1% -8.1% -8.1%\nKhấu hao 4 4 4 7 7 8 9 10 11\nLợi nhuận từ HĐKD / EBIT 72 50 62 60 -90 -99 -109 -121 -133\nBiên lợi nhuận HĐKD / EBIT 10.6% 9.0% 9.0% 6.6% -8.8% -8.8% -8.8% -8.8% -8.8%\nNghiên cứu cổ phiếu 7\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nLợi nhuận khác -32 -39 -51 -44 0 0 0 0 0\nChi phí lãi vay ròng -16 -16 -10 -11 -20 -20 -20 -20 -20\nThuế -8 -4 -2 -3 0 0 0 0 0\nThuế suất thực tế 19.6% 38.1% 14.2% 20.1% 0.0% 0.0% 0.0% 0.0% 0.0%\nLNST sau CĐKKS / LNST CĐ 32 7 10 13 -110 -119 -129 -141 -153\nmẹ\nBiên lợi nhuận ròng 4.7% 1.2% 1.4% 1.4% -10.8% -10.6% -10.5% -10.3% -10.2%\nTiền mặt từ hoạt động kinh 44 21 23 -33 -110 -119 -130 -141 -154\ndoanh\nSố lượng cổ phiếu (triệu) 10 10 10 10 10 10 10 10 10\nEPS 10,388 2,134 1,461 1,344 -11,472 -12,452 -13,535 -14,732 -16,053\nEPS hiệu chỉnh 10,388 2,134 1,461 1,344 -11,472 -12,452 -13,535 -14,732 -16,053\nTăng trưởng EPS hiệu chỉnh — -79.5% -31.5% -8.0% -953.6% 8.5% 8.7% 8.8% 9.0%\nĐỘ NHẠY THEO DRIVER\nMinh họa độ nhạy theo kịch bản; báo cáo chính thức cần giả định được phê duyệt.\nThận trọng Cơ sở Tích cực\nGiá mục tiêu — — —\nTiềm năng tăng/giảm — — —\nÁp lực tăng trưởng doanh thu 7.5% 10.5% 13.5%\nÁp lực biên lợi nhuận gộp 9.2% 11.2% 13.2%\nÁp lực WACC 10.6% 9.6% 8.6%\nRủi ro đầu tư\nYẾU TỐ CẦN THEO DÕI\nRủi ro và yếu tố hỗ trợ của Cong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh đều gắn với cơ chế\ntruyền dẫn tài chính cụ thể, không đơn thuần là liệt kê định tính. Rủi ro giảm giá theo mức độ ưu tiên: (1) giá\ntrúng thầu ETC thấp hơn kỳ vọng — đây là rủi ro trọng yếu nhất vì tác động đồng thời lên doanh thu và biên\ngộp, tức là thu hẹp FCFF từ cả hai phía; (2) giá API nhập khẩu và tỷ giá USD/VND tăng — ảnh hưởng trực tiếp đến\ngiá vốn, thu hẹp biên gộp 11.2% giả định; (3) kéo dài chu kỳ phải thu bệnh viện — làm tăng ΔNWC và giảm FCFF\ndù lợi nhuận kế toán vẫn cao; (4) cạnh tranh generic gia tăng — tạo áp lực giảm giá trên sản phẩm chủ lực; (5)\nthay đổi chính sách đăng ký lưu hành và tiêu chuẩn GMP. Yếu tố hỗ trợ: trúng thêm thầu ETC mới là yếu tố có tác\nđộng lớn nhất và gần nhất đến FCFF; cải thiện cơ cấu sản phẩm biên cao (chuyển dần từ generic sang branded\ngeneric) nâng biên gộp một cách bền vững hơn mở rộng sản lượng thuần túy; hoàn tất đầu tư GMP-EU mở rộng\ntập khách hàng xuất khẩu, giảm phụ thuộc vào chu kỳ đấu thầu nội địa. Mỗi yếu tố cần gắn với chỉ báo sớm cụ\nNghiên cứu cổ phiếu 8\nthể: kết quả đấu thầu ETC hàng quý, biến động giá API theo chỉ số thị trường nguyên liệu dược, vòng quay phải\nthu so với cùng kỳ. Khi có dữ liệu mới, nhà phân tích nên chạy lại ma trận độ nhạy để xác nhận kết luận định giá\ncòn hiệu lực. [1]\nRỦI RO ĐẦU TƯ\nRủi ro Mức độ Theo dõi\nÁp lực giá thầu thuốc Cao Kết quả đấu thầu ETC\nBiến động nguyên liệu và tỷ Trung bình API, USD/VND\ngiá\nCạnh tranh generic Trung bình Thị phần và giá bán\nPhụ lục bảng tài chính\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 680 556 694 917 1,013 1,118 1,236 1,365 1,507\nTăng trưởng doanh thu — -18.2% 24.7% 32.2% 10.5% 10.5% 10.5% 10.5% 10.5%\nLợi nhuận ròng 32 7 10 13 -110 -119 -129 -141 -153\nTăng trưởng lợi nhuận — -79.5% 46.3% 33.4% -953.5% 8.6% 8.7% 8.8% 9.0%\nEPS điều chỉnh (VND) 10,388 2,134 1,461 1,344 -11,472 -12,452 -13,535 -14,732 -16,053\nTăng trưởng EPS — -79.5% -31.5% -8.0% -953.6% 8.5% 8.7% 8.8% 9.0%\nROE 98.7% 16.9% 5.4% 6.7% -122.9% 563.5% 91.7% 51.8% 37.1%\nROA 3.5% 0.7% 0.9% 1.1% -10.8% -13.1% -16.4% -21.4% -29.7%\nNợ ròng / EBITDA 1.6x 2.1x 0.0x 1.7x -4.5x -6.1x -7.3x -8.1x -8.6x\nP/E 2.9x 14.1x 20.5x 22.3x -2.6x -2.4x -2.2x -2.0x -1.9x\nP/B 8.8x 7.3x 1.6x 1.5x 3.2x -13.6x -2.0x -1.1x -0.7x\nCÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThay đổi vốn lưu động -7 -43 -40 25 7 8 9 10 11\nChi đầu tư 3 14 50 88 85 72 56 36 11\nĐầu tư vào công ty liên kết/liên — — — — — — — — —\ndoanh\nNghiên cứu cổ phiếu 9\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nCác khoản mục dòng tiền khác — — — — — — — — —\nDòng tiền tự do 41 8 -27 -121 -157 -152 -144 -133 -118\nPhát hành cổ phiếu — — — — — — — — —\nCổ tức 0 0 1 2 -8 -9 -9 -10 -11\nTổng nợ phải trả 891 901 849 929 929 929 929 929 929\nThay đổi tổng nợ phải trả — 10 -52 80 0 0 0 0 0\nNợ vay có lãi cuối năm 191 203 127 245 245 245 245 245 245\nThay đổi nợ vay có lãi — 11 -75 117 0 0 0 0 0\nTiền và tương đương tiền 70 88 127 130 -124 -308 -486 -655 -810\nNợ ròng cuối năm (nợ vay có lãi 121 115 1 115 369 553 731 900 1,055\n- tiền)\nThay đổi nợ ròng — -7 -114 114 254 184 178 168 155\nVốn CSH 32 39 180 191 89 -21 -141 -271 -413\nGiá trị sổ sách/cp (VND) 3,411 4,103 18,913 20,063 9,334 -2,210 -14,760 -28,420 -43,296\nNợ ròng / VCSH 374.8% 293.9% 0.4% 60.3% 413.9% -2621.8%-518.9% -331.6% -255.2%\nNợ ròng / EBITDA 1.6x 2.1x 0.0x 1.7x -4.5x -6.1x -7.3x -8.1x -8.6x\nTổng tài sản 924 940 1,029 1,120 1,018 908 788 658 516\nCHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ\nĐơn vị: lần hoặc %, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE 98.7% 16.9% 5.4% 6.7% -122.9% 563.5% 91.7% 51.8% 37.1%\nROA 3.5% 0.7% 0.9% 1.1% -10.8% -13.1% -16.4% -21.4% -29.7%\nROIC 37.6% 26.1% 27.7% 15.8% -15.7% -14.9% -14.9% -15.4% -16.7%\nWACC 9.6% 9.6% 9.6% 9.6% 9.6% 9.6% 9.6% 9.6% 9.6%\nEVA 27.9% 16.5% 18.1% 6.2% -25.4% -24.6% -24.5% -25.1% -26.3%\nP/E 2.9x 14.1x 20.5x 22.3x -2.6x -2.4x -2.2x -2.0x -1.9x\nEV/EBITDA 5.3x 7.4x 4.3x 6.0x -8.0x -9.2x -10.1x -10.7x -10.9x\nEV/FCF 10.0x 53.2x -10.5x -3.3x -4.2x -5.5x -7.0x -8.9x -11.3x\nP/B 8.8x 7.3x 1.6x 1.5x 3.2x -13.6x -2.0x -1.1x -0.7x\nNghiên cứu cổ phiếu 10\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nP/S 0.4x 0.5x 0.4x 0.3x 0.3x 0.3x 0.2x 0.2x 0.2x\nEV/Doanh thu 0.6x 0.7x 0.4x 0.4x 0.6x 0.8x 0.8x 0.9x 0.9x\nPEG — -0.2x -0.7x -2.8x 0.0x -0.3x -0.3x -0.2x -0.2x\nSuất sinh lợi cổ tức 0 0 0 0 0 0 0 0 0\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 680 556 694 917 1,013 1,118 1,236 1,365 1,507\nTăng trưởng doanh thu — -18.2% 24.7% 32.2% 10.5% 10.5% 10.5% 10.5% 10.5%\nLợi nhuận gộp 62 61 88 104 113 125 138 152 168\nBiên lợi nhuận gộp 9.1% 11.0% 12.7% 11.4% 11.2% 11.2% 11.2% 11.2% 11.2%\nGVHB trừ khấu hao -618 -495 -605 -813 -900 -994 -1,098 -1,212 -1,339\nChi phí bán hàng và quản lý 10 -11 -26 -44 -202 -224 -247 -273 -302\nDoanh thu tài chính 38 40 56 50 — — — — —\nChi phí tài chính -32 -39 -51 -44 -20 -20 -20 -20 -20\nEBITDA 76 54 66 67 -82 -91 -100 -111 -123\nTỷ suất EBITDA 11.2% 9.7% 9.6% 7.3% -8.1% -8.1% -8.1% -8.1% -8.1%\nKhấu hao 4 4 4 7 7 8 9 10 11\nLợi nhuận từ HĐKD / EBIT 72 50 62 60 -90 -99 -109 -121 -133\nBiên lợi nhuận HĐKD / EBIT 10.6% 9.0% 9.0% 6.6% -8.8% -8.8% -8.8% -8.8% -8.8%\nLợi nhuận khác -32 -39 -51 -44 0 0 0 0 0\nChi phí lãi vay ròng -16 -16 -10 -11 -20 -20 -20 -20 -20\nThuế -8 -4 -2 -3 0 0 0 0 0\nThuế suất thực tế 19.6% 38.1% 14.2% 20.1% 0.0% 0.0% 0.0% 0.0% 0.0%\nLNST sau CĐKKS / LNST CĐ mẹ 32 7 10 13 -110 -119 -129 -141 -153\nBiên lợi nhuận ròng 4.7% 1.2% 1.4% 1.4% -10.8% -10.6% -10.5% -10.3% -10.2%\nTiền mặt từ hoạt động kinh 44 21 23 -33 -110 -119 -130 -141 -154\ndoanh\nSố lượng cổ phiếu (triệu) 10 10 10 10 10 10 10 10 10\nNghiên cứu cổ phiếu 11\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nEPS 10,388 2,134 1,461 1,344 -11,472 -12,452 -13,535 -14,732 -16,053\nEPS hiệu chỉnh 10,388 2,134 1,461 1,344 -11,472 -12,452 -13,535 -14,732 -16,053\nTăng trưởng EPS hiệu chỉnh — -79.5% -31.5% -8.0% -953.6% 8.5% 8.7% 8.8% 9.0%\nPhương pháp định giá và nguồn dữ liệu\nPHƯƠNG PHÁP VÀ GIẢ ĐỊNH CHÍNH\nBáo cáo trình bày nguồn dữ liệu, giả định dự phóng và phương pháp định giá để các kết luận chính có thể được\nđối chiếu. Những khoảng trống dữ liệu trọng yếu được công khai trong bản nháp phân tích và phải được xử lý\ntrước khi phát hành cho khách hàng.\nHạng mục Diễn giải\nSố liệu định lượng lấy từ đâu Doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt và số cổ phiếu lấy trực tiếp\ntừ Báo cáo tài chính (BCTC) đã chuẩn hóa; giá, vốn hóa và thanh khoản lấy từ\ndữ liệu thị trường. Các số liệu được đối chiếu với báo cáo gốc của doanh\nnghiệp. [1]\nVì sao dự phóng theo cách này Mỗi dòng dự phóng nối tiếp số liệu lịch sử: tăng trưởng doanh thu, biên lợi\nnhuận, vốn lưu động, chi đầu tư và thuế được kéo dài từ xu hướng quá khứ\nvà đặc thù ngành dược, để dòng tiền dự phóng bám sát năng lực thực tế của\ndoanh nghiệp thay vì giả định tùy ý. [1][2]\nCách tính giá mục tiêu Từ dự phóng, mô hình tính dòng tiền tự do doanh nghiệp và vốn chủ sở hữu\n(FCFF/FCFE), chiết khấu về hiện tại bằng chi phí vốn bình quân (WACC), cộng\ngiá trị cuối kỳ, trừ nợ ròng rồi chia cho số cổ phiếu đang lưu hành để ra giá\ntrị mỗi cổ phần. [2]\nCách ra khuyến nghị Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. Mua\nnếu >20%, Bán nếu <-10%, còn lại là Giữ; nếu thiếu target mô hình đủ dùng\nthì xếp Theo dõi.\nKết quả hiện tại Giá hiện tại 30,000 VND, giá mục tiêu 30,000 VND, tiềm năng tăng/giảm\n+0.0%, tổng lợi suất kỳ vọng +0.0%, khuyến nghị: Theo dõi.\nThời điểm giá thị trường Giá hiện tại được ghi nhận tại ngày 2026-06-16; báo cáo được tạo lúc 2026-\n06-20 02:40:29+07:00. Báo cáo ưu tiên giá thị trường mới nhất tại thời điểm\ntạo báo cáo.\nNgười đọc tự kiểm chứng thế Mọi giả định đều hiển thị trong bảng dự phóng, mô hình định giá và ma trận\nnào độ nhạy. Nếu không đồng ý với giả định về chi phí vốn bình quân (WACC),\ntăng trưởng dài hạn, biên lợi nhuận hay vốn lưu động, người đọc có thể thay\nđổi và thấy ngay kết luận định giá thay đổi tương ứng. Mỗi nhận định định\ntính đều có đánh số [n] dẫn về nguồn ở mục Chú giải nguồn trích dẫn bên\ndưới.\nNghiên cứu cổ phiếu 12\nMinh chứng Chi tiết\nSố vết công thức 6 vết; phương pháp: wacc, fcff, fcfe, terminal_value, blend_dcf,\nsensitivity_matrix\nNguồn định giá tương đối Giả định tạm thời của mô hình; chưa có bộ doanh nghiệp so sánh được phê\nduyệt.\nTrạng thái định giá tương đối Đang chờ dữ liệu nhóm doanh nghiệp so sánh đã kiểm chứng.\nKiểm soát giá mục tiêu Raw model=N/A; headline=30,000 VND; band=18,000-42,000 VND; điều\nchỉnh=trung tính theo thị giá\nTrạng thái dữ liệu và phần còn thiếu\nChưa đủ dữ liệu kiểm chứng cho: lịch dự phóng nợ vay.\nCHÚ GIẢI NGUỒN TRÍCH DẪN\n[1] Dữ liệu tài chính & thị trường — Báo cáo tài chính (BCTC) đã chuẩn hóa và dữ liệu giao dịch thị trường; dùng\ncho mọi số liệu và nhận định về doanh thu, lợi nhuận, dòng tiền, nợ vay, vốn lưu động, biên lợi nhuận và định\ngiá.\n[2] Mô hình định giá nội bộ — dự phóng dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết khấu theo\nchi phí vốn bình quân (WACC), giá trị cuối kỳ, nợ ròng, số cổ phiếu và giá mục tiêu.\nTại thời điểm lập báo cáo, hệ thống chưa thu thập được bài báo bên ngoài phù hợp từ các nguồn được phép.\nPhần nhận định định tính được xây dựng từ báo cáo tài chính, công bố chính thức, dữ liệu định lượng và so sánh\ncùng ngành. Đây là hạn chế về coverage nguồn tin, không phải xác nhận rằng doanh nghiệp không có sự kiện\nmới.\nTUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM\nBáo cáo này chỉ nhằm mục đích cung cấp thông tin và không phải là lời mời mua hoặc bán chứng khoán. Nhà\nđầu tư cần tự đánh giá khẩu vị rủi ro và tham khảo ý kiến chuyên gia được cấp phép trước khi ra quyết định.\nNghiên cứu cổ phiếu 13"
+      "text": "Nghiên cứu cổ phiếu BÁO CÁO CẬP NHẬT ĐỊNH GIÁ\nNGÀNH DƯỢC PHẨM Ngày 2026-06-22\nCONG TY CO PHAN XUAT NHAP KHAU Y TE THANH PHO HO CHI MINH (YTC VN) UPCOM: YTC\nNhóm phân tích\nKhuyến nghị · UPCOM: YTC\nBáo cáo cập nhật\nTheo dõi\nUPCOM: YTC\nGiá mục tiêu: 30,000 VND | Tiềm năng tăng/giảm: +0.0% | Ngày\nDược phẩm\ngiá: 2026-06-16 | Tạo: 2026-06-22 16:18\nGiá mục tiêu 30,000 VND\nCong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh (YTC) là\nGiá hiện tại 30,000 doanh nghiệp dược phẩm có nền doanh thu 917 tỷ đồng với biên lợi\n(VND) nhuận gộp 11.4%, đủ để hỗ trợ tăng trưởng doanh thu dự phóng 10.5%\nmà không cần mở rộng đòn bẩy vận hành quá mức. Mô hình định giá\nNgày giá thị 2026-06-16\ncho giá mục tiêu 30,000 VND so với thị giá 30,000 VND, biên tiềm năng\ntrường\n0.0%. Khoảng giá trị hợp lý theo ma trận độ nhạy trải từ chưa đủ dữ liệu\nThời điểm tạo 2026-06-22 công bố đến chưa đủ dữ liệu công bố, phản ánh mức độ không chắc\nbáo cáo 16:18 chắn của các giả định dài hạn. Luận điểm đầu tư xoay quanh ba câu hỏi:\n(i) doanh nghiệp có giữ được biên gộp trước áp lực chi phí nguyên liệu\nTỷ lệ +0.0% API và tỷ giá không? (ii) kỷ luật chi phí bán hàng và quản lý có đảm bảo\ntăng/giảm\nbiên EBIT không bị xói mòn khi tăng doanh thu? (iii) chi đầu tư dài hạn\nphục vụ nâng chuẩn nhà máy GMP-EU có phá vỡ cấu trúc dòng tiền tự\nTổng tỷ suất lợi +0.0%\ndo hay không? Ba câu hỏi này quyết định độ tin cậy của kết quả mô\nnhuận\nhình FCFF và từ đó quyết định giá trị hợp lý. Rủi ro trọng yếu là kết quả\nđấu thầu ETC và biến động giá API — hai yếu tố này tác động đồng thời\nlên cả doanh thu lẫn biên, và là nguồn sai lệch lớn nhất so với giả định\ncơ sở. [1][2]\nLuận điểm cập nhật\nCong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh hoạt\nđộng trên hai kênh phân phối ETC (đấu thầu bệnh viện) và OTC (nhà\nthuốc bán lẻ). Doanh thu kỳ gần nhất đạt 917 tỷ đồng, tăng 32.2% so với\nkỳ trước — cần theo dõi tính bền vững so với CAGR lịch sử (CAGR lịch sử\n10.5%). Biên lợi nhuận gộp 11.4% phản ánh năng lực kiểm soát giá vốn\nAPI trong môi trường tỷ giá biến động; đây là chỉ số quan trọng hơn tốc\nđộ tăng doanh thu vì nó xác định chất lượng lợi nhuận thực sự. Tỷ lệ\nNguồn nhóm phân tích thu thập\nchuyển đổi tiền mặt -2.58 lần cho thấy mức độ lợi nhuận kế toán được\nNhận định: Thị giá 30,000 VND so hỗ trợ bởi dòng tiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu\nvới giá mục tiêu 30,000 VND, hàm ý áp lực vốn lưu động từ phải thu bệnh viện. Biến số vận hành trọng yếu\n+0.0%; tín hiệu giá chỉ có giá trị khi là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh\nđi cùng thanh khoản và ngày giá thu cao vừa chịu áp lực chính sách đấu thầu định kỳ. Diễn biến giá API\n2026-06-16. và tiến độ nâng chuẩn nhà máy là hai chỉ báo vận hành cần theo dõi\nsong song với kết quả tài chính quý. [1]\nThông tin giao dịch\nĐộng lực tăng trưởng\nMã giao dịch YTC VN\nDoanh thu 917 tỷ đồng tăng 32.2% so với kỳ trước, trên nền CAGR lịch\nSàn UPCOM\nsử 10.5%. Giả định dự phóng 10.5% thận trọng hơn tốc độ gần nhất\n32.2%, phản ánh quan điểm bảo thủ về tính bền vững của động lực tăng\nNgành Dược phẩm\ntrưởng hiện tại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh\nGiá đóng cửa 30,000\nETC (đấu thầu bệnh viện) — kênh này vừa có quy mô lớn vừa bị chi phối\nGiá cao/thấp 21,000 / 54,100 bởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các\n52 tuần quý. Kênh OTC ổn định hơn nhưng tăng trưởng thấp hơn; nó đóng vai\ntrò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần theo\nVốn hóa 285\ndõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức\nđộ thâm nhập kênh OTC — ba con số này sẽ xác nhận hoặc bác bỏ giả\nSố lượng cổ 10\nđịnh tăng trưởng của mô hình. [1]\nphiếu\nKLGD bình 253\nquân 30 phiên\nTỷ lệ sở hữu N/A\nnước ngoài\nTriển vọng kinh doanh và tài chính\nCẬP NHẬT HOẠT ĐỘNG KINH DOANH\nCong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh hoạt động trên hai kênh phân phối ETC (đấu thầu\nbệnh viện) và OTC (nhà thuốc bán lẻ). Doanh thu kỳ gần nhất đạt 917 tỷ đồng, tăng 32.2% so với kỳ trước — cần\ntheo dõi tính bền vững so với CAGR lịch sử (CAGR lịch sử 10.5%). Biên lợi nhuận gộp 11.4% phản ánh năng lực\nkiểm soát giá vốn API trong môi trường tỷ giá biến động; đây là chỉ số quan trọng hơn tốc độ tăng doanh thu vì\nnó xác định chất lượng lợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt -2.58 lần cho thấy mức độ lợi nhuận kế toán\nđược hỗ trợ bởi dòng tiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải thu\nbệnh viện. Biến số vận hành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu\ncao vừa chịu áp lực chính sách đấu thầu định kỳ. Diễn biến giá API và tiến độ nâng chuẩn nhà máy là hai chỉ báo\nvận hành cần theo dõi song song với kết quả tài chính quý. [1]\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A doanh thu 917 tỷ đồng, tăng +32.2% so với 2024A; biên EBITDA -2.2 điểm % và biên EBIT -2.4\nđiểm %. Nếu doanh thu tăng nhưng hai biên này không mở rộng, luận điểm tăng trưởng phải dựa vào chất\nlượng chi phí chứ không chỉ vào quy mô.\nNghiên cứu cổ phiếu 2\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A biên gộp 11.4% (-1.4 điểm % so với kỳ trước), biên ròng 1.4% (+0.0 điểm %), ROE 6.7% (+1.4\nđiểm % so với 2024A). Chênh lệch giữa biên lợi nhuận và ROE là tín hiệu về hiệu quả sử dụng vốn, không phải chỉ\nlà biến động kế toán.\nKẾT QUẢ TÀI CHÍNH CHÍNH\nDoanh thu 917 tỷ đồng với biên lợi nhuận ròng 1.4% và biên gộp 11.4% vẽ nên bức tranh một doanh nghiệp có\nkhả năng tạo lợi nhuận tương đối ổn định, song phụ thuộc vào kiểm soát chi phí hơn là tăng trưởng sản lượng\nđột biến. Điểm đáng chú ý là tỷ lệ chuyển đổi tiền mặt -2.58 lần. Tỷ lệ này báo hiệu cần kiểm tra chặt hơn chất\nlượng thu tiền và vốn lưu động. Đây là cơ chế giải thích tại sao biên lợi nhuận ròng 1.4% không nhất thiết tương\nđương với khả năng tạo dòng tiền tự do. Biến động lợi nhuận giữa các năm chủ yếu đến từ ba nguồn: (1) thay\nđổi giá vốn API/tỷ giá; (2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí bán hàng và quản lý liên quan đấu thầu. Những\nyếu tố này được chuẩn hóa thành biến số dự phóng (biên gộp 11.2%, chi phí bán hàng và quản lý 9.7% doanh\nthu) và là cơ sở để phân tích độ nhạy — người đọc có thể kiểm tra xem kết quả mô hình thay đổi như thế nào khi\ntừng giả định dịch chuyển. [1]\nNhận định: Lợi nhuận tăng chậm hơn doanh thu, cho thấy doanh thu mới chưa chuyển hóa trọn vẹn thành lợi\nnhuận. Cần rà soát biên gộp, SG&A và đòn bẩy vận hành trước khi nâng giả định tăng trưởng dài hạn. [1][2]\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 680 556 694 917 1,013 1,118 1,236 1,365 1,507\nTăng trưởng doanh thu — -18.2% 24.7% 32.2% 10.5% 10.5% 10.5% 10.5% 10.5%\nLợi nhuận ròng 32 7 10 13 -7 -7 -8 -9 -10\nTăng trưởng lợi nhuận — -79.5% 46.3% 33.4% -151.4% 10.6% 11.0% 9.9% 11.2%\nEPS điều chỉnh (VND) 10,388 2,134 1,461 1,344 -694 -767 -847 -936 -1,034\nTăng trưởng EPS — -79.5% -31.5% -8.0% -151.6% 10.5% 10.4% 10.5% 10.5%\nNghiên cứu cổ phiếu 3\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE 98.7% 16.9% 5.4% 6.7% -3.6% -4.1% -4.8% -5.5% -6.5%\nROA 3.5% 0.7% 0.9% 1.1% -0.6% -0.6% -0.7% -0.7% -0.8%\nNợ ròng / EBITDA 1.6x 2.1x 0.0x 1.7x 13.1x 16.5x 18.5x 19.5x 19.5x\nP/E 2.9x 14.1x 20.5x 22.3x -43.2x -39.1x -35.4x -32.1x -29.0x\nP/B 8.8x 7.3x 1.6x 1.5x 1.6x 1.6x 1.7x 1.8x 1.9x\nCẦU NỐI LỢI NHUẬN 2025A-2026F\nĐối chiếu trực tiếp với số liệu công bố trong mô hình định giá.\nChỉ tiêu 2025A 2026F Chênh lệch Nhận định\nDoanh thu thuần 917 1,013 +10.5% Cơ sở kiểm tra mức tăng lợi nhuận.\nBiên lợi nhuận gộp 11.4% 11.2% -20 bps Biến động biên trong ngưỡng theo\ndõi.\nChi phí bán hàng và quản lý -44 -99 +124.1% Chi phí vận hành tăng cùng quy mô\ndoanh thu.\nBiên lợi nhuận HĐKD / EBIT 6.6% 1.4% -513 bps Biến động biên trong ngưỡng theo\ndõi.\nLNST sau CĐKKS / LNST CĐ 13 -7 -151.4% Đối chiếu với tăng trưởng doanh\nmẹ thu và giả định mô hình.\nBiên lợi nhuận ròng 1.4% -0.7% -205 bps Biến động biên trong ngưỡng theo\ndõi.\nEPS 1,344 -694 -151.6% Đối chiếu với tăng trưởng doanh\nthu và giả định mô hình.\nĐỘNG LỰC DỰ PHÓNG\nDoanh thu 917 tỷ đồng tăng 32.2% so với kỳ trước, trên nền CAGR lịch sử 10.5%. Giả định dự phóng 10.5% thận\ntrọng hơn tốc độ gần nhất 32.2%, phản ánh quan điểm bảo thủ về tính bền vững của động lực tăng trưởng hiện\ntại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh ETC (đấu thầu bệnh viện) — kênh này vừa có quy mô\nlớn vừa bị chi phối bởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các quý. Kênh OTC ổn định\nhơn nhưng tăng trưởng thấp hơn; nó đóng vai trò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần\ntheo dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức độ thâm nhập kênh OTC — ba con\nsố này sẽ xác nhận hoặc bác bỏ giả định tăng trưởng của mô hình. [1]\nBiên lợi nhuận gộp hiện tại 11.4%, mô hình kỳ vọng biên gộp duy trì ổn định (11.2% dự phóng). Áp lực chính lên\nbiên gộp là chi phí API nhập khẩu và tỷ giá USD/VND: khi hai yếu tố này tăng cùng chiều, giá vốn hàng bán tăng\nvà biên gộp bị thu hẹp ngay trong quý tiếp theo vì chu kỳ nhập khẩu thường ngắn. Dư địa hấp thụ cú sốc này bị\ngiới hạn bởi biên lợi nhuận ròng hiện ở mức 1.4% — không đủ đệm để hấp thụ nếu biên gộp giảm quá 2–3 điểm\nphần trăm. Chi phí bán hàng và quản lý 9.7% doanh thu là lớp chi phí quyết định khoảng cách biên gộp đến biên\nEBIT; đặc biệt chi phí phục vụ đấu thầu ETC có xu hướng không co giãn theo doanh thu. Thuế suất hiệu dụng\n19.6% là bước chuyển cuối từ EBIT sang lợi nhuận sau thuế — biến số này ít biến động nhưng bất kỳ thay đổi ưu\nNghiên cứu cổ phiếu 4\nđãi thuế nào sẽ tác động trực tiếp. Chỉ báo cần theo dõi: giá API theo chỉ số thị trường nguyên liệu dược, tỷ giá\nUSD/VND, và biên gộp thực tế quý tiếp theo so với giả định — đây là tín hiệu sớm cho việc cần điều chỉnh mô\nhình. [1]\nNhận định: Biên lợi nhuận gộp thu hẹp (12.7% -> 11.4%). Biên thu hẹp gây áp lực lên dự phóng lợi nhuận; rà\nsoát giả định giá vốn. [1]\nNguồn: Dự phóng của nhóm phân tích dựa trên giả định đã phê duyệt.\nNhận định: 2026F hàm ý doanh thu tăng +10.5% so với 2025A, trong khi biên gộp dự phóng 11.2% so với mức\nthực tế 11.4%. Đây là điểm kiểm tra trọng yếu vì sai lệch nhỏ ở tăng trưởng hoặc biên gộp sẽ truyền trực tiếp vào\nEBIT và FCFF.\nNghiên cứu cổ phiếu 5\nĐỘNG LỰC DỰ PHÓNG CHÍNH\nGiả định biến số chính được hiệu chỉnh từ dữ liệu lịch sử và định hướng kinh doanh hiện tại.\nChỉ tiêu Giả định cơ sở Liên kết tài chính\nTăng trưởng doanh thu 10.5% Doanh thu dẫn tới EBIT và dòng tiền\ntự do\nBiên lợi nhuận gộp 11.2% Giá vốn dẫn tới lợi nhuận gộp\nChi phí bán hàng và quản lý / 9.7% Chi phí vận hành dẫn tới biên EBIT\ndoanh thu\nKhấu hao / doanh thu 0.7% EBIT và lá chắn thuế\nChi đầu tư / doanh thu 8.4% Dòng tiền tự do và mở rộng công suất\nThuế suất hiệu dụng 19.6% LNST và NOPAT\nChuyển đổi dòng tiền 2025 -257.7% Bất thường — cần soi vốn lưu động\n(không dùng làm luận điểm bền vững)\nWACC 9.6% Tỷ lệ chiết khấu dòng tiền\nTăng trưởng dài hạn 3.0% Giá trị cuối kỳ trong mô hình chiết\nkhấu dòng tiền\nĐịnh giá và độ nhạy\nLUẬN ĐIỂM ĐỊNH GIÁ\nDự phóng theo phương pháp dự phóng theo biến số, đi từ biến số kinh doanh tới dòng tài chính tới định giá. Giả\nđịnh cơ sở: tăng trưởng doanh thu 10.5% (căn cứ CAGR lịch sử 10.5% và kế hoạch mở rộng ETC/OTC); biên lợi\nnhuận gộp 11.2% (phản ánh áp lực API và cơ cấu sản phẩm); chi phí bán hàng và quản lý 9.7% doanh thu; thuế\nsuất hiệu dụng 19.6%; chi đầu tư 8.4% doanh thu. Biến số có tác động lớn nhất tới giá trị là: (1) tăng trưởng\ndoanh thu — mỗi điểm phần trăm hụt so với giả định cơ sở sẽ kéo EBIT và FCFF giảm theo tỷ lệ; (2) biên lợi\nnhuận gộp — biến động chi phí API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) chi\nđầu tư và vốn lưu động — quyết định bao nhiêu phần EBIT còn lại dưới dạng FCFF sau tái đầu tư. Hai tham số\nđịnh giá quan trọng nhất là WACC 9.6% và tăng trưởng dài hạn 3.0%; chúng xác định cách quy đổi FCFF tương lai\nvề hiện giá. Độ nhạy của giá mục tiêu với hai tham số này cao hơn bất kỳ biến số vận hành nào — đây là lý do\nma trận độ nhạy là bắt buộc chứ không phải tùy chọn. Rủi ro sai lệch lớn nhất là khi giả định tăng trưởng lạc\nquan gặp thực tế đấu thầu thắt chặt hoặc giá API tăng đột biến cùng lúc. [1][2]\nNhận định: Tiềm năng tăng/giảm giá theo mô hình định giá là +0.0%. Trạng thái khuyến nghị theo mô hình:\nTheo dõi. [2]\nKẾT QUẢ ĐỊNH GIÁ\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nFCFE 10,089 — Cần rà soát\nBLEND 10,089 — Cần rà soát\nNghiên cứu cổ phiếu 6\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nGiá mục tiêu tổng hợp 10,089 100.0% Tổng hợp\nCẦU NỐI WACC\nChỉ tiêu Giá trị\nLãi suất phi rủi ro 4.0%\nBeta 0.85\nPhần bù rủi ro thị trường 8.0%\nChi phí vốn chủ sở hữu 13.8%\nChi phí nợ vay 8.0%\nThuế suất 19.6%\nWACC 9.6%\nCẦU NỐI ĐỊNH GIÁ FCFF\nChỉ tiêu Giá trị\nPV giá trị cuối kỳ 59\nGiá trị doanh nghiệp -101\nTiền mặt và đầu tư ngắn hạn 79\nNợ vay 245\nGiá trị vốn chủ sở hữu -216\nSố cổ phiếu lưu hành (triệu) 10\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 680 556 694 917 1,013 1,118 1,236 1,365 1,507\nTăng trưởng doanh thu — -18.2% 24.7% 32.2% 10.5% 10.5% 10.5% 10.5% 10.5%\nLợi nhuận gộp 62 61 88 104 113 125 138 152 168\nBiên lợi nhuận gộp 9.1% 11.0% 12.7% 11.4% 11.2% 11.2% 11.2% 11.2% 11.2%\nGVHB trừ khấu hao -618 -495 -605 -813 -900 -994 -1,098 -1,212 -1,339\nChi phí bán hàng và quản lý 10 -11 -26 -44 -99 -109 -120 -133 -147\nDoanh thu tài chính 38 40 56 50 — — — — —\nNghiên cứu cổ phiếu 7\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nChi phí tài chính -32 -39 -51 -44 -21 -23 -26 -28 -31\nEBITDA 76 54 66 67 22 24 26 29 32\nTỷ suất EBITDA 11.2% 9.7% 9.6% 7.3% 2.1% 2.1% 2.1% 2.1% 2.1%\nKhấu hao 4 4 4 7 7 8 9 10 11\nLợi nhuận từ HĐKD / EBIT 72 50 62 60 14 16 18 20 22\nBiên lợi nhuận HĐKD / EBIT 10.6% 9.0% 9.0% 6.6% 1.4% 1.4% 1.4% 1.4% 1.4%\nLợi nhuận khác -32 -39 -51 -44 0 0 0 0 0\nChi phí lãi vay ròng -16 -16 -10 -11 -21 -23 -26 -28 -31\nThuế -8 -4 -2 -3 0 0 0 0 0\nThuế suất thực tế 19.6% 38.1% 14.2% 20.1% 0.0% 0.0% 0.0% 0.0% 0.0%\nLNST sau CĐKKS / LNST CĐ 32 7 10 13 -7 -7 -8 -9 -10\nmẹ\nBiên lợi nhuận ròng 4.7% 1.2% 1.4% 1.4% -0.7% -0.7% -0.7% -0.7% -0.7%\nTiền mặt từ hoạt động kinh 44 21 23 -33 -7 -8 -9 -10 -11\ndoanh\nSố lượng cổ phiếu (triệu) 10 10 10 10 10 10 10 10 10\nEPS 10,388 2,134 1,461 1,344 -694 -767 -847 -936 -1,034\nEPS hiệu chỉnh 10,388 2,134 1,461 1,344 -694 -767 -847 -936 -1,034\nTăng trưởng EPS hiệu chỉnh — -79.5% -31.5% -8.0% -151.6% 10.5% 10.4% 10.5% 10.5%\nĐỘ NHẠY THEO DRIVER\nMinh họa độ nhạy theo kịch bản; báo cáo chính thức cần giả định được phê duyệt.\nThận trọng Cơ sở Tích cực\nGiá mục tiêu 8,576 10,089 11,602\nTiềm năng tăng/giảm -71.4% -66.4% -61.3%\nÁp lực tăng trưởng doanh thu 7.5% 10.5% 13.5%\nÁp lực biên lợi nhuận gộp 9.2% 11.2% 13.2%\nÁp lực WACC 10.6% 9.6% 8.6%\nNghiên cứu cổ phiếu 8\nRủi ro đầu tư\nYẾU TỐ CẦN THEO DÕI\nRủi ro và yếu tố hỗ trợ của Cong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh đều gắn với cơ chế\ntruyền dẫn tài chính cụ thể, không đơn thuần là liệt kê định tính. Rủi ro giảm giá theo mức độ ưu tiên: (1) giá\ntrúng thầu ETC thấp hơn kỳ vọng — đây là rủi ro trọng yếu nhất vì tác động đồng thời lên doanh thu và biên\ngộp, tức là thu hẹp FCFF từ cả hai phía; (2) giá API nhập khẩu và tỷ giá USD/VND tăng — ảnh hưởng trực tiếp đến\ngiá vốn, thu hẹp biên gộp 11.2% giả định; (3) kéo dài chu kỳ phải thu bệnh viện — làm tăng ΔNWC và giảm FCFF\ndù lợi nhuận kế toán vẫn cao; (4) cạnh tranh generic gia tăng — tạo áp lực giảm giá trên sản phẩm chủ lực; (5)\nthay đổi chính sách đăng ký lưu hành và tiêu chuẩn GMP. Yếu tố hỗ trợ: trúng thêm thầu ETC mới là yếu tố có tác\nđộng lớn nhất và gần nhất đến FCFF; cải thiện cơ cấu sản phẩm biên cao (chuyển dần từ generic sang branded\ngeneric) nâng biên gộp một cách bền vững hơn mở rộng sản lượng thuần túy; hoàn tất đầu tư GMP-EU mở rộng\ntập khách hàng xuất khẩu, giảm phụ thuộc vào chu kỳ đấu thầu nội địa. Mỗi yếu tố cần gắn với chỉ báo sớm cụ\nthể: kết quả đấu thầu ETC hàng quý, biến động giá API theo chỉ số thị trường nguyên liệu dược, vòng quay phải\nthu so với cùng kỳ. Khi có dữ liệu mới, nhà phân tích nên chạy lại ma trận độ nhạy để xác nhận kết luận định giá\ncòn hiệu lực. [1]\nRỦI RO ĐẦU TƯ\nRủi ro Mức độ Theo dõi\nÁp lực giá thầu thuốc Cao Kết quả đấu thầu ETC\nBiến động nguyên liệu và tỷ Trung bình API, USD/VND\ngiá\nCạnh tranh generic Trung bình Thị phần và giá bán\nPhụ lục bảng tài chính\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 680 556 694 917 1,013 1,118 1,236 1,365 1,507\nTăng trưởng doanh thu — -18.2% 24.7% 32.2% 10.5% 10.5% 10.5% 10.5% 10.5%\nLợi nhuận ròng 32 7 10 13 -7 -7 -8 -9 -10\nTăng trưởng lợi nhuận — -79.5% 46.3% 33.4% -151.4% 10.6% 11.0% 9.9% 11.2%\nEPS điều chỉnh (VND) 10,388 2,134 1,461 1,344 -694 -767 -847 -936 -1,034\nTăng trưởng EPS — -79.5% -31.5% -8.0% -151.6% 10.5% 10.4% 10.5% 10.5%\nROE 98.7% 16.9% 5.4% 6.7% -3.6% -4.1% -4.8% -5.5% -6.5%\nROA 3.5% 0.7% 0.9% 1.1% -0.6% -0.6% -0.7% -0.7% -0.8%\nNợ ròng / EBITDA 1.6x 2.1x 0.0x 1.7x 13.1x 16.5x 18.5x 19.5x 19.5x\nP/E 2.9x 14.1x 20.5x 22.3x -43.2x -39.1x -35.4x -32.1x -29.0x\nNghiên cứu cổ phiếu 9\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nP/B 8.8x 7.3x 1.6x 1.5x 1.6x 1.6x 1.7x 1.8x 1.9x\nCÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThay đổi vốn lưu động -7 -43 -40 25 7 8 9 10 11\nChi đầu tư 3 14 50 88 85 72 56 36 11\nĐầu tư vào công ty liên kết/liên — — — — — — — — —\ndoanh\nCác khoản mục dòng tiền khác — — — — — — — — —\nDòng tiền tự do 41 8 -27 -121 -74 -60 -42 -21 6\nPhát hành cổ phiếu — — — — — — — — —\nCổ tức 0 0 1 2 -0 -0 -1 -1 -1\nTổng nợ phải trả 891 901 849 929 955 983 1,014 1,049 1,087\nThay đổi tổng nợ phải trả — 10 -52 80 26 28 31 34 38\nNợ vay có lãi cuối năm 191 203 127 245 270 299 330 364 403\nThay đổi nợ vay có lãi — 11 -75 117 26 28 31 34 38\nTiền và tương đương tiền 70 88 127 130 -14 -93 -158 -202 -223\nNợ ròng cuối năm (nợ vay có lãi 121 115 1 115 284 392 488 567 626\n- tiền)\nThay đổi nợ ròng — -7 -114 114 169 108 96 79 59\nVốn CSH 32 39 180 191 184 178 170 162 153\nGiá trị sổ sách/cp (VND) 3,411 4,103 18,913 20,063 19,327 18,615 17,829 16,960 15,996\nNợ ròng / VCSH 374.8% 293.9% 0.4% 60.3% 153.9% 220.6% 286.5% 350.2% 409.7%\nNợ ròng / EBITDA 1.6x 2.1x 0.0x 1.7x 13.1x 16.5x 18.5x 19.5x 19.5x\nTổng tài sản 924 940 1,029 1,120 1,139 1,161 1,185 1,211 1,240\nCHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ\nĐơn vị: lần hoặc %, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE 98.7% 16.9% 5.4% 6.7% -3.6% -4.1% -4.8% -5.5% -6.5%\nROA 3.5% 0.7% 0.9% 1.1% -0.6% -0.6% -0.7% -0.7% -0.8%\nNghiên cứu cổ phiếu 10\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROIC 37.6% 26.1% 27.7% 15.8% 2.5% 2.3% 2.2% 2.2% 2.2%\nWACC 9.6% 9.6% 9.6% 9.6% 9.6% 9.6% 9.6% 9.6% 9.6%\nEVA 27.9% 16.5% 18.1% 6.2% -7.2% -7.4% -7.5% -7.5% -7.4%\nP/E 2.9x 14.1x 20.5x 22.3x -43.2x -39.1x -35.4x -32.1x -29.0x\nEV/EBITDA 5.3x 7.4x 4.3x 6.0x 26.4x 28.5x 29.4x 29.3x 28.4x\nEV/FCF 10.0x 53.2x -10.5x -3.3x -7.8x -11.3x -18.2x -41.2x 152.0x\nP/B 8.8x 7.3x 1.6x 1.5x 1.6x 1.6x 1.7x 1.8x 1.9x\nP/S 0.4x 0.5x 0.4x 0.3x 0.3x 0.3x 0.2x 0.2x 0.2x\nEV/Doanh thu 0.6x 0.7x 0.4x 0.4x 0.6x 0.6x 0.6x 0.6x 0.6x\nPEG — -0.2x -0.7x -2.8x 0.3x -3.7x -3.4x -3.1x -2.8x\nSuất sinh lợi cổ tức 0 0 0 0 0 0 0 0 0\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 680 556 694 917 1,013 1,118 1,236 1,365 1,507\nTăng trưởng doanh thu — -18.2% 24.7% 32.2% 10.5% 10.5% 10.5% 10.5% 10.5%\nLợi nhuận gộp 62 61 88 104 113 125 138 152 168\nBiên lợi nhuận gộp 9.1% 11.0% 12.7% 11.4% 11.2% 11.2% 11.2% 11.2% 11.2%\nGVHB trừ khấu hao -618 -495 -605 -813 -900 -994 -1,098 -1,212 -1,339\nChi phí bán hàng và quản lý 10 -11 -26 -44 -99 -109 -120 -133 -147\nDoanh thu tài chính 38 40 56 50 — — — — —\nChi phí tài chính -32 -39 -51 -44 -21 -23 -26 -28 -31\nEBITDA 76 54 66 67 22 24 26 29 32\nTỷ suất EBITDA 11.2% 9.7% 9.6% 7.3% 2.1% 2.1% 2.1% 2.1% 2.1%\nKhấu hao 4 4 4 7 7 8 9 10 11\nLợi nhuận từ HĐKD / EBIT 72 50 62 60 14 16 18 20 22\nBiên lợi nhuận HĐKD / EBIT 10.6% 9.0% 9.0% 6.6% 1.4% 1.4% 1.4% 1.4% 1.4%\nLợi nhuận khác -32 -39 -51 -44 0 0 0 0 0\nChi phí lãi vay ròng -16 -16 -10 -11 -21 -23 -26 -28 -31\nNghiên cứu cổ phiếu 11\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThuế -8 -4 -2 -3 0 0 0 0 0\nThuế suất thực tế 19.6% 38.1% 14.2% 20.1% 0.0% 0.0% 0.0% 0.0% 0.0%\nLNST sau CĐKKS / LNST CĐ mẹ 32 7 10 13 -7 -7 -8 -9 -10\nBiên lợi nhuận ròng 4.7% 1.2% 1.4% 1.4% -0.7% -0.7% -0.7% -0.7% -0.7%\nTiền mặt từ hoạt động kinh 44 21 23 -33 -7 -8 -9 -10 -11\ndoanh\nSố lượng cổ phiếu (triệu) 10 10 10 10 10 10 10 10 10\nEPS 10,388 2,134 1,461 1,344 -694 -767 -847 -936 -1,034\nEPS hiệu chỉnh 10,388 2,134 1,461 1,344 -694 -767 -847 -936 -1,034\nTăng trưởng EPS hiệu chỉnh — -79.5% -31.5% -8.0% -151.6% 10.5% 10.4% 10.5% 10.5%\nPhương pháp định giá và nguồn dữ liệu\nPHƯƠNG PHÁP VÀ GIẢ ĐỊNH CHÍNH\nBáo cáo trình bày nguồn dữ liệu, giả định dự phóng và phương pháp định giá để các kết luận chính có thể được\nđối chiếu. Những khoảng trống dữ liệu trọng yếu được công khai trong bản nháp phân tích và phải được xử lý\ntrước khi phát hành cho khách hàng.\nHạng mục Diễn giải\nSố liệu định lượng lấy từ đâu Doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt và số cổ phiếu lấy trực tiếp\ntừ Báo cáo tài chính (BCTC) đã chuẩn hóa; giá, vốn hóa và thanh khoản lấy từ\ndữ liệu thị trường. Các số liệu được đối chiếu với báo cáo gốc của doanh\nnghiệp. [1]\nVì sao dự phóng theo cách này Mỗi dòng dự phóng nối tiếp số liệu lịch sử: tăng trưởng doanh thu, biên lợi\nnhuận, vốn lưu động, chi đầu tư và thuế được kéo dài từ xu hướng quá khứ\nvà đặc thù ngành dược, để dòng tiền dự phóng bám sát năng lực thực tế của\ndoanh nghiệp thay vì giả định tùy ý. [1][2]\nCách tính giá mục tiêu Từ dự phóng, mô hình tính dòng tiền tự do doanh nghiệp và vốn chủ sở hữu\n(FCFF/FCFE), chiết khấu về hiện tại bằng chi phí vốn bình quân (WACC), cộng\ngiá trị cuối kỳ, trừ nợ ròng rồi chia cho số cổ phiếu đang lưu hành để ra giá\ntrị mỗi cổ phần. [2]\nCách ra khuyến nghị Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. Mua\nnếu >20%, Bán nếu <-10%, còn lại là Giữ; nếu thiếu target mô hình đủ dùng\nthì xếp Theo dõi.\nKết quả hiện tại Giá hiện tại 30,000 VND, giá mục tiêu 30,000 VND, tiềm năng tăng/giảm\n+0.0%, tổng lợi suất kỳ vọng +0.0%, khuyến nghị: Theo dõi.\nThời điểm giá thị trường Giá hiện tại được ghi nhận tại ngày 2026-06-16; báo cáo được tạo lúc 2026-\n06-22 16:18:53+07:00. Báo cáo ưu tiên giá thị trường mới nhất tại thời điểm\nNghiên cứu cổ phiếu 12\nHạng mục Diễn giải\ntạo báo cáo.\nNgười đọc tự kiểm chứng thế Mọi giả định đều hiển thị trong bảng dự phóng, mô hình định giá và ma trận\nnào độ nhạy. Nếu không đồng ý với giả định về chi phí vốn bình quân (WACC),\ntăng trưởng dài hạn, biên lợi nhuận hay vốn lưu động, người đọc có thể thay\nđổi và thấy ngay kết luận định giá thay đổi tương ứng. Mỗi nhận định định\ntính đều có đánh số [n] dẫn về nguồn ở mục Chú giải nguồn trích dẫn bên\ndưới.\nMinh chứng Chi tiết\nSố vết công thức 6 vết; phương pháp: wacc, fcff, fcfe, terminal_value, blend_dcf,\nsensitivity_matrix\nNguồn định giá tương đối Giả định tạm thời của mô hình; chưa có bộ doanh nghiệp so sánh được phê\nduyệt.\nTrạng thái định giá tương đối Đang chờ dữ liệu nhóm doanh nghiệp so sánh đã kiểm chứng.\nKiểm soát giá mục tiêu Raw model=N/A; headline=30,000 VND; band=18,000-42,000 VND; điều\nchỉnh=trung tính theo thị giá\nTrạng thái dữ liệu\nKhông ghi nhận khoảng trống dữ liệu trọng yếu trong các mục bắt buộc.\nCHÚ GIẢI NGUỒN TRÍCH DẪN\n[1] Dữ liệu tài chính & thị trường — Báo cáo tài chính (BCTC) đã chuẩn hóa và dữ liệu giao dịch thị trường; dùng\ncho mọi số liệu và nhận định về doanh thu, lợi nhuận, dòng tiền, nợ vay, vốn lưu động, biên lợi nhuận và định\ngiá.\n[2] Mô hình định giá nội bộ — dự phóng dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết khấu theo\nchi phí vốn bình quân (WACC), giá trị cuối kỳ, nợ ròng, số cổ phiếu và giá mục tiêu.\nTại thời điểm lập báo cáo, hệ thống chưa thu thập được bài báo bên ngoài phù hợp từ các nguồn được phép.\nPhần nhận định định tính được xây dựng từ báo cáo tài chính, công bố chính thức, dữ liệu định lượng và so sánh\ncùng ngành. Đây là hạn chế về coverage nguồn tin, không phải xác nhận rằng doanh nghiệp không có sự kiện\nmới.\nTUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM\nBáo cáo này chỉ nhằm mục đích cung cấp thông tin và không phải là lời mời mua hoặc bán chứng khoán. Nhà\nđầu tư cần tự đánh giá khẩu vị rủi ro và tham khảo ý kiến chuyên gia được cấp phép trước khi ra quyết định.\nNghiên cứu cổ phiếu 13"
     },
     "explanation_pdf": {
       "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\YTC_explanation.pdf",
       "exists": true,
-      "pages": 6,
-      "text": "Mã cổ phiếu: YTC\nPhụ lục giải trình định giá - YTC\nDoanh nghiệp được phân tích: Cong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh.\nTài liệu này là phụ lục chi tiết của báo cáo định giá. Mục tiêu là giải thích vì sao báo cáo chính đưa ra giá mục tiêu,\nmức tăng/giảm kỳ vọng, khuyến nghị và các nhận định trọng tâm bằng dữ liệu đầu vào, công thức, bước tính trung\ngian và cảnh báo cần đọc kèm.\nTrạng thái và giới hạn\nTrạng thái báo cáo: Có thể đọc, kèm công bố phần dữ liệu còn thiếu\nMã lần chạy: run_ytc_20260619T193958_fa0987fcdc\nLịch nợ vay chưa đủ để kiểm tra toàn bộ định giá dòng tiền cho cổ đông.\nCần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\nThiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\nKết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nMinh chứng kiểm định\nThành phần Giá trị\nSố vết công thức 6 (wacc, fcff, fcfe, terminal_value, blend_dcf, sensitivity_matrix)\nNguồn định giá tương đối đối chiếu Giả định tạm thời của mô hình; chưa có bộ doanh nghiệp so sánh được phê duyệt.\nTrạng thái định giá tương đối Đang chờ dữ liệu nhóm doanh nghiệp so sánh đã kiểm chứng.\nDữ liệu và kiểm định cần bổ sung trước khi phát hành:\n- headline_target_market_anchor_neutral\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo trọng yếu; cần đọc cùng bảng tính chi tiết và phần đối chiếu trước khi sử dụng khuyến\nnghị.\nCảnh báo mô hình và dữ liệu:\n- No SG&A or EBIT history — using default SG&A of 20% of revenue\n- CAPEX/revenue dự phóng starts from recent level 8.4% instead of full-history median 4.8%; then tapers to\nmaintenance D&A.\n- TaxPolicy: 1 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\n- Lịch nợ vay dự phóng đang giữ nguyên dư nợ tại số cuối kỳ gần nhất; mức độ tin cậy thấp và cần chuyên viên phân\ntích rà soát.\n- Chi phí lãi vay mới được tính một vòng, chưa lặp đến hội tụ. Phương pháp giữ dư nợ ổn định khiến FCFE cần bổ\nsung lộ trình nợ vay đã phê duyệt.\n- Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\n- Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\n- Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\n- Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\n- Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\n- Thiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\n- Giá trị vốn chủ sở hữu âm nên không tính được giá mục tiêu theo phương pháp này.\n- FCFE thiếu lịch nợ vay đã xác minh: dư nợ được giữ cố định và vay ròng chưa có nguồn từ báo cáo lưu chuyển\ntiền tệ hoặc lịch đáo hạn. Cần lộ trình nợ vay đã phê duyệt.\n- Giá trị cuối kỳ FCFE bằng 0 do thiếu FCFE ở năm dự phóng cuối cùng.\n- P/E mục tiêu đang là giả định mặc định của mô hình; cần đối chiếu với P/E trung vị nhóm doanh nghiệp so sánh\ntrước khi dùng làm cơ sở khuyến nghị.\n- Định giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt; P/E, P/B và EV/EBITDA chỉ nên dùng sau khi có\nnhóm doanh nghiệp so sánh rõ ràng.\n- Lịch sử giá chưa đủ 12 tháng giao dịch\n- EPS dự phóng và P/E mục tiêu đã có nhưng giá suy ra theo P/E đang bị trống; đây là lỗi mapping cần kiểm tra trong\nbảng định giá tương đối.\n- Cảnh báo nghiêm trọng: cần rà soát thêm dữ liệu đầu vào và giả định định giá.\n- Cảnh báo nghiêm trọng: định giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt.\n- Cảnh báo nghiêm trọng: cần rà soát thêm dữ liệu đầu vào và giả định định giá.\n- Thiếu phê duyệt cuối cho khuyến nghị đầu tư.\nVì sao báo cáo chính kết luận như vậy\nThành phần Giá trị\nGiá thị trường dùng trong báo cáo 30,000\nGiá mục tiêu tính được 30,000\nTăng/giảm so với giá thị trường 0.0%\nKhuyến nghị trong báo cáo chính Theo dõi\nGiá trị theo FCFF —\nGiá trị theo FCFE —\nTrọng số FCFF / FCFE 60.0% / 40.0%\nĐộ lệch FCFF/FCFE —\nWACC 9.6%\nTăng trưởng dài hạn 3.0%\nDoanh thu năm đầu dự phóng 1,013\nDoanh thu năm cuối dự phóng 1,507\nLNST năm đầu dự phóng -110\nLNST năm cuối dự phóng -153\nKết luận trong báo cáo chính được nối trực tiếp từ giá thị trường, giá trị nội tại theo dòng tiền, mức tăng/giảm kỳ vọng\nvà các cảnh báo dữ liệu. Nếu FCFF và FCFE cho kết quả lệch lớn, người đọc phải ưu tiên phần kết hợp phương\npháp, phân tích độ nhạy và đối chiếu cảnh báo thay vì chỉ đọc một giá mục tiêu duy nhất.\nCảnh báo cần đọc kèm kết luận:\n- Lịch nợ vay chưa đủ để kiểm tra toàn bộ định giá dòng tiền cho cổ đông.\n- Cần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nChi tiết tính toán định giá\nPhần này trình bày đầy đủ công thức, dữ liệu đầu vào, bước tính trung gian, bảng dự phóng, cầu nối định giá,\nphân tích độ nhạy và cảnh báo để người đọc kiểm tra lại kết quả trong báo cáo chính.\n1. Thông tin chung\nThành phần Giá trị\nMã cổ phiếu YTC\nCông ty Cong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh\nSàn UPCOM\nNgành Dược phẩm\nMã lần chạy run_ytc_20260619T193958_fa0987fcdc\nNgày định giá —\nMã ảnh chụp dữ liệu v2snap_909f100c0e6fafa8f020\nNăm gốc —\nMã băm tái lập —\n2. Tóm tắt kết quả định giá\nThành phần Giá trị\nGiá hiện tại (VND) 30,000\nGiá mục tiêu kết hợp (VND) —\nTiềm năng tăng/giảm —\nKhuyến nghị Theo dõi\nLuật xếp hạng (tổng tỷ suất sinh lời = mức tăng/giảm giá + lợi suất cổ tức): > 20% → Mua; < −10% → Bán; còn lại\n→ Giữ.\n3. Bảng giả định\nThành phần Giá trị\nWACC 9.6%\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nSố năm dự phóng 5\nThuế suất —\nP/E mục tiêu 15.0x\nMức cộng/trừ định giá —\nCác giả định hiện là giá trị mặc định và phải được rà soát, phê duyệt trước khi sử dụng trong báo cáo chính thức.\n4. Dự phóng theo yếu tố dẫn dắt\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,013 1,118 1,236 1,365 1,507\nGiá vốn hàng bán (COGS) -900 -994 -1,098 -1,212 -1,339\nLợi nhuận gộp 113 125 138 152 168\nChi phí SG&A -202 -224 -247 -273 -302\nEBIT -90 -99 -109 -121 -133\nChi phí lãi vay -20 -20 -20 -20 -20\nLợi nhuận trước thuế -110 -119 -129 -141 -153\nChi phí thuế 0 0 0 0 0\nLNST cổ đông mẹ -110 -119 -129 -141 -153\nKhấu hao (D&A) 7 8 9 10 11\nCAPEX -85 -72 -56 -36 -11\nEPS (VND) -11,472 -12,452 -13,535 -14,732 -16,053\nVay ròng (phát hành nợ − trả nợ) 0 0 0 0 0\nDư nợ vay cuối kỳ 245 245 245 245 245\nCổ tức tiền mặt -8 -9 -9 -10 -11\nTỷ lệ chi trả cổ tức 7.3% 7.3% 7.3% 7.3% 7.3%\nLogic yếu tố dẫn dắt: doanh thu theo tăng trưởng giả định; biên lợi nhuận dẫn xuất EBIT/LNST; lịch nợ vay chuyển\ntiếp với vay ròng = phát hành nợ − trả nợ; cổ tức theo tỷ lệ chi trả.\nVì sao EBIT âm: chi phí bán hàng và quản lý (SG&A) lớn hơn lợi nhuận gộp ở 2026F, 2027F, 2028F, 2029F,\n2030F, nên EBIT chuyển âm dù lợi nhuận gộp vẫn dương. Đây là hệ quả trực tiếp của giả định chi phí hoạt động\ntrong dự phóng và cần được rà soát trước khi dùng kết quả định giá dòng tiền.\n5. Chỉ số tài chính\nChỉ số Công thức 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận gộp lợi nhuận gộp / doanh thu 11.2% 11.2% 11.2% 11.2% 11.2%\nBiên EBIT EBIT / doanh thu -8.8% -8.8% -8.8% -8.8% -8.8%\nBiên lợi nhuận ròng lợi nhuận sau thuế / doanh thu -10.8% -10.6% -10.5% -10.3% -10.2%\nROE lợi nhuận sau thuế / vốn chủ sở hữu -122.9% 563.5% 91.7% 51.8% 37.1%\n6. Định giá FCFF\nCông thức: FCFF = EBIT×(1−t) + D&A − CAPEX − ΔNWC\nWACC = 9.6%; tăng trưởng dài hạn g = 3.0%\nKhoản mục 2026F 2027F 2028F 2029F 2030F\nEBIT -90 -99 -109 -121 -133\nThuế suất — — — — —\nD&A 7 8 9 10 11\nCAPEX 85 72 56 36 11\nΔNWC 7 8 9 10 11\nFCFF -157 -152 -144 -133 -118\nHệ số chiết khấu 91.2% 83.2% 75.9% 69.2% 63.1%\nPV(FCFF) -143 -127 -110 -92 -75\nThành phần Giá trị\nPV dòng tiền dự phóng (Σ PV FCFF) -547\nGiá trị cuối kỳ (Gordon: FCFFₙ×(1+g)/(WACC−g)) -1,836\nGiá trị hiện tại của giá trị cuối kỳ -1,159\nTỷ trọng giá trị cuối kỳ / giá trị doanh nghiệp —\n= Giá trị doanh nghiệp (EV) -1,706\n− Nợ ròng 115\n= Giá trị vốn chủ sở hữu -1,821\n÷ Số cổ phiếu (triệu) 10\n= Giá/cổ phiếu (FCFF, VND) —\nGiá/cổ phiếu theo FCFF hiển thị — vì giá trị vốn chủ sở hữu âm (-1,821): dòng tiền tự do âm kéo giá trị doanh nghiệp\nvà phần vốn chủ sở hữu xuống dưới 0, nên không thể quy ra giá dương. Đây là kết quả kinh tế của mô hình, không\nphải thiếu dữ liệu.\n7. Định giá FCFE\nCông thức: FCFE = lợi nhuận sau thuế + khấu hao − CAPEX − ΔNWC + vay ròng, chiết khấu theo chi phí vốn chủ sở\nhữu.\nThành phần Giá trị\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nGiá trị vốn chủ sở hữu 0\n÷ Số cổ phiếu (triệu) 10\nThành phần Giá trị\n= Giá/cổ phiếu (FCFE, VND) —\nGiá/cổ phiếu theo FCFE hiển thị — vì giá trị vốn chủ sở hữu âm (0): dòng tiền cho cổ đông chiết khấu về giá trị âm nên\nkhông quy ra được giá dương. Đây là kết quả kinh tế của mô hình, không phải thiếu dữ liệu.\n8. Kết hợp phương pháp FCFF và FCFE\nCông thức: Giá mục tiêu = 0.60 × Giá_FCFF + 0.40 × Giá_FCFE\nDiễn giải: Chưa thể kết hợp theo trọng số 60/40 vì giá FCFF, giá FCFE, giá mục tiêu kết hợp chưa có giá trị hợp lệ.\nBảng giữ nguyên từng cấu phần để người đọc thấy rõ ô nào không thể tính.\nThành phần Giá trị\nGiá theo FCFF (VND) —\nGiá theo FCFE (VND) —\nTrọng số FCFF / FCFE 0.60 / 0.40\n= Giá mục tiêu kết hợp (VND) —\nChênh lệch FCFF/FCFE —\nChỉ ở dạng nháp Không\n9. P/E dự phóng để đối chiếu\nThành phần Giá trị\nEPS dự phóng (VND) —\nP/E trung vị nhóm so sánh —\nMức cộng/trừ định giá —\nP/E mục tiêu 15.0x\nGiá mục tiêu (VND) —\n10. Phân tích độ nhạy\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n7.6% — — — — —\n8.6% — — — — —\n9.6% — — — — —\n10.6% — — — — —\n11.6% — — — — —\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n11.8% — — — — —\n12.8% — — — — —\n13.8% — — — — —\n14.8% — — — — —\n15.8% — — — — —\nĐộ nhạy DCF giản lược\nĐộ nhạy DCF giản lược 2.0% 2.5% 3.0% 3.5% 4.0%\n8.0% — — — — —\nĐộ nhạy DCF giản lược 2.0% 2.5% 3.0% 3.5% 4.0%\n9.0% — — — — —\n10.0% — — — — —\n11.0% — — — — —\n12.0% — — — — —\n11. Đối chiếu & cảnh báo\nĐối chiếu nhất quán số:\nGiá suy ra theo FCFF / giá FCFF: thiếu dữ liệu để đối chiếu (—).\nCảnh báo từ mô hình tính toán:\nNo SG&A or EBIT history — using default SG&A of 20% of revenue\nCAPEX/revenue dự phóng starts from recent level 8.4% instead of full-history median 4.8%; then tapers to\nmaintenance D&A.\nTaxPolicy: 1 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\nLịch nợ vay dự phóng đang giữ nguyên dư nợ tại số cuối kỳ gần nhất; mức độ tin cậy thấp và cần chuyên viên\nphân tích rà soát.\nChi phí lãi vay mới được tính một vòng, chưa lặp đến hội tụ. Phương pháp giữ dư nợ ổn định khiến FCFE cần\nbổ sung lộ trình nợ vay đã phê duyệt.\nCổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\nThiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\nGiá trị vốn chủ sở hữu âm nên không tính được giá mục tiêu theo phương pháp này.\nFCFE thiếu lịch nợ vay đã xác minh: dư nợ được giữ cố định và vay ròng chưa có nguồn từ báo cáo lưu\nchuyển tiền tệ hoặc lịch đáo hạn. Cần lộ trình nợ vay đã phê duyệt.\nGiá trị cuối kỳ FCFE bằng 0 do thiếu FCFE ở năm dự phóng cuối cùng.\nMã băm tái lập: —\nNguồn gốc dữ liệu: mọi số định giá được dẫn xuất từ dữ liệu tài chính chuẩn hóa đã khóa và tệp kết quả định giá\nbằng Python; không có số liệu nào do mô hình ngôn ngữ sinh ra."
+      "pages": 7,
+      "text": "Mã cổ phiếu: YTC\nPhụ lục giải trình định giá - YTC\nDoanh nghiệp được phân tích: Cong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh.\nTài liệu này là phụ lục chi tiết của báo cáo định giá. Mục tiêu là giải thích vì sao báo cáo chính đưa ra giá mục tiêu,\nmức tăng/giảm kỳ vọng, khuyến nghị và các nhận định trọng tâm bằng dữ liệu đầu vào, công thức, bước tính trung\ngian và cảnh báo cần đọc kèm.\nTrạng thái và giới hạn\nTrạng thái báo cáo: Có thể đọc, kèm công bố phần dữ liệu còn thiếu\nMã lần chạy: run_ytc_20260617T041052_1108cca22b\nHai phương pháp dòng tiền có độ lệch lớn; cần đọc kỹ phần kết hợp phương pháp và đối chiếu.\nCần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\nGiá trị mô hình lệch đáng kể so với thị giá nhưng chưa có cầu nối giải thích bằng P/E, EV/EBITDA hoặc bằng\nchứng cơ bản.\nThiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\nCần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\nKết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nMinh chứng kiểm định\nThành phần Giá trị\nSố vết công thức 6 (wacc, fcff, fcfe, terminal_value, blend_dcf, sensitivity_matrix)\nNguồn định giá tương đối đối chiếu Giả định tạm thời của mô hình; chưa có bộ doanh nghiệp so sánh được phê duyệt.\nTrạng thái định giá tương đối Đang chờ dữ liệu nhóm doanh nghiệp so sánh đã kiểm chứng.\nDữ liệu và kiểm định cần bổ sung trước khi phát hành:\n- kết hợp phương pháp_is_draft_only\n- headline_target_market_anchor_neutral\n- Giá trị mô hình lệch đáng kể so với thị giá nhưng chưa có cầu nối giải thích bằng P/E, EV/EBITDA hoặc bằng chứng\ncơ bản.\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- senior_review_required_for_severe_downside\n- Kết quả định giá có cảnh báo trọng yếu; cần đọc cùng bảng tính chi tiết và phần đối chiếu trước khi sử dụng khuyến\nnghị.\nCảnh báo mô hình và dữ liệu:\n- SG&A historical median did not reconcile to operating EBIT; using pure operating EBIT margin (1.4%) back-solved\nfrom operating_profit minus financial income/expense.\n- CAPEX/revenue dự phóng starts from recent level 8.4% instead of full-history median 4.8%; then tapers to\nmaintenance D&A.\n- TaxPolicy: 1 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\n- [DebtSchedule] Debt dự phóng uses CFS-corroborated leverage path (debt held at 26.7% of revenue); vay ròng\ntracks business growth (FCFE publishable).\n- Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\n- Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\n- Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\n- Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\n- Cổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\n- Thiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\n- Giá trị vốn chủ sở hữu âm nên không tính được giá mục tiêu theo phương pháp này.\n- Price_FCFF không có — dùng 100% FCFE. Không đúng trọng số 60/40; kết quả cần phê duyệt thủ công.\n- P/E mục tiêu đang là giả định mặc định của mô hình; cần đối chiếu với P/E trung vị nhóm doanh nghiệp so sánh\ntrước khi dùng làm cơ sở khuyến nghị.\n- Định giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt; P/E, P/B và EV/EBITDA chỉ nên dùng sau khi có\nnhóm doanh nghiệp so sánh rõ ràng.\n- Lịch sử giá chưa đủ 12 tháng giao dịch\n- EPS dự phóng và P/E mục tiêu đã có nhưng giá suy ra theo P/E đang bị trống; đây là lỗi mapping cần kiểm tra trong\nbảng định giá tương đối.\n- Cảnh báo nghiêm trọng: định giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt.\n- FCFE có độ tin cậy thấp; lịch vay ròng và giả định dòng tiền cho cổ đông cần được kiểm định thêm.\n- Thiếu phê duyệt cuối cho khuyến nghị đầu tư.\nVì sao báo cáo chính kết luận như vậy\nThành phần Giá trị\nGiá thị trường dùng trong báo cáo 30,000\nGiá mục tiêu tính được 10,089\nTăng/giảm so với giá thị trường -66.4%\nKhuyến nghị trong báo cáo chính Theo dõi\nGiá trị theo FCFF —\nGiá trị theo FCFE 10,089\nTrọng số FCFF / FCFE 60.0% / 40.0%\nĐộ lệch FCFF/FCFE —\nWACC 9.6%\nTăng trưởng dài hạn 3.0%\nDoanh thu năm đầu dự phóng 1,013\nDoanh thu năm cuối dự phóng 1,507\nLNST năm đầu dự phóng -7\nLNST năm cuối dự phóng -10\nKết luận trong báo cáo chính được nối trực tiếp từ giá thị trường, giá trị nội tại theo dòng tiền, mức tăng/giảm kỳ vọng\nvà các cảnh báo dữ liệu. Nếu FCFF và FCFE cho kết quả lệch lớn, người đọc phải ưu tiên phần kết hợp phương\npháp, phân tích độ nhạy và đối chiếu cảnh báo thay vì chỉ đọc một giá mục tiêu duy nhất.\nCảnh báo cần đọc kèm kết luận:\n- Hai phương pháp dòng tiền có độ lệch lớn; cần đọc kỹ phần kết hợp phương pháp và đối chiếu.\n- Cần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\n- Giá trị mô hình lệch đáng kể so với thị giá nhưng chưa có cầu nối giải thích bằng P/E, EV/EBITDA hoặc bằng chứng\ncơ bản.\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Cần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\n- Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nKết quả phản biện chất lượng phân tích\nPhần này tóm tắt các đánh giá định tính về logic dự phóng, luận điểm đầu tư, chất lượng bằng chứng và tính nhất\nquán của định giá.\n[Critical] All historical periods in the snapshot are sourced only from Tier‑3 API data; the\nDATA_QUALITY_GATE reports 'consecutive_tier3_periods: 4 periods lack Tier-1/2 source — trend analysis\nthiếu dữ liệu'. This is a gating failure that prevents publishing valuation conclusions or final recommendations.\nUntil Tier‑1/2 (audited/filing) sources or reconciliations are provided, trend interpretation and valuation\nadjustments are provisional.\nDCF và FCFF/FCFE có cảnh báo về dòng tiền tự do lịch sử âm hoặc tỷ trọng giá trị cuối kỳ cao; cần kiểm tra\ntrong phân tích độ nhạy và bước chuẩn hóa giả định.\nĐịnh giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt nên P/E và EV/EBITDA chưa cho ra giá đối\nchiếu; báo cáo tạm thiếu một kiểm tra thị trường tiêu chuẩn.\n[Major] Debt-to-equity falls from >5x in 2022–2023 to ~0.71x in 2024 then re-levers to ~1.28x in 2025 per ratio\ntệp kết quả. This large swing likely reflects financing/balance-sheet events (repayments, proceeds from asset\nsales, equity issuance) rather than pure operating results. The report flags the hypothesis but lacks\nreconciliatory evidence (financing cash flows / notes).\nLịch tiền mặt và chính sách cổ tức dự phóng cần được đối chiếu lại để bảo đảm số dư tiền cuối kỳ và dòng\ntiền ra được trình bày nhất quán.\nCần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\nĐộ sâu bằng chứng (5.5/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nChất lượng diễn giải (7.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nTính toàn vẹn trích dẫn (10.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nMức độ đặc thù ngành (7.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nMức độ đầy đủ của bảng và biểu đồ (8.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả\nđịnh liên quan được công bố trong phụ lục.\nChi tiết tính toán định giá\nPhần này trình bày đầy đủ công thức, dữ liệu đầu vào, bước tính trung gian, bảng dự phóng, cầu nối định giá,\nphân tích độ nhạy và cảnh báo để người đọc kiểm tra lại kết quả trong báo cáo chính.\n1. Thông tin chung\nThành phần Giá trị\nMã cổ phiếu YTC\nCông ty Cong ty Co phan Xuat nhap khau Y te Thanh pho Ho Chi Minh\nSàn UPCOM\nNgành Dược phẩm\nMã lần chạy run_ytc_20260617T041052_1108cca22b\nNgày định giá —\nMã ảnh chụp dữ liệu v2snap_dc34950f142b192a3257\nNăm gốc —\nMã băm tái lập —\n2. Tóm tắt kết quả định giá\nThành phần Giá trị\nGiá hiện tại (VND) 30,000\nGiá mục tiêu kết hợp (VND) 10,089\nTiềm năng tăng/giảm -66.4%\nKhuyến nghị Theo dõi\nLuật xếp hạng (tổng tỷ suất sinh lời = mức tăng/giảm giá + lợi suất cổ tức): > 20% → Mua; < −10% → Bán; còn lại\n→ Giữ.\n3. Bảng giả định\nThành phần Giá trị\nWACC 9.6%\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nSố năm dự phóng 5\nThành phần Giá trị\nThuế suất —\nP/E mục tiêu 15.0x\nMức cộng/trừ định giá —\nCác giả định hiện là giá trị mặc định và phải được rà soát, phê duyệt trước khi sử dụng trong báo cáo chính thức.\n4. Dự phóng theo yếu tố dẫn dắt\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,013 1,118 1,236 1,365 1,507\nGiá vốn hàng bán (COGS) -900 -994 -1,098 -1,212 -1,339\nLợi nhuận gộp 113 125 138 152 168\nChi phí SG&A -99 -109 -120 -133 -147\nEBIT 14 16 18 20 22\nChi phí lãi vay -21 -23 -26 -28 -31\nLợi nhuận trước thuế -7 -7 -8 -9 -10\nChi phí thuế 0 0 0 0 0\nLNST cổ đông mẹ -7 -7 -8 -9 -10\nKhấu hao (D&A) 7 8 9 10 11\nCAPEX -85 -72 -56 -36 -11\nEPS (VND) -694 -767 -847 -936 -1,034\nVay ròng (phát hành nợ − trả nợ) 26 28 31 35 38\nDư nợ vay cuối kỳ 270 299 330 364 403\nCổ tức tiền mặt -0 -0 -1 -1 -1\nTỷ lệ chi trả cổ tức 7.3% 7.3% 7.3% 7.3% 7.3%\nLogic yếu tố dẫn dắt: doanh thu theo tăng trưởng giả định; biên lợi nhuận dẫn xuất EBIT/LNST; lịch nợ vay chuyển\ntiếp với vay ròng = phát hành nợ − trả nợ; cổ tức theo tỷ lệ chi trả.\n5. Chỉ số tài chính\nChỉ số Công thức 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận gộp lợi nhuận gộp / doanh thu 11.2% 11.2% 11.2% 11.2% 11.2%\nBiên EBIT EBIT / doanh thu 1.4% 1.4% 1.4% 1.4% 1.4%\nBiên lợi nhuận ròng lợi nhuận sau thuế / doanh thu -0.7% -0.7% -0.7% -0.7% -0.7%\nROE lợi nhuận sau thuế / vốn chủ sở hữu -3.6% -4.1% -4.8% -5.5% -6.5%\n6. Định giá FCFF\nCông thức: FCFF = EBIT×(1−t) + D&A − CAPEX − ΔNWC\nWACC = 9.6%; tăng trưởng dài hạn g = 3.0%\nKhoản mục 2026F 2027F 2028F 2029F 2030F\nEBIT 14 16 18 20 22\nThuế suất — — — — —\nD&A 7 8 9 10 11\nCAPEX 85 72 56 36 11\nKhoản mục 2026F 2027F 2028F 2029F 2030F\nΔNWC 7 8 9 10 11\nFCFF -74 -60 -42 -21 6\nHệ số chiết khấu 91.2% 83.2% 75.9% 69.2% 63.1%\nPV(FCFF) -67 -50 -32 -14 4\nThành phần Giá trị\nPV dòng tiền dự phóng (Σ PV FCFF) -160\nGiá trị cuối kỳ (Gordon: FCFFₙ×(1+g)/(WACC−g)) 94\nGiá trị hiện tại của giá trị cuối kỳ 59\nTỷ trọng giá trị cuối kỳ / giá trị doanh nghiệp —\n= Giá trị doanh nghiệp (EV) -101\n− Nợ ròng 115\n= Giá trị vốn chủ sở hữu -216\n÷ Số cổ phiếu (triệu) 10\n= Giá/cổ phiếu (FCFF, VND) —\nGiá/cổ phiếu theo FCFF hiển thị — vì giá trị vốn chủ sở hữu âm (-216): dòng tiền tự do âm kéo giá trị doanh nghiệp và\nphần vốn chủ sở hữu xuống dưới 0, nên không thể quy ra giá dương. Đây là kết quả kinh tế của mô hình, không phải\nthiếu dữ liệu.\n7. Định giá FCFE\nCông thức: FCFE = lợi nhuận sau thuế + khấu hao − CAPEX − ΔNWC + vay ròng, chiết khấu theo chi phí vốn chủ sở\nhữu.\nThành phần Giá trị\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nGiá trị vốn chủ sở hữu 96\n÷ Số cổ phiếu (triệu) 10\n= Giá/cổ phiếu (FCFE, VND) 10,089\n8. Kết hợp phương pháp FCFF và FCFE\nCông thức: Giá mục tiêu = 0.60 × Giá_FCFF + 0.40 × Giá_FCFE\nDiễn giải: Chưa thể kết hợp theo trọng số 60/40 vì giá FCFF chưa có giá trị hợp lệ. Bảng giữ nguyên từng cấu phần\nđể người đọc thấy rõ ô nào không thể tính.\nThành phần Giá trị\nGiá theo FCFF (VND) —\nGiá theo FCFE (VND) 10,089\nTrọng số FCFF / FCFE 0.60 / 0.40\n= Giá mục tiêu kết hợp (VND) 10,089\nChênh lệch FCFF/FCFE —\nChỉ ở dạng nháp Có\n9. P/E dự phóng để đối chiếu\nThành phần Giá trị\nEPS dự phóng (VND) —\nThành phần Giá trị\nP/E trung vị nhóm so sánh —\nMức cộng/trừ định giá —\nP/E mục tiêu 15.0x\nGiá mục tiêu (VND) —\n10. Phân tích độ nhạy\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n7.6% — — — — —\n8.6% — — — — —\n9.6% — — — — —\n10.6% — — — — —\n11.6% — — — — —\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n11.8% 11,448 12,073 12,770 13,550 14,430\n12.8% 10,225 10,720 11,264 11,868 12,540\n13.8% 9,256 9,654 10,089 10,566 11,092\n14.8% 8,478 8,804 9,157 9,542 9,962\n15.8% 7,850 8,119 8,410 8,725 9,066\nĐộ nhạy EV/EBITDA — Giá = (EBITDA × Hệ số − Nợ ròng − Lợi ích cổ đông không kiểm soát + Tài sản ngoài\nhoạt động) / Số cổ phiếu × 1000\nĐộ nhạy EV/EBITDA 7 8 9 10 11\n18 — — — — —\n20 — — — — —\n22 — — — — —\n23 — — — — —\n25 — — — — —\nĐộ nhạy DCF giản lược\nĐộ nhạy DCF giản lược 2.0% 2.5% 3.0% 3.5% 4.0%\n8.0% — — — — —\n9.0% — — — — —\n10.0% — — — — —\n11.0% — — — — —\n12.0% — — — — —\n11. Đối chiếu & cảnh báo\nĐối chiếu nhất quán số:\nGiá suy ra theo FCFF / giá FCFF: thiếu dữ liệu để đối chiếu (—).\nCảnh báo từ mô hình tính toán:\nPrice_FCFF không có — dùng 100% FCFE. Không đúng trọng số 60/40; kết quả cần phê duyệt thủ công.\nSG&A historical median did not reconcile to operating EBIT; using pure operating EBIT margin (1.4%) back-\nsolved from operating_profit minus financial income/expense.\nCAPEX/revenue dự phóng starts from recent level 8.4% instead of full-history median 4.8%; then tapers to\nmaintenance D&A.\nTaxPolicy: 1 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\n[DebtSchedule] Debt dự phóng uses CFS-corroborated leverage path (debt held at 26.7% of revenue); vay\nròng tracks business growth (FCFE publishable).\nCổ tức dự phóng mang dấu âm (dòng tiền ra); mô hình đã quy về giá trị tuyệt đối khi tính lịch tiền mặt.\nThiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\nGiá trị vốn chủ sở hữu âm nên không tính được giá mục tiêu theo phương pháp này.\nMã băm tái lập: —\nNguồn gốc dữ liệu: mọi số định giá được dẫn xuất từ dữ liệu tài chính chuẩn hóa đã khóa và tệp kết quả định giá\nbằng Python; không có số liệu nào do mô hình ngôn ngữ sinh ra."
     }
   },
   "publication_readiness": {

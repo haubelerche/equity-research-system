@@ -4,7 +4,7 @@
   "plan_id": "06",
   "plan_name": "Report quality",
   "ticker": "MKP",
-  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
   "status": "pass",
   "test_execution": {
     "status": "not_measured",
@@ -134,7 +134,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -174,7 +174,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -204,7 +204,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -350,7 +350,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -475,19 +475,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "explanation_pdf_rendered",
@@ -539,7 +539,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -579,7 +579,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -609,7 +609,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -755,7 +755,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -880,19 +880,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "financial_gate_passed",
@@ -956,19 +956,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.quality_total",
@@ -1034,7 +1034,7 @@
                 {
                   "id": "valuation_generated_at_present",
                   "passed": true,
-                  "actual": "2026-06-19T20:36:23.934352+00:00",
+                  "actual": "2026-06-22T16:31:58.667734+00:00",
                   "expected": "generated_at present",
                   "evidence_refs": [
                     "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -1064,7 +1064,7 @@
                 {
                   "id": "fcff_table_present",
                   "passed": true,
-                  "actual": 4,
+                  "actual": 5,
                   "expected": ">= 1 FCFF row",
                   "evidence_refs": [
                     "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -1210,7 +1210,7 @@
                 {
                   "id": "formula_traces_present",
                   "passed": true,
-                  "actual": 2,
+                  "actual": 3,
                   "expected": "formula traces present",
                   "evidence_refs": [
                     "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -1318,7 +1318,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -1358,7 +1358,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -1388,7 +1388,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -1534,7 +1534,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -1659,19 +1659,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report_quality_score",
@@ -1737,7 +1737,7 @@
                 {
                   "id": "valuation_generated_at_present",
                   "passed": true,
-                  "actual": "2026-06-19T20:36:23.934352+00:00",
+                  "actual": "2026-06-22T16:31:58.667734+00:00",
                   "expected": "generated_at present",
                   "evidence_refs": [
                     "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -1767,7 +1767,7 @@
                 {
                   "id": "fcff_table_present",
                   "passed": true,
-                  "actual": 4,
+                  "actual": 5,
                   "expected": ">= 1 FCFF row",
                   "evidence_refs": [
                     "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -1913,7 +1913,7 @@
                 {
                   "id": "formula_traces_present",
                   "passed": true,
-                  "actual": 2,
+                  "actual": 3,
                   "expected": "formula traces present",
                   "evidence_refs": [
                     "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -2021,7 +2021,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -2061,7 +2061,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -2091,7 +2091,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -2237,7 +2237,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -2362,19 +2362,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.benchmark_hardness_score",
@@ -2439,7 +2439,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -2479,7 +2479,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -2509,7 +2509,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -2655,7 +2655,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -2780,19 +2780,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.completeness",
@@ -2844,7 +2844,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -2884,7 +2884,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -2914,7 +2914,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -3060,7 +3060,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -3185,19 +3185,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.thesis_specificity",
@@ -3249,7 +3249,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -3289,7 +3289,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -3319,7 +3319,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -3465,7 +3465,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -3590,19 +3590,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.financial_analysis_depth",
@@ -3654,7 +3654,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -3694,7 +3694,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -3724,7 +3724,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -3870,7 +3870,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -3995,19 +3995,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.forecast_rationale",
@@ -4059,7 +4059,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -4099,7 +4099,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -4129,7 +4129,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -4275,7 +4275,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -4400,19 +4400,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.valuation_transparency",
@@ -4464,7 +4464,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -4504,7 +4504,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -4534,7 +4534,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -4680,7 +4680,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -4805,19 +4805,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.risk_catalyst_quality",
@@ -4869,7 +4869,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -4909,7 +4909,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -4939,7 +4939,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -5085,7 +5085,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -5210,19 +5210,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.evidence_integration",
@@ -5274,7 +5274,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -5314,7 +5314,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -5344,7 +5344,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -5490,7 +5490,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -5615,19 +5615,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.peer_industry_context_quality",
@@ -5679,7 +5679,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -5719,7 +5719,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -5749,7 +5749,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -5895,7 +5895,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -6020,19 +6020,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.executive_summary_actionability",
@@ -6084,7 +6084,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -6124,7 +6124,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -6154,7 +6154,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -6300,7 +6300,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -6425,19 +6425,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.sensitivity_disclosure_completeness",
@@ -6489,7 +6489,7 @@
             "report_exists": true,
             "explanation_exists": true,
             "claim_ledger_path": "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-            "evidence_packet_path": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "evidence_packet_path": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "evidence_support_available": true,
             "structured_report_quality_available": true,
             "scores": {
@@ -6529,7 +6529,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -6559,7 +6559,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -6705,7 +6705,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/MKP/balance_sheet_year.json",
@@ -6830,19 +6830,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.recommendation_consistency",
@@ -6916,19 +6916,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "publication_readiness",
@@ -7006,19 +7006,19 @@
           "output\\MKP_report.pdf",
           "output\\MKP_explanation.pdf",
           "storage\\archive\\benchmark_mkp\\claim_ledger.json",
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\MKP_report.pdf": 953992,
-          "output\\MKP_explanation.pdf": 383383,
+          "output\\MKP_report.pdf": 949415,
+          "output\\MKP_explanation.pdf": 380811,
           "storage\\archive\\benchmark_mkp\\claim_ledger.json": 2667,
-          "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 24630
+          "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json": 26210
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "rubric": "report_quality_v1",
@@ -7043,13 +7043,13 @@
       "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\MKP_report.pdf",
       "exists": true,
       "pages": 13,
-      "text": "Nghiên cứu cổ phiếu BÁO CÁO CẬP NHẬT ĐỊNH GIÁ\nNGÀNH DƯỢC PHẨM Ngày 2026-06-20\nCONG TY CO PHAN HOA - DUOC PHAM MEKOPHAR (MKP VN) HOSE: MKP\nNhóm phân tích\nKhuyến nghị · HOSE: MKP\nBáo cáo cập nhật\nBán\nHOSE: MKP\nGiá mục tiêu: 16,020 VND | Tiềm năng tăng/giảm: -40.0% | Ngày\nDược phẩm\ngiá: 2026-06-18 | Tạo: 2026-06-20 02:25\nGiá mục tiêu 16,020 VND\nCong ty Co phan Hoa - Duoc pham Mekophar (MKP) là doanh nghiệp\nGiá hiện tại 26,700 dược phẩm có nền doanh thu 939 tỷ đồng với biên lợi nhuận gộp\n(VND) 26.4%, đủ để hỗ trợ tăng trưởng doanh thu dự phóng -7.6% mà không\ncần mở rộng đòn bẩy vận hành quá mức. Mô hình định giá cho giá mục\nNgày giá thị 2026-06-18\ntiêu 16,020 VND so với thị giá 26,700 VND, biên tiềm năng -40.0%.\ntrường\nKhoảng giá trị hợp lý theo ma trận độ nhạy trải từ 34,636 VND đến\nThời điểm tạo 2026-06-20 47,766 VND, phản ánh mức độ không chắc chắn của các giả định dài\nbáo cáo 02:25 hạn. Luận điểm đầu tư xoay quanh ba câu hỏi: (i) doanh nghiệp có giữ\nđược biên gộp trước áp lực chi phí nguyên liệu API và tỷ giá không? (ii)\nTỷ lệ -40.0% kỷ luật chi phí bán hàng và quản lý có đảm bảo biên EBIT không bị xói\ntăng/giảm\nmòn khi tăng doanh thu? (iii) chi đầu tư dài hạn phục vụ nâng chuẩn\nnhà máy GMP-EU có phá vỡ cấu trúc dòng tiền tự do hay không? Ba câu\nTổng tỷ suất lợi -36.9%\nhỏi này quyết định độ tin cậy của kết quả mô hình FCFF và từ đó quyết\nnhuận\nđịnh giá trị hợp lý. Rủi ro trọng yếu là kết quả đấu thầu ETC và biến\nđộng giá API — hai yếu tố này tác động đồng thời lên cả doanh thu lẫn\nbiên, và là nguồn sai lệch lớn nhất so với giả định cơ sở. [1][2]\nLuận điểm cập nhật\nCong ty Co phan Hoa - Duoc pham Mekophar hoạt động trên hai kênh\nphân phối ETC (đấu thầu bệnh viện) và OTC (nhà thuốc bán lẻ). Doanh\nthu kỳ gần nhất đạt 939 tỷ đồng, tăng 2.1% so với kỳ trước — cần theo\ndõi tính bền vững so với CAGR lịch sử (CAGR lịch sử -7.6%). Biên lợi\nnhuận gộp 26.4% phản ánh năng lực kiểm soát giá vốn API trong môi\ntrường tỷ giá biến động; đây là chỉ số quan trọng hơn tốc độ tăng\ndoanh thu vì nó xác định chất lượng lợi nhuận thực sự. Tỷ lệ chuyển đổi\ntiền mặt 15.07 lần cho thấy mức độ lợi nhuận kế toán được hỗ trợ bởi\nNguồn nhóm phân tích thu thập\ndòng tiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực\nNhận định: Thị giá 26,700 VND so vốn lưu động từ phải thu bệnh viện. Biến số vận hành trọng yếu là sản\nvới giá mục tiêu 16,020 VND, hàm ý lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu cao\n-40.0%; tín hiệu giá chỉ có giá trị khi vừa chịu áp lực chính sách đấu thầu định kỳ. Diễn biến giá API và tiến độ\nđi cùng thanh khoản và ngày giá nâng chuẩn nhà máy là hai chỉ báo vận hành cần theo dõi song song với\n2026-06-18. kết quả tài chính quý. [1]\nThông tin giao dịch\nĐộng lực tăng trưởng\nMã giao dịch MKP VN Doanh thu 939 tỷ đồng tăng 2.1% so với kỳ trước, trên nền CAGR lịch sử\n-7.6%. Giả định dự phóng -7.6% thận trọng hơn tốc độ gần nhất 2.1%,\nSàn HOSE\nphản ánh quan điểm bảo thủ về tính bền vững của động lực tăng\ntrưởng hiện tại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh\nNgành Dược phẩm\nETC (đấu thầu bệnh viện) — kênh này vừa có quy mô lớn vừa bị chi phối\nbởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các\nGiá đóng cửa 26,700\nquý. Kênh OTC ổn định hơn nhưng tăng trưởng thấp hơn; nó đóng vai\nGiá cao/thấp 21,900 / 41,000 trò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần theo\n52 tuần dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức\nđộ thâm nhập kênh OTC — ba con số này sẽ xác nhận hoặc bác bỏ giả\nVốn hóa 675\nđịnh tăng trưởng của mô hình. [1]\nSố lượng cổ 25\nphiếu\nKLGD bình 3,450\nquân 30 phiên\nTỷ lệ sở hữu N/A\nnước ngoài\nTriển vọng kinh doanh và tài chính\nCẬP NHẬT HOẠT ĐỘNG KINH DOANH\nCong ty Co phan Hoa - Duoc pham Mekophar hoạt động trên hai kênh phân phối ETC (đấu thầu bệnh viện) và\nOTC (nhà thuốc bán lẻ). Doanh thu kỳ gần nhất đạt 939 tỷ đồng, tăng 2.1% so với kỳ trước — cần theo dõi tính\nbền vững so với CAGR lịch sử (CAGR lịch sử -7.6%). Biên lợi nhuận gộp 26.4% phản ánh năng lực kiểm soát giá\nvốn API trong môi trường tỷ giá biến động; đây là chỉ số quan trọng hơn tốc độ tăng doanh thu vì nó xác định\nchất lượng lợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt 15.07 lần cho thấy mức độ lợi nhuận kế toán được hỗ trợ\nbởi dòng tiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải thu bệnh viện.\nBiến số vận hành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu cao vừa\nchịu áp lực chính sách đấu thầu định kỳ. Diễn biến giá API và tiến độ nâng chuẩn nhà máy là hai chỉ báo vận hành\ncần theo dõi song song với kết quả tài chính quý. [1]\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A doanh thu 939 tỷ đồng, tăng +2.1% so với 2024A; biên EBITDA -4.9 điểm % và biên EBIT -2.4\nđiểm %. Nếu doanh thu tăng nhưng hai biên này không mở rộng, luận điểm tăng trưởng phải dựa vào chất\nlượng chi phí chứ không chỉ vào quy mô.\nNghiên cứu cổ phiếu 2\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A biên gộp 26.4% (-0.6 điểm % so với kỳ trước), biên ròng 0.5% (-4.0 điểm %), ROE 0.3% (-2.8\nđiểm % so với 2024A). Chênh lệch giữa biên lợi nhuận và ROE là tín hiệu về hiệu quả sử dụng vốn, không phải chỉ\nlà biến động kế toán.\nKẾT QUẢ TÀI CHÍNH CHÍNH\nDoanh thu 939 tỷ đồng với biên lợi nhuận ròng 0.5% và biên gộp 26.4% vẽ nên bức tranh một doanh nghiệp có\nkhả năng tạo lợi nhuận tương đối ổn định, song phụ thuộc vào kiểm soát chi phí hơn là tăng trưởng sản lượng\nđột biến. Điểm đáng chú ý là tỷ lệ chuyển đổi tiền mặt 15.07 lần. Tỷ lệ này cho thấy lợi nhuận được hỗ trợ tốt bởi\ndòng tiền thực. Đây là cơ chế giải thích tại sao biên lợi nhuận ròng 0.5% không nhất thiết tương đương với khả\nnăng tạo dòng tiền tự do. Biến động lợi nhuận giữa các năm chủ yếu đến từ ba nguồn: (1) thay đổi giá vốn API/tỷ\ngiá; (2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí bán hàng và quản lý liên quan đấu thầu. Những yếu tố này được\nchuẩn hóa thành biến số dự phóng (biên gộp 28.1%, chi phí bán hàng và quản lý 20.0% doanh thu) và là cơ sở để\nphân tích độ nhạy — người đọc có thể kiểm tra xem kết quả mô hình thay đổi như thế nào khi từng giả định dịch\nchuyển. [1]\nNhận định: Lợi nhuận tăng nhanh hơn doanh thu, cho thấy tăng trưởng chủ yếu đến từ cải thiện biên lợi nhuận\nvà tiết giảm chi phí, không phải từ tăng sản lượng. Chất lượng tăng trưởng phụ thuộc vào khả năng duy trì\nbiên; không nên nâng tăng trưởng dài hạn chỉ dựa trên mức lợi nhuận cao nhất thời. [1][2]\nNhận định: Doanh nghiệp ở vị thế tiền mặt ròng (nợ ròng âm so với EBITDA). Linh hoạt tài chính cao, hỗ trợ cổ\ntức/đầu tư; rủi ro đòn bẩy thấp. [1]\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,192 905 920 939 867 801 740 683 631\nTăng trưởng doanh thu — -24.1% 1.6% 2.1% -7.7% -7.6% -7.7% -7.6% -7.7%\nLợi nhuận ròng 42 25 41 4 53 49 46 42 39\nTăng trưởng lợi nhuận — -39.8% 62.4% -89.5% 1139.1% -7.5% -7.7% -7.7% -7.6%\nNghiên cứu cổ phiếu 3\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nEPS điều chỉnh (VND) 1,650 994 1,614 168 2,084 1,924 1,777 1,641 1,516\nTăng trưởng EPS — -39.8% 62.4% -89.6% 1140.5% -7.7% -7.6% -7.7% -7.6%\nROE 3.3% 2.0% 3.2% 0.3% 4.1% 3.7% 3.3% 3.0% 2.8%\nROA 2.6% 1.6% 2.5% 0.3% 3.2% 2.9% 2.6% 2.4% 2.2%\nNợ ròng / EBITDA -1.0x -1.9x -2.2x -4.2x -3.2x -4.4x -5.7x -7.0x -8.3x\nP/E 16.2x 26.9x 16.5x 158.9x 12.8x 13.9x 15.0x 16.3x 17.6x\nP/B 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x\nCẦU NỐI LỢI NHUẬN 2025A-2026F\nĐối chiếu trực tiếp với số liệu công bố trong mô hình định giá.\nChỉ tiêu 2025A 2026F Chênh lệch Nhận định\nDoanh thu thuần 939 867 -7.7% Cơ sở kiểm tra mức tăng lợi nhuận.\nBiên lợi nhuận gộp 26.4% 28.1% +171 bps Biến động biên trong ngưỡng theo\ndõi.\nChi phí bán hàng và quản lý -212 -173 -18.2% Chi phí tuyệt đối giảm dù doanh thu\ntăng; cần bằng chứng vận hành.\nBiên lợi nhuận HĐKD / EBIT 3.8% 8.1% +428 bps Biên tăng trên 300 bps; cần cầu nối\nchi phí và bằng chứng định lượng.\nLNST sau CĐKKS / LNST CĐ 4 53 +1139.1% Đối chiếu với tăng trưởng doanh\nmẹ thu và giả định mô hình.\nBiên lợi nhuận ròng 0.5% 6.1% +569 bps Biên tăng trên 300 bps; cần cầu nối\nchi phí và bằng chứng định lượng.\nEPS 168 2,084 +1140.5% Đối chiếu với tăng trưởng doanh\nthu và giả định mô hình.\nĐỘNG LỰC DỰ PHÓNG\nDoanh thu 939 tỷ đồng tăng 2.1% so với kỳ trước, trên nền CAGR lịch sử -7.6%. Giả định dự phóng -7.6% thận\ntrọng hơn tốc độ gần nhất 2.1%, phản ánh quan điểm bảo thủ về tính bền vững của động lực tăng trưởng hiện\ntại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh ETC (đấu thầu bệnh viện) — kênh này vừa có quy mô\nlớn vừa bị chi phối bởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các quý. Kênh OTC ổn định\nhơn nhưng tăng trưởng thấp hơn; nó đóng vai trò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần\ntheo dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức độ thâm nhập kênh OTC — ba con\nsố này sẽ xác nhận hoặc bác bỏ giả định tăng trưởng của mô hình. [1]\nBiên lợi nhuận gộp hiện tại 26.4%, mô hình kỳ vọng biên gộp cải thiện nhẹ so với mức lịch sử (28.1% dự phóng).\nÁp lực chính lên biên gộp là chi phí API nhập khẩu và tỷ giá USD/VND: khi hai yếu tố này tăng cùng chiều, giá\nvốn hàng bán tăng và biên gộp bị thu hẹp ngay trong quý tiếp theo vì chu kỳ nhập khẩu thường ngắn. Dư địa\nhấp thụ cú sốc này bị giới hạn bởi biên lợi nhuận ròng hiện ở mức 0.5% — không đủ đệm để hấp thụ nếu biên\nNghiên cứu cổ phiếu 4\ngộp giảm quá 2–3 điểm phần trăm. Chi phí bán hàng và quản lý 20.0% doanh thu là lớp chi phí quyết định\nkhoảng cách biên gộp đến biên EBIT; đặc biệt chi phí phục vụ đấu thầu ETC có xu hướng không co giãn theo\ndoanh thu. Thuế suất hiệu dụng 24.2% là bước chuyển cuối từ EBIT sang lợi nhuận sau thuế — biến số này ít biến\nđộng nhưng bất kỳ thay đổi ưu đãi thuế nào sẽ tác động trực tiếp. Chỉ báo cần theo dõi: giá API theo chỉ số thị\ntrường nguyên liệu dược, tỷ giá USD/VND, và biên gộp thực tế quý tiếp theo so với giả định — đây là tín hiệu\nsớm cho việc cần điều chỉnh mô hình. [1]\nNhận định: Biên lợi nhuận gộp thu hẹp (27.0% -> 26.4%). Biên thu hẹp gây áp lực lên dự phóng lợi nhuận; rà\nsoát giả định giá vốn. [1]\nNguồn: Dự phóng của nhóm phân tích dựa trên giả định đã phê duyệt.\nNhận định: 2026F hàm ý doanh thu tăng -7.7% so với 2025A, trong khi biên gộp dự phóng 28.1% so với mức\nthực tế 26.4%. Đây là điểm kiểm tra trọng yếu vì sai lệch nhỏ ở tăng trưởng hoặc biên gộp sẽ truyền trực tiếp vào\nEBIT và FCFF.\nNghiên cứu cổ phiếu 5\nĐỘNG LỰC DỰ PHÓNG CHÍNH\nGiả định biến số chính được hiệu chỉnh từ dữ liệu lịch sử và định hướng kinh doanh hiện tại.\nChỉ tiêu Giả định cơ sở Liên kết tài chính\nTăng trưởng doanh thu -7.6% Doanh thu dẫn tới EBIT và dòng tiền\ntự do\nBiên lợi nhuận gộp 28.1% Giá vốn dẫn tới lợi nhuận gộp\nChi phí bán hàng và quản lý / 20.0% Chi phí vận hành dẫn tới biên EBIT\ndoanh thu\nKhấu hao / doanh thu 4.6% EBIT và lá chắn thuế\nChi đầu tư / doanh thu 0.9% Dòng tiền tự do và mở rộng công suất\nThuế suất hiệu dụng 24.2% LNST và NOPAT\nChuyển đổi dòng tiền 2025 1507.0% Bất thường — cần soi vốn lưu động\n(không dùng làm luận điểm bền vững)\nWACC 13.8% Tỷ lệ chiết khấu dòng tiền\nTăng trưởng dài hạn 3.0% Giá trị cuối kỳ trong mô hình chiết\nkhấu dòng tiền\nĐịnh giá và độ nhạy\nLUẬN ĐIỂM ĐỊNH GIÁ\nDự phóng theo phương pháp dự phóng theo biến số, đi từ biến số kinh doanh tới dòng tài chính tới định giá. Giả\nđịnh cơ sở: tăng trưởng doanh thu -7.6% (căn cứ CAGR lịch sử -7.6% và kế hoạch mở rộng ETC/OTC); biên lợi\nnhuận gộp 28.1% (phản ánh áp lực API và cơ cấu sản phẩm); chi phí bán hàng và quản lý 20.0% doanh thu; thuế\nsuất hiệu dụng 24.2%; chi đầu tư 0.9% doanh thu. Biến số có tác động lớn nhất tới giá trị là: (1) tăng trưởng\ndoanh thu — mỗi điểm phần trăm hụt so với giả định cơ sở sẽ kéo EBIT và FCFF giảm theo tỷ lệ; (2) biên lợi\nnhuận gộp — biến động chi phí API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) chi\nđầu tư và vốn lưu động — quyết định bao nhiêu phần EBIT còn lại dưới dạng FCFF sau tái đầu tư. Hai tham số\nđịnh giá quan trọng nhất là WACC 13.8% và tăng trưởng dài hạn 3.0%; chúng xác định cách quy đổi FCFF tương\nlai về hiện giá. Độ nhạy của giá mục tiêu với hai tham số này cao hơn bất kỳ biến số vận hành nào — đây là lý do\nma trận độ nhạy là bắt buộc chứ không phải tùy chọn. Rủi ro sai lệch lớn nhất là khi giả định tăng trưởng lạc\nquan gặp thực tế đấu thầu thắt chặt hoặc giá API tăng đột biến cùng lúc. [1][2]\nNhận định: Tiềm năng tăng/giảm giá theo mô hình định giá là -40.0%. Trạng thái khuyến nghị theo mô hình:\nBán. [2]\nKẾT QUẢ ĐỊNH GIÁ\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nFCFF 39,449 — Cần rà soát\nFCFE 29,334 — Cần rà soát\nNghiên cứu cổ phiếu 6\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nBLEND 35,403 — Cần rà soát\nP/E 38,923 — Cần rà soát\nCORE P/E + NET CASH 49,706 — Cần rà soát\nGiá mục tiêu tổng hợp 35,403 100.0% Tổng hợp\nCẦU NỐI WACC\nChỉ tiêu Giá trị\nLãi suất phi rủi ro 4.0%\nBeta 0.85\nPhần bù rủi ro thị trường 8.0%\nChi phí vốn chủ sở hữu 13.8%\nChi phí nợ vay 8.0%\nThuế suất 24.2%\nWACC 13.8%\nCẦU NỐI ĐỊNH GIÁ FCFF\nChỉ tiêu Giá trị\nPV giá trị cuối kỳ 372\nGiá trị doanh nghiệp 751\nTiền mặt và đầu tư ngắn hạn 227\nNợ vay 0\nGiá trị vốn chủ sở hữu 1,010\nSố cổ phiếu lưu hành (triệu) 26\nGiá mục tiêu (VND/cổ phiếu) 39,449\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,192 905 920 939 867 801 740 683 631\nTăng trưởng doanh thu — -24.1% 1.6% 2.1% -7.7% -7.6% -7.7% -7.6% -7.7%\nLợi nhuận gộp 349 267 248 248 244 225 208 192 177\nNghiên cứu cổ phiếu 7\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận gộp 29.3% 29.6% 27.0% 26.4% 28.1% 28.1% 28.1% 28.1% 28.1%\nGVHB trừ khấu hao -843 -637 -672 -691 -623 -576 -532 -491 -453\nChi phí bán hàng và quản lý -266 -219 -191 -212 -173 -160 -148 -137 -126\nDoanh thu tài chính 17 25 66 44 — — — — —\nChi phí tài chính -18 -5 -4 -30 0 0 0 0 0\nEBITDA 131 97 105 61 110 102 94 87 80\nTỷ suất EBITDA 11.0% 10.7% 11.4% 6.5% 12.7% 12.7% 12.7% 12.7% 12.7%\nKhấu hao 48 48 47 25 40 37 34 31 29\nLợi nhuận từ HĐKD / EBIT 83 48 57 36 70 65 60 55 51\nBiên lợi nhuận HĐKD / EBIT 6.9% 5.3% 6.2% 3.8% 8.1% 8.1% 8.1% 8.1% 8.1%\nLợi nhuận khác -18 -5 -4 -30 0 0 0 0 0\nChi phí lãi vay ròng -4 -1 0 0 0 0 0 0 0\nThuế -23 -18 -12 -1 -17 -16 -14 -13 -12\nThuế suất thực tế 35.6% 42.0% 23.2% 25.1% 24.2% 24.2% 24.2% 24.2% 24.2%\nLNST sau CĐKKS / LNST CĐ 42 25 41 4 53 49 46 42 39\nmẹ\nBiên lợi nhuận ròng 3.5% 2.8% 4.4% 0.5% 6.1% 6.2% 6.2% 6.1% 6.2%\nTiền mặt từ hoạt động kinh -77 80 -3 65 156 131 121 112 103\ndoanh\nSố lượng cổ phiếu (triệu) 25 25 25 25 26 26 26 26 26\nEPS 1,650 994 1,614 168 2,084 1,924 1,777 1,641 1,516\nEPS hiệu chỉnh 1,650 994 1,614 168 2,084 1,924 1,777 1,641 1,516\nTăng trưởng EPS hiệu chỉnh — -39.8% 62.4% -89.6% 1140.5% -7.7% -7.6% -7.7% -7.6%\nĐỘ NHẠY GIÁ MỤC TIÊU (WACC × tăng trưởng dài hạn)\nĐơn vị: VND/cp — mô hình chiết khấu dòng tiền FCFF.\ng=2.0% g=2.5% g=3.0% g=3.5% g=4.0%\nWACC 11.8% 42,899 43,919 45,056 46,329 47,766\nWACC 12.8% 40,278 41,085 41,974 42,959 44,056\nWACC 13.8% 38,090 38,740 39,449 40,228 41,087\nWACC 14.8% 36,233 36,764 37,341 37,968 38,654\nNghiên cứu cổ phiếu 8\ng=2.0% g=2.5% g=3.0% g=3.5% g=4.0%\nWACC 15.8% 34,636 35,076 35,551 36,064 36,621\nRủi ro đầu tư\nYẾU TỐ CẦN THEO DÕI\nRủi ro và yếu tố hỗ trợ của Cong ty Co phan Hoa - Duoc pham Mekophar đều gắn với cơ chế truyền dẫn tài\nchính cụ thể, không đơn thuần là liệt kê định tính. Rủi ro giảm giá theo mức độ ưu tiên: (1) giá trúng thầu ETC\nthấp hơn kỳ vọng — đây là rủi ro trọng yếu nhất vì tác động đồng thời lên doanh thu và biên gộp, tức là thu hẹp\nFCFF từ cả hai phía; (2) giá API nhập khẩu và tỷ giá USD/VND tăng — ảnh hưởng trực tiếp đến giá vốn, thu hẹp\nbiên gộp 28.1% giả định; (3) kéo dài chu kỳ phải thu bệnh viện — làm tăng ΔNWC và giảm FCFF dù lợi nhuận kế\ntoán vẫn cao; (4) cạnh tranh generic gia tăng — tạo áp lực giảm giá trên sản phẩm chủ lực; (5) thay đổi chính\nsách đăng ký lưu hành và tiêu chuẩn GMP. Yếu tố hỗ trợ: trúng thêm thầu ETC mới là yếu tố có tác động lớn nhất\nvà gần nhất đến FCFF; cải thiện cơ cấu sản phẩm biên cao (chuyển dần từ generic sang branded generic) nâng\nbiên gộp một cách bền vững hơn mở rộng sản lượng thuần túy; hoàn tất đầu tư GMP-EU mở rộng tập khách\nhàng xuất khẩu, giảm phụ thuộc vào chu kỳ đấu thầu nội địa. Mỗi yếu tố cần gắn với chỉ báo sớm cụ thể: kết quả\nđấu thầu ETC hàng quý, biến động giá API theo chỉ số thị trường nguyên liệu dược, vòng quay phải thu so với\ncùng kỳ. Khi có dữ liệu mới, nhà phân tích nên chạy lại ma trận độ nhạy để xác nhận kết luận định giá còn hiệu\nlực. [1]\nRỦI RO ĐẦU TƯ\nRủi ro Mức độ Theo dõi\nÁp lực giá thầu thuốc Cao Kết quả đấu thầu ETC\nBiến động nguyên liệu và tỷ Trung bình API, USD/VND\ngiá\nCạnh tranh generic Trung bình Thị phần và giá bán\nPhụ lục bảng tài chính\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,192 905 920 939 867 801 740 683 631\nTăng trưởng doanh thu — -24.1% 1.6% 2.1% -7.7% -7.6% -7.7% -7.6% -7.7%\nLợi nhuận ròng 42 25 41 4 53 49 46 42 39\nTăng trưởng lợi nhuận — -39.8% 62.4% -89.5% 1139.1% -7.5% -7.7% -7.7% -7.6%\nEPS điều chỉnh (VND) 1,650 994 1,614 168 2,084 1,924 1,777 1,641 1,516\nTăng trưởng EPS — -39.8% 62.4% -89.6% 1140.5% -7.7% -7.6% -7.7% -7.6%\nROE 3.3% 2.0% 3.2% 0.3% 4.1% 3.7% 3.3% 3.0% 2.8%\nNghiên cứu cổ phiếu 9\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROA 2.6% 1.6% 2.5% 0.3% 3.2% 2.9% 2.6% 2.4% 2.2%\nNợ ròng / EBITDA -1.0x -1.9x -2.2x -4.2x -3.2x -4.4x -5.7x -7.0x -8.3x\nP/E 16.2x 26.9x 16.5x 158.9x 12.8x 13.9x 15.0x 16.3x 17.6x\nP/B 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x\nCÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThay đổi vốn lưu động 167 -53 50 -46 -63 -45 -42 -39 -36\nChi đầu tư 12 17 9 8 8 15 20 25 29\nĐầu tư vào công ty liên kết/liên — — — — — — — — —\ndoanh\nCác khoản mục dòng tiền khác — — — — — — — — —\nDòng tiền tự do -89 63 -12 57 148 117 101 87 74\nPhát hành cổ phiếu — — — — — — — — —\nCổ tức 20 25 13 13 21 20 18 17 15\nTổng nợ phải trả 353 288 347 390 390 390 390 390 390\nThay đổi tổng nợ phải trả — -65 59 43 0 0 0 0 0\nNợ vay có lãi cuối năm 8 0 0 0 0 0 0 0 0\nThay đổi nợ vay có lãi — -8 0 0 0 0 0 0 0\nTiền và tương đương tiền 133 186 230 259 354 451 534 604 663\nNợ ròng cuối năm (nợ vay có lãi -125 -186 -230 -259 -354 -451 -534 -604 -663\n- tiền)\nThay đổi nợ ròng — -61 -44 -29 -95 -97 -83 -70 -59\nVốn CSH 1,268 1,261 1,285 1,269 1,302 1,331 1,359 1,384 1,408\nGiá trị sổ sách/cp (VND) 50,168 49,900 50,842 50,240 50,838 51,998 53,072 54,060 54,974\nNợ ròng / VCSH -9.9% -14.8% -17.9% -20.4% -27.2% -33.9% -39.3% -43.6% -47.1%\nNợ ròng / EBITDA -1.0x -1.9x -2.2x -4.2x -3.2x -4.4x -5.7x -7.0x -8.3x\nTổng tài sản 1,620 1,549 1,632 1,659 1,691 1,721 1,749 1,774 1,797\nCHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ\nĐơn vị: lần hoặc %, trừ khi có ghi chú khác\nNghiên cứu cổ phiếu 10\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE 3.3% 2.0% 3.2% 0.3% 4.1% 3.7% 3.3% 3.0% 2.8%\nROA 2.6% 1.6% 2.5% 0.3% 3.2% 2.9% 2.6% 2.4% 2.2%\nROIC 5.5% 3.4% 4.1% 2.7% 5.6% 5.6% 5.5% 5.4% 5.2%\nWACC 13.8% 13.8% 13.8% 13.8% 13.8% 13.8% 13.8% 13.8% 13.8%\nEVA -8.3% -10.4% -9.7% -11.1% -8.2% -8.2% -8.3% -8.4% -8.6%\nP/E 16.2x 26.9x 16.5x 158.9x 12.8x 13.9x 15.0x 16.3x 17.6x\nEV/EBITDA 4.2x 5.1x 4.2x 6.8x 3.0x 2.3x 1.6x 0.9x 0.3x\nEV/FCF -6.2x 7.8x -36.5x 7.3x 2.2x 2.0x 1.5x 0.9x 0.3x\nP/B 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x\nP/S 0.6x 0.7x 0.7x 0.7x 0.8x 0.9x 0.9x 1.0x 1.1x\nEV/Doanh thu 0.5x 0.5x 0.5x 0.4x 0.4x 0.3x 0.2x 0.1x 0.0x\nPEG — -0.7x 0.3x -1.8x 0.0x -1.8x -2.0x -2.1x -2.3x\nSuất sinh lợi cổ tức 0 0 0 0 0 0 0 0 0\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,192 905 920 939 867 801 740 683 631\nTăng trưởng doanh thu — -24.1% 1.6% 2.1% -7.7% -7.6% -7.7% -7.6% -7.7%\nLợi nhuận gộp 349 267 248 248 244 225 208 192 177\nBiên lợi nhuận gộp 29.3% 29.6% 27.0% 26.4% 28.1% 28.1% 28.1% 28.1% 28.1%\nGVHB trừ khấu hao -843 -637 -672 -691 -623 -576 -532 -491 -453\nChi phí bán hàng và quản lý -266 -219 -191 -212 -173 -160 -148 -137 -126\nDoanh thu tài chính 17 25 66 44 — — — — —\nChi phí tài chính -18 -5 -4 -30 0 0 0 0 0\nEBITDA 131 97 105 61 110 102 94 87 80\nTỷ suất EBITDA 11.0% 10.7% 11.4% 6.5% 12.7% 12.7% 12.7% 12.7% 12.7%\nKhấu hao 48 48 47 25 40 37 34 31 29\nLợi nhuận từ HĐKD / EBIT 83 48 57 36 70 65 60 55 51\nBiên lợi nhuận HĐKD / EBIT 6.9% 5.3% 6.2% 3.8% 8.1% 8.1% 8.1% 8.1% 8.1%\nNghiên cứu cổ phiếu 11\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nLợi nhuận khác -18 -5 -4 -30 0 0 0 0 0\nChi phí lãi vay ròng -4 -1 0 0 0 0 0 0 0\nThuế -23 -18 -12 -1 -17 -16 -14 -13 -12\nThuế suất thực tế 35.6% 42.0% 23.2% 25.1% 24.2% 24.2% 24.2% 24.2% 24.2%\nLNST sau CĐKKS / LNST CĐ mẹ 42 25 41 4 53 49 46 42 39\nBiên lợi nhuận ròng 3.5% 2.8% 4.4% 0.5% 6.1% 6.2% 6.2% 6.1% 6.2%\nTiền mặt từ hoạt động kinh -77 80 -3 65 156 131 121 112 103\ndoanh\nSố lượng cổ phiếu (triệu) 25 25 25 25 26 26 26 26 26\nEPS 1,650 994 1,614 168 2,084 1,924 1,777 1,641 1,516\nEPS hiệu chỉnh 1,650 994 1,614 168 2,084 1,924 1,777 1,641 1,516\nTăng trưởng EPS hiệu chỉnh — -39.8% 62.4% -89.6% 1140.5% -7.7% -7.6% -7.7% -7.6%\nPhương pháp định giá và nguồn dữ liệu\nPHƯƠNG PHÁP VÀ GIẢ ĐỊNH CHÍNH\nBáo cáo trình bày nguồn dữ liệu, giả định dự phóng và phương pháp định giá để các kết luận chính có thể được\nđối chiếu. Những khoảng trống dữ liệu trọng yếu được công khai trong bản nháp phân tích và phải được xử lý\ntrước khi phát hành cho khách hàng.\nHạng mục Diễn giải\nSố liệu định lượng lấy từ đâu Doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt và số cổ phiếu lấy trực tiếp\ntừ Báo cáo tài chính (BCTC) đã chuẩn hóa; giá, vốn hóa và thanh khoản lấy từ\ndữ liệu thị trường. Các số liệu được đối chiếu với báo cáo gốc của doanh\nnghiệp. [1]\nVì sao dự phóng theo cách này Mỗi dòng dự phóng nối tiếp số liệu lịch sử: tăng trưởng doanh thu, biên lợi\nnhuận, vốn lưu động, chi đầu tư và thuế được kéo dài từ xu hướng quá khứ\nvà đặc thù ngành dược, để dòng tiền dự phóng bám sát năng lực thực tế của\ndoanh nghiệp thay vì giả định tùy ý. [1][2]\nCách tính giá mục tiêu Từ dự phóng, mô hình tính định giá tương đối theo P/E doanh nghiệp cùng\nngành, chiết khấu về hiện tại bằng chi phí vốn bình quân (WACC), cộng giá\ntrị cuối kỳ, trừ nợ ròng rồi chia cho số cổ phiếu đang lưu hành để ra giá trị\nmỗi cổ phần. [2]\nCách ra khuyến nghị Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. Mua\nnếu >20%, Bán nếu <-10%, còn lại là Giữ; nếu thiếu target mô hình đủ dùng\nthì xếp Theo dõi.\nNghiên cứu cổ phiếu 12\nHạng mục Diễn giải\nKết quả hiện tại Giá hiện tại 26,700 VND, giá mục tiêu 16,020 VND, tiềm năng tăng/giảm\n-40.0%, tổng lợi suất kỳ vọng -36.9%, khuyến nghị: Bán.\nThời điểm giá thị trường Giá hiện tại được ghi nhận tại ngày 2026-06-18; báo cáo được tạo lúc 2026-\n06-20 02:25:06+07:00. Báo cáo ưu tiên giá thị trường mới nhất tại thời điểm\ntạo báo cáo.\nNgười đọc tự kiểm chứng thế Mọi giả định đều hiển thị trong bảng dự phóng, mô hình định giá và ma trận\nnào độ nhạy. Nếu không đồng ý với giả định về chi phí vốn bình quân (WACC),\ntăng trưởng dài hạn, biên lợi nhuận hay vốn lưu động, người đọc có thể thay\nđổi và thấy ngay kết luận định giá thay đổi tương ứng. Mỗi nhận định định\ntính đều có đánh số [n] dẫn về nguồn ở mục Chú giải nguồn trích dẫn bên\ndưới.\nMinh chứng Chi tiết\nSố vết công thức 6 vết; phương pháp: wacc, fcff, fcfe, terminal_value, blend_dcf,\nsensitivity_matrix\nNguồn định giá tương đối vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nKiểm soát giá mục tiêu Raw model=3,138 VND; headline=16,020 VND; band=16,020-37,380 VND;\nđiều chỉnh=neo về cận dưới\nTrạng thái dữ liệu\nKhông ghi nhận khoảng trống dữ liệu trọng yếu trong các mục bắt buộc.\nCHÚ GIẢI NGUỒN TRÍCH DẪN\n[1] Dữ liệu tài chính & thị trường — Báo cáo tài chính (BCTC) đã chuẩn hóa và dữ liệu giao dịch thị trường; dùng\ncho mọi số liệu và nhận định về doanh thu, lợi nhuận, dòng tiền, nợ vay, vốn lưu động, biên lợi nhuận và định\ngiá.\n[2] Mô hình định giá nội bộ — dự phóng dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết khấu theo\nchi phí vốn bình quân (WACC), giá trị cuối kỳ, nợ ròng, số cổ phiếu và giá mục tiêu.\nTại thời điểm lập báo cáo, hệ thống chưa thu thập được bài báo bên ngoài phù hợp từ các nguồn được phép.\nPhần nhận định định tính được xây dựng từ báo cáo tài chính, công bố chính thức, dữ liệu định lượng và so sánh\ncùng ngành. Đây là hạn chế về coverage nguồn tin, không phải xác nhận rằng doanh nghiệp không có sự kiện\nmới.\nTUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM\nBáo cáo này chỉ nhằm mục đích cung cấp thông tin và không phải là lời mời mua hoặc bán chứng khoán. Nhà\nđầu tư cần tự đánh giá khẩu vị rủi ro và tham khảo ý kiến chuyên gia được cấp phép trước khi ra quyết định.\nNghiên cứu cổ phiếu 13"
+      "text": "Nghiên cứu cổ phiếu BÁO CÁO CẬP NHẬT ĐỊNH GIÁ\nNGÀNH DƯỢC PHẨM Ngày 2026-06-22\nCONG TY CO PHAN HOA - DUOC PHAM MEKOPHAR (MKP VN) HOSE: MKP\nNhóm phân tích\nKhuyến nghị · HOSE: MKP\nBáo cáo cập nhật\nGiữ\nHOSE: MKP\nGiá mục tiêu: 27,067 VND | Tiềm năng tăng/giảm: +1.4% | Ngày\nDược phẩm\ngiá: 2026-06-18 | Tạo: 2026-06-22 16:06\nGiá mục tiêu 27,067 VND\nCong ty Co phan Hoa - Duoc pham Mekophar (MKP) là doanh nghiệp\nGiá hiện tại 26,700 dược phẩm có nền doanh thu 939 tỷ đồng với biên lợi nhuận gộp\n(VND) 26.4%, đủ để hỗ trợ tăng trưởng doanh thu dự phóng -7.6% mà không\ncần mở rộng đòn bẩy vận hành quá mức. Mô hình định giá cho giá mục\nNgày giá thị 2026-06-18\ntiêu 27,067 VND so với thị giá 26,700 VND, biên tiềm năng 1.4%.\ntrường\nKhoảng giá trị hợp lý theo ma trận độ nhạy trải từ 24,458 VND đến\nThời điểm tạo 2026-06-22 31,549 VND, phản ánh mức độ không chắc chắn của các giả định dài\nbáo cáo 16:06 hạn. Luận điểm đầu tư xoay quanh ba câu hỏi: (i) doanh nghiệp có giữ\nđược biên gộp trước áp lực chi phí nguyên liệu API và tỷ giá không? (ii)\nTỷ lệ +1.4% kỷ luật chi phí bán hàng và quản lý có đảm bảo biên EBIT không bị xói\ntăng/giảm\nmòn khi tăng doanh thu? (iii) chi đầu tư dài hạn phục vụ nâng chuẩn\nnhà máy GMP-EU có phá vỡ cấu trúc dòng tiền tự do hay không? Ba câu\nTổng tỷ suất lợi +1.7%\nhỏi này quyết định độ tin cậy của kết quả mô hình FCFF và từ đó quyết\nnhuận\nđịnh giá trị hợp lý. Rủi ro trọng yếu là kết quả đấu thầu ETC và biến\nđộng giá API — hai yếu tố này tác động đồng thời lên cả doanh thu lẫn\nbiên, và là nguồn sai lệch lớn nhất so với giả định cơ sở. [1][2]\nLuận điểm cập nhật\nCong ty Co phan Hoa - Duoc pham Mekophar hoạt động trên hai kênh\nphân phối ETC (đấu thầu bệnh viện) và OTC (nhà thuốc bán lẻ). Doanh\nthu kỳ gần nhất đạt 939 tỷ đồng, tăng 2.1% so với kỳ trước — cần theo\ndõi tính bền vững so với CAGR lịch sử (CAGR lịch sử -7.6%). Biên lợi\nnhuận gộp 26.4% phản ánh năng lực kiểm soát giá vốn API trong môi\ntrường tỷ giá biến động; đây là chỉ số quan trọng hơn tốc độ tăng\ndoanh thu vì nó xác định chất lượng lợi nhuận thực sự. Tỷ lệ chuyển đổi\ntiền mặt 15.07 lần cho thấy mức độ lợi nhuận kế toán được hỗ trợ bởi\nNguồn nhóm phân tích thu thập\ndòng tiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực\nNhận định: Thị giá 26,700 VND so vốn lưu động từ phải thu bệnh viện. Biến số vận hành trọng yếu là sản\nvới giá mục tiêu 27,067 VND, hàm ý lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu cao\n+1.4%; tín hiệu giá chỉ có giá trị khi vừa chịu áp lực chính sách đấu thầu định kỳ. Diễn biến giá API và tiến độ\nđi cùng thanh khoản và ngày giá nâng chuẩn nhà máy là hai chỉ báo vận hành cần theo dõi song song với\n2026-06-18. kết quả tài chính quý. [1]\nThông tin giao dịch\nĐộng lực tăng trưởng\nMã giao dịch MKP VN Doanh thu 939 tỷ đồng tăng 2.1% so với kỳ trước, trên nền CAGR lịch sử\n-7.6%. Giả định dự phóng -7.6% thận trọng hơn tốc độ gần nhất 2.1%,\nSàn HOSE\nphản ánh quan điểm bảo thủ về tính bền vững của động lực tăng\ntrưởng hiện tại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh\nNgành Dược phẩm\nETC (đấu thầu bệnh viện) — kênh này vừa có quy mô lớn vừa bị chi phối\nbởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các\nGiá đóng cửa 26,700\nquý. Kênh OTC ổn định hơn nhưng tăng trưởng thấp hơn; nó đóng vai\nGiá cao/thấp 21,900 / 41,000 trò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần theo\n52 tuần dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức\nđộ thâm nhập kênh OTC — ba con số này sẽ xác nhận hoặc bác bỏ giả\nVốn hóa 684\nđịnh tăng trưởng của mô hình. [1]\nSố lượng cổ 26\nphiếu\nKLGD bình 3,450\nquân 30 phiên\nTỷ lệ sở hữu N/A\nnước ngoài\nTriển vọng kinh doanh và tài chính\nCẬP NHẬT HOẠT ĐỘNG KINH DOANH\nCong ty Co phan Hoa - Duoc pham Mekophar hoạt động trên hai kênh phân phối ETC (đấu thầu bệnh viện) và\nOTC (nhà thuốc bán lẻ). Doanh thu kỳ gần nhất đạt 939 tỷ đồng, tăng 2.1% so với kỳ trước — cần theo dõi tính\nbền vững so với CAGR lịch sử (CAGR lịch sử -7.6%). Biên lợi nhuận gộp 26.4% phản ánh năng lực kiểm soát giá\nvốn API trong môi trường tỷ giá biến động; đây là chỉ số quan trọng hơn tốc độ tăng doanh thu vì nó xác định\nchất lượng lợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt 15.07 lần cho thấy mức độ lợi nhuận kế toán được hỗ trợ\nbởi dòng tiền vận hành thực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải thu bệnh viện.\nBiến số vận hành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu cao vừa\nchịu áp lực chính sách đấu thầu định kỳ. Diễn biến giá API và tiến độ nâng chuẩn nhà máy là hai chỉ báo vận hành\ncần theo dõi song song với kết quả tài chính quý. [1]\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A doanh thu 939 tỷ đồng, tăng +2.1% so với 2024A; biên EBITDA -4.9 điểm % và biên EBIT -2.4\nđiểm %. Nếu doanh thu tăng nhưng hai biên này không mở rộng, luận điểm tăng trưởng phải dựa vào chất\nlượng chi phí chứ không chỉ vào quy mô.\nNghiên cứu cổ phiếu 2\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A biên gộp 26.4% (-0.6 điểm % so với kỳ trước), biên ròng 0.5% (-4.0 điểm %), ROE 0.3% (-2.8\nđiểm % so với 2024A). Chênh lệch giữa biên lợi nhuận và ROE là tín hiệu về hiệu quả sử dụng vốn, không phải chỉ\nlà biến động kế toán.\nKẾT QUẢ TÀI CHÍNH CHÍNH\nDoanh thu 939 tỷ đồng với biên lợi nhuận ròng 0.5% và biên gộp 26.4% vẽ nên bức tranh một doanh nghiệp có\nkhả năng tạo lợi nhuận tương đối ổn định, song phụ thuộc vào kiểm soát chi phí hơn là tăng trưởng sản lượng\nđột biến. Điểm đáng chú ý là tỷ lệ chuyển đổi tiền mặt 15.07 lần. Tỷ lệ này cho thấy lợi nhuận được hỗ trợ tốt bởi\ndòng tiền thực. Đây là cơ chế giải thích tại sao biên lợi nhuận ròng 0.5% không nhất thiết tương đương với khả\nnăng tạo dòng tiền tự do. Biến động lợi nhuận giữa các năm chủ yếu đến từ ba nguồn: (1) thay đổi giá vốn API/tỷ\ngiá; (2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí bán hàng và quản lý liên quan đấu thầu. Những yếu tố này được\nchuẩn hóa thành biến số dự phóng (biên gộp 28.1%, chi phí bán hàng và quản lý 27.2% doanh thu) và là cơ sở để\nphân tích độ nhạy — người đọc có thể kiểm tra xem kết quả mô hình thay đổi như thế nào khi từng giả định dịch\nchuyển. [1]\nNhận định: Lợi nhuận tăng nhanh hơn doanh thu, cho thấy tăng trưởng chủ yếu đến từ cải thiện biên lợi nhuận\nvà tiết giảm chi phí, không phải từ tăng sản lượng. Chất lượng tăng trưởng phụ thuộc vào khả năng duy trì\nbiên; không nên nâng tăng trưởng dài hạn chỉ dựa trên mức lợi nhuận cao nhất thời. [1][2]\nNhận định: Doanh nghiệp ở vị thế tiền mặt ròng (nợ ròng âm so với EBITDA). Linh hoạt tài chính cao, hỗ trợ cổ\ntức/đầu tư; rủi ro đòn bẩy thấp. [1]\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,192 905 920 939 867 801 740 683 631\nTăng trưởng doanh thu — -24.1% 1.6% 2.1% -7.7% -7.6% -7.7% -7.6% -7.7%\nLợi nhuận ròng 42 25 41 4 6 5 5 4 4\nTăng trưởng lợi nhuận — -39.8% 62.4% -89.5% 32.5% -7.0% -7.5% -8.2% -6.7%\nNghiên cứu cổ phiếu 3\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nEPS điều chỉnh (VND) 1,650 994 1,614 168 223 206 190 176 162\nTăng trưởng EPS — -39.8% 62.4% -89.6% 32.7% -7.6% -7.8% -7.4% -8.0%\nROE 3.3% 2.0% 3.2% 0.3% 0.4% 0.4% 0.4% 0.4% 0.3%\nROA 2.6% 1.6% 2.5% 0.3% 0.3% 0.3% 0.3% 0.3% 0.3%\nNợ ròng / EBITDA -1.0x -1.9x -2.2x -4.2x -6.9x -9.0x -11.2x -13.4x -15.6x\nP/E 16.2x 26.9x 16.5x 158.9x 119.7x 129.6x 140.5x 151.7x 164.8x\nP/B 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x\nCẦU NỐI LỢI NHUẬN 2025A-2026F\nĐối chiếu trực tiếp với số liệu công bố trong mô hình định giá.\nChỉ tiêu 2025A 2026F Chênh lệch Nhận định\nDoanh thu thuần 939 867 -7.7% Cơ sở kiểm tra mức tăng lợi nhuận.\nBiên lợi nhuận gộp 26.4% 28.1% +171 bps Biến động biên trong ngưỡng theo\ndõi.\nChi phí bán hàng và quản lý -212 -236 +11.5% Chi phí vận hành tăng cùng quy mô\ndoanh thu.\nBiên lợi nhuận HĐKD / EBIT 3.8% 0.9% -297 bps Biến động biên trong ngưỡng theo\ndõi.\nLNST sau CĐKKS / LNST CĐ 4 6 +32.5% Đối chiếu với tăng trưởng doanh\nmẹ thu và giả định mô hình.\nBiên lợi nhuận ròng 0.5% 0.7% +20 bps Biến động biên trong ngưỡng theo\ndõi.\nEPS 168 223 +32.7% Đối chiếu với tăng trưởng doanh\nthu và giả định mô hình.\nĐỘNG LỰC DỰ PHÓNG\nDoanh thu 939 tỷ đồng tăng 2.1% so với kỳ trước, trên nền CAGR lịch sử -7.6%. Giả định dự phóng -7.6% thận\ntrọng hơn tốc độ gần nhất 2.1%, phản ánh quan điểm bảo thủ về tính bền vững của động lực tăng trưởng hiện\ntại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh ETC (đấu thầu bệnh viện) — kênh này vừa có quy mô\nlớn vừa bị chi phối bởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các quý. Kênh OTC ổn định\nhơn nhưng tăng trưởng thấp hơn; nó đóng vai trò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần\ntheo dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức độ thâm nhập kênh OTC — ba con\nsố này sẽ xác nhận hoặc bác bỏ giả định tăng trưởng của mô hình. [1]\nBiên lợi nhuận gộp hiện tại 26.4%, mô hình kỳ vọng biên gộp cải thiện nhẹ so với mức lịch sử (28.1% dự phóng).\nÁp lực chính lên biên gộp là chi phí API nhập khẩu và tỷ giá USD/VND: khi hai yếu tố này tăng cùng chiều, giá\nvốn hàng bán tăng và biên gộp bị thu hẹp ngay trong quý tiếp theo vì chu kỳ nhập khẩu thường ngắn. Dư địa\nhấp thụ cú sốc này bị giới hạn bởi biên lợi nhuận ròng hiện ở mức 0.5% — không đủ đệm để hấp thụ nếu biên\nNghiên cứu cổ phiếu 4\ngộp giảm quá 2–3 điểm phần trăm. Chi phí bán hàng và quản lý 27.2% doanh thu là lớp chi phí quyết định\nkhoảng cách biên gộp đến biên EBIT; đặc biệt chi phí phục vụ đấu thầu ETC có xu hướng không co giãn theo\ndoanh thu. Thuế suất hiệu dụng 24.2% là bước chuyển cuối từ EBIT sang lợi nhuận sau thuế — biến số này ít biến\nđộng nhưng bất kỳ thay đổi ưu đãi thuế nào sẽ tác động trực tiếp. Chỉ báo cần theo dõi: giá API theo chỉ số thị\ntrường nguyên liệu dược, tỷ giá USD/VND, và biên gộp thực tế quý tiếp theo so với giả định — đây là tín hiệu\nsớm cho việc cần điều chỉnh mô hình. [1]\nNhận định: Biên lợi nhuận gộp thu hẹp (27.0% -> 26.4%). Biên thu hẹp gây áp lực lên dự phóng lợi nhuận; rà\nsoát giả định giá vốn. [1]\nNguồn: Dự phóng của nhóm phân tích dựa trên giả định đã phê duyệt.\nNhận định: 2026F hàm ý doanh thu tăng -7.7% so với 2025A, trong khi biên gộp dự phóng 28.1% so với mức\nthực tế 26.4%. Đây là điểm kiểm tra trọng yếu vì sai lệch nhỏ ở tăng trưởng hoặc biên gộp sẽ truyền trực tiếp vào\nEBIT và FCFF.\nNghiên cứu cổ phiếu 5\nĐỘNG LỰC DỰ PHÓNG CHÍNH\nGiả định biến số chính được hiệu chỉnh từ dữ liệu lịch sử và định hướng kinh doanh hiện tại.\nChỉ tiêu Giả định cơ sở Liên kết tài chính\nTăng trưởng doanh thu -7.6% Doanh thu dẫn tới EBIT và dòng tiền\ntự do\nBiên lợi nhuận gộp 28.1% Giá vốn dẫn tới lợi nhuận gộp\nChi phí bán hàng và quản lý / 27.2% Chi phí vận hành dẫn tới biên EBIT\ndoanh thu\nKhấu hao / doanh thu 4.6% EBIT và lá chắn thuế\nChi đầu tư / doanh thu 0.9% Dòng tiền tự do và mở rộng công suất\nThuế suất hiệu dụng 24.2% LNST và NOPAT\nChuyển đổi dòng tiền 2025 1507.0% Bất thường — cần soi vốn lưu động\n(không dùng làm luận điểm bền vững)\nWACC 13.8% Tỷ lệ chiết khấu dòng tiền\nTăng trưởng dài hạn 3.0% Giá trị cuối kỳ trong mô hình chiết\nkhấu dòng tiền\nĐịnh giá và độ nhạy\nLUẬN ĐIỂM ĐỊNH GIÁ\nDự phóng theo phương pháp dự phóng theo biến số, đi từ biến số kinh doanh tới dòng tài chính tới định giá. Giả\nđịnh cơ sở: tăng trưởng doanh thu -7.6% (căn cứ CAGR lịch sử -7.6% và kế hoạch mở rộng ETC/OTC); biên lợi\nnhuận gộp 28.1% (phản ánh áp lực API và cơ cấu sản phẩm); chi phí bán hàng và quản lý 27.2% doanh thu; thuế\nsuất hiệu dụng 24.2%; chi đầu tư 0.9% doanh thu. Biến số có tác động lớn nhất tới giá trị là: (1) tăng trưởng\ndoanh thu — mỗi điểm phần trăm hụt so với giả định cơ sở sẽ kéo EBIT và FCFF giảm theo tỷ lệ; (2) biên lợi\nnhuận gộp — biến động chi phí API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) chi\nđầu tư và vốn lưu động — quyết định bao nhiêu phần EBIT còn lại dưới dạng FCFF sau tái đầu tư. Hai tham số\nđịnh giá quan trọng nhất là WACC 13.8% và tăng trưởng dài hạn 3.0%; chúng xác định cách quy đổi FCFF tương\nlai về hiện giá. Độ nhạy của giá mục tiêu với hai tham số này cao hơn bất kỳ biến số vận hành nào — đây là lý do\nma trận độ nhạy là bắt buộc chứ không phải tùy chọn. Rủi ro sai lệch lớn nhất là khi giả định tăng trưởng lạc\nquan gặp thực tế đấu thầu thắt chặt hoặc giá API tăng đột biến cùng lúc. [1][2]\nNhận định: Tiềm năng tăng/giảm giá theo mô hình định giá là +1.4%. Trạng thái khuyến nghị theo mô hình:\nGiữ. [2]\nKẾT QUẢ ĐỊNH GIÁ\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nFCFF 27,067 — Cần rà soát\nFCFE 27,067 — Cần rà soát\nNghiên cứu cổ phiếu 6\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nBLEND 27,067 — Cần rà soát\nP/E 4,171 — Cần rà soát\nCORE P/E + NET CASH 14,359 — Cần rà soát\nGiá mục tiêu tổng hợp 27,067 100.0% Tổng hợp\nCẦU NỐI WACC\nChỉ tiêu Giá trị\nLãi suất phi rủi ro 4.0%\nBeta 0.85\nPhần bù rủi ro thị trường 8.0%\nChi phí vốn chủ sở hữu 13.8%\nChi phí nợ vay 8.0%\nThuế suất 24.2%\nWACC 13.8%\nCẦU NỐI ĐỊNH GIÁ FCFF\nChỉ tiêu Giá trị\nPV giá trị cuối kỳ 199\nGiá trị doanh nghiệp 434\nTiền mặt và đầu tư ngắn hạn 227\nNợ vay 0\nGiá trị vốn chủ sở hữu 693\nSố cổ phiếu lưu hành (triệu) 26\nGiá mục tiêu (VND/cổ phiếu) 27,067\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,192 905 920 939 867 801 740 683 631\nTăng trưởng doanh thu — -24.1% 1.6% 2.1% -7.7% -7.6% -7.7% -7.6% -7.7%\nLợi nhuận gộp 349 267 248 248 244 225 208 192 177\nNghiên cứu cổ phiếu 7\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận gộp 29.3% 29.6% 27.0% 26.4% 28.1% 28.1% 28.1% 28.1% 28.1%\nGVHB trừ khấu hao -843 -637 -672 -691 -623 -576 -532 -491 -453\nChi phí bán hàng và quản lý -266 -219 -191 -212 -236 -218 -202 -186 -172\nDoanh thu tài chính 17 25 66 44 — — — — —\nChi phí tài chính -18 -5 -4 -30 0 0 0 0 0\nEBITDA 131 97 105 61 47 44 40 37 34\nTỷ suất EBITDA 11.0% 10.7% 11.4% 6.5% 5.5% 5.5% 5.5% 5.5% 5.5%\nKhấu hao 48 48 47 25 40 37 34 31 29\nLợi nhuận từ HĐKD / EBIT 83 48 57 36 8 7 6 6 6\nBiên lợi nhuận HĐKD / EBIT 6.9% 5.3% 6.2% 3.8% 0.9% 0.9% 0.9% 0.9% 0.9%\nLợi nhuận khác -18 -5 -4 -30 0 0 0 0 0\nChi phí lãi vay ròng -4 -1 0 0 0 0 0 0 0\nThuế -23 -18 -12 -1 -2 -2 -2 -1 -1\nThuế suất thực tế 35.6% 42.0% 23.2% 25.1% 24.0% 24.3% 24.6% 23.7% 23.6%\nLNST sau CĐKKS / LNST CĐ 42 25 41 4 6 5 5 4 4\nmẹ\nBiên lợi nhuận ròng 3.5% 2.8% 4.4% 0.5% 0.7% 0.7% 0.7% 0.7% 0.7%\nTiền mặt từ hoạt động kinh -77 80 -3 65 108 87 81 74 69\ndoanh\nSố lượng cổ phiếu (triệu) 26 26 26 26 26 26 26 26 26\nEPS 1,650 994 1,614 168 223 206 190 176 162\nEPS hiệu chỉnh 1,650 994 1,614 168 223 206 190 176 162\nTăng trưởng EPS hiệu chỉnh — -39.8% 62.4% -89.6% 32.7% -7.6% -7.8% -7.4% -8.0%\nĐỘ NHẠY GIÁ MỤC TIÊU (WACC × tăng trưởng dài hạn)\nĐơn vị: VND/cp — mô hình chiết khấu dòng tiền FCFF.\ng=2.0% g=2.5% g=3.0% g=3.5% g=4.0%\nWACC 11.8% 28,949 29,494 30,101 30,782 31,549\nWACC 12.8% 27,529 27,960 28,435 28,961 29,547\nWACC 13.8% 26,340 26,688 27,067 27,483 27,942\nWACC 14.8% 25,330 25,614 25,922 26,257 26,623\nNghiên cứu cổ phiếu 8\ng=2.0% g=2.5% g=3.0% g=3.5% g=4.0%\nWACC 15.8% 24,458 24,694 24,947 25,222 25,519\nRủi ro đầu tư\nYẾU TỐ CẦN THEO DÕI\nRủi ro và yếu tố hỗ trợ của Cong ty Co phan Hoa - Duoc pham Mekophar đều gắn với cơ chế truyền dẫn tài\nchính cụ thể, không đơn thuần là liệt kê định tính. Rủi ro giảm giá theo mức độ ưu tiên: (1) giá trúng thầu ETC\nthấp hơn kỳ vọng — đây là rủi ro trọng yếu nhất vì tác động đồng thời lên doanh thu và biên gộp, tức là thu hẹp\nFCFF từ cả hai phía; (2) giá API nhập khẩu và tỷ giá USD/VND tăng — ảnh hưởng trực tiếp đến giá vốn, thu hẹp\nbiên gộp 28.1% giả định; (3) kéo dài chu kỳ phải thu bệnh viện — làm tăng ΔNWC và giảm FCFF dù lợi nhuận kế\ntoán vẫn cao; (4) cạnh tranh generic gia tăng — tạo áp lực giảm giá trên sản phẩm chủ lực; (5) thay đổi chính\nsách đăng ký lưu hành và tiêu chuẩn GMP. Yếu tố hỗ trợ: trúng thêm thầu ETC mới là yếu tố có tác động lớn nhất\nvà gần nhất đến FCFF; cải thiện cơ cấu sản phẩm biên cao (chuyển dần từ generic sang branded generic) nâng\nbiên gộp một cách bền vững hơn mở rộng sản lượng thuần túy; hoàn tất đầu tư GMP-EU mở rộng tập khách\nhàng xuất khẩu, giảm phụ thuộc vào chu kỳ đấu thầu nội địa. Mỗi yếu tố cần gắn với chỉ báo sớm cụ thể: kết quả\nđấu thầu ETC hàng quý, biến động giá API theo chỉ số thị trường nguyên liệu dược, vòng quay phải thu so với\ncùng kỳ. Khi có dữ liệu mới, nhà phân tích nên chạy lại ma trận độ nhạy để xác nhận kết luận định giá còn hiệu\nlực. [1]\nRỦI RO ĐẦU TƯ\nRủi ro Mức độ Theo dõi\nÁp lực giá thầu thuốc Cao Kết quả đấu thầu ETC\nBiến động nguyên liệu và tỷ Trung bình API, USD/VND\ngiá\nCạnh tranh generic Trung bình Thị phần và giá bán\nPhụ lục bảng tài chính\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,192 905 920 939 867 801 740 683 631\nTăng trưởng doanh thu — -24.1% 1.6% 2.1% -7.7% -7.6% -7.7% -7.6% -7.7%\nLợi nhuận ròng 42 25 41 4 6 5 5 4 4\nTăng trưởng lợi nhuận — -39.8% 62.4% -89.5% 32.5% -7.0% -7.5% -8.2% -6.7%\nEPS điều chỉnh (VND) 1,650 994 1,614 168 223 206 190 176 162\nTăng trưởng EPS — -39.8% 62.4% -89.6% 32.7% -7.6% -7.8% -7.4% -8.0%\nROE 3.3% 2.0% 3.2% 0.3% 0.4% 0.4% 0.4% 0.4% 0.3%\nNghiên cứu cổ phiếu 9\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROA 2.6% 1.6% 2.5% 0.3% 0.3% 0.3% 0.3% 0.3% 0.3%\nNợ ròng / EBITDA -1.0x -1.9x -2.2x -4.2x -6.9x -9.0x -11.2x -13.4x -15.6x\nP/E 16.2x 26.9x 16.5x 158.9x 119.7x 129.6x 140.5x 151.7x 164.8x\nP/B 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x\nCÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThay đổi vốn lưu động 167 -6 91 -35 -63 -45 -42 -39 -36\nChi đầu tư 12 17 9 8 8 15 20 25 29\nĐầu tư vào công ty liên kết/liên — — — — — — — — —\ndoanh\nCác khoản mục dòng tiền khác — — — — — — — — —\nDòng tiền tự do -89 63 -12 57 100 73 60 49 40\nPhát hành cổ phiếu — — — — — — — — —\nCổ tức 20 25 13 13 2 2 2 2 2\nTổng nợ phải trả 353 288 347 390 390 390 390 390 390\nThay đổi tổng nợ phải trả — -65 59 43 0 0 0 0 0\nNợ vay có lãi cuối năm 8 0 0 0 0 0 0 0 0\nThay đổi nợ vay có lãi — -8 0 0 0 0 0 0 0\nTiền và tương đương tiền 133 186 230 259 325 396 454 502 540\nNợ ròng cuối năm (nợ vay có lãi -125 -186 -230 -259 -325 -396 -454 -502 -540\n- tiền)\nThay đổi nợ ròng — -61 -44 -29 -66 -70 -58 -48 -38\nVốn CSH 1,268 1,261 1,285 1,269 1,273 1,276 1,279 1,282 1,284\nGiá trị sổ sách/cp (VND) 49,518 49,254 50,183 49,589 49,717 49,842 49,955 50,064 50,162\nNợ ròng / VCSH -9.9% -14.8% -17.9% -20.4% -25.5% -31.0% -35.5% -39.1% -42.0%\nNợ ròng / EBITDA -1.0x -1.9x -2.2x -4.2x -6.9x -9.0x -11.2x -13.4x -15.6x\nTổng tài sản 1,620 1,549 1,632 1,659 1,663 1,666 1,669 1,672 1,674\nCHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ\nĐơn vị: lần hoặc %, trừ khi có ghi chú khác\nNghiên cứu cổ phiếu 10\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE 3.3% 2.0% 3.2% 0.3% 0.4% 0.4% 0.4% 0.4% 0.3%\nROA 2.6% 1.6% 2.5% 0.3% 0.3% 0.3% 0.3% 0.3% 0.3%\nROIC 5.5% 3.4% 4.1% 2.7% 0.6% 0.6% 0.6% 0.6% 0.6%\nWACC 13.8% 13.8% 13.8% 13.8% 13.8% 13.8% 13.8% 13.8% 13.8%\nEVA -8.3% -10.4% -9.7% -11.1% -13.2% -13.2% -13.2% -13.2% -13.2%\nP/E 16.2x 26.9x 16.5x 158.9x 119.7x 129.6x 140.5x 151.7x 164.8x\nEV/EBITDA 4.3x 5.1x 4.3x 6.9x 7.6x 6.6x 5.7x 4.9x 4.2x\nEV/FCF -6.3x 7.9x -37.3x 7.4x 3.6x 4.0x 3.8x 3.7x 3.6x\nP/B 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x 0.5x\nP/S 0.6x 0.8x 0.7x 0.7x 0.8x 0.9x 0.9x 1.0x 1.1x\nEV/Doanh thu 0.5x 0.5x 0.5x 0.5x 0.4x 0.4x 0.3x 0.3x 0.2x\nPEG — -0.7x 0.3x -1.8x 3.7x -17.0x -18.1x -20.6x -20.7x\nSuất sinh lợi cổ tức 0 0 0 0 0 0 0 0 0\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,192 905 920 939 867 801 740 683 631\nTăng trưởng doanh thu — -24.1% 1.6% 2.1% -7.7% -7.6% -7.7% -7.6% -7.7%\nLợi nhuận gộp 349 267 248 248 244 225 208 192 177\nBiên lợi nhuận gộp 29.3% 29.6% 27.0% 26.4% 28.1% 28.1% 28.1% 28.1% 28.1%\nGVHB trừ khấu hao -843 -637 -672 -691 -623 -576 -532 -491 -453\nChi phí bán hàng và quản lý -266 -219 -191 -212 -236 -218 -202 -186 -172\nDoanh thu tài chính 17 25 66 44 — — — — —\nChi phí tài chính -18 -5 -4 -30 0 0 0 0 0\nEBITDA 131 97 105 61 47 44 40 37 34\nTỷ suất EBITDA 11.0% 10.7% 11.4% 6.5% 5.5% 5.5% 5.5% 5.5% 5.5%\nKhấu hao 48 48 47 25 40 37 34 31 29\nLợi nhuận từ HĐKD / EBIT 83 48 57 36 8 7 6 6 6\nBiên lợi nhuận HĐKD / EBIT 6.9% 5.3% 6.2% 3.8% 0.9% 0.9% 0.9% 0.9% 0.9%\nNghiên cứu cổ phiếu 11\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nLợi nhuận khác -18 -5 -4 -30 0 0 0 0 0\nChi phí lãi vay ròng -4 -1 0 0 0 0 0 0 0\nThuế -23 -18 -12 -1 -2 -2 -2 -1 -1\nThuế suất thực tế 35.6% 42.0% 23.2% 25.1% 24.0% 24.3% 24.6% 23.7% 23.6%\nLNST sau CĐKKS / LNST CĐ mẹ 42 25 41 4 6 5 5 4 4\nBiên lợi nhuận ròng 3.5% 2.8% 4.4% 0.5% 0.7% 0.7% 0.7% 0.7% 0.7%\nTiền mặt từ hoạt động kinh -77 80 -3 65 108 87 81 74 69\ndoanh\nSố lượng cổ phiếu (triệu) 26 26 26 26 26 26 26 26 26\nEPS 1,650 994 1,614 168 223 206 190 176 162\nEPS hiệu chỉnh 1,650 994 1,614 168 223 206 190 176 162\nTăng trưởng EPS hiệu chỉnh — -39.8% 62.4% -89.6% 32.7% -7.6% -7.8% -7.4% -8.0%\nPhương pháp định giá và nguồn dữ liệu\nPHƯƠNG PHÁP VÀ GIẢ ĐỊNH CHÍNH\nBáo cáo trình bày nguồn dữ liệu, giả định dự phóng và phương pháp định giá để các kết luận chính có thể được\nđối chiếu. Những khoảng trống dữ liệu trọng yếu được công khai trong bản nháp phân tích và phải được xử lý\ntrước khi phát hành cho khách hàng.\nHạng mục Diễn giải\nSố liệu định lượng lấy từ đâu Doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt và số cổ phiếu lấy trực tiếp\ntừ Báo cáo tài chính (BCTC) đã chuẩn hóa; giá, vốn hóa và thanh khoản lấy từ\ndữ liệu thị trường. Các số liệu được đối chiếu với báo cáo gốc của doanh\nnghiệp. [1]\nVì sao dự phóng theo cách này Mỗi dòng dự phóng nối tiếp số liệu lịch sử: tăng trưởng doanh thu, biên lợi\nnhuận, vốn lưu động, chi đầu tư và thuế được kéo dài từ xu hướng quá khứ\nvà đặc thù ngành dược, để dòng tiền dự phóng bám sát năng lực thực tế của\ndoanh nghiệp thay vì giả định tùy ý. [1][2]\nCách tính giá mục tiêu Từ dự phóng, mô hình tính dòng tiền tự do doanh nghiệp và vốn chủ sở hữu\n(FCFF/FCFE), chiết khấu về hiện tại bằng chi phí vốn bình quân (WACC), cộng\ngiá trị cuối kỳ, trừ nợ ròng rồi chia cho số cổ phiếu đang lưu hành để ra giá\ntrị mỗi cổ phần. [2]\nCách ra khuyến nghị Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. Mua\nnếu >20%, Bán nếu <-10%, còn lại là Giữ; nếu thiếu target mô hình đủ dùng\nthì xếp Theo dõi.\nNghiên cứu cổ phiếu 12\nHạng mục Diễn giải\nKết quả hiện tại Giá hiện tại 26,700 VND, giá mục tiêu 27,067 VND, tiềm năng tăng/giảm\n+1.4%, tổng lợi suất kỳ vọng +1.7%, khuyến nghị: Giữ.\nThời điểm giá thị trường Giá hiện tại được ghi nhận tại ngày 2026-06-18; báo cáo được tạo lúc 2026-\n06-22 16:06:19+07:00. Báo cáo ưu tiên giá thị trường mới nhất tại thời điểm\ntạo báo cáo.\nNgười đọc tự kiểm chứng thế Mọi giả định đều hiển thị trong bảng dự phóng, mô hình định giá và ma trận\nnào độ nhạy. Nếu không đồng ý với giả định về chi phí vốn bình quân (WACC),\ntăng trưởng dài hạn, biên lợi nhuận hay vốn lưu động, người đọc có thể thay\nđổi và thấy ngay kết luận định giá thay đổi tương ứng. Mỗi nhận định định\ntính đều có đánh số [n] dẫn về nguồn ở mục Chú giải nguồn trích dẫn bên\ndưới.\nMinh chứng Chi tiết\nSố vết công thức 6 vết; phương pháp: wacc, fcff, fcfe, terminal_value, blend_dcf,\nsensitivity_matrix\nNguồn định giá tương đối vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nKiểm soát giá mục tiêu Raw model=27,067 VND; headline=27,067 VND; band=16,020-37,380 VND;\nđiều chỉnh=không điều chỉnh\nTrạng thái dữ liệu\nKhông ghi nhận khoảng trống dữ liệu trọng yếu trong các mục bắt buộc.\nCHÚ GIẢI NGUỒN TRÍCH DẪN\n[1] Dữ liệu tài chính & thị trường — Báo cáo tài chính (BCTC) đã chuẩn hóa và dữ liệu giao dịch thị trường; dùng\ncho mọi số liệu và nhận định về doanh thu, lợi nhuận, dòng tiền, nợ vay, vốn lưu động, biên lợi nhuận và định\ngiá.\n[2] Mô hình định giá nội bộ — dự phóng dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết khấu theo\nchi phí vốn bình quân (WACC), giá trị cuối kỳ, nợ ròng, số cổ phiếu và giá mục tiêu.\nTại thời điểm lập báo cáo, hệ thống chưa thu thập được bài báo bên ngoài phù hợp từ các nguồn được phép.\nPhần nhận định định tính được xây dựng từ báo cáo tài chính, công bố chính thức, dữ liệu định lượng và so sánh\ncùng ngành. Đây là hạn chế về coverage nguồn tin, không phải xác nhận rằng doanh nghiệp không có sự kiện\nmới.\nTUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM\nBáo cáo này chỉ nhằm mục đích cung cấp thông tin và không phải là lời mời mua hoặc bán chứng khoán. Nhà\nđầu tư cần tự đánh giá khẩu vị rủi ro và tham khảo ý kiến chuyên gia được cấp phép trước khi ra quyết định.\nNghiên cứu cổ phiếu 13"
     },
     "explanation_pdf": {
       "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\MKP_explanation.pdf",
       "exists": true,
       "pages": 6,
-      "text": "Mã cổ phiếu: MKP\nPhụ lục giải trình định giá - MKP\nDoanh nghiệp được phân tích: Cong ty Co phan Hoa - Duoc pham Mekophar.\nTài liệu này là phụ lục chi tiết của báo cáo định giá. Mục tiêu là giải thích vì sao báo cáo chính đưa ra giá mục tiêu,\nmức tăng/giảm kỳ vọng, khuyến nghị và các nhận định trọng tâm bằng dữ liệu đầu vào, công thức, bước tính trung\ngian và cảnh báo cần đọc kèm.\nTrạng thái và giới hạn\nTrạng thái báo cáo: Có thể đọc, kèm công bố phần dữ liệu còn thiếu\nMã lần chạy: run_mkp_20260619T192356_48c732230d\nHai phương pháp dòng tiền có độ lệch lớn; cần đọc kỹ phần kết hợp phương pháp và đối chiếu.\nGiá trị theo FCFF và FCFE lệch trên 25%.\nCần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\nThiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\nKết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nMinh chứng kiểm định\nThành phần Giá trị\nSố vết công thức 6 (wacc, fcff, fcfe, terminal_value, blend_dcf, sensitivity_matrix)\nNguồn định giá tương đối đối chiếu vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nDữ liệu và kiểm định cần bổ sung trước khi phát hành:\n- kết hợp phương pháp_is_draft_only\n- fcff_fcfe_gap_gt_25pct\n- headline_target_clamped_low\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo trọng yếu; cần đọc cùng bảng tính chi tiết và phần đối chiếu trước khi sử dụng khuyến\nnghị.\nCảnh báo mô hình và dữ liệu:\n- No SG&A or EBIT history — using default SG&A of 20% of revenue\n- TaxPolicy: 2 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\n- Lịch nợ vay đang giả định không phát sinh nợ mới và dư nợ giảm về gần 0 ở năm cơ sở; FCFE có thể tính được\nnhưng vẫn cần kiểm tra lại chính sách vay, trả nợ và kế hoạch vốn.\n- Thiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\n- Thuế suất trong giả định WACC khác thuế suất hiệu dụng trong chính sách thuế; mô hình đang dùng thuế suất theo\nchính sách thuế để tính EBIT sau thuế.\n- FCFF/FCFE valuation gap = 34.5% > 25% — kết hợp phương pháp thiếu dữ liệu: audit vay ròng, net debt, CAPEX,\nNWC before publishing target price.\n- EV/EBITDA thiếu dữ liệu: EBITDA unavailable for EV bridge.\n- Cảnh báo nghiêm trọng: cần rà soát thêm dữ liệu đầu vào và giả định định giá.\n- Cảnh báo nghiêm trọng: cần rà soát thêm dữ liệu đầu vào và giả định định giá.\n- dcf_market_inconsistent_relative_fallback_used\n- FCFE có độ tin cậy thấp; lịch vay ròng và giả định dòng tiền cho cổ đông cần được kiểm định thêm.\n- FCFF có độ tin cậy thấp; WACC, tăng trưởng dài hạn và dòng tiền nền cần được kiểm định thêm.\n- Thiếu phê duyệt cuối cho khuyến nghị đầu tư.\n- relative_target_deviates_from_market\n- relative_valuation_fallback_pe\n- Cảnh báo đối chiếu định giá: các kiểm tra độc lập cho kết quả lệch đáng kể, cần rà soát cầu nối thị trường và giả\nđịnh mô hình.\nVì sao báo cáo chính kết luận như vậy\nThành phần Giá trị\nGiá thị trường dùng trong báo cáo 26,700\nGiá mục tiêu tính được 35,403\nTăng/giảm so với giá thị trường 32.6%\nKhuyến nghị trong báo cáo chính Bán\nGiá trị theo FCFF 39,449\nGiá trị theo FCFE 29,334\nTrọng số FCFF / FCFE 60.0% / 40.0%\nĐộ lệch FCFF/FCFE 34.5%\nWACC 13.8%\nTăng trưởng dài hạn 3.0%\nDoanh thu năm đầu dự phóng 867\nDoanh thu năm cuối dự phóng 631\nLNST năm đầu dự phóng 53\nLNST năm cuối dự phóng 39\nKết luận trong báo cáo chính được nối trực tiếp từ giá thị trường, giá trị nội tại theo dòng tiền, mức tăng/giảm kỳ vọng\nvà các cảnh báo dữ liệu. Nếu FCFF và FCFE cho kết quả lệch lớn, người đọc phải ưu tiên phần kết hợp phương\npháp, phân tích độ nhạy và đối chiếu cảnh báo thay vì chỉ đọc một giá mục tiêu duy nhất.\nCảnh báo cần đọc kèm kết luận:\n- Hai phương pháp dòng tiền có độ lệch lớn; cần đọc kỹ phần kết hợp phương pháp và đối chiếu.\n- Giá trị theo FCFF và FCFE lệch trên 25%.\n- Cần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nChi tiết tính toán định giá\nPhần này trình bày đầy đủ công thức, dữ liệu đầu vào, bước tính trung gian, bảng dự phóng, cầu nối định giá,\nphân tích độ nhạy và cảnh báo để người đọc kiểm tra lại kết quả trong báo cáo chính.\n1. Thông tin chung\nThành phần Giá trị\nMã cổ phiếu MKP\nCông ty Cong ty Co phan Hoa - Duoc pham Mekophar\nSàn HOSE\nNgành Dược phẩm\nMã lần chạy run_mkp_20260619T192356_48c732230d\nNgày định giá —\nMã ảnh chụp dữ liệu v2snap_ecca20e72b76e79bf900\nNăm gốc —\nMã băm tái lập —\n2. Tóm tắt kết quả định giá\nThành phần Giá trị\nGiá hiện tại (VND) 26,700\nGiá mục tiêu kết hợp (VND) 35,403\nTiềm năng tăng/giảm 32.6%\nKhuyến nghị Bán\nLuật xếp hạng (tổng tỷ suất sinh lời = mức tăng/giảm giá + lợi suất cổ tức): > 20% → Mua; < −10% → Bán; còn lại\n→ Giữ.\n3. Bảng giả định\nThành phần Giá trị\nWACC 13.8%\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nSố năm dự phóng 5\nThuế suất —\nP/E mục tiêu 18.7x\nMức cộng/trừ định giá —\nCác giả định hiện là giá trị mặc định và phải được rà soát, phê duyệt trước khi sử dụng trong báo cáo chính thức.\n4. Dự phóng theo yếu tố dẫn dắt\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 867 801 740 683 631\nGiá vốn hàng bán (COGS) -623 -576 -532 -491 -453\nLợi nhuận gộp 244 225 208 192 177\nChi phí SG&A -173 -160 -148 -137 -126\nEBIT 70 65 60 55 51\nChi phí lãi vay -0 -0 -0 -0 -0\nLợi nhuận trước thuế 70 65 60 55 51\nChi phí thuế -17 -16 -14 -13 -12\nLNST cổ đông mẹ 53 49 46 42 39\nKhấu hao (D&A) 40 37 34 31 29\nCAPEX -8 -15 -20 -25 -29\nEPS (VND) 2,084 1,924 1,777 1,641 1,516\nVay ròng (phát hành nợ − trả nợ) 0 0 0 0 0\nDư nợ vay cuối kỳ 0 0 0 0 0\nCổ tức tiền mặt 21 20 18 17 15\nTỷ lệ chi trả cổ tức 39.7% 39.7% 39.7% 39.7% 39.7%\nLogic yếu tố dẫn dắt: doanh thu theo tăng trưởng giả định; biên lợi nhuận dẫn xuất EBIT/LNST; lịch nợ vay chuyển\ntiếp với vay ròng = phát hành nợ − trả nợ; cổ tức theo tỷ lệ chi trả.\n5. Chỉ số tài chính\nChỉ số Công thức 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận gộp lợi nhuận gộp / doanh thu 28.1% 28.1% 28.1% 28.1% 28.1%\nBiên EBIT EBIT / doanh thu 8.1% 8.1% 8.1% 8.1% 8.1%\nBiên lợi nhuận ròng lợi nhuận sau thuế / doanh thu 6.1% 6.2% 6.2% 6.1% 6.2%\nROE lợi nhuận sau thuế / vốn chủ sở hữu 4.1% 3.7% 3.3% 3.0% 2.8%\n6. Định giá FCFF\nCông thức: FCFF = EBIT×(1−t) + D&A − CAPEX − ΔNWC\nWACC = 13.8%; tăng trưởng dài hạn g = 3.0%\nKhoản mục 2026F 2027F 2028F 2029F 2030F\nEBIT 70 65 60 55 51\nThuế suất — — — — —\nD&A 40 37 34 31 29\nCAPEX 8 15 20 25 29\nΔNWC -63 -45 -42 -39 -36\nFCFF 148 117 101 87 74\nHệ số chiết khấu 87.9% 77.2% 67.8% 59.6% 52.4%\nPV(FCFF) 130 90 68 52 39\nThành phần Giá trị\nPV dòng tiền dự phóng (Σ PV FCFF) 379\nGiá trị cuối kỳ (Gordon: FCFFₙ×(1+g)/(WACC−g)) 710\nGiá trị hiện tại của giá trị cuối kỳ 372\nTỷ trọng giá trị cuối kỳ / giá trị doanh nghiệp —\n= Giá trị doanh nghiệp (EV) 751\n− Nợ ròng -259\n= Giá trị vốn chủ sở hữu 1,010\n÷ Số cổ phiếu (triệu) 26\n= Giá/cổ phiếu (FCFF, VND) —\nGiá/cổ phiếu theo FCFF hiển thị — do thiếu một đầu vào bắt buộc như số cổ phiếu, nợ ròng hoặc dòng tiền nền. Xem\nphần đối chiếu và cảnh báo.\n7. Định giá FCFE\nCông thức: FCFE = lợi nhuận sau thuế + khấu hao − CAPEX − ΔNWC + vay ròng, chiết khấu theo chi phí vốn chủ sở\nhữu.\nThành phần Giá trị\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nGiá trị vốn chủ sở hữu 751\n÷ Số cổ phiếu (triệu) 26\n= Giá/cổ phiếu (FCFE, VND) —\nGiá FCFE chưa tính được do thiếu dữ liệu vay ròng hoặc số cổ phiếu. Hiển thị —.\n8. Kết hợp phương pháp FCFF và FCFE\nCông thức: Giá mục tiêu = 0.60 × Giá_FCFF + 0.40 × Giá_FCFE\nSố học: 0.60 × 39,449 + 0.40 × 29,334 = 35,403\nThành phần Giá trị\nGiá theo FCFF (VND) 39,449\nGiá theo FCFE (VND) 29,334\nTrọng số FCFF / FCFE 0.60 / 0.40\n= Giá mục tiêu kết hợp (VND) 35,403\nChênh lệch FCFF/FCFE 34.5%\nChỉ ở dạng nháp Có\nChênh lệch FCFF/FCFE > 25% — kết quả kết hợp cần rà soát thêm trước khi sử dụng; cần kiểm tra vay ròng, nợ\nròng, CAPEX và vốn lưu động.\n9. P/E dự phóng để đối chiếu\nThành phần Giá trị\nEPS dự phóng (VND) —\nP/E trung vị nhóm so sánh —\nMức cộng/trừ định giá —\nP/E mục tiêu 18.7x\nGiá mục tiêu (VND) —\n10. Phân tích độ nhạy\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n11.8% 42,899 43,919 45,056 46,329 47,766\n12.8% 40,278 41,085 41,974 42,959 44,056\n13.8% 38,090 38,740 39,449 40,228 41,087\n14.8% 36,233 36,764 37,341 37,968 38,654\n15.8% 34,636 35,076 35,551 36,064 36,621\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n11.8% 32,783 33,803 34,940 36,213 37,650\n12.8% 30,162 30,969 31,858 32,843 33,940\n13.8% 27,974 28,624 29,334 30,112 30,971\n14.8% 26,117 26,648 27,225 27,852 28,538\n15.8% 24,520 24,960 25,435 25,948 26,505\nĐộ nhạy giá mục tiêu kết hợp — 0.6 × Giá_FCFF + 0.4 × Giá_FCFE\nĐộ nhạy giá mục tiêu kết hợp 25,334 27,334 29,334 31,334 33,334\n29,449 27,803 28,603 29,403 30,203 31,003\n34,449 30,803 31,603 32,403 33,203 34,003\n39,449 33,803 34,603 35,403 36,203 37,003\nĐộ nhạy giá mục tiêu kết hợp 25,334 27,334 29,334 31,334 33,334\n44,449 36,803 37,603 38,403 39,203 40,003\n49,449 39,803 40,603 41,403 42,203 43,003\nĐộ nhạy P/E dự phóng — EPS năm dự phóng thứ nhất × P/E mục tiêu\nĐộ nhạy P/E dự phóng 10 12 14 16 18\n1,771 17,710 21,252 24,794 28,336 31,878\n1,917 19,170 23,004 26,838 30,672 34,506\n2,084 20,840 25,008 29,176 33,344 37,512\n2,250 22,500 27,000 31,500 36,000 40,500\n2,396 23,960 28,752 33,544 38,336 43,128\nĐộ nhạy EV/EBITDA — Giá = (EBITDA × Hệ số − Nợ ròng − Lợi ích cổ đông không kiểm soát + Tài sản ngoài\nhoạt động) / Số cổ phiếu × 1000\nĐộ nhạy EV/EBITDA 7 8 9 10 11\n94 — — — — —\n101 — — — — —\n110 — — — — —\n119 — — — — —\n127 — — — — —\nĐộ nhạy DCF giản lược\nĐộ nhạy DCF giản lược 2.0% 2.5% 3.0% 3.5% 4.0%\n8.0% — — — — —\n9.0% — — — — —\n10.0% — — — — —\n11.0% — — — — —\n12.0% — — — — —\n11. Đối chiếu & cảnh báo\nĐối chiếu nhất quán số:\nGiá suy ra theo FCFF / giá FCFF: thiếu dữ liệu để đối chiếu (—).\nCảnh báo từ mô hình tính toán:\nFCFF/FCFE valuation gap = 34.5% > 25% — kết hợp phương pháp thiếu dữ liệu: audit vay ròng, net debt,\nCAPEX, NWC before publishing target price.\nNo SG&A or EBIT history — using default SG&A of 20% of revenue\nTaxPolicy: 2 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\nLịch nợ vay đang giả định không phát sinh nợ mới và dư nợ giảm về gần 0 ở năm cơ sở; FCFE có thể tính\nđược nhưng vẫn cần kiểm tra lại chính sách vay, trả nợ và kế hoạch vốn.\nThiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\nThuế suất trong giả định WACC khác thuế suất hiệu dụng trong chính sách thuế; mô hình đang dùng thuế suất\ntheo chính sách thuế để tính EBIT sau thuế.\nMã băm tái lập: —\nNguồn gốc dữ liệu: mọi số định giá được dẫn xuất từ dữ liệu tài chính chuẩn hóa đã khóa và tệp kết quả định giá\nbằng Python; không có số liệu nào do mô hình ngôn ngữ sinh ra."
+      "text": "Mã cổ phiếu: MKP\nPhụ lục giải trình định giá - MKP\nDoanh nghiệp được phân tích: Cong ty Co phan Hoa - Duoc pham Mekophar.\nTài liệu này là phụ lục chi tiết của báo cáo định giá. Mục tiêu là giải thích vì sao báo cáo chính đưa ra giá mục tiêu,\nmức tăng/giảm kỳ vọng, khuyến nghị và các nhận định trọng tâm bằng dữ liệu đầu vào, công thức, bước tính trung\ngian và cảnh báo cần đọc kèm.\nTrạng thái và giới hạn\nTrạng thái báo cáo: Có thể đọc, kèm công bố phần dữ liệu còn thiếu\nMã lần chạy: run_mkp_20260614T210754_8e0e1ff588\nThiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\nKết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nMinh chứng kiểm định\nThành phần Giá trị\nSố vết công thức 6 (wacc, fcff, fcfe, terminal_value, blend_dcf, sensitivity_matrix)\nNguồn định giá tương đối đối chiếu vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nDữ liệu và kiểm định cần bổ sung trước khi phát hành:\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo trọng yếu; cần đọc cùng bảng tính chi tiết và phần đối chiếu trước khi sử dụng khuyến\nnghị.\nCảnh báo mô hình và dữ liệu:\n- SG&A historical median did not reconcile to operating EBIT; using pure operating EBIT margin (0.9%) back-solved\nfrom operating_profit minus financial income/expense.\n- TaxPolicy: 2 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\n- Lịch nợ vay đang giả định không phát sinh nợ mới và dư nợ giảm về gần 0 ở năm cơ sở; FCFE có thể tính được\nnhưng vẫn cần kiểm tra lại chính sách vay, trả nợ và kế hoạch vốn.\n- Thiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\n- Thuế suất trong giả định WACC khác thuế suất hiệu dụng trong chính sách thuế; mô hình đang dùng thuế suất theo\nchính sách thuế để tính EBIT sau thuế.\n- FCFE có độ tin cậy thấp; lịch vay ròng và giả định dòng tiền cho cổ đông cần được kiểm định thêm.\n- FCFF có độ tin cậy thấp; WACC, tăng trưởng dài hạn và dòng tiền nền cần được kiểm định thêm.\n- Thiếu phê duyệt cuối cho khuyến nghị đầu tư.\n- relative_valuation_fallback_pe\n- Cảnh báo đối chiếu định giá: các kiểm tra độc lập cho kết quả lệch đáng kể, cần rà soát cầu nối thị trường và giả\nđịnh mô hình.\nVì sao báo cáo chính kết luận như vậy\nThành phần Giá trị\nGiá thị trường dùng trong báo cáo 26,700\nGiá mục tiêu tính được 27,067\nTăng/giảm so với giá thị trường 1.4%\nKhuyến nghị trong báo cáo chính Giữ\nGiá trị theo FCFF 27,067\nGiá trị theo FCFE 27,067\nTrọng số FCFF / FCFE 60.0% / 40.0%\nĐộ lệch FCFF/FCFE 0.0%\nThành phần Giá trị\nWACC 13.8%\nTăng trưởng dài hạn 3.0%\nDoanh thu năm đầu dự phóng 867\nDoanh thu năm cuối dự phóng 631\nLNST năm đầu dự phóng 6\nLNST năm cuối dự phóng 4\nKết luận trong báo cáo chính được nối trực tiếp từ giá thị trường, giá trị nội tại theo dòng tiền, mức tăng/giảm kỳ vọng\nvà các cảnh báo dữ liệu. Nếu FCFF và FCFE cho kết quả lệch lớn, người đọc phải ưu tiên phần kết hợp phương\npháp, phân tích độ nhạy và đối chiếu cảnh báo thay vì chỉ đọc một giá mục tiêu duy nhất.\nCảnh báo cần đọc kèm kết luận:\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nChi tiết tính toán định giá\nPhần này trình bày đầy đủ công thức, dữ liệu đầu vào, bước tính trung gian, bảng dự phóng, cầu nối định giá,\nphân tích độ nhạy và cảnh báo để người đọc kiểm tra lại kết quả trong báo cáo chính.\n1. Thông tin chung\nThành phần Giá trị\nMã cổ phiếu MKP\nCông ty Cong ty Co phan Hoa - Duoc pham Mekophar\nSàn HOSE\nNgành Dược phẩm\nMã lần chạy run_mkp_20260614T210754_8e0e1ff588\nNgày định giá —\nMã ảnh chụp dữ liệu v2snap_200048aa62ab2e04df64\nNăm gốc —\nMã băm tái lập —\n2. Tóm tắt kết quả định giá\nThành phần Giá trị\nGiá hiện tại (VND) 26,700\nGiá mục tiêu kết hợp (VND) 27,067\nTiềm năng tăng/giảm 1.4%\nKhuyến nghị Giữ\nLuật xếp hạng (tổng tỷ suất sinh lời = mức tăng/giảm giá + lợi suất cổ tức): > 20% → Mua; < −10% → Bán; còn lại\n→ Giữ.\n3. Bảng giả định\nThành phần Giá trị\nWACC 13.8%\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nThành phần Giá trị\nSố năm dự phóng 5\nThuế suất —\nP/E mục tiêu 18.7x\nMức cộng/trừ định giá —\nCác giả định hiện là giá trị mặc định và phải được rà soát, phê duyệt trước khi sử dụng trong báo cáo chính thức.\n4. Dự phóng theo yếu tố dẫn dắt\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 867 801 740 683 631\nGiá vốn hàng bán (COGS) -623 -576 -532 -491 -453\nLợi nhuận gộp 244 225 208 192 177\nChi phí SG&A -236 -218 -202 -186 -172\nEBIT 8 7 6 6 6\nChi phí lãi vay -0 -0 -0 -0 -0\nLợi nhuận trước thuế 8 7 6 6 6\nChi phí thuế -2 -2 -2 -1 -1\nLNST cổ đông mẹ 6 5 5 4 4\nKhấu hao (D&A) 40 37 34 31 29\nCAPEX -8 -15 -20 -25 -29\nEPS (VND) 223 206 190 176 162\nVay ròng (phát hành nợ − trả nợ) 0 0 0 0 0\nDư nợ vay cuối kỳ 0 0 0 0 0\nCổ tức tiền mặt 2 2 2 2 2\nTỷ lệ chi trả cổ tức 39.7% 39.7% 39.7% 39.7% 39.7%\nLogic yếu tố dẫn dắt: doanh thu theo tăng trưởng giả định; biên lợi nhuận dẫn xuất EBIT/LNST; lịch nợ vay chuyển\ntiếp với vay ròng = phát hành nợ − trả nợ; cổ tức theo tỷ lệ chi trả.\n5. Chỉ số tài chính\nChỉ số Công thức 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận gộp lợi nhuận gộp / doanh thu 28.1% 28.1% 28.1% 28.1% 28.1%\nBiên EBIT EBIT / doanh thu 0.9% 0.9% 0.9% 0.9% 0.9%\nBiên lợi nhuận ròng lợi nhuận sau thuế / doanh thu 0.7% 0.7% 0.7% 0.7% 0.7%\nROE lợi nhuận sau thuế / vốn chủ sở hữu 0.4% 0.4% 0.4% 0.4% 0.3%\n6. Định giá FCFF\nCông thức: FCFF = EBIT×(1−t) + D&A − CAPEX − ΔNWC\nWACC = 13.8%; tăng trưởng dài hạn g = 3.0%\nKhoản mục 2026F 2027F 2028F 2029F 2030F\nEBIT 8 7 6 6 6\nThuế suất — — — — —\nD&A 40 37 34 31 29\nKhoản mục 2026F 2027F 2028F 2029F 2030F\nCAPEX 8 15 20 25 29\nΔNWC -63 -45 -42 -39 -36\nFCFF 100 73 60 49 40\nHệ số chiết khấu 87.9% 77.2% 67.8% 59.6% 52.4%\nPV(FCFF) 88 56 41 29 21\nThành phần Giá trị\nPV dòng tiền dự phóng (Σ PV FCFF) 235\nGiá trị cuối kỳ (Gordon: FCFFₙ×(1+g)/(WACC−g)) 379\nGiá trị hiện tại của giá trị cuối kỳ 199\nTỷ trọng giá trị cuối kỳ / giá trị doanh nghiệp —\n= Giá trị doanh nghiệp (EV) 434\n− Nợ ròng -259\n= Giá trị vốn chủ sở hữu 693\n÷ Số cổ phiếu (triệu) 26\n= Giá/cổ phiếu (FCFF, VND) 27,067\n7. Định giá FCFE\nCông thức: FCFE = lợi nhuận sau thuế + khấu hao − CAPEX − ΔNWC + vay ròng, chiết khấu theo chi phí vốn chủ sở\nhữu.\nThành phần Giá trị\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nGiá trị vốn chủ sở hữu 693\n÷ Số cổ phiếu (triệu) 26\n= Giá/cổ phiếu (FCFE, VND) 27,067\n8. Kết hợp phương pháp FCFF và FCFE\nCông thức: Giá mục tiêu = 0.60 × Giá_FCFF + 0.40 × Giá_FCFE\nSố học: 0.60 × 27,067 + 0.40 × 27,067 = 27,067\nThành phần Giá trị\nGiá theo FCFF (VND) 27,067\nGiá theo FCFE (VND) 27,067\nTrọng số FCFF / FCFE 0.60 / 0.40\n= Giá mục tiêu kết hợp (VND) 27,067\nChênh lệch FCFF/FCFE 0.0%\nChỉ ở dạng nháp Không\n9. P/E dự phóng để đối chiếu\nThành phần Giá trị\nEPS dự phóng (VND) —\nP/E trung vị nhóm so sánh —\nMức cộng/trừ định giá —\nThành phần Giá trị\nP/E mục tiêu 18.7x\nGiá mục tiêu (VND) —\n10. Phân tích độ nhạy\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n11.8% 28,949 29,494 30,101 30,782 31,549\n12.8% 27,529 27,960 28,435 28,961 29,547\n13.8% 26,340 26,688 27,067 27,483 27,942\n14.8% 25,330 25,614 25,922 26,257 26,623\n15.8% 24,458 24,694 24,947 25,222 25,519\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n11.8% 28,949 29,494 30,101 30,782 31,549\n12.8% 27,529 27,960 28,435 28,961 29,547\n13.8% 26,340 26,688 27,067 27,483 27,942\n14.8% 25,330 25,614 25,922 26,257 26,623\n15.8% 24,458 24,694 24,947 25,222 25,519\nĐộ nhạy giá mục tiêu kết hợp — 0.6 × Giá_FCFF + 0.4 × Giá_FCFE\nĐộ nhạy giá mục tiêu kết hợp 23,067 25,067 27,067 29,067 31,067\n17,067 19,467 20,267 21,067 21,867 22,667\n22,067 22,467 23,267 24,067 24,867 25,667\n27,067 25,467 26,267 27,067 27,867 28,667\n32,067 28,467 29,267 30,067 30,867 31,667\n37,067 31,467 32,267 33,067 33,867 34,667\nĐộ nhạy P/E dự phóng — EPS năm dự phóng thứ nhất × P/E mục tiêu\nĐộ nhạy P/E dự phóng 10 12 14 16 18\n190 1,900 2,280 2,660 3,040 3,420\n205 2,050 2,460 2,870 3,280 3,690\n223 2,230 2,676 3,122 3,568 4,014\n241 2,410 2,892 3,374 3,856 4,338\n257 2,570 3,084 3,598 4,112 4,626\nĐộ nhạy EV/EBITDA — Giá = (EBITDA × Hệ số − Nợ ròng − Lợi ích cổ đông không kiểm soát + Tài sản ngoài\nhoạt động) / Số cổ phiếu × 1000\nĐộ nhạy EV/EBITDA 7 8 9 10 11\n40 — — — — —\n44 — — — — —\n47 — — — — —\n51 — — — — —\n54 — — — — —\nĐộ nhạy DCF giản lược\nĐộ nhạy DCF giản lược 2.0% 2.5% 3.0% 3.5% 4.0%\n8.0% — — — — —\n9.0% — — — — —\n10.0% — — — — —\n11.0% — — — — —\n12.0% — — — — —\n11. Đối chiếu & cảnh báo\nĐối chiếu nhất quán số:\n✓ Giá suy ra theo FCFF (27,067) khớp giá FCFF trong kết quả kết hợp (27,067).\nCảnh báo từ mô hình tính toán:\nSG&A historical median did not reconcile to operating EBIT; using pure operating EBIT margin (0.9%) back-\nsolved from operating_profit minus financial income/expense.\nTaxPolicy: 2 FY period(s) excluded from tax rate calculation — see tax_policy.excluded_observations\nLịch nợ vay đang giả định không phát sinh nợ mới và dư nợ giảm về gần 0 ở năm cơ sở; FCFE có thể tính\nđược nhưng vẫn cần kiểm tra lại chính sách vay, trả nợ và kế hoạch vốn.\nThiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\nThuế suất trong giả định WACC khác thuế suất hiệu dụng trong chính sách thuế; mô hình đang dùng thuế suất\ntheo chính sách thuế để tính EBIT sau thuế.\nMã băm tái lập: —\nNguồn gốc dữ liệu: mọi số định giá được dẫn xuất từ dữ liệu tài chính chuẩn hóa đã khóa và tệp kết quả định giá\nbằng Python; không có số liệu nào do mô hình ngôn ngữ sinh ra."
     }
   },
   "publication_readiness": {

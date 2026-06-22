@@ -4,7 +4,7 @@
   "plan_id": "05",
   "plan_name": "Agent workflow and LLM judge",
   "ticker": "DTP",
-  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
   "status": "blocked",
   "test_execution": {
     "status": "not_measured",
@@ -86,7 +86,7 @@
     {
       "id": "agent.workflow_quality_score",
       "label": "Agent workflow quality stress score",
-      "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
+      "source": "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "agent.workflow_quality_score",
       "metric_name": "Agent workflow quality stress score",
@@ -283,23 +283,23 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 24672,
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 26253,
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "tool_permission_compliance",
       "label": "Tool permission compliance",
-      "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+      "source": "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
       "detail": "",
       "metric_id": "tool_permission_compliance",
       "metric_name": "Tool permission compliance",
@@ -369,21 +369,21 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json"
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 24672
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "artifact_manifest_compliance",
       "label": "Artifact manifest compliance",
-      "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+      "source": "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
       "detail": "",
       "metric_id": "artifact_manifest_compliance",
       "metric_name": "Artifact manifest compliance",
@@ -519,21 +519,21 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json"
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 24672
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 26253
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.stage_handoff_completeness",
       "label": "Stage handoff completeness",
-      "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
+      "source": "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "agent.stage_handoff_completeness",
       "metric_name": "Stage handoff completeness",
@@ -628,23 +628,23 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 24672,
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 26253,
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.tool_call_success_rate",
       "label": "Tool call success rate",
-      "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+      "source": "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
       "detail": "",
       "metric_id": "agent.tool_call_success_rate",
       "metric_name": "Tool call success rate",
@@ -706,23 +706,23 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 24672,
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 26253,
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.repair_loop_rate",
       "label": "Repair loop rate",
-      "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
+      "source": "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "agent.repair_loop_rate",
       "metric_name": "Repair loop rate",
@@ -771,23 +771,23 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 24672,
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 26253,
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.token_budget_adherence",
       "label": "Token budget adherence",
-      "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
+      "source": "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "agent.token_budget_adherence",
       "metric_name": "Token budget adherence",
@@ -845,18 +845,18 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 24672,
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 26253,
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "schema_validity",
@@ -907,7 +907,7 @@
             "value": true,
             "schema_valid": true,
             "failure_count": 0,
-            "path": "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json"
+            "path": "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json"
           },
           {
             "artifact": "agent_effectiveness_audit",
@@ -915,7 +915,7 @@
             "value": true,
             "schema_valid": true,
             "failure_count": 0,
-            "path": "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
+            "path": "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
           }
         ]
       },
@@ -927,18 +927,18 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 24672,
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 26253,
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "role_adherence",
@@ -1000,7 +1000,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "groundedness",
@@ -1062,12 +1062,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "no_unauthorized_calc",
       "label": "No unauthorized financial calculation",
-      "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
+      "source": "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "no_unauthorized_calc",
       "metric_name": "No unauthorized financial calculation",
@@ -1150,23 +1150,23 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 24672,
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json": 26253,
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "task_completion",
       "label": "Task completion",
-      "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
+      "source": "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "task_completion",
       "metric_name": "Task completion",
@@ -1234,16 +1234,16 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_dtp\\benchmark_dtp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "plan_adherence",
@@ -1305,7 +1305,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "critic_issue_recall",
@@ -1367,7 +1367,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.judge_calibration_agreement",
@@ -1424,7 +1424,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.judge_rationale_evidence_coverage",
@@ -1481,7 +1481,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "advisory_findings": [

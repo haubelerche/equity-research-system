@@ -69,7 +69,8 @@ export type BenchmarkMetricStatus =
   | "warning"
   | "not_evaluable"
   | "blocked"
-  | "measured_only";
+  | "measured_only"
+  | "not_applicable";
 
 export interface BenchmarkMetricResult {
   id?: string;

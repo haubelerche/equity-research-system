@@ -1,29 +1,232 @@
 {
-  "schema_version": "1.0",
-  "description": "Approved live-model target snapshot for golden-drift regression. Separate from the frozen closed-form valuation_cases truth set. Re-baseline only on an intentional, reviewed valuation change.",
-  "generated_at": "2026-06-18T10:55:00+00:00",
+  "generated_at": "2026-06-22T16:31:58.667734+00:00",
   "tolerance_pct": 0.02,
+  "note": "Live FCFF target snapshot per benchmark ticker for golden-drift regression (re-baselinable).",
   "tickers": {
-    "DBD": {
-      "fcff_target_price_vnd": 136561.52
-    },
     "DHG": {
-      "fcff_target_price_vnd": 227001.77
-    },
-    "DMC": {
-      "fcff_target_price_vnd": 113035.48
+      "fcff_target_price_vnd": 227001.77,
+      "tolerance_pct": 0.02,
+      "case_id": "DHG_live_baseline"
     },
     "IMP": {
-      "fcff_target_price_vnd": 53353.83
+      "fcff_target_price_vnd": 53353.83,
+      "tolerance_pct": 0.02,
+      "case_id": "IMP_live_baseline"
     },
-    "JVC": {
-      "fcff_target_price_vnd": 10949.3
-    },
-    "OPC": {
-      "fcff_target_price_vnd": 41481.04
+    "DMC": {
+      "fcff_target_price_vnd": 113035.48,
+      "tolerance_pct": 0.02,
+      "case_id": "DMC_live_baseline"
     },
     "TRA": {
-      "fcff_target_price_vnd": 155070.56
+      "fcff_target_price_vnd": 155070.56,
+      "tolerance_pct": 0.02,
+      "case_id": "TRA_live_baseline"
+    },
+    "DBD": {
+      "fcff_target_price_vnd": 136561.52,
+      "tolerance_pct": 0.02,
+      "case_id": "DBD_live_baseline"
+    },
+    "MKP": {
+      "fcff_target_price_vnd": 49737.72,
+      "tolerance_pct": 0.02,
+      "case_id": "MKP_live_baseline"
+    },
+    "TNH": {
+      "fcff_target_price_vnd": 39894.42,
+      "tolerance_pct": 0.02,
+      "case_id": "TNH_live_baseline"
+    },
+    "JVC": {
+      "fcff_target_price_vnd": 10949.3,
+      "tolerance_pct": 0.02,
+      "case_id": "JVC_live_baseline"
+    },
+    "DVN": {
+      "fcff_target_price_vnd": 66909.35,
+      "tolerance_pct": 0.02,
+      "case_id": "DVN_live_baseline"
+    },
+    "DHT": {
+      "fcff_target_price_vnd": 65280.03,
+      "tolerance_pct": 0.02,
+      "case_id": "DHT_live_baseline"
+    },
+    "LDP": {
+      "fcff_target_price_vnd": 10204.84,
+      "tolerance_pct": 0.02,
+      "case_id": "LDP_live_baseline"
+    },
+    "PPP": {
+      "fcff_target_price_vnd": 50507.32,
+      "tolerance_pct": 0.02,
+      "case_id": "PPP_live_baseline"
+    },
+    "DP3": {
+      "fcff_target_price_vnd": 124370.68,
+      "tolerance_pct": 0.02,
+      "case_id": "DP3_live_baseline"
+    },
+    "DP1": {
+      "fcff_target_price_vnd": 54030.92,
+      "tolerance_pct": 0.02,
+      "case_id": "DP1_live_baseline"
+    },
+    "TW3": {
+      "fcff_target_price_vnd": 83748.7,
+      "tolerance_pct": 0.02,
+      "case_id": "TW3_live_baseline"
+    },
+    "MED": {
+      "fcff_target_price_vnd": 75776.29,
+      "tolerance_pct": 0.02,
+      "case_id": "MED_live_baseline"
+    },
+    "PMC": {
+      "fcff_target_price_vnd": 405513.9,
+      "tolerance_pct": 0.02,
+      "case_id": "PMC_live_baseline"
+    },
+    "AMV": {
+      "fcff_target_price_vnd": 30186.63,
+      "tolerance_pct": 0.02,
+      "case_id": "AMV_live_baseline"
+    },
+    "YTC": {
+      "fcff_target_price_vnd": 215211.64,
+      "tolerance_pct": 0.02,
+      "case_id": "YTC_live_baseline"
+    },
+    "VHE": {
+      "fcff_target_price_vnd": 10591.44,
+      "tolerance_pct": 0.02,
+      "case_id": "VHE_live_baseline"
+    },
+    "VDP": {
+      "fcff_target_price_vnd": 110272.18,
+      "tolerance_pct": 0.02,
+      "case_id": "VDP_live_baseline"
+    },
+    "DCL": {
+      "fcff_target_price_vnd": 64255.97,
+      "tolerance_pct": 0.02,
+      "case_id": "DCL_live_baseline"
+    },
+    "SPM": {
+      "fcff_target_price_vnd": 32585.5,
+      "tolerance_pct": 0.02,
+      "case_id": "SPM_live_baseline"
+    },
+    "VMD": {
+      "fcff_target_price_vnd": 121852.64,
+      "tolerance_pct": 0.02,
+      "case_id": "VMD_live_baseline"
+    },
+    "DNM": {
+      "fcff_target_price_vnd": 25186.32,
+      "tolerance_pct": 0.02,
+      "case_id": "DNM_live_baseline"
+    },
+    "DBT": {
+      "fcff_target_price_vnd": 16429.88,
+      "tolerance_pct": 0.02,
+      "case_id": "DBT_live_baseline"
+    },
+    "DPP": {
+      "fcff_target_price_vnd": 67077.54,
+      "tolerance_pct": 0.02,
+      "case_id": "DPP_live_baseline"
+    },
+    "DTP": {
+      "fcff_target_price_vnd": 292364.22,
+      "tolerance_pct": 0.02,
+      "case_id": "DTP_live_baseline"
+    },
+    "AMP": {
+      "fcff_target_price_vnd": 18182.78,
+      "tolerance_pct": 0.02,
+      "case_id": "AMP_live_baseline"
+    },
+    "BCP": {
+      "fcff_target_price_vnd": 14266.42,
+      "tolerance_pct": 0.02,
+      "case_id": "BCP_live_baseline"
+    },
+    "BIO": {
+      "fcff_target_price_vnd": 43538.17,
+      "tolerance_pct": 0.02,
+      "case_id": "BIO_live_baseline"
+    },
+    "CDP": {
+      "fcff_target_price_vnd": 10792.61,
+      "tolerance_pct": 0.02,
+      "case_id": "CDP_live_baseline"
+    },
+    "CNC": {
+      "fcff_target_price_vnd": 136731.5,
+      "tolerance_pct": 0.02,
+      "case_id": "CNC_live_baseline"
+    },
+    "DAN": {
+      "fcff_target_price_vnd": 259376.08,
+      "tolerance_pct": 0.02,
+      "case_id": "DAN_live_baseline"
+    },
+    "DBM": {
+      "fcff_target_price_vnd": 92842.67,
+      "tolerance_pct": 0.02,
+      "case_id": "DBM_live_baseline"
+    },
+    "DDN": {
+      "fcff_target_price_vnd": 27614.14,
+      "tolerance_pct": 0.02,
+      "case_id": "DDN_live_baseline"
+    },
+    "DHN": {
+      "fcff_target_price_vnd": 58399.35,
+      "tolerance_pct": 0.02,
+      "case_id": "DHN_live_baseline"
+    },
+    "DP2": {
+      "fcff_target_price_vnd": 31742.17,
+      "tolerance_pct": 0.02,
+      "case_id": "DP2_live_baseline"
+    },
+    "DTG": {
+      "fcff_target_price_vnd": 55759.94,
+      "tolerance_pct": 0.02,
+      "case_id": "DTG_live_baseline"
+    },
+    "HDP": {
+      "fcff_target_price_vnd": 104336.9,
+      "tolerance_pct": 0.02,
+      "case_id": "HDP_live_baseline"
+    },
+    "MTP": {
+      "fcff_target_price_vnd": 52300.96,
+      "tolerance_pct": 0.02,
+      "case_id": "MTP_live_baseline"
+    },
+    "NDC": {
+      "fcff_target_price_vnd": 498787.37,
+      "tolerance_pct": 0.02,
+      "case_id": "NDC_live_baseline"
+    },
+    "DHD": {
+      "fcff_target_price_vnd": 162121.27,
+      "tolerance_pct": 0.02,
+      "case_id": "DHD_live_baseline"
+    },
+    "DPH": {
+      "fcff_target_price_vnd": 198927.26,
+      "tolerance_pct": 0.02,
+      "case_id": "DPH_live_baseline"
+    },
+    "OPC": {
+      "fcff_target_price_vnd": 41481.04,
+      "tolerance_pct": 0.02,
+      "case_id": "OPC_live_baseline"
     }
   }
 }

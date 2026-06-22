@@ -48,6 +48,17 @@ describe("evalMetricStatus", () => {
     expect(normalizeMetricStatus("not_evaluable")).toBe("not_evaluable");
   });
 
+  it("treats not_applicable as neutral, never as a fail", () => {
+    expect(normalizeMetricStatus("not_applicable")).toBe("not_applicable");
+    // A not_applicable metric (value null) must NOT be recomputed into a fail.
+    expect(
+      resolveMetricStatus(gte, { value: null, threshold: ">= 95%", status: "not_applicable" }),
+    ).toBe("not_applicable");
+    expect(
+      formatRuntimeMetricResult(gte, { value: null, status: "not_applicable" }),
+    ).toBe("Không áp dụng");
+  });
+
   it("formats pass and fail conditions explicitly", () => {
     expect(formatPassCondition(gte)).toContain("95%");
     expect(formatFailCondition(gte)).toBe("< 95%");

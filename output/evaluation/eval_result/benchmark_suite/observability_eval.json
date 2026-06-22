@@ -2,7 +2,7 @@
   "schema_version": "2.1",
   "benchmark_suite_version": "benchmark_standards_v1",
   "source": "benchmark_suite",
-  "cohort": "default",
+  "cohort": "full_universe",
   "tickers": [
     "DHG",
     "IMP",
@@ -50,7 +50,7 @@
     "DPH",
     "OPC"
   ],
-  "generated_at": "2026-06-21T16:39:41.027822+00:00",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
   "plan_id": "07",
   "name": "Observability, cost, and latency",
   "artifact": "observability_eval.json",
@@ -2253,7 +2253,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "cold_full_report_p95_latency",
@@ -6110,7 +6110,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "cost_per_report",
@@ -6125,7 +6125,7 @@
       "scope": "system_window",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 0.01,
+      "value": 0.015333333333333332,
       "threshold": "<= 2",
       "threshold_operator": "<=",
       "unit": "usd",
@@ -6255,7 +6255,7 @@
           "aggregation_policy": "full cohort denominator; missing or not_applicable score samples count as zero"
         },
         "aggregation": "cohort_mean",
-        "numerator": 0.45,
+        "numerator": 0.69,
         "denominator": 45,
         "per_sample_results": [
           {
@@ -10348,7 +10348,7 @@
                 "agent_id": "report_builder",
                 "status": "not_evaluable",
                 "latency_ms": 500,
-                "output": "Rendered benchmark report from cited artifacts.",
+                "output": "",
                 "event_status": "completed"
               },
               {
@@ -10886,7 +10886,7 @@
                 "agent_id": "report_builder",
                 "status": "not_evaluable",
                 "latency_ms": 500,
-                "output": "Rendered benchmark report from cited artifacts.",
+                "output": "",
                 "event_status": "completed"
               },
               {
@@ -11693,7 +11693,7 @@
                 "agent_id": "report_builder",
                 "status": "not_evaluable",
                 "latency_ms": 500,
-                "output": "Rendered benchmark report from cited artifacts.",
+                "output": "",
                 "event_status": "completed"
               },
               {
@@ -14114,7 +14114,7 @@
                 "agent_id": "report_builder",
                 "status": "not_evaluable",
                 "latency_ms": 500,
-                "output": "Rendered benchmark report from cited artifacts.",
+                "output": "",
                 "event_status": "completed"
               },
               {
@@ -15409,7 +15409,7 @@
             "artifact_id": "DBM/observability_eval.json",
             "source_metric_id": "cost_per_report",
             "status": "pass",
-            "value": 0.01,
+            "value": 0.06999999999999999,
             "threshold": "<= 2",
             "evaluator": {
               "id": "cost_per_report",
@@ -15419,7 +15419,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 1,
+            "sample_size": 2,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -15435,7 +15435,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 17
+              "per_sample_count": 18
             },
             "source_samples": [
               {
@@ -15475,6 +15475,20 @@
                 "content": "Planned benchmark artifact assembly from approved canonical facts.",
                 "event_status": "completed",
                 "value": 0.01
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "thesis_report",
+                "status": "measured_only",
+                "latency_ms": 900,
+                "tokens_input": 7200,
+                "tokens_output": 2100,
+                "cost_estimate": 0.06,
+                "retry_count": 0,
+                "content": "Expanded narrative draft before trimming.",
+                "event_status": "completed",
+                "value": 0.06
               },
               {
                 "run_id": "bench_dhg_20260615_01",
@@ -16535,7 +16549,7 @@
                 "agent_id": "report_builder",
                 "status": "not_evaluable",
                 "latency_ms": 500,
-                "output": "Rendered benchmark report from cited artifacts.",
+                "output": "",
                 "event_status": "completed"
               },
               {
@@ -17023,7 +17037,7 @@
             "artifact_id": "MTP/observability_eval.json",
             "source_metric_id": "cost_per_report",
             "status": "pass",
-            "value": 0.01,
+            "value": 0.06999999999999999,
             "threshold": "<= 2",
             "evaluator": {
               "id": "cost_per_report",
@@ -17033,7 +17047,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 1,
+            "sample_size": 2,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -17049,7 +17063,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 17
+              "per_sample_count": 18
             },
             "source_samples": [
               {
@@ -17089,6 +17103,20 @@
                 "content": "Planned benchmark artifact assembly from approved canonical facts.",
                 "event_status": "completed",
                 "value": 0.01
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "thesis_report",
+                "status": "measured_only",
+                "latency_ms": 900,
+                "tokens_input": 7200,
+                "tokens_output": 2100,
+                "cost_estimate": 0.06,
+                "retry_count": 0,
+                "content": "Expanded narrative draft before trimming.",
+                "event_status": "completed",
+                "value": 0.06
               },
               {
                 "run_id": "bench_dhg_20260615_01",
@@ -17561,7 +17589,7 @@
             "artifact_id": "DHD/observability_eval.json",
             "source_metric_id": "cost_per_report",
             "status": "pass",
-            "value": 0.01,
+            "value": 0.06999999999999999,
             "threshold": "<= 2",
             "evaluator": {
               "id": "cost_per_report",
@@ -17571,7 +17599,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 1,
+            "sample_size": 2,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -17587,7 +17615,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 17
+              "per_sample_count": 18
             },
             "source_samples": [
               {
@@ -17627,6 +17655,20 @@
                 "content": "Planned benchmark artifact assembly from approved canonical facts.",
                 "event_status": "completed",
                 "value": 0.01
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "thesis_report",
+                "status": "measured_only",
+                "latency_ms": 900,
+                "tokens_input": 7200,
+                "tokens_output": 2100,
+                "cost_estimate": 0.06,
+                "retry_count": 0,
+                "content": "Expanded narrative draft before trimming.",
+                "event_status": "completed",
+                "value": 0.06
               },
               {
                 "run_id": "bench_dhg_20260615_01",
@@ -17830,7 +17872,7 @@
             "artifact_id": "DPH/observability_eval.json",
             "source_metric_id": "cost_per_report",
             "status": "pass",
-            "value": 0.01,
+            "value": 0.06999999999999999,
             "threshold": "<= 2",
             "evaluator": {
               "id": "cost_per_report",
@@ -17840,7 +17882,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 1,
+            "sample_size": 2,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -17856,7 +17898,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 17
+              "per_sample_count": 18
             },
             "source_samples": [
               {
@@ -17896,6 +17938,20 @@
                 "content": "Planned benchmark artifact assembly from approved canonical facts.",
                 "event_status": "completed",
                 "value": 0.01
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "thesis_report",
+                "status": "measured_only",
+                "latency_ms": 900,
+                "tokens_input": 7200,
+                "tokens_output": 2100,
+                "cost_estimate": 0.06,
+                "retry_count": 0,
+                "content": "Expanded narrative draft before trimming.",
+                "event_status": "completed",
+                "value": 0.06
               },
               {
                 "run_id": "bench_dhg_20260615_01",
@@ -18426,7 +18482,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "duration_seconds",
@@ -18441,7 +18497,7 @@
       "scope": "system_window",
       "severity": "P3",
       "blocks_publish": false,
-      "value": 6.1,
+      "value": 6.204,
       "threshold": "<= baseline p95 + 30%",
       "threshold_operator": "<=",
       "unit": "seconds",
@@ -18570,7 +18626,7 @@
           "aggregation_policy": "full cohort denominator; missing or not_applicable score samples count as zero"
         },
         "aggregation": "cohort_mean_observed",
-        "numerator": 274.5,
+        "numerator": 279.18,
         "denominator": 45,
         "per_sample_results": [
           {
@@ -18770,7 +18826,7 @@
             "artifact_id": "DBD/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -18780,7 +18836,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -18796,7 +18852,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -18804,6 +18860,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -18866,7 +18928,7 @@
             "artifact_id": "TNH/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -18876,7 +18938,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -18892,7 +18954,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -18900,6 +18962,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -19154,7 +19222,7 @@
             "artifact_id": "DP3/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -19164,7 +19232,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -19180,7 +19248,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -19188,6 +19256,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -19202,7 +19276,7 @@
             "artifact_id": "DP1/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -19212,7 +19286,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -19228,7 +19302,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -19236,6 +19310,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -19346,7 +19426,7 @@
             "artifact_id": "PMC/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -19356,7 +19436,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -19372,7 +19452,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -19380,6 +19460,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -19394,7 +19480,7 @@
             "artifact_id": "AMV/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -19404,7 +19490,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -19420,7 +19506,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -19428,6 +19514,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -20066,7 +20158,7 @@
             "artifact_id": "CDP/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -20076,7 +20168,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -20092,7 +20184,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -20100,6 +20192,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -20210,7 +20308,7 @@
             "artifact_id": "DBM/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 7.0,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -20220,7 +20318,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -20236,7 +20334,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -20244,6 +20342,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "thesis_report",
+                "duration_seconds": 0.9,
+                "status": "measured_only",
+                "value": 0.9
               },
               {
                 "stage": "unknown",
@@ -20354,7 +20458,7 @@
             "artifact_id": "DP2/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -20364,7 +20468,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -20380,7 +20484,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -20388,6 +20492,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -20402,7 +20512,7 @@
             "artifact_id": "DTG/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -20412,7 +20522,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -20428,7 +20538,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -20436,6 +20546,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -20498,7 +20614,7 @@
             "artifact_id": "MTP/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 7.0,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -20508,7 +20624,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -20524,7 +20640,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -20532,6 +20648,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "thesis_report",
+                "duration_seconds": 0.9,
+                "status": "measured_only",
+                "value": 0.9
               },
               {
                 "stage": "unknown",
@@ -20594,7 +20716,7 @@
             "artifact_id": "DHD/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 7.0,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -20604,7 +20726,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -20620,7 +20742,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -20628,6 +20750,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "thesis_report",
+                "duration_seconds": 0.9,
+                "status": "measured_only",
+                "value": 0.9
               },
               {
                 "stage": "unknown",
@@ -20642,7 +20770,7 @@
             "artifact_id": "DPH/observability_eval.json",
             "source_metric_id": "duration_seconds",
             "status": "pass",
-            "value": 6.1,
+            "value": 7.0,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "duration_seconds",
@@ -20652,7 +20780,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -20668,7 +20796,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -20676,6 +20804,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "thesis_report",
+                "duration_seconds": 0.9,
+                "status": "measured_only",
+                "value": 0.9
               },
               {
                 "stage": "unknown",
@@ -20796,7 +20930,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "final_ocr_error_count",
@@ -22581,7 +22715,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "flash_memo_cold_retrieval_p95_latency",
@@ -24728,7 +24862,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "flash_memo_warm_p95_latency",
@@ -26875,7 +27009,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "full_run_duration",
@@ -26890,7 +27024,7 @@
       "scope": "system_window",
       "severity": "P3",
       "blocks_publish": false,
-      "value": 6.1,
+      "value": 6.204,
       "threshold": "<= baseline p95 + 30%",
       "threshold_operator": "<=",
       "unit": "seconds",
@@ -27019,7 +27153,7 @@
           "aggregation_policy": "full cohort denominator; missing or not_applicable score samples count as zero"
         },
         "aggregation": "cohort_mean_observed",
-        "numerator": 274.5,
+        "numerator": 279.18,
         "denominator": 45,
         "per_sample_results": [
           {
@@ -27219,7 +27353,7 @@
             "artifact_id": "DBD/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -27229,7 +27363,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -27245,7 +27379,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -27253,6 +27387,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -27315,7 +27455,7 @@
             "artifact_id": "TNH/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -27325,7 +27465,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -27341,7 +27481,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -27349,6 +27489,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -27603,7 +27749,7 @@
             "artifact_id": "DP3/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -27613,7 +27759,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -27629,7 +27775,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -27637,6 +27783,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -27651,7 +27803,7 @@
             "artifact_id": "DP1/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -27661,7 +27813,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -27677,7 +27829,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -27685,6 +27837,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -27795,7 +27953,7 @@
             "artifact_id": "PMC/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -27805,7 +27963,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -27821,7 +27979,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -27829,6 +27987,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -27843,7 +28007,7 @@
             "artifact_id": "AMV/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -27853,7 +28017,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -27869,7 +28033,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -27877,6 +28041,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -28515,7 +28685,7 @@
             "artifact_id": "CDP/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -28525,7 +28695,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -28541,7 +28711,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -28549,6 +28719,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -28659,7 +28835,7 @@
             "artifact_id": "DBM/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 7.0,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -28669,7 +28845,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -28685,7 +28861,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -28693,6 +28869,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "thesis_report",
+                "duration_seconds": 0.9,
+                "status": "measured_only",
+                "value": 0.9
               },
               {
                 "stage": "unknown",
@@ -28803,7 +28985,7 @@
             "artifact_id": "DP2/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -28813,7 +28995,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -28829,7 +29011,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -28837,6 +29019,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -28851,7 +29039,7 @@
             "artifact_id": "DTG/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 6.22,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -28861,7 +29049,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -28877,7 +29065,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -28885,6 +29073,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "report_builder",
+                "duration_seconds": 0.12,
+                "status": "measured_only",
+                "value": 0.12
               },
               {
                 "stage": "unknown",
@@ -28947,7 +29141,7 @@
             "artifact_id": "MTP/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 7.0,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -28957,7 +29151,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -28973,7 +29167,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -28981,6 +29175,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "thesis_report",
+                "duration_seconds": 0.9,
+                "status": "measured_only",
+                "value": 0.9
               },
               {
                 "stage": "unknown",
@@ -29043,7 +29243,7 @@
             "artifact_id": "DHD/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 7.0,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -29053,7 +29253,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -29069,7 +29269,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -29077,6 +29277,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "thesis_report",
+                "duration_seconds": 0.9,
+                "status": "measured_only",
+                "value": 0.9
               },
               {
                 "stage": "unknown",
@@ -29091,7 +29297,7 @@
             "artifact_id": "DPH/observability_eval.json",
             "source_metric_id": "full_run_duration",
             "status": "pass",
-            "value": 6.1,
+            "value": 7.0,
             "threshold": "<= baseline p95 + 30%",
             "evaluator": {
               "id": "full_run_duration",
@@ -29101,7 +29307,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 2,
+            "sample_size": 3,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -29117,7 +29323,7 @@
               "aggregation": "sum",
               "numerator": null,
               "denominator": null,
-              "per_sample_count": 2
+              "per_sample_count": 3
             },
             "source_samples": [
               {
@@ -29125,6 +29331,12 @@
                 "duration_seconds": 0.2,
                 "status": "measured_only",
                 "value": 0.2
+              },
+              {
+                "stage": "thesis_report",
+                "duration_seconds": 0.9,
+                "status": "measured_only",
+                "value": 0.9
               },
               {
                 "stage": "unknown",
@@ -29245,7 +29457,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "latency_regression_ratio",
@@ -39850,7 +40062,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "llm_retry_rate",
@@ -40096,7 +40308,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\archive\\benchmark_imp\\benchmark_imp_evidence_packet.json",
+            "source": "storage\\runs\\benchmark_imp\\benchmark_imp_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -40404,7 +40616,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_mkp\\benchmark_mkp_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -40558,7 +40770,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_jvc\\benchmark_jvc_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_jvc\\benchmark_jvc_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -40635,7 +40847,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\archive\\benchmark_dvn\\benchmark_dvn_evidence_packet.json",
+            "source": "storage\\runs\\benchmark_dvn\\benchmark_dvn_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -40712,7 +40924,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_dht\\benchmark_dht_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_dht\\benchmark_dht_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -40789,7 +41001,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_ldp\\benchmark_ldp_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -40866,7 +41078,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_ppp\\benchmark_ppp_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -40943,7 +41155,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\archive\\benchmark_dp3\\benchmark_dp3_evidence_packet.json",
+            "source": "storage\\runs\\benchmark_dp3\\benchmark_dp3_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -41020,7 +41232,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\archive\\benchmark_dp1\\benchmark_dp1_evidence_packet.json",
+            "source": "storage\\runs\\benchmark_dp1\\benchmark_dp1_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -41097,7 +41309,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\archive\\benchmark_tw3\\benchmark_tw3_evidence_packet.json",
+            "source": "storage\\runs\\benchmark_tw3\\benchmark_tw3_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -41209,7 +41421,7 @@
                 "agent_id": "report_builder",
                 "status": "pass",
                 "latency_ms": 500,
-                "output": "Rendered benchmark report from cited artifacts.",
+                "output": "",
                 "event_status": "completed",
                 "value": 0
               },
@@ -41251,7 +41463,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_pmc\\benchmark_pmc_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_pmc\\benchmark_pmc_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -41363,7 +41575,7 @@
                 "agent_id": "report_builder",
                 "status": "pass",
                 "latency_ms": 500,
-                "output": "Rendered benchmark report from cited artifacts.",
+                "output": "",
                 "event_status": "completed",
                 "value": 0
               },
@@ -41594,7 +41806,7 @@
                 "agent_id": "report_builder",
                 "status": "pass",
                 "latency_ms": 500,
-                "output": "Rendered benchmark report from cited artifacts.",
+                "output": "",
                 "event_status": "completed",
                 "value": 0
               },
@@ -41713,7 +41925,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_spm\\benchmark_spm_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_spm\\benchmark_spm_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -41790,7 +42002,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_vmd\\benchmark_vmd_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_vmd\\benchmark_vmd_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -42098,7 +42310,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_dtp\\benchmark_dtp_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -42252,7 +42464,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\archive\\benchmark_bcp\\benchmark_bcp_evidence_packet.json",
+            "source": "storage\\runs\\benchmark_bcp\\benchmark_bcp_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -42287,7 +42499,7 @@
                 "agent_id": "report_builder",
                 "status": "pass",
                 "latency_ms": 500,
-                "output": "Rendered benchmark report from cited artifacts.",
+                "output": "",
                 "event_status": "completed",
                 "value": 0
               },
@@ -42329,7 +42541,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_bio\\benchmark_bio_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_bio\\benchmark_bio_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -42630,14 +42842,14 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 4,
+            "sample_size": 5,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_dbm\\benchmark_dbm_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_dbm\\benchmark_dbm_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -42645,8 +42857,8 @@
             "source_calculation": {
               "aggregation": "rate",
               "numerator": 0,
-              "denominator": 4,
-              "per_sample_count": 4
+              "denominator": 5,
+              "per_sample_count": 5
             },
             "source_samples": [
               {
@@ -42689,6 +42901,20 @@
                 "content": "Planned benchmark artifact assembly from approved canonical facts.",
                 "event_status": "completed",
                 "value": 0
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "thesis_report",
+                "status": "pass",
+                "latency_ms": 900,
+                "tokens_input": 7200,
+                "tokens_output": 2100,
+                "cost_estimate": 0.06,
+                "retry_count": 0,
+                "content": "Expanded narrative draft before trimming.",
+                "event_status": "completed",
+                "value": 0
               }
             ]
           },
@@ -42714,7 +42940,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\archive\\benchmark_ddn\\benchmark_ddn_evidence_packet.json",
+            "source": "storage\\runs\\benchmark_ddn\\benchmark_ddn_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -42945,7 +43171,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_dtg\\benchmark_dtg_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_dtg\\benchmark_dtg_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -42980,7 +43206,7 @@
                 "agent_id": "report_builder",
                 "status": "pass",
                 "latency_ms": 500,
-                "output": "Rendered benchmark report from cited artifacts.",
+                "output": "",
                 "event_status": "completed",
                 "value": 0
               },
@@ -43022,7 +43248,7 @@
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\archive\\benchmark_hdp\\benchmark_hdp_evidence_packet.json",
+            "source": "storage\\runs\\benchmark_hdp\\benchmark_hdp_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -43092,14 +43318,14 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 4,
+            "sample_size": 5,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\archive\\benchmark_mtp\\benchmark_mtp_evidence_packet.json",
+            "source": "storage\\runs\\benchmark_mtp\\benchmark_mtp_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -43107,8 +43333,8 @@
             "source_calculation": {
               "aggregation": "rate",
               "numerator": 0,
-              "denominator": 4,
-              "per_sample_count": 4
+              "denominator": 5,
+              "per_sample_count": 5
             },
             "source_samples": [
               {
@@ -43149,6 +43375,20 @@
                 "cost_estimate": 0.01,
                 "retry_count": 0,
                 "content": "Planned benchmark artifact assembly from approved canonical facts.",
+                "event_status": "completed",
+                "value": 0
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "thesis_report",
+                "status": "pass",
+                "latency_ms": 900,
+                "tokens_input": 7200,
+                "tokens_output": 2100,
+                "cost_estimate": 0.06,
+                "retry_count": 0,
+                "content": "Expanded narrative draft before trimming.",
                 "event_status": "completed",
                 "value": 0
               }
@@ -43246,7 +43486,7 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 4,
+            "sample_size": 5,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
@@ -43261,8 +43501,8 @@
             "source_calculation": {
               "aggregation": "rate",
               "numerator": 0,
-              "denominator": 4,
-              "per_sample_count": 4
+              "denominator": 5,
+              "per_sample_count": 5
             },
             "source_samples": [
               {
@@ -43303,6 +43543,20 @@
                 "cost_estimate": 0.01,
                 "retry_count": 0,
                 "content": "Planned benchmark artifact assembly from approved canonical facts.",
+                "event_status": "completed",
+                "value": 0
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "thesis_report",
+                "status": "pass",
+                "latency_ms": 900,
+                "tokens_input": 7200,
+                "tokens_output": 2100,
+                "cost_estimate": 0.06,
+                "retry_count": 0,
+                "content": "Expanded narrative draft before trimming.",
                 "event_status": "completed",
                 "value": 0
               }
@@ -43323,14 +43577,14 @@
               "execution_status": "executed"
             },
             "detail": "",
-            "sample_size": 4,
+            "sample_size": 5,
             "failed_examples": [],
             "evidence": {
               "artifact_ids": [],
               "dataset_version": null,
               "trace_url": null
             },
-            "source": "storage\\runs\\benchmark_dph\\benchmark_dph_evidence_packet.json",
+            "source": "storage\\archive\\benchmark_dph\\benchmark_dph_evidence_packet.json",
             "structured_report_quality_available": false,
             "evidence_support_available": false,
             "claim_ledger_path": null,
@@ -43338,8 +43592,8 @@
             "source_calculation": {
               "aggregation": "rate",
               "numerator": 0,
-              "denominator": 4,
-              "per_sample_count": 4
+              "denominator": 5,
+              "per_sample_count": 5
             },
             "source_samples": [
               {
@@ -43380,6 +43634,20 @@
                 "cost_estimate": 0.01,
                 "retry_count": 0,
                 "content": "Planned benchmark artifact assembly from approved canonical facts.",
+                "event_status": "completed",
+                "value": 0
+              },
+              {
+                "origin": "packet.trace_summary",
+                "kind": "agent_message",
+                "agent_id": "thesis_report",
+                "status": "pass",
+                "latency_ms": 900,
+                "tokens_input": 7200,
+                "tokens_output": 2100,
+                "cost_estimate": 0.06,
+                "retry_count": 0,
+                "content": "Expanded narrative draft before trimming.",
                 "event_status": "completed",
                 "value": 0
               }
@@ -43525,7 +43793,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "ocr_failure_rate",
@@ -45310,7 +45578,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "ops.telemetry_quality_score",
@@ -51691,7 +51959,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "pdf_render_failures",
@@ -53881,7 +54149,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "render_only_p95_latency",
@@ -56028,7 +56296,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "retrieval_fallback_rate",
@@ -58263,7 +58531,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "warm_full_report_p95_latency",
@@ -64820,7 +65088,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-21T16:39:41.027822+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "blocking_issues": []

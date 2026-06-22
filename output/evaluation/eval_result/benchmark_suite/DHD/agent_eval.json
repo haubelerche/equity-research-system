@@ -4,8 +4,8 @@
   "plan_id": "05",
   "plan_name": "Agent workflow and LLM judge",
   "ticker": "DHD",
-  "generated_at": "2026-06-20T19:32:03.100279+00:00",
-  "status": "blocked",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
+  "status": "fail",
   "test_execution": {
     "status": "not_measured",
     "targets": [
@@ -96,7 +96,7 @@
       "scope": "benchmark_suite",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 0.92,
+      "value": 0.8700000000000001,
       "threshold": ">= 75%",
       "threshold_operator": ">=",
       "unit": "percent",
@@ -110,6 +110,16 @@
       "metric_registry_version": "20260615_v3",
       "owner": "platform",
       "failed_examples": [
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "token_budget_observability",
+          "component_score": 0.5,
+          "value": 0.5,
+          "status": "warning",
+          "passed": false,
+          "weight": 0.1,
+          "normalized_weight": 0.1
+        },
         {
           "sample_origin": "data_reliability_score_component",
           "component": "judge_readiness_score",
@@ -135,7 +145,7 @@
           "tool_calls": 2,
           "schema_units": 2,
           "agent_records": 3,
-          "token_samples": 1,
+          "token_samples": 2,
           "judge_samples": 0
         },
         "parameters": {
@@ -180,7 +190,7 @@
           ]
         },
         "aggregation": "weighted_score",
-        "numerator": 0.92,
+        "numerator": 0.8700000000000001,
         "denominator": 1.0,
         "per_sample_results": [
           {
@@ -246,10 +256,10 @@
           {
             "sample_origin": "data_reliability_score_component",
             "component": "token_budget_observability",
-            "component_score": 1.0,
-            "value": 1.0,
-            "status": "pass",
-            "passed": true,
+            "component_score": 0.5,
+            "value": 0.5,
+            "status": "warning",
+            "passed": false,
             "weight": 0.1,
             "normalized_weight": 0.1
           },
@@ -289,12 +299,12 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 24673,
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 695
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 26570,
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "tool_permission_compliance",
@@ -374,11 +384,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 24673
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 26570
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "artifact_manifest_compliance",
@@ -524,11 +534,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 24673
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 26570
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.stage_handoff_completeness",
@@ -634,12 +644,12 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 24673,
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 695
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 26570,
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.tool_call_success_rate",
@@ -712,12 +722,12 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 24673,
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 695
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 26570,
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.repair_loop_rate",
@@ -777,12 +787,12 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 24673,
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 695
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 26570,
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.token_budget_adherence",
@@ -797,20 +807,27 @@
       "scope": "report_run",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 1.0,
+      "value": 0.5,
       "threshold": ">= 90%",
       "threshold_operator": ">=",
       "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
-      "sample_size": 1,
+      "status": "fail",
+      "legacy_status": "fail",
+      "sample_size": 2,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "agent_id": "thesis_report",
+          "status": "fail",
+          "tokens": 9300,
+          "token_budget": 8000
+        }
+      ],
       "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
       "evaluator": {
         "id": "agent.token_budget_adherence",
@@ -827,12 +844,18 @@
         },
         "aggregation": "coverage",
         "numerator": 1,
-        "denominator": 1,
+        "denominator": 2,
         "per_sample_results": [
           {
             "agent_id": "planner",
             "status": "pass",
             "tokens": 160,
+            "token_budget": 8000
+          },
+          {
+            "agent_id": "thesis_report",
+            "status": "fail",
+            "tokens": 9300,
             "token_budget": 8000
           }
         ]
@@ -851,12 +874,12 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 24673,
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 695
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 26570,
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "schema_validity",
@@ -933,12 +956,12 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 24673,
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 695
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 26570,
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "role_adherence",
@@ -1000,7 +1023,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "groundedness",
@@ -1062,7 +1085,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "no_unauthorized_calc",
@@ -1083,7 +1106,7 @@
       "unit": "percent",
       "status": "pass",
       "legacy_status": "pass",
-      "sample_size": 4,
+      "sample_size": 5,
       "artifact_id": null,
       "artifact_version": null,
       "dataset_version": null,
@@ -1104,8 +1127,8 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "coverage",
-        "numerator": 4,
-        "denominator": 4,
+        "numerator": 5,
+        "denominator": 5,
         "per_sample_results": [
           {
             "origin": "audit.agent_execution",
@@ -1139,6 +1162,18 @@
             "cost_estimate": 0.01,
             "retry_count": 0,
             "content": "Planned benchmark artifact assembly from approved canonical facts."
+          },
+          {
+            "origin": "packet.trace_summary",
+            "kind": "agent_message",
+            "agent_id": "thesis_report",
+            "status": "completed",
+            "latency_ms": 900,
+            "tokens_input": 7200,
+            "tokens_output": 2100,
+            "cost_estimate": 0.06,
+            "retry_count": 0,
+            "content": "Expanded narrative draft before trimming."
           }
         ]
       },
@@ -1156,12 +1191,12 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 24673,
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 695
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_evidence_packet.json": 26570,
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "task_completion",
@@ -1239,11 +1274,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 695
+          "storage\\runs\\benchmark_dhd\\benchmark_dhd_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "plan_adherence",
@@ -1305,7 +1340,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "critic_issue_recall",
@@ -1367,7 +1402,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.judge_calibration_agreement",
@@ -1424,7 +1459,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.judge_rationale_evidence_coverage",
@@ -1481,7 +1516,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "advisory_findings": [

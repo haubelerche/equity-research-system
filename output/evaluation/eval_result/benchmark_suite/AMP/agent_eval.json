@@ -4,8 +4,8 @@
   "plan_id": "05",
   "plan_name": "Agent workflow and LLM judge",
   "ticker": "AMP",
-  "generated_at": "2026-06-20T19:32:03.100279+00:00",
-  "status": "blocked",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
+  "status": "fail",
   "test_execution": {
     "status": "not_measured",
     "targets": [
@@ -86,7 +86,7 @@
     {
       "id": "agent.workflow_quality_score",
       "label": "Agent workflow quality stress score",
-      "source": "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
+      "source": "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "agent.workflow_quality_score",
       "metric_name": "Agent workflow quality stress score",
@@ -96,7 +96,7 @@
       "scope": "benchmark_suite",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 0.92,
+      "value": 0.8600000000000001,
       "threshold": ">= 75%",
       "threshold_operator": ">=",
       "unit": "percent",
@@ -110,6 +110,16 @@
       "metric_registry_version": "20260615_v3",
       "owner": "platform",
       "failed_examples": [
+        {
+          "sample_origin": "data_reliability_score_component",
+          "component": "tool_call_success_rate",
+          "component_score": 0.5,
+          "value": 0.5,
+          "status": "warning",
+          "passed": false,
+          "weight": 0.12,
+          "normalized_weight": 0.12
+        },
         {
           "sample_origin": "data_reliability_score_component",
           "component": "judge_readiness_score",
@@ -180,7 +190,7 @@
           ]
         },
         "aggregation": "weighted_score",
-        "numerator": 0.92,
+        "numerator": 0.8600000000000001,
         "denominator": 1.0,
         "per_sample_results": [
           {
@@ -216,10 +226,10 @@
           {
             "sample_origin": "data_reliability_score_component",
             "component": "tool_call_success_rate",
-            "component_score": 1.0,
-            "value": 1.0,
-            "status": "pass",
-            "passed": true,
+            "component_score": 0.5,
+            "value": 0.5,
+            "status": "warning",
+            "passed": false,
             "weight": 0.12,
             "normalized_weight": 0.12
           },
@@ -284,17 +294,17 @@
       "evidence": {
         "artifact_ids": [
           "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json",
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 24659,
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 26242,
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "tool_permission_compliance",
@@ -374,11 +384,11 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 24659
+          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 26242
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "artifact_manifest_compliance",
@@ -524,16 +534,16 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 24659
+          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 26242
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.stage_handoff_completeness",
       "label": "Stage handoff completeness",
-      "source": "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
+      "source": "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "agent.stage_handoff_completeness",
       "metric_name": "Stage handoff completeness",
@@ -629,17 +639,17 @@
       "evidence": {
         "artifact_ids": [
           "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json",
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 24659,
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 26242,
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.tool_call_success_rate",
@@ -654,12 +664,12 @@
       "scope": "report_run",
       "severity": "P2",
       "blocks_publish": false,
-      "value": 1.0,
+      "value": 0.5,
       "threshold": ">= 95%",
       "threshold_operator": ">=",
       "unit": "percent",
-      "status": "pass",
-      "legacy_status": "pass",
+      "status": "fail",
+      "legacy_status": "fail",
       "sample_size": 2,
       "artifact_id": null,
       "artifact_version": null,
@@ -667,7 +677,14 @@
       "benchmark_suite_version": "benchmark_standards_v1",
       "metric_registry_version": "20260615_v3",
       "owner": "platform",
-      "failed_examples": [],
+      "failed_examples": [
+        {
+          "tool_name": "deterministic_valuation",
+          "status": "fail",
+          "runtime_status": "failed",
+          "controlled_failure": false
+        }
+      ],
       "remediation_hint": "Inspect the owning evaluator and add a domain-specific remediation hint.",
       "evaluator": {
         "id": "agent.tool_call_success_rate",
@@ -681,7 +698,7 @@
         "inputs": {},
         "parameters": {},
         "aggregation": "coverage",
-        "numerator": 2,
+        "numerator": 1,
         "denominator": 2,
         "per_sample_results": [
           {
@@ -692,8 +709,8 @@
           },
           {
             "tool_name": "deterministic_valuation",
-            "status": "pass",
-            "runtime_status": "completed",
+            "status": "fail",
+            "runtime_status": "failed",
             "controlled_failure": false
           }
         ]
@@ -707,22 +724,22 @@
       "evidence": {
         "artifact_ids": [
           "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json",
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 24659,
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 26242,
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.repair_loop_rate",
       "label": "Repair loop rate",
-      "source": "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
+      "source": "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "agent.repair_loop_rate",
       "metric_name": "Repair loop rate",
@@ -772,22 +789,22 @@
       "evidence": {
         "artifact_ids": [
           "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json",
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 24659,
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 26242,
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.token_budget_adherence",
       "label": "Token budget adherence",
-      "source": "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
+      "source": "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "agent.token_budget_adherence",
       "metric_name": "Token budget adherence",
@@ -846,17 +863,17 @@
       "evidence": {
         "artifact_ids": [
           "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json",
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 24659,
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 26242,
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "schema_validity",
@@ -915,7 +932,7 @@
             "value": true,
             "schema_valid": true,
             "failure_count": 0,
-            "path": "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
+            "path": "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
           }
         ]
       },
@@ -928,17 +945,17 @@
       "evidence": {
         "artifact_ids": [
           "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json",
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 24659,
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 26242,
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "role_adherence",
@@ -1000,7 +1017,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "groundedness",
@@ -1062,12 +1079,12 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "no_unauthorized_calc",
       "label": "No unauthorized financial calculation",
-      "source": "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
+      "source": "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "no_unauthorized_calc",
       "metric_name": "No unauthorized financial calculation",
@@ -1151,22 +1168,22 @@
       "evidence": {
         "artifact_ids": [
           "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json",
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 24659,
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 695
+          "storage\\archive\\benchmark_amp\\benchmark_amp_evidence_packet.json": 26242,
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "task_completion",
       "label": "Task completion",
-      "source": "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
+      "source": "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json",
       "detail": "",
       "metric_id": "task_completion",
       "metric_name": "Task completion",
@@ -1234,16 +1251,16 @@
       },
       "evidence": {
         "artifact_ids": [
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json"
         ],
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "storage\\archive\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 695
+          "storage\\runs\\benchmark_amp\\benchmark_amp_agent_effectiveness_audit.json": 755
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "plan_adherence",
@@ -1305,7 +1322,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "critic_issue_recall",
@@ -1367,7 +1384,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.judge_calibration_agreement",
@@ -1424,7 +1441,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "agent.judge_rationale_evidence_coverage",
@@ -1481,7 +1498,7 @@
         "dataset_version": null,
         "trace_url": null
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "advisory_findings": [

@@ -4,7 +4,7 @@
   "plan_id": "06",
   "plan_name": "Report quality",
   "ticker": "OPC",
-  "generated_at": "2026-06-20T19:32:03.100279+00:00",
+  "generated_at": "2026-06-22T16:34:24.327590+00:00",
   "status": "pass",
   "test_execution": {
     "status": "not_measured",
@@ -174,7 +174,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -204,7 +204,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -350,7 +350,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -480,14 +480,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "explanation_pdf_rendered",
@@ -579,7 +579,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -609,7 +609,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -755,7 +755,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -885,14 +885,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "financial_gate_passed",
@@ -961,14 +961,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.quality_total",
@@ -1034,7 +1034,7 @@
                 {
                   "id": "valuation_generated_at_present",
                   "passed": true,
-                  "actual": "2026-06-19T20:36:23.934352+00:00",
+                  "actual": "2026-06-22T16:31:58.667734+00:00",
                   "expected": "generated_at present",
                   "evidence_refs": [
                     "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -1064,7 +1064,7 @@
                 {
                   "id": "fcff_table_present",
                   "passed": true,
-                  "actual": 4,
+                  "actual": 5,
                   "expected": ">= 1 FCFF row",
                   "evidence_refs": [
                     "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -1210,7 +1210,7 @@
                 {
                   "id": "formula_traces_present",
                   "passed": true,
-                  "actual": 2,
+                  "actual": 3,
                   "expected": "formula traces present",
                   "evidence_refs": [
                     "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -1358,7 +1358,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -1388,7 +1388,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -1534,7 +1534,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -1664,14 +1664,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report_quality_score",
@@ -1737,7 +1737,7 @@
                 {
                   "id": "valuation_generated_at_present",
                   "passed": true,
-                  "actual": "2026-06-19T20:36:23.934352+00:00",
+                  "actual": "2026-06-22T16:31:58.667734+00:00",
                   "expected": "generated_at present",
                   "evidence_refs": [
                     "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -1767,7 +1767,7 @@
                 {
                   "id": "fcff_table_present",
                   "passed": true,
-                  "actual": 4,
+                  "actual": 5,
                   "expected": ">= 1 FCFF row",
                   "evidence_refs": [
                     "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -1913,7 +1913,7 @@
                 {
                   "id": "formula_traces_present",
                   "passed": true,
-                  "actual": 2,
+                  "actual": 3,
                   "expected": "formula traces present",
                   "evidence_refs": [
                     "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -2061,7 +2061,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -2091,7 +2091,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -2237,7 +2237,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -2367,14 +2367,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.benchmark_hardness_score",
@@ -2479,7 +2479,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -2509,7 +2509,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -2655,7 +2655,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -2785,14 +2785,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.completeness",
@@ -2884,7 +2884,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -2914,7 +2914,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -3060,7 +3060,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -3190,14 +3190,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.thesis_specificity",
@@ -3289,7 +3289,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -3319,7 +3319,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -3465,7 +3465,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -3595,14 +3595,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.financial_analysis_depth",
@@ -3694,7 +3694,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -3724,7 +3724,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -3870,7 +3870,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -4000,14 +4000,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.forecast_rationale",
@@ -4099,7 +4099,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -4129,7 +4129,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -4275,7 +4275,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -4405,14 +4405,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.valuation_transparency",
@@ -4504,7 +4504,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -4534,7 +4534,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -4680,7 +4680,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -4810,14 +4810,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.risk_catalyst_quality",
@@ -4909,7 +4909,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -4939,7 +4939,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -5085,7 +5085,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -5215,14 +5215,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.evidence_integration",
@@ -5314,7 +5314,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -5344,7 +5344,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -5490,7 +5490,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -5620,14 +5620,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.peer_industry_context_quality",
@@ -5719,7 +5719,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -5749,7 +5749,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -5895,7 +5895,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -6025,14 +6025,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.executive_summary_actionability",
@@ -6124,7 +6124,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -6154,7 +6154,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -6300,7 +6300,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -6430,14 +6430,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.sensitivity_disclosure_completeness",
@@ -6529,7 +6529,7 @@
                   {
                     "id": "valuation_generated_at_present",
                     "passed": true,
-                    "actual": "2026-06-19T20:36:23.934352+00:00",
+                    "actual": "2026-06-22T16:31:58.667734+00:00",
                     "expected": "generated_at present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -6559,7 +6559,7 @@
                   {
                     "id": "fcff_table_present",
                     "passed": true,
-                    "actual": 4,
+                    "actual": 5,
                     "expected": ">= 1 FCFF row",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -6705,7 +6705,7 @@
                   {
                     "id": "formula_traces_present",
                     "passed": true,
-                    "actual": 2,
+                    "actual": 3,
                     "expected": "formula traces present",
                     "evidence_refs": [
                       "local://data/raw/bctc/OPC/balance_sheet_year.json",
@@ -6835,14 +6835,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "report.recommendation_consistency",
@@ -6921,14 +6921,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     },
     {
       "id": "publication_readiness",
@@ -7011,14 +7011,14 @@
         "dataset_version": null,
         "trace_url": null,
         "artifact_sizes_bytes": {
-          "output\\OPC_report.pdf": 965774,
-          "output\\OPC_explanation.pdf": 388116,
+          "output\\OPC_report.pdf": 964046,
+          "output\\OPC_explanation.pdf": 391409,
           "storage\\archive\\benchmark_opc\\claim_ledger.json": 2670,
-          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 24636
+          "storage\\runs\\benchmark_opc\\benchmark_opc_evidence_packet.json": 26214
         },
         "evidence_available": true
       },
-      "evaluated_at": "2026-06-20T19:32:03.100279+00:00"
+      "evaluated_at": "2026-06-22T16:34:24.327590+00:00"
     }
   ],
   "rubric": "report_quality_v1",
@@ -7043,13 +7043,13 @@
       "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\OPC_report.pdf",
       "exists": true,
       "pages": 13,
-      "text": "Nghiên cứu cổ phiếu BÁO CÁO CẬP NHẬT ĐỊNH GIÁ\nNGÀNH DƯỢC PHẨM Ngày 2026-06-20\nCTCP DUOC PHAM OPC (OPC VN) HOSE: OPC\nNhóm phân tích\nKhuyến nghị · HOSE: OPC\nBáo cáo cập nhật\nGiữ\nHOSE: OPC\nGiá mục tiêu: 23,811 VND | Tiềm năng tăng/giảm: +1.3% | Ngày\nDược phẩm\ngiá: 2026-06-18 | Tạo: 2026-06-20 21:50\nGiá mục tiêu 23,811 VND\nCTCP Duoc pham OPC (OPC) là doanh nghiệp dược phẩm có nền doanh\nGiá hiện tại 23,500 thu 1,123 tỷ đồng với biên lợi nhuận gộp 41.4%, đủ để hỗ trợ tăng\n(VND) trưởng doanh thu dự phóng -1.4% mà không cần mở rộng đòn bẩy vận\nhành quá mức. Mô hình định giá cho giá mục tiêu 23,811 VND so với thị\nNgày giá thị 2026-06-18\ngiá 23,500 VND, biên tiềm năng 1.3%. Khoảng giá trị hợp lý theo ma\ntrường\ntrận độ nhạy trải từ 21,519 VND đến 32,430 VND, phản ánh mức độ\nThời điểm tạo 2026-06-20 không chắc chắn của các giả định dài hạn. Luận điểm đầu tư xoay quanh\nbáo cáo 21:50 ba câu hỏi: (i) doanh nghiệp có giữ được biên gộp trước áp lực chi phí\nnguyên liệu API và tỷ giá không? (ii) kỷ luật chi phí bán hàng và quản lý\nTỷ lệ +1.3% có đảm bảo biên EBIT không bị xói mòn khi tăng doanh thu? (iii) chi đầu\ntăng/giảm\ntư dài hạn phục vụ nâng chuẩn nhà máy GMP-EU có phá vỡ cấu trúc\ndòng tiền tự do hay không? Ba câu hỏi này quyết định độ tin cậy của kết\nTổng tỷ suất lợi +6.4%\nquả mô hình FCFF và từ đó quyết định giá trị hợp lý. Rủi ro trọng yếu là\nnhuận\nkết quả đấu thầu ETC và biến động giá API — hai yếu tố này tác động\nđồng thời lên cả doanh thu lẫn biên, và là nguồn sai lệch lớn nhất so với\ngiả định cơ sở. [1][2]\nLuận điểm cập nhật\nCTCP Duoc pham OPC hoạt động trên hai kênh phân phối ETC (đấu thầu\nbệnh viện) và OTC (nhà thuốc bán lẻ). Doanh thu kỳ gần nhất đạt 1,123\ntỷ đồng, tăng 15.9% so với kỳ trước — cần theo dõi tính bền vững so với\nCAGR lịch sử (CAGR lịch sử -1.4%). Biên lợi nhuận gộp 41.4% phản ánh\nnăng lực kiểm soát giá vốn API trong môi trường tỷ giá biến động; đây\nlà chỉ số quan trọng hơn tốc độ tăng doanh thu vì nó xác định chất\nlượng lợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt 0.51 lần cho thấy mức\nđộ lợi nhuận kế toán được hỗ trợ bởi dòng tiền vận hành thực — tỷ lệ\nNguồn nhóm phân tích thu thập\ndưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải thu bệnh viện.\nNhận định: Thị giá 23,500 VND so\nBiến số vận hành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh\nvới giá mục tiêu 23,811 VND, hàm ý\nnày vừa có tỷ trọng doanh thu cao vừa chịu áp lực chính sách đấu thầu\n+1.3%; tín hiệu giá chỉ có giá trị khi\nđịnh kỳ. Diễn biến giá API và tiến độ nâng chuẩn nhà máy là hai chỉ báo\nđi cùng thanh khoản và ngày giá\nvận hành cần theo dõi song song với kết quả tài chính quý. [1]\n2026-06-18.\nĐộng lực tăng trưởng\nThông tin giao dịch\nDoanh thu 1,123 tỷ đồng tăng 15.9% so với kỳ trước, trên nền CAGR lịch\nMã giao dịch OPC VN\nsử -1.4%. Giả định dự phóng -1.4% thận trọng hơn tốc độ gần nhất\n15.9%, phản ánh quan điểm bảo thủ về tính bền vững của động lực tăng\nSàn HOSE\ntrưởng hiện tại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh\nNgành Dược phẩm ETC (đấu thầu bệnh viện) — kênh này vừa có quy mô lớn vừa bị chi phối\nbởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các\nquý. Kênh OTC ổn định hơn nhưng tăng trưởng thấp hơn; nó đóng vai\nGiá đóng cửa 23,500\ntrò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần theo\nGiá cao/thấp 21,100 / 25,400 dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức\n52 tuần độ thâm nhập kênh OTC — ba con số này sẽ xác nhận hoặc bác bỏ giả\nđịnh tăng trưởng của mô hình. [1]\nVốn hóa 1,779\nSố lượng cổ 76\nphiếu\nKLGD bình 7,190\nquân 30 phiên\nTỷ lệ sở hữu N/A\nnước ngoài\nTriển vọng kinh doanh và tài chính\nCẬP NHẬT HOẠT ĐỘNG KINH DOANH\nCTCP Duoc pham OPC hoạt động trên hai kênh phân phối ETC (đấu thầu bệnh viện) và OTC (nhà thuốc bán lẻ).\nDoanh thu kỳ gần nhất đạt 1,123 tỷ đồng, tăng 15.9% so với kỳ trước — cần theo dõi tính bền vững so với CAGR\nlịch sử (CAGR lịch sử -1.4%). Biên lợi nhuận gộp 41.4% phản ánh năng lực kiểm soát giá vốn API trong môi trường\ntỷ giá biến động; đây là chỉ số quan trọng hơn tốc độ tăng doanh thu vì nó xác định chất lượng lợi nhuận thực\nsự. Tỷ lệ chuyển đổi tiền mặt 0.51 lần cho thấy mức độ lợi nhuận kế toán được hỗ trợ bởi dòng tiền vận hành\nthực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải thu bệnh viện. Biến số vận hành trọng yếu\nlà sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu cao vừa chịu áp lực chính sách đấu\nthầu định kỳ. Diễn biến giá API và tiến độ nâng chuẩn nhà máy là hai chỉ báo vận hành cần theo dõi song song\nvới kết quả tài chính quý. [1]\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A doanh thu 1,123 tỷ đồng, tăng +15.9% so với 2024A; biên EBITDA -1.5 điểm % và biên EBIT\n-1.1 điểm %. Nếu doanh thu tăng nhưng hai biên này không mở rộng, luận điểm tăng trưởng phải dựa vào chất\nlượng chi phí chứ không chỉ vào quy mô.\nNghiên cứu cổ phiếu 2\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A biên gộp 41.4% (-0.2 điểm % so với kỳ trước), biên ròng 10.4% (-0.9 điểm %), ROE 11.9% (-0.5\nđiểm % so với 2024A). Chênh lệch giữa biên lợi nhuận và ROE là tín hiệu về hiệu quả sử dụng vốn, không phải chỉ\nlà biến động kế toán.\nKẾT QUẢ TÀI CHÍNH CHÍNH\nDoanh thu 1,123 tỷ đồng với biên lợi nhuận ròng 10.4% và biên gộp 41.4% vẽ nên bức tranh một doanh nghiệp\ncó khả năng tạo lợi nhuận tương đối ổn định, song phụ thuộc vào kiểm soát chi phí hơn là tăng trưởng sản\nlượng đột biến. Điểm đáng chú ý là tỷ lệ chuyển đổi tiền mặt 0.51 lần. Tỷ lệ này báo hiệu cần kiểm tra chặt hơn\nchất lượng thu tiền và vốn lưu động. Đây là cơ chế giải thích tại sao biên lợi nhuận ròng 10.4% không nhất thiết\ntương đương với khả năng tạo dòng tiền tự do. Biến động lợi nhuận giữa các năm chủ yếu đến từ ba nguồn: (1)\nthay đổi giá vốn API/tỷ giá; (2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí bán hàng và quản lý liên quan đấu thầu.\nNhững yếu tố này được chuẩn hóa thành biến số dự phóng (biên gộp 41.5%, chi phí bán hàng và quản lý 20.0%\ndoanh thu) và là cơ sở để phân tích độ nhạy — người đọc có thể kiểm tra xem kết quả mô hình thay đổi như thế\nnào khi từng giả định dịch chuyển. [1]\nNhận định: Lợi nhuận tăng nhanh hơn doanh thu, cho thấy tăng trưởng chủ yếu đến từ cải thiện biên lợi nhuận\nvà tiết giảm chi phí, không phải từ tăng sản lượng. Chất lượng tăng trưởng phụ thuộc vào khả năng duy trì\nbiên; không nên nâng tăng trưởng dài hạn chỉ dựa trên mức lợi nhuận cao nhất thời. [1][2]\nNhận định: Doanh nghiệp ở vị thế tiền mặt ròng (nợ ròng âm so với EBITDA). Linh hoạt tài chính cao, hỗ trợ cổ\ntức/đầu tư; rủi ro đòn bẩy thấp. [1]\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,172 1,005 969 1,123 1,107 1,092 1,076 1,061 1,046\nTăng trưởng doanh thu — -14.2% -3.6% 15.9% -1.4% -1.4% -1.4% -1.4% -1.4%\nLợi nhuận ròng 142 122 109 116 188 185 183 180 178\nTăng trưởng lợi nhuận — -14.1% -10.5% 6.4% 61.4% -1.4% -1.4% -1.4% -1.4%\nNghiên cứu cổ phiếu 3\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nEPS điều chỉnh (VND) 2,000 1,634 1,421 1,538 2,482 2,447 2,413 2,379 2,346\nTăng trưởng EPS — -18.3% -13.0% 8.2% 61.4% -1.4% -1.4% -1.4% -1.4%\nROE 16.3% 13.8% 12.5% 11.9% 17.5% 15.9% 14.5% 13.3% 12.3%\nROA 11.4% 9.7% 9.0% 8.5% 12.8% 11.8% 11.0% 10.3% 9.6%\nNợ ròng / EBITDA -1.5x -1.7x -1.5x -1.8x -1.3x -1.7x -2.2x -2.6x -3.1x\nP/E 11.8x 14.4x 16.5x 15.3x 9.5x 9.6x 9.7x 9.9x 10.0x\nP/B 2.0x 2.0x 2.0x 1.8x 1.7x 1.5x 1.4x 1.3x 1.2x\nCẦU NỐI LỢI NHUẬN 2025A-2026F\nĐối chiếu trực tiếp với số liệu công bố trong mô hình định giá.\nChỉ tiêu 2025A 2026F Chênh lệch Nhận định\nDoanh thu thuần 1,123 1,107 -1.4% Cơ sở kiểm tra mức tăng lợi nhuận.\nBiên lợi nhuận gộp 41.4% 41.5% +10 bps Biến động biên trong ngưỡng theo\ndõi.\nChi phí bán hàng và quản lý -311 -221 -28.7% Chi phí tuyệt đối giảm dù doanh thu\ntăng; cần bằng chứng vận hành.\nBiên lợi nhuận HĐKD / EBIT 13.7% 21.5% +775 bps Biên tăng trên 300 bps; cần cầu nối\nchi phí và bằng chứng định lượng.\nLNST sau CĐKKS / LNST CĐ 116 188 +61.4% Đối chiếu với tăng trưởng doanh\nmẹ thu và giả định mô hình.\nBiên lợi nhuận ròng 10.4% 17.0% +660 bps Biên tăng trên 300 bps; cần cầu nối\nchi phí và bằng chứng định lượng.\nEPS 1,538 2,482 +61.4% Đối chiếu với tăng trưởng doanh\nthu và giả định mô hình.\nĐỘNG LỰC DỰ PHÓNG\nDoanh thu 1,123 tỷ đồng tăng 15.9% so với kỳ trước, trên nền CAGR lịch sử -1.4%. Giả định dự phóng -1.4% thận\ntrọng hơn tốc độ gần nhất 15.9%, phản ánh quan điểm bảo thủ về tính bền vững của động lực tăng trưởng hiện\ntại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh ETC (đấu thầu bệnh viện) — kênh này vừa có quy mô\nlớn vừa bị chi phối bởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các quý. Kênh OTC ổn định\nhơn nhưng tăng trưởng thấp hơn; nó đóng vai trò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần\ntheo dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức độ thâm nhập kênh OTC — ba con\nsố này sẽ xác nhận hoặc bác bỏ giả định tăng trưởng của mô hình. [1]\nBiên lợi nhuận gộp hiện tại 41.4%, mô hình kỳ vọng biên gộp duy trì ổn định (41.5% dự phóng). Áp lực chính lên\nbiên gộp là chi phí API nhập khẩu và tỷ giá USD/VND: khi hai yếu tố này tăng cùng chiều, giá vốn hàng bán tăng\nvà biên gộp bị thu hẹp ngay trong quý tiếp theo vì chu kỳ nhập khẩu thường ngắn. Dư địa hấp thụ cú sốc này bị\ngiới hạn bởi biên lợi nhuận ròng hiện ở mức 10.4% — không đủ đệm để hấp thụ nếu biên gộp giảm quá 2–3\nNghiên cứu cổ phiếu 4\nđiểm phần trăm. Chi phí bán hàng và quản lý 20.0% doanh thu là lớp chi phí quyết định khoảng cách biên gộp\nđến biên EBIT; đặc biệt chi phí phục vụ đấu thầu ETC có xu hướng không co giãn theo doanh thu. Thuế suất hiệu\ndụng 21.1% là bước chuyển cuối từ EBIT sang lợi nhuận sau thuế — biến số này ít biến động nhưng bất kỳ thay\nđổi ưu đãi thuế nào sẽ tác động trực tiếp. Chỉ báo cần theo dõi: giá API theo chỉ số thị trường nguyên liệu dược,\ntỷ giá USD/VND, và biên gộp thực tế quý tiếp theo so với giả định — đây là tín hiệu sớm cho việc cần điều chỉnh\nmô hình. [1]\nNguồn: Dự phóng của nhóm phân tích dựa trên giả định đã phê duyệt.\nNhận định: 2026F hàm ý doanh thu tăng -1.4% so với 2025A, trong khi biên gộp dự phóng 41.5% so với mức\nthực tế 41.4%. Đây là điểm kiểm tra trọng yếu vì sai lệch nhỏ ở tăng trưởng hoặc biên gộp sẽ truyền trực tiếp vào\nEBIT và FCFF.\nNghiên cứu cổ phiếu 5\nĐỘNG LỰC DỰ PHÓNG CHÍNH\nGiả định biến số chính được hiệu chỉnh từ dữ liệu lịch sử và định hướng kinh doanh hiện tại.\nChỉ tiêu Giả định cơ sở Liên kết tài chính\nTăng trưởng doanh thu -1.4% Doanh thu dẫn tới EBIT và dòng tiền\ntự do\nBiên lợi nhuận gộp 41.5% Giá vốn dẫn tới lợi nhuận gộp\nChi phí bán hàng và quản lý / 20.0% Chi phí vận hành dẫn tới biên EBIT\ndoanh thu\nKhấu hao / doanh thu 2.1% EBIT và lá chắn thuế\nChi đầu tư / doanh thu 1.4% Dòng tiền tự do và mở rộng công suất\nThuế suất hiệu dụng 21.1% LNST và NOPAT\nChuyển đổi dòng tiền 2025 51.5% Kỷ luật vốn lưu động\nWACC 13.8% Tỷ lệ chiết khấu dòng tiền\nTăng trưởng dài hạn 3.0% Giá trị cuối kỳ trong mô hình chiết\nkhấu dòng tiền\nĐịnh giá và độ nhạy\nLUẬN ĐIỂM ĐỊNH GIÁ\nDự phóng theo phương pháp dự phóng theo biến số, đi từ biến số kinh doanh tới dòng tài chính tới định giá. Giả\nđịnh cơ sở: tăng trưởng doanh thu -1.4% (căn cứ CAGR lịch sử -1.4% và kế hoạch mở rộng ETC/OTC); biên lợi\nnhuận gộp 41.5% (phản ánh áp lực API và cơ cấu sản phẩm); chi phí bán hàng và quản lý 20.0% doanh thu; thuế\nsuất hiệu dụng 21.1%; chi đầu tư 1.4% doanh thu. Biến số có tác động lớn nhất tới giá trị là: (1) tăng trưởng\ndoanh thu — mỗi điểm phần trăm hụt so với giả định cơ sở sẽ kéo EBIT và FCFF giảm theo tỷ lệ; (2) biên lợi\nnhuận gộp — biến động chi phí API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) chi\nđầu tư và vốn lưu động — quyết định bao nhiêu phần EBIT còn lại dưới dạng FCFF sau tái đầu tư. Hai tham số\nđịnh giá quan trọng nhất là WACC 13.8% và tăng trưởng dài hạn 3.0%; chúng xác định cách quy đổi FCFF tương\nlai về hiện giá. Độ nhạy của giá mục tiêu với hai tham số này cao hơn bất kỳ biến số vận hành nào — đây là lý do\nma trận độ nhạy là bắt buộc chứ không phải tùy chọn. Rủi ro sai lệch lớn nhất là khi giả định tăng trưởng lạc\nquan gặp thực tế đấu thầu thắt chặt hoặc giá API tăng đột biến cùng lúc. [1][2]\nNhận định: Tiềm năng tăng/giảm giá theo mô hình định giá là +1.3%. Trạng thái khuyến nghị theo mô hình:\nGiữ. [2]\nKẾT QUẢ ĐỊNH GIÁ\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nFCFF 25,493 — Cần rà soát\nFCFE 21,287 — Cần rà soát\nBLEND 23,811 — Cần rà soát\nNghiên cứu cổ phiếu 6\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nP/E 46,368 — Cần rà soát\nCORE P/E + NET CASH 51,369 — Cần rà soát\nGiá mục tiêu tổng hợp 23,811 100.0% Tổng hợp\nCẦU NỐI WACC\nChỉ tiêu Giá trị\nLãi suất phi rủi ro 4.0%\nBeta 0.85\nPhần bù rủi ro thị trường 8.0%\nChi phí vốn chủ sở hữu 13.8%\nChi phí nợ vay 8.0%\nThuế suất 21.1%\nWACC 13.8%\nCẦU NỐI ĐỊNH GIÁ FCFF\nChỉ tiêu Giá trị\nPV giá trị cuối kỳ 932\nGiá trị doanh nghiệp 1,611\nTiền mặt và đầu tư ngắn hạn 222\nNợ vay 0\nGiá trị vốn chủ sở hữu 1,930\nSố cổ phiếu lưu hành (triệu) 76\nGiá mục tiêu (VND/cổ phiếu) 25,493\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,172 1,005 969 1,123 1,107 1,092 1,076 1,061 1,046\nTăng trưởng doanh thu — -14.2% -3.6% 15.9% -1.4% -1.4% -1.4% -1.4% -1.4%\nLợi nhuận gộp 485 427 403 465 460 453 447 440 434\nBiên lợi nhuận gộp 41.4% 42.5% 41.6% 41.4% 41.5% 41.5% 41.5% 41.5% 41.5%\nNghiên cứu cổ phiếu 7\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nGVHB trừ khấu hao -687 -578 -566 -658 -648 -639 -630 -621 -612\nChi phí bán hàng và quản lý -297 -264 -259 -311 -221 -218 -215 -212 -209\nDoanh thu tài chính 8 17 9 20 — — — — —\nChi phí tài chính -8 -7 -7 -6 0 0 0 0 0\nEBITDA 211 186 166 176 261 258 254 251 247\nTỷ suất EBITDA 18.0% 18.5% 17.2% 15.7% 23.6% 23.6% 23.6% 23.6% 23.6%\nKhấu hao 23 23 22 22 23 23 23 22 22\nLợi nhuận từ HĐKD / EBIT 188 163 144 154 238 235 231 228 225\nBiên lợi nhuận HĐKD / EBIT 16.1% 16.2% 14.9% 13.7% 21.5% 21.5% 21.5% 21.5% 21.5%\nLợi nhuận khác -8 -7 -7 -6 0 0 0 0 0\nChi phí lãi vay ròng -1 0 0 0 0 0 0 0 0\nThuế -38 -33 -28 -32 -50 -49 -49 -48 -47\nThuế suất thực tế 20.9% 21.2% 20.2% 21.4% 21.1% 21.0% 21.0% 21.0% 21.1%\nLNST sau CĐKKS / LNST CĐ 142 122 109 116 188 185 183 180 178\nmẹ\nBiên lợi nhuận ròng 12.2% 12.2% 11.3% 10.4% 17.0% 17.0% 17.0% 17.0% 17.0%\nTiền mặt từ hoạt động kinh 36 255 24 60 221 218 214 212 209\ndoanh\nSố lượng cổ phiếu (triệu) 76 76 76 76 76 76 76 76 76\nEPS 2,000 1,634 1,421 1,538 2,482 2,447 2,413 2,379 2,346\nEPS hiệu chỉnh 2,000 1,634 1,421 1,538 2,482 2,447 2,413 2,379 2,346\nTăng trưởng EPS hiệu chỉnh — -18.3% -13.0% 8.2% 61.4% -1.4% -1.4% -1.4% -1.4%\nĐỘ NHẠY GIÁ MỤC TIÊU (WACC × tăng trưởng dài hạn)\nĐơn vị: VND/cp — mô hình chiết khấu dòng tiền FCFF.\ng=2.0% g=2.5% g=3.0% g=3.5% g=4.0%\nWACC 11.8% 28,305 29,170 30,133 31,212 32,430\nWACC 12.8% 26,140 26,824 27,578 28,413 29,342\nWACC 13.8% 24,341 24,891 25,493 26,153 26,881\nWACC 14.8% 22,820 23,271 23,759 24,291 24,872\nWACC 15.8% 21,519 21,892 22,294 22,729 23,201\nNghiên cứu cổ phiếu 8\nRủi ro đầu tư\nYẾU TỐ CẦN THEO DÕI\nRủi ro và yếu tố hỗ trợ của CTCP Duoc pham OPC đều gắn với cơ chế truyền dẫn tài chính cụ thể, không đơn\nthuần là liệt kê định tính. Rủi ro giảm giá theo mức độ ưu tiên: (1) giá trúng thầu ETC thấp hơn kỳ vọng — đây là\nrủi ro trọng yếu nhất vì tác động đồng thời lên doanh thu và biên gộp, tức là thu hẹp FCFF từ cả hai phía; (2) giá\nAPI nhập khẩu và tỷ giá USD/VND tăng — ảnh hưởng trực tiếp đến giá vốn, thu hẹp biên gộp 41.5% giả định; (3)\nkéo dài chu kỳ phải thu bệnh viện — làm tăng ΔNWC và giảm FCFF dù lợi nhuận kế toán vẫn cao; (4) cạnh tranh\ngeneric gia tăng — tạo áp lực giảm giá trên sản phẩm chủ lực; (5) thay đổi chính sách đăng ký lưu hành và tiêu\nchuẩn GMP. Yếu tố hỗ trợ: trúng thêm thầu ETC mới là yếu tố có tác động lớn nhất và gần nhất đến FCFF; cải\nthiện cơ cấu sản phẩm biên cao (chuyển dần từ generic sang branded generic) nâng biên gộp một cách bền vững\nhơn mở rộng sản lượng thuần túy; hoàn tất đầu tư GMP-EU mở rộng tập khách hàng xuất khẩu, giảm phụ thuộc\nvào chu kỳ đấu thầu nội địa. Mỗi yếu tố cần gắn với chỉ báo sớm cụ thể: kết quả đấu thầu ETC hàng quý, biến\nđộng giá API theo chỉ số thị trường nguyên liệu dược, vòng quay phải thu so với cùng kỳ. Khi có dữ liệu mới, nhà\nphân tích nên chạy lại ma trận độ nhạy để xác nhận kết luận định giá còn hiệu lực. [1]\nRỦI RO ĐẦU TƯ\nRủi ro Mức độ Theo dõi\nÁp lực giá thầu thuốc Cao Kết quả đấu thầu ETC\nBiến động nguyên liệu và tỷ Trung bình API, USD/VND\ngiá\nCạnh tranh generic Trung bình Thị phần và giá bán\nPhụ lục bảng tài chính\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,172 1,005 969 1,123 1,107 1,092 1,076 1,061 1,046\nTăng trưởng doanh thu — -14.2% -3.6% 15.9% -1.4% -1.4% -1.4% -1.4% -1.4%\nLợi nhuận ròng 142 122 109 116 188 185 183 180 178\nTăng trưởng lợi nhuận — -14.1% -10.5% 6.4% 61.4% -1.4% -1.4% -1.4% -1.4%\nEPS điều chỉnh (VND) 2,000 1,634 1,421 1,538 2,482 2,447 2,413 2,379 2,346\nTăng trưởng EPS — -18.3% -13.0% 8.2% 61.4% -1.4% -1.4% -1.4% -1.4%\nROE 16.3% 13.8% 12.5% 11.9% 17.5% 15.9% 14.5% 13.3% 12.3%\nROA 11.4% 9.7% 9.0% 8.5% 12.8% 11.8% 11.0% 10.3% 9.6%\nNợ ròng / EBITDA -1.5x -1.7x -1.5x -1.8x -1.3x -1.7x -2.2x -2.6x -3.1x\nP/E 11.8x 14.4x 16.5x 15.3x 9.5x 9.6x 9.7x 9.9x 10.0x\nNghiên cứu cổ phiếu 9\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nP/B 2.0x 2.0x 2.0x 1.8x 1.7x 1.5x 1.4x 1.3x 1.2x\nCÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThay đổi vốn lưu động 129 22 26 74 -10 -9 -9 -9 -9\nChi đầu tư 7 12 12 18 16 17 19 21 22\nĐầu tư vào công ty liên kết/liên — — — — — — — — —\ndoanh\nCác khoản mục dòng tiền khác — — — — — — — — —\nDòng tiền tự do 29 243 12 42 206 200 196 191 186\nPhát hành cổ phiếu — — — — — — — — —\nCổ tức 27 96 96 0 91 90 89 87 86\nTổng nợ phải trả 374 377 345 396 396 396 396 396 396\nThay đổi tổng nợ phải trả — 2 -32 51 0 0 0 0 0\nNợ vay có lãi cuối năm 0 0 0 0 0 0 0 0 0\nThay đổi nợ vay có lãi — 0 0 0 0 0 0 0 0\nTiền và tương đương tiền 315 321 247 318 337 447 554 658 758\nNợ ròng cuối năm (nợ vay có lãi -315 -321 -247 -318 -337 -447 -554 -658 -758\n- tiền)\nThay đổi nợ ròng — -6 74 -72 -19 -110 -107 -104 -100\nVốn CSH 872 884 877 976 1,072 1,168 1,262 1,354 1,446\nGiá trị sổ sách/cp (VND) 11,519 11,680 11,583 12,886 14,166 15,426 16,668 17,894 19,101\nNợ ròng / VCSH -36.1% -36.3% -28.1% -32.6% -31.4% -38.3% -43.9% -48.6% -52.4%\nNợ ròng / EBITDA -1.5x -1.7x -1.5x -1.8x -1.3x -1.7x -2.2x -2.6x -3.1x\nTổng tài sản 1,246 1,261 1,222 1,372 1,468 1,564 1,658 1,751 1,842\nCHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ\nĐơn vị: lần hoặc %, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE 16.3% 13.8% 12.5% 11.9% 17.5% 15.9% 14.5% 13.3% 12.3%\nROA 11.4% 9.7% 9.0% 8.5% 12.8% 11.8% 11.0% 10.3% 9.6%\nNghiên cứu cổ phiếu 10\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROIC 26.7% 22.8% 18.0% 18.5% 25.5% 25.7% 25.8% 25.9% 25.8%\nWACC 13.8% 13.8% 13.8% 13.8% 13.8% 13.8% 13.8% 13.8% 13.8%\nEVA 12.9% 9.0% 4.2% 4.7% 11.7% 11.9% 12.0% 12.1% 12.0%\nP/E 11.8x 14.4x 16.5x 15.3x 9.5x 9.6x 9.7x 9.9x 10.0x\nEV/EBITDA 6.9x 7.9x 9.2x 8.3x 5.5x 5.2x 4.8x 4.5x 4.1x\nEV/FCF 51.0x 6.0x 126.1x 35.0x 7.0x 6.6x 6.3x 5.9x 5.5x\nP/B 2.0x 2.0x 2.0x 1.8x 1.7x 1.5x 1.4x 1.3x 1.2x\nP/S 1.5x 1.8x 1.8x 1.6x 1.6x 1.6x 1.7x 1.7x 1.7x\nEV/Doanh thu 1.2x 1.5x 1.6x 1.3x 1.3x 1.2x 1.1x 1.1x 1.0x\nPEG — -0.8x -1.3x 1.9x 0.2x -6.8x -7.0x -7.0x -7.2x\nSuất sinh lợi cổ tức 0 0 0 0 0 0 0 0 0\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,172 1,005 969 1,123 1,107 1,092 1,076 1,061 1,046\nTăng trưởng doanh thu — -14.2% -3.6% 15.9% -1.4% -1.4% -1.4% -1.4% -1.4%\nLợi nhuận gộp 485 427 403 465 460 453 447 440 434\nBiên lợi nhuận gộp 41.4% 42.5% 41.6% 41.4% 41.5% 41.5% 41.5% 41.5% 41.5%\nGVHB trừ khấu hao -687 -578 -566 -658 -648 -639 -630 -621 -612\nChi phí bán hàng và quản lý -297 -264 -259 -311 -221 -218 -215 -212 -209\nDoanh thu tài chính 8 17 9 20 — — — — —\nChi phí tài chính -8 -7 -7 -6 0 0 0 0 0\nEBITDA 211 186 166 176 261 258 254 251 247\nTỷ suất EBITDA 18.0% 18.5% 17.2% 15.7% 23.6% 23.6% 23.6% 23.6% 23.6%\nKhấu hao 23 23 22 22 23 23 23 22 22\nLợi nhuận từ HĐKD / EBIT 188 163 144 154 238 235 231 228 225\nBiên lợi nhuận HĐKD / EBIT 16.1% 16.2% 14.9% 13.7% 21.5% 21.5% 21.5% 21.5% 21.5%\nLợi nhuận khác -8 -7 -7 -6 0 0 0 0 0\nChi phí lãi vay ròng -1 0 0 0 0 0 0 0 0\nNghiên cứu cổ phiếu 11\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThuế -38 -33 -28 -32 -50 -49 -49 -48 -47\nThuế suất thực tế 20.9% 21.2% 20.2% 21.4% 21.1% 21.0% 21.0% 21.0% 21.1%\nLNST sau CĐKKS / LNST CĐ mẹ 142 122 109 116 188 185 183 180 178\nBiên lợi nhuận ròng 12.2% 12.2% 11.3% 10.4% 17.0% 17.0% 17.0% 17.0% 17.0%\nTiền mặt từ hoạt động kinh 36 255 24 60 221 218 214 212 209\ndoanh\nSố lượng cổ phiếu (triệu) 76 76 76 76 76 76 76 76 76\nEPS 2,000 1,634 1,421 1,538 2,482 2,447 2,413 2,379 2,346\nEPS hiệu chỉnh 2,000 1,634 1,421 1,538 2,482 2,447 2,413 2,379 2,346\nTăng trưởng EPS hiệu chỉnh — -18.3% -13.0% 8.2% 61.4% -1.4% -1.4% -1.4% -1.4%\nPhương pháp định giá và nguồn dữ liệu\nPHƯƠNG PHÁP VÀ GIẢ ĐỊNH CHÍNH\nBáo cáo trình bày nguồn dữ liệu, giả định dự phóng và phương pháp định giá để các kết luận chính có thể được\nđối chiếu. Những khoảng trống dữ liệu trọng yếu được công khai trong bản nháp phân tích và phải được xử lý\ntrước khi phát hành cho khách hàng.\nHạng mục Diễn giải\nSố liệu định lượng lấy từ đâu Doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt và số cổ phiếu lấy trực tiếp\ntừ Báo cáo tài chính (BCTC) đã chuẩn hóa; giá, vốn hóa và thanh khoản lấy từ\ndữ liệu thị trường. Các số liệu được đối chiếu với báo cáo gốc của doanh\nnghiệp. [1]\nVì sao dự phóng theo cách này Mỗi dòng dự phóng nối tiếp số liệu lịch sử: tăng trưởng doanh thu, biên lợi\nnhuận, vốn lưu động, chi đầu tư và thuế được kéo dài từ xu hướng quá khứ\nvà đặc thù ngành dược, để dòng tiền dự phóng bám sát năng lực thực tế của\ndoanh nghiệp thay vì giả định tùy ý. [1][2]\nCách tính giá mục tiêu Từ dự phóng, mô hình tính dòng tiền tự do doanh nghiệp và vốn chủ sở hữu\n(FCFF/FCFE), chiết khấu về hiện tại bằng chi phí vốn bình quân (WACC), cộng\ngiá trị cuối kỳ, trừ nợ ròng rồi chia cho số cổ phiếu đang lưu hành để ra giá\ntrị mỗi cổ phần. [2]\nCách ra khuyến nghị Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. Mua\nnếu >20%, Bán nếu <-10%, còn lại là Giữ; nếu thiếu target mô hình đủ dùng\nthì xếp Theo dõi.\nKết quả hiện tại Giá hiện tại 23,500 VND, giá mục tiêu 23,811 VND, tiềm năng tăng/giảm\n+1.3%, tổng lợi suất kỳ vọng +6.4%, khuyến nghị: Giữ.\nThời điểm giá thị trường Giá hiện tại được ghi nhận tại ngày 2026-06-18; báo cáo được tạo lúc 2026-\n06-20 21:50:34+07:00. Báo cáo ưu tiên giá thị trường mới nhất tại thời điểm\nNghiên cứu cổ phiếu 12\nHạng mục Diễn giải\ntạo báo cáo.\nNgười đọc tự kiểm chứng thế Mọi giả định đều hiển thị trong bảng dự phóng, mô hình định giá và ma trận\nnào độ nhạy. Nếu không đồng ý với giả định về chi phí vốn bình quân (WACC),\ntăng trưởng dài hạn, biên lợi nhuận hay vốn lưu động, người đọc có thể thay\nđổi và thấy ngay kết luận định giá thay đổi tương ứng. Mỗi nhận định định\ntính đều có đánh số [n] dẫn về nguồn ở mục Chú giải nguồn trích dẫn bên\ndưới.\nMinh chứng Chi tiết\nSố vết công thức 6 vết; phương pháp: wacc, fcff, fcfe, terminal_value, blend_dcf,\nsensitivity_matrix\nNguồn định giá tương đối vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nKiểm soát giá mục tiêu Raw model=23,811 VND; headline=23,811 VND; band=14,100-32,900 VND;\nđiều chỉnh=không điều chỉnh\nTrạng thái dữ liệu\nKhông ghi nhận khoảng trống dữ liệu trọng yếu trong các mục bắt buộc.\nCHÚ GIẢI NGUỒN TRÍCH DẪN\n[1] Dữ liệu tài chính & thị trường — Báo cáo tài chính (BCTC) đã chuẩn hóa và dữ liệu giao dịch thị trường; dùng\ncho mọi số liệu và nhận định về doanh thu, lợi nhuận, dòng tiền, nợ vay, vốn lưu động, biên lợi nhuận và định\ngiá.\n[2] Mô hình định giá nội bộ — dự phóng dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết khấu theo\nchi phí vốn bình quân (WACC), giá trị cuối kỳ, nợ ròng, số cổ phiếu và giá mục tiêu.\nTại thời điểm lập báo cáo, hệ thống chưa thu thập được bài báo bên ngoài phù hợp từ các nguồn được phép.\nPhần nhận định định tính được xây dựng từ báo cáo tài chính, công bố chính thức, dữ liệu định lượng và so sánh\ncùng ngành. Đây là hạn chế về coverage nguồn tin, không phải xác nhận rằng doanh nghiệp không có sự kiện\nmới.\nTUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM\nBáo cáo này chỉ nhằm mục đích cung cấp thông tin và không phải là lời mời mua hoặc bán chứng khoán. Nhà\nđầu tư cần tự đánh giá khẩu vị rủi ro và tham khảo ý kiến chuyên gia được cấp phép trước khi ra quyết định.\nNghiên cứu cổ phiếu 13"
+      "text": "Nghiên cứu cổ phiếu BÁO CÁO CẬP NHẬT ĐỊNH GIÁ\nNGÀNH DƯỢC PHẨM Ngày 2026-06-22\nCTCP DUOC PHAM OPC (OPC VN) HOSE: OPC\nNhóm phân tích\nKhuyến nghị · HOSE: OPC\nBáo cáo cập nhật\nBán\nHOSE: OPC\nGiá mục tiêu: 20,138 VND | Tiềm năng tăng/giảm: -14.3% | Ngày\nDược phẩm\ngiá: 2026-06-18 | Tạo: 2026-06-22 16:48\nGiá mục tiêu 20,138 VND\nCTCP Duoc pham OPC (OPC) là doanh nghiệp dược phẩm có nền doanh\nGiá hiện tại 23,500 thu 1,123 tỷ đồng với biên lợi nhuận gộp 41.4%, đủ để hỗ trợ tăng\n(VND) trưởng doanh thu dự phóng -1.4% mà không cần mở rộng đòn bẩy vận\nhành quá mức. Mô hình định giá cho giá mục tiêu 20,138 VND so với thị\nNgày giá thị 2026-06-18\ngiá 23,500 VND, biên tiềm năng -14.3%. Khoảng giá trị hợp lý theo ma\ntrường\ntrận độ nhạy trải từ 16,907 VND đến 26,144 VND, phản ánh mức độ\nThời điểm tạo 2026-06-22 không chắc chắn của các giả định dài hạn. Luận điểm đầu tư xoay quanh\nbáo cáo 16:48 ba câu hỏi: (i) doanh nghiệp có giữ được biên gộp trước áp lực chi phí\nnguyên liệu API và tỷ giá không? (ii) kỷ luật chi phí bán hàng và quản lý\nTỷ lệ -14.3% có đảm bảo biên EBIT không bị xói mòn khi tăng doanh thu? (iii) chi đầu\ntăng/giảm\ntư dài hạn phục vụ nâng chuẩn nhà máy GMP-EU có phá vỡ cấu trúc\ndòng tiền tự do hay không? Ba câu hỏi này quyết định độ tin cậy của kết\nTổng tỷ suất lợi -10.9%\nquả mô hình FCFF và từ đó quyết định giá trị hợp lý. Rủi ro trọng yếu là\nnhuận\nkết quả đấu thầu ETC và biến động giá API — hai yếu tố này tác động\nđồng thời lên cả doanh thu lẫn biên, và là nguồn sai lệch lớn nhất so với\ngiả định cơ sở. [1][2]\nLuận điểm cập nhật\nCTCP Duoc pham OPC hoạt động trên hai kênh phân phối ETC (đấu thầu\nbệnh viện) và OTC (nhà thuốc bán lẻ). Doanh thu kỳ gần nhất đạt 1,123\ntỷ đồng, tăng 15.9% so với kỳ trước — cần theo dõi tính bền vững so với\nCAGR lịch sử (CAGR lịch sử -1.4%). Biên lợi nhuận gộp 41.4% phản ánh\nnăng lực kiểm soát giá vốn API trong môi trường tỷ giá biến động; đây\nlà chỉ số quan trọng hơn tốc độ tăng doanh thu vì nó xác định chất\nlượng lợi nhuận thực sự. Tỷ lệ chuyển đổi tiền mặt 0.51 lần cho thấy mức\nđộ lợi nhuận kế toán được hỗ trợ bởi dòng tiền vận hành thực — tỷ lệ\nNguồn nhóm phân tích thu thập\ndưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải thu bệnh viện.\nNhận định: Thị giá 23,500 VND so\nBiến số vận hành trọng yếu là sản lượng và giá trúng thầu ETC, vì kênh\nvới giá mục tiêu 20,138 VND, hàm ý\nnày vừa có tỷ trọng doanh thu cao vừa chịu áp lực chính sách đấu thầu\n-14.3%; tín hiệu giá chỉ có giá trị khi\nđịnh kỳ. Diễn biến giá API và tiến độ nâng chuẩn nhà máy là hai chỉ báo\nđi cùng thanh khoản và ngày giá\nvận hành cần theo dõi song song với kết quả tài chính quý. [1]\n2026-06-18.\nĐộng lực tăng trưởng\nThông tin giao dịch\nDoanh thu 1,123 tỷ đồng tăng 15.9% so với kỳ trước, trên nền CAGR lịch\nMã giao dịch OPC VN\nsử -1.4%. Giả định dự phóng -1.4% thận trọng hơn tốc độ gần nhất\n15.9%, phản ánh quan điểm bảo thủ về tính bền vững của động lực tăng\nSàn HOSE\ntrưởng hiện tại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh\nNgành Dược phẩm ETC (đấu thầu bệnh viện) — kênh này vừa có quy mô lớn vừa bị chi phối\nbởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các\nquý. Kênh OTC ổn định hơn nhưng tăng trưởng thấp hơn; nó đóng vai\nGiá đóng cửa 23,500\ntrò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần theo\nGiá cao/thấp 21,100 / 25,400 dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức\n52 tuần độ thâm nhập kênh OTC — ba con số này sẽ xác nhận hoặc bác bỏ giả\nđịnh tăng trưởng của mô hình. [1]\nVốn hóa 1,779\nSố lượng cổ 76\nphiếu\nKLGD bình 7,190\nquân 30 phiên\nTỷ lệ sở hữu N/A\nnước ngoài\nTriển vọng kinh doanh và tài chính\nCẬP NHẬT HOẠT ĐỘNG KINH DOANH\nCTCP Duoc pham OPC hoạt động trên hai kênh phân phối ETC (đấu thầu bệnh viện) và OTC (nhà thuốc bán lẻ).\nDoanh thu kỳ gần nhất đạt 1,123 tỷ đồng, tăng 15.9% so với kỳ trước — cần theo dõi tính bền vững so với CAGR\nlịch sử (CAGR lịch sử -1.4%). Biên lợi nhuận gộp 41.4% phản ánh năng lực kiểm soát giá vốn API trong môi trường\ntỷ giá biến động; đây là chỉ số quan trọng hơn tốc độ tăng doanh thu vì nó xác định chất lượng lợi nhuận thực\nsự. Tỷ lệ chuyển đổi tiền mặt 0.51 lần cho thấy mức độ lợi nhuận kế toán được hỗ trợ bởi dòng tiền vận hành\nthực — tỷ lệ dưới 0,8 lần thường báo hiệu áp lực vốn lưu động từ phải thu bệnh viện. Biến số vận hành trọng yếu\nlà sản lượng và giá trúng thầu ETC, vì kênh này vừa có tỷ trọng doanh thu cao vừa chịu áp lực chính sách đấu\nthầu định kỳ. Diễn biến giá API và tiến độ nâng chuẩn nhà máy là hai chỉ báo vận hành cần theo dõi song song\nvới kết quả tài chính quý. [1]\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A doanh thu 1,123 tỷ đồng, tăng +15.9% so với 2024A; biên EBITDA -1.5 điểm % và biên EBIT\n-1.1 điểm %. Nếu doanh thu tăng nhưng hai biên này không mở rộng, luận điểm tăng trưởng phải dựa vào chất\nlượng chi phí chứ không chỉ vào quy mô.\nNghiên cứu cổ phiếu 2\nNguồn: Báo cáo tài chính công ty; tính toán của nhóm phân tích.\nNhận định: 2025A biên gộp 41.4% (-0.2 điểm % so với kỳ trước), biên ròng 10.4% (-0.9 điểm %), ROE 11.9% (-0.5\nđiểm % so với 2024A). Chênh lệch giữa biên lợi nhuận và ROE là tín hiệu về hiệu quả sử dụng vốn, không phải chỉ\nlà biến động kế toán.\nKẾT QUẢ TÀI CHÍNH CHÍNH\nDoanh thu 1,123 tỷ đồng với biên lợi nhuận ròng 10.4% và biên gộp 41.4% vẽ nên bức tranh một doanh nghiệp\ncó khả năng tạo lợi nhuận tương đối ổn định, song phụ thuộc vào kiểm soát chi phí hơn là tăng trưởng sản\nlượng đột biến. Điểm đáng chú ý là tỷ lệ chuyển đổi tiền mặt 0.51 lần. Tỷ lệ này báo hiệu cần kiểm tra chặt hơn\nchất lượng thu tiền và vốn lưu động. Đây là cơ chế giải thích tại sao biên lợi nhuận ròng 10.4% không nhất thiết\ntương đương với khả năng tạo dòng tiền tự do. Biến động lợi nhuận giữa các năm chủ yếu đến từ ba nguồn: (1)\nthay đổi giá vốn API/tỷ giá; (2) cơ cấu kênh ETC/OTC; (3) chu kỳ chi phí bán hàng và quản lý liên quan đấu thầu.\nNhững yếu tố này được chuẩn hóa thành biến số dự phóng (biên gộp 41.5%, chi phí bán hàng và quản lý 27.3%\ndoanh thu) và là cơ sở để phân tích độ nhạy — người đọc có thể kiểm tra xem kết quả mô hình thay đổi như thế\nnào khi từng giả định dịch chuyển. [1]\nNhận định: Lợi nhuận tăng nhanh hơn doanh thu, cho thấy tăng trưởng chủ yếu đến từ cải thiện biên lợi nhuận\nvà tiết giảm chi phí, không phải từ tăng sản lượng. Chất lượng tăng trưởng phụ thuộc vào khả năng duy trì\nbiên; không nên nâng tăng trưởng dài hạn chỉ dựa trên mức lợi nhuận cao nhất thời. [1][2]\nNhận định: Doanh nghiệp ở vị thế tiền mặt ròng (nợ ròng âm so với EBITDA). Linh hoạt tài chính cao, hỗ trợ cổ\ntức/đầu tư; rủi ro đòn bẩy thấp. [1]\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,172 1,005 969 1,123 1,107 1,092 1,076 1,061 1,046\nTăng trưởng doanh thu — -14.2% -3.6% 15.9% -1.4% -1.4% -1.4% -1.4% -1.4%\nLợi nhuận ròng 142 122 109 116 124 123 121 119 118\nTăng trưởng lợi nhuận — -14.1% -10.5% 6.4% 6.9% -1.4% -1.4% -1.4% -1.4%\nNghiên cứu cổ phiếu 3\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nEPS điều chỉnh (VND) 2,000 1,634 1,421 1,538 1,645 1,622 1,599 1,577 1,555\nTăng trưởng EPS — -18.3% -13.0% 8.2% 7.0% -1.4% -1.4% -1.4% -1.4%\nROE 16.3% 13.8% 12.5% 11.9% 12.0% 11.1% 10.4% 9.7% 9.1%\nROA 11.4% 9.7% 9.0% 8.5% 8.7% 8.2% 7.8% 7.4% 7.0%\nNợ ròng / EBITDA -1.5x -1.7x -1.5x -1.8x -1.7x -2.1x -2.6x -3.1x -3.5x\nP/E 11.8x 14.4x 16.5x 15.3x 14.3x 14.5x 14.7x 14.9x 15.1x\nP/B 2.0x 2.0x 2.0x 1.8x 1.7x 1.6x 1.5x 1.5x 1.4x\nCẦU NỐI LỢI NHUẬN 2025A-2026F\nĐối chiếu trực tiếp với số liệu công bố trong mô hình định giá.\nChỉ tiêu 2025A 2026F Chênh lệch Nhận định\nDoanh thu thuần 1,123 1,107 -1.4% Cơ sở kiểm tra mức tăng lợi nhuận.\nBiên lợi nhuận gộp 41.4% 41.5% +10 bps Biến động biên trong ngưỡng theo\ndõi.\nChi phí bán hàng và quản lý -311 -302 -2.9% Chi phí tuyệt đối giảm dù doanh thu\ntăng; cần bằng chứng vận hành.\nBiên lợi nhuận HĐKD / EBIT 13.7% 14.2% +50 bps Biến động biên trong ngưỡng theo\ndõi.\nLNST sau CĐKKS / LNST CĐ 116 124 +6.9% Đối chiếu với tăng trưởng doanh\nmẹ thu và giả định mô hình.\nBiên lợi nhuận ròng 10.4% 11.2% +88 bps Biến động biên trong ngưỡng theo\ndõi.\nEPS 1,538 1,645 +7.0% Đối chiếu với tăng trưởng doanh\nthu và giả định mô hình.\nĐỘNG LỰC DỰ PHÓNG\nDoanh thu 1,123 tỷ đồng tăng 15.9% so với kỳ trước, trên nền CAGR lịch sử -1.4%. Giả định dự phóng -1.4% thận\ntrọng hơn tốc độ gần nhất 15.9%, phản ánh quan điểm bảo thủ về tính bền vững của động lực tăng trưởng hiện\ntại. Nguồn tăng trưởng chính là mở rộng sản lượng kênh ETC (đấu thầu bệnh viện) — kênh này vừa có quy mô\nlớn vừa bị chi phối bởi chu kỳ đấu thầu định kỳ, tạo ra sự biến động không đều giữa các quý. Kênh OTC ổn định\nhơn nhưng tăng trưởng thấp hơn; nó đóng vai trò giảm thiểu biến động hơn là dẫn dắt tăng trưởng. Chỉ báo cần\ntheo dõi: tỷ lệ trúng thầu so với dự thầu ETC, tiến độ đầu tư công suất và mức độ thâm nhập kênh OTC — ba con\nsố này sẽ xác nhận hoặc bác bỏ giả định tăng trưởng của mô hình. [1]\nBiên lợi nhuận gộp hiện tại 41.4%, mô hình kỳ vọng biên gộp duy trì ổn định (41.5% dự phóng). Áp lực chính lên\nbiên gộp là chi phí API nhập khẩu và tỷ giá USD/VND: khi hai yếu tố này tăng cùng chiều, giá vốn hàng bán tăng\nvà biên gộp bị thu hẹp ngay trong quý tiếp theo vì chu kỳ nhập khẩu thường ngắn. Dư địa hấp thụ cú sốc này bị\ngiới hạn bởi biên lợi nhuận ròng hiện ở mức 10.4% — không đủ đệm để hấp thụ nếu biên gộp giảm quá 2–3\nNghiên cứu cổ phiếu 4\nđiểm phần trăm. Chi phí bán hàng và quản lý 27.3% doanh thu là lớp chi phí quyết định khoảng cách biên gộp\nđến biên EBIT; đặc biệt chi phí phục vụ đấu thầu ETC có xu hướng không co giãn theo doanh thu. Thuế suất hiệu\ndụng 21.1% là bước chuyển cuối từ EBIT sang lợi nhuận sau thuế — biến số này ít biến động nhưng bất kỳ thay\nđổi ưu đãi thuế nào sẽ tác động trực tiếp. Chỉ báo cần theo dõi: giá API theo chỉ số thị trường nguyên liệu dược,\ntỷ giá USD/VND, và biên gộp thực tế quý tiếp theo so với giả định — đây là tín hiệu sớm cho việc cần điều chỉnh\nmô hình. [1]\nNguồn: Dự phóng của nhóm phân tích dựa trên giả định đã phê duyệt.\nNhận định: 2026F hàm ý doanh thu tăng -1.4% so với 2025A, trong khi biên gộp dự phóng 41.5% so với mức\nthực tế 41.4%. Đây là điểm kiểm tra trọng yếu vì sai lệch nhỏ ở tăng trưởng hoặc biên gộp sẽ truyền trực tiếp vào\nEBIT và FCFF.\nNghiên cứu cổ phiếu 5\nĐỘNG LỰC DỰ PHÓNG CHÍNH\nGiả định biến số chính được hiệu chỉnh từ dữ liệu lịch sử và định hướng kinh doanh hiện tại.\nChỉ tiêu Giả định cơ sở Liên kết tài chính\nTăng trưởng doanh thu -1.4% Doanh thu dẫn tới EBIT và dòng tiền\ntự do\nBiên lợi nhuận gộp 41.5% Giá vốn dẫn tới lợi nhuận gộp\nChi phí bán hàng và quản lý / 27.3% Chi phí vận hành dẫn tới biên EBIT\ndoanh thu\nKhấu hao / doanh thu 2.1% EBIT và lá chắn thuế\nChi đầu tư / doanh thu 1.4% Dòng tiền tự do và mở rộng công suất\nThuế suất hiệu dụng 21.1% LNST và NOPAT\nChuyển đổi dòng tiền 2025 51.5% Kỷ luật vốn lưu động\nWACC 12.8% Tỷ lệ chiết khấu dòng tiền\nTăng trưởng dài hạn 3.0% Giá trị cuối kỳ trong mô hình chiết\nkhấu dòng tiền\nĐịnh giá và độ nhạy\nLUẬN ĐIỂM ĐỊNH GIÁ\nDự phóng theo phương pháp dự phóng theo biến số, đi từ biến số kinh doanh tới dòng tài chính tới định giá. Giả\nđịnh cơ sở: tăng trưởng doanh thu -1.4% (căn cứ CAGR lịch sử -1.4% và kế hoạch mở rộng ETC/OTC); biên lợi\nnhuận gộp 41.5% (phản ánh áp lực API và cơ cấu sản phẩm); chi phí bán hàng và quản lý 27.3% doanh thu; thuế\nsuất hiệu dụng 21.1%; chi đầu tư 1.4% doanh thu. Biến số có tác động lớn nhất tới giá trị là: (1) tăng trưởng\ndoanh thu — mỗi điểm phần trăm hụt so với giả định cơ sở sẽ kéo EBIT và FCFF giảm theo tỷ lệ; (2) biên lợi\nnhuận gộp — biến động chi phí API truyền trực tiếp vào đây trước khi ảnh hưởng xuống các tầng dưới; (3) chi\nđầu tư và vốn lưu động — quyết định bao nhiêu phần EBIT còn lại dưới dạng FCFF sau tái đầu tư. Hai tham số\nđịnh giá quan trọng nhất là WACC 12.8% và tăng trưởng dài hạn 3.0%; chúng xác định cách quy đổi FCFF tương\nlai về hiện giá. Độ nhạy của giá mục tiêu với hai tham số này cao hơn bất kỳ biến số vận hành nào — đây là lý do\nma trận độ nhạy là bắt buộc chứ không phải tùy chọn. Rủi ro sai lệch lớn nhất là khi giả định tăng trưởng lạc\nquan gặp thực tế đấu thầu thắt chặt hoặc giá API tăng đột biến cùng lúc. [1][2]\nNhận định: Tiềm năng tăng/giảm giá theo mô hình định giá là -14.3%. Trạng thái khuyến nghị theo mô hình:\nBán. [2]\nKẾT QUẢ ĐỊNH GIÁ\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nFCFF 20,138 — Cần rà soát\nFCFE 20,138 — Cần rà soát\nBLEND 20,138 — Cần rà soát\nNghiên cứu cổ phiếu 6\nChỉ tiêu Giá trị mỗi cổ phiếu (VNTDr)ọng số Trạng thái\nP/E 30,731 — Cần rà soát\nCORE P/E + NET CASH 35,464 — Cần rà soát\nGiá mục tiêu tổng hợp 20,138 100.0% Tổng hợp\nCẦU NỐI WACC\nChỉ tiêu Giá trị\nLãi suất phi rủi ro 4.0%\nBeta 0.85\nPhần bù rủi ro thị trường 8.0%\nChi phí vốn chủ sở hữu 12.8%\nChi phí nợ vay 8.0%\nThuế suất 21.1%\nWACC 12.8%\nCẦU NỐI ĐỊNH GIÁ FCFF\nChỉ tiêu Giá trị\nPV giá trị cuối kỳ 728\nGiá trị doanh nghiệp 1,206\nTiền mặt và đầu tư ngắn hạn 222\nNợ vay 0\nGiá trị vốn chủ sở hữu 1,524\nSố cổ phiếu lưu hành (triệu) 76\nGiá mục tiêu (VND/cổ phiếu) 20,138\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,172 1,005 969 1,123 1,107 1,092 1,076 1,061 1,046\nTăng trưởng doanh thu — -14.2% -3.6% 15.9% -1.4% -1.4% -1.4% -1.4% -1.4%\nLợi nhuận gộp 485 427 403 465 460 453 447 440 434\nBiên lợi nhuận gộp 41.4% 42.5% 41.6% 41.4% 41.5% 41.5% 41.5% 41.5% 41.5%\nNghiên cứu cổ phiếu 7\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nGVHB trừ khấu hao -687 -578 -566 -658 -648 -639 -630 -621 -612\nChi phí bán hàng và quản lý -297 -264 -259 -311 -302 -298 -293 -289 -285\nDoanh thu tài chính 8 17 9 20 — — — — —\nChi phí tài chính -8 -7 -7 -6 0 0 0 0 0\nEBITDA 211 186 166 176 181 179 176 174 171\nTỷ suất EBITDA 18.0% 18.5% 17.2% 15.7% 16.4% 16.4% 16.4% 16.4% 16.4%\nKhấu hao 23 23 22 22 23 23 23 22 22\nLợi nhuận từ HĐKD / EBIT 188 163 144 154 158 156 153 151 149\nBiên lợi nhuận HĐKD / EBIT 16.1% 16.2% 14.9% 13.7% 14.2% 14.2% 14.2% 14.2% 14.2%\nLợi nhuận khác -8 -7 -7 -6 0 0 0 0 0\nChi phí lãi vay ròng -1 0 0 0 0 0 0 0 0\nThuế -38 -33 -28 -32 -33 -33 -32 -32 -31\nThuế suất thực tế 20.9% 21.2% 20.2% 21.4% 21.1% 21.0% 21.1% 21.0% 21.1%\nLNST sau CĐKKS / LNST CĐ 142 122 109 116 124 123 121 119 118\nmẹ\nBiên lợi nhuận ròng 12.2% 12.2% 11.3% 10.4% 11.2% 11.2% 11.3% 11.3% 11.2%\nTiền mặt từ hoạt động kinh 36 255 24 60 158 155 153 151 149\ndoanh\nSố lượng cổ phiếu (triệu) 76 76 76 76 76 76 76 76 76\nEPS 2,000 1,634 1,421 1,538 1,645 1,622 1,599 1,577 1,555\nEPS hiệu chỉnh 2,000 1,634 1,421 1,538 1,645 1,622 1,599 1,577 1,555\nTăng trưởng EPS hiệu chỉnh — -18.3% -13.0% 8.2% 7.0% -1.4% -1.4% -1.4% -1.4%\nĐỘ NHẠY GIÁ MỤC TIÊU (WACC × tăng trưởng dài hạn)\nĐơn vị: VND/cp — mô hình chiết khấu dòng tiền FCFF.\ng=2.0% g=2.5% g=3.0% g=3.5% g=4.0%\nWACC 10.8% 22,436 23,195 24,052 25,026 26,144\nWACC 11.8% 20,633 21,220 21,874 22,607 23,433\nWACC 12.8% 19,163 19,627 20,138 20,705 21,336\nWACC 13.8% 17,940 18,314 18,722 19,170 19,664\nWACC 14.8% 16,907 17,212 17,544 17,905 18,300\nNghiên cứu cổ phiếu 8\nRủi ro đầu tư\nYẾU TỐ CẦN THEO DÕI\nRủi ro và yếu tố hỗ trợ của CTCP Duoc pham OPC đều gắn với cơ chế truyền dẫn tài chính cụ thể, không đơn\nthuần là liệt kê định tính. Rủi ro giảm giá theo mức độ ưu tiên: (1) giá trúng thầu ETC thấp hơn kỳ vọng — đây là\nrủi ro trọng yếu nhất vì tác động đồng thời lên doanh thu và biên gộp, tức là thu hẹp FCFF từ cả hai phía; (2) giá\nAPI nhập khẩu và tỷ giá USD/VND tăng — ảnh hưởng trực tiếp đến giá vốn, thu hẹp biên gộp 41.5% giả định; (3)\nkéo dài chu kỳ phải thu bệnh viện — làm tăng ΔNWC và giảm FCFF dù lợi nhuận kế toán vẫn cao; (4) cạnh tranh\ngeneric gia tăng — tạo áp lực giảm giá trên sản phẩm chủ lực; (5) thay đổi chính sách đăng ký lưu hành và tiêu\nchuẩn GMP. Yếu tố hỗ trợ: trúng thêm thầu ETC mới là yếu tố có tác động lớn nhất và gần nhất đến FCFF; cải\nthiện cơ cấu sản phẩm biên cao (chuyển dần từ generic sang branded generic) nâng biên gộp một cách bền vững\nhơn mở rộng sản lượng thuần túy; hoàn tất đầu tư GMP-EU mở rộng tập khách hàng xuất khẩu, giảm phụ thuộc\nvào chu kỳ đấu thầu nội địa. Mỗi yếu tố cần gắn với chỉ báo sớm cụ thể: kết quả đấu thầu ETC hàng quý, biến\nđộng giá API theo chỉ số thị trường nguyên liệu dược, vòng quay phải thu so với cùng kỳ. Khi có dữ liệu mới, nhà\nphân tích nên chạy lại ma trận độ nhạy để xác nhận kết luận định giá còn hiệu lực. [1]\nRỦI RO ĐẦU TƯ\nRủi ro Mức độ Theo dõi\nÁp lực giá thầu thuốc Cao Kết quả đấu thầu ETC\nBiến động nguyên liệu và tỷ Trung bình API, USD/VND\ngiá\nCạnh tranh generic Trung bình Thị phần và giá bán\nPhụ lục bảng tài chính\nTÓM TẮT TÀI CHÍNH\nĐơn vị: tỷ đồng, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,172 1,005 969 1,123 1,107 1,092 1,076 1,061 1,046\nTăng trưởng doanh thu — -14.2% -3.6% 15.9% -1.4% -1.4% -1.4% -1.4% -1.4%\nLợi nhuận ròng 142 122 109 116 124 123 121 119 118\nTăng trưởng lợi nhuận — -14.1% -10.5% 6.4% 6.9% -1.4% -1.4% -1.4% -1.4%\nEPS điều chỉnh (VND) 2,000 1,634 1,421 1,538 1,645 1,622 1,599 1,577 1,555\nTăng trưởng EPS — -18.3% -13.0% 8.2% 7.0% -1.4% -1.4% -1.4% -1.4%\nROE 16.3% 13.8% 12.5% 11.9% 12.0% 11.1% 10.4% 9.7% 9.1%\nROA 11.4% 9.7% 9.0% 8.5% 8.7% 8.2% 7.8% 7.4% 7.0%\nNợ ròng / EBITDA -1.5x -1.7x -1.5x -1.8x -1.7x -2.1x -2.6x -3.1x -3.5x\nP/E 11.8x 14.4x 16.5x 15.3x 14.3x 14.5x 14.7x 14.9x 15.1x\nNghiên cứu cổ phiếu 9\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nP/B 2.0x 2.0x 2.0x 1.8x 1.7x 1.6x 1.5x 1.5x 1.4x\nCÁC KHOẢN MỤC CĐKT VÀ DÒNG TIỀN\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThay đổi vốn lưu động 129 22 26 74 -10 -9 -9 -9 -9\nChi đầu tư 7 12 12 18 16 17 19 21 22\nĐầu tư vào công ty liên kết/liên — — — — — — — — —\ndoanh\nCác khoản mục dòng tiền khác — — — — — — — — —\nDòng tiền tự do 29 243 12 42 142 138 134 130 127\nPhát hành cổ phiếu — — — — — — — — —\nCổ tức 27 96 96 0 60 60 59 58 57\nTổng nợ phải trả 374 377 345 396 396 396 396 396 396\nThay đổi tổng nợ phải trả — 2 -32 51 0 0 0 0 0\nNợ vay có lãi cuối năm 0 0 0 0 0 0 0 0 0\nThay đổi nợ vay có lãi — 0 0 0 0 0 0 0 0\nTiền và tương đương tiền 315 321 247 318 304 383 458 530 600\nNợ ròng cuối năm (nợ vay có lãi -315 -321 -247 -318 -304 -383 -458 -530 -600\n- tiền)\nThay đổi nợ ròng — -6 74 -72 14 -78 -75 -72 -69\nVốn CSH 872 884 877 976 1,040 1,103 1,165 1,227 1,287\nGiá trị sổ sách/cp (VND) 11,519 11,680 11,583 12,886 13,734 14,570 15,393 16,206 17,006\nNợ ròng / VCSH -36.1% -36.3% -28.1% -32.6% -29.3% -34.7% -39.3% -43.2% -46.6%\nNợ ròng / EBITDA -1.5x -1.7x -1.5x -1.8x -1.7x -2.1x -2.6x -3.1x -3.5x\nTổng tài sản 1,246 1,261 1,222 1,372 1,436 1,499 1,561 1,623 1,684\nCHỈ SỐ KHẢ NĂNG SINH LỢI VÀ ĐỊNH GIÁ\nĐơn vị: lần hoặc %, trừ khi có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROE 16.3% 13.8% 12.5% 11.9% 12.0% 11.1% 10.4% 9.7% 9.1%\nROA 11.4% 9.7% 9.0% 8.5% 8.7% 8.2% 7.8% 7.4% 7.0%\nNghiên cứu cổ phiếu 10\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nROIC 26.7% 22.8% 18.0% 18.5% 16.9% 17.0% 17.1% 17.1% 17.1%\nWACC 12.8% 12.8% 12.8% 12.8% 12.8% 12.8% 12.8% 12.8% 12.8%\nEVA 13.9% 10.0% 5.2% 5.7% 4.1% 4.2% 4.3% 4.3% 4.3%\nP/E 11.8x 14.4x 16.5x 15.3x 14.3x 14.5x 14.7x 14.9x 15.1x\nEV/EBITDA 6.9x 7.9x 9.2x 8.3x 8.1x 7.8x 7.5x 7.2x 6.9x\nEV/FCF 51.0x 6.0x 126.1x 35.0x 10.4x 10.1x 9.9x 9.6x 9.3x\nP/B 2.0x 2.0x 2.0x 1.8x 1.7x 1.6x 1.5x 1.5x 1.4x\nP/S 1.5x 1.8x 1.8x 1.6x 1.6x 1.6x 1.7x 1.7x 1.7x\nEV/Doanh thu 1.2x 1.5x 1.6x 1.3x 1.3x 1.3x 1.2x 1.2x 1.1x\nPEG — -0.8x -1.3x 1.9x 2.1x -10.4x -10.4x -10.8x -10.8x\nSuất sinh lợi cổ tức 0 0 0 0 0 0 0 0 0\nMÔ HÌNH ĐỊNH GIÁ\nĐơn vị: tỷ đồng nếu không có ghi chú khác\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,172 1,005 969 1,123 1,107 1,092 1,076 1,061 1,046\nTăng trưởng doanh thu — -14.2% -3.6% 15.9% -1.4% -1.4% -1.4% -1.4% -1.4%\nLợi nhuận gộp 485 427 403 465 460 453 447 440 434\nBiên lợi nhuận gộp 41.4% 42.5% 41.6% 41.4% 41.5% 41.5% 41.5% 41.5% 41.5%\nGVHB trừ khấu hao -687 -578 -566 -658 -648 -639 -630 -621 -612\nChi phí bán hàng và quản lý -297 -264 -259 -311 -302 -298 -293 -289 -285\nDoanh thu tài chính 8 17 9 20 — — — — —\nChi phí tài chính -8 -7 -7 -6 0 0 0 0 0\nEBITDA 211 186 166 176 181 179 176 174 171\nTỷ suất EBITDA 18.0% 18.5% 17.2% 15.7% 16.4% 16.4% 16.4% 16.4% 16.4%\nKhấu hao 23 23 22 22 23 23 23 22 22\nLợi nhuận từ HĐKD / EBIT 188 163 144 154 158 156 153 151 149\nBiên lợi nhuận HĐKD / EBIT 16.1% 16.2% 14.9% 13.7% 14.2% 14.2% 14.2% 14.2% 14.2%\nLợi nhuận khác -8 -7 -7 -6 0 0 0 0 0\nChi phí lãi vay ròng -1 0 0 0 0 0 0 0 0\nNghiên cứu cổ phiếu 11\nChỉ tiêu 2022A 2023A 2024A 2025A 2026F 2027F 2028F 2029F 2030F\nThuế -38 -33 -28 -32 -33 -33 -32 -32 -31\nThuế suất thực tế 20.9% 21.2% 20.2% 21.4% 21.1% 21.0% 21.1% 21.0% 21.1%\nLNST sau CĐKKS / LNST CĐ mẹ 142 122 109 116 124 123 121 119 118\nBiên lợi nhuận ròng 12.2% 12.2% 11.3% 10.4% 11.2% 11.2% 11.3% 11.3% 11.2%\nTiền mặt từ hoạt động kinh 36 255 24 60 158 155 153 151 149\ndoanh\nSố lượng cổ phiếu (triệu) 76 76 76 76 76 76 76 76 76\nEPS 2,000 1,634 1,421 1,538 1,645 1,622 1,599 1,577 1,555\nEPS hiệu chỉnh 2,000 1,634 1,421 1,538 1,645 1,622 1,599 1,577 1,555\nTăng trưởng EPS hiệu chỉnh — -18.3% -13.0% 8.2% 7.0% -1.4% -1.4% -1.4% -1.4%\nPhương pháp định giá và nguồn dữ liệu\nPHƯƠNG PHÁP VÀ GIẢ ĐỊNH CHÍNH\nBáo cáo trình bày nguồn dữ liệu, giả định dự phóng và phương pháp định giá để các kết luận chính có thể được\nđối chiếu. Những khoảng trống dữ liệu trọng yếu được công khai trong bản nháp phân tích và phải được xử lý\ntrước khi phát hành cho khách hàng.\nHạng mục Diễn giải\nSố liệu định lượng lấy từ đâu Doanh thu, lợi nhuận, dòng tiền, nợ vay, tiền mặt và số cổ phiếu lấy trực tiếp\ntừ Báo cáo tài chính (BCTC) đã chuẩn hóa; giá, vốn hóa và thanh khoản lấy từ\ndữ liệu thị trường. Các số liệu được đối chiếu với báo cáo gốc của doanh\nnghiệp. [1]\nVì sao dự phóng theo cách này Mỗi dòng dự phóng nối tiếp số liệu lịch sử: tăng trưởng doanh thu, biên lợi\nnhuận, vốn lưu động, chi đầu tư và thuế được kéo dài từ xu hướng quá khứ\nvà đặc thù ngành dược, để dòng tiền dự phóng bám sát năng lực thực tế của\ndoanh nghiệp thay vì giả định tùy ý. [1][2]\nCách tính giá mục tiêu Từ dự phóng, mô hình tính dòng tiền tự do doanh nghiệp và vốn chủ sở hữu\n(FCFF/FCFE), chiết khấu về hiện tại bằng chi phí vốn bình quân (WACC), cộng\ngiá trị cuối kỳ, trừ nợ ròng rồi chia cho số cổ phiếu đang lưu hành để ra giá\ntrị mỗi cổ phần. [2]\nCách ra khuyến nghị Tổng lợi suất kỳ vọng = tiềm năng tăng/giảm giá + suất sinh lợi cổ tức. Mua\nnếu >20%, Bán nếu <-10%, còn lại là Giữ; nếu thiếu target mô hình đủ dùng\nthì xếp Theo dõi.\nKết quả hiện tại Giá hiện tại 23,500 VND, giá mục tiêu 20,138 VND, tiềm năng tăng/giảm\n-14.3%, tổng lợi suất kỳ vọng -10.9%, khuyến nghị: Bán.\nThời điểm giá thị trường Giá hiện tại được ghi nhận tại ngày 2026-06-18; báo cáo được tạo lúc 2026-\n06-22 16:48:02+07:00. Báo cáo ưu tiên giá thị trường mới nhất tại thời điểm\nNghiên cứu cổ phiếu 12\nHạng mục Diễn giải\ntạo báo cáo.\nNgười đọc tự kiểm chứng thế Mọi giả định đều hiển thị trong bảng dự phóng, mô hình định giá và ma trận\nnào độ nhạy. Nếu không đồng ý với giả định về chi phí vốn bình quân (WACC),\ntăng trưởng dài hạn, biên lợi nhuận hay vốn lưu động, người đọc có thể thay\nđổi và thấy ngay kết luận định giá thay đổi tương ứng. Mỗi nhận định định\ntính đều có đánh số [n] dẫn về nguồn ở mục Chú giải nguồn trích dẫn bên\ndưới.\nMinh chứng Chi tiết\nSố vết công thức 6 vết; phương pháp: wacc, fcff, fcfe, terminal_value, blend_dcf,\nsensitivity_matrix\nNguồn định giá tương đối vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nKiểm soát giá mục tiêu Raw model=20,138 VND; headline=20,138 VND; band=14,100-32,900 VND;\nđiều chỉnh=không điều chỉnh\nTrạng thái dữ liệu\nKhông ghi nhận khoảng trống dữ liệu trọng yếu trong các mục bắt buộc.\nCHÚ GIẢI NGUỒN TRÍCH DẪN\n[1] Dữ liệu tài chính & thị trường — Báo cáo tài chính (BCTC) đã chuẩn hóa và dữ liệu giao dịch thị trường; dùng\ncho mọi số liệu và nhận định về doanh thu, lợi nhuận, dòng tiền, nợ vay, vốn lưu động, biên lợi nhuận và định\ngiá.\n[2] Mô hình định giá nội bộ — dự phóng dòng tiền tự do doanh nghiệp/cổ đông (FCFF/FCFE), chiết khấu theo\nchi phí vốn bình quân (WACC), giá trị cuối kỳ, nợ ròng, số cổ phiếu và giá mục tiêu.\nTại thời điểm lập báo cáo, hệ thống chưa thu thập được bài báo bên ngoài phù hợp từ các nguồn được phép.\nPhần nhận định định tính được xây dựng từ báo cáo tài chính, công bố chính thức, dữ liệu định lượng và so sánh\ncùng ngành. Đây là hạn chế về coverage nguồn tin, không phải xác nhận rằng doanh nghiệp không có sự kiện\nmới.\nTUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM\nBáo cáo này chỉ nhằm mục đích cung cấp thông tin và không phải là lời mời mua hoặc bán chứng khoán. Nhà\nđầu tư cần tự đánh giá khẩu vị rủi ro và tham khảo ý kiến chuyên gia được cấp phép trước khi ra quyết định.\nNghiên cứu cổ phiếu 13"
     },
     "explanation_pdf": {
       "path": "C:\\Users\\Admin\\Desktop\\multi-agent-equity-research\\output\\OPC_explanation.pdf",
       "exists": true,
       "pages": 6,
-      "text": "Mã cổ phiếu: OPC\nPhụ lục giải trình định giá - OPC\nDoanh nghiệp được phân tích: CTCP Duoc pham OPC.\nTài liệu này là phụ lục chi tiết của báo cáo định giá. Mục tiêu là giải thích vì sao báo cáo chính đưa ra giá mục tiêu,\nmức tăng/giảm kỳ vọng, khuyến nghị và các nhận định trọng tâm bằng dữ liệu đầu vào, công thức, bước tính trung\ngian và cảnh báo cần đọc kèm.\nTrạng thái và giới hạn\nTrạng thái báo cáo: Có thể đọc, kèm công bố phần dữ liệu còn thiếu\nMã lần chạy: run_opc_20260620T143352_af5de12a35\nThiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\nKết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nMinh chứng kiểm định\nThành phần Giá trị\nSố vết công thức 6 (wacc, fcff, fcfe, terminal_value, blend_dcf, sensitivity_matrix)\nNguồn định giá tương đối đối chiếu vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nDữ liệu và kiểm định cần bổ sung trước khi phát hành:\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo trọng yếu; cần đọc cùng bảng tính chi tiết và phần đối chiếu trước khi sử dụng khuyến\nnghị.\nCảnh báo mô hình và dữ liệu:\n- No SG&A or EBIT history — using default SG&A of 20% of revenue\n- [DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.\n- Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to\ninterest_expense/revenue ratio as proxy. Interest expense confidence: low.\n- Thiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\n- EV/EBITDA thiếu dữ liệu: EBITDA unavailable for EV bridge.\n- Cảnh báo nghiêm trọng: cần rà soát thêm dữ liệu đầu vào và giả định định giá.\n- FCFE có độ tin cậy thấp; lịch vay ròng và giả định dòng tiền cho cổ đông cần được kiểm định thêm.\n- FCFF có độ tin cậy thấp; WACC, tăng trưởng dài hạn và dòng tiền nền cần được kiểm định thêm.\n- Thiếu phê duyệt cuối cho khuyến nghị đầu tư.\n- relative_valuation_fallback_pe\n- Cảnh báo đối chiếu định giá: các kiểm tra độc lập cho kết quả lệch đáng kể, cần rà soát cầu nối thị trường và giả\nđịnh mô hình.\nVì sao báo cáo chính kết luận như vậy\nThành phần Giá trị\nGiá thị trường dùng trong báo cáo 23,500\nGiá mục tiêu tính được 23,811\nTăng/giảm so với giá thị trường 1.3%\nKhuyến nghị trong báo cáo chính Giữ\nGiá trị theo FCFF 25,493\nGiá trị theo FCFE 21,287\nTrọng số FCFF / FCFE 60.0% / 40.0%\nĐộ lệch FCFF/FCFE 19.8%\nWACC 13.8%\nThành phần Giá trị\nTăng trưởng dài hạn 3.0%\nDoanh thu năm đầu dự phóng 1,107\nDoanh thu năm cuối dự phóng 1,046\nLNST năm đầu dự phóng 188\nLNST năm cuối dự phóng 178\nKết luận trong báo cáo chính được nối trực tiếp từ giá thị trường, giá trị nội tại theo dòng tiền, mức tăng/giảm kỳ vọng\nvà các cảnh báo dữ liệu. Nếu FCFF và FCFE cho kết quả lệch lớn, người đọc phải ưu tiên phần kết hợp phương\npháp, phân tích độ nhạy và đối chiếu cảnh báo thay vì chỉ đọc một giá mục tiêu duy nhất.\nCảnh báo cần đọc kèm kết luận:\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nKết quả phản biện chất lượng phân tích\nPhần này tóm tắt các đánh giá định tính về logic dự phóng, luận điểm đầu tư, chất lượng bằng chứng và tính nhất\nquán của định giá.\nCần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\nDCF và FCFF/FCFE có cảnh báo về dòng tiền tự do lịch sử âm hoặc tỷ trọng giá trị cuối kỳ cao; cần kiểm tra\ntrong phân tích độ nhạy và bước chuẩn hóa giả định.\n[Mức độ trung bình] Peer P/E and EV/EBITDA medians are missing for the peer group, limiting cross-checks\nand relative valuation robustness. The PE method is thiếu dữ liệu; EV/EBITDA bridge lacks peer median.\nProvide peer dataset or define peer taxonomy.\n[Mức độ trung bình] SG&A historical line items are insufficient (sga.total flagged insufficient evidence). dự\nphóng uses a default SGA = 20% of revenue, which materially affects EBIT and free cash flow. Historical SG&A\nor management guidance is needed to reduce dự phóng risk.\nMức độ cân bằng rủi ro (7.8/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nĐịnh giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt nên P/E và EV/EBITDA chưa cho ra giá đối\nchiếu; báo cáo tạm thiếu một kiểm tra thị trường tiêu chuẩn.\nChất lượng diễn giải (8.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nTính toàn vẹn trích dẫn (9.7/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nMức độ đặc thù ngành (8.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nLịch tiền mặt và chính sách cổ tức dự phóng cần được đối chiếu lại để bảo đảm số dư tiền cuối kỳ và dòng\ntiền ra được trình bày nhất quán.\nMức độ đầy đủ của bảng và biểu đồ (8.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả\nđịnh liên quan được công bố trong phụ lục.\nChi tiết tính toán định giá\nPhần này trình bày đầy đủ công thức, dữ liệu đầu vào, bước tính trung gian, bảng dự phóng, cầu nối định giá,\nphân tích độ nhạy và cảnh báo để người đọc kiểm tra lại kết quả trong báo cáo chính.\n1. Thông tin chung\nThành phần Giá trị\nMã cổ phiếu OPC\nCông ty CTCP Duoc pham OPC\nSàn HOSE\nNgành Dược phẩm\nThành phần Giá trị\nMã lần chạy run_opc_20260620T143352_af5de12a35\nNgày định giá —\nMã ảnh chụp dữ liệu v2snap_8e15de3070b39415c7da\nNăm gốc —\nMã băm tái lập —\n2. Tóm tắt kết quả định giá\nThành phần Giá trị\nGiá hiện tại (VND) 23,500\nGiá mục tiêu kết hợp (VND) 23,811\nTiềm năng tăng/giảm 1.3%\nKhuyến nghị Giữ\nLuật xếp hạng (tổng tỷ suất sinh lời = mức tăng/giảm giá + lợi suất cổ tức): > 20% → Mua; < −10% → Bán; còn lại\n→ Giữ.\n3. Bảng giả định\nThành phần Giá trị\nWACC 13.8%\nChi phí vốn chủ sở hữu (Re) 13.8%\nTăng trưởng dài hạn (g) 3.0%\nSố năm dự phóng 5\nThuế suất —\nP/E mục tiêu 18.7x\nMức cộng/trừ định giá —\nCác giả định hiện là giá trị mặc định và phải được rà soát, phê duyệt trước khi sử dụng trong báo cáo chính thức.\n4. Dự phóng theo yếu tố dẫn dắt\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,107 1,092 1,076 1,061 1,046\nGiá vốn hàng bán (COGS) -648 -639 -630 -621 -612\nLợi nhuận gộp 460 453 447 440 434\nChi phí SG&A -221 -218 -215 -212 -209\nEBIT 238 235 231 228 225\nChi phí lãi vay -0 -0 -0 -0 -0\nLợi nhuận trước thuế 238 235 231 228 225\nChi phí thuế -50 -49 -49 -48 -47\nLNST cổ đông mẹ 188 185 183 180 178\nKhấu hao (D&A) 23 23 23 22 22\nCAPEX -16 -17 -19 -21 -22\nEPS (VND) 2,482 2,447 2,413 2,379 2,346\nVay ròng (phát hành nợ − trả nợ) 0 0 0 0 0\nDư nợ vay cuối kỳ 0 0 0 0 0\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nCổ tức tiền mặt 91 90 89 87 86\nTỷ lệ chi trả cổ tức 48.5% 48.5% 48.5% 48.5% 48.5%\nLogic yếu tố dẫn dắt: doanh thu theo tăng trưởng giả định; biên lợi nhuận dẫn xuất EBIT/LNST; lịch nợ vay chuyển\ntiếp với vay ròng = phát hành nợ − trả nợ; cổ tức theo tỷ lệ chi trả.\n5. Chỉ số tài chính\nChỉ số Công thức 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận gộp lợi nhuận gộp / doanh thu 41.5% 41.5% 41.5% 41.5% 41.5%\nBiên EBIT EBIT / doanh thu 21.5% 21.5% 21.5% 21.5% 21.5%\nBiên lợi nhuận ròng lợi nhuận sau thuế / doanh thu 17.0% 17.0% 17.0% 17.0% 17.0%\nROE lợi nhuận sau thuế / vốn chủ sở hữu 17.5% 15.9% 14.5% 13.3% 12.3%\n6. Định giá FCFF\nCông thức: FCFF = EBIT×(1−t) + D&A − CAPEX − ΔNWC\nWACC = 13.8%; tăng trưởng dài hạn g = 3.0%\nKhoản mục 2026F 2027F 2028F 2029F 2030F\nEBIT 238 235 231 228 225\nThuế suất — — — — —\nD&A 23 23 23 22 22\nCAPEX 16 17 19 21 22\nΔNWC -10 -9 -9 -9 -9\nFCFF 206 200 196 191 186\nHệ số chiết khấu 87.9% 77.2% 67.8% 59.6% 52.4%\nPV(FCFF) 181 155 133 114 98\nThành phần Giá trị\nPV dòng tiền dự phóng (Σ PV FCFF) 680\nGiá trị cuối kỳ (Gordon: FCFFₙ×(1+g)/(WACC−g)) 1,778\nGiá trị hiện tại của giá trị cuối kỳ 932\nTỷ trọng giá trị cuối kỳ / giá trị doanh nghiệp —\n= Giá trị doanh nghiệp (EV) 1,611\n− Nợ ròng -318\n= Giá trị vốn chủ sở hữu 1,930\n÷ Số cổ phiếu (triệu) 76\n= Giá/cổ phiếu (FCFF, VND) —\nGiá/cổ phiếu theo FCFF hiển thị — do thiếu một đầu vào bắt buộc như số cổ phiếu, nợ ròng hoặc dòng tiền nền. Xem\nphần đối chiếu và cảnh báo.\n7. Định giá FCFE\nCông thức: FCFE = lợi nhuận sau thuế + khấu hao − CAPEX − ΔNWC + vay ròng, chiết khấu theo chi phí vốn chủ sở\nhữu.\nThành phần Giá trị\nChi phí vốn chủ sở hữu (Re) 13.8%\nThành phần Giá trị\nTăng trưởng dài hạn (g) 3.0%\nGiá trị vốn chủ sở hữu 1,611\n÷ Số cổ phiếu (triệu) 76\n= Giá/cổ phiếu (FCFE, VND) —\nGiá FCFE chưa tính được do thiếu dữ liệu vay ròng hoặc số cổ phiếu. Hiển thị —.\n8. Kết hợp phương pháp FCFF và FCFE\nCông thức: Giá mục tiêu = 0.60 × Giá_FCFF + 0.40 × Giá_FCFE\nSố học: 0.60 × 25,493 + 0.40 × 21,287 = 23,811\nThành phần Giá trị\nGiá theo FCFF (VND) 25,493\nGiá theo FCFE (VND) 21,287\nTrọng số FCFF / FCFE 0.60 / 0.40\n= Giá mục tiêu kết hợp (VND) 23,811\nChênh lệch FCFF/FCFE 19.8%\nChỉ ở dạng nháp Không\n9. P/E dự phóng để đối chiếu\nThành phần Giá trị\nEPS dự phóng (VND) —\nP/E trung vị nhóm so sánh —\nMức cộng/trừ định giá —\nP/E mục tiêu 18.7x\nGiá mục tiêu (VND) —\n10. Phân tích độ nhạy\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n11.8% 28,305 29,170 30,133 31,212 32,430\n12.8% 26,140 26,824 27,578 28,413 29,342\n13.8% 24,341 24,891 25,493 26,153 26,881\n14.8% 22,820 23,271 23,759 24,291 24,872\n15.8% 21,519 21,892 22,294 22,729 23,201\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n11.8% 24,099 24,964 25,927 27,006 28,224\n12.8% 21,934 22,618 23,372 24,206 25,136\n13.8% 20,134 20,685 21,287 21,947 22,674\n14.8% 18,614 19,064 19,553 20,085 20,666\n15.8% 17,312 17,686 18,088 18,523 18,995\nĐộ nhạy giá mục tiêu kết hợp — 0.6 × Giá_FCFF + 0.4 × Giá_FCFE\nĐộ nhạy giá mục tiêu kết hợp 17,287 19,287 21,287 23,287 25,287\n15,493 16,211 17,011 17,811 18,611 19,411\n20,493 19,211 20,011 20,811 21,611 22,411\n25,493 22,211 23,011 23,811 24,611 25,411\n30,493 25,211 26,011 26,811 27,611 28,411\n35,493 28,211 29,011 29,811 30,611 31,411\nĐộ nhạy P/E dự phóng — EPS năm dự phóng thứ nhất × P/E mục tiêu\nĐộ nhạy P/E dự phóng 10 12 14 16 18\n2,110 21,100 25,320 29,540 33,760 37,980\n2,284 22,840 27,408 31,976 36,544 41,112\n2,482 24,820 29,784 34,748 39,712 44,676\n2,681 26,810 32,172 37,534 42,896 48,258\n2,855 28,550 34,260 39,970 45,680 51,390\nĐộ nhạy EV/EBITDA — Giá = (EBITDA × Hệ số − Nợ ròng − Lợi ích cổ đông không kiểm soát + Tài sản ngoài\nhoạt động) / Số cổ phiếu × 1000\nĐộ nhạy EV/EBITDA 7 8 9 10 11\n222 — — — — —\n240 — — — — —\n261 — — — — —\n282 — — — — —\n301 — — — — —\nĐộ nhạy DCF giản lược\nĐộ nhạy DCF giản lược 2.0% 2.5% 3.0% 3.5% 4.0%\n8.0% 19,257 20,400 21,770 23,446 25,541\n9.0% 17,014 17,813 18,744 19,846 21,167\n10.0% 15,335 15,919 16,586 17,356 18,254\n11.0% 14,031 14,473 14,970 15,533 16,176\n12.0% 12,990 13,334 13,715 14,141 14,620\n11. Đối chiếu & cảnh báo\nĐối chiếu nhất quán số:\nGiá suy ra theo FCFF / giá FCFF: thiếu dữ liệu để đối chiếu (—).\nCảnh báo từ mô hình tính toán:\nNo SG&A or EBIT history — using default SG&A of 20% of revenue\n[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.\nCost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to\ninterest_expense/revenue ratio as proxy. Interest expense confidence: low.\nThiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\nMã băm tái lập: —\nNguồn gốc dữ liệu: mọi số định giá được dẫn xuất từ dữ liệu tài chính chuẩn hóa đã khóa và tệp kết quả định giá\nbằng Python; không có số liệu nào do mô hình ngôn ngữ sinh ra."
+      "text": "Mã cổ phiếu: OPC\nPhụ lục giải trình định giá - OPC\nDoanh nghiệp được phân tích: CTCP Duoc pham OPC.\nTài liệu này là phụ lục chi tiết của báo cáo định giá. Mục tiêu là giải thích vì sao báo cáo chính đưa ra giá mục tiêu,\nmức tăng/giảm kỳ vọng, khuyến nghị và các nhận định trọng tâm bằng dữ liệu đầu vào, công thức, bước tính trung\ngian và cảnh báo cần đọc kèm.\nTrạng thái và giới hạn\nTrạng thái báo cáo: Có thể đọc, kèm công bố phần dữ liệu còn thiếu\nMã lần chạy: run_opc_20260620T143352_af5de12a35\nThiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\nKết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nMinh chứng kiểm định\nThành phần Giá trị\nSố vết công thức 6 (wacc, fcff, fcfe, terminal_value, blend_dcf, sensitivity_matrix)\nNguồn định giá tương đối đối chiếu vnstock: 10 VN pharma peers (price/EPS, EV/EBITDA)\nTrạng thái định giá tương đối peer_data_available\nDữ liệu và kiểm định cần bổ sung trước khi phát hành:\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo trọng yếu; cần đọc cùng bảng tính chi tiết và phần đối chiếu trước khi sử dụng khuyến\nnghị.\nCảnh báo mô hình và dữ liệu:\n- SG&A historical median did not reconcile to operating EBIT; using pure operating EBIT margin (14.2%) back-solved\nfrom operating_profit minus financial income/expense.\n- [DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.\n- Cost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to\ninterest_expense/revenue ratio as proxy. Interest expense confidence: low.\n- Thiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\n- FCFE có độ tin cậy thấp; lịch vay ròng và giả định dòng tiền cho cổ đông cần được kiểm định thêm.\n- FCFF có độ tin cậy thấp; WACC, tăng trưởng dài hạn và dòng tiền nền cần được kiểm định thêm.\n- Thiếu phê duyệt cuối cho khuyến nghị đầu tư.\n- relative_valuation_fallback_pe\n- Cảnh báo đối chiếu định giá: các kiểm tra độc lập cho kết quả lệch đáng kể, cần rà soát cầu nối thị trường và giả\nđịnh mô hình.\nVì sao báo cáo chính kết luận như vậy\nThành phần Giá trị\nGiá thị trường dùng trong báo cáo 23,500\nGiá mục tiêu tính được 20,138\nTăng/giảm so với giá thị trường -14.3%\nKhuyến nghị trong báo cáo chính Bán\nGiá trị theo FCFF 20,138\nGiá trị theo FCFE 20,138\nTrọng số FCFF / FCFE 60.0% / 40.0%\nĐộ lệch FCFF/FCFE 0.0%\nWACC 12.8%\nThành phần Giá trị\nTăng trưởng dài hạn 3.0%\nDoanh thu năm đầu dự phóng 1,107\nDoanh thu năm cuối dự phóng 1,046\nLNST năm đầu dự phóng 124\nLNST năm cuối dự phóng 118\nKết luận trong báo cáo chính được nối trực tiếp từ giá thị trường, giá trị nội tại theo dòng tiền, mức tăng/giảm kỳ vọng\nvà các cảnh báo dữ liệu. Nếu FCFF và FCFE cho kết quả lệch lớn, người đọc phải ưu tiên phần kết hợp phương\npháp, phân tích độ nhạy và đối chiếu cảnh báo thay vì chỉ đọc một giá mục tiêu duy nhất.\nCảnh báo cần đọc kèm kết luận:\n- Thiếu phương pháp định giá chính đã được xác minh để làm cơ sở khuyến nghị.\n- Kết quả định giá có cảnh báo cần đọc cùng bảng tính chi tiết và phần đối chiếu.\nKết quả phản biện chất lượng phân tích\nPhần này tóm tắt các đánh giá định tính về logic dự phóng, luận điểm đầu tư, chất lượng bằng chứng và tính nhất\nquán của định giá.\nCần rà soát thêm một cảnh báo dữ liệu hoặc phương pháp chưa được phân loại trong bản phát hành.\nDCF và FCFF/FCFE có cảnh báo về dòng tiền tự do lịch sử âm hoặc tỷ trọng giá trị cuối kỳ cao; cần kiểm tra\ntrong phân tích độ nhạy và bước chuẩn hóa giả định.\n[Mức độ trung bình] Peer P/E and EV/EBITDA medians are missing for the peer group, limiting cross-checks\nand relative valuation robustness. The PE method is thiếu dữ liệu; EV/EBITDA bridge lacks peer median.\nProvide peer dataset or define peer taxonomy.\n[Mức độ trung bình] SG&A historical line items are insufficient (sga.total flagged insufficient evidence). dự\nphóng uses a default SGA = 20% of revenue, which materially affects EBIT and free cash flow. Historical SG&A\nor management guidance is needed to reduce dự phóng risk.\nMức độ cân bằng rủi ro (7.8/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nĐịnh giá tương đối thiếu bộ doanh nghiệp so sánh đã phê duyệt nên P/E và EV/EBITDA chưa cho ra giá đối\nchiếu; báo cáo tạm thiếu một kiểm tra thị trường tiêu chuẩn.\nChất lượng diễn giải (8.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nTính toàn vẹn trích dẫn (9.7/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nMức độ đặc thù ngành (8.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả định liên quan\nđược công bố trong phụ lục.\nLịch tiền mặt và chính sách cổ tức dự phóng cần được đối chiếu lại để bảo đảm số dư tiền cuối kỳ và dòng\ntiền ra được trình bày nhất quán.\nMức độ đầy đủ của bảng và biểu đồ (8.0/10): kết quả đánh giá có cơ sở truy vết; các hạn chế dữ liệu và giả\nđịnh liên quan được công bố trong phụ lục.\nChi tiết tính toán định giá\nPhần này trình bày đầy đủ công thức, dữ liệu đầu vào, bước tính trung gian, bảng dự phóng, cầu nối định giá,\nphân tích độ nhạy và cảnh báo để người đọc kiểm tra lại kết quả trong báo cáo chính.\n1. Thông tin chung\nThành phần Giá trị\nMã cổ phiếu OPC\nCông ty CTCP Duoc pham OPC\nSàn HOSE\nNgành Dược phẩm\nThành phần Giá trị\nMã lần chạy run_opc_20260620T143352_af5de12a35\nNgày định giá —\nMã ảnh chụp dữ liệu v2snap_4bb031fe94baf5029a0d\nNăm gốc —\nMã băm tái lập —\n2. Tóm tắt kết quả định giá\nThành phần Giá trị\nGiá hiện tại (VND) 23,500\nGiá mục tiêu kết hợp (VND) 20,138\nTiềm năng tăng/giảm -14.3%\nKhuyến nghị Bán\nLuật xếp hạng (tổng tỷ suất sinh lời = mức tăng/giảm giá + lợi suất cổ tức): > 20% → Mua; < −10% → Bán; còn lại\n→ Giữ.\n3. Bảng giả định\nThành phần Giá trị\nWACC 12.8%\nChi phí vốn chủ sở hữu (Re) 12.8%\nTăng trưởng dài hạn (g) 3.0%\nSố năm dự phóng 5\nThuế suất —\nP/E mục tiêu 18.7x\nMức cộng/trừ định giá —\nCác giả định hiện là giá trị mặc định và phải được rà soát, phê duyệt trước khi sử dụng trong báo cáo chính thức.\n4. Dự phóng theo yếu tố dẫn dắt\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nDoanh thu thuần 1,107 1,092 1,076 1,061 1,046\nGiá vốn hàng bán (COGS) -648 -639 -630 -621 -612\nLợi nhuận gộp 460 453 447 440 434\nChi phí SG&A -302 -298 -293 -289 -285\nEBIT 158 156 153 151 149\nChi phí lãi vay -0 -0 -0 -0 -0\nLợi nhuận trước thuế 158 156 153 151 149\nChi phí thuế -33 -33 -32 -32 -31\nLNST cổ đông mẹ 124 123 121 119 118\nKhấu hao (D&A) 23 23 23 22 22\nCAPEX -16 -17 -19 -21 -22\nEPS (VND) 1,645 1,622 1,599 1,577 1,555\nVay ròng (phát hành nợ − trả nợ) 0 0 0 0 0\nDư nợ vay cuối kỳ 0 0 0 0 0\nChỉ tiêu 2026F 2027F 2028F 2029F 2030F\nCổ tức tiền mặt 60 60 59 58 57\nTỷ lệ chi trả cổ tức 48.5% 48.5% 48.5% 48.5% 48.5%\nLogic yếu tố dẫn dắt: doanh thu theo tăng trưởng giả định; biên lợi nhuận dẫn xuất EBIT/LNST; lịch nợ vay chuyển\ntiếp với vay ròng = phát hành nợ − trả nợ; cổ tức theo tỷ lệ chi trả.\n5. Chỉ số tài chính\nChỉ số Công thức 2026F 2027F 2028F 2029F 2030F\nBiên lợi nhuận gộp lợi nhuận gộp / doanh thu 41.5% 41.5% 41.5% 41.5% 41.5%\nBiên EBIT EBIT / doanh thu 14.2% 14.2% 14.2% 14.2% 14.2%\nBiên lợi nhuận ròng lợi nhuận sau thuế / doanh thu 11.2% 11.2% 11.3% 11.3% 11.2%\nROE lợi nhuận sau thuế / vốn chủ sở hữu 12.0% 11.1% 10.4% 9.7% 9.1%\n6. Định giá FCFF\nCông thức: FCFF = EBIT×(1−t) + D&A − CAPEX − ΔNWC\nWACC = 12.8%; tăng trưởng dài hạn g = 3.0%\nKhoản mục 2026F 2027F 2028F 2029F 2030F\nEBIT 158 156 153 151 149\nThuế suất — — — — —\nD&A 23 23 23 22 22\nCAPEX 16 17 19 21 22\nΔNWC -10 -9 -9 -9 -9\nFCFF 142 138 134 130 127\nHệ số chiết khấu 88.6% 78.6% 69.7% 61.8% 54.8%\nPV(FCFF) 126 108 93 80 69\nThành phần Giá trị\nPV dòng tiền dự phóng (Σ PV FCFF) 478\nGiá trị cuối kỳ (Gordon: FCFFₙ×(1+g)/(WACC−g)) 1,330\nGiá trị hiện tại của giá trị cuối kỳ 728\nTỷ trọng giá trị cuối kỳ / giá trị doanh nghiệp —\n= Giá trị doanh nghiệp (EV) 1,206\n− Nợ ròng -318\n= Giá trị vốn chủ sở hữu 1,524\n÷ Số cổ phiếu (triệu) 76\n= Giá/cổ phiếu (FCFF, VND) 20,138\n7. Định giá FCFE\nCông thức: FCFE = lợi nhuận sau thuế + khấu hao − CAPEX − ΔNWC + vay ròng, chiết khấu theo chi phí vốn chủ sở\nhữu.\nThành phần Giá trị\nChi phí vốn chủ sở hữu (Re) 12.8%\nTăng trưởng dài hạn (g) 3.0%\nGiá trị vốn chủ sở hữu 1,524\nThành phần Giá trị\n÷ Số cổ phiếu (triệu) 76\n= Giá/cổ phiếu (FCFE, VND) 20,138\n8. Kết hợp phương pháp FCFF và FCFE\nCông thức: Giá mục tiêu = 0.60 × Giá_FCFF + 0.40 × Giá_FCFE\nSố học: 0.60 × 20,138 + 0.40 × 20,138 = 20,138\nThành phần Giá trị\nGiá theo FCFF (VND) 20,138\nGiá theo FCFE (VND) 20,138\nTrọng số FCFF / FCFE 0.60 / 0.40\n= Giá mục tiêu kết hợp (VND) 20,138\nChênh lệch FCFF/FCFE 0.0%\nChỉ ở dạng nháp Không\n9. P/E dự phóng để đối chiếu\nThành phần Giá trị\nEPS dự phóng (VND) —\nP/E trung vị nhóm so sánh —\nMức cộng/trừ định giá —\nP/E mục tiêu 18.7x\nGiá mục tiêu (VND) —\n10. Phân tích độ nhạy\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn\nĐộ nhạy FCFF theo WACC và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n10.8% 22,436 23,195 24,052 25,026 26,144\n11.8% 20,633 21,220 21,874 22,607 23,433\n12.8% 19,163 19,627 20,138 20,705 21,336\n13.8% 17,940 18,314 18,722 19,170 19,664\n14.8% 16,907 17,212 17,544 17,905 18,300\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn\nĐộ nhạy FCFE theo chi phí vốn chủ sở hữu và tăng trưởng dài hạn 2.0% 2.5% 3.0% 3.5% 4.0%\n10.8% 22,436 23,195 24,052 25,026 26,144\n11.8% 20,633 21,220 21,874 22,607 23,433\n12.8% 19,163 19,627 20,138 20,705 21,336\n13.8% 17,940 18,314 18,722 19,170 19,664\n14.8% 16,907 17,212 17,544 17,905 18,300\nĐộ nhạy giá mục tiêu kết hợp — 0.6 × Giá_FCFF + 0.4 × Giá_FCFE\nĐộ nhạy giá mục tiêu kết hợp 16,138 18,138 20,138 22,138 24,138\n10,138 12,538 13,338 14,138 14,938 15,738\n15,138 15,538 16,338 17,138 17,938 18,738\n20,138 18,538 19,338 20,138 20,938 21,738\nĐộ nhạy giá mục tiêu kết hợp 16,138 18,138 20,138 22,138 24,138\n25,138 21,538 22,338 23,138 23,938 24,738\n30,138 24,538 25,338 26,138 26,938 27,738\nĐộ nhạy P/E dự phóng — EPS năm dự phóng thứ nhất × P/E mục tiêu\nĐộ nhạy P/E dự phóng 10 12 14 16 18\n1,398 13,980 16,776 19,572 22,368 25,164\n1,514 15,140 18,168 21,196 24,224 27,252\n1,645 16,450 19,740 23,030 26,320 29,610\n1,777 17,770 21,324 24,878 28,432 31,986\n1,892 18,920 22,704 26,488 30,272 34,056\nĐộ nhạy EV/EBITDA — Giá = (EBITDA × Hệ số − Nợ ròng − Lợi ích cổ đông không kiểm soát + Tài sản ngoài\nhoạt động) / Số cổ phiếu × 1000\nĐộ nhạy EV/EBITDA 7 8 9 10 11\n154 — — — — —\n167 — — — — —\n181 — — — — —\n196 — — — — —\n208 — — — — —\nĐộ nhạy DCF giản lược\nĐộ nhạy DCF giản lược 2.0% 2.5% 3.0% 3.5% 4.0%\n8.0% 19,257 20,400 21,770 23,446 25,541\n9.0% 17,014 17,813 18,744 19,846 21,167\n10.0% 15,335 15,919 16,586 17,356 18,254\n11.0% 14,031 14,473 14,970 15,533 16,176\n12.0% 12,990 13,334 13,715 14,141 14,620\n11. Đối chiếu & cảnh báo\nĐối chiếu nhất quán số:\n✓ Giá suy ra theo FCFF (20,138) khớp giá FCFF trong kết quả kết hợp (20,138).\nCảnh báo từ mô hình tính toán:\nSG&A historical median did not reconcile to operating EBIT; using pure operating EBIT margin (14.2%) back-\nsolved from operating_profit minus financial income/expense.\n[DebtSchedule] Zero-debt policy applied: historical interest-bearing debt is negligible.\nCost of debt not derivable from debt schedule (no historical interest/debt pairs). Falling back to\ninterest_expense/revenue ratio as proxy. Interest expense confidence: low.\nThiếu số dư tiền cuối kỳ đã báo cáo nên chưa thể đối chiếu lịch tiền mặt; trạng thái đang chờ xác minh.\nMã băm tái lập: —\nNguồn gốc dữ liệu: mọi số định giá được dẫn xuất từ dữ liệu tài chính chuẩn hóa đã khóa và tệp kết quả định giá\nbằng Python; không có số liệu nào do mô hình ngôn ngữ sinh ra."
     }
   },
   "publication_readiness": {

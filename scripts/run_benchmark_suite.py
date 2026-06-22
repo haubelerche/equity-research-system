@@ -817,12 +817,20 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
         str(sample["metric"].get("status") or "") == "not_evaluable"
         for sample in applicable_samples
     )
+    # When every cohort sample is not_applicable there is no signal to aggregate
+    # for ANY metric type. Without this guard the fallback pass-equivalent path
+    # would score not_applicable samples as 0.0 and report a phantom pass for
+    # lower-is-better metrics (e.g. an error_rate of 0.0 "passing" <= 15%).
+    all_applicable_not_applicable = bool(applicable_samples) and all(
+        str(sample["metric"].get("status") or "") == "not_applicable"
+        for sample in applicable_samples
+    )
     pooled_coverage = (
         _pooled_coverage_value(metric_id, samples)
         if metric_type == "coverage" and not is_pass_gate and not is_boolean_gate
         else None
     )
-    if all_applicable_not_evaluable:
+    if all_applicable_not_evaluable or all_applicable_not_applicable:
         value = None
         passed_count = 0
     elif not is_pass_gate and pooled_coverage is None and not numeric_values and metric_type in {"coverage", "score"}:
@@ -859,6 +867,8 @@ def _aggregate_metric_group(metric_id: str, samples: list[dict[str, Any]], gener
     elif is_boolean_gate:
         # value is None only when every sample was not_applicable (all excluded).
         status = "not_applicable" if value is None else ("pass" if value == 1.0 else "fail")
+    elif all_applicable_not_applicable:
+        status = "not_applicable"
     elif all_applicable_not_evaluable:
         status = "not_evaluable"
     elif is_pass_gate:

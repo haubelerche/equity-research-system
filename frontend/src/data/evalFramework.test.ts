@@ -113,21 +113,14 @@ describe("evalFramework", () => {
     expect(LAYER_VISIBLE_METRIC_IDS.financial).toEqual([
       "finance.model_quality_score",
       "accounting_invariant_violations",
-      "fcff",
-      "target_price",
-      "gordon_growth",
-      "net_debt",
-      "formula_trace",
+      "golden_drift_out_of_tolerance",
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.agent).toEqual([
       "agent.workflow_quality_score",
-      "tool_permission_compliance",
-      "schema_validity",
-      "no_unauthorized_calc",
       "stage_handoff_completeness",
       "tool_call_success_rate",
-      "repair_loop_rate",
       "token_budget_adherence",
+      "repair_loop_rate",
     ]);
     expect(LAYER_VISIBLE_METRIC_IDS.report_quality).toEqual([
       "report.quality_total",
