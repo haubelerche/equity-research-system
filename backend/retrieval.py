@@ -269,13 +269,30 @@ class RetrievalService:
                     return cur.fetchall()
 
             # Run search for each query variant; merge results deduped by chunk_id.
+            import os as _os2
+            from backend.retrieval_enhance import reciprocal_rank_fusion as _rrf
+            _hybrid = _os2.getenv("RAG_HYBRID_FUSION") == "1"
+
             all_rows: list[dict[str, Any]] = []
             seen_ids: set[int] = set()
             for _variant in _variants:
                 _variant_embedding = _embed_query(_variant) if _variant != query else query_embedding
-                _variant_rows = _run_search(_variant_embedding is not None, _variant, _variant_embedding)
-                if not _variant_rows and _variant and _variant.strip() and _variant_embedding is not None:
-                    _variant_rows = _run_search(False, _variant, None)
+                if _hybrid:
+                    # Run BOTH vector and FTS paths, fuse with RRF.
+                    _candidate_lists: list[list[dict[str, Any]]] = []
+                    if _variant_embedding is not None:
+                        _vector_rows = _run_search(True, _variant, _variant_embedding)
+                        if _vector_rows:
+                            _candidate_lists.append(_vector_rows)
+                    _fts_rows = _run_search(False, _variant, None)
+                    if _fts_rows:
+                        _candidate_lists.append(_fts_rows)
+                    _variant_rows = _rrf(_candidate_lists, key="chunk_id") if _candidate_lists else []
+                else:
+                    # Original single-path behaviour: vector when embedding available, else FTS.
+                    _variant_rows = _run_search(_variant_embedding is not None, _variant, _variant_embedding)
+                    if not _variant_rows and _variant and _variant.strip() and _variant_embedding is not None:
+                        _variant_rows = _run_search(False, _variant, None)
                 for _r in _variant_rows:
                     _cid = _r["chunk_id"]
                     if _cid not in seen_ids:

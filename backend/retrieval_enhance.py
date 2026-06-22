@@ -27,3 +27,20 @@ def expand_query(query: str) -> list[str]:
     if not extras:
         return [base]
     return [base, f"{base} {' '.join(dict.fromkeys(extras))}"]
+
+
+def reciprocal_rank_fusion(
+    result_lists: list[list[dict[str, Any]]], *, k: int = 60, key: str = "chunk_id"
+) -> list[dict[str, Any]]:
+    """Fuse multiple ranked lists by Reciprocal Rank Fusion; returns one de-duplicated list."""
+    scores: dict[Any, float] = {}
+    first_seen: dict[Any, dict[str, Any]] = {}
+    for results in result_lists:
+        for rank, item in enumerate(results, start=1):
+            ident = item.get(key)
+            if ident is None:
+                continue
+            scores[ident] = scores.get(ident, 0.0) + 1.0 / (k + rank)
+            first_seen.setdefault(ident, item)
+    ordered = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)
+    return [first_seen[ident] for ident, _ in ordered]
