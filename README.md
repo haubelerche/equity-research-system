@@ -1,9 +1,10 @@
+
 # Vietnam Pharma Equity Research Agent
 
 Hệ thống nghiên cứu cổ phiếu dược và y tế Việt Nam theo nguyên tắc **evidence-grounded**, **code-first valuation** và **human-in-the-loop approval**. LLM chỉ hỗ trợ trích xuất, tổng hợp và phản biện; số liệu tài chính, forecast, FCFF, FCFE, debt schedule, multiples và gates được tính bằng code.
 
 > Hệ thống dùng cho nghiên cứu nội bộ và học thuật. Đây không phải phần mềm tư vấn đầu tư; báo cáo client-final cần phê duyệt chuyên gia.
-
+<img width="562" height="802" alt="Screenshot 2026-06-25 224339" src="https://github.com/user-attachments/assets/a019f227-6ffd-40ac-a1b2-cf67fa4a2f9f" /> 
 ## Cài đặt nhanh
 
 ```powershell
